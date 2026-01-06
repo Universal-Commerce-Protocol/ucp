@@ -73,7 +73,7 @@ extra:
 
 # Configuration
 theme:
-  logo: assets/inverted_logo.svg
+  logo: assets/updated-icon.svg
   name: material
   font:
     text: Google Sans
