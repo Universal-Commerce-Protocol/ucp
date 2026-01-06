@@ -1,5 +1,3 @@
-**NDA / CONFIDENTIAL - DO NOT SHARE**
-
 <!--
    Copyright 2025 Google LLC
 
@@ -17,8 +15,6 @@
 -->
 
 # Universal Commerce Protocol (UCP)
-
-Note: This will be the GitHub homepage.
 
 ## Overview
 
