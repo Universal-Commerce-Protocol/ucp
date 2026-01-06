@@ -164,39 +164,39 @@ plugins:
       full_output: llms-full.txt
       sections:
         Introduction:
-          - docs/index.md
-          - docs/documentation/core-concepts.md
+          - index.md
+          - documentation/core-concepts.md
         UCP and AP2:
-          - docs/documentation/ucp-and-ap2.md
+          - documentation/ucp-and-ap2.md
         Google's Implementation:
-          - docs/documentation/google-implementation.md
+          - documentation/google-implementation.md
         Roadmap:
-          - docs/documentation/roadmap.md
+          - documentation/roadmap.md
         Specification Overview:
-          - docs/specification/overview.md
-          - docs/specification/capability-schema.md
+          - specification/overview.md
+          - specification/capability-schema.md
         Checkout Capability:
-          - docs/specification/checkout.md
-          - docs/specification/checkout-rest.md
-          - docs/specification/checkout-mcp.md
+          - specification/checkout.md
+          - specification/checkout-rest.md
+          - specification/checkout-mcp.md
         Checkout Extensions:
-          - docs/specification/ap2-mandates.md
-          - docs/specification/buyer-consent.md
-          - docs/specification/discount.md
-          - docs/specification/embedded-checkout.md
-          - docs/specification/fulfillment.md
+          - specification/ap2-mandates.md
+          - specification/buyer-consent.md
+          - specification/discount.md
+          - specification/embedded-checkout.md
+          - specification/fulfillment.md
         Order Capability:
-          - docs/specification/order.md
+          - specification/order.md
         Identity Linking Capability:
-          - docs/specification/identity-linking.md
+          - specification/identity-linking.md
         Payment Handlers:
-          - docs/specification/payment-handler-guide.md
-          - docs/specification/payment-handler-template.md
-          - docs/specification/tokenization-guide.md
-          - docs/specification/gpay-payment-handler.md
-          - docs/specification/shop-pay-handler.md
+          - specification/payment-handler-guide.md
+          - specification/payment-handler-template.md
+          - specification/tokenization-guide.md
+          - specification/gpay-payment-handler.md
+          - specification/shop-pay-handler.md
         Payment Handler Examples:
-          - docs/specification/examples/merchant-tokenizer-payment-handler.md
-          - docs/specification/examples/agent-tokenizer-payment-handler.md
-          - docs/specification/examples/psp-payment-handler.md
-          - docs/specification/examples/agent-encrypted-credential-handler.md
+          - specification/examples/merchant-tokenizer-payment-handler.md
+          - specification/examples/agent-tokenizer-payment-handler.md
+          - specification/examples/psp-payment-handler.md
+          - specification/examples/agent-encrypted-credential-handler.md
