@@ -14,16 +14,17 @@
    limitations under the License.
 -->
 
-# Embedded Checkout Extension
+# Embedded Checkout Protocol
 
 **Namespace:** `ec`
 
 ## 1. Introduction
 
-Embedded Checkout (EC) is a UCP extension that enables a **Host** to embed a
-**Merchant's** checkout interface, receive events as the buyer interacts with
-the checkout, and allows delegation of key user actions, such as address and
-payment selection.
+Embedded Checkout Protocol (ECP) is a UCP transport binding that enables a
+**Host** to embed a **Merchant's** checkout interface, receive events as the
+buyer interacts with the checkout, and delegate key user actions such as address
+and payment selection. ECP is a transport binding (like REST)—it defines **how**
+to communicate, not **what** data exists.
 
 ### 1.1 Conformance & Standards
 
@@ -33,7 +34,7 @@ described in **[RFC 2119](https://www.rfc-editor.org/rfc/rfc2119)**.
 
 #### W3C Payment Request Conceptual Alignment
 
-This extension draws inspiration from the
+ECP draws inspiration from the
 **[W3C Payment Request API](https://www.w3.org/TR/payment-request/)**, adapting
 its mental model for embedded checkout scenarios. Developers familiar with
 Payment Request will recognize similar patterns, though the execution model
@@ -55,7 +56,7 @@ delegation allowing the Host to handle specific interactions natively.
 | **Address Change**        | `shippingaddresschange` event    | `ec.fulfillment.change` and `ec.fulfillment.address_change_request` |
 | **Submit Payment**        | User accepts → `PaymentResponse` | Delegated `ec.payment.credential_request`                           |
 | **Completion**            | `response.complete()`            | `ec.complete` notification                                          |
-| **Errors**                | Promise rejection                | `ec.messages.change` notification                                  |
+| **Errors/Messages**       | Promise rejection                | `ec.messages.change` notification                                   |
 
 **Key difference:** In W3C Payment Request, the browser orchestrates the payment
 flow. In Embedded Checkout, the Merchant orchestrates within the embedded
@@ -82,89 +83,54 @@ picker) to the Host for native experiences.
 
 ## 3. Requirements
 
-### 3.1 Discovery and Versioning
+### 3.1 Discovery
 
-When `dev.ucp.shopping.embedded_checkout` appears in a response's capabilities
-array, the Host knows Embedded Checkout is available. The capability object MUST
-contain:
+ECP availability is signaled via service discovery. When a merchant advertises
+the `embedded` transport in their `/.well-known/ucp` profile, all checkout
+`continue_url` values support the Embedded Checkout Protocol.
 
--   `name` (string, REQUIRED): `"dev.ucp.shopping.embedded_checkout"`
--   `version` (string, REQUIRED): The negotiated ECP version (format:
-    `YYYY-MM-DD`)
--   `extends`: The string `"dev.ucp.shopping.checkout"`, as this extension
-    extends the Checkout capability.
--   `spec`: The URL of the Embedded Checkout specification.
--   `schema`: The URL of the Embedded Checkout schema.
--   `config` (object, OPTIONAL): Configuration object
-    -   `auth` (object, OPTIONAL): Authentication configuration
-        -   `required` (boolean, REQUIRED): Whether authentication is required
-        -   `url` (string, OPTIONAL): URL for authentication documentation
-
-**Example Checkout UCP Response, Authentication Required:**
+**Service Discovery Example:**
 
 ```json
-// Authentication required
 {
-    "ucp": {
-        "version": "2026-01-11",
-        "capabilities": [
-            {
-                "name": "dev.ucp.shopping.embedded_checkout",
-                "version": "2026-01-11",
-                "extends": "dev.ucp.shopping.checkout",
-                "spec": "https://ucp.dev/specs/shopping/embedded_checkout",
-                "schema": "https://ucp.dev/schemas/shopping/embedded-checkout.json",
-                "config": {
-                    "auth": {
-                        "required": true,
-                        "url": "https://shop.example.com/developers/ecp/authentication"
-                    }
-                }
+    "services": {
+        "dev.ucp.shopping": {
+            "version": "2026-01-11",
+            "rest": {
+                "schema": "https://ucp.dev/services/shopping/rest.openapi.json",
+                "endpoint": "https://merchant.example.com/ucp/v1"
+            },
+            "mcp": {
+                "schema": "https://ucp.dev/services/shopping/mcp.openrpc.json",
+                "endpoint": "https://merchant.example.com/ucp/mcp"
+            },
+            "embedded": {
+                "schema": "https://ucp.dev/services/shopping/embedded.openrpc.json"
             }
-        ]
-    },
-    "checkout": {
-        "status": "requires_escalation",
-        "continue_url": "https://shop.example.com/checkout/abc123"
-        /* ... */
+        }
     }
 }
 ```
 
-```json
-// Authentication not required (auth omitted, defaults to not required)
-{
-    "ucp": {
-        "version": "2026-01-11",
-        "capabilities": [
-            {
-                "name": "dev.ucp.shopping.embedded_checkout",
-                "version": "2026-01-11",
-                "spec": "https://ucp.dev/specs/shopping/embedded-checkout",
-                "schema": "https://ucp.dev/schemas/shopping/embedded-checkout.json"
-            }
-        ]
-    },
-    "checkout": {
-        "status": "requires_escalation",
-        "continue_url": "https://shop.example.com/checkout/abc123"
-        /* ... */
-    }
-}
-```
+When `embedded` is present in the service definition:
+
+-   All `continue_url` values returned by that merchant support ECP
+-   ECP version matches the service's UCP version
+-   Delegations are negotiated at runtime via the `ec.ready` handshake
+
+When `embedded` is absent from the service definition, the merchant only
+supports redirect-based checkout continuation via `continue_url`.
 
 ### 3.2 Loading an Embedded Checkout URL
 
-When a Host receives a UCP response with `ucp.embedded_checkout` in the
-capabilities array, it MAY initiate an ECP session by loading `continue_url` in
-an embedded context.
+When a Host receives a checkout response with a `continue_url` from a merchant
+that advertises ECP support, it MAY initiate an ECP session by loading the URL
+in an embedded context.
 
-The Host SHOULD first check `auth.required` on the capability:
+Before loading the embedded context, the Host SHOULD:
 
--   If `true`: Host MUST provide authentication credentials negotiated
-    out-of-band
--   Otherwise: Host may proceed without authentication or may provide
-    credentials for enhanced capabilities
+1.  Prepare handlers for any delegations the Host wants to support
+2.  Optionally prepare authentication credentials if required by the merchant
 
 To initiate the session, the Host MUST augment the `continue_url` with ECP query
 parameters using the `ec_` prefix.
@@ -174,12 +140,12 @@ maximum compatibility across different embedding environments. Parameters use
 the `ec_` prefix to avoid namespace pollution and clearly distinguish ECP
 parameters from merchant-specific query parameters:
 
--   `ec_version` (string, REQUIRED): The selected ECP protocol version (format:
-    `YYYY-MM-DD`)
+-   `ec_version` (string, REQUIRED): The UCP version for this session (format:
+    `YYYY-MM-DD`). Must match the version from service discovery.
 -   `ec_auth` (string, OPTIONAL): Authentication token in merchant-defined
     format
--   `ec_delegate` (string, OPTIONAL): Comma-delimited list of capabilities to
-    delegate
+-   `ec_delegate` (string, OPTIONAL): Comma-delimited list of delegations the
+    Host wants to handle
 
 #### 3.2.1 Authentication
 
@@ -217,10 +183,10 @@ Note: All query parameter values must be properly URL-encoded per RFC 3986.
 
 #### 3.2.2 Delegation
 
-The optional `ec_delegate` parameter declares which operations the Host requests
+The optional `ec_delegate` parameter declares which operations the Host wants
 to handle natively, instead of having a buyer handle them in the Embedded
 Checkout UI. Each delegation identifier maps to a corresponding `_request`
-message following a consistent pattern: `ec.{delegate}_request`
+message following a consistent pattern: `ec.{delegation}_request`
 
 **Example delegation identifiers:**
 
@@ -230,7 +196,7 @@ message following a consistent pattern: `ec.{delegate}_request`
 | `payment.credential`         | `ec.payment.credential_request`         |
 | `fulfillment.address_change` | `ec.fulfillment.address_change_request` |
 
-Capabilities define their own delegation identifiers; see each capability's
+Extensions define their own delegation identifiers; see each extension's
 specification for available options.
 
 ```
@@ -406,13 +372,13 @@ Embedded Checkout MUST initialize this global object — and start listening for
 #### 5.1.1 Core Messages
 
 Core messages are defined by the ECP specification and MUST be supported by all
-implementations:
+implementations. All messages are sent from Embedded Checkout to Host.
 
-| Category         | Purpose                                                 | Pattern      | Core Messages                                                   |
-| ---------------- | ------------------------------------------------------- | ------------ | --------------------------------------------------------------- |
-| **Handshake**    | Establish connection between Host and Embedded Checkout | Request      | `ec.ready`                                                      |
-| **Lifecycle**    | Inform of checkout state transitions                    | Notification | `ec.start`, `ec.complete`                                       |
-| **State Change** | Inform of checkout state changes                        | Notification | `ec.messages.change`, `ec.line_items.change`, `ec.buyer.change` |
+| Category         | Purpose                                                 | Pattern      | Core Messages                             |
+| ---------------- | ------------------------------------------------------- | ------------ | ----------------------------------------- |
+| **Handshake**    | Establish connection between Host and Embedded Checkout | Request      | `ec.ready`                                |
+| **Lifecycle**    | Inform of checkout state transitions                    | Notification | `ec.start`, `ec.complete`                 |
+| **State Change** | Inform of checkout field changes                        | Notification | `ec.line_items.change`, `ec.buyer.change`, `ec.payment.change`, `ec.messages.change` |
 
 #### 5.1.2 Extension Messages
 
@@ -585,7 +551,6 @@ Signals that checkout is visible and ready for interaction.
 {
     "jsonrpc": "2.0",
     "method": "ec.start",
-    "id": "start_1",
     "params": {
         "checkout": {
             "id": "gid://merchant.com/Checkout/123",
@@ -599,19 +564,10 @@ Signals that checkout is visible and ready for interaction.
                     "severity": "recoverable"
                 }
             ],
-            "totals": [
-                /* ... */
-            ],
-            "line_items": [
-                /* ... */
-            ],
-            "buyer": {
-                /* ... */
-            },
-            "payment": {
-                /* ... */
-            }
-            // ...
+            "totals": [/* ... */],
+            "line_items": [/* ... */],
+            "buyer": {/* ... */},
+            "payment": {/* ... */}
         }
     }
 }
@@ -653,36 +609,6 @@ Indicates successful checkout completion.
 State change messages inform the embedder of changes that have already occurred
 in the checkout interface. These are informational only. The checkout has
 already applied the changes and rendered the updated UI.
-
-#### 5.3.3 `ec.messages.change`
-
-Indicates that the `messages` on the checkout — including errors, warnings,
-and/or information notices — has changed in the Embedded Checkout.
-
--   **Direction:** Embedded Checkout → Host
--   **Type:** Notification
--   **Payload:**
-    -   `checkout`: The latest state of the checkout
-
-**Example Message:**
-
-```json
-{
-    "jsonrpc": "2.0",
-    "method": "ec.messages.change",
-    "params": {
-        "checkout": {
-            "id": "gid://merchant.com/Checkout/123",
-            // The entire checkout object is provided, including the updated list of
-            // error/ warning/ info messages
-            "messages": [
-                /* ... */
-            ]
-            // ...
-        }
-    }
-}
-```
 
 #### 5.4.1 `ec.line_items.change`
 
@@ -743,6 +669,50 @@ Buyer information has been updated in the checkout UI.
     }
 }
 ```
+
+#### 5.4.3 `ec.messages.change`
+
+Checkout messages have been updated. Messages include errors, warnings, and
+informational notices about the checkout state.
+
+-   **Direction:** Embedded Checkout → Host
+-   **Type:** Notification
+-   **Payload:**
+    -   `checkout`: The latest state of the checkout
+
+**Example Message:**
+
+```json
+{
+    "jsonrpc": "2.0",
+    "method": "ec.messages.change",
+    "params": {
+        "checkout": {
+            "id": "gid://merchant.com/Checkout/123",
+            "messages": [
+                {
+                    "type": "error",
+                    "code": "invalid_address",
+                    "path": "$.buyer.shipping_address",
+                    "content": "We cannot ship to this address",
+                    "severity": "recoverable"
+                },
+                {
+                    "type": "info",
+                    "code": "free_shipping",
+                    "content": "Free shipping applied!"
+                }
+            ]
+            // ...
+        }
+    }
+}
+```
+
+#### 5.4.4 `ec.payment.change`
+
+Payment state has been updated. See [Section 6.2.1](#621-ecpaymentchange) for
+full documentation.
 
 ## 6. Payment Extension
 
@@ -938,13 +908,13 @@ submission.
 }
 ```
 
-The Host MUST respond with either an error, or the credential for the selected
-payment instrument. In successful responses, the Host MUST supply a partial
-update to the `checkout` object, updating only the instrument indicated by
-`payment.selected_instrument_id` with the new `credentials` field. The Embedded
-Checkout MUST treat this update as a PUT-style change by entirely replacing the
-existing state for `payment.instruments`, rather than attempting to merge the
-new data with existing state.
+The Host MUST respond with either an error, or the credential for the
+selected payment instrument. In successful responses, the Host MUST supply a
+partial update to the `checkout` object, updating only the instrument indicated
+by `payment.selected_instrument_id` with the new `credentials` field. The
+Embedded Checkout MUST treat this update as a PUT-style change by entirely
+replacing the existing state for `payment.instruments`, rather than attempting
+to merge the new data with existing state.
 
 -   **Direction:** Host → Embedded Checkout
 -   **Type:** Response

@@ -215,8 +215,8 @@ allowing the buyer to continue and finalize the checkout session.
 ### Availability
 
 Merchants **MUST** provide `continue_url` when returning `status` =
-`requires_escalation`. For all other non-terminal statuses (`in_progress`,
-`recoverable_errors`, `ready_for_complete`, `unrecoverable_errors`), merchants
+`requires_escalation`. For all other non-terminal statuses (`incomplete`,
+`ready_for_complete`, `complete_in_progress`), merchants
 **SHOULD** provide `continue_url`. For terminal states (`completed`,
 `canceled`), `continue_url` **SHOULD** be omitted.
 
@@ -332,7 +332,7 @@ to minimize discrepancies and a streamlined user experience the product data
 (price/title etc.) provided by the merchant through the feeds should match
 the actual attributes.
 
-{{ method_fields('create_checkout', 'openapi.json', 'checkout') }}
+{{ method_fields('create_checkout', 'rest.openapi.json', 'checkout') }}
 
 ### Get Checkout
 
@@ -344,7 +344,7 @@ checkout.
 The platform will honor the TTL provided by the merchant via expires_at at the
 time of checkout session creation.
 
-{{ method_fields('get_checkout', 'openapi.json', 'checkout') }}
+{{ method_fields('get_checkout', 'rest.openapi.json', 'checkout') }}
 
 ### Update Checkout
 
@@ -353,7 +353,7 @@ The platform is required to send the entire checkout resource containing any
 data updates to write-only data fields. The resource provided in the request
 will replace the existing checkout session state on the merchant side.
 
-{{ method_fields('update_checkout', 'openapi.json', 'checkout') }}
+{{ method_fields('update_checkout', 'rest.openapi.json', 'checkout') }}
 
 ### Complete Checkout
 
@@ -369,7 +369,7 @@ create the initial order representation).
 After this call, other details will be updated through subsequent events
 as the order, and its associated items, moves through the supply chain.
 
-{{ method_fields('complete_checkout', 'openapi.json', 'checkout') }}
+{{ method_fields('complete_checkout', 'rest.openapi.json', 'checkout') }}
 
 ### Cancel Checkout
 
@@ -379,7 +379,7 @@ already canceled or completed), then the server should send back an error
 indicating the operation is not allowed. Any checkout session with a status that
 is not equal to completed or canceled should be cancelable.
 
-{{ method_fields('cancel_checkout', 'openapi.json', 'checkout') }}
+{{ method_fields('cancel_checkout', 'rest.openapi.json', 'checkout') }}
 
 ## Transport Bindings
 
@@ -388,6 +388,7 @@ defined below:
 
 *   [REST Binding](checkout-rest.md): RESTful API mapping using standard HTTP verbs and JSON payloads.
 *   [MCP Binding](checkout-mcp.md): Model Context Protocol mapping for agentic interaction.
+*   [Embedded Checkout Binding](embedded-checkout.md): JSON-RPC for powering embedded checkout.
 
 ## Entities
 

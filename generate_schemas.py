@@ -12,14 +12,17 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-"""Generates spec/ schemas from annotated source/ schemas.
+"""Generates spec/ from annotated source/ schemas and ECP definitions.
 
-Processes UCP annotations (ucp_request, ucp_response) and produces per-operation
-JSON Schema output. Files with annotations generate:
-
+Pass 1-2: Processes UCP annotations (ucp_request, ucp_response) and produces
+per-operation JSON Schema output. Files with annotations generate:
   - type.create_req.json, type.update_req.json, type_resp.json
 Files without annotations are copied as-is. $refs to annotated schemas are
 rewritten to point to the appropriate per-operation variant.
+
+Pass 3: Generates Embedded Protocol OpenRPC spec by aggregating methods
+from source/services/shopping/embedded.json and extension schemas.
+
 Usage: python generate_schemas.py
 """
 
@@ -40,6 +43,11 @@ UCP_ANNOTATIONS = {"ucp_request", "ucp_response", "ucp_shared_request"}
 # Valid annotation values
 VALID_REQUEST_VALUES = {"omit", "optional", "required"}
 VALID_RESPONSE_VALUES = {"omit"}
+
+# ECP constants
+ECP_SOURCE_FILE = "source/services/shopping/embedded.json"
+ECP_SCHEMAS_DIR = "source/schemas/shopping"
+ECP_VERSION = "2026-01-11"
 
 
 def get_visibility(prop: Any, operation: Optional[str]) -> tuple[str, bool]:
@@ -370,6 +378,172 @@ def process_schema(
   return generated, []
 
 
+# =============================================================================
+# EP (Embedded Protocol) Generation
+# =============================================================================
+
+
+def rewrite_refs_for_ecp(data: Any, annotated_schemas: set[str]) -> Any:
+  """Rewrite $refs in ECP methods to point to spec/ schema paths.
+
+  Source embedded.json uses refs like ../../schemas/shopping/checkout.json
+  which need _resp suffix for annotated schemas.
+
+  Args:
+    data: Schema data to rewrite refs for.
+    annotated_schemas: Set of annotated schema paths.
+
+  Returns:
+    Schema data with rewritten refs.
+  """
+  if isinstance(data, dict):
+    result = {}
+    for k, v in data.items():
+      if k == "$ref" and isinstance(v, str) and not v.startswith("#"):
+        if "schemas/shopping/" in v:
+          parts = v.split("schemas/shopping/")
+          if len(parts) == 2:
+            schema_path = parts[1]
+            anchor_part = ""
+            if "#" in schema_path:
+              schema_path, anchor_part = schema_path.split("#", 1)
+              anchor_part = "#" + anchor_part
+            # Add _resp suffix if schema has ucp annotations
+            if schema_path in annotated_schemas and schema_path.endswith(
+                ".json"
+            ):
+              schema_path = schema_path[:-5] + "_resp.json"
+            result[k] = f"../../schemas/shopping/{schema_path}{anchor_part}"
+          else:
+            result[k] = v
+        else:
+          result[k] = v
+      else:
+        result[k] = rewrite_refs_for_ecp(v, annotated_schemas)
+    return result
+  elif isinstance(data, list):
+    return [rewrite_refs_for_ecp(item, annotated_schemas) for item in data]
+  return data
+
+
+def transform_ecp_method(
+    method: dict[str, Any], annotated_schemas: set[str]
+) -> dict[str, Any]:
+  """Transform an ECP method definition to OpenRPC format."""
+  openrpc_method = {
+      "name": method["name"],
+      "summary": method.get("summary", ""),
+  }
+  if method.get("description"):
+    openrpc_method["description"] = method["description"]
+
+  if "params" in method:
+    openrpc_method["params"] = []
+    for param in method["params"]:
+      openrpc_param = {
+          "name": param["name"],
+          "required": param.get("required", False),
+          "schema": rewrite_refs_for_ecp(param["schema"], annotated_schemas),
+      }
+      if "description" in param.get("schema", {}):
+        openrpc_param["description"] = param["schema"]["description"]
+      openrpc_method["params"].append(openrpc_param)
+
+  if "result" in method:
+    result = method["result"]
+    openrpc_method["result"] = {
+        "name": result.get("name", "result"),
+        "schema": rewrite_refs_for_ecp(result["schema"], annotated_schemas),
+    }
+
+  if "errors" in method:
+    openrpc_method["errors"] = method["errors"]
+
+  return openrpc_method
+
+
+def generate_ecp_spec(annotated_schemas: set[str]) -> int:
+  """Generate Embedded Protocol OpenRPC spec.
+
+  Args:
+    annotated_schemas: Set of annotated schema paths.
+
+  Returns:
+    number of files generated.
+  """
+  print(
+      f"\n{schema_utils.Colors.CYAN}Pass 3: Generating ECP OpenRPC"
+      f" spec...{schema_utils.Colors.RESET}\n"
+  )
+
+  methods = []
+  delegations = []
+  ep_title = "Embedded Protocol"
+  ep_description = "Embedded Protocol methods for UCP capabilities."
+
+  # Collect core methods from embedded.json
+  if os.path.exists(ECP_SOURCE_FILE):
+    with open(ECP_SOURCE_FILE, "r") as f:
+      data = json.load(f)
+    ep_title = data.get("title", ep_title)
+    ep_description = data.get("description", ep_description)
+    if "methods" in data:
+      for method in data["methods"]:
+        methods.append(transform_ecp_method(method, annotated_schemas))
+    if "delegations" in data:
+      delegations.extend(data["delegations"])
+    print(f"  From embedded.json: {len(methods)} methods")
+
+  # Collect extension methods from schema files with "embedded" blocks
+  ext_count = 0
+  if os.path.exists(ECP_SCHEMAS_DIR):
+    for filename in os.listdir(ECP_SCHEMAS_DIR):
+      if not filename.endswith(".json"):
+        continue
+      if filename in ["checkout.json", "payment.json", "order.json"]:
+        continue
+      filepath = os.path.join(ECP_SCHEMAS_DIR, filename)
+      with open(filepath, "r") as f:
+        data = json.load(f)
+      if "embedded" not in data:
+        continue
+      embedded_block = data["embedded"]
+      if "methods" in embedded_block:
+        for method in embedded_block["methods"]:
+          methods.append(transform_ecp_method(method, annotated_schemas))
+          ext_count += 1
+      if "delegations" in embedded_block:
+        delegations.extend(embedded_block["delegations"])
+
+  if ext_count:
+    print(f"  From extensions: {ext_count} methods")
+
+  print(f"\n  Total: {len(methods)} methods")
+  print(f"  Delegations: {list(set(delegations))}\n")
+
+  # Generate OpenRPC spec
+  spec = {
+      "openrpc": "1.3.2",
+      "info": {
+          "title": ep_title,
+          "description": ep_description,
+          "version": ECP_VERSION,
+      },
+      "x-delegations": sorted(set(delegations)),
+      "methods": methods,
+  }
+
+  out_path = os.path.join(SPEC_DIR, "services/shopping/embedded.openrpc.json")
+  os.makedirs(os.path.dirname(out_path), exist_ok=True)
+  write_json(spec, out_path)
+  print(
+      f"{schema_utils.Colors.GREEN}✓{schema_utils.Colors.RESET}"
+      " services/shopping/embedded.openrpc.json"
+  )
+
+  return 1
+
+
 def main() -> None:
   if not os.path.exists(SOURCE_DIR):
     print(
@@ -410,10 +584,21 @@ def main() -> None:
       source_path = os.path.join(root, filename)
       rel_path = os.path.relpath(source_path, SOURCE_DIR)
 
-      if filename.endswith(".json") and filename not in [
-          "openapi.json",
-          "openrpc.json",
-      ]:
+      # Skip embedded.json - we generate embedded.openrpc.json in Pass 3
+      if filename == "embedded.json":
+        continue
+
+      # Rename transport specs in services/ to use
+      # {transport}.{format}.json naming
+      transport_renames = {}
+      if rel_path.startswith("services/"):
+        transport_renames = {
+            "openapi.json": "rest.openapi.json",
+            "openrpc.json": "mcp.openrpc.json",
+        }
+
+      # Process JSON schemas, copy other files as-is
+      if filename.endswith(".json") and filename not in transport_renames:
         generated, errors = process_schema(
             source_path, SPEC_DIR, rel_path, annotated_schemas
         )
@@ -422,16 +607,31 @@ def main() -> None:
         generated_count += len(generated)
         all_errors.extend(errors)
       else:
-        dest_path = os.path.join(SPEC_DIR, rel_path)
+        # Apply rename if this is a services/ transport spec
+        dest_filename = transport_renames.get(filename, filename)
+        dest_rel_path = os.path.join(os.path.dirname(rel_path), dest_filename)
+        dest_path = os.path.join(SPEC_DIR, dest_rel_path)
         try:
           os.makedirs(os.path.dirname(dest_path), exist_ok=True)
           shutil.copy2(source_path, dest_path)
           print(
-              f"{schema_utils.Colors.GREEN}✓{schema_utils.Colors.RESET} {rel_path}"
+              f"{schema_utils.Colors.GREEN}✓{schema_utils.Colors.RESET}"
+              f" {dest_rel_path}"
           )
           generated_count += 1
         except OSError as e:
           all_errors.append(f"Error copying {source_path}: {e}")
+
+  # Pass 3: Generate ECP OpenRPC spec
+  # Convert annotated_schemas to relative paths for ECP ref rewriting
+  schemas_base = os.path.normpath(os.path.join(SOURCE_DIR, "schemas/shopping"))
+  ecp_annotated = set()
+  for abs_path in annotated_schemas:
+    if schemas_base in abs_path:
+      rel_path = os.path.relpath(abs_path, schemas_base)
+      ecp_annotated.add(rel_path)
+  ecp_count = generate_ecp_spec(ecp_annotated)
+  generated_count += ecp_count
 
   print()
   if all_errors:

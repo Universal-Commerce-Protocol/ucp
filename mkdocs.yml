@@ -35,10 +35,10 @@ nav:
       - Overview: specification/checkout.md
       - HTTP/REST Binding: specification/checkout-rest.md
       - MCP Binding: specification/checkout-mcp.md
+      - Embedded Checkout Binding: specification/embedded-checkout.md
       - AP2 Mandates Extension: specification/ap2-mandates.md
       - Buyer Consent Extension: specification/buyer-consent.md
       - Discounts Extension: specification/discount.md
-      - Embedded Checkout Extension: specification/embedded-checkout.md
       - Fulfillment Extension: specification/fulfillment.md
     - Order Capability:
       - Overview: specification/order.md

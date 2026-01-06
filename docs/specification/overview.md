@@ -231,6 +231,7 @@ standard formats:
 
 -   **REST**: OpenAPI 3.x (JSON format)
 -   **MCP**: OpenRPC (JSON format)
+-   **Embedded**: OpenRPC (JSON format)
 
 #### 5.2.1 Service Definition
 
@@ -244,6 +245,8 @@ standard formats:
 | `mcp`           | object | No       | MCP transport binding                |
 | `mcp.schema`    | string | Yes      | URL to OpenRPC spec (JSON)           |
 | `mcp.endpoint`  | string | Yes      | Merchant's MCP endpoint              |
+| `embedded`      | string | No       | Embedded transport binding           |
+|`embedded.schema`| string | Yes      | URL to OpenRPC spec (JSON)           |
 
 Transport definitions MUST be thin: they declare method names and reference
 base schemas only. See [5.4.1 Requirements](#541-requirements) for details.
@@ -257,7 +260,7 @@ appended to this endpoint to form the complete URL.
 
 ```json
 "rest": {
-  "schema": "https://ucp.dev/services/shopping/openapi.json",
+  "schema": "https://ucp.dev/services/shopping/rest.openapi.json",
   "endpoint": "https://merchant.example.com/api/v2"
 }
 ```
@@ -376,11 +379,11 @@ Merchants publish their profile at `/.well-known/ucp`:
         "version": "2026-01-11",
         "spec": "https://ucp.dev/specs/shopping",
         "rest": {
-          "schema": "https://ucp.dev/services/shopping/openapi.json",
+          "schema": "https://ucp.dev/services/shopping/rest.openapi.json",
           "endpoint": "https://merchant.example.com/ucp/v1"
         },
         "mcp": {
-          "schema": "https://ucp.dev/services/shopping/openrpc.json",
+          "schema": "https://ucp.dev/services/shopping/mcp.openrpc.json",
           "endpoint": "https://merchant.example.com/ucp/mcp"
         }
       }
@@ -666,7 +669,7 @@ UCP-Agent: profile="https://agent.example/profile"
     "capabilities": [...]
   },
   "id": "chk_123",
-  "status": "in_progress",
+  "status": "incomplete",
   "line_items": [...],
   "currency": "USD",
   "payment": {
@@ -1026,7 +1029,7 @@ Request: {
 Response: {
   "ucp": {...},
   "id": "chk_123",
-  "status": "in_progress",
+  "status": "incomplete",
   "line_items": [...],
   "currency": "USD",
   "payment": {
@@ -1048,7 +1051,7 @@ changed). This allows agents to cache handler information and begin instrument
 acquisition with confidence.
 
 If checkout state changes significantly after `ready_for_complete`, merchants
-MAY return the checkout to `in_progress` status and update the handlers array
+MAY return the checkout to `incomplete` status and update the handlers array
 accordingly.
 
 **Handling Orphaned Instruments**
@@ -1059,12 +1062,12 @@ the request with an error:
 
 ```json
 {
-  "status": "unrecoverable_errors",
+  "status": "requires_escalation",
   "messages": [{
     "type": "error",
     "code": "invalid_handler_id",
     "content": "The handler 'example_pay' is no longer available for this checkout.",
-    "severity": "unrecoverable"
+    "severity": "requires_buyer_input"
   }]
 }
 ```

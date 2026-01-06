@@ -35,5 +35,61 @@
         }
       ]
     }
+  },
+
+  "embedded": {
+    "delegations": ["fulfillment.address_change"],
+    "methods": [
+      {
+        "name": "ec.fulfillment.change",
+        "summary": "Fulfillment details changed",
+        "description": "Merchant notifies host that checkout.fulfillment has changed (shipping method selected, destination updated).",
+        "params": [
+          {
+            "name": "checkout",
+            "required": true,
+            "schema": {
+              "$ref": "../../schemas/shopping/checkout.json",
+              "description": "Current checkout state with updated fulfillment."
+            }
+          }
+        ]
+      },
+      {
+        "name": "ec.fulfillment.address_change_request",
+        "summary": "Request address selection",
+        "description": "Merchant requests host to present address selection UI for a shipping fulfillment method.",
+        "params": [
+          {
+            "name": "checkout",
+            "required": true,
+            "schema": {
+              "$ref": "../../schemas/shopping/checkout.json",
+              "description": "Current checkout state with fulfillment context."
+            }
+          }
+        ],
+        "result": {
+          "name": "addressChangeResult",
+          "schema": {
+            "type": "object",
+            "description": "Checkout state with updated fulfillment address.",
+            "required": ["checkout"],
+            "properties": {
+              "checkout": {
+                "type": "object",
+                "description": "Partial checkout update with fulfillment address selection.",
+                "properties": {
+                  "fulfillment": {
+                    "$ref": "../../schemas/shopping/types/fulfillment.json",
+                    "description": "Fulfillment with updated destinations and selected_destination_id."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
   }
 }

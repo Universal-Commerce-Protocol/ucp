@@ -246,7 +246,7 @@ embedded in the JSON-RPC error's `data` field:
         {
           "code": "MERCHANDISE_NOT_AVAILABLE",
           "message": "One or more cart items are not available",
-          "severity": "unrecoverable",
+          "severity": "requires_buyer_input",
           "details": {
             "invalid_items": ["sku_999"]
           }

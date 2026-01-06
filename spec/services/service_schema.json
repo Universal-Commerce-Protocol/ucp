@@ -58,6 +58,20 @@
           "description": "Merchant's MCP endpoint"
         }
       }
+    },
+    "embedded": {
+      "type": "object",
+      "description": "Embedded transport binding (JSON-RPC 2.0 over postMessage). Unlike REST/MCP, the endpoint is per-capability (i.e. per-checkout via continue_url), not per-service.",
+      "required": [
+        "schema"
+      ],
+      "properties": {
+        "schema": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL to OpenRPC specification (JSON format) defining the embedded protocol"
+        }
+      }
     }
   }
 }
