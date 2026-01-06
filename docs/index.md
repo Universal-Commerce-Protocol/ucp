@@ -23,7 +23,7 @@ hide:
   <div class="promo-card">
     <h3>Learn</h3>
     <p>Protocol overview, core concepts, and design principles</p>
-    <a href="specification/overview.md" class="promo-button">
+    <a href="specification/overview/" class="promo-button">
       Read the docs
     </a>
   </div>
@@ -89,7 +89,7 @@ hide:
         <div style="text-transform: uppercase; color: #5f6368; font-size: 0.7rem; font-weight: 700; letter-spacing: 1.2px; margin-bottom: 15px;">SEE IT IN ACTION</div>
         <h3>Checkout</h3>
         <p>Support complex cart logic, dynamic pricing, and tax calculations across millions of merchants through unified checkout sessions.</p>
-        <a href="specification/checkout-rest.md" class="learn-more-btn">Learn more</a>
+        <a href="specification/checkout-rest/" class="learn-more-btn">Learn more</a>
       </div>
       <div class="pane-visuals">
         <div class="image-container">
@@ -109,7 +109,7 @@ hide:
         <div style="text-transform: uppercase; color: #5f6368; font-size: 0.7rem; font-weight: 700; letter-spacing: 1.2px; margin-bottom: 15px;">SEE IT IN ACTION</div>
         <h3>Identity Linking</h3>
         <p>OAuth 2.0 standard enables agents to maintain secure, authorized relationships without sharing credentials.</p>
-        <a href="specification/identity-linking.md" class="learn-more-btn">Learn more</a>
+        <a href="specification/identity-linking/" class="learn-more-btn">Learn more</a>
       </div>
       <div class="pane-visuals">
         <div class="image-container">
@@ -129,7 +129,7 @@ hide:
         <div style="text-transform: uppercase; color: #5f6368; font-size: 0.7rem; font-weight: 700; letter-spacing: 1.2px; margin-bottom: 15px;">SEE IT IN ACTION</div>
         <h3>Order</h3>
         <p>From purchase confirmation to delivery. Real-time web-hooks power status updates, shipment tracking, and return processing across every channel.</p>
-        <a href="specification/order.md" class="learn-more-btn">Learn more</a>
+        <a href="specification/order/" class="learn-more-btn">Learn more</a>
       </div>
       <div class="pane-visuals">
         <div class="image-container">
@@ -180,7 +180,7 @@ function openTab(evt, tabName) {
     <p style="color: #5f6368; font-size: 0.95rem; line-height: 1.6; margin-bottom: 30px; flex-grow: 1;">
       Embed your checkout UI within an iframe to support more complex checkout flows, with advanced capabilities like bidirectional communication, payments and shipping address handoffs.
     </p>
-    <a href="specification/embedded/" class="md-button" style="background: #fff; border-radius: 24px; padding: 0.6rem 2rem; border: 1px solid #dadce0; color: #3c4043; font-weight: 500; text-transform: none;">Learn more</a>
+    <a href="specification/embedded-checkout/" class="md-button" style="background: #fff; border-radius: 24px; padding: 0.6rem 2rem; border: 1px solid #dadce0; color: #3c4043; font-weight: 500; text-transform: none;">Learn more</a>
   </div>
 
 </div>
@@ -269,7 +269,7 @@ function openTab(evt, tabName) {
       <p style="color: #5f6368; font-size: 0.95rem; line-height: 1.6; margin-bottom: 30px; flex-grow: 1;">
         Build the future of commerce on an open foundation. Join our community in evolving an open-source standard designed for the next generation of digital trade.
       </p>
-      <a href="specification/overview.md" style="color: #1a73e8; text-decoration: none; font-weight: 500; font-size: 0.95rem;">View the technical spec</a>
+      <a href="specification/overview/" style="color: #1a73e8; text-decoration: none; font-weight: 500; font-size: 0.95rem;">View the technical spec</a>
     </div>
 
     <div style="flex: 1; min-width: 300px; max-width: 360px; border: 1px solid #dadce0; border-radius: 32px; padding: 40px 30px; display: flex; flex-direction: column; align-items: center;">
@@ -291,7 +291,7 @@ function openTab(evt, tabName) {
       <p style="color: #5f6368; font-size: 0.95rem; line-height: 1.6; margin-bottom: 30px; flex-grow: 1;">
         Simplify merchant onboarding with standardized APIs and provide your audience with an integrated shopping experience. Compatible with MCP, A2A, and existing agent frameworks.
       </p>
-      <a href="documentation/core-concepts.md" style="color: #1a73e8; text-decoration: none; font-weight: 500; font-size: 0.95rem;">Learn more UCP core concepts</a>
+      <a href="documentation/core-concepts/" style="color: #1a73e8; text-decoration: none; font-weight: 500; font-size: 0.95rem;">Learn more UCP core concepts</a>
     </div>
 
   </div>
@@ -306,7 +306,7 @@ function openTab(evt, tabName) {
       <p style="color: #5f6368; font-size: 0.95rem; line-height: 1.6; margin-bottom: 30px; flex-grow: 1;">
         Universal payments that are provable—every authorization backed by cryptographic proof of user consent. Open, modular payment handler design enables open interoperability.
       </p>
-      <a href="documentation/ucp-and-ap2.md" style="color: #1a73e8; text-decoration: none; font-weight: 500; font-size: 0.95rem;">Learn more about UCP and AP2</a>
+      <a href="documentation/ucp-and-ap2/" style="color: #1a73e8; text-decoration: none; font-weight: 500; font-size: 0.95rem;">Learn more about UCP and AP2</a>
     </div>
 
     <div style="flex: 1; min-width: 300px; max-width: 360px; border: 1px solid #dadce0; border-radius: 32px; padding: 40px 30px; display: flex; flex-direction: column; align-items: center;">
