@@ -160,7 +160,7 @@ described in RFC 2119 and RFC 8174.
 Schema notes:
 
 -   Date format: Always specified as RFC 3339 unless otherwise specified
--   Amounts format: Micros
+-   Amounts format: Minor units (cents)
 
 ## 5. Discovery, Governance, and Negotiation
 
@@ -1202,11 +1202,11 @@ understand how to invoke your payment method.
           },
           "min_amount": {
             "type": "integer",
-            "description": "Minimum order amount in micros for this option."
+            "description": "Minimum order amount in minor units (cents)."
           },
           "max_amount": {
             "type": "integer",
-            "description": "Maximum order amount in micros for this option."
+            "description": "Maximum order amount in minor units (cents)."
           }
         }
       }
@@ -1329,12 +1329,12 @@ handler in their checkout response:
         "payment_options": [
           {
             "type": "pay_in_4",
-            "min_amount": 3500000,
-            "max_amount": 150000000
+            "min_amount": 350,
+            "max_amount": 15000
           },
           {
             "type": "financing",
-            "min_amount": 20000000
+            "min_amount": 2000
           }
         ]
       }
@@ -1363,7 +1363,7 @@ Agents MUST follow this flow to process a `com.acme.pay_later` handler:
       "purchase_country": "US",
       "purchase_currency": "USD",
       "locale": "en-US",
-      "order_amount": 50000000,
+      "order_amount": 5000,
       "order_lines": [...],
       "merchant_reference1": "{checkout_id}"
     }
@@ -1445,8 +1445,8 @@ Upon receiving an `acme_pay_later` instrument, merchants MUST:
     "environment": "production",
     "locale": "en-US",
     "payment_options": [
-      { "type": "pay_in_4", "min_amount": 3500000, "max_amount": 150000000 },
-      { "type": "financing", "min_amount": 20000000 }
+      { "type": "pay_in_4", "min_amount": 350, "max_amount": 15000 },
+      { "type": "financing", "min_amount": 2000 }
     ]
   }
 }
