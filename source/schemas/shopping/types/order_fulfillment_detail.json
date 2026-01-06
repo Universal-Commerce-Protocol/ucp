@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OrderFulfillmentDetail",
+  "description": "This correlates with the notion of a delivery package. Multiple order_line_items in the order with the same \"fulfillment_detail_id\" would be considered to be part of the same delivery package.",
+  "type": "object",
+  "required": [
+    "id",
+    "fulfillment_option",
+    "status"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Should match with fulfillment_detail_id from order_line_item."
+    },
+    "fulfillment_option": {
+      "$ref": "../fulfillment.json#/$defs/fulfillment_option"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "processing",
+        "shipped",
+        "in_transit",
+        "out_for_delivery",
+        "delivered",
+        "failed_attempt",
+        "canceled"
+      ],
+      "description": "Current fulfillment status."
+    },
+    "fulfillment_address": {
+      "$ref": "postal_address.json",
+      "description": "Single shipping destination address."
+    },
+    "tracking_identifier": {
+      "type": "string",
+      "description": "Required if status != processing or canceled. The tracking identifier for the fulfillment."
+    },
+    "fulfillment_tracking_url": {
+      "type": "string",
+      "description": "Required if status != processing or canceled. URL to send the user to to see the tracking.",
+      "format": "uri"
+    },
+    "expected_fulfillment_time": {
+      "type": "string",
+      "description": "RFC 3339 format. Required if status != processing or canceled. More granular date provided from the carrier."
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/handlers/google_pay/order_confirmation.json",
+  "title": "Order Confirmation",
+  "description": "Order confirmation returned by the merchant.",
+  "type": "object",
+  "required": [
+    "id",
+    "permalink_url"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Order ID."
+    },
+    "permalink_url": {
+      "type": "string",
+      "description": "Permalink to access the order on merchant site."
+    }
+  }
+}

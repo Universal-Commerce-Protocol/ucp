@@ -1,0 +1,497 @@
+/**
+ * Copyright 2025 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Copyright 2025 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/* --- HEADER & BASE --- */
+.md-header {
+  /* 1. Set the whole bar to black */
+  background-color: #000000 !important;
+
+  /* 2. Remove the grey border so it's a solid block */
+  border-bottom: none;
+
+  /* 3. Force base text color to white */
+  color: #ffffff !important;
+}
+
+/* 4. Ensure the Site Title ("Universal Commerce Protocol") is white */
+.md-header__title, .md-header__topic {
+  color: #ffffff !important;
+  font-weight: 700; /* Optional: makes it pop like the image */
+}
+
+/* 5. Ensure all icons (Menu, GitHub, Search magnifying glass) are white */
+.md-header__button {
+  color: #ffffff !important;
+}
+
+/* --- HERO SECTION --- */
+.hero-wrapper {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 60px 40px;
+  gap: 40px;
+}
+
+.hero-content {
+  flex: 1;
+  max-width: 650px;
+}
+
+.hero-content h1 {
+  font-size: 3.5rem;
+  line-height: 1.2;
+  font-weight: 500;
+  color: #202124;
+  margin: 0 0 2rem 0;
+  letter-spacing: -0.02em;
+}
+
+.hero-subheading {
+  font-size: 1.5rem;
+  line-height: 1.4;
+  color: #3c4043;
+  margin: 0 0 1.5rem 0;
+}
+
+.hero-description {
+  font-size: 1.25rem;
+  line-height: 1.6;
+  color: #5f6368;
+  margin: 0;
+}
+
+.hero-image {
+  flex: 0 0 250px;
+  display: flex;
+  justify-content: center;
+  margin-top: 15px;
+}
+
+.hero-logo-crisp {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+/* --- PROMO CARDS  --- */
+.promo-card-wrapper {
+  display: flex;
+  gap: 24px;
+  max-width: 1200px;
+  margin: 40px auto;
+  flex-wrap: wrap;
+}
+
+.promo-card {
+  flex: 1;
+  min-width: 300px;
+  background-color: #f8f9fa;
+  border-radius: 24px; /* Matches the rounded look in your image */
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.promo-card h3 {
+  font-size: 1.5rem;
+  font-weight: 400;
+  color: #202124;
+  margin-top: 0;
+  margin-bottom: 12px;
+}
+
+.promo-card p {
+  color: #5f6368;
+  font-size: 1rem;
+  line-height: 1.5;
+  margin-bottom: 32px;
+  flex-grow: 1;
+}
+
+.promo-button {
+  display: inline-block;
+  padding: 12px 28px;
+  border: 1px solid #202124;
+  border-radius: 50px; /* Pill shape */
+  text-decoration: none;
+  color: #202124;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: background-color 0.2s ease;
+  background-color: transparent;
+}
+
+.promo-button:hover {
+  background-color: #e8eaed; /* Light gray hover effect */
+}
+
+/* --- PARTNER SECTION --- */
+.partner-carousel {
+  text-align: center;
+  padding: 60px 0;
+  max-width: 100%;
+  margin: 0 auto;
+  overflow: hidden; /* Hides logos as they move off screen */
+  position: relative;
+  background: white;
+}
+
+.partner-carousel h2 {
+  font-size: 2.5rem;
+  font-weight: 500;
+  color: #202124;
+  margin-bottom: 50px;
+}
+
+/* Gradient fade on the sides */
+.partner-carousel::before,
+.partner-carousel::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 150px;
+  height: 100%;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.partner-carousel::before {
+  left: 0;
+  background: linear-gradient(to right, white, transparent);
+}
+
+.partner-carousel::after {
+  right: 0;
+  background: linear-gradient(to left, white, transparent);
+}
+
+/* The moving track */
+.partner-track {
+  display: flex;
+  gap: 60px; /* Space between logos */
+  width: max-content;
+  /* 40s is the speed. Lower number = faster */
+  animation: partnerScroll 40s linear infinite; 
+}
+
+/* Pause on hover */
+.partner-track:hover {
+  animation-play-state: paused;
+}
+
+/* Individual Logo Styles */
+.partner-logo {
+  display: flex;
+  align-items: center;
+  opacity: 0.9;
+  transition: opacity 0.3s;
+}
+
+.partner-logo:hover {
+  opacity: 1;
+}
+
+.partner-logo img {
+  height: 40px; /* Fixed height for consistency */
+  width: auto;
+}
+
+/* Fallback text (if image fails) */
+.partner-logo span {
+  display: none;
+  font-weight: 700;
+  color: #202124;
+  font-size: 1.4rem;
+  white-space: nowrap;
+}
+
+/* The Animation Loop */
+@keyframes partnerScroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* Mobile Tweak */
+@media screen and (max-width: 768px) {
+  .partner-logo img {
+    height: 30px; /* Smaller logos on phone */
+  }
+  .partner-track {
+    gap: 40px; /* Tighter spacing on phone */
+  }
+}
+
+/* --- ACTION CAROUSEL SECTION --- */
+.action-carousel-section {
+  text-align: center;
+  padding: 60px 0;
+  max-width: 100%;
+  margin: 40px 0;
+}
+
+.action-carousel-section h2 {
+  font-size: 2.5rem;
+  margin-bottom: 40px;
+  color: #202124;
+  font-weight: 500;
+}
+
+/* Navigation Tabs */
+.carousel-tabs {
+  display: inline-flex;
+  background-color: #f1f3f4;
+  border-radius: 50px;
+  padding: 4px;
+  margin-bottom: 50px;
+}
+
+.tab-btn {
+  background: transparent;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 50px;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #5f6368;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.tab-btn:hover {
+  color: #202124;
+}
+
+.tab-btn.active {
+  background-color: #202124;
+  color: #fff;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+/* Content Area */
+.carousel-content {
+  min-height: 500px;
+  position: relative;
+}
+
+.tab-pane {
+  display: none;
+  /* Force Flex Row on Desktop */
+  display: none; /* Hidden by default */
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-start; /* Aligns top */
+  gap: 40px;
+  text-align: left;
+  animation: fadeIn 0.4s ease;
+  width: 100%;
+}
+
+.tab-pane.active {
+  display: flex !important; /* Force display when active */
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Left Column: Text */
+.pane-text {
+  flex: 1;
+  min-width: 250px;
+  max-width: 350px;
+  padding-top: 20px;
+}
+
+.icon-placeholder {
+  margin-bottom: 20px;
+}
+
+.icon-placeholder img {
+    height: 48px;
+    width: auto;
+}
+
+.pane-text h3 {
+  font-size: 2.2rem;
+  margin-bottom: 20px;
+  font-weight: 500;
+  color: #202124;
+  line-height: 1.2;
+}
+
+.pane-text p {
+  color: #5f6368;
+  line-height: 1.6;
+  font-size: 1.05rem;
+  margin-bottom: 30px;
+}
+
+.learn-more-btn {
+  display: inline-block;
+  padding: 0.6rem 2rem;
+  border: 1px solid #dadce0;
+  border-radius: 24px;
+  text-decoration: none;
+  color: #3c4043;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: background 0.2s;
+}
+
+.learn-more-btn:hover {
+  background-color: #f8f9fa;
+  color: #202124;
+}
+
+/* Right Column: Visuals Container */
+.pane-visuals {
+  flex: 2;
+  display: flex;
+  flex-direction: row; /* Force items side by side */
+  gap: 20px;
+  justify-content: center;
+  align-items: flex-start;
+  min-width: 400px; /* Prevents squishing */
+}
+
+/* Image Wrapper */
+.image-container {
+  width: 260px;
+  flex-shrink: 0;
+}
+
+.phone-mockup {
+  width: 100%;
+  height: auto;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  background-color: #fff;
+  display: block;
+}
+
+/* Code Block Wrapper */
+.code-block-placeholder {
+  flex: 1;
+  background-color: #f8f9fa;
+  border-radius: 12px;
+  padding: 20px;
+  font-family: monospace;
+  font-size: 12px;
+  color: #333;
+  min-height: 400px;
+  overflow: hidden;
+  border: 1px solid #dadce0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* --- MOBILE RESPONSIVENESS (< 960px) --- */
+@media screen and (max-width: 960px) {
+
+  /* Hero */
+  .hero-wrapper {
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+    gap: 2rem;
+    padding: 40px 20px;
+  }
+
+  .hero-content {
+    flex: auto;
+    width: 100%;
+  }
+
+  .hero-content h1 {
+    font-size: 2.5rem;
+  }
+
+  .hero-image {
+    flex: 0 0 auto;
+    width: 60%;
+    margin-bottom: 40px;
+  }
+
+  .hero-logo-crisp {
+    max-width: 240px;
+  }
+
+  /* Partner Grid */
+  .partner-grid {
+    gap: 1.5rem;
+  }
+
+  /* Carousel Mobile */
+  .tab-pane {
+    flex-direction: column !important; /* Stack vertically on mobile */
+    align-items: center;
+    gap: 40px;
+  }
+
+  .pane-text {
+    text-align: center;
+    max-width: 100%;
+  }
+
+  .pane-visuals {
+    flex-direction: column; /* Stack image and code */
+    width: 100%;
+    min-width: 0; /* Reset desktop constraint */
+    align-items: center;
+  }
+
+  .code-block-placeholder {
+      display: none; /* Hide code on small screens to save space */
+  }
+}
+
+/* Optional: Match the White Search Bar from your reference image */
+.md-search__form {
+  background-color: #ffffff !important;
+  border-radius: 4px;
+}
+.md-search__input {
+  color: #000000 !important; /* Text you type is black */
+}
+.md-search__input::placeholder {
+  color: #5f6368 !important; /* Placeholder text is grey */
+}
+label.md-search__icon {
+  color: #5f6368 !important; /* Search icon is grey */
+}

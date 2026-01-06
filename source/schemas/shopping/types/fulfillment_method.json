@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/fulfillment_method.json",
+  "title": "FulfillmentMethod",
+  "description": "A fulfillment method (shipping or pickup) with destinations and groups.",
+  "type": "object",
+  "ucp_shared_request": true,
+  "required": ["id", "type", "line_item_ids"],
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique fulfillment method identifier.",
+      "ucp_request": "omit"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["shipping", "pickup"],
+      "description": "Fulfillment method type.",
+      "ucp_request": "omit"
+    },
+    "line_item_ids": {
+      "type": "array",
+      "description": "Line item IDs fulfilled via this method.",
+      "items": { "type": "string" },
+      "ucp_request": "omit"
+    },
+    "destinations": {
+      "type": "array",
+      "description": "Available destinations. For shipping: addresses. For pickup: retail locations.",
+      "items": { "$ref": "fulfillment_destination.json" },
+      "ucp_request": "omit"
+    },
+    "selected_destination_id": {
+      "type": ["string", "null"],
+      "description": "ID of the selected destination."
+    },
+    "groups": {
+      "type": "array",
+      "description": "Merchant-computed fulfillment groups (packages) for selected destination.",
+      "items": { "$ref": "fulfillment_group.json" },
+      "ucp_request": "omit"
+    }
+  }
+}

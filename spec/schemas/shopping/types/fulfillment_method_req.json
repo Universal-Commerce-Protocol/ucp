@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/fulfillment_method_req.json",
+  "title": "FulfillmentMethod Request",
+  "description": "A fulfillment method (shipping or pickup) with destinations and groups.",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "selected_destination_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "ID of the selected destination."
+    }
+  }
+}

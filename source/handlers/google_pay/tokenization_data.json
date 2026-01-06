@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "TokenizationData",
+  "type": "object",
+  "required": [
+    "type",
+    "token"
+  ],
+  "properties": {
+    "type": {
+      "type": "string",
+      "description": "The type of tokenization to be applied to the selected payment method. This value matches the type set in tokenization_specification."
+    },
+    "token": {
+      "type": "string"
+    }
+  }
+}

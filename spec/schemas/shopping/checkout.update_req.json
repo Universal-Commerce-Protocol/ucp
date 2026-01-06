@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/checkout.update_req.json",
+  "title": "Checkout Update Request",
+  "description": "Base checkout schema. Extensions compose onto this using allOf.",
+  "type": "object",
+  "required": [
+    "id",
+    "line_items",
+    "currency",
+    "payment"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Identifier of the checkout session. Recommended format: gid://merchant.com/Checkout/{checkout_id}"
+    },
+    "line_items": {
+      "type": "array",
+      "items": {
+        "$ref": "types/line_item.update_req.json"
+      },
+      "description": "List of line items being checked out."
+    },
+    "buyer": {
+      "$ref": "types/buyer.json",
+      "description": "Representation of the buyer."
+    },
+    "currency": {
+      "type": "string",
+      "description": "ISO 4217 currency code."
+    },
+    "payment": {
+      "$ref": "payment.update_req.json"
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "TokenizationSpecification",
+  "type": "object",
+  "required": [
+    "type",
+    "parameters"
+  ],
+  "properties": {
+    "type": {
+      "type": "string",
+      "description": "A payment method tokenization type is supported for the given PaymentMethod. For the CARD payment method, use PAYMENT_GATEWAY or DIRECT."
+    },
+    "parameters": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Parameters specific to the selected payment method tokenization type."
+    }
+  }
+}

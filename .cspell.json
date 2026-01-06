@@ -1,0 +1,58 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "caseSensitive": true,
+  "useGitignore": true,
+  "ignorePaths": [
+    ".github/**",
+    ".cspell/**",
+    ".gemini/**",
+    ".vscode/**",
+    ".cspell.json",
+    "**/*.svg"
+  ],
+  "dictionaryDefinitions": [
+    {
+        "name": "custom-words",
+        "path": ".cspell/custom-words.txt",
+        "addWords": true
+    }
+  ],
+  "dictionaries": [
+    "custom-words",
+    "aws",
+    "bash-words",
+    "companies",
+    "css",
+    "data-science-models",
+    "data-science",
+    "data-science-tools",
+    "acronyms",
+    "shared-additional-words",
+    "en_GB",
+    "en_US",
+    "filetypes",
+    "fonts",
+    "fullstack",
+    "go",
+    "google",
+    "html",
+    "java",
+    "k8s",
+    "mnemonics",
+    "monkeyc_keywords",
+    "node",
+    "npm",
+    "people-names",
+    "python",
+    "python-common",
+    "shell-all-words",
+    "softwareTerms",
+    "webServices",
+    "common-terms",
+    "sql",
+    "tsql",
+    "terraform",
+    "typescript"
+  ]
+}

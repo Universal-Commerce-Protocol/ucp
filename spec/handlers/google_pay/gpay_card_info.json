@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/handlers/google_pay/schemas/card_info.json",
+  "title": "Google Pay Card Info",
+  "description": "This object provides information about the selected payment card.",
+  "type": "object",
+  "properties": {
+    "card_details": {
+      "type": "string",
+      "description": "The details about the card. This value is commonly the last four digits of the selected payment account number.",
+      "pattern": "^[0-9]+$",
+      "examples": [
+        "1234"
+      ]
+    },
+    "assurance_details": {
+      "$ref": "assurance_details_specifications.json",
+      "description": "This object provides information about the validation performed on the returned payment data if assuranceDetailsRequired is set to true in the CardParameters."
+    },
+    "card_network": {
+      "type": "string",
+      "description": "The payment card network of the selected payment. Returned values match the format of allowedCardNetworks in CardParameters.",
+      "examples": [
+        "VISA",
+        "MASTERCARD",
+        "AMEX"
+      ]
+    },
+    "billing_address": {
+      "$ref": "../../schemas/shopping/types/postal_address.json",
+      "description": "The billing address associated with the provided payment method, if billingAddressRequired is set to true in CardParameters."
+    },
+    "card_funding_source": {
+      "type": "string",
+      "description": "Card funding source for the selected payment method.",
+      "enum": [
+        "UNKNOWN",
+        "CREDIT",
+        "DEBIT",
+        "PREPAID"
+      ]
+    }
+  },
+  "required": [
+    "card_details",
+    "assurance_details",
+    "card_network",
+    "card_funding_source"
+  ],
+  "additionalProperties": false
+}

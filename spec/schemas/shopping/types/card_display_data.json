@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/card_display_data.json",
+  "title": "Card Display Data",
+  "type": "object",
+  "required": [
+    "summary",
+    "brand",
+    "last_digits",
+    "expiry_month",
+    "expiry_year"
+  ],
+  "properties": {
+    "summary": {
+      "type": "string",
+      "examples": [
+        "Visa \u2022\u2022\u2022\u2022 4242"
+      ]
+    },
+    "brand": {
+      "type": "string",
+      "enum": [
+        "visa",
+        "mastercard",
+        "amex",
+        "discover"
+      ]
+    },
+    "last_digits": {
+      "type": "string",
+      "maxLength": 4
+    },
+    "expiry_month": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 12
+    },
+    "expiry_year": {
+      "type": "integer"
+    },
+    "card_art_url": {
+      "type": "string",
+      "format": "uri"
+    }
+  }
+}

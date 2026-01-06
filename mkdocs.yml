@@ -1,0 +1,160 @@
+#   Copyright 2025 Google LLC
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+
+
+site_name: UCP - Universal Commerce Protocol
+site_description: >
+  The Universal Commerce Protocol (UCP) is a solution for enabling gen AI agents to make payments on
+  behalf of users, safely, securely, and in a decentralized and privacy protecting manner.
+  This protocol is a part of the broader ecosystem, which includes agentic protocols like A2A and
+  MCP, and encompasses the global nature of payments.
+site_dir: site
+edit_uri: edit/main/docs/
+
+# Navigation
+nav:
+  - Home: index.md
+  - Core Concepts: documentation/core-concepts.md
+  - UCP and AP2: documentation/ucp-and-ap2.md
+  - Specification:
+    - Overview: specification/overview.md
+    - Checkout Capability:
+      - Overview: specification/checkout.md
+      - HTTP/REST Binding: specification/checkout-rest.md
+      - MCP Binding: specification/checkout-mcp.md
+      - AP2 Mandates Extension: specification/ap2-mandates.md
+      - Buyer Consent Extension: specification/buyer-consent.md
+      - Discounts Extension: specification/discount.md
+      - Embedded Checkout Extension: specification/embedded-checkout.md
+      - Fulfillment Extension: specification/fulfillment.md
+    - Order Capability:
+      - Overview: specification/order.md
+    - Identity Linking Capability: specification/identity-linking.md
+    - Payment Handlers:
+      - Guide: specification/payment-handler-guide.md
+      - Template: specification/payment-handler-template.md
+      - Tokenization Guide: specification/tokenization-guide.md
+      - Google Pay Payment Handler: specification/gpay-payment-handler.md
+      - Shop Pay Payment Handler: specification/shop-pay-handler.md
+      - Examples:
+        - Merchant Tokenizer: specification/examples/merchant-tokenizer-payment-handler.md
+        - Agent Tokenizer: specification/examples/agent-tokenizer-payment-handler.md
+        - PSP Handler: specification/examples/psp-payment-handler.md
+        - Agent Encrypted Credential: specification/examples/agent-encrypted-credential-handler.md
+  - Google's Implementation: documentation/google-implementation.md
+  - Roadmap: documentation/roadmap.md
+
+# repo_name: UCP - Universal Commerce Protocol
+# repo_url:
+
+# Copyright
+copyright: Copyright 2025 Google. Licensed under the Apache License, Version 2.0.
+
+# Custom CSS
+extra_css:
+  - stylesheets/custom.css
+
+#Global Constants
+extra:
+  ucp_url: https://ucp.dev
+
+# Configuration
+theme:
+  logo: assets/inverted_logo.svg
+  name: material
+  font:
+    text: Google Sans
+    code: Roboto Mono
+  icon:
+    repo: fontawesome/brands/github
+    view: material/pencil-box-multiple
+    admonition:
+      note: fontawesome/solid/note-sticky
+      abstract: fontawesome/solid/book
+      info: fontawesome/solid/circle-info
+      tip: fontawesome/solid/bullhorn
+      success: fontawesome/solid/check
+      question: fontawesome/solid/circle-question
+      warning: fontawesome/solid/triangle-exclamation
+      failure: fontawesome/solid/bomb
+      danger: fontawesome/solid/skull
+      bug: fontawesome/solid/robot
+      example: fontawesome/solid/flask
+      quote: fontawesome/solid/quote-left
+  palette:
+    - scheme: default
+      primary: white
+      accent: indigo
+    - scheme: slate
+      primary: black
+      accent: indigo
+  features:
+    - announce.dismiss
+    - content.action.view
+    - content.code.annotate
+    - content.code.copy
+    - content.code.select
+    - content.tabs.link
+    - content.tooltips
+    - navigation.sections
+    - navigation.footer
+    - navigation.indexes
+    - navigation.instant
+    - navigation.instant.progress
+    - navigation.path
+    - navigation.top
+    - navigation.tracking
+    - toc.follow
+
+# Extensions
+markdown_extensions:
+  - meta
+  - footnotes
+  - admonition
+  - attr_list
+  - md_in_html
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets:
+      base_path: .
+      url_download: true
+      dedent_subsections: true
+      check_paths: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - toc:
+      permalink: true
+
+# Plugins
+plugins:
+  - search
+  - macros
+  - site-urls

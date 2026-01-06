@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/fulfillment_group.json",
+  "title": "FulfillmentGroup",
+  "description": "A merchant-generated package/group of line items with fulfillment options.",
+  "type": "object",
+  "ucp_shared_request": true,
+  "required": ["id", "line_item_ids"],
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique fulfillment group identifier.",
+      "ucp_request": "omit"
+    },
+    "line_item_ids": {
+      "type": "array",
+      "description": "Line item IDs included in this group/package.",
+      "items": { "type": "string" },
+      "ucp_request": "omit"
+    },
+    "options": {
+      "type": "array",
+      "description": "Available fulfillment options for this group.",
+      "items": { "$ref": "fulfillment_option.json" },
+      "ucp_request": "omit"
+    },
+    "selected_option_id": {
+      "type": ["string", "null"],
+      "description": "ID of the selected fulfillment option for this group."
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/handlers/google_pay/schemas/assurance_details_specifications.json",
+  "title": "Assurance Details Specifications",
+  "description": "This object provides information about what validation has been performed on the returned payment credentials so that appropriate instrument risk checks can be applied.",
+  "type": "object",
+  "properties": {
+    "account_verified": {
+      "type": "boolean",
+      "description": "If true, indicates that Cardholder possession validation has been performed on returned payment credential."
+    },
+    "card_holder_authenticated": {
+      "type": "boolean",
+      "description": "If true, indicates that identification and verifications (ID&V) was performed on the returned payment credential. If false, the same risk-based authentication can be performed as you would for card transactions (e.g. 3D Secure)."
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/checkout.json",
+  "title": "Checkout",
+  "description": "Base checkout schema. Extensions compose onto this using allOf.",
+  "type": "object",
+  "required": [
+    "ucp",
+    "id",
+    "line_items",
+    "status",
+    "currency",
+    "totals",
+    "links",
+    "payment"
+  ],
+  "properties": {
+    "ucp": {
+      "$ref": "../ucp.json#/$defs/checkout_response",
+      "ucp_request": "omit"
+    },
+    "id": {
+      "type": "string",
+      "description": "Identifier of the checkout session. Recommended format: gid://merchant.com/Checkout/{checkout_id}",
+      "ucp_request": {
+        "create": "omit",
+        "update": "required"
+      }
+    },
+    "line_items": {
+      "type": "array",
+      "items": {
+        "$ref": "types/line_item.json"
+      },
+      "description": "List of line items being checked out."
+    },
+    "buyer": {
+      "$ref": "types/buyer.json",
+      "description": "Representation of the buyer."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "incomplete",
+        "requires_escalation",
+        "ready_for_complete",
+        "complete_in_progress",
+        "completed",
+        "canceled"
+      ],
+      "description": "Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details.",
+      "ucp_request": "omit"
+    },
+    "currency": {
+      "type": "string",
+      "description": "ISO 4217 currency code."
+    },
+    "totals": {
+      "type": "array",
+      "items": {
+        "$ref": "types/total.json"
+      },
+      "description": "Different cart totals.",
+      "ucp_request": "omit"
+    },
+    "messages": {
+      "type": "array",
+      "items": {
+        "$ref": "types/message.json"
+      },
+      "description": "List of messages with error and info about the checkout session state.",
+      "ucp_request": "omit"
+    },
+    "links": {
+      "type": "array",
+      "items": {
+        "$ref": "types/link.json"
+      },
+      "description": "Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.",
+      "ucp_request": "omit"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.",
+      "ucp_request": "omit"
+    },
+    "continue_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL for checkout handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements.",
+      "ucp_request": "omit"
+    },
+    "payment": {
+      "$ref": "payment.json"
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/payment.json",
+  "title": "Payment",
+  "description": "Payment configuration containing handlers.",
+  "type": "object",
+  "required": [
+    "handlers"
+  ],
+  "properties": {
+    "handlers": {
+      "type": "array",
+      "items": {
+        "$ref": "types/payment_handler.json"
+      },
+      "description": "Processing configurations that define how payment instruments can be collected. Each handler specifies a tokenization or payment collection strategy.",
+      "ucp_request": "omit"
+    },
+    "selected_instrument_id": {
+      "type": "string",
+      "description": "The id of the currently selected payment instrument from the instruments array. Set by the agent when submitting payment, and echoed back by the merchant in finalized state."
+    },
+    "instruments": {
+      "type": "array",
+      "items": {
+        "$ref": "types/payment_instrument.json"
+      },
+      "description": "The payment instruments available for this payment. Each instrument is associated with a specific handler via the handler_id field. Handlers can extend the base payment_instrument schema to add handler-specific fields."
+    }
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OrderLineItem",
+  "type": "object",
+  "required": [
+    "id",
+    "item",
+    "quantity",
+    "base_amount",
+    "subtotal",
+    "total",
+    "status"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Line item identifier."
+    },
+    "item": {
+      "$ref": "item_resp.json",
+      "description": "Product data (id, title, price, image_url)."
+    },
+    "quantity": {
+      "type": "object",
+      "required": [
+        "total",
+        "fulfilled"
+      ],
+      "properties": {
+        "total": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Current total quantity."
+        },
+        "fulfilled": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Quantity fulfilled (sum from fulfillment events)."
+        }
+      },
+      "description": "Quantity tracking. Both total and fulfilled are derived from events."
+    },
+    "base_amount": {
+      "type": "integer",
+      "description": "Base price in minor units (cents) before discounts."
+    },
+    "subtotal": {
+      "type": "integer",
+      "description": "Subtotal after discounts, before tax."
+    },
+    "total": {
+      "type": "integer",
+      "description": "Final total including tax."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "processing",
+        "partial",
+        "fulfilled"
+      ],
+      "description": "Derived status: fulfilled if quantity.fulfilled == quantity.total, partial if quantity.fulfilled > 0, otherwise processing."
+    },
+    "parent_id": {
+      "type": "string",
+      "description": "Parent line item identifier for any nested structures."
+    }
+  }
+}

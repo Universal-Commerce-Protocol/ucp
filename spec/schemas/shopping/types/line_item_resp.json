@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LineItem Response",
+  "type": "object",
+  "description": "Line item object. Expected to use the currency of the parent object.",
+  "required": [
+    "id",
+    "item",
+    "quantity",
+    "base_amount",
+    "subtotal",
+    "total"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "item": {
+      "$ref": "item_resp.json"
+    },
+    "quantity": {
+      "type": "integer",
+      "description": "Quantity of the item being purchased.",
+      "minimum": 1
+    },
+    "base_amount": {
+      "type": "integer",
+      "description": "Line total before discounts (item.price x item.quantity) in minor (cents) currency units.",
+      "minimum": 0
+    },
+    "discount": {
+      "type": "integer",
+      "description": "Line-level discount amount in minor (cents) currency units.",
+      "minimum": 0
+    },
+    "subtotal": {
+      "type": "integer",
+      "description": "Line total after discounts in minor (cents) currency units.",
+      "minimum": 0
+    },
+    "total": {
+      "type": "integer",
+      "description": "Final line total (same as subtotal) in minor (cents) currency units.",
+      "minimum": 0
+    },
+    "parent_id": {
+      "type": "string",
+      "description": "Parent line item identifier for any nested structures."
+    }
+  }
+}

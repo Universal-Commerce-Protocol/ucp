@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://ucp.dev/handlers/google_pay/schemas/merchant_info.json",
+  "title": "Google Pay Merchant Info",
+  "description": "Identity details for the merchant as required by the Google Pay UCP handler.",
+  "type": "object",
+  "properties": {
+    "merchant_name": {
+      "type": "string",
+      "description": "The user-facing name of the merchant that will appear on the Google Pay payment sheet.",
+      "examples": [
+        "Example Merchant"
+      ]
+    },
+    "merchant_id": {
+      "type": "string",
+      "description": "The Google Pay Merchant ID. Use a dummy value or 'TEST' for the TEST environment; use the real Merchant ID for PRODUCTION.",
+      "pattern": "^[0-9a-zA-Z]+$",
+      "examples": [
+        "01234567890123456789"
+      ]
+    },
+    "merchant_origin": {
+      "type": "string",
+      "description": "The fully qualified domain name where the checkout occurs, used for origin validation.",
+      "format": "hostname",
+      "examples": [
+        "checkout.merchant.com"
+      ]
+    },
+    "auth_jwt": {
+      "type": "string",
+      "description": "An optional authorization JWT for certain integration contexts.",
+      "examples": [
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      ]
+    }
+  },
+  "required": [
+    "merchant_name",
+    "merchant_id",
+    "merchant_origin"
+  ],
+  "additionalProperties": false
+}

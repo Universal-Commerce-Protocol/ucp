@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/fulfillment.update_req.json",
+  "title": "Fulfillment Extension Update Request",
+  "description": "Extends Checkout with fulfillment support using methods, destinations, and groups.",
+  "$defs": {
+    "fulfillment_option": {
+      "$ref": "types/fulfillment_option_req.json"
+    },
+    "fulfillment_group": {
+      "$ref": "types/fulfillment_group_req.json"
+    },
+    "fulfillment_method": {
+      "$ref": "types/fulfillment_method_req.json"
+    },
+    "fulfillment_available_method": {
+      "$ref": "types/fulfillment_available_method_req.json"
+    },
+    "fulfillment": {
+      "$ref": "types/fulfillment_req.json"
+    },
+    "checkout": {
+      "title": "Checkout with Fulfillment Update Request",
+      "description": "Checkout extended with hierarchical fulfillment.",
+      "allOf": [
+        {
+          "$ref": "checkout.update_req.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "fulfillment": {
+              "$ref": "types/fulfillment_req.json"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

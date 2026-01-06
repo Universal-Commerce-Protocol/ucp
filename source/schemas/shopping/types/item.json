@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Item",
+  "type": "object",
+  "required": [
+    "id",
+    "title",
+    "price"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Should be recognized by both the Platform, and the Business. For Google it should match the id provided in the \"id\" field in the product feed."
+    },
+    "title": {
+      "type": "string",
+      "description": "Product title."
+    },
+    "price": {
+      "type": "integer",
+      "description": "Unit price in minor (cents) currency units.",
+      "minimum": 0,
+      "ucp_request": "omit"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "Product image URI.",
+      "format": "uri",
+      "ucp_request": "omit"
+    }
+  }
+}

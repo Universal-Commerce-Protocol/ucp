@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/payment.create_req.json",
+  "title": "Payment Create Request",
+  "description": "Payment configuration containing handlers.",
+  "type": "object",
+  "properties": {
+    "selected_instrument_id": {
+      "type": "string",
+      "description": "The id of the currently selected payment instrument from the instruments array. Set by the agent when submitting payment, and echoed back by the merchant in finalized state."
+    },
+    "instruments": {
+      "type": "array",
+      "items": {
+        "$ref": "types/payment_instrument.json"
+      },
+      "description": "The payment instruments available for this payment. Each instrument is associated with a specific handler via the handler_id field. Handlers can extend the base payment_instrument schema to add handler-specific fields."
+    }
+  }
+}

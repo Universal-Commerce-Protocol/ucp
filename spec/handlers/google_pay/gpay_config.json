@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/handlers/google_pay/config.json",
+  "title": "Google Pay Handler Configuration",
+  "description": "Configuration schema for the com.google.pay payment handler.",
+  "type": "object",
+  "required": [
+    "api_version",
+    "api_version_minor",
+    "merchant_info",
+    "allowed_payment_methods"
+  ],
+  "properties": {
+    "api_version": {
+      "type": "integer",
+      "const": 2,
+      "description": "The major Google Pay API version. Currently, this must be 2."
+    },
+    "api_version_minor": {
+      "type": "integer",
+      "description": "The minor Google Pay API version (e.g., 0)."
+    },
+    "environment": {
+      "type": "string",
+      "enum": [
+        "TEST",
+        "PRODUCTION"
+      ],
+      "description": "The Google Pay environment."
+    },
+    "merchant_info": {
+      "$ref": "merchant_info.json",
+      "description": "Identity details for the merchant as required by the Google Pay UCP handler."
+    },
+    "allowed_payment_methods": {
+      "type": "array",
+      "items": {
+        "$ref": "gpay_payment_method.json"
+      },
+      "description": "The payment methods allowed for this transaction."
+    }
+  }
+}

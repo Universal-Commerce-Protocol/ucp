@@ -1,0 +1,578 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "UCP Shopping Service",
+    "version": "2026-01-11",
+    "description": "Canonical REST interface for UCP Shopping service. Schema references are logical pointers - actual payload shape is determined by negotiated capabilities.\n\n**Endpoint Resolution:** This spec defines operations only. The base URL MUST be obtained from the merchant's discovery profile at `/.well-known/ucp` under `services[\"dev.ucp.shopping\"].rest.endpoint`. The `{endpoint}` server variable below is a placeholder for tooling compatibility."
+  },
+  "servers": [
+    {
+      "url": "{endpoint}",
+      "description": "Merchant-provided endpoint from UCP discovery profile",
+      "variables": {
+        "endpoint": {
+          "default": "https://merchant.example.com/ucp",
+          "description": "Obtain from /.well-known/ucp → services[\"dev.ucp.shopping\"].rest.endpoint"
+        }
+      }
+    }
+  ],
+  "paths": {
+    "/checkout-sessions": {
+      "post": {
+        "operationId": "create_checkout",
+        "summary": "Create Checkout",
+        "description": "Create a checkout session. Called as soon as a user adds an item to a cart.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/authorization"
+          },
+          {
+            "$ref": "#/components/parameters/x_api_key"
+          },
+          {
+            "$ref": "#/components/parameters/request_signature"
+          },
+          {
+            "$ref": "#/components/parameters/x_forwarded_for"
+          },
+          {
+            "$ref": "#/components/parameters/idempotency_key"
+          },
+          {
+            "$ref": "#/components/parameters/request_id"
+          },
+          {
+            "$ref": "#/components/parameters/user_agent"
+          },
+          {
+            "$ref": "#/components/parameters/content_type"
+          },
+          {
+            "$ref": "#/components/parameters/accept"
+          },
+          {
+            "$ref": "#/components/parameters/accept_language"
+          },
+          {
+            "$ref": "#/components/parameters/accept_encoding"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/checkout"}
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Checkout session created",
+            "headers": {
+              "X-Detached-JWT": {
+                "$ref": "#/components/headers/x_detached_jwt"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/checkout"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/checkout-sessions/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "get_checkout",
+        "summary": "Get Checkout",
+        "description": "Get the latest state of a checkout session.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/authorization"
+          },
+          {
+            "$ref": "#/components/parameters/x_api_key"
+          },
+          {
+            "$ref": "#/components/parameters/request_signature"
+          },
+          {
+            "$ref": "#/components/parameters/x_forwarded_for"
+          },
+          {
+            "$ref": "#/components/parameters/idempotency_key"
+          },
+          {
+            "$ref": "#/components/parameters/request_id"
+          },
+          {
+            "$ref": "#/components/parameters/user_agent"
+          },
+          {
+            "$ref": "#/components/parameters/content_type"
+          },
+          {
+            "$ref": "#/components/parameters/accept"
+          },
+          {
+            "$ref": "#/components/parameters/accept_language"
+          },
+          {
+            "$ref": "#/components/parameters/accept_encoding"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Checkout session retrieved",
+            "headers": {
+              "X-Detached-JWT": {
+                "$ref": "#/components/headers/x_detached_jwt"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/checkout"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "update_checkout",
+        "summary": "Update Checkout",
+        "description": "If an optional field is provided in the request body, its value is treated as a complete replacement for the corresponding data. If optional field is omitted, then current checkout session is unchanged.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/authorization"
+          },
+          {
+            "$ref": "#/components/parameters/x_api_key"
+          },
+          {
+            "$ref": "#/components/parameters/request_signature"
+          },
+          {
+            "$ref": "#/components/parameters/x_forwarded_for"
+          },
+          {
+            "$ref": "#/components/parameters/idempotency_key"
+          },
+          {
+            "$ref": "#/components/parameters/request_id"
+          },
+          {
+            "$ref": "#/components/parameters/user_agent"
+          },
+          {
+            "$ref": "#/components/parameters/content_type"
+          },
+          {
+            "$ref": "#/components/parameters/accept"
+          },
+          {
+            "$ref": "#/components/parameters/accept_language"
+          },
+          {
+            "$ref": "#/components/parameters/accept_encoding"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/checkout"}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Checkout session updated",
+            "headers": {
+              "X-Detached-JWT": {
+                "$ref": "#/components/headers/x_detached_jwt"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/checkout"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/checkout-sessions/{id}/complete": {
+      "parameters": [
+        {"name": "id", "in": "path", "required": true, "schema": {"type": "string"}}
+      ],
+      "post": {
+        "operationId": "complete_checkout",
+        "summary": "Complete Checkout",
+        "description": "Place the order",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/authorization"
+          },
+          {
+            "$ref": "#/components/parameters/x_api_key"
+          },
+          {
+            "$ref": "#/components/parameters/request_signature"
+          },
+          {
+            "$ref": "#/components/parameters/x_forwarded_for"
+          },
+          {
+            "$ref": "#/components/parameters/idempotency_key"
+          },
+          {
+            "$ref": "#/components/parameters/request_id"
+          },
+          {
+            "$ref": "#/components/parameters/user_agent"
+          },
+          {
+            "$ref": "#/components/parameters/content_type"
+          },
+          {
+            "$ref": "#/components/parameters/accept"
+          },
+          {
+            "$ref": "#/components/parameters/accept_language"
+          },
+          {
+            "$ref": "#/components/parameters/accept_encoding"
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "payment": {
+                    "$ref": "#/components/schemas/payment"
+                  },
+                  "risk_signals": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Checkout session completed",
+            "headers": {
+              "X-Detached-JWT": {
+                "$ref": "#/components/headers/x_detached_jwt"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/checkout"
+                    },
+                    {
+                      "type": "object",
+                      "required": [
+                        "order_id",
+                        "order_permalink_url"
+                      ],
+                      "properties": {
+                        "order_id": {
+                          "type": "string",
+                          "description": "Identifier of the order created based on the checkout session. Recommended format: gid://merchant.com/Order/{order_id}."
+                        },
+                        "order_permalink_url": {
+                          "type": "string",
+                          "description": "Permalink provided by the merchant to access the order."
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/checkout-sessions/{id}/cancel": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {"type": "string"}
+        }
+      ],
+      "post": {
+        "operationId": "cancel_checkout",
+        "summary": "Cancel Checkout",
+        "description": "Cancel a checkout session",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/authorization"
+          },
+          {
+            "$ref": "#/components/parameters/x_api_key"
+          },
+          {
+            "$ref": "#/components/parameters/request_signature"
+          },
+          {
+            "$ref": "#/components/parameters/x_forwarded_for"
+          },
+          {
+            "$ref": "#/components/parameters/idempotency_key"
+          },
+          {
+            "$ref": "#/components/parameters/request_id"
+          },
+          {
+            "$ref": "#/components/parameters/user_agent"
+          },
+          {
+            "$ref": "#/components/parameters/content_type"
+          },
+          {
+            "$ref": "#/components/parameters/accept"
+          },
+          {
+            "$ref": "#/components/parameters/accept_language"
+          },
+          {
+            "$ref": "#/components/parameters/accept_encoding"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Checkout session canceled",
+            "headers": {
+              "X-Detached-JWT": {
+                "$ref": "#/components/headers/x_detached_jwt"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/checkout"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "webhooks": {
+    "orderEvent": {
+      "post": {
+        "operationId": "order_event_webhook",
+        "summary": "Order Event Webhook",
+        "description": "Merchant sends order lifecycle events to the platform's registered webhook URL. The platform provides the webhook URL during partner onboarding.",
+        "parameters": [
+          {"$ref": "#/components/parameters/request_signature"},
+          {"$ref": "#/components/parameters/x_api_key"}
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {"$ref": "#/components/schemas/order"},
+                  {
+                    "type": "object",
+                    "required": ["event_id", "created_time"],
+                    "properties": {
+                      "event_id": {
+                        "type": "string",
+                        "description": "Unique event identifier. Recommended format: gid://merchant.com/Event/{event_id}."
+                      },
+                      "created_time": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Event creation timestamp in RFC 3339 format."
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Event received and acknowledged",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["ucp"],
+                  "properties": {
+                    "ucp": {
+                      "$ref": "#/components/schemas/ucp"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "authorization": {
+        "name": "Authorization",
+        "in": "header",
+        "required": false,
+        "schema": {
+          "type": "string"
+        },
+        "description": "Should contain oauth token representing the following 2 schemes: 1. Platform self authenticating (client_credentials). 2. Platform authenticating on behalf of end user (authorization_code)."
+      },
+      "x_api_key": {
+        "name": "X-API-Key",
+        "in": "header",
+        "required": false,
+        "schema": {
+          "type": "string"
+        },
+        "description": "Authenticates the platform with a reusable api key allocated to the platform by the business."
+      },
+      "request_signature": {
+        "name": "Request-Signature",
+        "in": "header",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "description": "Ensure the authenticity and integrity of an HTTP message."
+      },
+      "x_forwarded_for": {
+        "name": "X-Forwarded-For",
+        "in": "header",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "description": "Identifies the originating IP address."
+      },
+      "idempotency_key": {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "description": "For non GET requests. Ensures duplicate operations don't happen during retries."
+      },
+      "request_id": {
+        "name": "Request-Id",
+        "in": "header",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "description": "For tracing the requests across network layers and components."
+      },
+      "user_agent": {
+        "name": "User-Agent",
+        "in": "header",
+        "required": false,
+        "schema": {
+          "type": "string"
+        },
+        "description": "Identifies the user agent string making the call."
+      },
+      "content_type": {
+        "name": "Content-Type",
+        "in": "header",
+        "required": false,
+        "schema": {
+          "type": "string"
+        },
+        "description": "Representation Metadata. Tells the receiver what the data in the message body actually is."
+      },
+      "accept": {
+        "name": "Accept",
+        "in": "header",
+        "required": false,
+        "schema": {
+          "type": "string"
+        },
+        "description": "Content Negotiation. The client tells the server what data formats it is capable of understanding."
+      },
+      "accept_language": {
+        "name": "Accept-Language",
+        "in": "header",
+        "required": false,
+        "schema": {
+          "type": "string"
+        },
+        "description": "Localization. Tells the receiver the user's preferred natural languages, often with \"weights\" or priorities."
+      },
+      "accept_encoding": {
+        "name": "Accept-Encoding",
+        "in": "header",
+        "required": false,
+        "schema": {
+          "type": "string"
+        },
+        "description": "Compression. The client tells the server which content-codings it supports, usually for compression"
+      }
+    },
+    "headers": {
+      "x_detached_jwt": {
+        "required": false,
+        "schema": {
+          "type": "string"
+        },
+        "description": "Optional detached JWT signature for the response body. Verifies the response came from the server."
+      }
+    },
+    "schemas": {
+      "checkout": {
+        "$ref": "https://ucp.dev/schemas/shopping/checkout.json"
+      },
+      "order": {
+        "$ref": "https://ucp.dev/schemas/shopping/order.json"
+      },
+      "payment": {
+        "$ref": "https://ucp.dev/schemas/shopping/payment.json"
+      },
+      "ucp": {
+        "$ref": "https://ucp.dev/schemas/ucp.json"
+      }
+    }
+  }
+}

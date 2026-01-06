@@ -1,0 +1,58 @@
+# Roadmap
+
+This roadmap is meant to provide transparency into our strategic priorities and
+to align our partners on the critical path toward a fully agentic, global
+commerce standard. Our goal is to move beyond isolated transactions and build a
+cohesive, intelligent commerce layer that works across borders and verticals.
+
+**Note**: This roadmap reflects our current direction and intends to guide
+planning, but it does not constitute a commitment to deliver specific features.
+Our approach to these challenges may evolve, and initiatives are subject to
+change, removal, or addition as business priorities shift and we receive
+community feedback.
+
+## Upcoming roadmap priorities
+
+### Deeper support for the full consumer journey
+
+To move beyond isolated transactions, we are expanding the protocol’s scope to
+tackle key user journeys such as multi-item checkout, loyalty, and lifecycle
+management, while ensuring the business’’s brand and logic remain central to all
+shopping experiences. Key upcoming initiatives include:
+
+*   **Cart and basket building**: support for multi-item checkout from a
+    business, complex basket rules (e.g., promotions, tax, shipping), and varied
+    fulfillment logic that reflects how people actually shop.
+*   **Upper-funnel product discovery and post-order management**: by
+    facilitating the entire journey, we help merchants maximize lifetime and
+    average order value rather than just processing a single item for checkout.
+*   **Loyalty & Member benefits**: Capabilities to enable loyalty and member
+    benefits to help users find the best value and merchants achieve a deeper
+    connection with their consumers flows through account linking.
+*   **Native cross-sell and upsell modules**: capabilities for merchants to
+    provide personalized recommendations and upsells based on user context .
+
+### Support for global markets
+
+We are building a scalable ecosystem that is inclusive of all merchant sizes and
+geographies, ensuring that "simple and open" means accessible to everyone. We
+plan to do this through phased rollout across markets, including India,
+Indonesia, Latin America, and others. We are adapting the protocol to support
+broader regional use cases and localized payment interoperability.
+
+### Building blocks for flexibility
+
+We’ll be considering **dynamic extensions**: where two parties can co-define
+capability with custom extensions for their business while continuing to
+leverage the pre-defined capabilities and extensions from core protocol. This
+can allow them to support complex use cases very quickly without waiting for
+support for these custom extensions to be built into the core protocol.
+
+## Build with us
+
+The future of commerce cannot be built in a vacuum. We invite merchants,
+developers, and payment providers to join us in refining these specifications.
+Your feedback on our early builds helps us shape the standards that will power
+the next generation of global commerce.
+
+[Become a UCP contributor]
