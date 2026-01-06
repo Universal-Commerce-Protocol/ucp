@@ -95,7 +95,14 @@ method.
         "line_item_ids": ["shirt", "pants"],
         "selected_destination_id": "dest_1",
         "destinations": [
-          { "id": "dest_1", "address_street": "123 Main St", "address_locality": "Springfield", "address_region": "IL", "postal_code": "62701", "address_country": "US" }
+          {
+            "id": "dest_1",
+            "address_street": "123 Main St",
+            "address_locality": "Springfield",
+            "address_region": "IL",
+            "postal_code": "62701",
+            "address_country": "US"
+          }
         ],
         "groups": [
           {
@@ -103,8 +110,18 @@ method.
             "line_item_ids": ["shirt", "pants"],
             "selected_option_id": "standard",
             "options": [
-              { "id": "standard", "title": "Standard Shipping", "description": "Arrives Dec 12-15 via USPS", "total": 500 },
-              { "id": "express", "title": "Express Shipping", "description": "Arrives Dec 10-11 via FedEx", "total": 1000 }
+              {
+                "id": "standard",
+                "title": "Standard Shipping",
+                "description": "Arrives Dec 12-15 via USPS",
+                "total": 500
+              },
+              {
+                "id": "express",
+                "title": "Express Shipping",
+                "description": "Arrives Dec 10-11 via FedEx",
+                "total": 1000
+              }
             ]
           }
         ]
@@ -317,7 +334,14 @@ so no extension needed.
         "line_item_ids": ["shirt", "pants"],
         "selected_destination_id": "dest_1",
         "destinations": [
-          { "id": "dest_1", "address_street": "123 Main St", "address_locality": "Springfield", "address_region": "IL", "postal_code": "62701", "address_country": "US" }
+          {
+            "id": "dest_1",
+            "address_street": "123 Main St",
+            "address_locality": "Springfield",
+            "address_region": "IL",
+            "postal_code": "62701",
+            "address_country": "US"
+          }
         ],
         "groups": [
           {
@@ -325,8 +349,18 @@ so no extension needed.
             "line_item_ids": ["shirt", "pants"],
             "selected_option_id": "standard",
             "options": [
-              { "id": "standard", "title": "Standard Shipping", "description": "Arrives Dec 12-15 via USPS", "total": 500 },
-              { "id": "express", "title": "Express Shipping", "description": "Arrives Dec 10-11 via FedEx", "total": 1000 }
+              {
+                "id": "standard",
+                "title": "Standard Shipping",
+                "description": "Arrives Dec 12-15 via USPS",
+                "total": 500
+              },
+              {
+                "id": "express",
+                "title": "Express Shipping",
+                "description": "Arrives Dec 10-11 via FedEx",
+                "total": 1000
+              }
             ]
           }
         ]
@@ -353,7 +387,14 @@ package.
         "line_item_ids": ["shirt", "pants"],
         "selected_destination_id": "dest_1",
         "destinations": [
-          { "id": "dest_1", "address_street": "123 Main St", "address_locality": "Springfield", "address_region": "IL", "postal_code": "62701", "address_country": "US" }
+          {
+            "id": "dest_1",
+            "address_street": "123 Main St",
+            "address_locality": "Springfield",
+            "address_region": "IL",
+            "postal_code": "62701",
+            "address_country": "US"
+          }
         ],
         "groups": [
           {
@@ -399,7 +440,14 @@ same type, each with its own destination.
         "line_item_ids": ["shirt"],
         "selected_destination_id": "dest_mom",
         "destinations": [
-          { "id": "dest_mom", "address_street": "123 Mom St", "address_locality": "Springfield", "address_region": "IL", "postal_code": "62701", "address_country": "US" }
+          {
+            "id": "dest_mom",
+            "address_street": "123 Mom St",
+            "address_locality": "Springfield",
+            "address_region": "IL",
+            "postal_code": "62701",
+            "address_country": "US"
+          }
         ],
         "groups": [
           {
@@ -407,8 +455,16 @@ same type, each with its own destination.
             "line_item_ids": ["shirt"],
             "selected_option_id": "standard",
             "options": [
-              { "id": "standard", "title": "Standard", "total": 500 },
-              { "id": "express", "title": "Express", "total": 1000 }
+              {
+                "id": "standard",
+                "title": "Standard",
+                "total": 500
+              },
+              {
+                "id": "express",
+                "title": "Express",
+                "total": 1000
+              }
             ]
           }
         ]
@@ -419,7 +475,12 @@ same type, each with its own destination.
         "line_item_ids": ["pants"],
         "selected_destination_id": "dest_grandma",
         "destinations": [
-          { "id": "dest_grandma", "address_street": "88 Queensway", "address_locality": "Hong Kong", "address_country": "HK" }
+          {
+            "id": "dest_grandma",
+            "address_street": "88 Queensway",
+            "address_locality": "Hong Kong",
+            "address_country": "HK"
+          }
         ],
         "groups": [
           {
@@ -427,8 +488,16 @@ same type, each with its own destination.
             "line_item_ids": ["pants"],
             "selected_option_id": "standard",
             "options": [
-              { "id": "standard", "title": "Standard", "total": 500 },
-              { "id": "express", "title": "Express", "total": 1000 }
+              {
+                "id": "standard",
+                "title": "Standard",
+                "total": 500
+              },
+              {
+                "id": "express",
+                "title": "Express",
+                "total": 1000
+              }
             ]
           }
         ]

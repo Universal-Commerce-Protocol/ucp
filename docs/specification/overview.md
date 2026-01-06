@@ -1235,7 +1235,9 @@ payment instrument structure agents will submit:
   "title": "AcmePayLaterInstrument",
   "description": "Payment instrument structure for ACME Pay Later.",
   "allOf": [
-    { "$ref": "https://ucp.dev/schemas/shopping/types/payment_instrument.json" },
+    {
+      "$ref": "https://ucp.dev/schemas/shopping/types/payment_instrument.json"
+    },
     {
       "type": "object",
       "properties": {
@@ -1325,8 +1327,15 @@ handler in their checkout response:
         "environment": "production",
         "locale": "en-US",
         "payment_options": [
-          { "type": "pay_in_4", "min_amount": 3500000, "max_amount": 150000000 },
-          { "type": "financing", "min_amount": 20000000 }
+          {
+            "type": "pay_in_4",
+            "min_amount": 3500000,
+            "max_amount": 150000000
+          },
+          {
+            "type": "financing",
+            "min_amount": 20000000
+          }
         ]
       }
     }]

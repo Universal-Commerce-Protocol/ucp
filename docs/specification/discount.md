@@ -264,7 +264,12 @@ to line items, and an automatic shipping discount at the order level.
   "line_items": [
     {
       "id": "li_1",
-      "item": {"id": "prod_1", "quantity": 2, "title": "T-Shirt", "price": 2000},
+      "item": {
+        "id": "prod_1",
+        "quantity": 2,
+        "title": "T-Shirt",
+        "price": 2000
+      },
       "base_amount": 4000,
       "discount": 800,
       "subtotal": 3200,
@@ -354,8 +359,28 @@ Multiple discounts applied with full allocation breakdown:
 ```json
 {
   "line_items": [
-    {"id": "li_1", "item": {"title": "T-Shirt", "price": 6000}, "base_amount": 6000, "discount": 1500, "subtotal": 4500, "total": 4500},
-    {"id": "li_2", "item": {"title": "Socks", "price": 4000}, "base_amount": 4000, "discount": 1000, "subtotal": 3000, "total": 3000}
+    {
+      "id": "li_1",
+      "item": {
+        "title": "T-Shirt",
+        "price": 6000
+      },
+      "base_amount": 6000,
+      "discount": 1500,
+      "subtotal": 4500,
+      "total": 4500
+    },
+    {
+      "id": "li_2",
+      "item": {
+        "title": "Socks",
+        "price": 4000
+      },
+      "base_amount": 4000,
+      "discount": 1000,
+      "subtotal": 3000,
+      "total": 3000
+    }
   ],
   "discounts": {
     "codes": ["SUMMER20", "LOYALTY5"],
