@@ -155,7 +155,7 @@ compliant once they decrypt the credentials locally.
 
 Upon receiving a checkout with an encrypted credential:
 
-1. **Validate Handler:** Confirm `instrument.handler_name` matches `com.example.agent_encrypted`
+1. **Validate Handler:** Confirm `instrument.handler_id` matches the expected handler ID
 2. **Decrypt Credential:** Use merchant's private key to decrypt the credential
 3. **Verify Binding:** Confirm the decrypted `checkout_id` matches the current checkout
 4. **Process Payment:** Use the decrypted credential to complete payment
@@ -209,7 +209,7 @@ Content-Type: application/json
 {
   "payment_data": {
     "id": "instr_1",
-    "handler_name": "com.example.agent_encrypted",
+    "handler_id": "agent_encrypted",
     "type": "card",
     "brand": "visa",
     "last_digits": "1111",

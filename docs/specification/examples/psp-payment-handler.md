@@ -158,7 +158,7 @@ The connection between them MUST use secure TLS.
 
 Upon receiving a checkout with a token credential, the merchant:
 
-1. **Validate Handler:** Confirm `instrument.handler_name` matches `com.example.psp_payments`
+1. **Validate Handler:** Confirm `instrument.handler_id` matches the expected handler ID
 2. **Forward to PSP:** Call the PSP's to process payments with the token and payment details
 3. **Handle Response:** The PSP returns the payment result directly
 4. **Return Response:** Respond with the finalized checkout state
@@ -257,7 +257,7 @@ Content-Type: application/json
 {
   "payment_data": {
     "id": "instr_1",
-    "handler_name": "com.example.psp_payments",
+    "handler_id": "psp_payments",
     "type": "card",
     "brand": "visa",
     "last_digits": "4242",

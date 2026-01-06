@@ -555,7 +555,7 @@ export declare interface PaymentInstrumentBase {
    */
   handler_id: string;
   /**
-   * The broad category of the instrument (e.g., 'card', 'tokenized_card', 'paypal'). specific schemas will constrain this to a constant value.
+   * The broad category of the instrument (e.g., 'card', 'tokenized_card'). specific schemas will constrain this to a constant value.
    */
   type: string;
   billing_address?: PostalAddress;

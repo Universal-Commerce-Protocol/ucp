@@ -20,7 +20,7 @@
     },
     "type": {
       "type": "string",
-      "description": "The broad category of the instrument (e.g., 'card', 'tokenized_card', 'paypal'). specific schemas will constrain this to a constant value."
+      "description": "The broad category of the instrument (e.g., 'card', 'tokenized_card'). Specific schemas will constrain this to a constant value."
     },
     "billing_address": {
       "$ref": "postal_address.json",

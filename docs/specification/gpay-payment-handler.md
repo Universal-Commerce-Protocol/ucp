@@ -220,7 +220,7 @@ payment button.
 
 #### Step 5: Complete Checkout
 Upon successful user interaction, the Google Pay API returns a
-`PaymentInstrumenct` object with the key as `payment_data`.
+`PaymentInstrument` object with the key as `payment_data`.
 The agent maps this response to the `card_payment_instrument` schema
 and submits the checkout completion request.
 
@@ -229,26 +229,24 @@ POST /checkout-sessions/{checkout_id}/complete
 
 {
   "payment_data": {
-    {
-      "id": "pm_1234567890abc",
-      "handler_id": "gpay",
-      "type": "card",
-      "brand": "visa",
-      "last_digits": "4242",
-      "billing_address": {
-          "street_address": "123 Main Street",
-          "extended_address": "Suite 400",
-          "address_locality": "Charleston",
-          "address_region": "SC",
-          "postal_code": "29401",
-          "address_country": "US",
-          "first_name": "Jane",
-          "last_name": "Smith"
-      },
-      "credential": {
-        "type": "DIRECT",
-        "token": "{\"signature\":\"...\",\"protocolVersion\":\"ECv2\"...}"
-      }
+    "id": "pm_1234567890abc",
+    "handler_id": "gpay",
+    "type": "card",
+    "brand": "visa",
+    "last_digits": "4242",
+    "billing_address": {
+      "street_address": "123 Main Street",
+      "extended_address": "Suite 400",
+      "address_locality": "Charleston",
+      "address_region": "SC",
+      "postal_code": "29401",
+      "address_country": "US",
+      "first_name": "Jane",
+      "last_name": "Smith"
+    },
+    "credential": {
+      "type": "DIRECT",
+      "token": "{\"signature\":\"...\",\"protocolVersion\":\"ECv2\"...}"
     }
   }
 }

@@ -203,7 +203,7 @@ also be PCI DSS compliant.
 
 Upon receiving a checkout with a token credential:
 
-1. **Validate Handler:** Confirm `instrument.handler_name` matches `com.example.agent_tokenizer`
+1. **Validate Handler:** Confirm `instrument.handler_id` matches the expected handler ID
 2. **Detokenize or Delegate:**
    - **Option A:** Call the agent's card vaulting service `/detokenize` endpoint directly, then process payments
    - **Option B:** Forward the token to your PSP for detokenization and payment processing.
@@ -280,7 +280,7 @@ Content-Type: application/json
 {
   "payment_data": {
     "id": "instr_1",
-    "handler_name": "com.example.agent_tokenizer",
+    "handler_id": "agent_wallet",
     "type": "card",
     "brand": "visa",
     "last_digits": "4242",

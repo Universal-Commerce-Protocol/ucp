@@ -738,16 +738,14 @@ Content-Type: application/json
 
 {
   "payment_data": {
-    {
-      "id": "instr_1",
-      "handler_id": "card_tokenizer",
-      "type": "card",
-      "brand": "visa",
-      "last_digits": "4242",
-      "credential": { // Required for payment processing
-        "type": "session_id",
-        "token": "tok_visa_123"
-      }
+    "id": "instr_1",
+    "handler_id": "card_tokenizer",
+    "type": "card",
+    "brand": "visa",
+    "last_digits": "4242",
+    "credential": {
+      "type": "token",
+      "token": "tok_visa_123"
     }
   }
 }
@@ -1009,8 +1007,8 @@ filter the handlers array based on:
     "handlers": [
       {"id": "card", "name": "com.example.merchant_tokenizer", ...},
       {"id": "gpay", "name": "com.google.pay", ...},
-      {"id": "klarna", "name": "com.klarna.pay_later", ...},
-      {"id": "ideal", "name": "com.stripe.ideal", ...}
+      {"id": "shop_pay", "name": "com.shopify.shop_pay", ...},
+      {"id": "example_pay", "name": "com.example.pay", ...}
     ]
   }
 }
@@ -1035,8 +1033,8 @@ Response: {
     "handlers": [
       {"id": "card", "name": "com.example.merchant_tokenizer", ...},
       {"id": "gpay", "name": "com.google.pay", ...},
-      {"id": "ideal", "name": "com.stripe.ideal", ...}
-      // Klarna filtered out - not available in Netherlands
+      {"id": "shop_pay", "name": "com.shopify.shop_pay", ...}
+      // example_pay filtered out - not available in Netherlands
     ]
   }
 }
@@ -1065,7 +1063,7 @@ the request with an error:
   "messages": [{
     "type": "error",
     "code": "invalid_handler_id",
-    "content": "The handler 'klarna' is no longer available for this checkout.",
+    "content": "The handler 'example_pay' is no longer available for this checkout.",
     "severity": "unrecoverable"
   }]
 }

@@ -151,7 +151,7 @@ compliant. The connection between them MUST use secure TLS.
 
 Upon receiving a checkout with a token credential:
 
-1. **Validate Handler:** Confirm `instrument.handler_name` matches `com.example.merchant_tokenizer`
+1. **Validate Handler:** Confirm `instrument.handler_id` matches the expected handler ID
 2. **Resolve Token:** Look up the token in internal storage to retrieve the original credential
 3. **Verify Binding:** Confirm the token's `checkout_id` matches the current checkout
 4. **Process Payment:** Charge the credential through the merchant's payment processor
@@ -245,7 +245,7 @@ Content-Type: application/json
 {
   "payment_data": {
     "id": "instr_1",
-    "handler_name": "com.example.merchant_tokenizer",
+    "handler_id": "merchant_tokenizer",
     "type": "card",
     "brand": "visa",
     "last_digits": "1111",
