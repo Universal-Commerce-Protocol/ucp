@@ -491,6 +491,10 @@ omitting them.
 
 {{ schema_fields('postal_address', 'checkout') }}
 
+#### Payment Data
+
+{{ schema_fields('payment_data', 'checkout') }}
+
 ### Response
 
 {{ extension_schema_fields('capability.json#/$defs/response', 'checkout') }}

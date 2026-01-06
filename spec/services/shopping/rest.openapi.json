@@ -62,7 +62,7 @@
           "required": true,
           "content": {
             "application/json": {
-              "schema": {"$ref": "#/components/schemas/checkout"}
+              "schema": { "$ref": "#/components/schemas/checkout" }
             }
           }
         },
@@ -87,14 +87,7 @@
     },
     "/checkout-sessions/{id}": {
       "parameters": [
-        {
-          "name": "id",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string"
-          }
-        }
+        { "$ref": "#/components/parameters/checkout_session_id_path" }
       ],
       "get": {
         "operationId": "get_checkout",
@@ -112,9 +105,6 @@
           },
           {
             "$ref": "#/components/parameters/x_forwarded_for"
-          },
-          {
-            "$ref": "#/components/parameters/idempotency_key"
           },
           {
             "$ref": "#/components/parameters/request_id"
@@ -196,7 +186,7 @@
           "required": true,
           "content": {
             "application/json": {
-              "schema": {"$ref": "#/components/schemas/checkout"}
+              "schema": { "$ref": "#/components/schemas/checkout" }
             }
           }
         },
@@ -221,7 +211,7 @@
     },
     "/checkout-sessions/{id}/complete": {
       "parameters": [
-        {"name": "id", "in": "path", "required": true, "schema": {"type": "string"}}
+        { "$ref": "#/components/parameters/checkout_session_id_path" }
       ],
       "post": {
         "operationId": "complete_checkout",
@@ -269,8 +259,8 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "payment": {
-                    "$ref": "#/components/schemas/payment"
+                  "payment_data": {
+                    "$ref": "#/components/schemas/payment_data"
                   },
                   "risk_signals": {
                     "type": "object",
@@ -298,10 +288,7 @@
                     },
                     {
                       "type": "object",
-                      "required": [
-                        "order_id",
-                        "order_permalink_url"
-                      ],
+                      "required": ["order_id", "order_permalink_url"],
                       "properties": {
                         "order_id": {
                           "type": "string",
@@ -323,12 +310,7 @@
     },
     "/checkout-sessions/{id}/cancel": {
       "parameters": [
-        {
-          "name": "id",
-          "in": "path",
-          "required": true,
-          "schema": {"type": "string"}
-        }
+        { "$ref": "#/components/parameters/checkout_session_id_path" }
       ],
       "post": {
         "operationId": "cancel_checkout",
@@ -396,8 +378,8 @@
         "summary": "Order Event Webhook",
         "description": "Merchant sends order lifecycle events to the platform's registered webhook URL. The platform provides the webhook URL during partner onboarding.",
         "parameters": [
-          {"$ref": "#/components/parameters/request_signature"},
-          {"$ref": "#/components/parameters/x_api_key"}
+          { "$ref": "#/components/parameters/request_signature" },
+          { "$ref": "#/components/parameters/x_api_key" }
         ],
         "requestBody": {
           "required": true,
@@ -405,7 +387,7 @@
             "application/json": {
               "schema": {
                 "allOf": [
-                  {"$ref": "#/components/schemas/order"},
+                  { "$ref": "#/components/schemas/order" },
                   {
                     "type": "object",
                     "required": ["event_id", "created_time"],
@@ -449,6 +431,15 @@
   },
   "components": {
     "parameters": {
+      "checkout_session_id_path": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "The unique identifier of the checkout session.",
+        "schema": {
+          "type": "string"
+        }
+      },
       "authorization": {
         "name": "Authorization",
         "in": "header",
@@ -493,7 +484,7 @@
           "type": "string",
           "format": "uuid"
         },
-        "description": "For non GET requests. Ensures duplicate operations don't happen during retries."
+        "description": "Ensures duplicate operations don't happen during retries."
       },
       "request_id": {
         "name": "Request-Id",

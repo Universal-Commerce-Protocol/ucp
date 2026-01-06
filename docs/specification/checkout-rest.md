@@ -90,7 +90,7 @@ Content-Type: application/json
         "name": "dev.ucp.shopping.checkout",
         "version": "2026-01-11"
       }
-    ],
+    ]
   },
   "id": "chk_1234567890",
   "status": "incomplete",
@@ -138,7 +138,47 @@ Content-Type: application/json
       "url": "https://merchant.com/terms"
     }
   ],
-  // Additional payment fields placeholder
+  "payment": {
+    "handlers": [
+      {
+        "id": "com.google.pay",
+        "name": "gpay",
+        "version": "2024-12-03",
+        "spec": "https://ucp.dev/handlers/google_pay",
+        "config_schema": "https://ucp.dev/handlers/google_pay/config.json",
+        "instrument_schemas": [
+          "https://ucp.dev/handlers/google_pay/card_payment_instrument.json"
+        ],
+        "config": {
+          "allowed_payment_methods": [
+            {
+              "type": "CARD",
+              "parameters": {
+                "allowed_card_networks": [
+                  "VISA",
+                  "MASTERCARD",
+                  "AMEX"
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "selected_instrument_id": "pi_gpay_5678",
+    "instruments": [
+      {
+        "id": "pi_gpay_5678",
+        "handler_id": "com.google.pay",
+        "type": "card",
+        "brand": "mastercard",
+        "last_digits": "5678",
+        "expiry_month": 5,
+        "expiry_year": 2027,
+        "rich_text_description": "Google Pay •••• 5678"
+      }
+    ]
+  }
 }
 ```
 
@@ -245,7 +285,47 @@ Content-Type: application/json
       "url": "https://merchant.com/terms"
     }
   ],
-  // Additional payment fields placeholder
+  "payment": {
+    "handlers": [
+      {
+        "id": "com.google.pay",
+        "name": "gpay",
+        "version": "2024-12-03",
+        "spec": "https://ucp.dev/handlers/google_pay",
+        "config_schema": "https://ucp.dev/handlers/google_pay/config.json",
+        "instrument_schemas": [
+          "https://ucp.dev/handlers/google_pay/card_payment_instrument.json"
+        ],
+        "config": {
+          "allowed_payment_methods": [
+            {
+              "type": "CARD",
+              "parameters": {
+                "allowed_card_networks": [
+                  "VISA",
+                  "MASTERCARD",
+                  "AMEX"
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "selected_instrument_id": "pi_gpay_5678",
+    "instruments": [
+      {
+        "id": "pi_gpay_5678",
+        "handler_id": "com.google.pay",
+        "type": "card",
+        "brand": "mastercard",
+        "last_digits": "5678",
+        "expiry_month": 5,
+        "expiry_year": 2027,
+        "rich_text_description": "Google Pay •••• 5678"
+      }
+    ]
+  }
 }
 ```
 
@@ -359,7 +439,6 @@ Content-Type: application/json
       "url": "https://merchant.com/terms"
     }
   ],
-  // Additional payment fields placeholder
   "fulfillment_address": {
     "full_name": "John Doe", // Can differ from buyer name.
     "street_address": "123 Urban St",
@@ -383,7 +462,48 @@ Content-Type: application/json
       "sub_title": "Arrives in 1-2 days",
       "subtotal": 1500
     }
-  ]
+  ],
+  "payment": {
+    "handlers": [
+      {
+        "id": "com.google.pay",
+        "name": "gpay",
+        "version": "2024-12-03",
+        "spec": "https://ucp.dev/handlers/google_pay",
+        "config_schema": "https://ucp.dev/handlers/google_pay/config.json",
+        "instrument_schemas": [
+          "https://ucp.dev/handlers/google_pay/card_payment_instrument.json"
+        ],
+        "config": {
+          "allowed_payment_methods": [
+            {
+              "type": "CARD",
+              "parameters": {
+                "allowed_card_networks": [
+                  "VISA",
+                  "MASTERCARD",
+                  "AMEX"
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "selected_instrument_id": "pi_gpay_5678",
+    "instruments": [
+      {
+        "id": "pi_gpay_5678",
+        "handler_id": "com.google.pay",
+        "type": "card",
+        "brand": "mastercard",
+        "last_digits": "5678",
+        "expiry_month": 5,
+        "expiry_year": 2027,
+        "rich_text_description": "Google Pay •••• 5678"
+      }
+    ]
+  }
 }
 ```
 
@@ -487,7 +607,6 @@ Content-Type: application/json
       "url": "https://merchant.com/terms"
     }
   ],
-  // Additional payment fields placeholder
   "fulfillment_address": {
     "full_name": "John Doe", // Can differ from buyer name.
     "street_address": "123 Urban St",
@@ -512,7 +631,48 @@ Content-Type: application/json
       "subtotal": 1500
     }
   ],
-  "fulfillment_option_id": "ship-2"
+  "fulfillment_option_id": "ship-2",
+  "payment": {
+    "handlers": [
+      {
+        "id": "com.google.pay",
+        "name": "gpay",
+        "version": "2024-12-03",
+        "spec": "https://ucp.dev/handlers/google_pay",
+        "config_schema": "https://ucp.dev/handlers/google_pay/config.json",
+        "instrument_schemas": [
+          "https://ucp.dev/handlers/google_pay/card_payment_instrument.json"
+        ],
+        "config": {
+          "allowed_payment_methods": [
+            {
+              "type": "CARD",
+              "parameters": {
+                "allowed_card_networks": [
+                  "VISA",
+                  "MASTERCARD",
+                  "AMEX"
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "selected_instrument_id": "pi_gpay_5678",
+    "instruments": [
+      {
+        "id": "pi_gpay_5678",
+        "handler_id": "com.google.pay",
+        "type": "card",
+        "brand": "mastercard",
+        "last_digits": "5678",
+        "expiry_month": 5,
+        "expiry_year": 2027,
+        "rich_text_description": "Google Pay •••• 5678"
+      }
+    ]
+  }
 }
 ```
 
@@ -529,11 +689,8 @@ POST /checkout-sessions/{id}/complete
 Content-Type: application/json
 
 {
-  "payment": {
-    "instruments": [
-      // Payment instruments with credentials submitted by the buyer
-    ],
-    "selected_instrument_id": "instr_1"
+  "payment_data": {
+    // .. payment instrument instance
   },
   "risk_signals": {
     //... risk signal related data (device fingerprint / risk token)
@@ -603,7 +760,6 @@ Content-Type: application/json
       "url": "https://merchant.com/terms"
     }
   ],
-  // Additional payment fields placeholder
   "fulfillment_address": {
     "full_name": "John Doe", // Can differ from buyer name.
     "street_address": "123 Urban St",
@@ -628,7 +784,48 @@ Content-Type: application/json
       "subtotal": 1500
     }
   ],
-  "fulfillment_option_id": "ship-2"
+  "fulfillment_option_id": "ship-2",
+  "payment": {
+    "handlers": [
+      {
+        "id": "com.google.pay",
+        "name": "gpay",
+        "version": "2024-12-03",
+        "spec": "https://ucp.dev/handlers/google_pay",
+        "config_schema": "https://ucp.dev/handlers/google_pay/config.json",
+        "instrument_schemas": [
+          "https://ucp.dev/handlers/google_pay/card_payment_instrument.json"
+        ],
+        "config": {
+          "allowed_payment_methods": [
+            {
+              "type": "CARD",
+              "parameters": {
+                "allowed_card_networks": [
+                  "VISA",
+                  "MASTERCARD",
+                  "AMEX"
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "selected_instrument_id": "pi_gpay_5678",
+    "instruments": [
+      {
+        "id": "pi_gpay_5678",
+        "handler_id": "com.google.pay",
+        "type": "card",
+        "brand": "mastercard",
+        "last_digits": "5678",
+        "expiry_month": 5,
+        "expiry_year": 2027,
+        "rich_text_description": "Google Pay •••• 5678"
+      }
+    ]
+  }
 }
 ```
 
@@ -705,7 +902,6 @@ Content-Type: application/json
       "url": "https://merchant.com/terms"
     }
   ],
-  // Additional payment fields placeholder
   "fulfillment_address": {
     "full_name": "John Doe", // Can differ from buyer name.
     "street_address": "123 Urban St",
@@ -730,7 +926,48 @@ Content-Type: application/json
       "subtotal": 1500
     }
   ],
-  "fulfillment_option_id": "ship-2"
+  "fulfillment_option_id": "ship-2",
+  "payment": {
+    "handlers": [
+      {
+        "id": "com.google.pay",
+        "name": "gpay",
+        "version": "2024-12-03",
+        "spec": "https://ucp.dev/handlers/google_pay",
+        "config_schema": "https://ucp.dev/handlers/google_pay/config.json",
+        "instrument_schemas": [
+          "https://ucp.dev/handlers/google_pay/card_payment_instrument.json"
+        ],
+        "config": {
+          "allowed_payment_methods": [
+            {
+              "type": "CARD",
+              "parameters": {
+                "allowed_card_networks": [
+                  "VISA",
+                  "MASTERCARD",
+                  "AMEX"
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "selected_instrument_id": "pi_gpay_5678",
+    "instruments": [
+      {
+        "id": "pi_gpay_5678",
+        "handler_id": "com.google.pay",
+        "type": "card",
+        "brand": "mastercard",
+        "last_digits": "5678",
+        "expiry_month": 5,
+        "expiry_year": 2027,
+        "rich_text_description": "Google Pay •••• 5678"
+      }
+    ]
+  }
 }
 ```
 
@@ -805,7 +1042,6 @@ Content-Type: application/json
       "url": "https://merchant.com/terms"
     }
   ],
-  // Additional payment fields placeholder
   "fulfillment_address": {
     "full_name": "John Doe", // Can differ from buyer name.
     "street_address": "123 Urban St",
@@ -830,7 +1066,48 @@ Content-Type: application/json
       "subtotal": 1500
     }
   ],
-  "fulfillment_option_id": "ship-2"
+  "fulfillment_option_id": "ship-2",
+  "payment": {
+    "handlers": [
+      {
+        "id": "com.google.pay",
+        "name": "gpay",
+        "version": "2024-12-03",
+        "spec": "https://ucp.dev/handlers/google_pay",
+        "config_schema": "https://ucp.dev/handlers/google_pay/config.json",
+        "instrument_schemas": [
+          "https://ucp.dev/handlers/google_pay/card_payment_instrument.json"
+        ],
+        "config": {
+          "allowed_payment_methods": [
+            {
+              "type": "CARD",
+              "parameters": {
+                "allowed_card_networks": [
+                  "VISA",
+                  "MASTERCARD",
+                  "AMEX"
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "selected_instrument_id": "pi_gpay_5678",
+    "instruments": [
+      {
+        "id": "pi_gpay_5678",
+        "handler_id": "com.google.pay",
+        "type": "card",
+        "brand": "mastercard",
+        "last_digits": "5678",
+        "expiry_month": 5,
+        "expiry_year": 2027,
+        "rich_text_description": "Google Pay •••• 5678"
+      }
+    ]
+  }
 }
 ```
 

@@ -17,7 +17,10 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["credential", "binding"],
+                "required": [
+                  "credential",
+                  "binding"
+                ],
                 "properties": {
                   "credential": {
                     "$ref": "../../schemas/shopping/types/payment_credential.json",
@@ -99,7 +102,9 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": ["token"],
+                  "required": [
+                    "token"
+                  ],
                   "properties": {
                     "token": {
                       "type": "string",
@@ -132,7 +137,10 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["token", "binding"],
+                "required": [
+                  "token",
+                  "binding"
+                ],
                 "properties": {
                   "token": {
                     "type": "string",
@@ -213,4 +221,3 @@
     }
   }
 }
-

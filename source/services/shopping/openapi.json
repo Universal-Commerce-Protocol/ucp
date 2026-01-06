@@ -259,8 +259,8 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "payment": {
-                    "$ref": "#/components/schemas/payment"
+                  "payment_data": {
+                    "$ref": "#/components/schemas/payment_data"
                   },
                   "risk_signals": {
                     "type": "object",
