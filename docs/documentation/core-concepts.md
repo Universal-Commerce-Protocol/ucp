@@ -34,9 +34,3 @@ bloating the core Capability definitions.
 *   **Buyer consent**: Capturing necessary user permissions.
 *   **Embedded checkout**: Logic for native/embedded experiences.
 *   **Fulfillment**: Logistics and shipping details.
-
-**Extending Order**
-
-*   **Refund**: Processing partial or full refunds.
-*   **Return**: Managing item returns.
-*   **Dispute**: Handling chargebacks or disagreements.
