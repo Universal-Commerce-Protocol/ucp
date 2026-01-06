@@ -231,6 +231,7 @@ standard formats:
 
 -   **REST**: OpenAPI 3.x (JSON format)
 -   **MCP**: OpenRPC (JSON format)
+-   **A2A**: Agent Card Specification
 -   **Embedded**: OpenRPC (JSON format)
 
 #### 5.2.1 Service Definition
@@ -245,6 +246,8 @@ standard formats:
 | `mcp`           | object | No       | MCP transport binding                |
 | `mcp.schema`    | string | Yes      | URL to OpenRPC spec (JSON)           |
 | `mcp.endpoint`  | string | Yes      | Merchant's MCP endpoint              |
+| `a2a`           | object | No       | A2A transport binding                |
+| `a2a.endpoint`  | string | Yes      | Merchant's A2A Agent Card URL        |
 | `embedded`      | string | No       | Embedded transport binding           |
 |`embedded.schema`| string | Yes      | URL to OpenRPC spec (JSON)           |
 
@@ -276,6 +279,7 @@ POST https://merchant.example.com/api/v2/checkout
 -   `endpoint` SHOULD NOT have a trailing slash
 -   OpenAPI paths are relative and appended directly to endpoint
 -   Same resolution applies to MCP endpoints for JSON-RPC calls
+-   `endpoint` for A2A transport refers to the Agent Card URL for the agent
 
 ### 5.3 Capabilities
 
@@ -1975,6 +1979,11 @@ patterns.
 UCP Capabilities map 1:1 to MCP Tools. A merchant MAY expose an MCP server that
 wraps their UCP implementation, allowing LLMs to call tools like
 `create_checkout_session` directly.
+
+### 7.2. Agent-to-Agent Protocol (A2A)
+
+A merchant MAY expose an A2A Agent that supports UCP as an A2A Extension
+allowing integration with client applications with structured UCP data types.
 
 ## 8. Standard Capabilities
 

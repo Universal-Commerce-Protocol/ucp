@@ -388,6 +388,7 @@ defined below:
 
 *   [REST Binding](checkout-rest.md): RESTful API mapping using standard HTTP verbs and JSON payloads.
 *   [MCP Binding](checkout-mcp.md): Model Context Protocol mapping for agentic interaction.
+*   [A2A Binding](checkout-a2a.md): Agent-to-Agent Protocol mapping for agentic interactions.
 *   [Embedded Checkout Binding](embedded-checkout.md): JSON-RPC for powering embedded checkout.
 
 ## Entities

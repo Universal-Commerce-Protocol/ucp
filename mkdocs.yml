@@ -35,6 +35,7 @@ nav:
       - Overview: specification/checkout.md
       - HTTP/REST Binding: specification/checkout-rest.md
       - MCP Binding: specification/checkout-mcp.md
+      - A2A Binding: specification/checkout-a2a.md
       - Embedded Checkout Binding: specification/embedded-checkout.md
       - AP2 Mandates Extension: specification/ap2-mandates.md
       - Buyer Consent Extension: specification/buyer-consent.md
@@ -179,6 +180,7 @@ plugins:
           - specification/checkout.md
           - specification/checkout-rest.md
           - specification/checkout-mcp.md
+          - specification/checkout-a2a.md
         Checkout Extensions:
           - specification/ap2-mandates.md
           - specification/buyer-consent.md

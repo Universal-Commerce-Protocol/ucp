@@ -59,6 +59,20 @@
         }
       }
     },
+    "a2a": {
+      "type": "object",
+      "description": "A2A transport binding",
+      "required": [
+        "endpoint"
+      ],
+      "properties": {
+        "endpoint": {
+          "type": "string",
+          "format": "uri",
+          "description": "Merchant's Agent Card endpoint"
+        }
+      }
+    },
     "embedded": {
       "type": "object",
       "description": "Embedded transport binding (JSON-RPC 2.0 over postMessage). Unlike REST/MCP, the endpoint is per-capability (i.e. per-checkout via continue_url), not per-service.",
