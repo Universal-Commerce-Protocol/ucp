@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/shopping/types/retail_location.json",
-  "title": "RetailLocation",
+  "title": "Retail Location",
   "description": "A pickup location (retail store, locker, etc.).",
   "type": "object",
   "required": ["id", "name"],

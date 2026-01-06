@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/shopping/types/fulfillment_method_resp.json",
-  "title": "FulfillmentMethod Response",
+  "title": "Fulfillment Method Response",
   "description": "A fulfillment method (shipping or pickup) with destinations and groups.",
   "type": "object",
   "required": [

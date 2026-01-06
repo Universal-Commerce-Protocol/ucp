@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "LineItem Response",
+  "title": "Line Item Response",
   "type": "object",
   "description": "Line item object. Expected to use the currency of the parent object.",
   "required": [

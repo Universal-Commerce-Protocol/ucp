@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/shopping/types/payment_instrument_base.json",
-  "title": "PaymentInstrumentBase",
+  "title": "Payment Instrument Base",
   "description": "The base definition for any payment instrument. It links the instrument to a specific Merchant configuration (handler_id) and defines common fields like billing address.",
   "type": "object",
   "required": [

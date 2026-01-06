@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "OrderFulfillmentDetail",
+  "title": "Order Fulfillment Detail",
   "description": "This correlates with the notion of a delivery package. Multiple order_line_items in the order with the same \"fulfillment_detail_id\" would be considered to be part of the same delivery package.",
   "type": "object",
   "required": [

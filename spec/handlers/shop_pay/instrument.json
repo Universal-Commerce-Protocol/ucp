@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://shopify.dev/ucp/handlers/shop_pay/instrument.json",
-  "title": "ShopPayInstrument",
+  "title": "Shop Pay Instrument",
   "description": "Payment instrument structure for Shop Pay. Extends the base payment instrument with Shop Pay-specific credential types.",
   "allOf": [
     {

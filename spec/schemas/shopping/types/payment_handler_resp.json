@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/shopping/types/payment_handler_resp.json",
-  "title": "PaymentHandler Response",
+  "title": "Payment Handler Response",
   "type": "object",
   "required": [
     "id",

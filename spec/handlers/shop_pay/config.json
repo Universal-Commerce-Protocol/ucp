@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://shopify.dev/ucp/handlers/shop_pay/config.json",
-  "title": "ShopPayHandlerConfig",
+  "title": "Shop Pay Handler Config",
   "description": "Configuration schema for the com.shopify.shop_pay payment handler. Merchants advertise this configuration to enable agents to process Shop Pay payments on their behalf.",
   "type": "object",
   "required": [

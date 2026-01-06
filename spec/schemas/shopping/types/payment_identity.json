@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/shopping/types/payment_identity.json",
-  "title": "PaymentIdentity",
+  "title": "Payment Identity",
   "description": "Identity of a participant for token binding. The access_token uniquely identifies the participant who tokens should be bound to.",
   "type": "object",
   "required": [

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "FulfillmentEvent",
+  "title": "Fulfillment Event",
   "description": "Append-only fulfillment event representing an actual shipment. References line items by ID.",
   "type": "object",
   "required": [
