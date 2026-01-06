@@ -52,7 +52,6 @@ nav:
         - Agent Tokenizer: specification/examples/agent-tokenizer-payment-handler.md
         - PSP Handler: specification/examples/psp-payment-handler.md
         - Agent Encrypted Credential: specification/examples/agent-encrypted-credential-handler.md
-  - Google's Implementation: documentation/google-implementation.md
   - Roadmap: documentation/roadmap.md
 
 # repo_name: UCP - Universal Commerce Protocol
