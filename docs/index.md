@@ -395,7 +395,7 @@ function openTab(evt, tabName) {
       <span>Adyen</span>
     </div>
     <div class="partner-logo">
-      <img src="assets/partner/A&I.png" alt="Ant International" style="height: 60px;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+      <img src="assets/partner/A&I.png" alt="Ant International" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
       <span>Ant International</span>
     </div>
     <div class="partner-logo">
