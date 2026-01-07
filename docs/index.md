@@ -39,7 +39,7 @@ hide:
 </div>
 
 <div style="text-align: center; padding: 60px 0; max-width: 1200px; margin: 0 auto;">
-  <h2 style="font-size: 2.5rem; font-weight: 500; color: #202124; margin-bottom: 20px;">
+  <h2 style="font-size: 2.0rem; font-weight: 500; color: #202124; margin-bottom: 20px;">
     Created and adopted by industry partners
   </h2>
 
@@ -47,146 +47,34 @@ hide:
     UCP is co-developed with foundational partners like Shopify, Target, Walmart, Etsy, and Wayfair to ensure it solves real-world retail pain points, not just tech theory.
   </p>
 
-  <div style="display: flex; justify-content: center; align-items: center; gap: 60px; margin-bottom: 40px; flex-wrap: wrap;">
-    <img src="assets/Google_Logo.svg" alt="Google" style="height: 38px; width: auto; opacity: 0.9;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+  <div style="display: flex; justify-content: center; align-items: center; gap: 80px; margin-bottom: 50px; flex-wrap: wrap;">
+    <img src="assets/Google_Logo.svg" alt="Google" style="height: 45px; width: auto; opacity: 0.9;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
     <span style="display:none; font-weight: 700; color: #202124; font-size: 1.4rem;">Google</span>
 
-    <img src="assets/shopify_monotone_black.svg" alt="Shopify" style="height: 35px; width: auto; opacity: 0.9;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+    <img src="assets/partner/shopify_monotone_black.svg" alt="Shopify" style="height: 45px; width: auto; opacity: 0.9;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
     <span style="display:none; font-weight: 700; color: #202124; font-size: 1.4rem;">Shopify</span>
 
-    <img src="assets/Wayfair_Logo.svg" alt="Wayfair" style="height: 35px; width: auto; opacity: 0.9;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
-    <span style="display:none; font-weight: 700; color: #202124; font-size: 1.4rem;">Wayfair</span>
+    <img src="assets/partner/etsy.png" alt="Etsy" style="height: 45px; width: auto; opacity: 0.9;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+    <span style="display:none; font-weight: 700; color: #202124; font-size: 1.4rem;">Etsy</span>
   </div>
 
-  <div style="display: flex; justify-content: center; align-items: center; gap: 60px; flex-wrap: wrap;">
-    <img src="assets/Etsy.svg" alt="Etsy" style="height: 38px; width: auto; opacity: 0.9;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
-    <span style="display:none; font-weight: 700; color: #202124; font-size: 1.4rem;">Etsy</span>
+  <div style="display: flex; justify-content: center; align-items: center; gap: 80px; flex-wrap: wrap;">
+    <img src="assets/partner/wayfair.png" alt="Wayfair" style="height: 45px; width: auto; opacity: 0.9;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+    <span style="display:none; font-weight: 700; color: #202124; font-size: 1.4rem;">Wayfair</span>
 
-    <img src="assets/Target.svg" alt="Target" style="height: 38px; width: auto; opacity: 0.9;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+    <img src="assets/Target.svg" alt="Target" style="height: 45px; width: auto; opacity: 0.9;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
     <span style="display:none; font-weight: 700; color: #202124; font-size: 1.4rem;">Target</span>
 
-    <img src="assets/walmart.svg" alt="Walmart" style="height: 38px; width: auto; opacity: 0.9;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+    <img src="assets/walmart.svg" alt="Walmart" style="height: 45px; width: auto; opacity: 0.9;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
     <span style="display:none; font-weight: 700; color: #202124; font-size: 1.4rem;">Walmart</span>
   </div>
 </div>
 
-<section class="action-carousel-section">
-  <h2>See it in action</h2>
-
-  <div class="carousel-tabs">
-    <button class="tab-btn active" onclick="openTab(event, 'tab-checkout')">Checkout</button>
-    <button class="tab-btn" onclick="openTab(event, 'tab-identity')">Identity Linking</button>
-    <button class="tab-btn" onclick="openTab(event, 'tab-order')">Order</button>
-  </div>
-
-  <div class="carousel-content">
-
-    <div id="tab-checkout" class="tab-pane active">
-      <div class="pane-text">
-        <div class="icon-placeholder">
-           <img src="assets/updated-icon.svg" alt="UCP Icon">
-        </div>
-        <div style="text-transform: uppercase; color: #5f6368; font-size: 0.7rem; font-weight: 700; letter-spacing: 1.2px; margin-bottom: 15px;">SEE IT IN ACTION</div>
-        <h3>Checkout</h3>
-        <p>Support complex cart logic, dynamic pricing, and tax calculations across millions of merchants through unified checkout sessions.</p>
-        <a href="specification/checkout-rest/" class="learn-more-btn">Learn more</a>
-      </div>
-      <div class="pane-visuals">
-        <div class="image-container">
-           <img src="assets/Paysheet_with_address.svg" alt="Checkout UI" class="phone-mockup" onerror="this.src='https://placehold.co/260x500/EEE/31343C?text=Checkout+UI'">
-        </div>
-        <div class="code-block-placeholder">
-           <code>// Code snippet space...</code>
-        </div>
-      </div>
-    </div>
-
-    <div id="tab-identity" class="tab-pane">
-      <div class="pane-text">
-        <div class="icon-placeholder">
-           <img src="assets/updated-icon.svg" alt="UCP Icon">
-        </div>
-        <div style="text-transform: uppercase; color: #5f6368; font-size: 0.7rem; font-weight: 700; letter-spacing: 1.2px; margin-bottom: 15px;">SEE IT IN ACTION</div>
-        <h3>Identity Linking</h3>
-        <p>OAuth 2.0 standard enables agents to maintain secure, authorized relationships without sharing credentials.</p>
-        <a href="specification/identity-linking/" class="learn-more-btn">Learn more</a>
-      </div>
-      <div class="pane-visuals">
-        <div class="image-container">
-           <img src="assets/Duo_branding.svg" alt="Identity UI" class="phone-mockup" onerror="this.src='https://placehold.co/260x500/EEE/31343C?text=Identity+UI'">
-        </div>
-        <div class="code-block-placeholder">
-           <code>// Code snippet space...</code>
-        </div>
-      </div>
-    </div>
-
-    <div id="tab-order" class="tab-pane">
-      <div class="pane-text">
-          <div class="icon-placeholder">
-            <img src="assets/updated-icon.svg" alt="UCP Icon">
-        </div>
-        <div style="text-transform: uppercase; color: #5f6368; font-size: 0.7rem; font-weight: 700; letter-spacing: 1.2px; margin-bottom: 15px;">SEE IT IN ACTION</div>
-        <h3>Order</h3>
-        <p>From purchase confirmation to delivery. Real-time web-hooks power status updates, shipment tracking, and return processing across every channel.</p>
-        <a href="specification/order/" class="learn-more-btn">Learn more</a>
-      </div>
-      <div class="pane-visuals">
-        <div class="image-container">
-           <img src="assets/Confirmation.svg" alt="Order UI" class="phone-mockup" onerror="this.src='https://placehold.co/260x500/EEE/31343C?text=Order+UI'">
-        </div>
-        <div class="code-block-placeholder">
-           <code>// Code snippet space...</code>
-        </div>
-      </div>
-    </div>
-
-</section>
-
-<script>
-function openTab(evt, tabName) {
-  var i, tabContent, tabBtns;
-  tabContent = document.getElementsByClassName("tab-pane");
-  for (i = 0; i < tabContent.length; i++) {
-    tabContent[i].classList.remove("active");
-  }
-  tabBtns = document.getElementsByClassName("tab-btn");
-  for (i = 0; i < tabBtns.length; i++) {
-    tabBtns[i].classList.remove("active");
-  }
-  document.getElementById(tabName).classList.add("active");
-  evt.currentTarget.classList.add("active");
-}
-</script>
-
-<div style="display: flex; gap: 30px; flex-wrap: wrap; justify-content: center;">
-
-  <div style="flex: 1; min-width: 300px; background: #f8f9fa; border-radius: 16px; padding: 40px; display: flex; flex-direction: column; align-items: flex-start;">
-    <div style="margin-bottom: 20px;">
-      <img src="assets/Icon=Native_Checkout.svg" alt="Native Checkout feature icon" width="96" style="display: block;">
-    </div>
-    <h3 style="font-size: 1.5rem; margin: 0 0 15px 0; font-weight: 500; color: #202124;">Power native checkout UI</h3>
-    <p style="color: #5f6368; font-size: 0.95rem; line-height: 1.6; margin-bottom: 30px; flex-grow: 1;">
-      Integrate and negotiate directly with the merchant checkout API to power native UI and workflows for your platform.
-    </p>
-    <a href="specification/native/" class="md-button" style="background: #fff; border-radius: 24px; padding: 0.6rem 2rem; border: 1px solid #dadce0; color: #3c4043; font-weight: 500; text-transform: none;">See how it works</a>
-  </div>
-
-  <div style="flex: 1; min-width: 300px; background: #f8f9fa; border-radius: 16px; padding: 40px; display: flex; flex-direction: column; align-items: flex-start;">
-    <div style="margin-bottom: 20px;">
-      <img src="assets/Icon=Embedded_Option.svg" alt="Embedded Option feature icon" width="96" style="display: block;">
-    </div>
-    <h3 style="font-size: 1.5rem; margin: 0 0 15px 0; font-weight: 500; color: #202124;">Embed business checkout UI</h3>
-    <p style="color: #5f6368; font-size: 0.95rem; line-height: 1.6; margin-bottom: 30px; flex-grow: 1;">
-      Embed your checkout UI within an iframe to support more complex checkout flows, with advanced capabilities like bidirectional communication, payments and shipping address handoffs.
-    </p>
-    <a href="specification/embedded-checkout/" class="md-button" style="background: #fff; border-radius: 24px; padding: 0.6rem 2rem; border: 1px solid #dadce0; color: #3c4043; font-weight: 500; text-transform: none;">Learn more</a>
-  </div>
-
-</div>
-
 <div style="text-align: center; margin: 100px 0 60px;">
-  <h2 style="font-size: 2.5rem; font-weight: 500; color: #202124;">UCP Principles</h2>
+  <h2 style="font-size: 2.0rem; font-weight: 500; color: #202124; margin-bottom: 20px;">Built for flexibility, security, and scale</h2>
+  <p style="color: #5f6368; font-size: 0.95rem; line-height: 1.6; max-width: 800px; margin: 0 auto;">
+    Agentic commerce demands interoperability. UCP is built on industry standards — REST and JSON-RPC transports; <a href="https://ap2-protocol.org/">Agent Payments Protocol (AP2)</a>, <a href="https://a2a-protocol.org/latest/">Agent2Agent (A2A)</a>, and <a href="https://modelcontextprotocol.io/docs/getting-started/intro">Model Context Protocol (MCP)</a> support built-in — so different systems can work together without custom integration.
+  </p>
 </div>
 
 <div style="max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px;">
@@ -253,9 +141,124 @@ function openTab(evt, tabName) {
 
 </div>
 
+<section class="action-carousel-section">
+  <h2 style="font-size: 2.0rem; font-weight: 500; color: #202124; margin-bottom: 20px;">See it in action</h2>
+
+  <div class="carousel-tabs">
+    <button class="tab-btn active" onclick="openTab(event, 'tab-checkout')">Checkout</button>
+    <button class="tab-btn" onclick="openTab(event, 'tab-identity')">Identity Linking</button>
+    <button class="tab-btn" onclick="openTab(event, 'tab-order')">Order</button>
+  </div>
+
+  <div class="carousel-content">
+
+    <div id="tab-checkout" class="tab-pane active">
+      <div class="pane-text">
+        <div class="icon-placeholder">
+           <img src="assets/updated-icon.svg" alt="UCP Icon">
+        </div>
+        <div class="pane-eyebrow">SEE IT IN ACTION</div>
+        <h3>Checkout</h3>
+        <p>Support complex cart logic, dynamic pricing, and tax calculations across millions of merchants through unified checkout sessions.</p>
+        <a href="specification/checkout-rest/" class="learn-more-btn">Learn more</a>
+      </div>
+      <div class="pane-visuals">
+        <div class="image-container">
+           <img src="assets/Paysheet_with_address.svg" alt="Checkout UI" class="phone-mockup" onerror="this.src='https://placehold.co/260x500/EEE/31343C?text=Checkout+UI'">
+        </div>
+        <div class="code-block-placeholder">
+           <code>// Code snippet space...</code>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-identity" class="tab-pane">
+      <div class="pane-text">
+        <div class="icon-placeholder">
+           <img src="assets/updated-icon.svg" alt="UCP Icon">
+        </div>
+        <div class="pane-eyebrow">SEE IT IN ACTION</div>
+        <h3>Identity Linking</h3>
+        <p>OAuth 2.0 standard enables agents to maintain secure, authorized relationships without sharing credentials.</p>
+        <a href="specification/identity-linking/" class="learn-more-btn">Learn more</a>
+      </div>
+      <div class="pane-visuals">
+        <div class="image-container">
+           <img src="assets/duo_branding.svg" alt="Identity UI" class="phone-mockup" onerror="this.src='https://placehold.co/260x500/EEE/31343C?text=Identity+UI'">
+        </div>
+        <div class="code-block-placeholder">
+           <code>// Code snippet space...</code>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-order" class="tab-pane">
+      <div class="pane-text">
+          <div class="icon-placeholder">
+            <img src="assets/updated-icon.svg" alt="UCP Icon">
+        </div>
+        <div class="pane-eyebrow">SEE IT IN ACTION</div>
+        <h3>Order</h3>
+        <p>From purchase confirmation to delivery. Real-time web-hooks power status updates, shipment tracking, and return processing across every channel.</p>
+        <a href="specification/order/" class="learn-more-btn">Learn more</a>
+      </div>
+      <div class="pane-visuals">
+        <div class="image-container">
+           <img src="assets/Confirmation.svg" alt="Order UI" class="phone-mockup" onerror="this.src='https://placehold.co/260x500/EEE/31343C?text=Order+UI'">
+        </div>
+        <div class="code-block-placeholder">
+           <code>// Code snippet space...</code>
+        </div>
+      </div>
+    </div>
+
+</section>
+
+<script>
+function openTab(evt, tabName) {
+  var i, tabContent, tabBtns;
+  tabContent = document.getElementsByClassName("tab-pane");
+  for (i = 0; i < tabContent.length; i++) {
+    tabContent[i].classList.remove("active");
+  }
+  tabBtns = document.getElementsByClassName("tab-btn");
+  for (i = 0; i < tabBtns.length; i++) {
+    tabBtns[i].classList.remove("active");
+  }
+  document.getElementById(tabName).classList.add("active");
+  evt.currentTarget.classList.add("active");
+}
+</script>
+
+<div style="display: flex; gap: 30px; flex-wrap: wrap; justify-content: center;">
+
+  <div style="flex: 1; min-width: 300px; background: #f8f9fa; border-radius: 16px; padding: 40px; display: flex; flex-direction: column; align-items: flex-start;">
+    <div style="margin-bottom: 20px;">
+      <img src="assets/Icon=Native_Checkout.svg" alt="Native Checkout feature icon" width="96" style="display: block;">
+    </div>
+    <h3 style="font-size: 1.5rem; margin: 0 0 15px 0; font-weight: 500; color: #202124;">Power native checkout UI</h3>
+    <p style="color: #5f6368; font-size: 0.95rem; line-height: 1.6; margin-bottom: 30px; flex-grow: 1;">
+      Integrate and negotiate directly with the merchant checkout API to power native UI and workflows for your platform.
+    </p>
+    <a href="specification/native/" class="md-button" style="background: #fff; border-radius: 24px; padding: 0.6rem 2rem; border: 1px solid #dadce0; color: #3c4043; font-weight: 500; text-transform: none;">See how it works</a>
+  </div>
+
+  <div style="flex: 1; min-width: 300px; background: #f8f9fa; border-radius: 16px; padding: 40px; display: flex; flex-direction: column; align-items: flex-start;">
+    <div style="margin-bottom: 20px;">
+      <img src="assets/Icon=Embedded_Option.svg" alt="Embedded Option feature icon" width="96" style="display: block;">
+    </div>
+    <h3 style="font-size: 1.5rem; margin: 0 0 15px 0; font-weight: 500; color: #202124;">Embed business checkout</h3>
+    <p style="color: #5f6368; font-size: 0.95rem; line-height: 1.6; margin-bottom: 30px; flex-grow: 1;">
+      As an optional mechanism, embed your checkout UI within an iframe to support more complex checkout flows, with advanced capabilities like bidirectional communication, payments and shipping address handoffs.
+    </p>
+    <a href="specification/embedded-checkout/" class="md-button" style="background: #fff; border-radius: 24px; padding: 0.6rem 2rem; border: 1px solid #dadce0; color: #3c4043; font-weight: 500; text-transform: none;">Learn more</a>
+  </div>
+
+</div>
+
 <div class="lifecycle-container" style="padding: 80px 0; text-align: center; max-width: 1200px; margin: 0 auto;">
 
-  <h2 style="font-size: 2.5rem; font-weight: 500; color: #202124; margin-bottom: 60px; line-height: 1.2; max-width: 800px; margin-left: auto; margin-right: auto;">
+  <h2 style="font-size: 2.0rem; font-weight: 500; color: #202124; margin-bottom: 60px; line-height: 1.2; max-width: 800px; margin-left: auto; margin-right: auto;">
     The foundational open-source standard for the end-to-end commerce lifecycle
   </h2>
 
@@ -278,10 +281,14 @@ function openTab(evt, tabName) {
       </div>
       <h3 style="font-size: 1.4rem; margin: 0 0 15px 0; font-weight: 500; color: #202124;">For Businesses</h3>
       <p style="color: #5f6368; font-size: 0.95rem; line-height: 1.6; margin-bottom: 30px; flex-grow: 1;">
-        UCP lets you meet customers wherever they are—AI assistants, shopping agents, embedded experiences—without rebuilding your checkout for each. Your existing payment stack stays intact.
+        UCP empowers retailers to meet customers wherever they are—AI assistants, shopping agents, embedded experiences—without rebuilding your checkout for each. Your existing payment stack stays intact.
       </p>
       <a href="#" style="color: #1a73e8; text-decoration: none; font-weight: 500; font-size: 0.95rem;">Integrate with UCP</a>
     </div>
+
+  </div>
+
+  <div style="display: flex; gap: 24px; flex-wrap: wrap; justify-content: center;">
 
     <div style="flex: 1; min-width: 300px; max-width: 360px; border: 1px solid #dadce0; border-radius: 32px; padding: 40px 30px; display: flex; flex-direction: column; align-items: center;">
       <div style="height: 120px; margin-bottom: 30px; display: flex; align-items: center; justify-content: center;">
@@ -294,10 +301,6 @@ function openTab(evt, tabName) {
       <a href="documentation/core-concepts/" style="color: #1a73e8; text-decoration: none; font-weight: 500; font-size: 0.95rem;">Learn more UCP core concepts</a>
     </div>
 
-  </div>
-
-  <div style="display: flex; gap: 24px; flex-wrap: wrap; justify-content: center;">
-
     <div style="flex: 1; min-width: 300px; max-width: 360px; border: 1px solid #dadce0; border-radius: 32px; padding: 40px 30px; display: flex; flex-direction: column; align-items: center;">
       <div style="height: 120px; margin-bottom: 30px; display: flex; align-items: center; justify-content: center;">
         <img src="assets/Content=Payment_Providers.svg" alt="Content illustration for Payment Providers" style="max-height: 100%; width: auto;">
@@ -309,102 +312,91 @@ function openTab(evt, tabName) {
       <a href="documentation/ucp-and-ap2/" style="color: #1a73e8; text-decoration: none; font-weight: 500; font-size: 0.95rem;">Learn more about UCP and AP2</a>
     </div>
 
-    <div style="flex: 1; min-width: 300px; max-width: 360px; border: 1px solid #dadce0; border-radius: 32px; padding: 40px 30px; display: flex; flex-direction: column; align-items: center;">
-      <div style="height: 120px; margin-bottom: 30px; display: flex; align-items: center; justify-content: center;">
-        <img src="assets/Content=Shoppers.svg" alt="Content illustration for Shoppers" style="max-height: 100%; width: auto;">
-      </div>
-      <h3 style="font-size: 1.4rem; margin: 0 0 15px 0; font-weight: 500; color: #202124;">For Shoppers</h3>
-      <p style="color: #5f6368; font-size: 0.95rem; line-height: 1.6; margin-bottom: 30px; flex-grow: 1;">
-        Shop with absolute confidence. UCP ensures your preferred payment methods work across every agent and app, with a consistent checkout experience no matter where you buy.
-      </p>
-      <a href="tutotials.md" style="color: #1a73e8; text-decoration: none; font-weight: 500; font-size: 0.95rem;">Learn more about the launch on Google's AI Mode in Search</a>
-    </div>
-
   </div>
 </div>
 
 <div class="partner-carousel">
-  <h2>Trusted by market leaders</h2>
+  <h2 style="font-size: 2.0rem; font-weight: 500; color: #202124; margin-bottom: 80px;">Endorsed across the ecosystem</h2>
 
   <div class="partner-track">
-    <div class="partner-logo">
-      <img src="assets/Adyen_Logo.svg" alt="Adyen" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+    <div class="partner-logo" style="padding: 0 80px;">
+      <img src="assets/partner/ayden.svg" alt="Adyen" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
       <span>Adyen</span>
     </div>
-    <div class="partner-logo">
-      <img src="assets/AntInternational_Logo.svg" alt="Ant International" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+    <div class="partner-logo" style="padding: 0 80px;">
+      <img src="assets/partner/A&I.png" alt="Ant International" style="height: 60px;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
       <span>Ant International</span>
     </div>
-    <div class="partner-logo">
-      <img src="assets/BestBuy_Logo.svg" alt="Best Buy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+    <div class="partner-logo" style="padding: 0 80px;">
+      <img src="assets/partner/bestbuy.svg" alt="Best Buy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
       <span>Best Buy</span>
     </div>
-    <div class="partner-logo">
-      <img src="assets/Carrefour_Logo.svg" alt="Carrefour" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+    <div class="partner-logo" style="padding: 0 80px;">
+      <img src="assets/partner/carrefour.png" alt="Carrefour" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
       <span>Carrefour</span>
     </div>
-    <div class="partner-logo">
-      <img src="assets/Chewy_Logo.svg" alt="Chewy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+    <div class="partner-logo" style="padding: 0 80px;">
+      <img src="assets/partner/chewy.jpg" alt="Chewy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
       <span>Chewy</span>
     </div>
-    <div class="partner-logo">
-      <img src="assets/Commerce_Logo_Black_RGB.png" alt="Commerce" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+    <div class="partner-logo" style="padding: 0 80px;">
+      <img src="assets/partner/commerce.jpg" alt="Commerce" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
       <span>Commerce</span>
     </div>
-    <div class="partner-logo">
-      <img src="assets/Etsy.svg" alt="Etsy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+    <div class="partner-logo" style="padding: 0 80px;">
+      <img src="assets/partner/etsy.png" alt="Etsy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
       <span>Etsy</span>
     </div>
-    <div class="partner-logo">
-      <img src="assets/Flipkart_Logo.svg" alt="Flipkart" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+    <div class="partner-logo" style="padding: 0 80px;">
+      <img src="assets/partner/flipkart.png" alt="Flipkart" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
       <span>Flipkart</span>
     </div>
-    <div class="partner-logo">
-      <img src="assets/Gap_Logo.svg" alt="Gap" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+    <div class="partner-logo" style="padding: 0 80px;">
+      <img src="assets/partner/gap.svg" alt="Gap" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
       <span>Gap</span>
     </div>
-    <div class="partner-logo">
-      <img src="assets/HomeDepot_Logo.svg" alt="The Home Depot" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+    <div class="partner-logo" style="padding: 0 80px;">
+      <img src="assets/partner/homedepot.jpg" alt="The Home Depot" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
       <span>The Home Depot</span>
     </div>
-    <div class="partner-logo">
-      <img src="assets/Kroger_Logo.svg" alt="Kroger" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+    <div class="partner-logo" style="padding: 0 80px;">
+      <img src="assets/partner/kroger.jpg" alt="Kroger" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
       <span>Kroger</span>
     </div>
-    <div class="partner-logo">
-      <img src="assets/Lowes_Logo.svg" alt="Lowe's" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+    <div class="partner-logo" style="padding: 0 80px;">
+      <img src="assets/partner/lowes.jpg" alt="Lowe's" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
       <span>Lowe's</span>
     </div>
-    <div class="partner-logo">
-      <img src="assets/Macys_Logo.svg" alt="Macy's" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+    <div class="partner-logo" style="padding: 0 80px;">
+      <img src="assets/partner/macys.png" alt="Macy's" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
       <span>Macy's</span>
     </div>
-    <div class="partner-logo">
-      <img src="assets/Sephora_Logo.svg" alt="Sephora" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+    <div class="partner-logo" style="padding: 0 80px;">
+      <img src="assets/partner/sephora.png" alt="Sephora" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
       <span>Sephora</span>
     </div>
-    <div class="partner-logo">
-      <img src="assets/Shopee_Logo.svg" alt="Shopee" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+    <div class="partner-logo" style="padding: 0 80px;">
+      <img src="assets/partner/shopee.png" alt="Shopee" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
       <span>Shopee</span>
     </div>
-    <div class="partner-logo">
-      <img src="assets/shopify_monotone_black.svg" alt="Shopify" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+    <div class="partner-logo" style="padding: 0 80px;">
+      <img src="assets/partner/shopify_monotone_black.svg" alt="Shopify" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
       <span>Shopify</span>
     </div>
-    <div class="partner-logo">
+    <div class="partner-logo" style="padding: 0 80px;">
       <img src="assets/Target.svg" alt="Target" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
       <span>Target</span>
     </div>
-    <div class="partner-logo">
-      <img src="assets/Ulta_Logo.svg" alt="Ulta" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+    <div class="partner-logo" style="padding: 0 80px;">
+      <img src="assets/partner/ulta.png" alt="Ulta" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
       <span>Ulta</span>
     </div>
-    <div class="partner-logo">
-      <img src="assets/Worldpay_Logo.svg" alt="Worldpay" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+    <div class="partner-logo" style="padding: 0 80px;">
+      <img src="assets/partner/worldpay.png" alt="Worldpay" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
       <span>Worldpay</span>
     </div>
-    <div class="partner-logo">
-      <img src="assets/Zalando_Logo.svg" alt="Zalando" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+    <div class="partner-logo" style="padding: 0 80px;">
+      <img src="assets/partner/zalando.svg" alt="Zalando" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
       <span>Zalando</span>
     </div>
   </div>
@@ -413,7 +405,7 @@ function openTab(evt, tabName) {
 <div class="get-started-container" style="max-width: 1200px; margin: 0 auto; padding: 100px 20px 80px; text-align: center;">
 
   <div style="margin-bottom: 60px;">
-    <h2 style="font-size: 2.5rem; font-weight: 500; color: #202124; margin-bottom: 30px; line-height: 1.2;">Get started today</h2>
+    <h2 style="font-size: 2.0rem; font-weight: 500; color: #202124; margin-bottom: 30px; line-height: 1.2;">Get started today</h2>
 
     <p style="color: #3c4043; font-size: 1.1rem; line-height: 1.6; margin-bottom: 15px; max-width: 900px; margin-left: auto; margin-right: auto;">
       UCP is an open standard designed to let AI agents, apps, merchants, and payment providers interact seamlessly without needing custom, one-off integrations for every connection. We actively seek your feedback and contributions to help build the future of commerce.

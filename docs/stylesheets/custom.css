@@ -32,25 +32,40 @@
 
 /* --- HEADER & BASE --- */
 .md-header {
-  /* 1. Set the whole bar to black */
-  background-color: #000000 !important;
+  /* 1. Revert background to white */
+  background-color: #ffffff !important; 
 
-  /* 2. Remove the grey border so it's a solid block */
-  border-bottom: none;
+  /* 2. Restore the subtle grey border */
+  border-bottom: 0.05rem solid rgba(0,0,0,0.1);
 
-  /* 3. Force base text color to white */
-  color: #ffffff !important;
+  /* 3. Revert base text color to black */
+  color: #202124 !important;
 }
 
-/* 4. Ensure the Site Title ("Universal Commerce Protocol") is white */
+/* 4. Ensure the Site Title is dark grey/black */
 .md-header__title, .md-header__topic {
-  color: #ffffff !important;
-  font-weight: 700; /* Optional: makes it pop like the image */
+  color: #202124 !important;
+  font-weight: 500;
 }
 
-/* 5. Ensure all icons (Menu, GitHub, Search magnifying glass) are white */
+/* 5. Ensure icons (Menu, GitHub, Search) are grey */
 .md-header__button {
-  color: #ffffff !important;
+  color: #5f6368 !important;
+}
+
+/* 6. Reset Search Bar for White Header */
+.md-search__form {
+  background-color: rgba(0,0,0,0.05) !important; /* Light grey background */
+  border-radius: 4px;
+}
+.md-search__input {
+  color: #202124 !important;
+}
+.md-search__input::placeholder {
+  color: #5f6368 !important;
+}
+label.md-search__icon {
+  color: #5f6368 !important;
 }
 
 /* --- HERO SECTION --- */
@@ -225,7 +240,7 @@
 }
 
 .partner-logo img {
-  height: 40px; /* Fixed height for consistency */
+  height: 45px; /* Fixed height for consistency */
   width: auto;
 }
 
@@ -342,8 +357,17 @@
 }
 
 .icon-placeholder img {
-    height: 48px;
+    height: 64px;
     width: auto;
+}
+
+.pane-eyebrow {
+  text-transform: uppercase;
+  color: #5f6368;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  margin-bottom: 5px;
 }
 
 .pane-text h3 {
