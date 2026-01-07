@@ -34,9 +34,6 @@
             "$ref": "#/components/parameters/request_signature"
           },
           {
-            "$ref": "#/components/parameters/x_forwarded_for"
-          },
-          {
             "$ref": "#/components/parameters/idempotency_key"
           },
           {
@@ -104,9 +101,6 @@
             "$ref": "#/components/parameters/request_signature"
           },
           {
-            "$ref": "#/components/parameters/x_forwarded_for"
-          },
-          {
             "$ref": "#/components/parameters/request_id"
           },
           {
@@ -156,9 +150,6 @@
           },
           {
             "$ref": "#/components/parameters/request_signature"
-          },
-          {
-            "$ref": "#/components/parameters/x_forwarded_for"
           },
           {
             "$ref": "#/components/parameters/idempotency_key"
@@ -226,9 +217,6 @@
           },
           {
             "$ref": "#/components/parameters/request_signature"
-          },
-          {
-            "$ref": "#/components/parameters/x_forwarded_for"
           },
           {
             "$ref": "#/components/parameters/idempotency_key"
@@ -325,9 +313,6 @@
           },
           {
             "$ref": "#/components/parameters/request_signature"
-          },
-          {
-            "$ref": "#/components/parameters/x_forwarded_for"
           },
           {
             "$ref": "#/components/parameters/idempotency_key"
@@ -466,15 +451,6 @@
           "type": "string"
         },
         "description": "Ensure the authenticity and integrity of an HTTP message."
-      },
-      "x_forwarded_for": {
-        "name": "X-Forwarded-For",
-        "in": "header",
-        "required": true,
-        "schema": {
-          "type": "string"
-        },
-        "description": "Identifies the originating IP address."
       },
       "idempotency_key": {
         "name": "Idempotency-Key",

@@ -89,7 +89,6 @@ MCP environment when transported over HTTP.
 | `Request-Signature` | Transport Config | Verified by Gateway. Reject before MCP processing if invalid. |
 | `User-Agent` | Transport Config | Identifies the calling software. |
 | `Request-Id` | Transport Config | Used for distributed tracing. |
-| `X-Forwarded-For` | Context Injection | Server extracts this to determine User Location/Fraud Risk. |
 | `Accept-Language` | Context Injection | Server extracts this to localize Tool responses. |
 | `Idempotency-Key` | Tool Argument | Must be defined as a property in the Tool Input Schema. |
 
@@ -101,8 +100,6 @@ values.
 
 *   **Localization**: If `Accept-Language` is `es-MX`, the Server should
     format monetary values and translate error messages automatically.
-*   **Geolocation**: The Server uses `X-Forwarded-For` for implicit location
-    and fraud checks.
 
 ### Security Warning
 
