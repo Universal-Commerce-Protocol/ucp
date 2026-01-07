@@ -1561,7 +1561,7 @@ Content-Type: application/json
     "type": "card",
     "brand": "visa",
     "last_digits": "4242",
-    "rich_card_art": "xxx",
+    "rich_card_art": "https://cart-art-1.html",
     "rich_text_description": "Visa •••• 1234",
     "billing_address": {
       "street_address": "123 Main St",

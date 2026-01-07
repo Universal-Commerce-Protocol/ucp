@@ -203,7 +203,7 @@ Maps to the [Complete Checkout](checkout.md#complete-checkout) operation.
 #### Input Schema
 
 *   `checkout_id` (String): The ID of the checkout session.
-*   `payment` ([Payment](checkout.md#payment)): Payment instruments submitted
+*   `payment_data` ([Payment Data](checkout.md#payment_data)): Payment instrument instance submitted
     by the buyer.
 *   `risk_signals` (Object, Optional): Associated risk signals.
 *   `idempotency_key` (String, UUID): **Required**. Unique key for retry
