@@ -28,6 +28,8 @@ nav:
   - Home: index.md
   - Core Concepts: documentation/core-concepts.md
   - UCP and AP2: documentation/ucp-and-ap2.md
+  - Google's Implementation: documentation/google-implementation.md
+  - Roadmap: documentation/roadmap.md
   - Specification:
     - Overview: specification/overview.md
     - Capability Schema: specification/capability-schema.md
@@ -55,8 +57,6 @@ nav:
         - Agent Tokenizer: specification/examples/agent-tokenizer-payment-handler.md
         - PSP Handler: specification/examples/psp-payment-handler.md
         - Agent Encrypted Credential: specification/examples/agent-encrypted-credential-handler.md
-  - Google's implementation: documentation/google-implementation.md
-  - Roadmap: documentation/roadmap.md
 
 repo_name: UCP - Universal Commerce Protocol
 repo_url: https://github.com/Universal-Commerce-Protocol/ucp

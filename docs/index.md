@@ -399,6 +399,86 @@ function openTab(evt, tabName) {
       <img src="assets/partner/zalando.svg" alt="Zalando" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
       <span>Zalando</span>
     </div>
+    <div class="partner-logo" style="padding: 0 80px;">
+      <img src="assets/partner/ayden.svg" alt="Adyen" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+      <span>Adyen</span>
+    </div>
+    <div class="partner-logo" style="padding: 0 80px;">
+      <img src="assets/partner/A&I.png" alt="Ant International" style="height: 60px;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+      <span>Ant International</span>
+    </div>
+    <div class="partner-logo" style="padding: 0 80px;">
+      <img src="assets/partner/bestbuy.svg" alt="Best Buy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+      <span>Best Buy</span>
+    </div>
+    <div class="partner-logo" style="padding: 0 80px;">
+      <img src="assets/partner/carrefour.png" alt="Carrefour" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+      <span>Carrefour</span>
+    </div>
+    <div class="partner-logo" style="padding: 0 80px;">
+      <img src="assets/partner/chewy.jpg" alt="Chewy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+      <span>Chewy</span>
+    </div>
+    <div class="partner-logo" style="padding: 0 80px;">
+      <img src="assets/partner/commerce.jpg" alt="Commerce" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+      <span>Commerce</span>
+    </div>
+    <div class="partner-logo" style="padding: 0 80px;">
+      <img src="assets/partner/etsy.png" alt="Etsy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+      <span>Etsy</span>
+    </div>
+    <div class="partner-logo" style="padding: 0 80px;">
+      <img src="assets/partner/flipkart.png" alt="Flipkart" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+      <span>Flipkart</span>
+    </div>
+    <div class="partner-logo" style="padding: 0 80px;">
+      <img src="assets/partner/gap.svg" alt="Gap" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+      <span>Gap</span>
+    </div>
+    <div class="partner-logo" style="padding: 0 80px;">
+      <img src="assets/partner/homedepot.jpg" alt="The Home Depot" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+      <span>The Home Depot</span>
+    </div>
+    <div class="partner-logo" style="padding: 0 80px;">
+      <img src="assets/partner/kroger.jpg" alt="Kroger" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+      <span>Kroger</span>
+    </div>
+    <div class="partner-logo" style="padding: 0 80px;">
+      <img src="assets/partner/lowes.jpg" alt="Lowe's" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+      <span>Lowe's</span>
+    </div>
+    <div class="partner-logo" style="padding: 0 80px;">
+      <img src="assets/partner/macys.png" alt="Macy's" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+      <span>Macy's</span>
+    </div>
+    <div class="partner-logo" style="padding: 0 80px;">
+      <img src="assets/partner/sephora.png" alt="Sephora" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+      <span>Sephora</span>
+    </div>
+    <div class="partner-logo" style="padding: 0 80px;">
+      <img src="assets/partner/shopee.png" alt="Shopee" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+      <span>Shopee</span>
+    </div>
+    <div class="partner-logo" style="padding: 0 80px;">
+      <img src="assets/partner/shopify_monotone_black.svg" alt="Shopify" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+      <span>Shopify</span>
+    </div>
+    <div class="partner-logo" style="padding: 0 80px;">
+      <img src="assets/Target.svg" alt="Target" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+      <span>Target</span>
+    </div>
+    <div class="partner-logo" style="padding: 0 80px;">
+      <img src="assets/partner/ulta.png" alt="Ulta" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+      <span>Ulta</span>
+    </div>
+    <div class="partner-logo" style="padding: 0 80px;">
+      <img src="assets/partner/worldpay.png" alt="Worldpay" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+      <span>Worldpay</span>
+    </div>
+    <div class="partner-logo" style="padding: 0 80px;">
+      <img src="assets/partner/zalando.svg" alt="Zalando" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+      <span>Zalando</span>
+    </div>
   </div>
 </div>
 

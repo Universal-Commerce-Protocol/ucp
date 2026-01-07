@@ -240,7 +240,7 @@ label.md-search__icon {
 }
 
 .partner-logo img {
-  height: 60px; /* Fixed height for consistency */
+  height: 65px; /* Fixed height for consistency */
   width: auto;
 }
 
@@ -262,7 +262,7 @@ label.md-search__icon {
 /* Mobile Tweak */
 @media screen and (max-width: 768px) {
   .partner-logo img {
-    height: 40px; /* Smaller logos on phone */
+    height: 45px; /* Smaller logos on phone */
   }
   .partner-track {
     gap: 40px; /* Tighter spacing on phone */
