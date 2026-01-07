@@ -51,6 +51,16 @@ UCP-Agent: profile="https://agent.example/profiles/v2025-11/shopping-agent.json"
 Content-Type: application/json
 ```
 
+### Header Mapping Reference
+
+The following table defines the required headers for enabling an A2A Agent
+to communicate UCP data types with client applications.
+
+| Header Name | Description |
+| :--- | :--- |
+| `UCP-Agent` | Shopping Agent/Client application profile URI. |
+| `X-A2A-Extensions` | UCP Extension URI (specified below). |
+
 ## A2A Interactions
 
 The A2A Protocol provides a strong foundation for inter-agent communication.
@@ -209,8 +219,9 @@ When a user is ready to make a payment, the PaymentData must be submitted
 to the merchant agent to complete the checkout process. Payment data is a
 structured data type specified as part of UCP. When processing a payment to
 complete the checkout, the Payment data must be submitted to the merchant agent
-as a DataPart with attribute name `a2a.ucp.checkout.payment`. Any associated
-risk signals should be sent with attribute name `a2a.ucp.checkout.risk_signals`.
+as a DataPart with attribute name `a2a.ucp.checkout.payment_data`. Any
+associated risk signals should be sent with attribute
+name `a2a.ucp.checkout.risk_signals`.
 
 Upon completion of the checkout process, the merchant agent must return the
  checkout object along with the order\_id and order\_permalink\_url attributes.
@@ -229,7 +240,7 @@ Upon completion of the checkout process, the merchant agent must return the
       {
         "kind": "data",
         "data": {
-          "a2a.ucp.checkout.payment": {
+          "a2a.ucp.checkout.payment_data": {
             ...paymentObject
           },
           "a2a.ucp.checkout.risk_signals":{...content}
@@ -321,7 +332,7 @@ When the user confirms the payment on a client application, the user signed
 Checkout Mandate object and Payment Mandate object must be sent as a DataPart
 to the Merchant Agent for completing the Checkout. The Payment data which
 includes the Payment Mandate must be submitted as part of a DataPart
-with attribute name `a2a.ucp.checkout.payment`. Signed Checkout Mandate
+with attribute name `a2a.ucp.checkout.payment_data`. Signed Checkout Mandate
 must be specified in the DataPart as`ap2.checkout_mandate`. The `token`
 attribute part of the payment data contains the payment mandate. Refer
 [AP2 Mandates Extension](ap2-mandates.md) documentation for more details
@@ -343,7 +354,7 @@ about verification and processing of the mandates to complete the checkout.
       {
         "kind": "data",
         "data": {
-          "a2a.ucp.checkout.payment": {
+          "a2a.ucp.checkout.payment_data": {
             "id": "instr_1",
             "handler_id": "gpay",
             "type": "card",
