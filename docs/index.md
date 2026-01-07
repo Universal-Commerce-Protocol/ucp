@@ -168,35 +168,35 @@ hide:
         <div class="code-block-placeholder">
           <pre>
             <code>
-              {
-                "id": "chk_123456789",
-                "buyer": {
-                  "email": "e.beckett@example.com",
-                  "first_name": "Elisa",
-                  "last_name": "Beckett"
-                },
-                "line_items": [
-                  {
-                    "item": {
-                      "id": "item_123",
-                      "title": "Monos Carry-On Pro suitcase",
-                      "price": 26550
-                    },
-                    "id": "li_1",
-                    "quantity": 1
-                  }
-                ],
-                "fulfillment_address": {
-                  "full_name": "Elisa Beckett",
-                  "street_address": "1600 Amphitheatre Pkwy",
-                  "address_locality": "Mountain View",
-                  "address_region": "CA",
-                  "postal_code": "94043",
-                  "address_country": "US"
-                },
-                "fulfillment_option_id": "free-shipping",
-                // ..other fields..
-              }
+{
+  "id": "chk_123456789",
+  "buyer": {
+    "email": "e.beckett@example.com",
+    "first_name": "Elisa",
+    "last_name": "Beckett"
+  },
+  "line_items": [
+    {
+      "item": {
+        "id": "item_123",
+        "title": "Monos Carry-On Pro suitcase",
+        "price": 26550
+      },
+      "id": "li_1",
+      "quantity": 1
+    }
+  ],
+  "fulfillment_address": {
+    "full_name": "Elisa Beckett",
+    "street_address": "1600 Amphitheatre Pkwy",
+    "address_locality": "Mountain View",
+    "address_region": "CA",
+    "postal_code": "94043",
+    "address_country": "US"
+  },
+  "fulfillment_option_id": "free-shipping",
+  ...other checkout fields...
+}
             </code>
           </pre>
         </div>
@@ -219,27 +219,28 @@ hide:
         <div class="code-block-placeholder">
           <pre>
             <code>
-              # Sample of /.well-known/oauth-authorization-server
-              {
-                "issuer": "https://merchant.example.com",
-                "authorization_endpoint": "https://merchant.example.com/oauth2/authorize",
-                "token_endpoint": "https://merchant.example.com/oauth2/token",
-                "revocation_endpoint": "https://merchant.example.com/oauth2/revoke",
-                "scopes_supported": [
-                  "ucp:scopes:checkout_session",
-                ],
-                "response_types_supported": [
-                  "code"
-                ],
-                "grant_types_supported": [
-                  "authorization_code",
-                  "refresh_token"
-                ],
-                "token_endpoint_auth_methods_supported": [
-                  "client_secret_basic"
-                ],
-                "service_documentation": "https://merchant.example.com/docs/oauth2"
-              }
+Sample of /.well-known/oauth-authorization-server
+
+{
+  "issuer": "https://merchant.example.com",
+  "authorization_endpoint": "https://merchant.example.com/oauth2/authorize",
+  "token_endpoint": "https://merchant.example.com/oauth2/token",
+  "revocation_endpoint": "https://merchant.example.com/oauth2/revoke",
+  "scopes_supported": [
+    "ucp:scopes:checkout_session",
+  ],
+  "response_types_supported": [
+    "code"
+  ],
+  "grant_types_supported": [
+    "authorization_code",
+    "refresh_token"
+  ],
+  "token_endpoint_auth_methods_supported": [
+    "client_secret_basic"
+  ],
+  "service_documentation": "https://merchant.example.com/docs/oauth2"
+}
             </code>
           </pre>
         </div>
@@ -262,26 +263,26 @@ hide:
         <div class="code-block-placeholder">
           <pre>
             <code>
-             ...other checkout fields...
-            "fulfillment": {
-              "expectations": [
-                {
-                  "id": "exp_1",
-                  "line_items": [{ "id": "li_1", "quantity": 1 }],
-                  "method_type": "shipping",
-                  "destination": {
-                    "street_address": "1600 Amphitheatre Pkwy",
-                    "address_locality": "Mountain View",
-                    "address_region": "CA",
-                    "postal_code": "94043",
-                    "address_country": "US"
-                  },
-                  "description": "Arrives in 2-3 business days",
-                  "fulfillable_on": "now"
-                }
-              ]
-            }
-            ...other checkout fields...
+...other checkout fields...
+"fulfillment": {
+  "expectations": [
+    {
+      "id": "exp_1",
+      "line_items": [{ "id": "li_1", "quantity": 1 }],
+      "method_type": "shipping",
+      "destination": {
+        "street_address": "1600 Amphitheatre Pkwy",
+        "address_locality": "Mountain View",
+        "address_region": "CA",
+        "postal_code": "94043",
+        "address_country": "US"
+      },
+      "description": "Arrives in 2-3 business days",
+      "fulfillable_on": "now"
+    }
+  ]
+}
+...other checkout fields...
             </code>
           </pre>
         </div>
