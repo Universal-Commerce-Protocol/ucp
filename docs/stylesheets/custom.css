@@ -158,6 +158,54 @@ label.md-search__icon {
 }
 
 /* --- PARTNER SECTION --- */
+
+.partners-intro-wrapper {
+  text-align: center;
+  padding: 60px 0;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.partners-intro-title {
+  font-size: 2.0rem;
+  font-weight: 500;
+  color: #202124;
+  margin-bottom: 20px;
+}
+
+.partners-intro-text {
+  color: #5f6368;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  max-width: 800px;
+  margin: 0 auto 50px auto;
+}
+
+.partners-logo-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 80px;
+  flex-wrap: wrap;
+}
+
+.partners-logo-row.bottom-spacing {
+  margin-bottom: 50px;
+}
+
+.partners-logo-img {
+  height: 45px !important;
+  width: auto;
+  opacity: 0.9;
+}
+
+.partners-logo-fallback {
+  display: none;
+  font-weight: 700;
+  color: #202124;
+  font-size: 1.4rem;
+}
+
 .partner-carousel {
   text-align: center;
   padding: 60px 0;
@@ -217,6 +265,7 @@ label.md-search__icon {
   align-items: center;
   opacity: 0.9;
   transition: opacity 0.3s;
+  padding: 0 80px;
 }
 
 .partner-logo:hover {
@@ -462,7 +511,7 @@ label.md-search__icon {
   .hero-logo-crisp {
     max-width: 240px;
   }
-
+  
   /* Partner Grid */
   .partner-grid {
     gap: 1.5rem;
