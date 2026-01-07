@@ -39,7 +39,7 @@ sign a new one.
 This project follows [Google's Open Source Community
 Guidelines](https://opensource.google/conduct/).
 
-## Contribution process
+## Contribution Process
 
 ### Code Reviews
 
@@ -47,16 +47,28 @@ All submissions, including submissions by project members, require review. We
 use [GitHub pull requests](https://docs.github.com/articles/about-pull-requests)
 for this purpose.
 
-## Local development setup
+## Local Development Setup
+
+### Spec Development
+
+1. Make relevant updates to JSON files in `source/`
+2. Run `python generate_schemas.py` to generate updated files in `spec/`
+3. Check outputs from step above to ensure deltas are expected. You may need to
+   extend `generate_schemas.py` if you are introducing a new generation concept
+
+To validate JSON and YAML files format and references in `spec/`, run
+`python validate_specs.py`.
+
+It is also important to go through documentation locally whenever spec files
+are updated to ensure there are no broken references or stale/missing contents.
+
+### Documentation Development
 
 1.  Ensure dependencies are installed: `pip install -r requirements-docs.txt`
 2.  Run the development server: `mkdocs serve --watch spec`
-3.  Open **http://127.0.0.1:8000** in your browser.
+3.  Open **http://127.0.0.1:8000** in your browser
 
-To validate JSON and YAML files format and references in `spec/`, run
-`python validate_specs.py`
-
-### Using a virtual environment (Recommended)
+#### Using a virtual environment (Recommended)
 
 To avoid polluting your global environment, use a virtual environment. Prefix
 the virtual environment name with a `.` so the versioning control systems don't
