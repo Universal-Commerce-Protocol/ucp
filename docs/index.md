@@ -600,9 +600,9 @@ function openTab(evt, tabName) {
 
 </div>
 
-<div style="background: #f8f9fa; padding: 60px 20px; text-align: center; border-top: 1px solid #e0e0e0;">
-  <div style="display: flex; justify-content: center; align-items: center; gap: 15px; opacity: 0.9;">
-    <img src="assets/updated-icon.svg" alt="UCP" style="height: 28px; width: auto;">
-    <span style="font-size: 1.2rem; color: #5f6368; font-weight: 400; letter-spacing: -0.5px; font-family: 'Google Sans', sans-serif;">Universal Commerce Protocol</span>
+<div class="footer-wrapper">
+  <div class="footer-content">
+    <img src="assets/updated-icon.svg" alt="UCP" class="footer-logo">
+    <span class="footer-text">Universal Commerce Protocol</span>
   </div>
 </div>

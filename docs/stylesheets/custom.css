@@ -506,3 +506,32 @@ label.md-search__icon {
 label.md-search__icon {
   color: #5f6368 !important; /* Search icon is grey */
 }
+
+/* --- FOOTER SECTION --- */
+.footer-wrapper {
+  background: #f8f9fa;
+  padding: 60px 20px;
+  text-align: center;
+  border-top: 1px solid #e0e0e0;
+}
+
+.footer-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  opacity: 0.9;
+}
+
+.footer-logo {
+  height: 28px !important;
+  width: auto;
+}
+
+.footer-text {
+  font-size: 1.2rem;
+  color: #5f6368;
+  font-weight: 400;
+  letter-spacing: -0.5px;
+  font-family: 'Google Sans', sans-serif;
+}
