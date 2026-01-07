@@ -862,7 +862,8 @@ payment providers:
 -   A payment provider defines the handler specification, exposing a schema for
     custom payment instruments, token types, and a handler config. As well the
     provider defines a protocol for the agent to execute when processing the
-    handler.
+    handler. This setup allows for a variety of different payment methods and
+    token-types to be supported in the flow, including network tokens.
 -   A merchant must implement support for receiving the defined instruments and
     tokens, as well as expose the well-structured handler config.
 -   An agent must execute the handler's defined protocol to process the
@@ -1465,127 +1466,40 @@ interoperability through the common UCP framework.
 The payment flow in UCP is a **2-step process** involving **Token Acquisition**
 (Client-side) and **Order Placement** (Server-side).
 
-1.  **Select:** The Agent/User selects a payment handler based on compatibility
-    and customer preference.
-2.  **Acquire:** The Agent uses the handler's `config` to acquire a secure
-    token (e.g., exchanging payment credentials for a network token, PSP token
-    or requesting a Google Pay token).
-3.  **Complete:** The Agent submits the `instrument` to the Merchant's
-    `complete` endpoint via the `payment.instruments` array.
+1.  **Select:** The Agent/User selects a payment handler from the
+    `payment.handlers` array provided in the checkout response.
+2.  **Acquire:** The Agent uses the handler's `config` to acquire a secure token
+    (e.g., exchanging payment credentials for a network token via a PSP, or
+    requesting a Google Pay payload).
+3.  **Complete:** The Agent submits the instrument to the Merchant's `complete`
+    endpoint.
+4.  **Challenge (Conditional):** If the bank or PSP requires strong customer
+    authentication (SCA), the merchant responds with a `requires_escalation`
+    status, and the Agent facilitates the user interaction.
 
-#### Payment Field Flow Direction
+#### 6.4.1 Data Security & Schema Enforcement
 
-Understanding which payment fields flow in which direction is critical for
-implementing the checkout protocol correctly:
+To prevent the leakage of sensitive payment data, the handling of credentials is
+strictly enforced at the schema level.
+
+*   **Write-Only Credentials:** The `credential` object within a payment instrument is strictly **Write-Only**.
+    *   It is defined in the JSON Schema using appropriate annotations.
+    *   Agents MUST submit this field during the `complete` phase.
+    *   Merchants **MUST NOT** echo this field in any API response.
+*   **Display Information:** Non-sensitive fields (Brand, Last 4, Billing Address) MAY be echoed by the merchant in responses to confirm the payment method details for the UI.
+
+**Field Flow Direction:**
 
 | Field | Create/Update Request | Create/Update Response | Complete Request | Complete Response |
 |-------|----------------------|----------------------|------------------|-------------------|
 | `payment.handlers` | ❌ **Omitted** - Agents never send handlers | ✅ **Required** - Merchant advertises supported handlers | ❌ **Omitted** - Agents never send handlers | ✅ **Optional** - May be included in final state |
 | `payment.instruments` | ✅ **Optional** - Display info only (for embedded checkout UI) | ✅ **Optional** - Echoed display info | ✅ **Required** - Display info + credentials | ✅ **Optional** - Display info only (credentials omitted) |
 | `payment.instruments[].credential` | ❌ **Never included** - Not needed before completion | ❌ **Never included** - Security sensitive | ✅ **Required** - Contains payment token/data | ❌ **Omitted** - Never echoed back for security |
-| `payment.selected_instrument_id` | ✅ **Optional** - May be provided with instruments | ✅ **Optional** - Echoed if provided | ✅ **Required** - Agent indicates which instrument to charge | ✅ **Required** - Merchant confirms selected instrument |
+| `payment.selected_instrument_id` | ✅ **Optional** - May be provided with instruments | ✅ **Optional** - Echoed if provided | ✅ **Omitted** - Currently only provide one instrument instance | ✅ **Required** - Merchant confirms selected instrument |
 
-**Key Principles:**
+#### 6.4.2 Example Flow A: Google Pay
 
--   **Handlers are response-only**: Merchants advertise what they support in
-    checkout responses; agents consume this information but never send handlers
-    back.
--   **Instruments have two-stage submission**:
-    -   **Stage 1 (Optional)**: During checkout creation/updates, agents MAY
-        submit instruments with display information only (no credentials). This
-        is only needed for **embedded checkout scenarios** where the UI needs to
-        show which payment method will be used before completion.
-    -   **Stage 2 (Required)**: During checkout completion, agents MUST submit
-        instruments with credentials for payment processing. Display information
-        SHOULD also be included for consistency.
--   **Display info vs Credentials**:
-    -   **Display information** (brand, last 4 digits, billing address)
-        can flow at any stage for UI purposes
-    -   **Credentials** (payment tokens) ONLY flow during completion and are
-        required for payment processing
--   **Credentials are unidirectional and security-sensitive**: The `credential`
-    field flows agent → merchant only during completion. Merchants MUST NOT echo
-    credentials back in responses. Merchants process payment based on
-    credentials, not display information.
--   **Selected instrument ID flows with instruments**: The
-    `selected_instrument_id` MAY be provided whenever instruments are provided
-    (even with just display info for embedded checkout). It is REQUIRED during
-    completion to indicate which instrument to charge. Merchants echo this
-    selection to confirm which payment method was selected.
--   **Handlers may change dynamically**: On checkout updates, merchants MAY
-    filter the handlers array based on cart contents, buyer location,
-    transaction amount, or other factors. Agents SHOULD refresh handler
-    information after significant checkout updates.
-
-#### 6.4.1 Example Flow A: Direct Card Tokenization (Agentic)
-
-In this scenario, an AI Agent uses secure vault to retrieve token from a
-generic tokenizer provided by the merchant before sending it to the
-checkout.
-
-**1. Merchant Configuration (Response from Create Checkout)**
-
-The checkout response includes payment handlers (shown here is the `payment`
-field only):
-
-```json
-{
-  "payment": {
-    "handlers": [
-      {
-        "id": "merchant_tokenizer",
-        "name": "com.example.merchant_tokenizer",
-        "version": "2026-01-11",
-        "spec": "https://example.com/specs/payments/merchant_tokenizer",
-        "config_schema": "https://example.com/specs/payments/merchant_tokenizer.json",
-        "instrument_schemas": [
-          "https://ucp.dev/schemas/shopping/types/card_payment_instrument.json"
-        ],
-        "config": {
-          "type": "CARD",
-          "tokenization_specification": {
-            "type": "token",
-            "parameters": {
-              "token_retrieval_url": "https://api.psp.com/v1/tokens"
-            }
-          }
-        }
-      }
-    ]
-  }
-}
-```
-
-**2. Token Execution (Client-Side)**
-The Agent retrieve token securely from the PSP's tokenization
-endpoint.
-*Response:* `{"token": "tok_visa_123"}`
-
-**3. Complete Checkout (Request to Merchant)**
-```json
-POST /checkout-sessions/{checkout_id}/complete
-Content-Type: application/json
-
-{
-  "payment_data": {
-    "id": "instr_1",
-    "handler_id": "card_tokenizer",
-    "type": "card",
-    "brand": "visa",
-    "last_digits": "4242",
-    "expiry_month": 12,
-    "expiry_year": 2026,
-    "credential": {
-      "type": "session_id",
-      "token": "tok_visa_123"
-    }
-  }
-}
-```
-
-#### 6.4.2 Example Flow B: Google Pay
-
-In this scenario, the Agent or User uses Google Pay as a credential provider.
+In this scenario, the Agent uses a specific payment handler Google Pay.
 The Merchant configures the handler using Google Pay's standard payment data
 model.
 
@@ -1642,21 +1556,132 @@ Content-Type: application/json
 
 {
   "payment_data": {
-      "id": "instr_1",
-      "handler_id": "gpay",
-      "type": "card",
-      "description": "Visa •••• 1234",
-      "billing_address": {
-        "street_address": "123 Main St",
-        "address_locality": "Anytown",
-        "address_region": "CA",
-        "address_country": "US",
-        "postal_code": "12345"
-      },
-      "credential": {
-        "type": "PAYMENT_GATEWAY",
-        "token": "examplePaymentMethodToken"
+    "id": "instr_1",
+    "handler_id": "gpay",
+    "type": "card",
+    "brand": "visa",
+    "last_digits": "4242",
+    "rich_card_art": "xxx",
+    "rich_text_description": "Visa •••• 1234",
+    "billing_address": {
+      "street_address": "123 Main St",
+      "address_locality": "Anytown",
+      "address_region": "CA",
+      "address_country": "US",
+      "postal_code": "12345"
+    },
+    "credential": {
+      "type": "PAYMENT_GATEWAY",
+      "token": "examplePaymentMethodToken"
+    }
+  },
+  "risk_signals": {
+    // ... host could send risk_signals here
+  }
+}
+```
+
+#### 6.4.3 Example Flow B: Direct Card Tokenization
+
+In this scenario, an AI Agent uses a secure vault to retrieve a token from a
+PSP before sending it to the checkout. Transactions sometimes require Strong
+Customer Authentication (SCA), such as a 3DS banking challenge. The Merchant
+`complete` response utilizes a `status` field to handoff this flow.
+
+**1. Merchant Configuration (Response from Create Checkout)**
+
+The Merchant advertises the supported tokenizer in the `payment.handlers` array.
+
+```json
+{
+  "payment": {
+    "handlers": [
+      {
+        "id": "merchant_tokenizer",
+        "name": "com.example.merchant_tokenizer",
+        "version": "2026-01-11",
+        "config": {
+          "type": "CARD",
+          "tokenization_specification": {
+            "type": "token",
+            "parameters": {
+              "token_retrieval_url": "https://api.psp.com/v1/tokens"
+            }
+          }
+        }
       }
+    ]
+  }
+}
+```
+
+**2. Token Execution (Client-Side)**
+
+The Agent retrieves a token securely from the PSP's tokenization endpoint
+defined in the handler config. *Example Result:* `tok_visa_123`
+
+**3. Complete Checkout (Request to Merchant)**
+
+```json
+POST /checkout-sessions/{checkout_id}/complete
+Content-Type: application/json
+
+{
+  "payment_data": {
+    "id": "instr_1",
+    "handler_id": "merchant_tokenizer",
+    "type": "card",
+    "brand": "visa",
+    "last_digits": "4242",
+    "expiry_month": 12,
+    "expiry_year": 2026,
+    "credential": {
+      "type": "token",
+      "value": "tok_visa_123"
+    }
+  },
+  "risk_signals": {
+    // ... host could send risk_signals here
+  }
+}
+```
+
+**4. Action Required Response (Merchant to Agent)**
+
+```json
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "status": "requires_escalation",
+  "messages": [
+    {
+      "type": "error",
+      "code": "requires_3ds",
+      "content": "Your bank requires verification to complete this purchase.",
+      "severity": "requires_buyer_input"
+    }
+  ],
+  "continue_url": " ... " // this will host the handoff URL
+}
+```
+
+### 6.4.4 Risk Signals
+
+To aid in fraud assessment, the Agent MAY include additional risk signals in
+the complete call, providing the Merchant with more context about the
+transaction's legitimacy. The structure and content of these risk signals are
+not strictly defined by this specification, allowing flexibility based on the
+agreement between the Agent and Merchant or specific payment handler
+requirements.
+
+**Example (Flexible Structure):**
+
+```json
+{
+  "risk_signal": {
+    "session_id": "abc_123_xyz",
+    "score": 0.95
   }
 }
 ```
