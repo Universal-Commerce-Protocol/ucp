@@ -5,7 +5,7 @@
   "description": "Payment instrument structure for Shop Pay. Extends the base payment instrument with Shop Pay-specific credential types.",
   "allOf": [
     {
-      "$ref": "../../schemas/shopping/types/payment_instrument.json"
+      "$ref": "../../schemas/shopping/types/card_payment_instrument.json"
     },
     {
       "type": "object",

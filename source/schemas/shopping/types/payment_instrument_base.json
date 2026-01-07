@@ -16,7 +16,7 @@
     },
     "handler_id": {
       "type": "string",
-      "description": "The ID of the payment handler configuration (from the 'Create Checkout' response) that was used to generate this instrument. This tells the Merchant which key/gateway to use for decryption."
+      "description": "The unique identifier for the handler instance that produced this instrument. This corresponds to the 'id' field in the Payment Handler definition."
     },
     "type": {
       "type": "string",
@@ -27,10 +27,7 @@
       "description": "The billing address associated with this payment method."
     },
     "credential": {
-      "type": "object",
-      "description": "The secure payload required to process the transaction (e.g., payment token, cryptogram, or encrypted card data). The specific structure is defined by the child schema.",
-      "additionalProperties": true
+      "$ref": "payment_credential.json"
     }
-  },
-  "additionalProperties": true
+  }
 }

@@ -44,9 +44,6 @@
           "type": "string",
           "format": "uri",
           "description": "An optional URI to a rich image representing the card (e.g., card art provided by the issuer)."
-        },
-        "credential": {
-          "$ref": "payment_credential.json"
         }
       }
     }
