@@ -85,7 +85,7 @@ label.md-search__icon {
 }
 
 .hero-description {
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   line-height: 1.6;
   color: #5f6368;
   margin: 0;
@@ -140,21 +140,24 @@ label.md-search__icon {
   flex-grow: 1;
 }
 
-.promo-button {
+.promo-button,
+.learn-more-btn {
   display: inline-block;
-  padding: 12px 28px;
-  border: 1px solid #202124;
+  padding: 0.6rem 2rem;
+  border: 1px solid #000;
   border-radius: 50px; /* Pill shape */
   text-decoration: none;
-  color: #202124;
+  color: #000 !important;
   font-weight: 500;
   font-size: 0.95rem;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.2s ease-in-out;
   background-color: transparent;
 }
 
-.promo-button:hover {
-  background-color: #e8eaed; /* Light gray hover effect */
+.promo-button:hover,
+.learn-more-btn:hover {
+  background-color: #e9ecef; /* Light gray hover effect */
+  color: #000 !important;
 }
 
 /* --- PARTNER SECTION --- */
@@ -194,7 +197,9 @@ label.md-search__icon {
 }
 
 .partners-logo-img {
-  height: 45px !important;
+  max-height: 45px;
+  max-width: 150px;
+  height: auto;
   width: auto;
   opacity: 0.9;
 }
@@ -248,7 +253,7 @@ label.md-search__icon {
 /* The moving track */
 .partner-track {
   display: flex;
-  gap: 60px; /* Space between logos */
+  gap: 40px; /* Space between logos */
   width: max-content;
   /* 40s is the speed. Lower number = faster */
   animation: partnerScroll 40s linear infinite; 
@@ -265,7 +270,8 @@ label.md-search__icon {
   align-items: center;
   opacity: 0.9;
   transition: opacity 0.3s;
-  padding: 0 80px;
+  padding: 0 40px;
+  min-height: 65px; /* Ensure vertical alignment */
 }
 
 .partner-logo:hover {
@@ -273,7 +279,9 @@ label.md-search__icon {
 }
 
 .partner-logo img {
-  height: 65px; /* Fixed height for consistency */
+  max-height: 65px; /* Contain logo */
+  max-width: 180px; /* Prevent wide logos stretching */
+  height: auto;
   width: auto;
 }
 
@@ -404,7 +412,7 @@ label.md-search__icon {
 }
 
 .pane-text h3 {
-  font-size: 2.2rem;
+  font-size: 1.8rem;
   margin-bottom: 20px;
   font-weight: 500;
   color: #202124;
@@ -418,22 +426,7 @@ label.md-search__icon {
   margin-bottom: 30px;
 }
 
-.learn-more-btn {
-  display: inline-block;
-  padding: 0.6rem 2rem;
-  border: 1px solid #dadce0;
-  border-radius: 24px;
-  text-decoration: none;
-  color: #3c4043;
-  font-weight: 500;
-  font-size: 0.95rem;
-  transition: background 0.2s;
-}
 
-.learn-more-btn:hover {
-  background-color: #f8f9fa;
-  color: #202124;
-}
 
 /* Right Column: Visuals Container */
 .pane-visuals {
@@ -442,7 +435,7 @@ label.md-search__icon {
   flex-direction: row; /* Force items side by side */
   gap: 20px;
   justify-content: center;
-  align-items: flex-start;
+  align-items: stretch;
   min-width: 400px; /* Prevents squishing */
 }
 
@@ -536,8 +529,9 @@ label.md-search__icon {
     align-items: center;
   }
 
+  /* Make sure code block is visible on mobile */
   .code-block-placeholder {
-      display: none; /* Hide code on small screens to save space */
+      display: flex;
   }
 }
 

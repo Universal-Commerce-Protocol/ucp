@@ -10,7 +10,7 @@ hide:
       The common language for consumers, agents and businesses.
     </p>
     <p class="hero-description">
-      Discover products, Negotiate capabilities, Complete transactions. UCP defines the primitives for agentic commerce so platforms, businesses, and payment providers can interoperate through one standard, without custom builds.
+      Discover products. Negotiate capabilities. Complete transactions. UCP defines the primitives for agentic commerce so platforms, businesses, and payment providers can interoperate through one standard, without custom builds.
     </p>
   </div>
   <div class="hero-image">
@@ -39,7 +39,7 @@ hide:
 </div>
 
 <div class="partners-intro-wrapper">
-  <h2 class="partners-intro-title">
+  <h2 class="partners-intro-title" style="font-size: 2.0rem; font-weight: 500; color: #202124; margin-bottom: 20px;">
     Created and adopted by industry partners
   </h2>
 
@@ -73,7 +73,7 @@ hide:
 <div style="text-align: center; margin: 100px 0 60px;">
   <h2 style="font-size: 2.0rem; font-weight: 500; color: #202124; margin-bottom: 20px;">Built for flexibility, security, and scale</h2>
   <p style="color: #5f6368; font-size: 0.95rem; line-height: 1.6; max-width: 800px; margin: 0 auto;">
-    Agentic commerce demands interoperability. UCP is built on industry standards — REST and JSON-RPC transports; <a href="https://ap2-protocol.org/">Agent Payments Protocol (AP2)</a>, <a href="https://a2a-protocol.org/latest/">Agent2Agent (A2A)</a>, and <a href="https://modelcontextprotocol.io/docs/getting-started/intro">Model Context Protocol (MCP)</a> support built-in — so different systems can work together without custom integration.
+    Agentic commerce demands interoperability. UCP is built on industry standards — REST and JSON-RPC transports; <a href="https://ap2-protocol.org/" style="text-decoration: underline;">Agent Payments Protocol (AP2)</a>, <a href="https://a2a-protocol.org/latest/" style="text-decoration: underline;">Agent2Agent (A2A)</a>, and <a href="https://modelcontextprotocol.io/docs/getting-started/intro" style="text-decoration: underline;">Model Context Protocol (MCP)</a> support built-in — so different systems can work together without custom integration.
   </p>
 </div>
 
@@ -143,7 +143,10 @@ hide:
 
 <section class="action-carousel-section">
   <h2 style="font-size: 2.0rem; font-weight: 500; color: #202124; margin-bottom: 20px;">See it in action</h2>
-
+  <p style="color: #5f6368; font-size: 1.05rem; line-height: 1.6; max-width: 800px; margin: 0 auto 40px auto;">
+    UCP is designed to facilitate the entire commerce lifecycle, from initial product discovery and search to final sale and post-purchase support.
+The protocol's initial launch focuses on three core capabilities: Checkout, Identity Linking, and Order Management.
+  </p>
   <div class="carousel-tabs">
     <button class="tab-btn active" onclick="openTab(event, 'tab-checkout')">Checkout</button>
     <button class="tab-btn" onclick="openTab(event, 'tab-identity')">Identity Linking</button>
@@ -317,7 +320,7 @@ function openTab(evt, tabName) {
     <p style="color: #5f6368; font-size: 0.95rem; line-height: 1.6; margin-bottom: 30px; flex-grow: 1;">
       Integrate and negotiate directly with the merchant checkout API to power native UI and workflows for your platform.
     </p>
-    <a href="specification/native/" class="md-button" style="background: #fff; border-radius: 24px; padding: 0.6rem 2rem; border: 1px solid #dadce0; color: #3c4043; font-weight: 500; text-transform: none;">See how it works</a>
+    <a href="specification/native/" class="promo-button">See how it works</a>
   </div>
 
   <div style="flex: 1; min-width: 300px; background: #f8f9fa; border-radius: 16px; padding: 40px; display: flex; flex-direction: column; align-items: flex-start;">
@@ -328,7 +331,7 @@ function openTab(evt, tabName) {
     <p style="color: #5f6368; font-size: 0.95rem; line-height: 1.6; margin-bottom: 30px; flex-grow: 1;">
       As an optional mechanism, embed your checkout UI within an iframe to support more complex checkout flows, with advanced capabilities like bidirectional communication, payments and shipping address handoffs.
     </p>
-    <a href="specification/embedded-checkout/" class="md-button" style="background: #fff; border-radius: 24px; padding: 0.6rem 2rem; border: 1px solid #dadce0; color: #3c4043; font-weight: 500; text-transform: none;">Learn more</a>
+    <a href="specification/embedded-checkout/" class="promo-button">Learn more</a>
   </div>
 
 </div>
@@ -348,7 +351,7 @@ function openTab(evt, tabName) {
       <p style="color: #5f6368; font-size: 0.95rem; line-height: 1.6; margin-bottom: 30px; flex-grow: 1;">
         Build the future of commerce on an open foundation. Join our community in evolving an open-source standard designed for the next generation of digital trade.
       </p>
-      <a href="specification/overview/" style="color: #1a73e8; text-decoration: none; font-weight: 500; font-size: 0.95rem;">View the technical spec</a>
+      <a href="specification/overview/" style="color: #1a73e8; text-decoration: underline; font-weight: 500; font-size: 0.95rem;">View the technical spec</a>
     </div>
     <div style="flex: 1; min-width: 300px; max-width: 360px; border: 1px solid #dadce0; border-radius: 32px; padding: 40px 30px; display: flex; flex-direction: column; align-items: center;">
       <div style="height: 120px; margin-bottom: 30px; display: flex; align-items: center; justify-content: center;">
@@ -358,7 +361,7 @@ function openTab(evt, tabName) {
       <p style="color: #5f6368; font-size: 0.95rem; line-height: 1.6; margin-bottom: 30px; flex-grow: 1;">
         UCP empowers retailers to meet customers wherever they are—AI assistants, shopping agents, embedded experiences—without rebuilding your checkout for each. Your existing payment stack stays intact.
       </p>
-      <a href="#" style="color: #1a73e8; text-decoration: none; font-weight: 500; font-size: 0.95rem;">Integrate with UCP</a>
+      <a href="#" style="color: #1a73e8; text-decoration: underline; font-weight: 500; font-size: 0.95rem;">Integrate with UCP</a>
     </div>
   </div>
   <div style="display: flex; gap: 24px; flex-wrap: wrap; justify-content: center;">
@@ -370,7 +373,7 @@ function openTab(evt, tabName) {
       <p style="color: #5f6368; font-size: 0.95rem; line-height: 1.6; margin-bottom: 30px; flex-grow: 1;">
         Simplify merchant onboarding with standardized APIs and provide your audience with an integrated shopping experience. Compatible with MCP, A2A, and existing agent frameworks.
       </p>
-      <a href="documentation/core-concepts/" style="color: #1a73e8; text-decoration: none; font-weight: 500; font-size: 0.95rem;">Learn more UCP core concepts</a>
+      <a href="documentation/core-concepts/" style="color: #1a73e8; text-decoration: underline; font-weight: 500; font-size: 0.95rem;">Learn more UCP core concepts</a>
     </div>
     <div style="flex: 1; min-width: 300px; max-width: 360px; border: 1px solid #dadce0; border-radius: 32px; padding: 40px 30px; display: flex; flex-direction: column; align-items: center;">
       <div style="height: 120px; margin-bottom: 30px; display: flex; align-items: center; justify-content: center;">
@@ -380,7 +383,7 @@ function openTab(evt, tabName) {
       <p style="color: #5f6368; font-size: 0.95rem; line-height: 1.6; margin-bottom: 30px; flex-grow: 1;">
         Universal payments that are provable—every authorization backed by cryptographic proof of user consent. Open, modular payment handler design enables open interoperability.
       </p>
-      <a href="documentation/ucp-and-ap2/" style="color: #1a73e8; text-decoration: none; font-weight: 500; font-size: 0.95rem;">Learn more about UCP and AP2</a>
+      <a href="documentation/ucp-and-ap2/" style="color: #1a73e8; text-decoration: underline; font-weight: 500; font-size: 0.95rem;">Learn more about UCP and AP2</a>
     </div>
 
   </div>
@@ -395,7 +398,7 @@ function openTab(evt, tabName) {
       <span>Adyen</span>
     </div>
     <div class="partner-logo">
-      <img src="assets/partner/A&I.png" alt="Ant International" style="height: 60px;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+      <img src="assets/partner/A&I.png" alt="Ant International" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
       <span>Ant International</span>
     </div>
     <div class="partner-logo">
@@ -419,7 +422,7 @@ function openTab(evt, tabName) {
       <span>Etsy</span>
     </div>
     <div class="partner-logo">
-      <img src="assets/partner/flipkart.png" alt="Flipkart" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+      <img src="assets/partner/flipkart.png" alt="Flipkart partner company logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
       <span>Flipkart</span>
     </div>
     <div class="partner-logo">
@@ -475,7 +478,7 @@ function openTab(evt, tabName) {
       <span>Adyen</span>
     </div>
     <div class="partner-logo">
-      <img src="assets/partner/A&I.png" alt="Ant International" style="height: 60px;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+      <img src="assets/partner/A&I.png" alt="Ant International" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
       <span>Ant International</span>
     </div>
     <div class="partner-logo">
@@ -569,7 +572,7 @@ function openTab(evt, tabName) {
   <div style="display: flex; justify-content: center; gap: 60px; flex-wrap: wrap; text-align: center;">
     <div style="flex: 1; min-width: 250px; max-width: 350px; display: flex; flex-direction: column; align-items: center;">
       <div style="height: 60px; margin-bottom: 20px;">
-        <img src="assets/Icon=Download.svg" alt="Download" style="height: 48px; width: auto; opacity: 0.8;">
+        <img src="assets/Icon=Download.svg" alt="Download icon for code samples" style="height: 48px; width: auto; opacity: 0.8;">
       </div>
       <h3 style="font-size: 1.4rem; font-weight: 400; color: #202124; margin: 0 0 15px 0;">Download</h3>
       <p style="color: #5f6368; font-size: 1rem; line-height: 1.5;">Download and run our code samples</p>
@@ -590,19 +593,12 @@ function openTab(evt, tabName) {
     </div>
   </div>
   <div style="text-align: center; margin-top: 60px;">
-    <a href="https://github.com/Universal-Commerce-Protocol/ucp" style="display: inline-flex; align-items: center; gap: 12px; padding: 14px 32px; border: 1px solid #dadce0; border-radius: 50px; text-decoration: none; color: #3c4043; font-weight: 500; font-size: 1rem; transition: all 0.2s; background: #fff;">
-      <svg height="24" width="24" viewBox="0 0 16 16" version="1.1" fill="#3c4043">
+    <a href="https://github.com/Universal-Commerce-Protocol/ucp" class="promo-button" style="display: inline-flex; align-items: center; gap: 12px;">
+      <svg height="24" width="24" viewBox="0 0 16 16" version="1.1" fill="currentColor">
         <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
       </svg>
       Visit the Github repository
     </a>
   </div>
 
-</div>
-
-<div class="footer-wrapper">
-  <div class="footer-content">
-    <img src="assets/updated-icon.svg" alt="UCP" class="footer-logo">
-    <span class="footer-text">Universal Commerce Protocol</span>
-  </div>
 </div>
