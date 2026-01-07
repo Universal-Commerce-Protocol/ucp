@@ -151,7 +151,6 @@ hide:
   </div>
 
   <div class="carousel-content">
-
     <div id="tab-checkout" class="tab-pane active">
       <div class="pane-text">
         <div class="icon-placeholder">
@@ -164,18 +163,49 @@ hide:
       </div>
       <div class="pane-visuals">
         <div class="image-container">
-           <img src="assets/Paysheet_with_address.svg" alt="Checkout UI" class="phone-mockup" onerror="this.src='https://placehold.co/260x500/EEE/31343C?text=Checkout+UI'">
+           <img src="assets/Paysheet_with_address.svg" alt="Example checkout screen with address details" class="phone-mockup" onerror="this.src='https://placehold.co/260x500/EEE/31343C?text=Checkout+UI'">
         </div>
         <div class="code-block-placeholder">
-           <code>// Code snippet space...</code>
+          <pre>
+            <code>
+              {
+                "id": "chk_123456789",
+                "buyer": {
+                  "email": "e.beckett@example.com",
+                  "first_name": "Elisa",
+                  "last_name": "Beckett"
+                },
+                "line_items": [
+                  {
+                    "item": {
+                      "id": "item_123",
+                      "title": "Monos Carry-On Pro suitcase",
+                      "price": 26550
+                    },
+                    "id": "li_1",
+                    "quantity": 1
+                  }
+                ],
+                "fulfillment_address": {
+                  "full_name": "Elisa Beckett",
+                  "street_address": "1600 Amphitheatre Pkwy",
+                  "address_locality": "Mountain View",
+                  "address_region": "CA",
+                  "postal_code": "94043",
+                  "address_country": "US"
+                },
+                "fulfillment_option_id": "free-shipping",
+                // ..other fields..
+              }
+            </code>
+          </pre>
         </div>
       </div>
     </div>
-
     <div id="tab-identity" class="tab-pane">
       <div class="pane-text">
         <div class="icon-placeholder">
-           <img src="assets/updated-icon.svg" alt="UCP Icon">
+           <img src="assets/updated-icon.svg" alt="Universal Commerce Protocol icon">
         </div>
         <div class="pane-eyebrow">SEE IT IN ACTION</div>
         <h3>Identity Linking</h3>
@@ -184,14 +214,37 @@ hide:
       </div>
       <div class="pane-visuals">
         <div class="image-container">
-           <img src="assets/duo_branding.svg" alt="Identity UI" class="phone-mockup" onerror="this.src='https://placehold.co/260x500/EEE/31343C?text=Identity+UI'">
+           <img src="assets/duo_branding.svg" alt="Example user interface for identity linking" class="phone-mockup" onerror="this.src='https://placehold.co/260x500/EEE/31343C?text=Identity+UI'">
         </div>
         <div class="code-block-placeholder">
-           <code>// Code snippet space...</code>
+          <pre>
+            <code>
+              # Sample of /.well-known/oauth-authorization-server
+              {
+                "issuer": "https://merchant.example.com",
+                "authorization_endpoint": "https://merchant.example.com/oauth2/authorize",
+                "token_endpoint": "https://merchant.example.com/oauth2/token",
+                "revocation_endpoint": "https://merchant.example.com/oauth2/revoke",
+                "scopes_supported": [
+                  "ucp:scopes:checkout_session",
+                ],
+                "response_types_supported": [
+                  "code"
+                ],
+                "grant_types_supported": [
+                  "authorization_code",
+                  "refresh_token"
+                ],
+                "token_endpoint_auth_methods_supported": [
+                  "client_secret_basic"
+                ],
+                "service_documentation": "https://merchant.example.com/docs/oauth2"
+              }
+            </code>
+          </pre>
         </div>
       </div>
     </div>
-
     <div id="tab-order" class="tab-pane">
       <div class="pane-text">
           <div class="icon-placeholder">
@@ -204,14 +257,37 @@ hide:
       </div>
       <div class="pane-visuals">
         <div class="image-container">
-           <img src="assets/Confirmation.svg" alt="Order UI" class="phone-mockup" onerror="this.src='https://placehold.co/260x500/EEE/31343C?text=Order+UI'">
+           <img src="assets/Confirmation.svg" alt="Example user interface showing order confirmation details" class="phone-mockup" onerror="this.src='https://placehold.co/260x500/EEE/31343C?text=Order+UI'">
         </div>
         <div class="code-block-placeholder">
-           <code>// Code snippet space...</code>
+          <pre>
+            <code>
+             ...other checkout fields...
+            "fulfillment": {
+              "expectations": [
+                {
+                  "id": "exp_1",
+                  "line_items": [{ "id": "li_1", "quantity": 1 }],
+                  "method_type": "shipping",
+                  "destination": {
+                    "street_address": "1600 Amphitheatre Pkwy",
+                    "address_locality": "Mountain View",
+                    "address_region": "CA",
+                    "postal_code": "94043",
+                    "address_country": "US"
+                  },
+                  "description": "Arrives in 2-3 business days",
+                  "fulfillable_on": "now"
+                }
+              ]
+            }
+            ...other checkout fields...
+            </code>
+          </pre>
         </div>
       </div>
     </div>
-
+  </div>
 </section>
 
 <script>
@@ -263,7 +339,6 @@ function openTab(evt, tabName) {
   </h2>
 
   <div style="display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; margin-bottom: 24px;">
-
     <div style="flex: 1; min-width: 300px; max-width: 360px; border: 1px solid #dadce0; border-radius: 32px; padding: 40px 30px; display: flex; flex-direction: column; align-items: center;">
       <div style="height: 120px; margin-bottom: 30px; display: flex; align-items: center; justify-content: center;">
         <img src="assets/Content=Developers.svg" alt="Content illustration for Developers" style="max-height: 100%; width: auto;">
@@ -274,7 +349,6 @@ function openTab(evt, tabName) {
       </p>
       <a href="specification/overview/" style="color: #1a73e8; text-decoration: none; font-weight: 500; font-size: 0.95rem;">View the technical spec</a>
     </div>
-
     <div style="flex: 1; min-width: 300px; max-width: 360px; border: 1px solid #dadce0; border-radius: 32px; padding: 40px 30px; display: flex; flex-direction: column; align-items: center;">
       <div style="height: 120px; margin-bottom: 30px; display: flex; align-items: center; justify-content: center;">
         <img src="assets/Content=Retailers.svg" alt="Content illustration for Businesses" style="max-height: 100%; width: auto;">
@@ -285,11 +359,8 @@ function openTab(evt, tabName) {
       </p>
       <a href="#" style="color: #1a73e8; text-decoration: none; font-weight: 500; font-size: 0.95rem;">Integrate with UCP</a>
     </div>
-
   </div>
-
   <div style="display: flex; gap: 24px; flex-wrap: wrap; justify-content: center;">
-
     <div style="flex: 1; min-width: 300px; max-width: 360px; border: 1px solid #dadce0; border-radius: 32px; padding: 40px 30px; display: flex; flex-direction: column; align-items: center;">
       <div style="height: 120px; margin-bottom: 30px; display: flex; align-items: center; justify-content: center;">
         <img src="assets/Content=AI_Platforms.svg" alt="Content illustration for AI Platforms" style="max-height: 100%; width: auto;">
@@ -300,7 +371,6 @@ function openTab(evt, tabName) {
       </p>
       <a href="documentation/core-concepts/" style="color: #1a73e8; text-decoration: none; font-weight: 500; font-size: 0.95rem;">Learn more UCP core concepts</a>
     </div>
-
     <div style="flex: 1; min-width: 300px; max-width: 360px; border: 1px solid #dadce0; border-radius: 32px; padding: 40px 30px; display: flex; flex-direction: column; align-items: center;">
       <div style="height: 120px; margin-bottom: 30px; display: flex; align-items: center; justify-content: center;">
         <img src="assets/Content=Payment_Providers.svg" alt="Content illustration for Payment Providers" style="max-height: 100%; width: auto;">
@@ -496,7 +566,6 @@ function openTab(evt, tabName) {
   </div>
 
   <div style="display: flex; justify-content: center; gap: 60px; flex-wrap: wrap; text-align: center;">
-
     <div style="flex: 1; min-width: 250px; max-width: 350px; display: flex; flex-direction: column; align-items: center;">
       <div style="height: 60px; margin-bottom: 20px;">
         <img src="assets/Icon=Download.svg" alt="Download" style="height: 48px; width: auto; opacity: 0.8;">
@@ -504,7 +573,6 @@ function openTab(evt, tabName) {
       <h3 style="font-size: 1.4rem; font-weight: 400; color: #202124; margin: 0 0 15px 0;">Download</h3>
       <p style="color: #5f6368; font-size: 1rem; line-height: 1.5;">Download and run our code samples</p>
     </div>
-
     <div style="flex: 1; min-width: 250px; max-width: 350px; display: flex; flex-direction: column; align-items: center;">
       <div style="height: 60px; margin-bottom: 20px;">
         <img src="assets/Icon=Experiment.svg" alt="Experiment" style="height: 48px; width: auto; opacity: 0.8;">
@@ -512,7 +580,6 @@ function openTab(evt, tabName) {
       <h3 style="font-size: 1.4rem; font-weight: 400; color: #202124; margin: 0 0 15px 0;">Experiment</h3>
       <p style="color: #5f6368; font-size: 1rem; line-height: 1.5;">Experiment with the protocol and its different agent roles</p>
     </div>
-
     <div style="flex: 1; min-width: 250px; max-width: 350px; display: flex; flex-direction: column; align-items: center;">
       <div style="height: 60px; margin-bottom: 20px;">
         <img src="assets/Icon=Contribute.svg" alt="Contribute" style="height: 48px; width: auto; opacity: 0.8;">
@@ -520,9 +587,7 @@ function openTab(evt, tabName) {
       <h3 style="font-size: 1.4rem; font-weight: 400; color: #202124; margin: 0 0 15px 0;">Contribute</h3>
       <p style="color: #5f6368; font-size: 1rem; line-height: 1.5;">Contribute your feedback and code to the public repository</p>
     </div>
-
   </div>
-
   <div style="text-align: center; margin-top: 60px;">
     <a href="https://github.com/Universal-Commerce-Protocol/ucp" style="display: inline-flex; align-items: center; gap: 12px; padding: 14px 32px; border: 1px solid #dadce0; border-radius: 50px; text-decoration: none; color: #3c4043; font-weight: 500; font-size: 1rem; transition: all 0.2s; background: #fff;">
       <svg height="24" width="24" viewBox="0 0 16 16" version="1.1" fill="#3c4043">
