@@ -120,15 +120,13 @@
     <h2>Sell everywhere your customers are with UCP</h2>
     <p>The Universal Commerce Protocol (UCP) empowers you to turn AI interactions into instant sales. Enable users to buy your products directly on Google AI-Mode and Gemini with a new open standard designed for the future of commerce.</p>
     <div class="hero-section-h1-buttons">
-      <a href="#" class="button-primary">Learn more about this launch</a>
-      <!-- disableFinding(LINK_RELATIVE_G3DOC) -->
-      <a href="../specification/overview.md" class="button-secondary">Read the documentation</a>
-      <a href="#" class="button-secondary">Join the waitlist</a>
+      <a href="https://developers.google.com/merchant/ucp" class="button-primary">Learn more about this launch</a>
+      <a href="https://developers.google.com/merchant/ucp/guides" class="button-secondary">Read the documentation</a>
+      <a href="https://support.google.com/merchants/contact/ucp_integration_interest" class="button-secondary">Join the waitlist</a>
     </div>
   </div>
   <div class="hero-section-h1-video">
-    <video autoplay loop muted playsinline>
-      <!-- disableFinding(LINK_RELATIVE_G3DOC) -->
+    <video autoplay loop muted playsinline onerror="this.src='https://placehold.co/260x500/EEE/31343C?text=Video'">
       <source src="../assets/Suitcase_PhoneFrame.mp4" type="video/mp4">
       Your browser does not support the video tag.
     </video>

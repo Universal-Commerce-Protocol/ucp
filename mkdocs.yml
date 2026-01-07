@@ -58,7 +58,7 @@ nav:
         - PSP Handler: specification/examples/psp-payment-handler.md
         - Agent Encrypted Credential: specification/examples/agent-encrypted-credential-handler.md
 
-repo_name: UCP - Universal Commerce Protocol
+repo_name: UCP on GitHub # Override repo name to be shorter on site header.
 repo_url: https://github.com/Universal-Commerce-Protocol/ucp
 
 # Copyright
