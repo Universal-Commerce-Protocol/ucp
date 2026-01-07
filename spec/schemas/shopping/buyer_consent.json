@@ -3,7 +3,6 @@
   "$id": "https://ucp.dev/schemas/shopping/buyer_consent.json",
   "name": "dev.ucp.shopping.buyer_consent",
   "version": "2026-01-11",
-  "extends": "dev.ucp.shopping.checkout",
   "title": "Buyer Consent Extension",
   "description": "Extends Checkout with buyer consent tracking for privacy compliance via the buyer object.",
   "$defs": {

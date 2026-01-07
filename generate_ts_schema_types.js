@@ -85,15 +85,6 @@ async function generate() {
               function clean(obj) {
                 if (typeof obj !== 'object' || obj === null) return;
 
-                // 'extends' is not a standard JSON Schema keyword (it was
-                // replaced by 'allOf'). We remove it to prevent
-                // json-schema-to-typescript from treating it as a property or
-                // failing to compile, as it can cause syntax errors in the
-                // generated output.
-                if (obj.extends) {
-                  delete obj.extends;
-                }
-
                 // When $ref is present, other properties like title and
                 // description are technically ignored in older JSON Schema
                 // drafts. We remove them here to prevent

@@ -8,14 +8,14 @@
  */
 
 /**
- * JWS Detached Content signature (RFC 7515 Appendix F) over the checkout response body (excluding ap2 field). Format: <base64url-header>..<base64url-signature>. The header MUST contain 'alg' (ES256/ES384/ES512) and 'kid' claims. The signature covers both the header and JCS-canonicalized checkout payload.
+ * JWS Detached Content signature (RFC 7515 Appendix F) over the checkout response body (excluding ap2 field). Format: `<base64url-header>..<base64url-signature>`. The header MUST contain 'alg' (ES256/ES384/ES512) and 'kid' claims. The signature covers both the header and JCS-canonicalized checkout payload.
  *
  * This interface was referenced by `AP2MandateExtension`'s JSON-Schema
  * via the `definition` "merchant_authorization".
  */
 export type MerchantAuthorization = string;
 /**
- * SD-JWT+kb credential proving user authorization for the checkout. Contains the full checkout including ap2.merchant_authorization.
+ * SD-JWT+kb credential in `ap2.checkout_mandate`. Proving user authorization for the checkout. Contains the full checkout including `ap2.merchant_authorization`.
  *
  * This interface was referenced by `AP2MandateExtension`'s JSON-Schema
  * via the `definition` "checkout_mandate".
@@ -39,7 +39,7 @@ export type AP2ErrorCode =
  * Checkout extended with AP2 embedded signature support.
  *
  * This interface was referenced by `AP2MandateExtension`'s JSON-Schema
- * via the `definition` "checkout".
+ * via the `definition` "checkout_response_with_ap2".
  */
 export type CheckoutWithAP2Mandate = CheckoutResponse & {
   ap2?: AP2CheckoutResponseObject;
@@ -310,6 +310,10 @@ export declare interface Base {
    */
   schema?: string;
   /**
+   * Parent capability this extends. Present for extensions, absent for root capabilities.
+   */
+  extends?: string;
+  /**
    * Capability-specific configuration (structure defined by each capability).
    */
   config?: {
@@ -555,7 +559,7 @@ export declare interface PaymentInstrumentBase {
    */
   handler_id: string;
   /**
-   * The broad category of the instrument (e.g., 'card', 'tokenized_card'). specific schemas will constrain this to a constant value.
+   * The broad category of the instrument (e.g., 'card', 'tokenized_card'). Specific schemas will constrain this to a constant value.
    */
   type: string;
   billing_address?: PostalAddress;
@@ -674,7 +678,7 @@ export declare interface CardCredential {
  * Extension fields for complete_checkout when AP2 is negotiated.
  *
  * This interface was referenced by `AP2MandateExtension`'s JSON-Schema
- * via the `definition` "complete_checkout_request".
+ * via the `definition` "complete_request_with_ap2".
  */
 export declare interface CompleteCheckoutRequestWithAP2 {
   ap2?: AP2CompleteRequestObject;
@@ -1392,6 +1396,13 @@ export declare interface PlatformOrderConfig {
    * URL where merchant sends order lifecycle events (webhooks).
    */
   webhook_url: string;
+  [k: string]: unknown;
+}
+/**
+ * The data that will used to submit payment to the merchant.
+ */
+export declare interface PaymentData {
+  payment_data?: PaymentInstrument;
   [k: string]: unknown;
 }
 /**

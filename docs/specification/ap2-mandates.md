@@ -237,6 +237,8 @@ a completion request without mandates **MUST** result in a session failure.
 The Agent initiates the session. The Merchant returns the `Checkout` object
 with `ap2.merchant_authorization` embedded in the response body.
 
+{{ extension_schema_fields('ap2_mandate.json#/$defs/checkout_response_with_ap2', 'ap2-mandates') }}
+
 **Example Response:**
 ```json
 {
@@ -319,6 +321,8 @@ Binding (+kb) signature.
 Once the mandates are generated, the Agent submits them in the completion
 request:
 
+{{ extension_schema_fields('ap2_mandate.json#/$defs/complete_request_with_ap2', 'ap2-mandates') }}
+
 ```json
 {
   "payment_data": {
@@ -397,33 +401,27 @@ checkout.
 
 ### Merchant Authorization
 
-JWS Detached Content signature embedded in checkout responses when AP2
-is negotiated.
-
-{{ extension_schema_fields('ap2_mandate.json#/$defs/merchant_authorization', 'ap2_mandate') }}
+{{ extension_schema_fields('ap2_mandate.json#/$defs/merchant_authorization', 'ap2-mandates') }}
 
 ### AP2 Checkout Response
 
-The `ap2` object included in checkout responses.
+The `ap2` object included in CREATE / UPDATE checkout responses.
 
-{{ extension_schema_fields('ap2_mandate.json#/$defs/ap2_checkout_response', 'ap2_mandate') }}
+{{ extension_schema_fields('ap2_mandate.json#/$defs/ap2_checkout_response', 'ap2-mandates') }}
 
 ### AP2 Complete Request
 
-The `ap2` object included in complete_checkout requests.
+The `ap2` object included in COMPLETE checkout requests.
 
-{{ extension_schema_fields('ap2_mandate.json#/$defs/ap2_complete_request', 'ap2_mandate') }}
+{{ extension_schema_fields('ap2_mandate.json#/$defs/ap2_complete_request', 'ap2-mandates') }}
 
 ### Checkout Mandate
 
-SD-JWT+kb credential proving user authorization, included in
-`ap2.checkout_mandate`.
-
-{{ extension_schema_fields('ap2_mandate.json#/$defs/checkout_mandate', 'ap2_mandate') }}
+{{ extension_schema_fields('ap2_mandate.json#/$defs/checkout_mandate', 'ap2-mandates') }}
 
 ### Error Codes
 
-{{ extension_schema_fields('ap2_mandate.json#/$defs/error_code', 'ap2_mandate') }}
+{{ extension_schema_fields('ap2_mandate.json#/$defs/error_code', 'ap2-mandates') }}
 
 | Error Code | Description |
 | :--------- | :---------- |

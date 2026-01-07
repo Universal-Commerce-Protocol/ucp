@@ -307,6 +307,20 @@ def define_env(env):
         and 'oneOf' not in schema_data
         and '$ref' not in schema_data
     ):
+      # Fallback for scalar schemas (Enums, Strings with patterns, etc.)
+      s_type = schema_data.get('type')
+      enum_val = schema_data.get('enum')
+      pattern_val = schema_data.get('pattern')
+
+      if s_type or enum_val:
+        desc = schema_data.get('description', '')
+        if pattern_val:
+          desc += f'\n\n**Pattern:** `{pattern_val}`'
+        if enum_val:
+          formatted = ', '.join([f'`{v}`' for v in enum_val])
+          desc += f'\n\n**Enum:** {formatted}'
+        return desc
+
       return '_No properties defined._'
 
     md = []
