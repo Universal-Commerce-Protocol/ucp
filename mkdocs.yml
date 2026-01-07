@@ -32,7 +32,6 @@ nav:
   - Roadmap: documentation/roadmap.md
   - Specification:
     - Overview: specification/overview.md
-    - Capability Schema: specification/capability-schema.md
     - Checkout Capability:
       - Overview: specification/checkout.md
       - HTTP/REST Binding: specification/checkout-rest.md
@@ -175,7 +174,6 @@ plugins:
           - documentation/roadmap.md
         Specification Overview:
           - specification/overview.md
-          - specification/capability-schema.md
         Checkout Capability:
           - specification/checkout.md
           - specification/checkout-rest.md

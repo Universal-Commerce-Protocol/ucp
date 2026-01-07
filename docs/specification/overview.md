@@ -288,13 +288,7 @@ functionality is supported and where to find documentation and schemas.
 
 #### 5.3.1 Capability Definition
 
-| Field     | Type   | Required | Description                      |
-| --------- | ------ | -------- | -------------------------------- |
-| `name`    | string | Yes      | Reverse-domain identifier        |
-| `version` | string | Yes      | Version (YYYY-MM-DD format)      |
-| `spec`    | string | Yes      | URL to human documentation       |
-| `schema`  | string | Yes      | URL to JSON Schema               |
-| `extends` | string | No       | Parent capability (for extensions)|
+{{ extension_schema_fields('capability.json#/$defs/discovery', 'capability-schema') }}
 
 #### 5.3.2 Extensions
 
