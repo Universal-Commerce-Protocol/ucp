@@ -75,7 +75,7 @@ def check_ref(
           " with '/')"
       )
     try:
-      with open(referenced_path, "r") as f:
+      with open(referenced_path, "r", encoding="utf-8") as f:
         if referenced_path.endswith(".json"):
           referenced_data = json.load(f)
         elif referenced_path.endswith((".yaml", ".yml")):
@@ -134,7 +134,7 @@ def validate_file(filepath: str) -> Tuple[bool, Optional[str]]:
   # 1. Validate JSON
   if filepath.endswith(".json"):
     try:
-      with open(filepath, "r") as f:
+      with open(filepath, "r", encoding="utf-8") as f:
         data = json.load(f)
 
       # Validate references
@@ -149,7 +149,7 @@ def validate_file(filepath: str) -> Tuple[bool, Optional[str]]:
   # 2. Validate YAML
   elif filepath.endswith((".yaml", ".yml")):
     try:
-      with open(filepath, "r") as f:
+      with open(filepath, "r", encoding="utf-8") as f:
         data = yaml.safe_load(f)
 
       # Validate references

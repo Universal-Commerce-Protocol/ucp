@@ -561,6 +561,9 @@
       "payment": {
         "$ref": "https://ucp.dev/schemas/shopping/payment.json"
       },
+      "payment_data": {
+        "$ref": "https://ucp.dev/schemas/shopping/payment_data.json"
+      },
       "ucp": {
         "$ref": "https://ucp.dev/schemas/ucp.json"
       }

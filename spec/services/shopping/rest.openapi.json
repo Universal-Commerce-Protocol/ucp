@@ -62,7 +62,9 @@
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/checkout" }
+              "schema": {
+                "$ref": "#/components/schemas/checkout_create_req"
+              }
             }
           }
         },
@@ -77,7 +79,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/checkout"
+                  "$ref": "#/components/schemas/checkout_resp"
                 }
               }
             }
@@ -87,7 +89,9 @@
     },
     "/checkout-sessions/{id}": {
       "parameters": [
-        { "$ref": "#/components/parameters/checkout_session_id_path" }
+        {
+          "$ref": "#/components/parameters/checkout_session_id_path"
+        }
       ],
       "get": {
         "operationId": "get_checkout",
@@ -136,7 +140,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/checkout"
+                  "$ref": "#/components/schemas/checkout_resp"
                 }
               }
             }
@@ -186,7 +190,9 @@
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/checkout" }
+              "schema": {
+                "$ref": "#/components/schemas/checkout_update_req"
+              }
             }
           }
         },
@@ -201,7 +207,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/checkout"
+                  "$ref": "#/components/schemas/checkout_resp"
                 }
               }
             }
@@ -211,7 +217,9 @@
     },
     "/checkout-sessions/{id}/complete": {
       "parameters": [
-        { "$ref": "#/components/parameters/checkout_session_id_path" }
+        {
+          "$ref": "#/components/parameters/checkout_session_id_path"
+        }
       ],
       "post": {
         "operationId": "complete_checkout",
@@ -284,11 +292,14 @@
                 "schema": {
                   "allOf": [
                     {
-                      "$ref": "#/components/schemas/checkout"
+                      "$ref": "#/components/schemas/checkout_resp"
                     },
                     {
                       "type": "object",
-                      "required": ["order_id", "order_permalink_url"],
+                      "required": [
+                        "order_id",
+                        "order_permalink_url"
+                      ],
                       "properties": {
                         "order_id": {
                           "type": "string",
@@ -310,7 +321,9 @@
     },
     "/checkout-sessions/{id}/cancel": {
       "parameters": [
-        { "$ref": "#/components/parameters/checkout_session_id_path" }
+        {
+          "$ref": "#/components/parameters/checkout_session_id_path"
+        }
       ],
       "post": {
         "operationId": "cancel_checkout",
@@ -362,7 +375,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/checkout"
+                  "$ref": "#/components/schemas/checkout_resp"
                 }
               }
             }
@@ -378,8 +391,12 @@
         "summary": "Order Event Webhook",
         "description": "Merchant sends order lifecycle events to the platform's registered webhook URL. The platform provides the webhook URL during partner onboarding.",
         "parameters": [
-          { "$ref": "#/components/parameters/request_signature" },
-          { "$ref": "#/components/parameters/x_api_key" }
+          {
+            "$ref": "#/components/parameters/request_signature"
+          },
+          {
+            "$ref": "#/components/parameters/x_api_key"
+          }
         ],
         "requestBody": {
           "required": true,
@@ -387,10 +404,15 @@
             "application/json": {
               "schema": {
                 "allOf": [
-                  { "$ref": "#/components/schemas/order" },
+                  {
+                    "$ref": "#/components/schemas/order"
+                  },
                   {
                     "type": "object",
-                    "required": ["event_id", "created_time"],
+                    "required": [
+                      "event_id",
+                      "created_time"
+                    ],
                     "properties": {
                       "event_id": {
                         "type": "string",
@@ -415,7 +437,9 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": ["ucp"],
+                  "required": [
+                    "ucp"
+                  ],
                   "properties": {
                     "ucp": {
                       "$ref": "#/components/schemas/ucp"
@@ -552,17 +576,32 @@
       }
     },
     "schemas": {
-      "checkout": {
-        "$ref": "https://ucp.dev/schemas/shopping/checkout.json"
-      },
       "order": {
         "$ref": "https://ucp.dev/schemas/shopping/order.json"
       },
-      "payment": {
-        "$ref": "https://ucp.dev/schemas/shopping/payment.json"
+      "payment_data": {
+        "$ref": "https://ucp.dev/schemas/shopping/payment_data.json"
       },
       "ucp": {
         "$ref": "https://ucp.dev/schemas/ucp.json"
+      },
+      "checkout_resp": {
+        "$ref": "https://ucp.dev/schemas/shopping/checkout_resp.json"
+      },
+      "checkout_create_req": {
+        "$ref": "https://ucp.dev/schemas/shopping/checkout.create_req.json"
+      },
+      "checkout_update_req": {
+        "$ref": "https://ucp.dev/schemas/shopping/checkout.update_req.json"
+      },
+      "payment_resp": {
+        "$ref": "https://ucp.dev/schemas/shopping/payment_resp.json"
+      },
+      "payment_create_req": {
+        "$ref": "https://ucp.dev/schemas/shopping/payment.create_req.json"
+      },
+      "payment_update_req": {
+        "$ref": "https://ucp.dev/schemas/shopping/payment.update_req.json"
       }
     }
   }

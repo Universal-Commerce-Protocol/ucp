@@ -297,8 +297,8 @@ def transform_schema(
 
 def write_json(data: dict[str, Any], path: str) -> None:
   os.makedirs(os.path.dirname(path), exist_ok=True)
-  with open(path, "w") as f:
-    json.dump(data, f, indent=2)
+  with open(path, "w", encoding="utf-8") as f:
+    json.dump(data, f, indent=2, ensure_ascii=False)
     f.write("\n")
 
 
@@ -376,6 +376,105 @@ def process_schema(
     generated.append(rel_path)
 
   return generated, []
+
+
+def process_openapi(
+    source_path: str, dest_path: str, annotated_schemas: dict[str, bool]
+) -> None:
+  """Splits components and converts refs. Preserves absolute URLs if present."""
+  spec = schema_utils.load_json(source_path)
+  if not spec or "components" not in spec:
+    return
+
+  ref_map = {}
+  schemas = spec["components"].get("schemas", {})
+  source_dir_abs = os.path.dirname(os.path.abspath(source_path))
+
+  for name, schema in list(schemas.items()):
+    ref = schema.get("$ref", "")
+
+    # 1. Find the local file that matches this Ref
+    found_path = None
+    for path in annotated_schemas:
+      # Normalize path separators for comparison
+      # e.g., matches "schemas/shopping/checkout.json" inside the URL or path
+      path_suffix = os.path.relpath(path, SOURCE_DIR).replace(os.sep, "/")
+      if ref.endswith(path_suffix):
+        found_path = path
+        break
+
+    if found_path:
+      is_shared = annotated_schemas[found_path]
+
+      # 2. Calculate the base for the new $ref
+      # If the original ref was a URL, keep it a URL.
+      # If it was a local file path, keep it relative.
+      if ref.startswith("http:") or ref.startswith("https:"):
+        base_ref, _ = os.path.splitext(ref)
+      else:
+        rel_path = os.path.relpath(found_path, source_dir_abs)
+        base_ref, _ = os.path.splitext(rel_path)
+
+      # 3. Create Split Components
+      # Response (always exists)
+      resp_comp = f"{name}_resp"
+      schemas[resp_comp] = {"$ref": f"{base_ref}_resp.json"}
+
+      req_refs = {}
+      if is_shared:
+        req_comp = f"{name}_req"
+        schemas[req_comp] = {"$ref": f"{base_ref}_req.json"}
+        req_refs["create"] = req_refs["update"] = (
+            f"#/components/schemas/{req_comp}"
+        )
+      else:
+        create_comp = f"{name}_create_req"
+        schemas[create_comp] = {"$ref": f"{base_ref}.create_req.json"}
+
+        update_comp = f"{name}_update_req"
+        schemas[update_comp] = {"$ref": f"{base_ref}.update_req.json"}
+
+        req_refs["create"] = f"#/components/schemas/{create_comp}"
+        req_refs["update"] = f"#/components/schemas/{update_comp}"
+
+      # 4. Map Old -> New and Delete
+      ref_map[f"#/components/schemas/{name}"] = {
+          "response": f"#/components/schemas/{resp_comp}",
+          **req_refs,
+      }
+      del schemas[name]
+
+  # --- Update Paths ---
+  def update_node(node: Any, ctx: str):
+    if isinstance(node, dict):
+      if "$ref" in node and node["$ref"] in ref_map:
+        if ctx in ref_map[node["$ref"]]:
+          node["$ref"] = ref_map[node["$ref"]][ctx]
+      for v in node.values():
+        update_node(v, ctx)
+    elif isinstance(node, list):
+      for v in node:
+        update_node(v, ctx)
+
+  for root in [spec.get("paths", {}), spec.get("webhooks", {})]:
+    for path_item in root.values():
+      for method, op in path_item.items():
+        if method in ["parameters", "summary", "description", "$ref"]:
+          continue
+
+        if method == "post":
+          req_ctx = "create"
+        elif method in ["put", "patch"]:
+          req_ctx = "update"
+        else:
+          req_ctx = "read"
+
+        if "requestBody" in op:
+          update_node(op["requestBody"], req_ctx)
+        if "responses" in op:
+          update_node(op["responses"], "response")
+
+  write_json(spec, dest_path)
 
 
 # =============================================================================
@@ -483,7 +582,7 @@ def generate_ecp_spec(annotated_schemas: set[str]) -> int:
 
   # Collect core methods from embedded.json
   if os.path.exists(ECP_SOURCE_FILE):
-    with open(ECP_SOURCE_FILE, "r") as f:
+    with open(ECP_SOURCE_FILE, "r", encoding="utf-8") as f:
       data = json.load(f)
     ep_title = data.get("title", ep_title)
     ep_description = data.get("description", ep_description)
@@ -503,7 +602,7 @@ def generate_ecp_spec(annotated_schemas: set[str]) -> int:
       if filename in ["checkout.json", "payment.json", "order.json"]:
         continue
       filepath = os.path.join(ECP_SCHEMAS_DIR, filename)
-      with open(filepath, "r") as f:
+      with open(filepath, "r", encoding="utf-8") as f:
         data = json.load(f)
       if "embedded" not in data:
         continue
@@ -584,21 +683,24 @@ def main() -> None:
       source_path = os.path.join(root, filename)
       rel_path = os.path.relpath(source_path, SOURCE_DIR)
 
-      # Skip embedded.json - we generate embedded.openrpc.json in Pass 3
-      if filename == "embedded.json":
-        continue
+      # 1. Special Handling: OpenAPI Spec (The Linker)
+      if filename == "openapi.json" and rel_path.startswith("services/"):
+        dest_rel = os.path.join(os.path.dirname(rel_path), "rest.openapi.json")
+        process_openapi(
+            source_path, os.path.join(SPEC_DIR, dest_rel), annotated_schemas
+        )
+        print(
+            f"{schema_utils.Colors.GREEN}✓{schema_utils.Colors.RESET}"
+            f" {dest_rel}"
+        )
+        generated_count += 1
 
-      # Rename transport specs in services/ to use
-      # {transport}.{format}.json naming
-      transport_renames = {}
-      if rel_path.startswith("services/"):
-        transport_renames = {
-            "openapi.json": "rest.openapi.json",
-            "openrpc.json": "mcp.openrpc.json",
-        }
+      # 2. Special Handling: Embedded Protocol (Skip, done in Pass 3)
+      elif filename == "embedded.json":
+        pass
 
-      # Process JSON schemas, copy other files as-is
-      if filename.endswith(".json") and filename not in transport_renames:
+      # 3. Standard Handling: JSON Schemas (The Generator)
+      elif filename.endswith(".json") and filename != "openrpc.json":
         generated, errors = process_schema(
             source_path, SPEC_DIR, rel_path, annotated_schemas
         )
@@ -606,11 +708,14 @@ def main() -> None:
           print(f"{schema_utils.Colors.GREEN}✓{schema_utils.Colors.RESET} {g}")
         generated_count += len(generated)
         all_errors.extend(errors)
+
+      # 4. Fallback: Copy other files (e.g. openrpc.json)
       else:
-        # Apply rename if this is a services/ transport spec
-        dest_filename = transport_renames.get(filename, filename)
-        dest_rel_path = os.path.join(os.path.dirname(rel_path), dest_filename)
-        dest_path = os.path.join(SPEC_DIR, dest_rel_path)
+        dest_name = (
+            "mcp.openrpc.json" if filename == "openrpc.json" else filename
+        )
+        dest_rel_path = os.path.join(os.path.dirname(rel_path), dest_name)
+        dest_path = os.path.join(SPEC_DIR, os.path.dirname(rel_path), dest_name)
         try:
           os.makedirs(os.path.dirname(dest_path), exist_ok=True)
           shutil.copy2(source_path, dest_path)

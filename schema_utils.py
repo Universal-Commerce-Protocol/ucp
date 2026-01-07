@@ -58,7 +58,7 @@ def resolve_ref_path(ref: str, current_file: str) -> Optional[str]:
 def load_json(path: str) -> Optional[dict[str, Any]]:
   """Loads JSON file, returns None on error."""
   try:
-    with open(path) as f:
+    with open(path, "r", encoding="utf-8") as f:
       return json.load(f)
   except (json.JSONDecodeError, OSError):
     return None

@@ -52,7 +52,7 @@
       "items": {
         "$ref": "types/order_line_item.json"
       },
-      "description": "Immutable line items \u2014 source of truth for what was ordered."
+      "description": "Immutable line items — source of truth for what was ordered."
     },
     "fulfillment": {
       "type": "object",

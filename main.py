@@ -55,7 +55,7 @@ def define_env(env):
     for schemas_dir in schemas_dirs:
       full_path = schemas_dir + entity_name + '.json'
       try:
-        with open(full_path, 'r') as f:
+        with open(full_path, 'r', encoding='utf-8') as f:
           return json.load(f)
       except FileNotFoundError:
         continue
@@ -368,7 +368,7 @@ def define_env(env):
         version_data = None
         if ref and ref.endswith('#/$defs/version'):
           try:
-            with open('spec/schemas/ucp.json', 'r') as f:
+            with open('spec/schemas/ucp.json', 'r', encoding='utf-8') as f:
               data = json.load(f)
               version_data = data.get('$defs', {}).get('version', {})
           except json.JSONDecodeError as e:
@@ -524,7 +524,7 @@ def define_env(env):
     # Construct full path based on new structure
     full_path = 'spec/schemas/shopping/' + entity_name + '.json'
     try:
-      with open(full_path, 'r') as f:
+      with open(full_path, 'r', encoding='utf-8') as f:
         data = json.load(f)
 
       # Extension schemas have their composed type in $defs.checkout
@@ -560,7 +560,7 @@ def define_env(env):
     full_path = openapi_dir + file_name
 
     try:
-      with open(full_path, 'r') as f:
+      with open(full_path, 'r', encoding='utf-8') as f:
         data = json.load(f)
 
       # 1. Find the Operation Object by ID (search paths first, then webhooks)
@@ -743,7 +743,7 @@ def define_env(env):
     full_path = openapi_dir + file_name
 
     try:
-      with open(full_path, 'r') as f:
+      with open(full_path, 'r', encoding='utf-8') as f:
         data = json.load(f)
 
       # 1. Find the Operation Object by ID
