@@ -58,13 +58,15 @@ To validate JSON and YAML files format and references in `spec/`, run
 
 ### Using a virtual environment (Recommended)
 
-To avoid polluting your global environment, use a virtual environment:
+To avoid polluting your global environment, use a virtual environment. Prefix
+the virtual environment name with a `.` so the versioning control systems don't
+track pip install files:
 
 ```bash
 $ sudo apt-get install virtualenv python3-venv
-$ virtualenv ucp-env # or python3 -m venv ucp-env
-$ source ucp-env/bin/activate
-(ucp-env) $ pip install -r requirements-docs.txt
-(ucp-env) $ mkdocs serve --watch spec
-(ucp-env) $ deactivate # when done
+$ virtualenv .ucp # or python3 -m venv .ucp
+$ source .ucp/bin/activate
+(.ucp) $ pip install -r requirements-docs.txt
+(.ucp) $ mkdocs serve --watch spec
+(.ucp) $ deactivate # when done
 ```
