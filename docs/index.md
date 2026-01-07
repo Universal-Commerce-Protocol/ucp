@@ -222,10 +222,10 @@ hide:
 Sample of /.well-known/oauth-authorization-server
 
 {
-  "issuer": "https://merchant.example.com",
-  "authorization_endpoint": "https://merchant.example.com/oauth2/authorize",
-  "token_endpoint": "https://merchant.example.com/oauth2/token",
-  "revocation_endpoint": "https://merchant.example.com/oauth2/revoke",
+  "issuer": "https://example.com",
+  "authorization_endpoint": "https://example.com/oauth2/authorize",
+  "token_endpoint": "https://example.com/oauth2/token",
+  "revocation_endpoint": "https://example.com/oauth2/revoke",
   "scopes_supported": [
     "ucp:scopes:checkout_session",
   ],
@@ -239,7 +239,7 @@ Sample of /.well-known/oauth-authorization-server
   "token_endpoint_auth_methods_supported": [
     "client_secret_basic"
   ],
-  "service_documentation": "https://merchant.example.com/docs/oauth2"
+  "service_documentation": "https://example.com/docs/oauth2"
 }
             </code>
           </pre>
