@@ -2,11 +2,12 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/shopping/types/fulfillment_destination.json",
   "title": "Fulfillment Destination",
-  "description": "A destination for fulfillment. Both options guarantee an 'id' field exists.",
+  "description": "A destination for fulfillment.",
   "type": "object",
+  "ucp_shared_request": true,
   "oneOf": [
     {
-      "description": "Shipping destination (Postal Address does not have ID, so we add it here).",
+      "description": "Shipping destination.",
       "allOf": [
         {
           "$ref": "postal_address.json"
@@ -25,7 +26,7 @@
       ]
     },
     {
-      "description": "Pickup location (RetailLocation already requires ID, so we just reference it).",
+      "description": "Pickup location.",
       "$ref": "retail_location.json"
     }
   ]

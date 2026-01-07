@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/schemas/shopping/types/fulfillment_destination_resp.json",
-  "title": "Fulfillment Destination Response",
+  "$id": "https://ucp.dev/schemas/shopping/types/fulfillment_destination_req.json",
+  "title": "Fulfillment Destination Request",
   "description": "A destination for fulfillment.",
   "type": "object",
   "oneOf": [
@@ -18,16 +18,13 @@
               "type": "string",
               "description": "ID specific to this shipping destination."
             }
-          },
-          "required": [
-            "id"
-          ]
+          }
         }
       ]
     },
     {
       "description": "Pickup location.",
-      "$ref": "retail_location_resp.json"
+      "$ref": "retail_location_req.json"
     }
   ]
 }

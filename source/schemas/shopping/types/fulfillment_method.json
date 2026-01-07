@@ -28,8 +28,7 @@
     "destinations": {
       "type": "array",
       "description": "Available destinations. For shipping: addresses. For pickup: retail locations.",
-      "items": { "$ref": "fulfillment_destination.json" },
-      "ucp_request": "omit"
+      "items": { "$ref": "fulfillment_destination.json" }
     },
     "selected_destination_id": {
       "type": ["string", "null"],

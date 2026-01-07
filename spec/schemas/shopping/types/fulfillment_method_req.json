@@ -6,6 +6,13 @@
   "type": "object",
   "additionalProperties": true,
   "properties": {
+    "destinations": {
+      "type": "array",
+      "description": "Available destinations. For shipping: addresses. For pickup: retail locations.",
+      "items": {
+        "$ref": "fulfillment_destination_req.json"
+      }
+    },
     "selected_destination_id": {
       "type": [
         "string",
