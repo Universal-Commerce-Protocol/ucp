@@ -214,7 +214,7 @@ hide:
       </div>
       <div class="pane-visuals">
         <div class="image-container">
-           <img src="assets/duo_branding.svg" alt="Example user interface for identity linking" class="phone-mockup" onerror="this.src='https://placehold.co/260x500/EEE/31343C?text=Identity+UI'">
+           <img src="assets/Duo_branding.svg" alt="Example user interface for identity linking" class="phone-mockup" onerror="this.src='https://placehold.co/260x500/EEE/31343C?text=Identity+UI'">
         </div>
         <div class="code-block-placeholder">
           <pre>
