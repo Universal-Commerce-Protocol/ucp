@@ -58,7 +58,8 @@ export type Message = MessageError | MessageWarning | MessageInfo;
 /**
  * Matches a specific instrument type based on validation logic.
  */
-export type PaymentInstrument = CardPaymentInstrument | GooglePayCardPaymentInstrument;
+export type PaymentInstrument =
+    CardPaymentInstrument|GooglePayCardPaymentInstrument|ShopPayInstrument;
 /**
  * A basic card payment instrument with visible card details. Can be inherited by a handler's instrument schema to define handler-specific display details or more complex credential structures.
  */
@@ -91,16 +92,42 @@ export type CardPaymentInstrument = PaymentInstrumentBase & {
    * An optional URI to a rich image representing the card (e.g., card art provided by the issuer).
    */
   rich_card_art?: string;
-  credential?: PaymentCredential;
   [k: string]: unknown;
 };
 /**
  * Container for sensitive payment data. Use the specific schema matching the 'type' field.
  */
-export type PaymentCredential = TokenizationData | TokenCredentialResponse | CardCredential;
-export type GooglePayCardPaymentInstrument = CardPaymentInstrument & {
-  handler_id?: 'gpay';
+export type PaymentCredential =
+    TokenCredentialResponse|CardCredential|TokenizationData|ShopPayCredential;
+/**
+ * Credential structure for Shop Pay. Extends the base token credential with a
+ * Shop Pay-specific type.
+ */
+export type ShopPayCredential = TokenCredentialResponse&{
+  /**
+   * The credential type for Shop Pay tokens.
+   */
+  type?: 'shop_token';
+  [k: string]: unknown;
+};
+export type GooglePayCardPaymentInstrument = CardPaymentInstrument&{
   credential?: TokenizationData;
+  [k: string]: unknown;
+};
+/**
+ * Payment instrument structure for Shop Pay. Extends the base payment
+ * instrument with Shop Pay-specific credential types.
+ */
+export type ShopPayInstrument = CardPaymentInstrument&{
+  /**
+   * The payment instrument type identifier for Shop Pay.
+   */
+  type?: 'shop_pay';
+  credential?: ShopPayCredential;
+  /**
+   * The buyer's email address associated with the Shop Pay account.
+   */
+  email?: string;
   [k: string]: unknown;
 };
 /**
@@ -173,31 +200,6 @@ export type FulfillmentDestinationResponse =
  */
 export type CheckoutWithFulfillmentResponse = CheckoutResponse & {
   fulfillment?: FulfillmentResponse;
-  [k: string]: unknown;
-};
-/**
- * Credential structure for Shop Pay. Extends the base token credential with a Shop Pay-specific type.
- */
-export type ShopPayCredential = TokenCredentialResponse & {
-  /**
-   * The credential type for Shop Pay tokens.
-   */
-  type?: 'shop_token';
-  [k: string]: unknown;
-};
-/**
- * Payment instrument structure for Shop Pay. Extends the base payment instrument with Shop Pay-specific credential types.
- */
-export type ShopPayInstrument = PaymentInstrument & {
-  /**
-   * The payment instrument type identifier for Shop Pay.
-   */
-  type?: 'shop_pay';
-  credential?: ShopPayCredential;
-  /**
-   * The buyer's email address associated with the Shop Pay account.
-   */
-  email?: string;
   [k: string]: unknown;
 };
 
@@ -555,7 +557,9 @@ export declare interface PaymentInstrumentBase {
    */
   id: string;
   /**
-   * The ID of the payment handler configuration (from the 'Create Checkout' response) that was used to generate this instrument. This tells the Merchant which key/gateway to use for decryption.
+   * The unique identifier for the handler instance that produced this
+   * instrument. This corresponds to the 'id' field in the Payment Handler
+   * definition.
    */
   handler_id: string;
   /**
@@ -563,12 +567,7 @@ export declare interface PaymentInstrumentBase {
    */
   type: string;
   billing_address?: PostalAddress;
-  /**
-   * The secure payload required to process the transaction (e.g., payment token, cryptogram, or encrypted card data). The specific structure is defined by the child schema.
-   */
-  credential?: {
-    [k: string]: unknown;
-  };
+  credential?: PaymentCredential;
   [k: string]: unknown;
 }
 export declare interface PostalAddress {
@@ -612,14 +611,6 @@ export declare interface PostalAddress {
    * Optional. Phone number of the contact associated with the address.
    */
   phone_number?: string;
-  [k: string]: unknown;
-}
-export declare interface TokenizationData {
-  /**
-   * The type of tokenization to be applied to the selected payment method. This value matches the type set in tokenization_specification.
-   */
-  type: string;
-  token: string;
   [k: string]: unknown;
 }
 /**
@@ -672,6 +663,15 @@ export declare interface CardCredential {
    * Electronic Commerce Indicator / Security Level Indicator provided with network tokens.
    */
   eci_value?: string;
+  [k: string]: unknown;
+}
+export declare interface TokenizationData {
+  /**
+   * The type of tokenization to be applied to the selected payment method. This
+   * value matches the type set in tokenization_specification.
+   */
+  type: string;
+  token: string;
   [k: string]: unknown;
 }
 /**

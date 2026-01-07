@@ -9,9 +9,6 @@
     {
       "type": "object",
       "properties": {
-        "handler_id": {
-          "const": "gpay"
-        },
         "credential": {
           "$ref": "tokenization_data.json"
         }
