@@ -28,7 +28,8 @@
           "type": "object",
           "properties": {
             "fulfillment": {
-              "$ref": "types/fulfillment.json",
+              "$ref": "#/$defs/fulfillment",
+              "description": "Fulfillment details.",
               "ucp_request": "optional"
             }
           }

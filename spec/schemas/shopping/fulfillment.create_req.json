@@ -30,7 +30,8 @@
           "type": "object",
           "properties": {
             "fulfillment": {
-              "$ref": "types/fulfillment_req.json"
+              "$ref": "#/$defs/fulfillment",
+              "description": "Fulfillment details."
             }
           }
         }

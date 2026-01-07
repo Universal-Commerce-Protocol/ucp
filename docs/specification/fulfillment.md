@@ -55,33 +55,37 @@ method.
 
 ### Properties
 
-{{ extension_fields('fulfillment', 'fulfillment') }}
+{{ extension_fields('fulfillment_resp', 'fulfillment') }}
 
 ### Entities
 
-#### Fulfillment Method
+#### Fulfillment
 
-{{ extension_schema_fields('fulfillment_resp.json#/$defs/fulfillment_method', 'fulfillment') }}
+{{ schema_fields('types/fulfillment_resp', 'fulfillment') }}
 
-#### Fulfillment Destination
+#### Fulfillment Method Response
 
-{{ extension_schema_fields('fulfillment_resp.json#/$defs/fulfillment_destination', 'fulfillment') }}
+{{ schema_fields('types/fulfillment_method_resp', 'fulfillment') }}
+
+#### Fulfillment Destination Response
+
+{{ schema_fields('types/fulfillment_destination_resp', 'fulfillment') }}
 
 #### Retail Location
 
-{{ extension_schema_fields('fulfillment_resp.json#/$defs/retail_location', 'fulfillment') }}
+{{ schema_fields('types/retail_location', 'fulfillment') }}
 
-#### Fulfillment Group
+#### Fulfillment Group Response
 
-{{ extension_schema_fields('fulfillment_resp.json#/$defs/fulfillment_group', 'fulfillment') }}
+{{ schema_fields('types/fulfillment_group_resp', 'fulfillment') }}
 
-#### Fulfillment Option
+#### Fulfillment Option Response
 
-{{ extension_schema_fields('fulfillment_resp.json#/$defs/fulfillment_option', 'fulfillment') }}
+{{ schema_fields('types/fulfillment_option_resp', 'fulfillment') }}
 
-#### Fulfillment Available Method
+#### Fulfillment Available Method Response
 
-{{ extension_schema_fields('fulfillment_resp.json#/$defs/fulfillment_available_method', 'fulfillment') }}
+{{ schema_fields('types/fulfillment_available_method_resp', 'fulfillment') }}
 
 ### Example
 
@@ -249,7 +253,7 @@ Merchants fetch platform profiles to adapt responses accordingly.
 
 Platforms declare their rendering capabilities using `platform_config`:
 
-{{ extension_schema_fields('fulfillment_resp.json#/$defs/platform_config', 'fulfillment') }}
+{{ schema_fields('types/platform_fulfillment_config', 'fulfillment') }}
 
 Platforms that omit config or set `supports_multi_group: false` receive
 single-group responses. The response shape is always
@@ -269,7 +273,7 @@ within each method.
 Merchants declare what fulfillment configurations they support using
 `merchant_config`:
 
-{{ extension_schema_fields('fulfillment_resp.json#/$defs/merchant_config', 'fulfillment') }}
+{{ schema_fields('types/merchant_fulfillment_config', 'fulfillment') }}
 
 ```json
 {

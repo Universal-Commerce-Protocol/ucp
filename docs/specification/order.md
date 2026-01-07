@@ -268,7 +268,7 @@ Merchants send order status changes as events after order placement.
 The merchant POSTs order events to a webhook URL provided by the platform
 during partner onboarding. The URL format is platform-specific.
 
-{{ method_fields('order_event_webhook', 'openapi.json', 'order') }}
+{{ method_fields('order_event_webhook', 'rest.openapi.json', 'order') }}
 
 ### Webhook URL Configuration
 
@@ -340,22 +340,22 @@ rotation:
 
 ## 7. Entity Reference
 
-### Item
+### Item Response
 
-{{ schema_fields('item', 'order') }}
+{{ schema_fields('types/item_resp', 'order') }}
 
 ### Postal Address
 
 {{ schema_fields('postal_address', 'order') }}
 
-### Total
+### Response
 
-{{ schema_fields('total', 'order') }}
+{{ extension_schema_fields('capability.json#/$defs/response', 'order') }}
 
-### UCP Metadata
+### Total Response
 
-{{ schema_fields('ucp_metadata', 'order' )}}
+{{ schema_fields('types/total_resp', 'order') }}
 
-### UCP Metadata Capability
+### UCP Order Response
 
-{{ schema_fields('ucp_metadata_capability', 'order') }}
+{{ extension_schema_fields('ucp.json#/$defs/order_response', 'order') }}

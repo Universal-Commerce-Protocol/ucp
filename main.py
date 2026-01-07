@@ -149,14 +149,16 @@ def define_env(env):
     if len(parts) > 1:
       variant = parts[1]
       variant_expanded = (
-          variant.replace('create_req', 'create_request')
-          .replace('update_req', 'update_request')
+          variant.replace('create_req', 'create-request')
+          .replace('update_req', 'update-request')
           .replace('resp', 'response')
           .replace('-', ' ')
       )
       anchor_name = f'{anchor_name}-{variant_expanded}'.replace(' ', '-')
     elif raw_name.endswith('_resp'):
-      anchor_name = raw_name.replace('_', '-').replace('_resp', '_response')
+      anchor_name = raw_name.replace('_', '-').replace('-resp', '-response')
+    elif raw_name.endswith('_req'):
+      anchor_name = raw_name.replace('_', '-').replace('-req', '-request')
 
     # FIX: Ensure anchor starts with ucp- for UCP definitions
     if is_ucp and not anchor_name.startswith('ucp-'):
@@ -448,6 +450,15 @@ def define_env(env):
     """Resolves a local reference (e.g., '#/components/parameters/id')."""
     return schema_utils.resolve_internal_ref(ref, root_data)
 
+  def _create_file_loader(schema_path):
+    """Creates a file loader closure for a given base path."""
+
+    def _loader(filename):
+      dir_path = os.path.dirname(schema_path)
+      return schema_utils.load_json(os.path.join(dir_path, filename))
+
+    return _loader
+
   def _read_schema_from_defs(
       entity_name, spec_file_name, need_header=True, parent_required_list=None
   ):
@@ -466,11 +477,12 @@ def define_env(env):
       full_path = os.path.join(schemas_dir, core_entity_name)
       data = schema_utils.load_json(full_path)
       if data:
+        file_loader = _create_file_loader(full_path)
         embedded_schema_data = schema_utils.resolve_internal_ref(def_path, data)
         if embedded_schema_data is not None:
           # Resolve allOf/refs before rendering to flatten composed schemas
           resolved_schema = schema_utils.resolve_schema(
-              embedded_schema_data, data
+              embedded_schema_data, data, file_loader
           )
           return _render_table_from_schema(
               resolved_schema,
@@ -501,10 +513,24 @@ def define_env(env):
       spec_file_name: The name of the spec file indicating where the dictionary
         should be rendered (e.g., "checkout", "fulfillment").
     """
-    # Construct full path based on configuration
-    data = _load_json_file(entity_name)
-    if data:
-      return _render_table_from_schema(data, spec_file_name)
+    data = None
+    loaded_path = None
+    for schemas_dir in schemas_dirs:
+      full_path = schemas_dir + entity_name + '.json'
+      try:
+        with open(full_path, 'r') as f:
+          data = json.load(f)
+          loaded_path = full_path
+          break
+      except FileNotFoundError:
+        continue
+      except json.JSONDecodeError as e:
+        return f"**Error parsing schema '{full_path}':** {e}"
+
+    if data and loaded_path:
+      file_loader = _create_file_loader(loaded_path)
+      resolved_schema = schema_utils.resolve_schema(data, data, file_loader)
+      return _render_table_from_schema(resolved_schema, spec_file_name)
     return (
         f"**Error:** Schema '{entity_name}' not found in any schema directory."
     )
