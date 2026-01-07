@@ -39,7 +39,7 @@ hide:
 </div>
 
 <div class="partners-intro-wrapper">
-  <h2 class="partners-intro-title" style="font-size: 2.0rem; font-weight: 500; color: #202124; margin-bottom: 20px;">
+  <h2 class="partners-intro-title">
     Created and adopted by industry partners
   </h2>
 
@@ -70,70 +70,70 @@ hide:
   </div>
 </div>
 
-<div style="text-align: center; margin: 100px 0 60px;">
-  <h2 style="font-size: 2.0rem; font-weight: 500; color: #202124; margin-bottom: 20px;">Built for flexibility, security, and scale</h2>
-  <p style="color: #5f6368; font-size: 0.95rem; line-height: 1.6; max-width: 800px; margin: 0 auto;">
-    Agentic commerce demands interoperability. UCP is built on industry standards — REST and JSON-RPC transports; <a href="https://ap2-protocol.org/" style="text-decoration: underline;">Agent Payments Protocol (AP2)</a>, <a href="https://a2a-protocol.org/latest/" style="text-decoration: underline;">Agent2Agent (A2A)</a>, and <a href="https://modelcontextprotocol.io/docs/getting-started/intro" style="text-decoration: underline;">Model Context Protocol (MCP)</a> support built-in — so different systems can work together without custom integration.
+<div class="flexibility-section">
+  <h2 class="flexibility-section-title">Built for flexibility, security, and scale</h2>
+  <p class="flexibility-section-text">
+    Agentic commerce demands interoperability. UCP is built on industry standards — REST and JSON-RPC transports; <a href="https://ap2-protocol.org/">Agent Payments Protocol (AP2)</a>, <a href="https://a2a-protocol.org/latest/">Agent2Agent (A2A)</a>, and <a href="https://modelcontextprotocol.io/docs/getting-started/intro">Model Context Protocol (MCP)</a> support built-in — so different systems can work together without custom integration.
   </p>
 </div>
 
-<div style="max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px;">
+<div class="features-list">
 
-  <div style="display: flex; align-items: center; gap: 30px; padding: 30px; background: #fff; border: 1px solid #e0e0e0; border-radius: 16px;">
-    <div style="flex-shrink: 0;">
+  <div class="feature-item">
+    <div class="feature-item-icon">
       <img src="assets/Icon=Extensible.svg" alt="Scalable" width="72">
     </div>
     <div>
-      <h3 style="font-size: 1.2rem; font-weight: 500; margin: 0 0 8px 0; color: #202124;">Scalable and universal</h3>
-      <p style="margin: 0; color: #5f6368; line-height: 1.5; font-size: 0.95rem;">
+      <h3 class="feature-item-title">Scalable and universal</h3>
+      <p class="feature-item-description">
         Surface-agnostic design that can scale to support any commerce entity (from small merchants to enterprise builders) and all modalities (chat, visual commerce, voice, etc).
       </p>
     </div>
   </div>
 
-  <div style="display: flex; align-items: center; gap: 30px; padding: 30px; background: #fff; border: 1px solid #e0e0e0; border-radius: 16px;">
-    <div style="flex-shrink: 0;">
+  <div class="feature-item">
+    <div class="feature-item-icon">
       <img src="assets/Icon=Open_Source.svg" alt="Simple" width="72">
     </div>
     <div>
-      <h3 style="font-size: 1.2rem; font-weight: 500; margin: 0 0 8px 0; color: #202124;">Open and extensible</h3>
-      <p style="margin: 0; color: #5f6368; line-height: 1.5; font-size: 0.95rem;">
+      <h3 class="feature-item-title">Open and extensible</h3>
+      <p class="feature-item-description">
         Open and extensible by design, enabling development of community-driven capabilities and extensions. Model your commerce, your way.
       </p>
     </div>
   </div>
 
-  <div style="display: flex; align-items: center; gap: 30px; padding: 30px; background: #fff; border: 1px solid #e0e0e0; border-radius: 16px;">
-    <div style="flex-shrink: 0;">
+  <div class="feature-item">
+    <div class="feature-item-icon">
       <img src="assets/Icon=Merchant_at_the_Center.svg" alt="Merchants" width="72">
     </div>
     <div>
-      <h3 style="font-size: 1.2rem; font-weight: 500; margin: 0 0 8px 0; color: #202124;">Businesses at the center</h3>
-      <p style="margin: 0; color: #5f6368; line-height: 1.5; font-size: 0.95rem;">
+      <h3 class="feature-item-title">Businesses at the center</h3>
+      <p class="feature-item-description">
         Built to facilitate commerce, ensuring retailers retain control of their business rules and remains the Merchant of Record with full ownership of customer relationship.
       </p>
     </div>
   </div>
 
-  <div style="display: flex; align-items: center; gap: 30px; padding: 30px; background: #fff; border: 1px solid #e0e0e0; border-radius: 16px;">
-    <div style="flex-shrink: 0;">
+  <div class="feature-item">
+    <div class="feature-item-icon">
       <img src="assets/Icon=Secure_and_Private.svg" alt="Secure" width="72">
     </div>
     <div>
-      <h3 style="font-size: 1.2rem; font-weight: 500; margin: 0 0 8px 0; color: #202124;">Secure and private</h3>
-      <p style="margin: 0; color: #5f6368; line-height: 1.5; font-size: 0.95rem;">
+      <h3 class="feature-item-title">Secure and private</h3>
+      <p class="feature-item-description">
         Built-on proven security standards for account linking (OAuth 2.0) and secure payment(Ap2) via payment mandates and verifiable credentials.
       </p>
     </div>
   </div>
 
-  <div style="display: flex; align-items: center; gap: 30px; padding: 30px; background: #fff; border: 1px solid #e0e0e0; border-radius: 16px;">
-    <div style="flex-shrink: 0;">
+  <div class="feature-item">
+    <div class="feature-item-icon">
       <img src="assets/Icon=Frictionless_Payments.svg" alt="Frictionless" width="72">
     </div>
     <div>
-      <h3 style="font-size: 1.2rem; font-weight: 500; margin: 0 0 8px 0; color: #202124;">Frictionless payments</h3>
-      <p style="margin: 0; color: #5f6368; line-height: 1.5; font-size: 0.95rem;">
+      <h3 class="feature-item-title">Frictionless payments</h3>
+      <p class="feature-item-description">
         Open wallet ecosystem with interoperability between providers to ensure buyers can pay with their preferred payment methods.
       </p>
     </div>
@@ -142,8 +142,8 @@ hide:
 </div>
 
 <section class="action-carousel-section">
-  <h2 style="font-size: 2.0rem; font-weight: 500; color: #202124; margin-bottom: 20px;">See it in action</h2>
-  <p style="color: #5f6368; font-size: 1.05rem; line-height: 1.6; max-width: 800px; margin: 0 auto 40px auto;">
+  <h2 class="action-carousel-section__title">See it in action</h2>
+  <p class="action-carousel-section__text">
     UCP is designed to facilitate the entire commerce lifecycle, from initial product discovery and search to final sale and post-purchase support.
 The protocol's initial launch focuses on three core capabilities: Checkout, Identity Linking, and Order Management.
   </p>
@@ -310,25 +310,25 @@ function openTab(evt, tabName) {
 }
 </script>
 
-<div style="display: flex; gap: 30px; flex-wrap: wrap; justify-content: center;">
+<div class="two-column-promo">
 
-  <div style="flex: 1; min-width: 300px; background: #f8f9fa; border-radius: 16px; padding: 40px; display: flex; flex-direction: column; align-items: flex-start;">
-    <div style="margin-bottom: 20px;">
-      <img src="assets/Icon=Native_Checkout.svg" alt="Native Checkout feature icon" width="96" style="display: block;">
+  <div class="two-column-promo-item">
+    <div class="two-column-promo-item__icon-wrapper">
+      <img src="assets/Icon=Native_Checkout.svg" alt="Native Checkout feature icon" width="96" class="two-column-promo-item__icon">
     </div>
-    <h3 style="font-size: 1.5rem; margin: 0 0 15px 0; font-weight: 500; color: #202124;">Power native checkout UI</h3>
-    <p style="color: #5f6368; font-size: 0.95rem; line-height: 1.6; margin-bottom: 30px; flex-grow: 1;">
+    <h3 class="two-column-promo-item__title">Power native checkout UI</h3>
+    <p class="two-column-promo-item__text">
       Integrate and negotiate directly with the merchant checkout API to power native UI and workflows for your platform.
     </p>
     <a href="specification/native/" class="promo-button">See how it works</a>
   </div>
 
-  <div style="flex: 1; min-width: 300px; background: #f8f9fa; border-radius: 16px; padding: 40px; display: flex; flex-direction: column; align-items: flex-start;">
-    <div style="margin-bottom: 20px;">
-      <img src="assets/Icon=Embedded_Option.svg" alt="Embedded Option feature icon" width="96" style="display: block;">
+  <div class="two-column-promo-item">
+    <div class="two-column-promo-item__icon-wrapper">
+      <img src="assets/Icon=Embedded_Option.svg" alt="Embedded Option feature icon" width="96" class="two-column-promo-item__icon">
     </div>
-    <h3 style="font-size: 1.5rem; margin: 0 0 15px 0; font-weight: 500; color: #202124;">Embed business checkout</h3>
-    <p style="color: #5f6368; font-size: 0.95rem; line-height: 1.6; margin-bottom: 30px; flex-grow: 1;">
+    <h3 class="two-column-promo-item__title">Embed business checkout</h3>
+    <p class="two-column-promo-item__text">
       As an optional mechanism, embed your checkout UI within an iframe to support more complex checkout flows, with advanced capabilities like bidirectional communication, payments and shipping address handoffs.
     </p>
     <a href="specification/embedded-checkout/" class="promo-button">Learn more</a>
@@ -336,61 +336,61 @@ function openTab(evt, tabName) {
 
 </div>
 
-<div class="lifecycle-container" style="padding: 80px 0; text-align: center; max-width: 1200px; margin: 0 auto;">
+<div class="lifecycle-container">
 
-  <h2 style="font-size: 2.0rem; font-weight: 500; color: #202124; margin-bottom: 60px; line-height: 1.2; max-width: 800px; margin-left: auto; margin-right: auto;">
+  <h2 class="lifecycle-container__title">
     The foundational open-source standard for the end-to-end commerce lifecycle
   </h2>
 
-  <div style="display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; margin-bottom: 24px;">
-    <div style="flex: 1; min-width: 300px; max-width: 360px; border: 1px solid #dadce0; border-radius: 32px; padding: 40px 30px; display: flex; flex-direction: column; align-items: center;">
-      <div style="height: 120px; margin-bottom: 30px; display: flex; align-items: center; justify-content: center;">
-        <img src="assets/Content=Developers.svg" alt="Content illustration for Developers" style="max-height: 100%; width: auto;">
+  <div class="lifecycle-container__row">
+    <div class="lifecycle-container__item">
+      <div class="lifecycle-container__item-img-wrapper">
+        <img src="assets/Content=Developers.svg" alt="Content illustration for Developers" class="lifecycle-container__item-img">
       </div>
-      <h3 style="font-size: 1.4rem; margin: 0 0 15px 0; font-weight: 500; color: #202124;">For Developers</h3>
-      <p style="color: #5f6368; font-size: 0.95rem; line-height: 1.6; margin-bottom: 30px; flex-grow: 1;">
+      <h3 class="lifecycle-container__item-title">For Developers</h3>
+      <p class="lifecycle-container__item-text">
         Build the future of commerce on an open foundation. Join our community in evolving an open-source standard designed for the next generation of digital trade.
       </p>
-      <a href="specification/overview/" style="color: #1a73e8; text-decoration: underline; font-weight: 500; font-size: 0.95rem;">View the technical spec</a>
+      <a href="specification/overview/" class="lifecycle-container__item-link">View the technical spec</a>
     </div>
-    <div style="flex: 1; min-width: 300px; max-width: 360px; border: 1px solid #dadce0; border-radius: 32px; padding: 40px 30px; display: flex; flex-direction: column; align-items: center;">
-      <div style="height: 120px; margin-bottom: 30px; display: flex; align-items: center; justify-content: center;">
-        <img src="assets/Content=Retailers.svg" alt="Content illustration for Businesses" style="max-height: 100%; width: auto;">
+    <div class="lifecycle-container__item">
+      <div class="lifecycle-container__item-img-wrapper">
+        <img src="assets/Content=Retailers.svg" alt="Content illustration for Businesses" class="lifecycle-container__item-img">
       </div>
-      <h3 style="font-size: 1.4rem; margin: 0 0 15px 0; font-weight: 500; color: #202124;">For Businesses</h3>
-      <p style="color: #5f6368; font-size: 0.95rem; line-height: 1.6; margin-bottom: 30px; flex-grow: 1;">
+      <h3 class="lifecycle-container__item-title">For Businesses</h3>
+      <p class="lifecycle-container__item-text">
         UCP empowers retailers to meet customers wherever they are—AI assistants, shopping agents, embedded experiences—without rebuilding your checkout for each. Your existing payment stack stays intact.
       </p>
-      <a href="#" style="color: #1a73e8; text-decoration: underline; font-weight: 500; font-size: 0.95rem;">Integrate with UCP</a>
+      <a href="#" class="lifecycle-container__item-link">Integrate with UCP</a>
     </div>
   </div>
-  <div style="display: flex; gap: 24px; flex-wrap: wrap; justify-content: center;">
-    <div style="flex: 1; min-width: 300px; max-width: 360px; border: 1px solid #dadce0; border-radius: 32px; padding: 40px 30px; display: flex; flex-direction: column; align-items: center;">
-      <div style="height: 120px; margin-bottom: 30px; display: flex; align-items: center; justify-content: center;">
-        <img src="assets/Content=AI_Platforms.svg" alt="Content illustration for AI Platforms" style="max-height: 100%; width: auto;">
+  <div class="lifecycle-container__row">
+    <div class="lifecycle-container__item">
+      <div class="lifecycle-container__item-img-wrapper">
+        <img src="assets/Content=AI_Platforms.svg" alt="Content illustration for AI Platforms" class="lifecycle-container__item-img">
       </div>
-      <h3 style="font-size: 1.4rem; margin: 0 0 15px 0; font-weight: 500; color: #202124;">For AI Platforms</h3>
-      <p style="color: #5f6368; font-size: 0.95rem; line-height: 1.6; margin-bottom: 30px; flex-grow: 1;">
+      <h3 class="lifecycle-container__item-title">For AI Platforms</h3>
+      <p class="lifecycle-container__item-text">
         Simplify merchant onboarding with standardized APIs and provide your audience with an integrated shopping experience. Compatible with MCP, A2A, and existing agent frameworks.
       </p>
-      <a href="documentation/core-concepts/" style="color: #1a73e8; text-decoration: underline; font-weight: 500; font-size: 0.95rem;">Learn more UCP core concepts</a>
+      <a href="documentation/core-concepts/" class="lifecycle-container__item-link">Learn more UCP core concepts</a>
     </div>
-    <div style="flex: 1; min-width: 300px; max-width: 360px; border: 1px solid #dadce0; border-radius: 32px; padding: 40px 30px; display: flex; flex-direction: column; align-items: center;">
-      <div style="height: 120px; margin-bottom: 30px; display: flex; align-items: center; justify-content: center;">
-        <img src="assets/Content=Payment_Providers.svg" alt="Content illustration for Payment Providers" style="max-height: 100%; width: auto;">
+    <div class="lifecycle-container__item">
+      <div class="lifecycle-container__item-img-wrapper">
+        <img src="assets/Content=Payment_Providers.svg" alt="Content illustration for Payment Providers" class="lifecycle-container__item-img">
       </div>
-      <h3 style="font-size: 1.4rem; margin: 0 0 15px 0; font-weight: 500; color: #202124;">For Payment Providers</h3>
-      <p style="color: #5f6368; font-size: 0.95rem; line-height: 1.6; margin-bottom: 30px; flex-grow: 1;">
+      <h3 class="lifecycle-container__item-title">For Payment Providers</h3>
+      <p class="lifecycle-container__item-text">
         Universal payments that are provable—every authorization backed by cryptographic proof of user consent. Open, modular payment handler design enables open interoperability.
       </p>
-      <a href="documentation/ucp-and-ap2/" style="color: #1a73e8; text-decoration: underline; font-weight: 500; font-size: 0.95rem;">Learn more about UCP and AP2</a>
+      <a href="documentation/ucp-and-ap2/" class="lifecycle-container__item-link">Learn more about UCP and AP2</a>
     </div>
 
   </div>
 </div>
 
 <div class="partner-carousel">
-  <h2 style="font-size: 2.0rem; font-weight: 500; color: #202124; margin-bottom: 80px;">Endorsed across the ecosystem</h2>
+  <h2 class="partner-carousel__title">Endorsed across the ecosystem</h2>
 
   <div class="partner-track">
     <div class="partner-logo">
@@ -556,44 +556,44 @@ function openTab(evt, tabName) {
   </div>
 </div>
 
-<div class="get-started-container" style="max-width: 1200px; margin: 0 auto; padding: 100px 20px 80px; text-align: center;">
+<div class="get-started-container">
 
-  <div style="margin-bottom: 60px;">
-    <h2 style="font-size: 2.0rem; font-weight: 500; color: #202124; margin-bottom: 30px; line-height: 1.2;">Get started today</h2>
+  <div class="get-started-container__intro">
+    <h2 class="get-started-container__title">Get started today</h2>
 
-    <p style="color: #3c4043; font-size: 1.1rem; line-height: 1.6; margin-bottom: 15px; max-width: 900px; margin-left: auto; margin-right: auto;">
+    <p class="get-started-container__text">
       UCP is an open standard designed to let AI agents, apps, merchants, and payment providers interact seamlessly without needing custom, one-off integrations for every connection. We actively seek your feedback and contributions to help build the future of commerce.
     </p>
-    <p style="color: #3c4043; font-size: 1.1rem; line-height: 1.6; max-width: 900px; margin-left: auto; margin-right: auto;">
+    <p class="get-started-container__text">
       The complete technical specification, documentation, and reference implementations are hosted in our public GitHub repository.
     </p>
   </div>
 
-  <div style="display: flex; justify-content: center; gap: 60px; flex-wrap: wrap; text-align: center;">
-    <div style="flex: 1; min-width: 250px; max-width: 350px; display: flex; flex-direction: column; align-items: center;">
-      <div style="height: 60px; margin-bottom: 20px;">
-        <img src="assets/Icon=Download.svg" alt="Download icon for code samples" style="height: 48px; width: auto; opacity: 0.8;">
+  <div class="get-started-container__steps">
+    <div class="get-started-container__step">
+      <div class="get-started-container__step-icon-wrapper">
+        <img src="assets/Icon=Download.svg" alt="Download icon for code samples" class="get-started-container__step-icon">
       </div>
-      <h3 style="font-size: 1.4rem; font-weight: 400; color: #202124; margin: 0 0 15px 0;">Download</h3>
-      <p style="color: #5f6368; font-size: 1rem; line-height: 1.5;">Download and run our code samples</p>
+      <h3 class="get-started-container__step-title">Download</h3>
+      <p class="get-started-container__step-text">Download and run our code samples</p>
     </div>
-    <div style="flex: 1; min-width: 250px; max-width: 350px; display: flex; flex-direction: column; align-items: center;">
-      <div style="height: 60px; margin-bottom: 20px;">
-        <img src="assets/Icon=Experiment.svg" alt="Experiment" style="height: 48px; width: auto; opacity: 0.8;">
+    <div class="get-started-container__step">
+      <div class="get-started-container__step-icon-wrapper">
+        <img src="assets/Icon=Experiment.svg" alt="Experiment" class="get-started-container__step-icon">
       </div>
-      <h3 style="font-size: 1.4rem; font-weight: 400; color: #202124; margin: 0 0 15px 0;">Experiment</h3>
-      <p style="color: #5f6368; font-size: 1rem; line-height: 1.5;">Experiment with the protocol and its different agent roles</p>
+      <h3 class="get-started-container__step-title">Experiment</h3>
+      <p class="get-started-container__step-text">Experiment with the protocol and its different agent roles</p>
     </div>
-    <div style="flex: 1; min-width: 250px; max-width: 350px; display: flex; flex-direction: column; align-items: center;">
-      <div style="height: 60px; margin-bottom: 20px;">
-        <img src="assets/Icon=Contribute.svg" alt="Contribute" style="height: 48px; width: auto; opacity: 0.8;">
+    <div class="get-started-container__step">
+      <div class="get-started-container__step-icon-wrapper">
+        <img src="assets/Icon=Contribute.svg" alt="Contribute" class="get-started-container__step-icon">
       </div>
-      <h3 style="font-size: 1.4rem; font-weight: 400; color: #202124; margin: 0 0 15px 0;">Contribute</h3>
-      <p style="color: #5f6368; font-size: 1rem; line-height: 1.5;">Contribute your feedback and code to the public repository</p>
+      <h3 class="get-started-container__step-title">Contribute</h3>
+      <p class="get-started-container__step-text">Contribute your feedback and code to the public repository</p>
     </div>
   </div>
-  <div style="text-align: center; margin-top: 60px;">
-    <a href="https://github.com/Universal-Commerce-Protocol/ucp" class="promo-button" style="display: inline-flex; align-items: center; gap: 12px;">
+  <div class="get-started-container__repo-link">
+    <a href="https://github.com/Universal-Commerce-Protocol/ucp" class="promo-button">
       <svg height="24" width="24" viewBox="0 0 16 16" version="1.1" fill="currentColor">
         <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
       </svg>
