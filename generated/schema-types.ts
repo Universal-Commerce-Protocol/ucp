@@ -202,7 +202,6 @@ export type CheckoutWithFulfillmentResponse = CheckoutResponse & {
   fulfillment?: FulfillmentResponse;
   [k: string]: unknown;
 };
-
 /**
  * Extends Checkout with cryptographic mandate support for non-repudiable authorization per the AP2 protocol. Uses embedded signature model with ap2 namespace.
  */
@@ -1541,13 +1540,4 @@ export declare interface OrderConfirmation {
    */
   permalink_url: string;
   [k: string]: unknown;
-}
-/**
- * Configuration schema for the com.shopify.shop_pay payment handler. Merchants advertise this configuration to enable agents to process Shop Pay payments on their behalf.
- */
-export declare interface ShopPayHandlerConfig {
-  /**
-   * The merchant's unique Shop Pay identifier, obtained by registering your shop for Shop Pay.
-   */
-  shop_id: string;
 }

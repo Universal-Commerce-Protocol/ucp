@@ -827,12 +827,12 @@ This example shows the `payment` field from a checkout response:
       },
       {
         "id": "shop_pay",
-        "name": "com.shopify.shop_pay",
-        "version": "2025-12-08",
-        "spec": "https://shopify.dev/ucp/shop_pay",
-        "config_schema": "https://shopify.dev/ucp/schemas/shop_pay.json",
+        "name": "dev.shopify.shop_pay",
+        "version": "2026-01-11",
+        "spec": "https://shopify.dev/docs/api/shop-pay-handler",
+        "config_schema": "https://shopify.dev/ucp/shop-pay-handler/2026-01-11/config.json",
         "instrument_schemas": [
-          "https://shopify.dev/ucp/schemas/shop_pay_instrument.json"
+          "https://shopify.dev/ucp/shop-pay-handler/2026-01-11/instrument.json"
         ],
         "config": {
           "shop_id": "shopify-559128571"
@@ -890,7 +890,7 @@ Handlers follow the same reverse-DNS namespacing convention as capabilities:
 
 *   dev.ucp.\*: Core handlers defined by this specification
 *   com.vendor.\*: Extension handlers defined by payment providers
-*   Examples: com.google.pay, com.shopify.shop\_pay, com.stripe.tokenization
+*   Examples: com.google.pay, dev.shopify.shop_pay, com.stripe.tokenization
 
 #### Example Handler Declarations
 
@@ -944,12 +944,12 @@ Handlers follow the same reverse-DNS namespacing convention as capabilities:
       },
       {
         "id": "shop_pay",
-        "name": "com.shopify.shop_pay",
-        "version": "2025-12-08",
-        "spec": "https://shopify.dev/ucp/shop_pay",
-        "config_schema": "https://shopify.dev/ucp/schemas/shop_pay.json",
+        "name": "dev.shopify.shop_pay",
+        "version": "2026-01-11",
+        "spec": "https://shopify.dev/docs/api/shop-pay-handler",
+        "config_schema": "https://shopify.dev/ucp/shop-pay-handler/2026-01-11/config.json",
         "instrument_schemas": [
-          "https://shopify.dev/ucp/schemas/shop_pay_instrument.json"
+          "https://shopify.dev/ucp/shop-pay-handler/2026-01-11/instrument.json"
         ],
         "config": {
           "shop_id": "shopify-559128571"
@@ -1009,7 +1009,7 @@ filter the handlers array based on:
     "handlers": [
       {"id": "card", "name": "com.example.merchant_tokenizer", ...},
       {"id": "gpay", "name": "com.google.pay", ...},
-      {"id": "shop_pay", "name": "com.shopify.shop_pay", ...},
+      {"id": "shop_pay", "name": "dev.shopify.shop_pay", ...},
       {"id": "example_pay", "name": "com.example.pay", ...}
     ]
   }
@@ -1035,7 +1035,7 @@ Response: {
     "handlers": [
       {"id": "card", "name": "com.example.merchant_tokenizer", ...},
       {"id": "gpay", "name": "com.google.pay", ...},
-      {"id": "shop_pay", "name": "com.shopify.shop_pay", ...}
+      {"id": "shop_pay", "name": "dev.shopify.shop_pay", ...}
       // example_pay filtered out - not available in Netherlands
     ]
   }

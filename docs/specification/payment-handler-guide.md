@@ -42,7 +42,7 @@ these questions systematically.
 
 This guide applies to:
 
-- **Handlers** (e.g., `com.google.pay`, `com.shopify.shop_pay`) — Specific
+- **Handlers** (e.g., `com.google.pay`, `dev.shopify.shop_pay`) — Specific
   payment method implementations
 
 ---
@@ -440,4 +440,3 @@ specifications:
 
 - **[Tokenization Guide](tokenization-guide.md)** — Guide for building tokenization payment handlers
 - **[Google Pay Handler](gpay-payment-handler.md)** — Handler for Google Pay integration
-- **[Shop Pay Handler](shop-pay-handler.md)** — Handler for Shop Pay integration

@@ -50,7 +50,6 @@ nav:
       - Template: specification/payment-handler-template.md
       - Tokenization Guide: specification/tokenization-guide.md
       - Google Pay Payment Handler: specification/gpay-payment-handler.md
-      - Shop Pay Payment Handler: specification/shop-pay-handler.md
       - Examples:
         - Merchant Tokenizer: specification/examples/merchant-tokenizer-payment-handler.md
         - Agent Tokenizer: specification/examples/agent-tokenizer-payment-handler.md
@@ -194,7 +193,6 @@ plugins:
           - specification/payment-handler-template.md
           - specification/tokenization-guide.md
           - specification/gpay-payment-handler.md
-          - specification/shop-pay-handler.md
         Payment Handler Examples:
           - specification/examples/merchant-tokenizer-payment-handler.md
           - specification/examples/agent-tokenizer-payment-handler.md
