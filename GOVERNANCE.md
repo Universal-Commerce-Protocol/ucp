@@ -107,8 +107,6 @@ for a Summary, Motivation, Detailed Design, Risks, a Test Plan, and Graduation
 Criteria (defining the path from Alpha to Beta to General Availability). This
 creates a permanent, public design record for the project's evolution.
 
-TODO: Add a link for detailed enhancement proposal process.
-
 ### Voting and decision making
 
 The path below should be followed for resolving issues that are technical in
