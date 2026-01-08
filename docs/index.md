@@ -333,7 +333,7 @@ function openTab(evt, tabName) {
 <div class="lifecycle-container">
 
   <h2 class="lifecycle-container__title">
-    The foundational open-source standard for the end-to-end commerce lifecycle
+    Designed for the entire commerce ecosystem
   </h2>
 
   <div class="lifecycle-container__row">
