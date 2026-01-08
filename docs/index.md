@@ -249,7 +249,7 @@ hide:
           </div>
           <div class="pane-eyebrow">SEE IT IN ACTION</div>
           <h3>Order</h3>
-          <p>From purchase confirmation to delivery. Real-time web-hooks power status updates, shipment tracking, and return processing across every channel.</p>
+          <p>From purchase confirmation to delivery. Real-time webhooks power status updates, shipment tracking, and return processing across every channel.</p>
           <a href="specification/order/" class="learn-more-btn">Learn more</a>
         </div>
         <div class="pane-visuals">
@@ -311,7 +311,7 @@ hide:
       <p>
         Integrate and negotiate directly with the merchant checkout API to power native UI and workflows for your platform.
       </p>
-      <a href="specification/native/" class="promo-button">See how it works</a>
+      <a href="specification/checkout-rest/" class="promo-button">See how it works</a>
     </div>
 
     <div class="two-column-promo-item">
@@ -350,7 +350,7 @@ hide:
         <p>
           UCP empowers retailers to meet customers wherever they are—AI assistants, shopping agents, embedded experiences—without rebuilding your checkout for each. You remain the Merchant of Record and your business logic stays intact.
         </p>
-        <a href="#" class="lifecycle-container__item-link">Integrate with UCP</a>
+        <a href="documentation/google-implementation/" class="lifecycle-container__item-link">Integrate with UCP</a>
       </div>
     </div>
     <div class="lifecycle-container__row">

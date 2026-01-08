@@ -18,8 +18,6 @@
 
 ## Architecture overview
 
-![Concept diagram](../assets/concept-diagram.svg){style="width:100%"}
-
 The UCP architecture is built on a modular framework designed to define how
 entities interact. It consists of the following fundamental components:
 
