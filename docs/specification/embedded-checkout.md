@@ -16,7 +16,8 @@
 
 # Embedded Checkout Protocol
 
-**Namespace:** `ec`
+* **Namespace:** `ec`
+* **Version:** `2026-01-11`
 
 ## 1. Introduction
 

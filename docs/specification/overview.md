@@ -16,6 +16,8 @@
 
 # Universal Commerce Protocol (UCP) Official Specification
 
+**Version:** `2026-01-11`
+
 ## 1. Introduction
 
 The Universal Commerce Protocol (UCP) is an open standard designed to facilitate

@@ -16,8 +16,8 @@
 
 # Google Pay Payment Handler Specification
 
-**Handler Name:** `com.google.pay`
-**Version:** `2026-01-11`
+* **Handler Name:** `com.google.pay`
+* **Version:** `2026-01-11`
 
 ## 1. Introduction
 

@@ -16,8 +16,8 @@
 
 # Order Capability
 
-**Capability ID:** `dev.ucp.shopping.order`
-**Version:** `2026-01-11`
+* **Capability Name:** `dev.ucp.shopping.order`
+* **Version:** `2026-01-11`
 
 ## 1. Overview
 

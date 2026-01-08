@@ -16,6 +16,9 @@
 
 # Identity Linking Capability
 
+* **Capability Name:** `dev.ucp.common.identity_linking`
+* **Version:** `2026-01-11`
+
 ## Overview
 
 The Identity Linking capability enables a **Platform** (e.g., Google, an agentic

@@ -215,8 +215,8 @@ When publishing your handler, your specification document MUST include:
 ### Example Specification Outline
 
 ```markdown
-**Handler Name:** `com.acme.tokenization_payment`  
-**Version:** `2026-01`  
+**Handler Name:** `com.acme.tokenization_payment`
+**Version:** `2026-01-11`
 **OpenAPI:** [Tokenization API](https://ucp.dev/handlers/tokenization/openapi.json)
 
 | Environment | Base URL |

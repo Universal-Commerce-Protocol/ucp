@@ -16,7 +16,6 @@
 
 # Fulfillment Extension
 
-**Extension IDs:** `dev.ucp.shopping.fulfillment`
 **Version:** `2026-01-11`
 
 ## 1. Overview

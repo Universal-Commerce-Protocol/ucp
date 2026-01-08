@@ -16,7 +16,6 @@
 
 # Buyer Consent Extension
 
-**Extension ID:** `dev.ucp.shopping.buyer_consent`
 **Version:** `2026-01-11`
 
 ## 1. Overview

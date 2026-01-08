@@ -16,9 +16,7 @@
 
 # AP2 Mandates Extension
 
-**Extension ID:** `dev.ucp.shopping.ap2_mandate`
 **Version:** `2026-01-11`
-**Extends:** `dev.ucp.shopping.checkout`
 
 ## 1. Overview
 
