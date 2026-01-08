@@ -477,8 +477,10 @@ h2.action-carousel-section__title {
   color: #333;
   height: 500px;
   overflow-y: auto;
+  overflow-x: auto;
   border: 1px solid #dadce0;
   min-height: 0;
+  min-width: 0;
 }
 
 /* Scrollbar styling */

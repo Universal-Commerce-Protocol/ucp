@@ -27,9 +27,6 @@ edit_uri: edit/main/docs/
 nav:
   - Home: index.md
   - Core Concepts: documentation/core-concepts.md
-  - UCP and AP2: documentation/ucp-and-ap2.md
-  - Google's Implementation: documentation/google-implementation.md
-  - Roadmap: documentation/roadmap.md
   - Specification:
     - Overview: specification/overview.md
     - Checkout Capability:
@@ -55,6 +52,9 @@ nav:
         - Agent Tokenizer: specification/examples/agent-tokenizer-payment-handler.md
         - PSP Handler: specification/examples/psp-payment-handler.md
         - Agent Encrypted Credential: specification/examples/agent-encrypted-credential-handler.md
+  - UCP and AP2: documentation/ucp-and-ap2.md
+  - Google's Implementation: documentation/google-implementation.md
+  - Roadmap: documentation/roadmap.md
 
 repo_name: UCP on GitHub # Override repo name to be shorter on site header.
 repo_url: https://github.com/Universal-Commerce-Protocol/ucp
@@ -108,7 +108,7 @@ theme:
     - content.code.select
     - content.tabs.link
     - content.tooltips
-    - navigation.sections
+    - navigation.expand
     - navigation.footer
     - navigation.indexes
     - navigation.instant
