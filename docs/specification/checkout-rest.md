@@ -671,8 +671,8 @@ Content-Type: application/json
 ### Complete Checkout
 
 If merchants have specific logic to enforce field existence in `buyer` and
-addresses (i.e. `fulfillment_address`, `billing_address`). This is the right
-call to set these expectation via `messages`.
+addresses (i.e. `fulfillment_address`, `billing_address`), this is the right
+place to set these expectations via `messages`.
 
 **Request**
 
