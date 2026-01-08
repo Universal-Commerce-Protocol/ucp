@@ -10,6 +10,7 @@
     "currency",
     "payment"
   ],
+  "additionalProperties": true,
   "properties": {
     "id": {
       "type": "string",

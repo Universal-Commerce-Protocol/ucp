@@ -9,6 +9,7 @@
     "currency",
     "payment"
   ],
+  "additionalProperties": true,
   "properties": {
     "line_items": {
       "type": "array",
