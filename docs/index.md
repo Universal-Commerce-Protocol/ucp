@@ -22,7 +22,7 @@ hide:
   <div class="promo-card-wrapper">
 
     <div class="promo-card">
-      <h3 class="landing-page">Learn</h3>
+      <h3>Learn</h3>
       <p>Protocol overview, core concepts, and design principles</p>
       <a href="specification/overview/" class="promo-button">
         Read the docs
@@ -30,7 +30,7 @@ hide:
     </div>
 
     <div class="promo-card">
-      <h3 class="landing-page">Implement</h3>
+      <h3>Implement</h3>
       <p>GitHub repo, technical spec, SDKs, and reference implementations</p>
       <a href="https://github.com/Universal-Commerce-Protocol/ucp" class="promo-button">
         View on GitHub
@@ -40,11 +40,9 @@ hide:
   </div>
 
   <div class="partners-intro-wrapper">
-    <h2 class="landing-page partners-intro-title">
-      Co-developed and adopted by industry leaders
-    </h2>
+    <h2>Co-developed and adopted by industry leaders</h2>
 
-    <p class="partners-intro-text">
+    <p>
       UCP was built by the industry, for the industry to solve for fragmented commerce journeys that lead to abandoned carts and frustrated shoppers, and enable agentic commerce.
     </p>
 
@@ -70,10 +68,8 @@ hide:
   </div>
 
   <div class="flexibility-section">
-    <h2 class="landing-page flexibility-section-title">
-      Built for flexibility, security, and scale
-    </h2>
-    <p class="flexibility-section-text">
+    <h2>Built for flexibility, security, and scale</h2>
+    <p>
       Agentic commerce demands interoperability. UCP is built on industry standards — REST and JSON-RPC transports; <a href="https://ap2-protocol.org/">Agent Payments Protocol (AP2)</a>, <a href="https://a2a-protocol.org/latest/">Agent2Agent (A2A)</a>, and <a href="https://modelcontextprotocol.io/docs/getting-started/intro">Model Context Protocol (MCP)</a> support built-in — so different systems can work together without custom integration.
     </p>
   </div>
@@ -85,8 +81,8 @@ hide:
         <img src="assets/Icon=Extensible.svg" alt="Scalable" width="72">
       </div>
       <div>
-        <h3 class="feature-item-title">Scalable and universal</h3>
-        <p class="feature-item-description">
+        <h3>Scalable and universal</h3>
+        <p>
           Surface-agnostic design that can scale to support any commerce entity (from small businesses to enterprise scale) and all modalities (chat, visual commerce, voice, etc).
         </p>
       </div>
@@ -97,8 +93,8 @@ hide:
         <img src="assets/Icon=Merchant_at_the_Center.svg" alt="Merchants" width="72">
       </div>
       <div>
-        <h3 class="feature-item-title">Businesses at the center</h3>
-        <p class="feature-item-description">
+        <h3>Businesses at the center</h3>
+        <p>
           Built to facilitate commerce, ensuring retailers retain control of their business rules and remain the Merchant of Record with full ownership of customer relationship.
         </p>
       </div>
@@ -109,8 +105,8 @@ hide:
         <img src="assets/Icon=Open_Source.svg" alt="Simple" width="72">
       </div>
       <div>
-        <h3 class="feature-item-title">Open and extensible</h3>
-        <p class="feature-item-description">
+        <h3>Open and extensible</h3>
+        <p>
           Open and extensible by design, enabling development of community-driven capabilities and extensions across verticals.
         </p>
       </div>
@@ -121,8 +117,8 @@ hide:
         <img src="assets/Icon=Secure_and_Private.svg" alt="Secure" width="72">
       </div>
       <div>
-        <h3 class="feature-item-title">Secure and private</h3>
-        <p class="feature-item-description">
+        <h3>Secure and private</h3>
+        <p>
           Built-on proven security standards for account linking (OAuth 2.0) and secure payment(AP2) via payment mandates and verifiable credentials.
         </p>
       </div>
@@ -133,8 +129,8 @@ hide:
         <img src="assets/Icon=Frictionless_Payments.svg" alt="Frictionless" width="72">
       </div>
       <div>
-        <h3 class="feature-item-title">Frictionless payments</h3>
-        <p class="feature-item-description">
+        <h3>Frictionless payments</h3>
+        <p>
           Open wallet ecosystem with interoperability between providers to ensure buyers can pay with their preferred payment methods.
         </p>
       </div>
@@ -143,8 +139,8 @@ hide:
   </div>
 
   <section class="action-carousel-section">
-    <h2 class="landing-page action-carousel-section__title">See it in action</h2>
-    <p class="action-carousel-section__text">
+    <h2>See it in action</h2>
+    <p>
       UCP is designed to facilitate the entire commerce lifecycle, from initial product discovery and search to final sale and post-purchase support.
   The protocol's initial launch focuses on three core capabilities: Checkout, Identity Linking, and Order Management.
     </p>
@@ -161,7 +157,7 @@ hide:
             <img src="assets/updated-icon.svg" alt="UCP Icon">
           </div>
           <div class="pane-eyebrow">SEE IT IN ACTION</div>
-          <h3 class="landing-page">Checkout</h3>
+          <h3>Checkout</h3>
           <p>Support complex cart logic, dynamic pricing, and tax calculations and more across millions of merchants through unified checkout sessions.</p>
           <a href="specification/checkout-rest/" class="learn-more-btn">Learn more</a>
         </div>
@@ -210,7 +206,7 @@ hide:
             <img src="assets/updated-icon.svg" alt="Universal Commerce Protocol icon">
           </div>
           <div class="pane-eyebrow">SEE IT IN ACTION</div>
-          <h3 class="landing-page">Identity Linking</h3>
+          <h3>Identity Linking</h3>
           <p>OAuth 2.0 standard enables agents to maintain secure, authorized relationships without sharing credentials.</p>
           <a href="specification/identity-linking/" class="learn-more-btn">Learn more</a>
         </div>
@@ -252,7 +248,7 @@ hide:
               <img src="assets/updated-icon.svg" alt="UCP Icon">
           </div>
           <div class="pane-eyebrow">SEE IT IN ACTION</div>
-          <h3 class="landing-page">Order</h3>
+          <h3>Order</h3>
           <p>From purchase confirmation to delivery. Real-time web-hooks power status updates, shipment tracking, and return processing across every channel.</p>
           <a href="specification/order/" class="learn-more-btn">Learn more</a>
         </div>
@@ -311,8 +307,8 @@ hide:
       <div class="two-column-promo-item__icon-wrapper">
         <img src="assets/Icon=Native_Checkout.svg" alt="Native Checkout feature icon" width="96" class="two-column-promo-item__icon">
       </div>
-      <h3 class="two-column-promo-item__title">Power native checkout</h3>
-      <p class="two-column-promo-item__text">
+      <h3>Power native checkout</h3>
+      <p>
         Integrate and negotiate directly with the merchant checkout API to power native UI and workflows for your platform.
       </p>
       <a href="specification/native/" class="promo-button">See how it works</a>
@@ -322,8 +318,8 @@ hide:
       <div class="two-column-promo-item__icon-wrapper">
         <img src="assets/Icon=Embedded_Option.svg" alt="Embedded Option feature icon" width="96" class="two-column-promo-item__icon">
       </div>
-      <h3 class="two-column-promo-item__title">Embed business checkout</h3>
-      <p class="two-column-promo-item__text">
+      <h3>Embed business checkout</h3>
+      <p>
         As an optional mechanism, embed your checkout UI within an iframe to support more complex checkout flows, with advanced capabilities like bidirectional communication, payments and shipping address delegation.
       </p>
       <a href="specification/embedded-checkout/" class="promo-button">Learn more</a>
@@ -333,17 +329,15 @@ hide:
 
   <div class="lifecycle-container">
 
-    <h2 class="landing-page lifecycle-container__title">
-      Designed for the entire commerce ecosystem
-    </h2>
+    <h2>Designed for the entire commerce ecosystem</h2>
 
     <div class="lifecycle-container__row">
       <div class="lifecycle-container__item">
         <div class="lifecycle-container__item-img-wrapper">
           <img src="assets/Content=Developers.svg" alt="Content illustration for Developers" class="lifecycle-container__item-img">
         </div>
-        <h3 class="lifecycle-container__item-title">For Developers</h3>
-        <p class="lifecycle-container__item-text">
+        <h3>For Developers</h3>
+        <p>
           Build the future of commerce on an open foundation. Join our community in evolving an open-source standard designed for the next generation of digital commerce.
         </p>
         <a href="specification/overview/" class="lifecycle-container__item-link">View the technical spec</a>
@@ -352,8 +346,8 @@ hide:
         <div class="lifecycle-container__item-img-wrapper">
           <img src="assets/Content=Retailers.svg" alt="Content illustration for Businesses" class="lifecycle-container__item-img">
         </div>
-        <h3 class="lifecycle-container__item-title">For Businesses</h3>
-        <p class="lifecycle-container__item-text">
+        <h3>For Businesses</h3>
+        <p>
           UCP empowers retailers to meet customers wherever they are—AI assistants, shopping agents, embedded experiences—without rebuilding your checkout for each. You remain the Merchant of Record and your business logic stays intact.
         </p>
         <a href="#" class="lifecycle-container__item-link">Integrate with UCP</a>
@@ -364,8 +358,8 @@ hide:
         <div class="lifecycle-container__item-img-wrapper">
           <img src="assets/Content=AI_Platforms.svg" alt="Content illustration for AI Platforms" class="lifecycle-container__item-img">
         </div>
-        <h3 class="lifecycle-container__item-title">For AI Platforms</h3>
-        <p class="lifecycle-container__item-text">
+        <h3>For AI Platforms</h3>
+        <p>
           Simplify merchant onboarding with standardized APIs and provide your audience with an integrated shopping experience. Compatible with MCP, A2A, and existing agent frameworks.
         </p>
         <a href="documentation/core-concepts/" class="lifecycle-container__item-link">Learn more UCP core concepts</a>
@@ -374,8 +368,8 @@ hide:
         <div class="lifecycle-container__item-img-wrapper">
           <img src="assets/Content=Payment_Providers.svg" alt="Content illustration for Payment Providers" class="lifecycle-container__item-img">
         </div>
-        <h3 class="lifecycle-container__item-title">For Payment Providers</h3>
-        <p class="lifecycle-container__item-text">
+        <h3>For Payment Providers</h3>
+        <p>
           Universal payments that are provable—every authorization backed by cryptographic proof of user consent. Open, modular payment handler design enables open interoperability and choice of payment methods.
         </p>
         <a href="documentation/ucp-and-ap2/" class="lifecycle-container__item-link">Learn more about UCP and AP2</a>
@@ -385,7 +379,7 @@ hide:
   </div>
 
   <div class="partner-carousel">
-    <h2 class="landing-page partner-carousel__title">Endorsed across the ecosystem</h2>
+    <h2>Endorsed across the ecosystem</h2>
 
     <div class="partner-track">
       <div class="partner-logo">
@@ -567,12 +561,12 @@ hide:
   <div class="get-started-container">
 
     <div class="get-started-container__intro">
-      <h2 class="landing-page get-started-container__title">Get started today</h2>
+      <h2>Get started today</h2>
 
-      <p class="get-started-container__text">
+      <p>
         UCP is an open standard designed to let AI agents, apps, merchants, and payment providers interact seamlessly without needing custom, one-off integrations for every connection. We actively seek your feedback and contributions to help build the future of commerce.
       </p>
-      <p class="get-started-container__text">
+      <p>
         The complete technical specification, documentation, and reference implementations are hosted in our public GitHub repository.
       </p>
     </div>
@@ -582,22 +576,22 @@ hide:
         <div class="get-started-container__step-icon-wrapper">
           <img src="assets/Icon=Download.svg" alt="Download icon for code samples" class="get-started-container__step-icon">
         </div>
-        <h3 class="get-started-container__step-title">Download</h3>
-        <p class="get-started-container__step-text">Download and run our code samples</p>
+        <h3>Download</h3>
+        <p>Download and run our code samples</p>
       </div>
       <div class="get-started-container__step">
         <div class="get-started-container__step-icon-wrapper">
           <img src="assets/Icon=Experiment.svg" alt="Experiment" class="get-started-container__step-icon">
         </div>
-        <h3 class="get-started-container__step-title">Experiment</h3>
-        <p class="get-started-container__step-text">Experiment with the protocol and its different agent roles</p>
+        <h3>Experiment</h3>
+        <p>Experiment with the protocol and its different agent roles</p>
       </div>
       <div class="get-started-container__step">
         <div class="get-started-container__step-icon-wrapper">
           <img src="assets/Icon=Contribute.svg" alt="Contribute" class="get-started-container__step-icon">
         </div>
-        <h3 class="get-started-container__step-title">Contribute</h3>
-        <p class="get-started-container__step-text">Contribute your feedback and code to the public repository</p>
+        <h3>Contribute</h3>
+        <p>Contribute your feedback and code to the public repository</p>
       </div>
     </div>
     <div class="get-started-container__repo-link">
