@@ -33,14 +33,14 @@
 
 The Universal Commerce Protocol (UCP) addresses a fragmented commerce landscape
 by providing a standardized common language and functional primitives. It
-enables consumer surfaces (like AI agents and apps), merchants, Payment Service
+enables platforms (like AI agents and apps), businesses, Payment Service
 Providers (PSPs), and Credential Providers (CPs) to communicate effectively,
 ensuring secure and consistent commerce experiences across the web.
 
-With UCP, merchants can:
+With UCP, businesses can:
 
 *   **Declare** supported capabilities to enable autonomous discovery by
-    consumer surfaces.
+    platforms.
 *   **Facilitate** secure checkout sessions, with or without human intervention.
 *   **Offer** personalized shopping experiences through standardized data
     exchange.
@@ -51,11 +51,11 @@ As commerce becomes increasingly agentic and distributed, the ability for
 different systems to interoperate without custom, one-off integrations is vital.
 UCP aims to:
 
-*   **Standardize Interaction:** Provide a uniform way for agents and platforms
-    to interact with merchants, regardless of the underlying backend.
-*   **Modularize Commerce:** Break down commerce into distinct **Capabilities**
-    (e.g., Checkout, Order Status) and **Extensions** (e.g., Discounts,
-    Loyalty), allowing for flexible implementation.
+*   **Standardize Interaction:** Provide a uniform way for platforms to interact
+    with businesses, regardless of the underlying backend.
+*   **Modularize Commerce:** Breakdown commerce into distinct **Capabilities**
+    (e.g., Checkout, Order) and **Extensions** (e.g., Discounts,
+    Fulfillment), allowing for flexible implementation.
 *   **Enable Agentic Commerce:** Designed from the ground up to support AI
     agents acting on behalf of users to discover products, fill carts, and
     complete purchases securely.
@@ -64,15 +64,15 @@ UCP aims to:
 
 ### Key Features
 
-*   **Composable Architecture:** UCP defines core **Capabilities** (such as
-    "Checkout" or "Identity Linking") that merchants implement to enable easy
+*   **Composable Architecture:** UCP defines **Capabilities** (such as
+    "Checkout" or "Identity Linking") that businesses implement to enable easy
     integration. On top of that, specific **Extensions** can be added to enhance
-    the consumer experience without bloating the core protocol.
-*   **Dynamic Discovery:** Merchants declare their supported Capabilities in a
-    standardized profile, allowing applications and agents to autonomously
-    discover and configure themselves.
+    the consumer experience without bloating the capability definitions.
+*   **Dynamic Discovery:** Businesses declare their supported Capabilities in a
+    standardized profile, allowing platforms to autonomously discover and
+    configure themselves.
 *   **Transport Agnostic:** The protocol is designed to work across various
-    transports. Merchants can offer Capabilities via REST APIs, MCP (Model
+    transports. Businesses can offer Capabilities via REST APIs, MCP (Model
     Context Protocol), or A2A, depending on their infrastructure.
 *   **Built on Standards:** UCP leverages existing open standards for payments,
     identity, and security wherever applicable, rather than reinventing the
@@ -88,7 +88,7 @@ The initial release focuses on the essential primitives for transacting:
     tax calculation, supporting flows with or without human intervention.
 *   **Identity Linking:** Enables platforms to obtain authorization to perform
     actions on a user's behalf via OAuth 2.0.
-*   **Order Status:** Webhook-based updates for order lifecycle events (shipped,
+*   **Order:** Webhook-based updates for order lifecycle events (shipped,
     delivered, returned).
 *   **Payment Token Exchange:** Protocols for PSPs and Credential Providers to
     securely exchange payment tokens and credentials.
