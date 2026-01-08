@@ -402,7 +402,7 @@ defined below:
 
 ### Fulfillment Option
 
-{{ extension_schema_fields('fulfillment.json#/$defs/fulfillment_option', 'checkout') }}
+{{ extension_schema_fields('fulfillment_resp.json#/$defs/fulfillment_option', 'checkout') }}
 
 ### Item
 
