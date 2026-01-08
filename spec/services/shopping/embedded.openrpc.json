@@ -84,15 +84,6 @@
             "description": "Final checkout state."
           },
           "description": "Final checkout state."
-        },
-        {
-          "name": "order",
-          "required": true,
-          "schema": {
-            "$ref": "../../schemas/shopping/order.json",
-            "description": "Order confirmation details."
-          },
-          "description": "Order confirmation details."
         }
       ]
     },

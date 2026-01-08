@@ -582,8 +582,6 @@ Indicates successful checkout completion.
 -   **Payload:**
     -   `checkout`: The latest state of the checkout, using the same structure
         as the `checkout` object in UCP responses.
-    -   `order`: Order confirmation details, using the same structure as the
-        `order` object in UCP responses.
 
 **Example Message:**
 
@@ -593,12 +591,10 @@ Indicates successful checkout completion.
     "method": "ec.complete",
     "params": {
         "checkout": {
-            "id": "gid://merchant.com/Checkout/123"
-            // ...
-        },
-        "order": {
-            "id": "gid://merchant.com/Order/123"
-            // ...
+            "id": "gid://merchant.com/Checkout/123",
+            // ... other checkout fields
+            "order_id": "987654321",
+            "order_permalink_url": "https://shop.com/orders/xyz123"
         }
     }
 }

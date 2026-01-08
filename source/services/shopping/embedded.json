@@ -79,14 +79,6 @@
             "$ref": "../../schemas/shopping/checkout.json",
             "description": "Final checkout state."
           }
-        },
-        {
-          "name": "order",
-          "required": true,
-          "schema": {
-            "$ref": "../../schemas/shopping/order.json",
-            "description": "Order confirmation details."
-          }
         }
       ]
     },
