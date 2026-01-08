@@ -45,8 +45,6 @@
     height: auto;
     display: block; /* Changed to block to remove inline spacing issues */
     border-radius: 24px;
-    box-shadow: 0 4px 8px rgba(0,0,0,.05), 0 1px 3px rgba(0,0,0,.08);
-    border: 1px solid rgba(128,128,128,.1);
   }
 
   .hero-section-h1-text h1 {

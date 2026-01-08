@@ -196,14 +196,14 @@ p.hero-description {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 100px;
+  gap: 120px;
   flex-wrap: wrap;
   padding: 16px 0;
 }
 
 .partners-logo-img {
-  max-height: 65px;
-  max-width: 200px;
+  max-height: 80px;
+  max-width: 240px;
   height: auto;
   width: auto;
   opacity: 0.9;

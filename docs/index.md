@@ -119,7 +119,7 @@ hide:
       <div>
         <h3>Secure and private</h3>
         <p>
-          Built-on proven security standards for account linking (OAuth 2.0) and secure payment(AP2) via payment mandates and verifiable credentials.
+          Built-on proven security standards for account linking (OAuth 2.0) and secure payment (AP2) via payment mandates and verifiable credentials.
         </p>
       </div>
     </div>
@@ -194,7 +194,7 @@ hide:
       "address_country": "US"
     },
     "fulfillment_option_id": "free-shipping",
-    ...other checkout fields...
+
   }
   ```
           </div>
@@ -258,7 +258,7 @@ hide:
           </div>
           <div class="code-block-placeholder">
   ```json { .yaml .no-copy }
-  ...other checkout fields...
+
   "fulfillment": {
     "expectations": [
       {
@@ -277,7 +277,7 @@ hide:
       }
     ]
   }
-  ...other checkout fields...
+
   ```
           </div>
         </div>
@@ -383,7 +383,7 @@ hide:
 
     <div class="partner-track">
       <div class="partner-logo">
-        <img src="assets/partner/endorsed/Ayden.svg" alt="Adyen" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+        <img src="assets/partner/endorsed/Adyen.svg" alt="Adyen" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
         <span>Adyen</span>
       </div>
       <div class="partner-logo">
@@ -467,7 +467,7 @@ hide:
         <span>Zalando</span>
       </div>
       <div class="partner-logo">
-        <img src="assets/partner/endorsed/Ayden.svg" alt="Adyen" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+        <img src="assets/partner/endorsed/Adyen.svg" alt="Adyen" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
         <span>Adyen</span>
       </div>
       <div class="partner-logo">
