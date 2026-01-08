@@ -23,10 +23,10 @@ hide:
   <div class="hero-content">
     <h1>Universal Commerce<br>Protocol</h1>
     <p class="hero-subheading">
-      The common language for consumers, agents and businesses.
+      The common language for platforms, agents and businesses.
     </p>
     <p class="hero-description">
-      Discover products. Negotiate capabilities. Complete transactions. UCP defines the primitives for agentic commerce so platforms, businesses, and payment providers can interoperate through one standard, without custom builds.
+      UCP defines building blocks for agentic commerce—from discovering and buying to post purchase experiences—allowing the ecosystem to interoperate through one standard, without custom builds.
     </p>
   </div>
   <div class="hero-image">
@@ -56,11 +56,11 @@ hide:
 
 <div class="partners-intro-wrapper">
   <h2 class="partners-intro-title">
-    Created and adopted by industry partners
+    Co-developed and adopted by industry leaders
   </h2>
 
   <p class="partners-intro-text">
-    UCP is co-developed with foundational partners like Shopify, Target, Walmart, Etsy, and Wayfair to ensure it solves real-world retail pain points, not just tech theory.
+    UCP was built by the industry, for the industry to solve for fragmented commerce journeys that lead to abandoned carts and frustrated shoppers, and enable agentic commerce.
   </p>
 
   <div class="partners-logo-row bottom-spacing">
@@ -102,19 +102,7 @@ hide:
     <div>
       <h3 class="feature-item-title">Scalable and universal</h3>
       <p class="feature-item-description">
-        Surface-agnostic design that can scale to support any commerce entity (from small merchants to enterprise builders) and all modalities (chat, visual commerce, voice, etc).
-      </p>
-    </div>
-  </div>
-
-  <div class="feature-item">
-    <div class="feature-item-icon">
-      <img src="assets/Icon=Open_Source.svg" alt="Simple" width="72">
-    </div>
-    <div>
-      <h3 class="feature-item-title">Open and extensible</h3>
-      <p class="feature-item-description">
-        Open and extensible by design, enabling development of community-driven capabilities and extensions. Model your commerce, your way.
+        Surface-agnostic design that can scale to support any commerce entity (from small businesses to enterprise scale) and all modalities (chat, visual commerce, voice, etc).
       </p>
     </div>
   </div>
@@ -126,7 +114,19 @@ hide:
     <div>
       <h3 class="feature-item-title">Businesses at the center</h3>
       <p class="feature-item-description">
-        Built to facilitate commerce, ensuring retailers retain control of their business rules and remains the Merchant of Record with full ownership of customer relationship.
+        Built to facilitate commerce, ensuring retailers retain control of their business rules and remain the Merchant of Record with full ownership of customer relationship.
+      </p>
+    </div>
+  </div>
+
+  <div class="feature-item">
+    <div class="feature-item-icon">
+      <img src="assets/Icon=Open_Source.svg" alt="Simple" width="72">
+    </div>
+    <div>
+      <h3 class="feature-item-title">Open and extensible</h3>
+      <p class="feature-item-description">
+        Open and extensible by design, enabling development of community-driven capabilities and extensions across verticals.
       </p>
     </div>
   </div>
@@ -177,7 +177,7 @@ The protocol's initial launch focuses on three core capabilities: Checkout, Iden
         </div>
         <div class="pane-eyebrow">SEE IT IN ACTION</div>
         <h3>Checkout</h3>
-        <p>Support complex cart logic, dynamic pricing, and tax calculations across millions of merchants through unified checkout sessions.</p>
+        <p>Support complex cart logic, dynamic pricing, and tax calculations and more across millions of merchants through unified checkout sessions.</p>
         <a href="specification/checkout-rest/" class="learn-more-btn">Learn more</a>
       </div>
       <div class="pane-visuals">
@@ -332,7 +332,7 @@ function openTab(evt, tabName) {
     <div class="two-column-promo-item__icon-wrapper">
       <img src="assets/Icon=Native_Checkout.svg" alt="Native Checkout feature icon" width="96" class="two-column-promo-item__icon">
     </div>
-    <h3 class="two-column-promo-item__title">Power native checkout UI</h3>
+    <h3 class="two-column-promo-item__title">Power native checkout</h3>
     <p class="two-column-promo-item__text">
       Integrate and negotiate directly with the merchant checkout API to power native UI and workflows for your platform.
     </p>
@@ -345,7 +345,7 @@ function openTab(evt, tabName) {
     </div>
     <h3 class="two-column-promo-item__title">Embed business checkout</h3>
     <p class="two-column-promo-item__text">
-      As an optional mechanism, embed your checkout UI within an iframe to support more complex checkout flows, with advanced capabilities like bidirectional communication, payments and shipping address handoffs.
+      As an optional mechanism, embed your checkout UI within an iframe to support more complex checkout flows, with advanced capabilities like bidirectional communication, payments and shipping address delegation.
     </p>
     <a href="specification/embedded-checkout/" class="promo-button">Learn more</a>
   </div>
@@ -365,7 +365,7 @@ function openTab(evt, tabName) {
       </div>
       <h3 class="lifecycle-container__item-title">For Developers</h3>
       <p class="lifecycle-container__item-text">
-        Build the future of commerce on an open foundation. Join our community in evolving an open-source standard designed for the next generation of digital trade.
+        Build the future of commerce on an open foundation. Join our community in evolving an open-source standard designed for the next generation of digital commerce.
       </p>
       <a href="specification/overview/" class="lifecycle-container__item-link">View the technical spec</a>
     </div>
@@ -375,7 +375,7 @@ function openTab(evt, tabName) {
       </div>
       <h3 class="lifecycle-container__item-title">For Businesses</h3>
       <p class="lifecycle-container__item-text">
-        UCP empowers retailers to meet customers wherever they are—AI assistants, shopping agents, embedded experiences—without rebuilding your checkout for each. Your existing payment stack stays intact.
+        UCP empowers retailers to meet customers wherever they are—AI assistants, shopping agents, embedded experiences—without rebuilding your checkout for each. You remain the Merchant of Record and your business logic stays intact.
       </p>
       <a href="#" class="lifecycle-container__item-link">Integrate with UCP</a>
     </div>
@@ -397,7 +397,7 @@ function openTab(evt, tabName) {
       </div>
       <h3 class="lifecycle-container__item-title">For Payment Providers</h3>
       <p class="lifecycle-container__item-text">
-        Universal payments that are provable—every authorization backed by cryptographic proof of user consent. Open, modular payment handler design enables open interoperability.
+        Universal payments that are provable—every authorization backed by cryptographic proof of user consent. Open, modular payment handler design enables open interoperability and choice of payment methods.
       </p>
       <a href="documentation/ucp-and-ap2/" class="lifecycle-container__item-link">Learn more about UCP and AP2</a>
     </div>

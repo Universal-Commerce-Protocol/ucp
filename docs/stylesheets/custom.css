@@ -85,7 +85,7 @@ label.md-search__icon {
 }
 
 .hero-description {
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   line-height: 1.6;
   color: #5f6368;
   margin: 0;
@@ -134,7 +134,7 @@ label.md-search__icon {
 
 .promo-card p {
   color: #5f6368;
-  font-size: 1rem;
+  font-size: 0.95rem;
   line-height: 1.5;
   margin-bottom: 32px;
   flex-grow: 1;
@@ -178,10 +178,11 @@ h2.partners-intro-title {
 
 .partners-intro-text {
   color: #5f6368;
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   line-height: 1.6;
   max-width: 800px;
   margin: 0 auto 50px auto;
+  text-align: center;
 }
 
 .partners-logo-row {
@@ -328,10 +329,11 @@ h2.action-carousel-section__title {
 
 .action-carousel-section__text {
   color: #5f6368;
-  font-size: 1.05rem;
+  font-size: 0.95rem;
   line-height: 1.6;
   max-width: 800px;
   margin: 0 auto 40px auto;
+  text-align: center;
 }
 
 /* Navigation Tabs */
@@ -431,7 +433,7 @@ h2.action-carousel-section__title {
 .pane-text p {
   color: #5f6368;
   line-height: 1.6;
-  font-size: 1.05rem;
+  font-size: 0.95rem;
   margin-bottom: 30px;
 }
 
@@ -591,6 +593,7 @@ h2.flexibility-section-title {
   line-height: 1.6;
   max-width: 800px;
   margin: 0 auto;
+  text-align: center;
 }
 .flexibility-section-text a {
   text-decoration: underline;
@@ -722,6 +725,7 @@ h3.lifecycle-container__item-title {
   line-height: 1.6;
   margin-bottom: 30px;
   flex-grow: 1;
+  text-align: center;
 }
 .lifecycle-container__item-link {
   color: #1a73e8;
@@ -749,12 +753,13 @@ h2.get-started-container__title {
 }
 .get-started-container__text {
   color: #3c4043;
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   line-height: 1.6;
   margin-bottom: 15px;
   max-width: 900px;
   margin-left: auto;
   margin-right: auto;
+  text-align: center;
 }
 .get-started-container__steps {
   display: flex;
@@ -788,8 +793,9 @@ h3.get-started-container__step-title {
 }
 .get-started-container__step-text {
   color: #5f6368;
-  font-size: 1rem;
+  font-size: 0.95rem;
   line-height: 1.5;
+  text-align: center;
 }
 .get-started-container__repo-link {
   text-align: center;
