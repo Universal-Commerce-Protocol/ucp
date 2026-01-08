@@ -417,21 +417,21 @@ def process_openapi(
 
       # 3. Create Split Components
       # Response (always exists)
-      resp_comp = f"{name}_resp"
+      resp_comp = f"{name}_response"
       schemas[resp_comp] = {"$ref": f"{base_ref}_resp.json"}
 
       req_refs = {}
       if is_shared:
-        req_comp = f"{name}_req"
+        req_comp = f"{name}_request"
         schemas[req_comp] = {"$ref": f"{base_ref}_req.json"}
         req_refs["create"] = req_refs["update"] = (
             f"#/components/schemas/{req_comp}"
         )
       else:
-        create_comp = f"{name}_create_req"
+        create_comp = f"{name}_create_request"
         schemas[create_comp] = {"$ref": f"{base_ref}.create_req.json"}
 
-        update_comp = f"{name}_update_req"
+        update_comp = f"{name}_update_request"
         schemas[update_comp] = {"$ref": f"{base_ref}.update_req.json"}
 
         req_refs["create"] = f"#/components/schemas/{create_comp}"

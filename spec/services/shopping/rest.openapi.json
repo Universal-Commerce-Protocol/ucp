@@ -60,7 +60,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/checkout_create_req"
+                "$ref": "#/components/schemas/checkout_create_request"
               }
             }
           }
@@ -76,7 +76,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/checkout_resp"
+                  "$ref": "#/components/schemas/checkout_response"
                 }
               }
             }
@@ -134,7 +134,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/checkout_resp"
+                  "$ref": "#/components/schemas/checkout_response"
                 }
               }
             }
@@ -182,7 +182,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/checkout_update_req"
+                "$ref": "#/components/schemas/checkout_update_request"
               }
             }
           }
@@ -198,7 +198,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/checkout_resp"
+                  "$ref": "#/components/schemas/checkout_response"
                 }
               }
             }
@@ -278,7 +278,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/checkout_resp"
+                  "$ref": "#/components/schemas/checkout_response"
                 }
               }
             }
@@ -339,7 +339,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/checkout_resp"
+                  "$ref": "#/components/schemas/checkout_response"
                 }
               }
             }
@@ -540,22 +540,22 @@
       "ucp": {
         "$ref": "https://ucp.dev/schemas/ucp.json"
       },
-      "checkout_resp": {
+      "checkout_response": {
         "$ref": "https://ucp.dev/schemas/shopping/checkout_resp.json"
       },
-      "checkout_create_req": {
+      "checkout_create_request": {
         "$ref": "https://ucp.dev/schemas/shopping/checkout.create_req.json"
       },
-      "checkout_update_req": {
+      "checkout_update_request": {
         "$ref": "https://ucp.dev/schemas/shopping/checkout.update_req.json"
       },
-      "payment_resp": {
+      "payment_response": {
         "$ref": "https://ucp.dev/schemas/shopping/payment_resp.json"
       },
-      "payment_create_req": {
+      "payment_create_request": {
         "$ref": "https://ucp.dev/schemas/shopping/payment.create_req.json"
       },
-      "payment_update_req": {
+      "payment_update_request": {
         "$ref": "https://ucp.dev/schemas/shopping/payment.update_req.json"
       }
     }
