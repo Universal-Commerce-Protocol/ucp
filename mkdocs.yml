@@ -84,6 +84,7 @@ extra:
 # Configuration
 theme:
   logo: assets/updated-icon.svg
+  favicon: assets/favicon.png
   name: material
   font:
     text: Google Sans
