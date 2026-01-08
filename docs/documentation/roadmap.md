@@ -40,17 +40,17 @@ shopping experiences. Key upcoming initiatives include:
     business, complex basket rules (e.g., promotions, tax, shipping), and varied
     fulfillment logic that reflects how people actually shop.
 *   **Upper-funnel product discovery and post-order management**: by
-    facilitating the entire journey, we help merchants maximize lifetime and
+    facilitating the entire journey, we help businesses maximize lifetime and
     average order value rather than just processing a single item for checkout.
 *   **Loyalty & Member benefits**: Capabilities to enable loyalty and member
-    benefits to help users find the best value and merchants achieve a deeper
+    benefits to help users find the best value and businesses achieve a deeper
     connection with their consumers flows through account linking.
-*   **Native cross-sell and upsell modules**: capabilities for merchants to
+*   **Native cross-sell and upsell modules**: capabilities for businesses to
     provide personalized recommendations and upsells based on user context .
 
 ### Support for global markets
 
-We are building a scalable ecosystem that is inclusive of all merchant sizes and
+We are building a scalable ecosystem that is inclusive of all business sizes and
 geographies, ensuring that "simple and open" means accessible to everyone. We
 plan to do this through phased rollout across markets, including India,
 Indonesia, Latin America, and others. We are adapting the protocol to support
@@ -58,7 +58,7 @@ broader regional use cases and localized payment interoperability.
 
 ## Build with us
 
-The future of commerce cannot be built in a vacuum. We invite merchants,
+The future of commerce cannot be built in a vacuum. We invite businesses,
 developers, and payment providers to join us in refining these specifications.
 Your feedback on our early builds helps us shape the standards that will power
 the next generation of global commerce.
