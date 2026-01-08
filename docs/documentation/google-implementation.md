@@ -39,7 +39,7 @@
     text-align: center;
   }
 
-  .hero-section-h1-video video {
+  .hero-section-h1-video img {
     width: 280px;
     max-width: 100%;
     height: auto;
@@ -142,9 +142,6 @@
     </div>
   </div>
   <div class="hero-section-h1-video">
-    <video autoplay loop muted playsinline onerror="this.src='https://placehold.co/260x500/EEE/31343C?text=Video'">
-      <source src="../assets/Suitcase_PhoneFrame.mp4" type="video/mp4">
-      Your browser does not support the video tag.
-    </video>
+    <img src="../../assets/Suitcase_PhoneFrame_v17.gif" alt="Demo video">
   </div>
 </div>
