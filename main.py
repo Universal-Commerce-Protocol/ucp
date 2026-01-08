@@ -295,6 +295,26 @@ def define_env(env):
     if not schema_data:
       return '_No content fields defined._'
 
+    # If schema is ONLY a oneOf, render as prose instead of table
+    if (
+        'oneOf' in schema_data
+        and not schema_data.get('properties')
+        and not schema_data.get('allOf')
+        and not schema_data.get('$ref')
+    ):
+      links = []
+      for item in schema_data['oneOf']:
+        if '$ref' in item:
+          links.append(create_link(item['$ref'], spec_file_name))
+        elif item.get('type'):
+          links.append(f"`{item.get('type')}`")
+      if links:
+        return (
+            '\nThis object MUST be one of the following types: '
+            + ', '.join(links)
+            + '.\n'
+        )
+
     properties = schema_data.get('properties', {})
     required_list = schema_data.get('required', [])
 
@@ -339,15 +359,6 @@ def define_env(env):
               context,
           )
       )
-    elif 'oneOf' in schema_data:
-      f_type = 'oneOf['
-      for idx, one_of_type in enumerate(schema_data.get('oneOf', [])):
-        if '$ref' in one_of_type.keys():
-          f_type += create_link(one_of_type['$ref'], spec_file_name)
-          if idx < len(schema_data.get('oneOf', [])) - 1:
-            f_type += ', '
-      f_type += ']'
-      md.append(f'| | {f_type} | | |')
     elif 'allOf' in schema_data:
       md.append(
           _render_embedded_table(
@@ -548,6 +559,127 @@ def define_env(env):
         should be rendered (e.g., "checkout", "fulfillment").
     """
     return _read_schema_from_defs(entity_name, spec_file_name)
+
+  @env.macro
+  def auto_generate_schema_reference(
+      sub_dir='.',
+      spec_file_name='reference',
+      include_extensions=True,
+      include_capability=True,
+  ):
+    """Scans a dir for JSON schemas and generates documentation.
+
+    Scans a subdirectory within spec/schemas/shopping/ for .json files
+    and generates documentation for each schema found.
+
+    Args:
+      sub_dir: The subdirectory to scan, relative to spec/schemas/shopping/.
+      spec_file_name: The name of the spec file for link generation.
+      include_extensions: If true, includes schemas with 'Extension' in title.
+      include_capability: If true, includes schemas without 'Extension' in
+        title.
+    """
+    schema_base_path = 'spec/schemas/shopping'
+    scan_path = (
+        os.path.join(schema_base_path, sub_dir)
+        if sub_dir != '.'
+        else schema_base_path
+    )
+
+    if not os.path.isdir(scan_path):
+      return f'<p><em>Schema directory not found: {scan_path}</em></p>'
+
+    output = []
+    try:
+      schema_files = sorted(
+          [f for f in os.listdir(scan_path) if f.endswith('.json')]
+      )
+    except FileNotFoundError:
+      return f'<p><em>Schema directory not found: {scan_path}</em></p>'
+
+    if not schema_files:
+      return f'<p><em>No schema files found in {scan_path}</em></p>'
+
+    for schema_file in schema_files:
+      entity_name_base = os.path.splitext(schema_file)[0]
+      if sub_dir == '.':
+        entity_name = entity_name_base
+      else:
+        entity_name = sub_dir.replace(os.sep, '/') + '/' + entity_name_base
+
+      schema_data = _load_json_file(entity_name)
+      if schema_data:
+        is_extension = 'Extension' in schema_data.get('title', '')
+        if is_extension and not include_extensions:
+          continue
+        if not is_extension and not include_capability:
+          continue
+
+        # If a schema has no structural elements worth documenting here,
+        # skip it.
+        if (
+            not schema_data.get('properties')
+            and not schema_data.get('allOf')
+            and not schema_data.get('oneOf')
+            and not schema_data.get('$ref')
+            and not schema_data.get('$defs')
+        ):
+          continue
+        schema_title = schema_data.get(
+            'title', entity_name_base.replace('_', ' ').title()
+        )
+        if is_extension:
+          output.append(f'### {schema_title}\n')
+          defs = schema_data.get('$defs', {})
+          def_count = 0
+          for def_name, def_schema in defs.items():
+            def_count += 1
+            def_title = def_schema.get(
+                'title', def_name.replace('_', ' ').title()
+            )
+            output.append(f'#### {def_title}\n')
+            rendered_table = _read_schema_from_defs(
+                f'{entity_name}.json#/$defs/{def_name}', spec_file_name
+            )
+            output.append(rendered_table)
+            output.append('\n')
+
+          if def_count > 0:
+            output.append('\n---\n')
+          elif (
+              schema_data.get('properties')
+              or schema_data.get('allOf')
+              or schema_data.get('oneOf')
+              or schema_data.get('$ref')
+          ):
+            rendered_table = _render_table_from_schema(
+                schema_data, spec_file_name
+            )
+            if rendered_table == '_No properties defined._':
+              output.pop()  # remove title
+              continue
+            output.append(rendered_table)
+            output.append('\n---\n')
+          else:
+            output.pop()  # remove title
+            continue
+        else:
+          rendered_table = _render_table_from_schema(
+              schema_data, spec_file_name
+          )
+          if rendered_table == '_No properties defined._':
+            continue
+          output.append(f'### {schema_title}\n')
+          output.append(rendered_table)
+          output.append('\n---\n')
+      else:
+        output.append(f'### {entity_name_base}\n')
+        output.append(
+            f'<p><em>Could not load schema for entity: {entity_name}</em></p>'
+        )
+        output.append('\n---\n')
+
+    return '\n'.join(output)
 
   # --- MACRO 2: For Standalone JSON Extensions ---
   @env.macro

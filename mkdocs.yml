@@ -52,6 +52,7 @@ nav:
         - Agent Tokenizer: specification/examples/agent-tokenizer-payment-handler.md
         - PSP Handler: specification/examples/psp-payment-handler.md
         - Agent Encrypted Credential: specification/examples/agent-encrypted-credential-handler.md
+    - Reference: specification/reference.md
   - UCP and AP2: documentation/ucp-and-ap2.md
   - Google's Implementation: documentation/google-implementation.md
   - Roadmap: documentation/roadmap.md
@@ -202,3 +203,5 @@ plugins:
           - specification/examples/agent-tokenizer-payment-handler.md
           - specification/examples/psp-payment-handler.md
           - specification/examples/agent-encrypted-credential-handler.md
+        Reference:
+          - specification/reference.md

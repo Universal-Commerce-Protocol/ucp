@@ -1,0 +1,65 @@
+<!--
+   Copyright 2025 Google LLC
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+
+# Schema Reference
+
+This page provides a reference for all the capability data models and types used
+within the UCP.
+
+## Capability Schemas
+{{ auto_generate_schema_reference('.', 'reference', include_extensions=False) }}
+
+## Type Schemas
+{{ auto_generate_schema_reference('types', 'reference', include_extensions=False) }}
+
+## Extension Schemas
+
+{{ auto_generate_schema_reference('.', 'reference', include_capability=False) }}
+
+## UCP Metadata
+
+The following schemas define the structure of UCP metadata used in dis`co`very
+and responses.
+
+### Discovery Profile
+The top-level structure of a discovery document (`/.well-known/ucp`).
+
+{{ extension_schema_fields('ucp.json#/$defs/discovery', 'reference') }}
+
+### Checkout Response Metadata
+The `ucp` object included in checkout responses.
+
+{{ extension_schema_fields('ucp.json#/$defs/checkout_response', 'reference') }}
+
+### Order Response Metadata
+The `ucp` object included in order responses or events.
+
+{{ extension_schema_fields('ucp.json#/$defs/order_response', 'reference') }}
+
+### Capability
+This object describes a single capability or extension. It appears in the
+`capabilities` array in discovery profiles and responses, with slightly
+different required fields in each context.
+
+#### Capability (Discovery)
+As seen in discovery profiles.
+
+{{ extension_schema_fields('capability.json#/$defs/discovery', 'reference') }}
+
+#### Capability (Response)
+As seen in response messages.
+
+{{ extension_schema_fields('capability.json#/$defs/response', 'reference') }}
