@@ -144,10 +144,10 @@ Content-Type: application/json
         "id": "com.google.pay",
         "name": "gpay",
         "version": "2024-12-03",
-        "spec": "https://ucp.dev/handlers/google_pay",
-        "config_schema": "https://ucp.dev/handlers/google_pay/config.json",
+        "spec": "https://developers.google.com/merchant/ucp/guides/gpay-payment-handler",
+        "config_schema": "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/gpay_config.json",
         "instrument_schemas": [
-          "https://ucp.dev/handlers/google_pay/card_payment_instrument.json"
+          "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/gpay_card_payment_instrument.json"
         ],
         "config": {
           "allowed_payment_methods": [
@@ -290,9 +290,9 @@ Content-Type: application/json
         "name": "gpay",
         "version": "2024-12-03",
         "spec": "https://ucp.dev/handlers/google_pay",
-        "config_schema": "https://ucp.dev/handlers/google_pay/config.json",
+        "config_schema": "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/gpay_config.json",
         "instrument_schemas": [
-          "https://ucp.dev/handlers/google_pay/card_payment_instrument.json"
+          "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/gpay_card_payment_instrument.json"
         ],
         "config": {
           "allowed_payment_methods": [

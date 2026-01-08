@@ -489,10 +489,10 @@ example:
         "id": "gpay",
         "name": "com.google.pay",
         "version": "2024-12-03",
-        "spec": "https://ucp.dev/handlers/google_pay",
-        "config_schema": "https://ucp.dev/handlers/google_pay/config.json",
+        "spec": "https://developers.google.com/merchant/ucp/guides/gpay-payment-handler",
+        "config_schema": "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/gpay_config.json",
         "instrument_schemas": [
-          "https://ucp.dev/handlers/google_pay/card_payment_instrument.json"
+          "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/gpay_card_payment_instrument.json"
         ]
       },
       {
@@ -814,7 +814,7 @@ This example shows the `payment` field from a checkout response:
         "id": "gpay",
         "name": "com.google.pay",
         "version": "2024-12-03",
-        "spec": "https://ucp.dev/handlers/google_pay",
+        "spec": "https://developers.google.com/merchant/ucp/guides/gpay-payment-handler",
         "config_schema": "https://ucp.dev/handlers/google_pay/config.json",
         "instrument_schemas": [
           "https://ucp.dev/handlers/google_pay/card_payment_instrument.json"
@@ -847,7 +847,7 @@ This example shows the `payment` field from a checkout response:
 ```
 
 This configuration tells platforms what payment collection strategies the
-business supports: PSP tokenization for direct card tokenization, Google Pay
+business supports: PSP tokenization for direct card tokenization, [Google Pay](https://developers.devsite.corp.google.com/merchant/ucp/guides/gpay-payment-handler)
 for wallet payments, and [Shop Pay](https://shopify.dev/docs/agents/checkout/shop-pay-handler) for Shopify's accelerated checkout.
 
 ### 6.2 Payment Handlers
@@ -924,7 +924,7 @@ Handlers follow the same reverse-DNS namespace convention as capabilities:
         "id": "gpay",
         "name": "com.google.pay",
         "version": "2024-12-03",
-        "spec": "https://ucp.dev/handlers/google_pay",
+        "spec": "https://developers.google.com/merchant/ucp/guides/gpay-payment-handler.html",
         "config_schema": "https://ucp.dev/handlers/google_pay/config.json",
         "instrument_schemas": [
           "https://ucp.dev/handlers/google_pay/card_payment_instrument.json"
@@ -965,7 +965,8 @@ Handlers follow the same reverse-DNS namespace convention as capabilities:
 
 This example illustrates a business supporting multiple payment processing
 strategies. The card_tokenizer handler uses PSP
-for secure tokenization of raw card credentials. The gpay handler integrates
+for secure tokenization of raw card credentials. The
+[gpay handler](https://developers.google.com/merchant/ucp/guides/gpay-payment-handler.md) integrates
 with Google Pay for wallet-based payments. The [shop_pay handler](https://shopify.dev/docs/agents/checkout/shop-pay-handler) enables
 Shopify's accelerated checkout experience. These handlers would be advertised in
 the business's discovery profile, allowing platforms to understand capabilities
@@ -1093,14 +1094,14 @@ URL and can define its own configuration schema.
 #### Example: Google Pay Payment Handler
 
 The `com.google.pay` handler demonstrates integration with a customized
-[specification](site:specification/gpay-payment-handler):
+[specification](https://developers.google.com/merchant/ucp/guides/gpay-payment-handler.md):
 
 ```json
 {
   "id": "gpay",
   "name": "com.google.pay",
   "version": "2024-12-03",
-  "spec": "https://ucp.dev/handlers/google_pay",
+  "spec": "https://developers.google.com/merchant/ucp/guides/gpay-payment-handler",
   "config_schema": "https://ucp.dev/handlers/google_pay/config.json",
   "instrument_schemas": [
     "https://ucp.dev/handlers/google_pay/card_payment_instrument.json"
@@ -1496,7 +1497,7 @@ strictly enforced at the schema level.
 
 #### 6.4.2 Example Flow A: Google Pay
 
-In this scenario, the Agent uses a specific payment handler Google Pay.
+In this scenario, the Agent uses a specific payment handler [Google Pay](https://developers.devsite.corp.google.com/merchant/ucp/guides/gpay-payment-handler).
 The Merchant configures the handler using Google Pay's standard payment data
 model.
 
@@ -1512,7 +1513,7 @@ field only):
       "id": "gpay",
       "name": "com.google.pay",
       "version": "2024-12-03",
-      "spec": "https://ucp.dev/handlers/google_pay",
+      "spec": "https://developers.google.com/merchant/ucp/guides/gpay-payment-handler",
       "config_schema": "https://ucp.dev/handlers/google_pay/config.json",
       "instrument_schemas": [
         "https://ucp.dev/handlers/google_pay/card_payment_instrument.json"
