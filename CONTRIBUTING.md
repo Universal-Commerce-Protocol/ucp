@@ -59,6 +59,12 @@ for this purpose.
 To validate JSON and YAML files format and references in `spec/`, run
 `python validate_specs.py`.
 
+If you change any JSON schemas in `spec/`, you must regenerate any SDK client
+libraries that depend on them. For example, to regenerate Python Pydantic
+models run `bash sdk/python/generate_models.sh`. Our CI system runs
+`scripts/ci_check_models.sh` to verify that models can be generated
+successfully from the schemas.
+
 It is also important to go through documentation locally whenever spec files
 are updated to ensure there are no broken references or stale/missing contents.
 
@@ -68,7 +74,7 @@ are updated to ensure there are no broken references or stale/missing contents.
 2.  Run the development server: `mkdocs serve --watch spec`
 3.  Open **http://127.0.0.1:8000** in your browser
 
-#### Using a virtual environment (Recommended)
+### Using a virtual environment (Recommended)
 
 To avoid polluting your global environment, use a virtual environment. Prefix
 the virtual environment name with a `.` so the versioning control systems don't
