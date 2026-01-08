@@ -1,4 +1,4 @@
-#   Copyright 2025 UCP Authors
+#   Copyright 2026 UCP Authors
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ repo_name: UCP on GitHub # Override repo name to be shorter on site header.
 repo_url: https://github.com/Universal-Commerce-Protocol/ucp
 
 # Copyright
-copyright: Copyright 2025 UCP Authors. Licensed under the Apache License, Version 2.0.
+copyright: Copyright 2026 UCP Authors. Licensed under the Apache License, Version 2.0.
 
 # Custom CSS
 extra_css:
