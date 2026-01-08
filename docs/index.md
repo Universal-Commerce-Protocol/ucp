@@ -47,7 +47,7 @@ hide:
     UCP was built by the industry, for the industry to solve for fragmented commerce journeys that lead to abandoned carts and frustrated shoppers, and enable agentic commerce.
   </p>
 
-  <div class="partners-logo-row bottom-spacing">
+  <div class="partners-logo-row">
     <img src="assets/partner/codeveloped/Google.svg" alt="Google" class="partners-logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
     <span class="partners-logo-fallback">Google</span>
 

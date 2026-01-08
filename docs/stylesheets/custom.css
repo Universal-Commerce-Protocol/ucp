@@ -52,41 +52,60 @@ label.md-search__icon {
   color: #5f6368 !important;
 }
 
+/* -- BODY -- */
+
+p {
+  font-size: 0.8rem;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.md-typeset h2 {
+  font-size: 2.0rem;
+  font-weight: 700;
+  color: #202124;
+  margin: 0 auto 36px 0;
+}
+
+.md-typeset h3 {
+  font-size: 1rem;
+  margin: 0 auto 16px auto;
+}
+
 /* --- HERO SECTION --- */
 .hero-wrapper {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   max-width: 1200px;
-  margin: 0 auto;
-  padding: 60px 40px;
-  gap: 40px;
+  margin: 80px auto 0 auto;
+  padding-bottom: 40px;
 }
 
 .hero-content {
   flex: 1;
-  max-width: 650px;
+  max-width: 26.8rem;
 }
 
 .hero-content h1 {
-  font-size: 3.5rem;
-  line-height: 1.2;
-  font-weight: 500;
+  font-size: 3.0rem;
+  line-height: 1.12;
+  font-weight: 700;
   color: #202124;
-  margin: 0 0 2rem 0;
+  margin-bottom: 0.5rem;
   letter-spacing: -0.02em;
 }
 
 .hero-subheading {
   font-size: 1.5rem;
-  line-height: 1.4;
+  line-height: 1.28;
   color: #3c4043;
-  margin: 0 0 1.5rem 0;
+  margin: 0 0 1rem 0;
 }
 
 .hero-description {
-  font-size: 0.95rem;
-  line-height: 1.6;
+  font-size: 0.7rem;
+  line-height: 1.4;
   color: #5f6368;
   margin: 0;
 }
@@ -109,7 +128,7 @@ label.md-search__icon {
   display: flex;
   gap: 24px;
   max-width: 1200px;
-  margin: 40px auto;
+  margin: 60px auto;
   flex-wrap: wrap;
 }
 
@@ -118,14 +137,13 @@ label.md-search__icon {
   min-width: 300px;
   background-color: #f8f9fa;
   border-radius: 24px; /* Matches the rounded look in your image */
-  padding: 40px;
+  padding: 16px 24px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
 }
 
 .promo-card h3 {
-  font-size: 1.5rem;
   font-weight: 400;
   color: #202124;
   margin-top: 0;
@@ -134,22 +152,20 @@ label.md-search__icon {
 
 .promo-card p {
   color: #5f6368;
-  font-size: 0.95rem;
-  line-height: 1.5;
-  margin-bottom: 32px;
+  margin-bottom: 16px;
   flex-grow: 1;
 }
 
 .promo-button,
 .learn-more-btn {
   display: inline-block;
-  padding: 0.6rem 2rem;
+  padding: 0.5rem 1.2rem;
   border: 1px solid #000;
   border-radius: 50px; /* Pill shape */
   text-decoration: none;
   color: #000 !important;
   font-weight: 500;
-  font-size: 0.95rem;
+  font-size: 0.8rem;
   transition: background-color 0.2s ease-in-out;
   background-color: transparent;
 }
@@ -164,22 +180,13 @@ label.md-search__icon {
 
 .partners-intro-wrapper {
   text-align: center;
-  padding: 60px 0;
   max-width: 1200px;
-  margin: 0 auto;
-}
-
-h2.partners-intro-title {
-  font-size: 2.0rem;
-  font-weight: 500;
-  color: #202124;
-  margin-bottom: 20px;
+  margin: 60px auto 0 auto;
+  padding-bottom: 60px;
 }
 
 .partners-intro-text {
   color: #5f6368;
-  font-size: 0.95rem;
-  line-height: 1.6;
   max-width: 800px;
   margin: 0 auto 50px auto;
   text-align: center;
@@ -191,10 +198,7 @@ h2.partners-intro-title {
   align-items: center;
   gap: 100px;
   flex-wrap: wrap;
-}
-
-.partners-logo-row.bottom-spacing {
-  margin-bottom: 50px;
+  padding: 16px 0;
 }
 
 .partners-logo-img {
@@ -215,19 +219,15 @@ h2.partners-intro-title {
 /* --- PARTNER CAROUSEL SECTION --- */
 .partner-carousel {
   text-align: center;
-  padding: 60px 0;
   max-width: 100%;
-  margin: 0 auto;
+  margin: 80px auto;
   overflow: hidden; /* Hides logos as they move off screen */
   position: relative;
   background: white;
 }
 
 h2.partner-carousel__title {
-  font-size: 2.0rem;
-  font-weight: 500;
-  color: #202124;
-  margin-bottom: 80px;
+  margin-bottom: 60px;
   position: relative;
   z-index: 3;
 }
@@ -322,17 +322,7 @@ h2.partner-carousel__title {
   margin: 40px 0;
 }
 
-h2.action-carousel-section__title {
-  font-size: 2.0rem;
-  font-weight: 500;
-  color: #202124;
-  margin-bottom: 20px;
-}
-
 .action-carousel-section__text {
-  color: #5f6368;
-  font-size: 0.95rem;
-  line-height: 1.6;
   max-width: 800px;
   margin: 0 auto 40px auto;
   text-align: center;
@@ -350,9 +340,9 @@ h2.action-carousel-section__title {
 .tab-btn {
   background: transparent;
   border: none;
-  padding: 12px 24px;
+  padding: 14px 24px;
   border-radius: 50px;
-  font-size: 1rem;
+  font-size: 0.8rem;
   font-weight: 500;
   color: #5f6368;
   cursor: pointer;
@@ -421,22 +411,18 @@ h2.action-carousel-section__title {
   font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 1.2px;
-  margin-bottom: 5px;
+  margin-bottom: 16px;
 }
 
 .pane-text h3 {
-  font-size: 1.8rem;
-  margin-bottom: 20px;
+  margin: 0 0 16px 0;
   font-weight: 500;
   color: #202124;
   line-height: 1.2;
 }
 
 .pane-text p {
-  color: #5f6368;
-  line-height: 1.6;
-  font-size: 0.95rem;
-  margin-bottom: 30px;
+  margin-bottom: 24px;
 }
 
 
@@ -600,18 +586,9 @@ label.md-search__icon {
 /* --- FLEXIBILITY SECTION --- */
 .flexibility-section {
   text-align: center;
-  margin: 100px 0 60px;
-}
-h2.flexibility-section-title {
-  font-size: 2.0rem;
-  font-weight: 500;
-  color: #202124;
-  margin-bottom: 20px;
+  margin: 80px 0 60px;
 }
 .flexibility-section-text {
-  color: #5f6368;
-  font-size: 0.95rem;
-  line-height: 1.6;
   max-width: 800px;
   margin: 0 auto;
   text-align: center;
@@ -641,16 +618,7 @@ h2.flexibility-section-title {
   flex-shrink: 0;
 }
 h3.feature-item-title {
-  font-size: 1.2rem;
-  font-weight: 500;
   margin: 0 0 8px 0;
-  color: #202124;
-}
-.feature-item-description {
-  margin: 0;
-  color: #5f6368;
-  line-height: 1.5;
-  font-size: 0.95rem;
 }
 
 /* --- TWO COLUMN PROMO --- */
@@ -669,24 +637,12 @@ h3.feature-item-title {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-}
-.two-column-promo-item__icon-wrapper {
-  margin-bottom: 20px;
+  gap: 16px;
 }
 .two-column-promo-item__icon {
   display: block;
 }
-h3.two-column-promo-item__title {
-  font-size: 1.5rem;
-  margin: 0 0 15px 0;
-  font-weight: 500;
-  color: #202124;
-}
 .two-column-promo-item__text {
-  color: #5f6368;
-  font-size: 0.95rem;
-  line-height: 1.6;
-  margin-bottom: 30px;
   flex-grow: 1;
 }
 
@@ -696,11 +652,7 @@ h3.two-column-promo-item__title {
   text-align: center;
 }
 h2.lifecycle-container__title {
-  font-size: 2.0rem;
-  font-weight: 500;
-  color: #202124;
   margin-bottom: 60px;
-  line-height: 1.2;
   max-width: 800px;
   margin-left: auto;
   margin-right: auto;
@@ -718,14 +670,14 @@ h2.lifecycle-container__title {
   max-width: 360px;
   border: 1px solid #dadce0;
   border-radius: 32px;
-  padding: 40px 30px;
+  padding: 0 30px 30px 30px;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 .lifecycle-container__item-img-wrapper {
   height: 120px;
-  margin-bottom: 30px;
+  margin-bottom: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -735,15 +687,11 @@ h2.lifecycle-container__title {
   width: auto;
 }
 h3.lifecycle-container__item-title {
-  font-size: 1.4rem;
-  margin: 0 0 15px 0;
+  margin: 0 0 16px 0;
   font-weight: 500;
   color: #202124;
 }
 .lifecycle-container__item-text {
-  color: #5f6368;
-  font-size: 0.95rem;
-  line-height: 1.6;
   margin-bottom: 30px;
   flex-grow: 1;
   text-align: center;
@@ -759,24 +707,14 @@ h3.lifecycle-container__item-title {
 .get-started-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 100px 20px 80px;
+  padding: 60px 0 0 0;
   text-align: center;
 }
 .get-started-container__intro {
   margin-bottom: 60px;
 }
-h2.get-started-container__title {
-  font-size: 2.0rem;
-  font-weight: 500;
-  color: #202124;
-  margin-bottom: 30px;
-  line-height: 1.2;
-}
 .get-started-container__text {
-  color: #3c4043;
-  font-size: 0.95rem;
-  line-height: 1.6;
-  margin-bottom: 15px;
+  margin-bottom: 16px;
   max-width: 900px;
   margin-left: auto;
   margin-right: auto;
@@ -796,6 +734,7 @@ h2.get-started-container__title {
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding: 32px 0;
 }
 .get-started-container__step-icon-wrapper {
   height: 60px;
@@ -806,16 +745,7 @@ h2.get-started-container__title {
   width: auto;
   opacity: 0.8;
 }
-h3.get-started-container__step-title {
-  font-size: 1.4rem;
-  font-weight: 400;
-  color: #202124;
-  margin: 0 0 15px 0;
-}
 .get-started-container__step-text {
-  color: #5f6368;
-  font-size: 0.95rem;
-  line-height: 1.5;
   text-align: center;
 }
 .get-started-container__repo-link {
