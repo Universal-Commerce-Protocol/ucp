@@ -126,18 +126,6 @@ A scope covering a capability must grant access to all operations associated to
 the capability. For example, ucp:scopes:checkout\_session must grant all of:
 Get, Create, Update, Delete, Cancel, Complete.
 
-## Extensions
-
-### Streamlined linking
-
-*   Google Streamlined Linking: As defined in
-    [https://developers.google.com/identity/account-linking/oauth-with-sign-in-linking\#requirements\_for\_streamlined\_linking](https://developers.google.com/identity/account-linking/oauth-with-sign-in-linking#requirements_for_streamlined_linking)
-    *   This flow leverages JWT assertions to combine intent checks and token
-        exchange on the OAuth 2.0 token endpoint (`check`, `create`, `get`
-        intents). While it draws concepts from
-        [RFC 7523](https://datatracker.ietf.org/doc/html/rfc7523), it differs to
-        enhance security.
-
 ## Examples
 
 ### Authorization server metadata
