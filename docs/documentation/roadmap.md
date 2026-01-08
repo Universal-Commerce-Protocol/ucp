@@ -56,14 +56,6 @@ plan to do this through phased rollout across markets, including India,
 Indonesia, Latin America, and others. We are adapting the protocol to support
 broader regional use cases and localized payment interoperability.
 
-### Building blocks for flexibility
-
-We’ll be considering **dynamic extensions**: where two parties can co-define
-capability with custom extensions for their business while continuing to
-leverage the pre-defined capabilities and extensions from core protocol. This
-can allow them to support complex use cases very quickly without waiting for
-support for these custom extensions to be built into the core protocol.
-
 ## Build with us
 
 The future of commerce cannot be built in a vacuum. We invite merchants,
