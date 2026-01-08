@@ -48,25 +48,23 @@ hide:
   </p>
 
   <div class="partners-logo-row bottom-spacing">
-    <img src="assets/Google_Logo.svg" alt="Google" class="partners-logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+    <img src="assets/partner/codeveloped/Google.svg" alt="Google" class="partners-logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
     <span class="partners-logo-fallback">Google</span>
 
-    <img src="assets/partner/shopify_monotone_black.svg" alt="Shopify" class="partners-logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+    <img src="assets/partner/codeveloped/Shopify.svg" alt="Shopify" class="partners-logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
     <span class="partners-logo-fallback">Shopify</span>
 
-    <img src="assets/partner/etsy.png" alt="Etsy" class="partners-logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+    <img src="assets/partner/codeveloped/Etsy.svg" alt="Etsy" class="partners-logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
     <span class="partners-logo-fallback">Etsy</span>
   </div>
 
   <div class="partners-logo-row">
-    <img src="assets/partner/wayfair.png" alt="Wayfair" class="partners-logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+    <img src="assets/partner/codeveloped/Wayfair.svg" alt="Wayfair" class="partners-logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
     <span class="partners-logo-fallback">Wayfair</span>
 
-    <img src="assets/Target.svg" alt="Target" class="partners-logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+    <img src="assets/partner/codeveloped/Target.svg" alt="Target" class="partners-logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
     <span class="partners-logo-fallback">Target</span>
 
-    <img src="assets/partner/walmart.svg" alt="Walmart" class="partners-logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
-    <span class="partners-logo-fallback">Walmart</span>
   </div>
 </div>
 
