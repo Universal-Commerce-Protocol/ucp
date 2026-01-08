@@ -411,19 +411,20 @@ Merchants publish their profile at `/.well-known/ucp`:
   },
   "payment": {
     "handlers": [
-    {
-      "id": "merchant_tokenizer",
-      "name": "dev.ucp.merchant_tokenizer",
-      "version": "2026-01-11",
-      "spec": "https://example.com/specs/payments/merchant_tokenizer-payment",
-      "config_schema": "https://ucp.dev/schemas/payments/delegate-payment.json",
-      "instrument_schemas": [
-        "https://ucp.dev/schemas/shopping/types/card_payment_instrument.json"
-      ],
-      "config": {
-        "endpoint": "https://merchant.example.com/tokenize",
-        "public_key": "pk_live_abc123",
-        "creates": "merchant.token"
+      {
+        "id": "merchant_tokenizer",
+        "name": "dev.ucp.merchant_tokenizer",
+        "version": "2026-01-11",
+        "spec": "https://example.com/specs/payments/merchant_tokenizer-payment",
+        "config_schema": "https://ucp.dev/schemas/payments/delegate-payment.json",
+        "instrument_schemas": [
+          "https://ucp.dev/schemas/shopping/types/card_payment_instrument.json"
+        ],
+        "config": {
+          "endpoint": "https://merchant.example.com/tokenize",
+          "public_key": "pk_live_abc123",
+          "creates": "merchant.token"
+        }
       }
     ]
   },
