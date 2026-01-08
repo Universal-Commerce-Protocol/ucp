@@ -13,7 +13,7 @@ Please delete options that are not relevant.
 - [ ] Documentation update
 
 ---
-### ⚠️ Is this a Breaking Change or Removal?
+### Is this a Breaking Change or Removal?
 
 <!-- disableFinding(LINE_OVER_80) -->
 If you checked "Breaking change" above, or if you are removing **any** schema files or fields:
@@ -41,7 +41,7 @@ If you checked "Breaking change" above, or if you are removing **any** schema fi
 
 ---
 
-### ⚠️ Pull Request Title
+### Pull Request Title
 
 This repository enforces **Conventional Commits**. Your PR title must follow
 this format: `type: description` or `type!: description` for breaking changes.
