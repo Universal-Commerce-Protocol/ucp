@@ -65,7 +65,7 @@ hide:
     <img src="assets/Target.svg" alt="Target" class="partners-logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
     <span class="partners-logo-fallback">Target</span>
 
-    <img src="assets/walmart.svg" alt="Walmart" class="partners-logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+    <img src="assets/partner/walmart.svg" alt="Walmart" class="partners-logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
     <span class="partners-logo-fallback">Walmart</span>
   </div>
 </div>

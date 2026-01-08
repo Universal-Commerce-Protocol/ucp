@@ -456,7 +456,8 @@ h2.action-carousel-section__title {
 
 .phone-mockup {
   width: 100%;
-  height: auto;
+  height: 500px;
+  object-fit: contain;
   border-radius: 16px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.1);
   background-color: #fff;
@@ -472,15 +473,29 @@ h2.action-carousel-section__title {
   font-family: monospace;
   font-size: 0.75rem;
   color: #333;
-  min-height: 400px;
-  overflow: hidden;
+  height: 500px;
+  overflow-y: auto;
   border: 1px solid #dadce0;
-  display: flex;
-  align-items: center;
+  min-height: 0;
+}
+
+/* Scrollbar styling */
+.code-block-placeholder::-webkit-scrollbar {
+  width: 8px;
+}
+.code-block-placeholder::-webkit-scrollbar-track {
+  background: transparent;
+}
+.code-block-placeholder::-webkit-scrollbar-thumb {
+  background-color: #202124;
+  border-radius: 4px;
 }
 
 .code-block-placeholder .md-clipboard {
     display: none;
+}
+.code-block-placeholder pre {
+  margin: 0;
 }
 
 /* --- MOBILE RESPONSIVENESS (< 960px) --- */
@@ -655,8 +670,6 @@ h3.two-column-promo-item__title {
 .lifecycle-container {
   padding: 80px 0;
   text-align: center;
-  max-width: 1200px;
-  margin: 0 auto;
 }
 h2.lifecycle-container__title {
   font-size: 2.0rem;
