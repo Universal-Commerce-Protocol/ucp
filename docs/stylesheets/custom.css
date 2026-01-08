@@ -52,22 +52,22 @@ label.md-search__icon {
   color: #5f6368 !important;
 }
 
-/* -- BODY -- */
+/* -- LANDING PAGE BODY -- */
 
-p {
+.landing-page p {
   font-size: 0.8rem;
   margin: 0;
   line-height: 1.5;
 }
 
-.md-typeset h2 {
+.landing-page h2 {
   font-size: 2.0rem;
   font-weight: 700;
   color: #202124;
   margin: 0 auto 36px 0;
 }
 
-.md-typeset h3 {
+.landing-page h3 {
   font-size: 1rem;
   margin: 0 0 16px 0;
 }
@@ -317,14 +317,13 @@ h2.partner-carousel__title {
 /* --- ACTION CAROUSEL SECTION --- */
 .action-carousel-section {
   text-align: center;
-  padding: 60px 0;
   max-width: 100%;
-  margin: 40px 0;
+  margin: 60px 0;
 }
 
 .action-carousel-section__text {
   max-width: 800px;
-  margin: 0 auto 40px auto;
+  margin: 0 auto 36px auto;
   text-align: center;
 }
 
@@ -334,7 +333,7 @@ h2.partner-carousel__title {
   background-color: #f1f3f4;
   border-radius: 50px;
   padding: 4px;
-  margin-bottom: 50px;
+  margin-bottom: 60px;
 }
 
 .tab-btn {
@@ -393,7 +392,6 @@ h2.partner-carousel__title {
   flex: 1;
   min-width: 250px;
   max-width: 350px;
-  padding-top: 20px;
 }
 
 .icon-placeholder {
@@ -604,6 +602,7 @@ label.md-search__icon {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  padding: 80px 0 0 0;
 }
 .feature-item {
   display: flex;
@@ -627,6 +626,7 @@ h3.feature-item-title {
   gap: 30px;
   flex-wrap: wrap;
   justify-content: center;
+  margin-top: 60px;
 }
 .two-column-promo-item {
   flex: 1;
