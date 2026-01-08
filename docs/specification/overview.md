@@ -1,5 +1,3 @@
-**NDA / CONFIDENTIAL - DO NOT SHARE**
-
 <!--
    Copyright 2025 UCP Authors
 
@@ -17,9 +15,6 @@
 -->
 
 # Universal Commerce Protocol (UCP) Official Specification
-
-NOTE: Current Version is Work in Progress. This document represents a draft
-specification. Interfaces and schemas are subject to change.
 
 ## 1. Introduction
 
