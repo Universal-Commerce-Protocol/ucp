@@ -21,9 +21,9 @@ This document specifies the Agent2Agent Protocol (A2A) binding for
 
 ## Transport Discovery
 
-Merchants that support A2A transport must specify the agent card endpoint as
-part of the transports in UCP Profile at /.well-known/ucp. This allows capable
-platforms to interact with the merchant services over A2A Protocol.
+Businesses that support A2A transport must specify the agent card endpoint as
+part of `services` in UCP Profile at `/.well-known/ucp`. This allows capable
+platforms to interact with the business services over A2A Protocol.
 ```json
 {
   "ucp": {
@@ -33,7 +33,7 @@ platforms to interact with the merchant services over A2A Protocol.
         "version": "2026-01-11",
         "spec": "https://ucp.dev/specs/shopping",
         "a2a": {
-          "endpoint": "https://example-merchant.com/.well-known/agent-card.json"
+          "endpoint": "https://example-business.com/.well-known/agent-card.json"
         }
       }
     }
@@ -43,7 +43,7 @@ platforms to interact with the merchant services over A2A Protocol.
 
 ## Shopping Agent Profile Advertisement
 
-Shopping Agents/Client applications interacting with Merchant Agent must
+Shopping platforms interacting with Business Agent must
 send their profile URI as `UCP-Agent` request headers with every request.
 
 ```
@@ -54,39 +54,45 @@ Content-Type: application/json
 ### Header Mapping Reference
 
 The following table defines the required headers for enabling an A2A Agent
-to communicate UCP data types with client applications.
+to communicate UCP data types with platforms.
 
 | Header Name | Description |
 | :--- | :--- |
-| `UCP-Agent` | Shopping Agent/Client application profile URI. |
+| `UCP-Agent` | Shopping Platform application profile URI. |
 | `X-A2A-Extensions` | UCP Extension URI (specified below). |
 
 ## A2A Interactions
 
 The A2A Protocol provides a strong foundation for inter-agent communication.
 [A2A extensions](https://a2a-protocol.org/latest/topics/extensions/) enable
-communication between agents with structured data types. This enables merchants
-building AI applications to leverage UCP data types for communication with
-client applications.
+communication between agents with structured data types. This enables businesses
+to build AI applications to leverage UCP data types for communication with
+platforms.
 
-The URI for UCP Extension
-is https://ucp.dev/a2a/extensions/shopping?v=2026-01-11
+The URI for UCP spec: `https://ucp.dev/specification/reference?v=2026-01-11`
 
-Agents supporting UCP extension must advertise the extension and any optional
-capabilities in their A2A Agent Card to allow client applications to activate
+Businesses supporting UCP must advertise the extension and any optional
+capabilities in their A2A Agent Card to allow platforms to activate
 the extension.
+
+An example:
 
 ```json
 {
   "extensions": [
     {
-      "uri": "https://ucp.dev/a2a/extensions/shopping?v=2026-01-11",
-      "description": "Merchant agent supporting UCP",
+      "uri": "https://ucp.dev/specification/reference?v=2026-01-11",
+      "description": "Business agent supporting UCP",
       "params": {
         "capabilities": [
           {
-            "name": "dev.ucp.shopping.fulfillment",
+            "name": "dev.ucp.shopping.checkout",
             "version": "2026-01-11"
+          },
+          {
+            "name": "dev.ucp.shopping.fulfillment",
+            "version": "2026-01-11",
+            "extends": "dev.ucp.shopping.checkout"
           }
         ]
       }
@@ -97,51 +103,51 @@ the extension.
 
 ### Agent2Agent Negotiation
 
-The merchant agents can leverage A2A Message objects for allowing interaction
-with shopping agents/client applications. The A2A Message object returned by
+The business agents can leverage A2A `Message` objects for allowing interaction
+with shopping agents/platforms. The A2A `Message` object returned by
 the agent will return structured data as DataParts part of the message.
-Client applications must pass the merchant agent generated contextId for
+Platforms must pass the business agent generated `contextId` for
 subsequent turns in a session to preserve the current context.
 
-Merchant agents may also leverage A2A Task objects for scenarios where
-applicable. In such scenarios, the Merchant agent will return Task objects
-with appropriate payload for interaction with the client applications.
-Client applications must pass the server generated taskId along with the
-contextId for subsequent turns until the task is completed.
+Business agents may also leverage A2A `Task` objects for scenarios where
+applicable. In such scenarios, the business agent will return `Task` objects
+with appropriate payload for interaction with the platforms.
+Platforms must pass the server generated `taskId` along with the
+`contextId` for subsequent turns until the task is completed.
 
-Client applications must be capable of handling further negotiation in the
+Platforms must be capable of handling further negotiation in the
 same session even after a task reaches a terminal state (e.g. user places an
 order and wants to place another order in the same context or if the task
-reaches a failed state due to an exception). Client applications must reset the
-taskId once a task reaches terminal state to allow further interactions with
-the agent, although the current contextId can be reused for subsequent
+reaches a failed state due to an exception). Platforms must reset the
+`taskId` once a task reaches terminal state to allow further interactions with
+the agent, although the current `contextId` can be reused for subsequent
 interactions.
 
-## Request idempotency
+## Request Idempotency
 
-Merchant agents must leverage the messageId sent as part of the A2A message
-to detect duplicate messages for client application retries.
+Business agents must leverage the `messageId` sent as part of the A2A `Message`
+to detect duplicate messages from platform retries.
 
-## Checkout functionality
+## Checkout Functionality
 
 The Checkout capability allows consumers to manage items in a shopping cart
-and complete the purchase process. The merchant agent typically integrates
-with the merchant’s checkout APIs for offering this functionality.
+and complete the purchase process. The business agent typically integrates
+with the business's checkout APIs for offering this functionality.
 
 The extension defines the data schema for representing the Checkout
-functionality by Merchant Agent for any cart related actions, completing or
-canceling the checkout. `Checkout` entity is a profile of an A2A Message.
-The Checkout entity must be returned by the merchant agent to the client
-applications that activate UCP-A2A Extension in a A2A Message DataPart.
-The checkout object MUST be returned as part of a DataPart object with
+functionality by business agent for any cart related actions, completing or
+canceling the checkout. `Checkout` entity is a profile of an A2A `Message`.
+The Checkout entity must be returned by the business agent to the platform
+that activated UCP-A2A Extension in an A2A `Message`'s `DataPart`.
+The checkout object **MUST** be returned as part of a `DataPart` object with
 key `a2a.ucp.checkout`.
 
 **Request format:**
 Agentic applications can accept natural language input from users interacting
- with the agent to identify the user’s intent, negotiate with the user to
- capture any required information and then invoke the appropriate tools to
- perform the operation. Inputs from client applications/platforms can be sent
- to the remote merchant agent as an A2A message.
+with the agent to identify the user's intent, negotiate with the user to
+capture any required information and then invoke the appropriate tools to
+perform the operation. Inputs from platforms can be sent to the remote business
+agent as an A2A `Message`.
 
 Examples:
 
@@ -189,7 +195,7 @@ Examples:
 ```
 
 **Response format:**
-Following is an example response from a merchant agent implementing
+Following is an example response from a business agent implementing
 Checkout functionality:
 
 ```json
@@ -215,16 +221,16 @@ Checkout functionality:
 
 ### Checkout Completion
 
-When a user is ready to make a payment, the PaymentData must be submitted
-to the merchant agent to complete the checkout process. Payment data is a
+When a user is ready to make a payment, `payment_data` must be submitted
+to the business agent to complete the checkout process. `payment_data` is a
 structured data type specified as part of UCP. When processing a payment to
-complete the checkout, the Payment data must be submitted to the merchant agent
-as a DataPart with attribute name `a2a.ucp.checkout.payment_data`. Any
+complete the checkout, `payment_data` must be submitted to the business agent
+as a `DataPart` with attribute name `a2a.ucp.checkout.payment_data`. Any
 associated risk signals should be sent with attribute
 name `a2a.ucp.checkout.risk_signals`.
 
-Upon completion of the checkout process, the merchant agent must return the
- checkout object along with the order\_id and order\_permalink\_url attributes.
+Upon completion of the checkout process, the business agent must return the
+checkout object containing the `order_id` and `order_permalink_url` attributes.
 
 **Request format:**
 
@@ -241,7 +247,7 @@ Upon completion of the checkout process, the merchant agent must return the
         "kind": "data",
         "data": {
           "a2a.ucp.checkout.payment_data": {
-            ...paymentObject
+            ...paymentDataObject
           },
           "a2a.ucp.checkout.risk_signals":{...content}
         }
@@ -257,7 +263,7 @@ Upon completion of the checkout process, the merchant agent must return the
 ```
 
 **Response format:**
-Following is an example response from a merchant agent implementing
+Following is an example response from a business agent implementing
 Checkout functionality:
 
 ```json
@@ -271,11 +277,7 @@ Checkout functionality:
     "parts": [
       {
         "data": {
-          "a2a.ucp.checkout": {
-            ...baseCheckoutObject,
-            "order_id": "<order_id>",
-            "order_permalink_url": "<order_url>"
-          }
+          "a2a.ucp.checkout": { ...checkoutObject }
         },
         "kind": "data"
       }
@@ -288,19 +290,18 @@ Checkout functionality:
 
 #### AP2 based Checkout Completion
 
-Merchant agents can implement AP2 mandates extension that enables secure
+Business agents can implement AP2 mandates extension that enables secure
 exchange of user intents and authorizations for Agent-to-Agent payment
-interactions. Merchants that support AP2 mandates extension for UCP must
-specify this capability in the UCP discovery document and the A2A agent card.
-The AP2 mandates extension is considered implicitly active when a Client
-Application/Platform and Merchant Agent advertise AP2 capability in their
-respective profiles.
+interactions. Businesses that support AP2 mandates extension for UCP must
+specify this in the UCP discovery document and the A2A agent card.
+The AP2 mandates extension is considered implicitly active when a platform and
+business agent advertise AP2 mandates extension in their respective profiles.
 
-When AP2 mandates extension is enabled, the Merchant Agent must create a
+When AP2 mandates extension is enabled, the business agent must create a
 detached JWS for the Checkout object and must return the generated signature
-as part of the DataPart as `ap2.merchant_authorization`.
-This will allow the Client applications to cryptographically verify the
-Checkout payload against the Merchant’s public keys.
+as part of the `DataPart` as `ap2.merchant_authorization`.
+This will allow the platform to cryptographically verify the
+Checkout payload against the business's public keys.
 
 ```json
 {
@@ -328,13 +329,13 @@ Checkout payload against the Merchant’s public keys.
 }
 ```
 
-When the user confirms the payment on a client application, the user signed
-Checkout Mandate object and Payment Mandate object must be sent as a DataPart
-to the Merchant Agent for completing the Checkout. The Payment data which
-includes the Payment Mandate must be submitted as part of a DataPart
-with attribute name `a2a.ucp.checkout.payment_data`. Signed Checkout Mandate
-must be specified in the DataPart as`ap2.checkout_mandate`. The `token`
-attribute part of the payment data contains the payment mandate. Refer
+When the user confirms the payment on a platform, the user signed
+checkout and payment mandate objects must be sent as `DataPart`s
+to the business agent for completing checkout. The `payment_data` which
+includes the payment mandate must be submitted as part of a `DataPart`
+with attribute name `a2a.ucp.checkout.payment_data`. Signed checkout mandate
+must be specified in the `DataPart` as`ap2.checkout_mandate`. The `token`
+attribute part of `payment_data` contains the payment mandate. Refer to
 [AP2 Mandates Extension](ap2-mandates.md) documentation for more details
 about verification and processing of the mandates to complete the checkout.
 
