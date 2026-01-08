@@ -77,7 +77,7 @@ jobs:
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
 
       - name: Check Python SDK Models Consistency
-        run: bash scripts/ci_check_models.sh
+        run: scripts/ci_check_models.sh
 
       - name: Check for Docs Update
         if: github.event_name == 'pull_request'
