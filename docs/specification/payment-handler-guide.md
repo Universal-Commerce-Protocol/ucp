@@ -26,14 +26,14 @@ structure to ensure consistency, completeness, and clarity for implementers.
 
 ### 1.1 Purpose
 
-Payment handlers enable the "N-to-N" interoperability between agents, merchants,
+Payment handlers enable "N-to-N" interoperability between platforms, businesses,
 and payment providers. A well-specified handler must answer these questions for
 each participant:
 
 - **Who participates?** What participants are involved and what are their roles?
-- **What are my prerequisites?** What onboarding or setup is required?
-- **How do I configure?** What configuration do I advertise or consume?
-- **How do I execute?** What protocol do I follow to acquire or process instruments?
+- **What are the prerequisites?** What onboarding or setup is required?
+- **How is it configured?** What configuration is advertised or consumed?
+- **How is it executed?** What protocol is followed to acquire or process instruments?
 
 This guide provides a framework that ensures every handler specification answers
 these questions systematically.
@@ -49,7 +49,12 @@ This guide applies to:
 
 ## 2. Core Concepts
 
-Every payment handler specification MUST define five core elements:
+Every payment handler specification MUST define the core elements below.
+
+**Note on Protocol Signatures:**: The function signatures provided in this
+section (e.g., `PROCESSING(...)`) epresent **logical data flows**, not literal
+function calls. Spec authors must map these logical flows to the actual
+transport protocol used by their implementation.
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────────┐
@@ -71,7 +76,7 @@ Every payment handler specification MUST define five core elements:
 │   │   HANDLER    │    │  INSTRUMENT  │      │  PROCESSING  │                 │
 │   │ DECLARATION  │    │  ACQUISITION │      │              │                 │
 │   └──────────────┘    └──────────────┘      └──────────────┘                 │
-│   Merchant advertises  Agent acquires        Participant                     │
+│   Business advertises  platform acquires       Participant                     │
 │   handler config       checkout instrument   processes instrument            │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
@@ -80,22 +85,27 @@ Every payment handler specification MUST define five core elements:
 ### 2.1 Participants
 
 **Definition:** The distinct actors that participate in the payment handler's
-lifecycle. Every handler has at minimum two participants (merchant and agent),
-but may define additional participants with specific roles.
+lifecycle. Every handler has at minimum two participants (business and
+platform), but may define additional participants with specific roles.
+
+**Note on Terminology:**: While this guide refers to the participant as the
+**"Business"**, technical schema fields may retain the standard industry
+nomenclature **`merchant_*`** (e.g., `merchant_id`, `merchant_name`).
+Specifications MUST explicitly document these field mappings.
 
 **Standard Participants:**
 
 | Participant | Role |
 |:------------|:-----|
-| **Merchant** | Advertises handler configuration, processes payment instruments |
-| **Agent** | Discovers handlers, acquires payment instruments, submits checkout |
+| **Business** | Advertises handler configuration, processes payment instruments |
+| **platform** | Discovers handlers, acquires payment instruments, submits checkout |
 
 **Extended Participants** (example handler-specific participants):
 
 | Participant | Example Role |
 |:------------|:-------------|
 | **Tokenizer** | Stores raw credentials and issues token credentials |
-| **PSP** | Processes payments on behalf of merchant using the checkout instrument |
+| **PSP** | Processes payments on behalf of business using the checkout instrument |
 
 ### 2.2 Prerequisites
 
@@ -110,19 +120,19 @@ PREREQUISITES(participant, onboarding_input) → prerequisites_output
 
 | Field | Description |
 |:------|:------------|
-| `participant` | The participant being onboarded (merchant, agent, etc.) |
+| `participant` | The participant being onboarded (business, platform, etc.) |
 | `onboarding_input` | What the participant provides during setup |
 | `prerequisites_output` | The identity and any additional configuration received |
 
 **Prerequisites Output:**
 
 The `prerequisites_output` contains what a participant receives from onboarding.
-At minimum, this includes an **identity** (see [PaymentIdentity schema](https://ucp.dev/schemas/shopping/types/payment_identity.json)).
+At minimum, this includes an **identity** (see [Payment Identity](https://ucp.dev/schemas/shopping/types/payment_identity.json)).
 It may also include additional configuration, credentials, or settings specific
 to the handler.
 
-Payment handler specifications do NOT need to define a formal schema for
-`prerequisites_output`. Instead, the specification SHOULD clearly document:
+Payment handler specifications **are not required** to define a formal schema
+for `prerequisites_output`. Instead, the specification SHOULD clearly document:
 
 - What identity is assigned (and how it maps to `PaymentIdentity`)
 - What additional configuration is provided
@@ -138,8 +148,8 @@ Payment handler specifications do NOT need to define a formal schema for
 
 ### 2.3 Handler Declaration
 
-**Definition:** The configuration a merchant advertises to indicate support for
-this handler and enable agents to invoke it.
+**Definition:** The configuration a business advertises to indicate support for
+this handler and enable platforms to invoke it.
 
 **Signature:**
 
@@ -149,14 +159,14 @@ HANDLER_DECLARATION(prerequisites_output) → handler_declaration
 
 | Field | Description |
 |:------|:------------|
-| `prerequisites_output` | The identity and configuration from merchant prerequisites |
+| `prerequisites_output` | The identity and configuration from business prerequisites |
 | `handler_declaration` | The complete handler object advertised in `payment.handlers[]` |
 
 **Output Structure:**
 
 The handler declaration conforms to the [`PaymentHandler`](https://ucp.dev/schemas/shopping/types/payment_handler.json)
-schema. Your specification should define the available config and instrument
-schemas, and how to construct each based on the merchant's prerequisites output
+schema. The specification SHOULD define the available config and instrument
+schemas, and how to construct each based on the business's prerequisites output
 and desired configuration.
 
 ```json
@@ -177,9 +187,14 @@ and desired configuration.
 
 ---
 
-#### 2.3.1 Defining Your Config Schema
+#### 2.3.1 Defining the Config Schema
 
-The `config_schema` field points to a JSON schema that validates the `config` object merchants provide. Both are optional, and there is no base config schema to extend — each handler defines its own, if needed, to assist agents in completing their Instrument Acquisition.
+The `config_schema` field points to a JSON schema that validates the `config`
+object businesses provide. Both are optional.
+
+**Recommendation:** Most handlers require an environment setting (e.g., Sandbox
+vs. Production). It is recommended to include this in the config schema to
+**standardize** testing flows.
 
 **Example Config Schema:**
 
@@ -194,7 +209,7 @@ The `config_schema` field points to a JSON schema that validates the `config` ob
     "environment": {
       "type": "string",
       "enum": ["sandbox", "production"],
-      "description": "The API environment this merchant supports for the example handler.",
+      "description": "The API environment this business supports for the example handler.",
       "default": "production"
     }
   }
@@ -212,33 +227,23 @@ The `config_schema` field points to a JSON schema that validates the `config` ob
 | [`payment_instrument.json`](https://ucp.dev/schemas/shopping/types/payment_instrument.json) | Base: id, handler_id, type, credential, billing_address |
 | [`card_payment_instrument.json`](https://ucp.dev/schemas/shopping/types/card_payment_instrument.json) | Card display: brand, last_digits, expiry |
 
-UCP offers basic schemas for universal payment instruments like `card`. You can
-extend any of the basic payment instruments if you want to add additional
+UCP provides base schemas for universal payment instruments like `card`. Spec
+authors MAY extend any of the basic payment instruments to add additional
 handler-specific display data.
-
-If your handler needs a custom instrument, extend the base `PaymentInstrument`
-and define your own shape.
 
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://example.com/handlers/my_wallet/instrument.json",
+  "$id": "https://example.com/ucp/handlers/my_wallet/instrument.json",
   "title": "MyWalletInstrument",
   "allOf": [
     { "$ref": "https://ucp.dev/schemas/shopping/types/payment_instrument.json" }
   ],
   "type": "object",
-  "required": ["type", "account_type", "display_email"],
+  "required": ["type", "account_type"],
   "properties": {
     "type": { "const": "my_wallet" },
-    "account_type": {
-      "type": "string",
-      "description": "The plan type for this wallet account."
-    },
-    "display_email": {
-      "type": "string",
-      "description": "The wallet account email to display."
-    }
+    // base payment instrument or specific payment instrument defined by handler
   }
 }
 ```
@@ -252,39 +257,40 @@ and define your own shape.
 | [`payment_credential.json`](https://ucp.dev/schemas/shopping/types/payment_credential.json) | Base: type discriminator only |
 | [`token_credential.json`](https://ucp.dev/schemas/shopping/types/token_credential.json) | Token: type + token string |
 
-UCP offers basic schemas for universal payment credentials like `card` and
-`token`. You can extend any of the basic payment credentials if you want to add
-additional handler-specific credential context.
+UCP provides base schemas for universal payment credentials like `card` and
+`token`. Authors MAY extend these schemas to include handler-specific
+credential context.
 
-When using credentials with your handler, be sure to define which credential
-types are accepted in your handler specification.
+The specification MUST define which credential types are accepted by the
+handler.
+
+**Important:** If using token credentials, the schema MUST include an
+expiration field (`expiry`, `ttl`, or similar) to ensure platforms know when to
+refresh credentials.
 
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://example.com/handlers/my_wallet/credential.json",
+  "$id": "https://example.com/ucp/handlers/my_wallet/credential.json",
   "title": "MyWalletCredential",
   "type": "object",
-  "required": ["type", "token", "verification_level"],
+  "required": ["type", "token"],
   "properties": {
-    "verification_level": {
-      "type": "string",
-      "description": "The verification level of this wallet account."
-    }
+    // base credential object or credential context defined by handler
   }
 }
 ```
 
 ### 2.4 Instrument Acquisition
 
-**Definition:** The protocol an agent follows to acquire a payment instrument
-that can be submitted to the merchant's checkout.
+**Definition:** The protocol a platform follows to acquire a payment instrument
+that can be submitted to the business's checkout.
 
 **Signature:**
 
 ```
 INSTRUMENT_ACQUISITION(
-  agent_prerequisites_output,
+  platform_prerequisites_output,
   handler_declaration,
   binding,
   buyer_input
@@ -293,23 +299,23 @@ INSTRUMENT_ACQUISITION(
 
 | Field | Description |
 |:------|:------------|
-| `agent_prerequisites_output` | Agent's prerequisites output (config), if prerequisites were required |
-| `handler_declaration.config` | Handler-specific configuration from the merchant |
-| `binding` | Context for binding the credential to a specific checkout (`checkout_id` and `identity` should be used) |
+| `platform_prerequisites_output` | platform's prerequisites output (config), if prerequisites were required |
+| `handler_declaration.config` | Handler-specific configuration from the business |
+| `binding` | **(See 2.6)** Context for binding the credential to a specific checkout |
 | `buyer_input` | Buyer's payment selection or credentials |
 | `checkout_instrument` | The payment instrument to submit at checkout |
 
 Payment handler specifications do NOT need to define a formal process for
 instrument acquisition. Instead, the specification SHOULD clearly document:
 
-- How to leverage the handler's advertised `config` to respect merchant configuration and create a `checkout_instrument`.
+- How to apply the handler's `config` to construct a valid `checkout_instrument`.
 - How to create an effective credential binding to the specific checkout and
-  merchant for usage, which is critical for security, based off the available
+  business for usage, which is critical for security, based on the available
   `config` and `checkout`.
 
 ### 2.5 Processing
 
-**Definition:** The steps a participant (typically merchant or PSP) takes to
+**Definition:** The steps a participant (typically business or PSP) takes to
 process a received payment instrument and complete the transaction.
 
 **Signature:**
@@ -326,10 +332,23 @@ PROCESSING(
 | Field | Description |
 |:------|:------------|
 | `identity` | The processing participant's `PaymentIdentity` |
-| `checkout_instrument` | The instrument received from the agent |
+| `checkout_instrument` | The instrument received from the platform |
 | `binding` | The binding context for verification |
 | `transaction_context` | Checkout totals, line items, etc. |
 | `processing_result` | Success/failure with payment details |
+
+#### 2.5.1 Error Handling
+
+The specification MUST define a mapping for common failures (e.g., 'Declined',
+'Insufficient Funds', 'Network Error') to standard UCP Error definitions. This
+ensures the platform can render localized, consistent error messages to the
+buyer regardless of the underlying processor.
+
+### 2.6 Key Definitions
+
+| Term | Definition |
+|:-----|:-----------|
+| **Binding** | A cryptographic or logical association of a payment instrument to a specific checkout transaction and business identity. This prevents replay attacks where a valid credential intended for Business A is intercepted and used at Business B. |
 
 ---
 
@@ -355,6 +374,7 @@ Before publishing a payment handler specification, verify:
 
 - [ ] All participants are listed
 - [ ] Each participant's role is clearly described
+- [ ] Note on "Business" vs "Merchant" terminology added if applicable
 
 ### 4.3 Prerequisites
 
@@ -366,27 +386,29 @@ Before publishing a payment handler specification, verify:
 ### 4.4 Handler Declaration
 
 - [ ] Identity schema is documented (base or extended)
-- [ ] Configuration schema is documented (if applicable)
+- [ ] Configuration schema is documented (if applicable) and includes environment
 - [ ] Instrument schema is documented (base or extended)
 
 ### 4.5 Instrument Acquisition
 
 - [ ] Protocol steps are enumerated and clear
+- [ ] Logical flow is mapped to actual protocol
 - [ ] API calls or SDK usage is shown with examples
 - [ ] Binding requirements are specified
-- [ ] Checkout PaymentInstrument creation and shape is well-defined
+- [ ] Checkout Payment Instrument creation and shape is well-defined
 
 ### 4.6 Processing
 
 - [ ] Processing steps are enumerated and clear
 - [ ] Verification requirements are specified
-- [ ] Error handling is addressed
+- [ ] Error handling and mapping is addressed
 
 ### 4.7 Security
 
 - [ ] Security requirements are listed
 - [ ] Binding verification is required
 - [ ] Credential handling guidance is provided
+- [ ] Token expiry is defined (if applicable)
 
 ### 4.8 General
 
@@ -407,8 +429,9 @@ specifications:
 | Practice | Description |
 |:---------|:------------|
 | **Extend, don't reinvent** | Use `allOf` to compose base schemas. Don't redefine `brand`, `last_digits`, etc. |
-| **Use const for discriminators** | Define `credential.type` as a `const` to identify your credential type unambiguously. |
-| **Validate early** | Publish your schemas at stable URLs before finalizing the spec so implementers can validate. |
+| **Use const for discriminators** | Define `credential.type` as a `const` to identify credential types unambiguously. |
+| **Validate early** | Publish schemas at stable URLs before finalizing the spec so implementers can validate. |
+| **Include Expiry** | When designing token credentials, always include `expiry` or `ttl`. |
 
 ### 5.2 Documentation
 
@@ -416,7 +439,7 @@ specifications:
 |:---------|:------------|
 | **Show, don't just tell** | Include complete JSON examples for every schema and protocol step. |
 | **Document error cases** | Specify what errors can occur and how participants should handle them. |
-| **Version independently** | Your handler version evolves independently of UCP core versions. |
+| **Version independently** | The handler version evolves independently of UCP core versions. |
 
 ### 5.3 Security
 
@@ -439,4 +462,4 @@ specifications:
 ## 6. See Also
 
 - **[Tokenization Guide](tokenization-guide.md)** — Guide for building tokenization payment handlers
-- **[Google Pay Handler](gpay-payment-handler.md)** — Handler for Google Pay integration
+- **[Google Pay Handler](https://developers.google.com/merchant/ucp/guides/gpay_payment_handler.md)** — Handler for Google Pay integration
