@@ -22,26 +22,26 @@
 
 The Universal Commerce Protocol (UCP) is an open standard designed to facilitate
 communication and interoperability between diverse commerce entities. In a
-fragmented landscape where agents, merchants, payment providers, and identity
-providers operate on different systems, UCP provides a standardized common
-language and functional primitives.
+fragmented landscape where consumer surfaces/platforms, businesses, payment
+providers, and identity providers operate on different systems, UCP provides
+a standardized common language and functional primitives.
 
 This document provides the detailed technical specification for UCP. Its primary
 goal is to enable:
 
-*   **Consumer Surfaces (Agents/Apps):** To discover merchant capabilities and
+*   **Consumer Surfaces/Platforms:** To discover business capabilities and
     facilitate purchases.
-*   **Merchants:** To expose their inventory and checkout logic in a standard
+*   **Businesses:** To expose their inventory and retail logic in a standard
     way without building custom integrations for every platform.
 *   **Payment & Credential Providers:** To securely exchange tokens and
     credentials to facilitate transactions.
 
 ### 1.1. Key Goals of UCP
 
-*   **Interoperability:** Bridge the gap between commerce platforms, agents, and
-    payment ecosystems.
+*   **Interoperability:** Bridge the gap between consumer surfaces, businesses,
+    and payment ecosystems.
 *   **Discovery:** Allow consumer surfaces to dynamically discover what a
-    merchant supports (e.g., "Do they support guest checkout?", "Do they have
+    business supports (e.g., "Do they support guest checkout?", "Do they have
     loyalty programs?").
 *   **Security:** Facilitate secure, standards-based (OAuth 2.0, PCI-DSS
     compliant patterns) exchanges of sensitive user and payment data.
@@ -50,24 +50,23 @@ goal is to enable:
 
 ### 1.2. Guiding Principles
 
-The design and evolution of the Universal Commerce Protocol are driven by the
-following core principles:
+The design and evolution of UCP are driven by the following core principles:
 
 *   **Scalability & Universality:** The interface must scale to support diverse
-    commerce entities—from small individual merchants to large enterprise store
+    commerce entities—from small individual businesses to large enterprise store
     builders—across various locales, identity providers, and payment ecosystems
     without friction.
 *   **Simplicity & Developer Experience:** We prioritize a clean, simple
-    interface that is easy to implement for merchants and platforms alike.
+    interface that is easy to implement for businesses and platforms alike.
     Complexity should be opt-in via extensions, not forced upon the core.
 *   **Extensibility & Openness:** The protocol is designed as an extensible
     framework. It allows for future growth and community-driven Capabilities
     (e.g., new vertical supports) to pave the way for adoption as an
     industry-wide standard.
-*   **Merchant Centricity (MoR Neutrality):** The Merchant remains the Merchant
+*   **Business Centricity (MoR Neutrality):** The business remains as Merchant
     of Record (MoR). UCP facilitates the transaction and data exchange, but the
-    Merchant retains ownership of the order, financial liability, and customer
-    relationship. The Platform acts as a facilitator, staying in the loop for
+    business retains ownership of the order, financial liability, and customer
+    relationship. The platform acts as a facilitator, staying in the loop for
     order events to assist the user.
 *   **Security & Privacy by Design:** The protocol must support strict
     enterprise-grade security and privacy standards. It ensures that sensitive
@@ -89,18 +88,18 @@ a specific role in the commerce lifecycle.
 
 ### 2.1. Platform (Application/Agent)
 
-The Platform is the consumer-facing surface (such as an AI agent, mobile app, or
+The platform is the consumer-facing surface (such as an AI agent, mobile app, or
 social media site) acting on behalf of the User. It orchestrates the commerce
-journey by discovering merchants and facilitating user intent.
+journey by discovering businesses and facilitating user intent.
 
-*   **Responsibilities:** Discovering merchant capabilities via manifests,
+*   **Responsibilities:** Discovering business capabilities via manifests,
     initiating checkout sessions, and presenting the UI or conversational
     interface to the user.
 *   **Examples:** AI Shopping Assistants, Super Apps, Search Engines.
 
-### 2.2. Merchant
+### 2.2. Business
 
-The entity selling goods or services. In the UCP model, the Merchant acts as the
+The entity selling goods or services. In the UCP model, the business acts as the
 **Merchant of Record (MoR)**, retaining financial liability and ownership of the
 order.
 
@@ -123,7 +122,7 @@ data, particularly payment instruments and shipping addresses.
 ### 2.4. Payment Service Provider (PSP)
 
 The financial infrastructure provider that processes payments on behalf of the
-Merchant.
+business.
 
 *   **Responsibilities:** Authorizing and capturing transactions, handling
     settlements, and communicating with card networks. The PSP often interacts
@@ -135,7 +134,7 @@ Merchant.
 UCP revolves around three fundamental constructs that define how entities
 interact.
 
-*   **Capabilities:** Standalone core features that a merchant supports. These
+*   **Capabilities:** Standalone core features that a business supports. These
     are the "verbs" of the protocol.
     *   *Examples:* Checkout, Identity Linking, Order.
 *   **Extensions:** Optional modules that augment a specific Capability. They
@@ -161,11 +160,11 @@ Schema notes:
 
 ## 5. Discovery, Governance, and Negotiation
 
-UCP employs a server-selects architecture where the merchant (server) chooses
+UCP employs a server-selects architecture where the business (server) chooses
 the protocol version and capabilities from the intersection of both parties'
-capabilities. Both merchant and agent profiles can be cached by both parties,
+capabilities. Both business and platform profiles can be cached by both parties,
 allowing efficient capability negotiation within the normal request/response
-flow between agent and merchant.
+flow between platform and business.
 
 ### 5.1 Namespace Governance
 
@@ -205,7 +204,7 @@ of these URLs MUST match the namespace authority:
 | `dev.ucp.*`     | `https://ucp.dev/...`     |
 | `com.example.*` | `https://example.com/...` |
 
-Agents MUST validate this binding and SHOULD reject capabilities where the
+Platform MUST validate this binding and SHOULD reject capabilities where the
 spec origin does not match the namespace authority.
 
 #### 5.1.3 Governance Model
@@ -239,12 +238,12 @@ standard formats:
 | `spec`          | string | Yes      | URL to service documentation         |
 | `rest`          | object | No       | REST transport binding               |
 | `rest.schema`   | string | Yes      | URL to OpenAPI spec (JSON)           |
-| `rest.endpoint` | string | Yes      | Merchant's REST endpoint             |
+| `rest.endpoint` | string | Yes      | Business's REST endpoint             |
 | `mcp`           | object | No       | MCP transport binding                |
 | `mcp.schema`    | string | Yes      | URL to OpenRPC spec (JSON)           |
-| `mcp.endpoint`  | string | Yes      | Merchant's MCP endpoint              |
+| `mcp.endpoint`  | string | Yes      | Business's MCP endpoint              |
 | `a2a`           | object | No       | A2A transport binding                |
-| `a2a.endpoint`  | string | Yes      | Merchant's A2A Agent Card URL        |
+| `a2a.endpoint`  | string | Yes      | Business's A2A Agent Card URL        |
 | `embedded`      | string | No       | Embedded transport binding           |
 |`embedded.schema`| string | Yes      | URL to OpenRPC spec (JSON)           |
 
@@ -261,13 +260,13 @@ appended to this endpoint to form the complete URL.
 ```json
 "rest": {
   "schema": "https://ucp.dev/services/shopping/rest.openapi.json",
-  "endpoint": "https://merchant.example.com/api/v2"
+  "endpoint": "https://business.example.com/api/v2"
 }
 ```
 
-With OpenAPI path `/checkout`, the resolved URL is:
+With OpenAPI path `/checkout-sessions`, the resolved URL is:
 ```
-POST https://merchant.example.com/api/v2/checkout
+POST https://business.example.com/api/v2/checkout-sessions
 ```
 
 **Rules:**
@@ -289,8 +288,8 @@ functionality is supported and where to find documentation and schemas.
 
 #### 5.3.2 Extensions
 
-An **extension** is a capability that augments another capability. Extensions
-use the `extends` field to declare their parent:
+An **extension** is an optional module that augments another capability.
+Extensions use the `extends` field to declare their parent:
 
 ```json
 {
@@ -310,7 +309,7 @@ Extensions can be:
 ### 5.4 Schema Composition
 
 Extensions can add new fields and modify shared structures (e.g., discounts
-modify `totals`, fulfillment adds shipping to `totals`).
+modify `totals`, fulfillment adds fulfillment to `totals.type`).
 
 #### 5.4.1 Requirements
 
@@ -324,20 +323,21 @@ modify `totals`, fulfillment adds shipping to `totals`).
 
 #### 5.4.2 Extension Schema Pattern
 
-Extension schemas define composed types using `allOf`:
+Extension schemas define composed types using `allOf`. An example is as follows:
 
 ```json
 {
   "$defs": {
-    "dev.ucp.shopping.fulfillment.Checkout": {
+    "discounts_object": { ... },
+    "checkout": {
       "allOf": [
         {"$ref": "checkout.json"},
         {
           "type": "object",
           "properties": {
-            "fulfillment_address": {"$ref": "types/postal_address.json"},
-            "fulfillment_options": {"type": "array"},
-            "fulfillment_option_id": {"type": "string"}
+            "discounts": {
+              "$ref": "#/$defs/discounts_object"
+            }
           }
         }
       ]
@@ -350,9 +350,9 @@ Composed type names MUST use the pattern: `{capability-name}.{TypeName}`
 
 #### 5.4.3 Resolution Flow
 
-Clients MUST resolve schemas following this sequence:
+Platforms MUST resolve schemas following this sequence:
 
-1.  **Discovery**: Fetch merchant profile from `/.well-known/ucp`
+1.  **Discovery**: Fetch business profile from `/.well-known/ucp`
 2.  **Negotiation**: Compute capability intersection (see
     [5.7.3](#573-intersection-algorithm))
 3.  **Schema Fetch**: Fetch base schema and all active extension schemas
@@ -361,9 +361,9 @@ Clients MUST resolve schemas following this sequence:
 
 ### 5.5 Profile Structure
 
-#### 5.5.1 Merchant Profile
+#### 5.5.1 Business Profile
 
-Merchants publish their profile at `/.well-known/ucp`:
+Businesses publish their profile at `/.well-known/ucp`. An example:
 
 ```json
 {
@@ -375,11 +375,11 @@ Merchants publish their profile at `/.well-known/ucp`:
         "spec": "https://ucp.dev/specs/shopping",
         "rest": {
           "schema": "https://ucp.dev/services/shopping/rest.openapi.json",
-          "endpoint": "https://merchant.example.com/ucp/v1"
+          "endpoint": "https://business.example.com/ucp/v1"
         },
         "mcp": {
           "schema": "https://ucp.dev/services/shopping/mcp.openrpc.json",
-          "endpoint": "https://merchant.example.com/ucp/mcp"
+          "endpoint": "https://business.example.com/ucp/mcp"
         }
       }
     },
@@ -445,11 +445,12 @@ capabilities. Payment configuration is a sibling—see
 contains public keys (JWK format) used to verify signatures on webhooks and
 other authenticated messages from the merchant.
 
-#### 5.5.2 Agent Profile
+#### 5.5.2 Platform Profile
 
-Agent profiles are similar and include signing keys for capabilities
+Platform profiles are similar and include signing keys for capabilities
 requiring cryptographic verification. Capabilities may include a `config` object
-for capability-specific settings (e.g., callback URLs, feature flags):
+for capability-specific settings (e.g., callback URLs, feature flags). An
+example:
 
 ```json
 {
@@ -475,7 +476,7 @@ for capability-specific settings (e.g., callback URLs, feature flags):
         "spec": "https://ucp.dev/specs/shopping/order",
         "schema": "https://ucp.dev/schemas/shopping/order.json",
         "config": {
-          "webhook_url": "https://agent.example.com/webhooks/ucp/orders"
+          "webhook_url": "https://platform.example.com/webhooks/ucp/orders"
         }
       }
     ]
@@ -518,12 +519,12 @@ for capability-specific settings (e.g., callback URLs, feature flags):
 }
 ```
 
-### 5.6 Agent Advertisement on Request
+### 5.6 Platform Advertisement on Request
 
-Agents MUST communicate their profile URI with each request to enable
+Platforms MUST communicate their profile URI with each request to enable
 capability negotiation.
 
-**HTTP Transport:** Agents MUST use Dictionary Structured Field syntax
+**HTTP Transport:** Platforms MUST use Dictionary Structured Field syntax
 ([RFC 8941](https://datatracker.ietf.org/doc/html/rfc8941)) in the UCP-Agent
 header:
 
@@ -535,7 +536,8 @@ Content-Type: application/json
 {"line_items": [...]}
 ```
 
-**MCP Transport:** Agents MUST use native dictionary structure in `_meta.ucp`:
+**MCP Transport:** Platforms MUST use native dictionary structure in
+`_meta.ucp`:
 
 ```json
 {
@@ -555,27 +557,28 @@ Content-Type: application/json
 
 ### 5.7 Negotiation Protocol
 
-#### 5.7.1 Agent Requirements
+#### 5.7.1 Platform Requirements
 
-1.  **Profile Advertisement**: Agents MUST include their profile URI in every
+1.  **Profile Advertisement**: Platforms MUST include their profile URI in every
     request using the transport-appropriate mechanism.
-2.  **Discovery**: Agents MAY fetch the merchant profile from `/.well-known/ucp`
-    before initiating requests. If fetched, agents SHOULD cache the profile
-    according to HTTP cache-control directives.
-3.  **Namespace Validation**: Agents MUST validate that capability `spec` URL
+2.  **Discovery**: Platforms MAY fetch the business profile from
+    `/.well-known/ucp` before initiating requests. If fetched, platforms
+    SHOULD cache the profile according to HTTP cache-control directives.
+3.  **Namespace Validation**: Platforms MUST validate that capability `spec` URL
     origins match namespace authorities.
-4.  **Schema Resolution**: Agents MUST fetch and compose schemas for negotiated
-    capabilities before making requests.
+4.  **Schema Resolution**: Platforms MUST fetch and compose schemas for
+    negotiated capabilities before making requests.
 
-#### 5.7.2 Merchant Requirements
+#### 5.7.2 Business Requirements
 
-1.  **Profile Resolution**: Upon receiving a request with an agent profile URI,
-    merchants MUST fetch and validate the agent profile unless already cached.
-2.  **Capability Intersection**: Merchants MUST compute the intersection of
-    agent and merchant capabilities.
+1.  **Profile Resolution**: Upon receiving a request with an platform profile
+    URI, businesses MUST fetch and validate the platform profile unless already
+    cached.
+2.  **Capability Intersection**: Businesses MUST compute the intersection of
+    platform and business capabilities.
 3.  **Extension Validation**: Extensions without their parent capability in the
     intersection MUST be excluded.
-4.  **Response Requirements**: Merchants MUST include the `ucp` field in every
+4.  **Response Requirements**: Businesses MUST include the `ucp` field in every
     response containing:
     -   `version`: The UCP version used to process the request
     -   `capabilities`: Array of active capabilities for this response
@@ -585,8 +588,8 @@ Content-Type: application/json
 The capability intersection algorithm determines which capabilities are active
 for a session:
 
-1.  **Compute intersection**: For each merchant capability, include it in the
-    result if an agent capability with the same `name` exists.
+1.  **Compute intersection**: For each business capability, include it in the
+    result if a platform capability with the same `name` exists.
 
 2.  **Prune orphaned extensions**: Remove any capability where `extends` is
     set but the parent capability is not in the intersection.
@@ -599,7 +602,7 @@ dependencies satisfied.
 
 #### 5.7.4 Error Handling
 
-If negotiation fails, merchants MUST return an error response:
+If negotiation fails, businesses MUST return an error response:
 
 ```json
 {
@@ -633,25 +636,25 @@ The `capabilities` array in responses indicates active capabilities:
 ## 6. Payment Architecture
 
 UCP adopts a decoupled architecture for payments to solve the "N-to-N"
-complexity problem between Agents, Merchants, and Payment Providers by
+complexity problem between Platforms, Businesses, and Payment Providers by
 separating payment methods (what types of payment are accepted) from payment
 handlers (how instruments are acquired). This separation enables critical
-capabilities: merchants can support multiple processing strategies for the same
+capabilities: businesses can support multiple processing strategies for the same
 payment instrument (e.g., accepting cards via direct tokenization, wallet apps),
-agents can choose the most appropriate handler based on their capabilities and
-user preferences, and new payment handlers and instruments can be introduced and
-adopted by the ecosystem in a permissionless way.
+platforms can choose the most appropriate handler based on their capabilities
+and user preferences, and new payment handlers and instruments can be introduced
+and adopted by the ecosystem in a permissionless way.
 
 ### 6.1 Payment in the Checkout Lifecycle
 
 Payment is an integral part of the UCP checkout flow, not a standalone
 transaction. The `payment` field is a required component of every checkout
-response, enabling the following communication pattern between merchants and
-agents:
+response, enabling the following communication pattern between businesses and
+platforms:
 
-**Step 1: Checkout Creation — Handler Advertisement (Merchant → Agent)**
+**Step 1: Checkout Creation — Handler Advertisement (Business → Platform)**
 
-When an agent creates or updates a checkout, the merchant includes available
+When a platform creates or updates a checkout, the business includes available
 payment handlers in the response:
 
 ```json
@@ -677,27 +680,27 @@ UCP-Agent: profile="https://agent.example/profile"
 ```
 
 The `payment.handlers` array advertises which payment collection strategies the
-merchant supports. Each handler tells the agent: "Here's how you can acquire a
-payment instrument for me." This is a **response-only field**—merchants
-advertise handlers, agents never send them.
+business supports. Each handler tells the platform: "Here's how you can acquire
+a payment instrument for me." This is a **response-only field**—businesses
+advertise handlers, platforms never send them.
 
-**Step 2: Instrument Acquisition — Client-Side Processing (Agent)**
+**Step 2: Instrument Acquisition — Client-Side Processing (Platform)**
 
-The agent selects a compatible handler based on:
+The platform selects a compatible handler based on:
 
 - Its own capabilities (e.g., can it execute Google Pay API calls?)
 - User preferences (e.g., saved payment methods)
 - Handler requirements (e.g., supported card networks)
 
-The agent then executes the handler's protocol (defined by its `spec` URL) to
-acquire a payment instrument. This happens **outside the merchant's checkout
+The platform then executes the handler's protocol (defined by its `spec` URL) to
+acquire a payment instrument. This happens **outside the business's checkout
 API**—the handler protocol may involve calling PSP endpoints, launching wallet
-UIs, or delegating to payment platforms. The merchant is not involved in this
+UIs, or delegating to payment platforms. The business is not involved in this
 step.
 
-**Optional: Display Info for Embedded Checkout (Agent → Merchant)**
+**Optional: Display Info for Embedded Checkout (Platform → Business)**
 
-For embedded checkout scenarios, agents MAY submit instruments with display
+For embedded checkout scenarios, platforms MAY submit instruments with display
 information (WITHOUT credentials) during checkout updates:
 
 ```json
@@ -726,9 +729,9 @@ used in their UI before the actual completion. The `selected_instrument_id`
 indicates which instrument from the array is selected. Credentials are NOT
 included at this stage.
 
-**Step 3: Checkout Completion — Credential Submission (Agent → Merchant)**
+**Step 3: Checkout Completion — Credential Submission (Platform → Business)**
 
-Once the agent is ready to complete the checkout, it submits the payment
+Once the platform is ready to complete the checkout, it submits the payment
 instrument WITH credentials for payment processing:
 
 ```json
@@ -759,19 +762,19 @@ Payment instruments have two distinct components that flow at different stages:
     -   Submitted by agents during checkout creation/updates (WITHOUT credentials)
     -   Enables embedded checkout platforms to show which payment method will be
         used in the UI
-    -   Echoed back by merchants in responses
+    -   Echoed back by businesses in responses
     -   Safe to display to users
 -   **Credentials** (payment tokens, encrypted data):
     -   ONLY submitted by agents during checkout **completion**
-    -   Required for payment processing—merchants cannot process payment without
+    -   Required for payment processing—businesses cannot process payment without
         credentials
 
 The `handler_id` links the instrument back to a handler configuration, telling
-the merchant which integration to use for processing (e.g., which PSP endpoint,
+the business which integration to use for processing (e.g., which PSP endpoint,
 which decryption key).
 
-This architecture allows merchants to remain agnostic about how instruments are
-acquired. The merchant only needs to:
+This architecture allows businesses to remain agnostic about how instruments are
+acquired. The business only needs to:
 1. Advertise which handlers it supports
 2. Process the resulting instruments using its existing PSP integrations
 
@@ -841,26 +844,26 @@ This example shows the `payment` field from a checkout response:
 }
 ```
 
-This configuration tells agents what payment collection strategies the merchant
-supports: PSP tokenization for direct card tokenization, Google Pay for wallet
-payments, and Shop Pay for Shopify's accelerated checkout.
+This configuration tells platforms what payment collection strategies the
+business supports: PSP tokenization for direct card tokenization, Google Pay
+for wallet payments, and Shop Pay for Shopify's accelerated checkout.
 
 ### 6.2 Payment Handlers
 
-Payment handlers are capability declarations that define how the merchant can
-collect payment instruments. They form a contract between merchants, agents, and
-payment providers:
+Payment handlers are capability declarations that define how the business can
+collect payment instruments. They form a contract between businesses, platforms,
+and payment providers:
 
 -   A payment provider defines the handler specification, exposing a schema for
     custom payment instruments, token types, and a handler config. As well the
-    provider defines a protocol for the agent to execute when processing the
+    provider defines a protocol for the platform to execute when processing the
     handler. This setup allows for a variety of different payment methods and
     token-types to be supported in the flow, including network tokens.
--   A merchant must implement support for receiving the defined instruments and
+-   A business must implement support for receiving the defined instruments and
     tokens, as well as expose the well-structured handler config.
--   An agent must execute the handler's defined protocol to process the
-    merchant's provided handler config and negotiate the resulting instrument
-    into the merchant's checkout.
+-   A platform must execute the handler's defined protocol to process the
+    business's provided handler config and negotiate the resulting instrument
+    into the business's checkout.
 
 Following the same pattern as other UCP capabilities, handlers are
 self-describing with namespaced identifiers, with independent versioning, and
@@ -882,9 +885,9 @@ Each handler declaration contains:
 
 Note: This schema is extensible. Additional fields may be present.
 
-#### Namespacing
+#### Namespace
 
-Handlers follow the same reverse-DNS namespacing convention as capabilities:
+Handlers follow the same reverse-DNS namespace convention as capabilities:
 
 *   dev.ucp.\*: Core handlers defined by this specification
 *   com.vendor.\*: Extension handlers defined by payment providers
@@ -958,12 +961,12 @@ Handlers follow the same reverse-DNS namespacing convention as capabilities:
 }
 ```
 
-This example illustrates a merchant supporting multiple payment processing
+This example illustrates a business supporting multiple payment processing
 strategies. The card_tokenizer handler uses PSP
 for secure tokenization of raw card credentials. The gpay handler integrates
 with Google Pay for wallet-based payments. The shop_pay handler enables
 Shopify's accelerated checkout experience. These handlers would be advertised in
-the merchant's discovery profile, allowing agents to understand capabilities
+the business's discovery profile, allowing platforms to understand capabilities
 before starting a transaction. Additionally, the available payment handlers are
 provided in Cart and Checkout responses, where they may be dynamically filtered
 based on cart contents, buyer location, or other transaction-specific factors.
@@ -971,20 +974,20 @@ based on cart contents, buyer location, or other transaction-specific factors.
 #### Handler Lifecycle and Dynamic Filtering
 
 Payment handlers are not static—they can change during the checkout session as
-conditions evolve. Understanding handler lifecycle is critical for agents
+conditions evolve. Understanding handler lifecycle is critical for platforms
 implementing robust checkout flows.
 
 **Initial Advertisement**
 
-When a checkout is created, merchants MUST provide all potentially applicable
+When a checkout is created, businesses MUST provide all potentially applicable
 handlers based on the initial checkout state (line items, currency, buyer
 information if known). This initial set represents the broadest possible payment
 options available.
 
 **Dynamic Filtering During Updates**
 
-As the checkout progresses and more information becomes available, merchants MAY
-filter the handlers array based on:
+As the checkout progresses and more information becomes available, businesses
+MAY filter the handlers array based on:
 
 -   **Cart Contents**: Certain products may restrict payment methods (e.g., age-
     restricted items, high-value goods, subscriptions requiring recurring
@@ -1044,17 +1047,17 @@ Response: {
 
 Once a checkout reaches `ready_for_complete` status, handlers SHOULD NOT change
 unless the checkout state is modified (e.g., line items updated, address
-changed). This allows agents to cache handler information and begin instrument
-acquisition with confidence.
+changed). This allows platforms to cache handler information and begin
+instrument acquisition with confidence.
 
-If checkout state changes significantly after `ready_for_complete`, merchants
+If checkout state changes significantly after `ready_for_complete`, businesses
 MAY return the checkout to `incomplete` status and update the handlers array
 accordingly.
 
 **Handling Orphaned Instruments**
 
-If an agent submits a completion request with an instrument referencing a
-`handler_id` that is not in the current handlers array, merchants MUST reject
+If a platform submits a completion request with an instrument referencing a
+`handler_id` that is not in the current handlers array, businesses MUST reject
 the request with an error:
 
 ```json
@@ -1069,9 +1072,9 @@ the request with an error:
 }
 ```
 
-**Agent Implementation Guidance**
+**Platform Implementation Guidance**
 
-Agents SHOULD:
+Platforms SHOULD:
 1. Refresh handler information after significant checkout updates (address,
    line items, totals changes)
 2. Validate that the selected handler is still present before beginning
@@ -1081,7 +1084,7 @@ Agents SHOULD:
 
 ### 6.3 Custom Payment Handlers
 
-Payment providers and merchants can define custom handlers by following the
+Payment providers and businesses can define custom handlers by following the
 capability pattern. Each handler is self-describing through its specification
 URL and can define its own configuration schema.
 
@@ -1156,8 +1159,8 @@ For example, if ACME Corporation (acme.com) creates a "pay later" handler:
 
 ##### Step 2: Define the Handler Config Schema
 
-Create a JSON Schema that validates the `config` object merchants must provide.
-The schema defines what configuration merchants expose, enabling agents to
+Create a JSON Schema that validates the `config` object businesses must provide.
+The schema defines what configuration businesses expose, enabling agents to
 understand how to invoke your payment method.
 
 **Example Schema** (`https://acme.com/ucp/schemas/pay_later_handler.json`):
@@ -1279,13 +1282,13 @@ payment instrument structure agents will submit:
 
 ##### Step 4: Write the Specification Document
 
-The specification document is human-readable documentation explaining how agents
-and merchants should implement your handler. It MUST include:
+The specification document is human-readable documentation explaining how
+platforms and businesses should implement your handler. It MUST include:
 
 1.  **Introduction**: Purpose and use cases for the handler
-2.  **Handler Configuration**: How merchants configure the handler
-3.  **Agent Protocol**: Step-by-step flow for agents to acquire tokens
-4.  **Merchant Processing**: How merchants process the resulting instruments
+2.  **Handler Configuration**: How businesses configure the handler
+3.  **Agent Protocol**: Step-by-step flow for platforms to acquire tokens
+4.  **Business Processing**: How businesses process the resulting instruments
 5.  **Security Considerations**: Authentication, token handling, and compliance
 
 **Example Specification** (`https://acme.com/ucp/specs/pay_later`):
@@ -1299,13 +1302,13 @@ and merchants should implement your handler. It MUST include:
 
 **1. Introduction**
 
-The `com.acme.pay_later` handler enables merchants to offer ACME's
+The `com.acme.pay_later` handler enables businesses to offer ACME's
 buy-now-pay-later options through UCP-compatible agents. Supported options
 include Pay in 4, Pay in 30 days, and Financing.
 
 **2. Handler Configuration**
 
-Merchants advertising support for `com.acme.pay_later` MUST include the
+Businesses advertising support for `com.acme.pay_later` MUST include the
 handler in their checkout response:
 
 ```json
