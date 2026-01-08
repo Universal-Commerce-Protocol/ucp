@@ -189,7 +189,7 @@ h2.partners-intro-title {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 80px;
+  gap: 100px;
   flex-wrap: wrap;
 }
 
@@ -198,8 +198,8 @@ h2.partners-intro-title {
 }
 
 .partners-logo-img {
-  max-height: 45px;
-  max-width: 150px;
+  max-height: 65px;
+  max-width: 200px;
   height: auto;
   width: auto;
   opacity: 0.9;
