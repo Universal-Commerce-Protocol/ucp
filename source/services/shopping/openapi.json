@@ -241,7 +241,7 @@
           }
         ],
         "requestBody": {
-          "required": false,
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -269,27 +269,7 @@
             },
             "content": {
               "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/checkout"
-                    },
-                    {
-                      "type": "object",
-                      "required": ["order_id", "order_permalink_url"],
-                      "properties": {
-                        "order_id": {
-                          "type": "string",
-                          "description": "Identifier of the order created based on the checkout session. Recommended format: gid://merchant.com/Order/{order_id}."
-                        },
-                        "order_permalink_url": {
-                          "type": "string",
-                          "description": "Permalink provided by the merchant to access the order."
-                        }
-                      }
-                    }
-                  ]
-                }
+                "schema": { "$ref": "#/components/schemas/checkout" }
               }
             }
           }

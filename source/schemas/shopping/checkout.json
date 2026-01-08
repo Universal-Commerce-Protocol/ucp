@@ -93,6 +93,16 @@
     },
     "payment": {
       "$ref": "payment.json"
+    },
+    "order_id": {
+      "type": "string",
+      "description": "Identifier of the order created based on the checkout session. Recommended format: gid://merchant.com/Order/{order_id}.",
+      "ucp_request": "omit"
+    },
+    "order_permalink_url": {
+      "type": "string",
+      "description": "Permalink provided by the merchant to access the order.",
+      "ucp_request": "omit"
     }
   }
 }
