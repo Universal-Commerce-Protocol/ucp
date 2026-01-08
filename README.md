@@ -14,12 +14,22 @@
    limitations under the License.
 -->
 
-# Universal Commerce Protocol (UCP)
+<p align="center">
+  <h1 align="center">Universal Commerce Protocol (UCP)</h1>
+</p>
+
+<p align="center">
+  <b>An open standard enabling interoperability between various commerce
+   entities to facilitate seamless commerce integrations.</b>
+</p>
+
+<p align="center">
+  <a href="https://ucp.dev">Documentation</a> |
+  <a href="https://ucp.dev/specification/overview">Specification</a> |
+  <a href="https://github.com/Universal-Commerce-Protocol/ucp/discussions">Discussions</a>
+</p>
 
 ## Overview
-
-**An open standard enabling interoperability between various commerce entities
-to facilitate seamless commerce integrations.**
 
 The Universal Commerce Protocol (UCP) addresses a fragmented commerce landscape
 by providing a standardized common language and functional primitives. It
@@ -85,21 +95,30 @@ The initial release focuses on the essential primitives for transacting:
 
 ## Getting Started
 
-📚 **Explore the Documentation:** Visit ucp.dev for a complete overview, the
-full protocol specification, tutorials, and guides.
+*   📚 **Explore the Documentation:** Visit [ucp.dev](https://ucp.dev) for a
+    complete overview, the full protocol specification, tutorials, and guides.
+*   🎬 **Review our
+    [samples](https://github.com/Universal-Commerce-Protocol/samples)** for
+    implementation examples.
+*   🛠️ **Use our
+    [SDKs](https://github.com/orgs/Universal-Commerce-Protocol/repositories)**
+    to start building your own integrations.
+*   📝 **Check conformance** with our [conformance tests](https://github.com/Universal-Commerce-Protocol/conformance).
 
 ## Contributing
 
-We welcome community contributions to enhance and evolve UCP\.
+We welcome community contributions to enhance and evolve UCP.
 
-*   **Questions & Discussions:** Join our GitHub Discussions.
-*   **Issues & Feedback:** Report issues or suggest improvements via
-    GitHub Issues.
+*   **Questions & Discussions:** Join our [GitHub
+    Discussions](https://github.com/Universal-Commerce-Protocol/ucp/discussions).
+*   **Issues & Feedback:** Report issues or suggest improvements via GitHub
+    Issues.
 *   **Contribution Guide:** See our [CONTRIBUTING.md](CONTRIBUTING.md) for
     details on how to contribute.
 
 ## What's Next
 
+Take a look at [our roadmap on ucp.dev](https://ucp.dev/documentation/roadmap/).
 Future enhancements include:
 
 *   **New Verticals:** Applications beyond Shopping (e.g., Travel, Services).
