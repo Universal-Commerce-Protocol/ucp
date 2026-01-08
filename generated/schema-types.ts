@@ -58,8 +58,7 @@ export type Message = MessageError | MessageWarning | MessageInfo;
 /**
  * Matches a specific instrument type based on validation logic.
  */
-export type PaymentInstrument =
-    CardPaymentInstrument|GooglePayCardPaymentInstrument|ShopPayInstrument;
+export type PaymentInstrument = CardPaymentInstrument | GooglePayCardPaymentInstrument;
 /**
  * A basic card payment instrument with visible card details. Can be inherited by a handler's instrument schema to define handler-specific display details or more complex credential structures.
  */
@@ -97,37 +96,9 @@ export type CardPaymentInstrument = PaymentInstrumentBase & {
 /**
  * Container for sensitive payment data. Use the specific schema matching the 'type' field.
  */
-export type PaymentCredential =
-    TokenCredentialResponse|CardCredential|TokenizationData|ShopPayCredential;
-/**
- * Credential structure for Shop Pay. Extends the base token credential with a
- * Shop Pay-specific type.
- */
-export type ShopPayCredential = TokenCredentialResponse&{
-  /**
-   * The credential type for Shop Pay tokens.
-   */
-  type?: 'shop_token';
-  [k: string]: unknown;
-};
-export type GooglePayCardPaymentInstrument = CardPaymentInstrument&{
+export type PaymentCredential = TokenCredentialResponse | CardCredential | TokenizationData;
+export type GooglePayCardPaymentInstrument = CardPaymentInstrument & {
   credential?: TokenizationData;
-  [k: string]: unknown;
-};
-/**
- * Payment instrument structure for Shop Pay. Extends the base payment
- * instrument with Shop Pay-specific credential types.
- */
-export type ShopPayInstrument = CardPaymentInstrument&{
-  /**
-   * The payment instrument type identifier for Shop Pay.
-   */
-  type?: 'shop_pay';
-  credential?: ShopPayCredential;
-  /**
-   * The buyer's email address associated with the Shop Pay account.
-   */
-  email?: string;
   [k: string]: unknown;
 };
 /**
@@ -161,6 +132,18 @@ export type CheckoutWithDiscount = CheckoutResponse & {
   [k: string]: unknown;
 };
 /**
+ * A destination for fulfillment.
+ */
+export type FulfillmentDestinationRequest =
+  | (PostalAddress & {
+      /**
+       * ID specific to this shipping destination.
+       */
+      id?: string;
+      [k: string]: unknown;
+    })
+  | RetailLocationRequest;
+/**
  * Checkout extended with hierarchical fulfillment.
  *
  * This interface was referenced by `FulfillmentExtensionCreateRequest`'s JSON-Schema
@@ -181,7 +164,7 @@ export type CheckoutWithFulfillmentUpdateRequest = CheckoutUpdateRequest & {
   [k: string]: unknown;
 };
 /**
- * A destination for fulfillment. Both options guarantee an 'id' field exists.
+ * A destination for fulfillment.
  */
 export type FulfillmentDestinationResponse =
   | (PostalAddress & {
@@ -191,7 +174,7 @@ export type FulfillmentDestinationResponse =
       id: string;
       [k: string]: unknown;
     })
-  | RetailLocation;
+  | RetailLocationResponse;
 /**
  * Checkout extended with hierarchical fulfillment.
  *
@@ -202,6 +185,7 @@ export type CheckoutWithFulfillmentResponse = CheckoutResponse & {
   fulfillment?: FulfillmentResponse;
   [k: string]: unknown;
 };
+
 /**
  * Extends Checkout with cryptographic mandate support for non-repudiable authorization per the AP2 protocol. Uses embedded signature model with ap2 namespace.
  */
@@ -277,6 +261,14 @@ export declare interface CheckoutResponse {
    */
   continue_url?: string;
   payment: PaymentResponse;
+  /**
+   * Identifier of the order created based on the checkout session. Recommended format: gid://merchant.com/Order/{order_id}.
+   */
+  order_id?: string;
+  /**
+   * Permalink provided by the merchant to access the order.
+   */
+  order_permalink_url?: string;
   [k: string]: unknown;
 }
 /**
@@ -548,7 +540,7 @@ export declare interface PaymentHandlerResponse {
   [k: string]: unknown;
 }
 /**
- * The base definition for any payment instrument. It links the instrument to a specific Merchant configuration (handler_id) and defines common fields like billing address.
+ * Represents the base definition for a payment instrument. It utilizes a static reference (handler_name) to identify the handler type and a dynamic reference (handler_id) to link the instrument to a specific merchant configuration, while also defining standard fields such as the billing address.
  */
 export declare interface PaymentInstrumentBase {
   /**
@@ -556,11 +548,13 @@ export declare interface PaymentInstrumentBase {
    */
   id: string;
   /**
-   * The unique identifier for the handler instance that produced this
-   * instrument. This corresponds to the 'id' field in the Payment Handler
-   * definition.
+   * The unique identifier for the handler instance that produced this instrument.
    */
   handler_id: string;
+  /**
+   * The name of the handler instance that produced this instrument. This corresponds to the 'name' field in the Payment Handler definition.
+   */
+  handler_name: string;
   /**
    * The broad category of the instrument (e.g., 'card', 'tokenized_card'). Specific schemas will constrain this to a constant value.
    */
@@ -666,8 +660,7 @@ export declare interface CardCredential {
 }
 export declare interface TokenizationData {
   /**
-   * The type of tokenization to be applied to the selected payment method. This
-   * value matches the type set in tokenization_specification.
+   * The type of tokenization to be applied to the selected payment method. This value matches the type set in tokenization_specification.
    */
   type: string;
   token: string;
@@ -746,10 +739,6 @@ export declare interface ItemCreateRequest {
    * Should be recognized by both the Platform, and the Business. For Google it should match the id provided in the "id" field in the product feed.
    */
   id: string;
-  /**
-   * Product title.
-   */
-  title: string;
   [k: string]: unknown;
 }
 /**
@@ -807,10 +796,6 @@ export declare interface ItemUpdateRequest {
    * Should be recognized by both the Platform, and the Business. For Google it should match the id provided in the "id" field in the product feed.
    */
   id: string;
-  /**
-   * Product title.
-   */
-  title: string;
   [k: string]: unknown;
 }
 /**
@@ -949,9 +934,24 @@ export declare interface FulfillmentGroupRequest {
  */
 export declare interface FulfillmentMethodRequest {
   /**
+   * Available destinations. For shipping: addresses. For pickup: retail locations.
+   */
+  destinations?: FulfillmentDestinationRequest[];
+  /**
    * ID of the selected destination.
    */
   selected_destination_id?: string | null;
+  [k: string]: unknown;
+}
+/**
+ * A pickup location (retail store, locker, etc.).
+ */
+export declare interface RetailLocationRequest {
+  /**
+   * Location name (e.g., store name).
+   */
+  name: string;
+  address?: PostalAddress;
   [k: string]: unknown;
 }
 /**
@@ -1100,7 +1100,7 @@ export declare interface FulfillmentMethodResponse {
 /**
  * A pickup location (retail store, locker, etc.).
  */
-export declare interface RetailLocation {
+export declare interface RetailLocationResponse {
   /**
    * Unique location identifier.
    */
