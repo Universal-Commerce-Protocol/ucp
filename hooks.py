@@ -17,10 +17,10 @@
 
 This module contains functions that are executed during the MkDocs build
 process.
-Currently, it includes a hook to copy schema files into the site directory
+Currently, it includes a hook to copy specs files into the site directory
 after the build is complete.
-This makes the schema JSON files available in the website and programmatically
-accessible at /schemas.
+This makes the specs JSON files available in the website and programmatically
+accessible.
 """
 
 import logging
@@ -31,19 +31,31 @@ log = logging.getLogger('mkdocs')
 
 
 def on_post_build(config):
-  """Moves all json files from the spec/schemas directory to the site directory after the build is complete.
+  """Moves all subdirectories from the spec/ directory to the site directory after the build is complete.
 
   Args:
-    config: The mkdocs config object.
+      config: The mkdocs config object.
   """
 
-  src = os.path.join(os.getcwd(), 'spec', 'schemas')
-  dest = os.path.join(config['site_dir'], 'schemas')
+  # Base path for the source directories
+  base_src_path = os.path.join(os.getcwd(), 'spec')
 
-  if os.path.exists(src):
-    if os.path.exists(dest):
-      shutil.rmtree(dest)
-    shutil.copytree(src, dest)
-    log.info('Copied schemas from %s to %s', src, dest)
-  else:
-    log.warning('Schema source directory not found: %s', src)
+  # Check if the parent 'spec' folder exists first
+  if not os.path.exists(base_src_path):
+    log.warning('Spec source directory not found: %s', base_src_path)
+    return
+
+  # Iterate over everything inside 'spec'
+  for item in os.listdir(base_src_path):
+    src = os.path.join(base_src_path, item)
+
+    # Only copy directories, skipping files like README.md in spec/.
+    if os.path.isdir(src):
+      dest = os.path.join(config['site_dir'], item)
+
+      # Clean up destination if it already exists to ensure a fresh copy
+      if os.path.exists(dest):
+        shutil.rmtree(dest)
+
+      shutil.copytree(src, dest)
+      log.info('Copied directory %s from %s to %s', item, src, dest)

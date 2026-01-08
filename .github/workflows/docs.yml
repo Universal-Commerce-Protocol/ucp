@@ -71,8 +71,12 @@ jobs:
       - name: Install documentation dependencies
         run: pip install -r requirements-docs.txt
 
-      - name: Create schemas folder
-        run: mkdir -p site/schemas
+      - name: Create specs folders for JSON publishing
+        run: |
+          mkdir -p site/schemas
+          mkdir -p site/services
+          mkdir -p site/handlers
+          mkdir -p site/discovery
 
       - name: Build Documentation (PR Check)
         if: github.event_name == 'pull_request'
