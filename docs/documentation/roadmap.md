@@ -33,7 +33,7 @@ community feedback.
 
 To move beyond isolated transactions, we are expanding the protocol’s scope to
 tackle key user journeys such as multi-item checkout, loyalty, and lifecycle
-management, while ensuring the business’’s brand and logic remain central to all
+management, while ensuring the business’ brand and logic remain central to all
 shopping experiences. Key upcoming initiatives include:
 
 *   **Cart and basket building**: support for multi-item checkout from a
