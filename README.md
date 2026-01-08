@@ -85,9 +85,8 @@ The initial release focuses on the essential primitives for transacting:
 
 ## Getting Started
 
-*   📚 **Explore the Documentation:** Visit the UCP Documentation Site for a
-    complete overview, the full protocol specification, tutorials, and guides.
-*   📝 **View the Specification:** UCP Protocol Specification
+📚 **Explore the Documentation:** Visit ucp.dev for a complete overview, the
+full protocol specification, tutorials, and guides.
 
 ## Contributing
 
