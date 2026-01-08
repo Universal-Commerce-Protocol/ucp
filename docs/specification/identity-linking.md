@@ -116,11 +116,11 @@ example "Allow \[Platform\] to manage checkout sessions".
 Resources       | Operation                  | Scope Action
 :-------------- | :------------------------- | :----------------------------
 CheckoutSession | Get                        | `ucp:scopes:checkout_session`
-CheckoutSession | Create                     |
-CheckoutSession | Update                     |
-CheckoutSession | Delete                     |
-CheckoutSession | Cancel                     |
-CheckoutSession | Complete                   |
+CheckoutSession | Create                     | `ucp:scopes:checkout_session`
+CheckoutSession | Update                     | `ucp:scopes:checkout_session`
+CheckoutSession | Delete                     | `ucp:scopes:checkout_session`
+CheckoutSession | Cancel                     | `ucp:scopes:checkout_session`
+CheckoutSession | Complete                   | `ucp:scopes:checkout_session`
 
 A scope covering a capability must grant access to all operations associated to
 the capability. For example, ucp:scopes:checkout\_session must grant all of:
