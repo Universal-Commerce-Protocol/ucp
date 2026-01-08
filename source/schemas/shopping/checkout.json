@@ -17,7 +17,7 @@
   "additionalProperties": true,
   "properties": {
     "ucp": {
-      "$ref": "../ucp.json#/$defs/reponse_checkout",
+      "$ref": "../ucp.json#/$defs/response_checkout",
       "ucp_request": "omit"
     },
     "id": {
