@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/schemas/shopping/types/fulfillment_resp.json",
+  "$id": "https://ucp.dev/schemas/shopping/types/fulfillment.json",
   "title": "Fulfillment Response",
   "description": "Container for fulfillment methods and availability.",
   "type": "object",

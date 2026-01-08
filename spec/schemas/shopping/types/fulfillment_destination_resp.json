@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/schemas/shopping/types/fulfillment_destination_resp.json",
+  "$id": "https://ucp.dev/schemas/shopping/types/fulfillment_destination.json",
   "title": "Fulfillment Destination Response",
   "description": "A destination for fulfillment.",
   "type": "object",

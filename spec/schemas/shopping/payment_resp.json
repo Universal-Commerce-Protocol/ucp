@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/schemas/shopping/payment_resp.json",
+  "$id": "https://ucp.dev/schemas/shopping/payment.json",
   "title": "Payment Response",
   "description": "Payment configuration containing handlers.",
   "type": "object",

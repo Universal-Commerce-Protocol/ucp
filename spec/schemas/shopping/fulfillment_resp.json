@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/schemas/shopping/fulfillment_resp.json",
+  "$id": "https://ucp.dev/schemas/shopping/fulfillment.json",
   "title": "Fulfillment Extension Response",
   "description": "Extends Checkout with fulfillment support using methods, destinations, and groups.",
   "$defs": {

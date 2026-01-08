@@ -362,8 +362,6 @@ def process_schema(
     transformed = transform_schema(
         data, None, source_path, annotated_schemas, suffix
     )
-    if "$id" in transformed:
-      transformed["$id"] = transformed["$id"].replace(".json", "_resp.json")
     write_json(transformed, out_path)
     generated.append(os.path.join(dir_path, out_name))
   else:
