@@ -119,7 +119,7 @@ theme:
     - content.code.select
     - content.tabs.link
     - content.tooltips
-    - navigation.expand
+    # - navigation.expand
     - navigation.footer
     - navigation.indexes
     - navigation.instant

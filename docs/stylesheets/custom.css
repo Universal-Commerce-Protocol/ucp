@@ -627,7 +627,7 @@ label.md-search__icon {
   gap: 30px;
   flex-wrap: wrap;
   justify-content: center;
-  margin-top: 60px;
+  padding-top: 60px;
   margin-bottom: 60px;
 }
 .two-column-promo-item {
