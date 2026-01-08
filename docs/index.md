@@ -169,8 +169,7 @@ The protocol's initial launch focuses on three core capabilities: Checkout, Iden
            <img src="assets/Paysheet_with_address.svg" alt="Example checkout screen with address details" class="phone-mockup" onerror="this.src='https://placehold.co/260x500/EEE/31343C?text=Checkout+UI'">
         </div>
         <div class="code-block-placeholder">
-          <pre>
-            <code>
+```json { .yaml .no-copy }
 {
   "id": "chk_123456789",
   "buyer": {
@@ -200,8 +199,7 @@ The protocol's initial launch focuses on three core capabilities: Checkout, Iden
   "fulfillment_option_id": "free-shipping",
   ...other checkout fields...
 }
-            </code>
-          </pre>
+```
         </div>
       </div>
     </div>
@@ -220,8 +218,7 @@ The protocol's initial launch focuses on three core capabilities: Checkout, Iden
            <img src="assets/duo_branding.svg" alt="Example user interface for identity linking" class="phone-mockup" onerror="this.src='https://placehold.co/260x500/EEE/31343C?text=Identity+UI'">
         </div>
         <div class="code-block-placeholder">
-          <pre>
-            <code>
+```json { .yaml .no-copy }
 Sample of /.well-known/oauth-authorization-server
 
 {
@@ -244,8 +241,7 @@ Sample of /.well-known/oauth-authorization-server
   ],
   "service_documentation": "https://example.com/docs/oauth2"
 }
-            </code>
-          </pre>
+```
         </div>
       </div>
     </div>
@@ -264,8 +260,7 @@ Sample of /.well-known/oauth-authorization-server
            <img src="assets/Confirmation.svg" alt="Example user interface showing order confirmation details" class="phone-mockup" onerror="this.src='https://placehold.co/260x500/EEE/31343C?text=Order+UI'">
         </div>
         <div class="code-block-placeholder">
-          <pre>
-            <code>
+```json { .yaml .no-copy }
 ...other checkout fields...
 "fulfillment": {
   "expectations": [
@@ -286,8 +281,7 @@ Sample of /.well-known/oauth-authorization-server
   ]
 }
 ...other checkout fields...
-            </code>
-          </pre>
+```
         </div>
       </div>
     </div>

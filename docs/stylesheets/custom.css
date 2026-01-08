@@ -17,7 +17,7 @@
 /* --- HEADER & BASE --- */
 .md-header {
   /* 1. Revert background to white */
-  background-color: #ffffff !important; 
+  background-color: #ffffff !important;
 
   /* 2. Restore the subtle grey border */
   border-bottom: 0.05rem solid rgba(0,0,0,0.1);
@@ -260,7 +260,7 @@ h2.partner-carousel__title {
   gap: 40px; /* Space between logos */
   width: max-content;
   /* 40s is the speed. Lower number = faster */
-  animation: partnerScroll 40s linear infinite; 
+  animation: partnerScroll 40s linear infinite;
 }
 
 /* Pause on hover */
@@ -454,13 +454,14 @@ h2.action-carousel-section__title {
 
 /* Image Wrapper */
 .image-container {
+  height: 520px;
   width: 260px;
   flex-shrink: 0;
 }
 
 .phone-mockup {
   width: 100%;
-  height: 500px;
+  height: 520px;
   object-fit: contain;
   border-radius: 16px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.1);
@@ -473,16 +474,13 @@ h2.action-carousel-section__title {
   flex: 1;
   background-color: #f5f5f5;
   border-radius: 12px;
-  padding: 10px;
   font-family: monospace;
   font-size: 0.75rem;
   color: #333;
-  height: 500px;
-  overflow-y: auto;
-  overflow-x: auto;
+  height: 520px;
+  overflow: auto;
   border: 1px solid #dadce0;
-  min-height: 0;
-  min-width: 0;
+  min-width: 300px;
 }
 
 /* Scrollbar styling */
@@ -502,6 +500,25 @@ h2.action-carousel-section__title {
 }
 .code-block-placeholder pre {
   margin: 0;
+}
+
+/* --- INTERMEDIATE RESPONSIVENESS (< 1200px) --- */
+@media screen and (max-width: 1200px) {
+  .tab-pane {
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+  }
+
+  .pane-text {
+    text-align: center;
+    max-width: 800px;
+  }
+
+  .pane-visuals {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 /* --- MOBILE RESPONSIVENESS (< 960px) --- */
@@ -534,7 +551,7 @@ h2.action-carousel-section__title {
   .hero-logo-crisp {
     max-width: 240px;
   }
-  
+
   /* Partner Grid */
   .partner-grid {
     gap: 1.5rem;
