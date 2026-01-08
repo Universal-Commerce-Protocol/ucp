@@ -100,7 +100,7 @@ POST /checkouts
 
 ```json
 {
-  "id": "checkout_456",
+  "id": "gid://merchant.com/Checkout/checkout_456",
   "status": "ready_for_payment",
   "currency": "USD",
   "buyer": {
