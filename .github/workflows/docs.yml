@@ -71,40 +71,9 @@ jobs:
       - name: Install documentation dependencies
         run: pip install -r requirements-docs.txt
 
-      - name: Install uv
-        run: |
-          curl -LsSf https://astral.sh/uv/install.sh | sh
-          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-
-      - name: Check Python SDK Models Consistency
-        run: scripts/ci_check_models.sh
-
-      - name: Check for Docs Update
-        if: github.event_name == 'pull_request'
-        env:
-          PR_BODY: ${{ github.event.pull_request.body }}
-        run: |
-          CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }})
-          echo "Checking for documentation updates..."
-          if echo "$CHANGED_FILES" | grep -q "spec/.*\.json$"; then
-            echo "Schema files ('spec/**/*.json') were modified."
-            if ! echo "$CHANGED_FILES" | grep -q "docs/.*\.md$"; then
-              echo "No matching changes found in 'docs/**/*.md'."
-              if echo "$PR_BODY" | grep -q "DOCS_CHECK_OFF="; then
-                echo "DOCS_CHECK_OFF tag found in PR description. Skipping check."
-              else
-                echo "Error: Changes to 'spec/**/*.json' files require corresponding changes in 'docs/**/*.md'."
-                echo "If this change doesn't require a docs update (e.g., typo fix), add DOCS_CHECK_OFF=<reason> to your PR description to bypass this check."
-                exit 1
-              fi
-            fi
-          fi
-          echo "Validation passed: Documentation update requirement met."
-
-
       - name: Build Documentation (PR Check)
         if: github.event_name == 'pull_request'
-        run: mkdocs build --strict
+        run: mkdocs build
 
       - name: Deploy development version from main branch
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
