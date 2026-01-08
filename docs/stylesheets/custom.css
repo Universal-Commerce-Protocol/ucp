@@ -228,6 +228,8 @@ h2.partner-carousel__title {
   font-weight: 500;
   color: #202124;
   margin-bottom: 80px;
+  position: relative;
+  z-index: 3;
 }
 
 /* Gradient fade on the sides */
