@@ -832,7 +832,7 @@ This example shows the `payment` field from a checkout response:
         "id": "shop_pay",
         "name": "dev.shopify.shop_pay",
         "version": "2026-01-11",
-        "spec": "https://shopify.dev/docs/api/shop-pay-handler",
+        "spec": "https://shopify.dev/docs/agents/checkout/shop-pay-handler",
         "config_schema": "https://shopify.dev/ucp/shop-pay-handler/2026-01-11/config.json",
         "instrument_schemas": [
           "https://shopify.dev/ucp/shop-pay-handler/2026-01-11/instrument.json"
@@ -848,7 +848,7 @@ This example shows the `payment` field from a checkout response:
 
 This configuration tells platforms what payment collection strategies the
 business supports: PSP tokenization for direct card tokenization, Google Pay
-for wallet payments, and Shop Pay for Shopify's accelerated checkout.
+for wallet payments, and [Shop Pay](https://shopify.dev/docs/agents/checkout/shop-pay-handler) for Shopify's accelerated checkout.
 
 ### 6.2 Payment Handlers
 
@@ -949,7 +949,7 @@ Handlers follow the same reverse-DNS namespace convention as capabilities:
         "id": "shop_pay",
         "name": "dev.shopify.shop_pay",
         "version": "2026-01-11",
-        "spec": "https://shopify.dev/docs/api/shop-pay-handler",
+        "spec": "https://shopify.dev/docs/agents/checkout/shop-pay-handler",
         "config_schema": "https://shopify.dev/ucp/shop-pay-handler/2026-01-11/config.json",
         "instrument_schemas": [
           "https://shopify.dev/ucp/shop-pay-handler/2026-01-11/instrument.json"
@@ -966,7 +966,7 @@ Handlers follow the same reverse-DNS namespace convention as capabilities:
 This example illustrates a business supporting multiple payment processing
 strategies. The card_tokenizer handler uses PSP
 for secure tokenization of raw card credentials. The gpay handler integrates
-with Google Pay for wallet-based payments. The shop_pay handler enables
+with Google Pay for wallet-based payments. The [shop_pay handler](https://shopify.dev/docs/agents/checkout/shop-pay-handler) enables
 Shopify's accelerated checkout experience. These handlers would be advertised in
 the business's discovery profile, allowing platforms to understand capabilities
 before starting a transaction. Additionally, the available payment handlers are
