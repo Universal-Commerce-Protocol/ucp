@@ -6,6 +6,15 @@
   "type": "object",
   "oneOf": [
     {
+      "$ref": "#/$defs/shipping_destination"
+    },
+    {
+      "$ref": "retail_location_resp.json"
+    }
+  ],
+  "$defs": {
+    "shipping_destination": {
+      "title": "Shipping Destination Response",
       "description": "Shipping destination.",
       "allOf": [
         {
@@ -24,10 +33,6 @@
           ]
         }
       ]
-    },
-    {
-      "description": "Pickup location.",
-      "$ref": "retail_location_resp.json"
     }
-  ]
+  }
 }

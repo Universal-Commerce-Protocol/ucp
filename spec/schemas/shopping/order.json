@@ -32,7 +32,7 @@
   ],
   "properties": {
     "ucp": {
-      "$ref": "../ucp.json#/$defs/order_response"
+      "$ref": "../ucp.json#/$defs/response_order"
     },
     "id": {
       "type": "string",

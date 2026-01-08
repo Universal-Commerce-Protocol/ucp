@@ -8,7 +8,7 @@
   "required": ["ucp"],
   "properties": {
     "ucp": {
-      "$ref": "../schemas/ucp.json#/$defs/discovery"
+      "$ref": "../schemas/ucp.json#/$defs/discovery_profile"
     },
     "payment": {
       "type": "object",

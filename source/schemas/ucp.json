@@ -17,7 +17,7 @@
       "additionalProperties": {"$ref": "../services/service_schema.json"}
     },
 
-    "discovery": {
+    "discovery_profile": {
       "title": "UCP Discovery Profile",
       "description": "Full UCP metadata for /.well-known/ucp discovery.",
       "type": "object",
@@ -33,7 +33,7 @@
       }
     },
 
-    "checkout_response": {
+    "response_checkout": {
       "title": "UCP Checkout Response",
       "description": "UCP metadata for checkout responses.",
       "type": "object",
@@ -48,7 +48,7 @@
       }
     },
 
-    "order_response": {
+    "response_order": {
       "title": "UCP Order Response",
       "description": "UCP metadata for order responses. No payment handlers needed post-purchase.",
       "type": "object",

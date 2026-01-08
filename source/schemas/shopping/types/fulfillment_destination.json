@@ -7,27 +7,29 @@
   "ucp_shared_request": true,
   "oneOf": [
     {
+      "$ref": "#/$defs/shipping_destination" 
+    },
+    {
+      "$ref": "retail_location.json"
+    }
+  ],
+  "$defs": {
+    "shipping_destination": {
+      "title": "Shipping Destination",
       "description": "Shipping destination.",
       "allOf": [
-        {
-          "$ref": "postal_address.json"
-        },
+        { "$ref": "postal_address.json" },
         {
           "type": "object",
           "properties": {
             "id": {
               "type": "string",
-              "description": "ID specific to this shipping destination.",
-              "ucp_request": "optional"
+              "description": "ID specific to this shipping destination."
             }
           },
           "required": ["id"]
         }
       ]
-    },
-    {
-      "description": "Pickup location.",
-      "$ref": "retail_location.json"
     }
-  ]
+  }
 }

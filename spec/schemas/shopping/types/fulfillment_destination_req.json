@@ -6,6 +6,15 @@
   "type": "object",
   "oneOf": [
     {
+      "$ref": "#/$defs/shipping_destination"
+    },
+    {
+      "$ref": "retail_location_req.json"
+    }
+  ],
+  "$defs": {
+    "shipping_destination": {
+      "title": "Shipping Destination Request",
       "description": "Shipping destination.",
       "allOf": [
         {
@@ -18,13 +27,12 @@
               "type": "string",
               "description": "ID specific to this shipping destination."
             }
-          }
+          },
+          "required": [
+            "id"
+          ]
         }
       ]
-    },
-    {
-      "description": "Pickup location.",
-      "$ref": "retail_location_req.json"
     }
-  ]
+  }
 }
