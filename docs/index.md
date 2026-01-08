@@ -122,7 +122,7 @@ hide:
     <div>
       <h3 class="feature-item-title">Secure and private</h3>
       <p class="feature-item-description">
-        Built-on proven security standards for account linking (OAuth 2.0) and secure payment(Ap2) via payment mandates and verifiable credentials.
+        Built-on proven security standards for account linking (OAuth 2.0) and secure payment(AP2) via payment mandates and verifiable credentials.
       </p>
     </div>
   </div>
