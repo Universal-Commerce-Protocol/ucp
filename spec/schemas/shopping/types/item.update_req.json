@@ -3,17 +3,12 @@
   "title": "Item Update Request",
   "type": "object",
   "required": [
-    "id",
-    "title"
+    "id"
   ],
   "properties": {
     "id": {
       "type": "string",
       "description": "Should be recognized by both the Platform, and the Business. For Google it should match the id provided in the \"id\" field in the product feed."
-    },
-    "title": {
-      "type": "string",
-      "description": "Product title."
     }
   }
 }

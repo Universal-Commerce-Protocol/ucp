@@ -14,7 +14,8 @@
     },
     "title": {
       "type": "string",
-      "description": "Product title."
+      "description": "Product title.",
+      "ucp_request": "omit"
     },
     "price": {
       "type": "integer",
