@@ -164,7 +164,7 @@ The protocol's initial launch focuses on three core capabilities: Checkout, Iden
       </div>
       <div class="pane-visuals">
         <div class="image-container">
-           <img src="assets/Paysheet_with_address.svg" alt="Example checkout screen with address details" class="phone-mockup" onerror="this.src='https://placehold.co/260x500/EEE/31343C?text=Checkout+UI'">
+           <img src="assets/checkout-latest.svg" alt="Example checkout screen with address details" class="phone-mockup" onerror="this.src='https://placehold.co/260x500/EEE/31343C?text=Checkout+UI'">
         </div>
         <div class="code-block-placeholder">
 ```json { .yaml .no-copy }
@@ -213,7 +213,7 @@ The protocol's initial launch focuses on three core capabilities: Checkout, Iden
       </div>
       <div class="pane-visuals">
         <div class="image-container">
-           <img src="assets/duo_branding.svg" alt="Example user interface for identity linking" class="phone-mockup" onerror="this.src='https://placehold.co/260x500/EEE/31343C?text=Identity+UI'">
+           <img src="assets/identity-latest.svg" alt="Example user interface for identity linking" class="phone-mockup" onerror="this.src='https://placehold.co/260x500/EEE/31343C?text=Identity+UI'">
         </div>
         <div class="code-block-placeholder">
 ```json { .yaml .no-copy }
@@ -255,7 +255,7 @@ Sample of /.well-known/oauth-authorization-server
       </div>
       <div class="pane-visuals">
         <div class="image-container">
-           <img src="assets/Confirmation.svg" alt="Example user interface showing order confirmation details" class="phone-mockup" onerror="this.src='https://placehold.co/260x500/EEE/31343C?text=Order+UI'">
+           <img src="assets/order-latest.svg" alt="Example user interface showing order confirmation details" class="phone-mockup" onerror="this.src='https://placehold.co/260x500/EEE/31343C?text=Order+UI'">
         </div>
         <div class="code-block-placeholder">
 ```json { .yaml .no-copy }
