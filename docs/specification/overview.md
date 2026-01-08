@@ -94,7 +94,7 @@ The platform is the consumer-facing surface (such as an AI agent, mobile app, or
 social media site) acting on behalf of the User. It orchestrates the commerce
 journey by discovering businesses and facilitating user intent.
 
-*   **Responsibilities:** Discovering business capabilities via manifests,
+*   **Responsibilities:** Discovering business capabilities via profiles,
     initiating checkout sessions, and presenting the UI or conversational
     interface to the user.
 *   **Examples:** AI Shopping Assistants, Super Apps, Search Engines.
@@ -1983,7 +1983,7 @@ architecture allows flexible integration with existing fraud prevention systems.
 ## 7. Transport Layer
 
 UCP supports multiple transport protocols. Agents and Merchants effectively
-negotiate the transport via the Manifest.
+negotiate the transport via their profiles.
 
 ### 7.1. REST Transport (Core)
 
@@ -2208,7 +2208,7 @@ version:
 | **Capability**                    | -       | A standalone core feature that a merchant supports (e.g., Checkout, IdentityLinking). Capabilities are the fundamental "verbs" of UCP.                        |
 | **Credential Provider**           | CP      | A trusted entity (like a digital wallet) responsible for securely managing and executing the user's payment and identity credentials.                         |
 | **Extension**                     | -       | An optional module that augments a specific UCP Capability, allowing for specialized functionality (e.g., Discounts) without bloating the core specification. |
-| **Manifest**                      | -       | A JSON discovery document hosted by the Merchant at a well-known URI, declaring their identity, supported capabilities, and endpoints.                        |
+| **Profile**                       | -       | A JSON document hosted by businesses and platforms at a well-known URI, declaring their identity, supported capabilities, and endpoints.                        |
 | **Merchant**                      | -       | The entity selling goods or services. In UCP, they act as the **Merchant of Record (MoR)**, retaining financial liability and ownership of the order.         |
 | **Model Context Protocol**        | MCP     | A protocol standardizing how AI models connect to external data and tools. UCP capabilities map 1:1 to MCP tools.                                             |
 | **Universal Commerce Protocol**   | UCP     | The standard defined in this document, enabling interoperability between commerce entities via standardized capabilities and discovery.                       |

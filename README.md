@@ -59,7 +59,7 @@ UCP aims to:
     integration. On top of that, specific **Extensions** can be added to enhance
     the consumer experience without bloating the core protocol.
 *   **Dynamic Discovery:** Merchants declare their supported Capabilities in a
-    standardized manifest, allowing applications and agents to autonomously
+    standardized profile, allowing applications and agents to autonomously
     discover and configure themselves.
 *   **Transport Agnostic:** The protocol is designed to work across various
     transports. Merchants can offer Capabilities via REST APIs, MCP (Model
