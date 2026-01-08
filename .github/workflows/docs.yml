@@ -71,6 +71,9 @@ jobs:
       - name: Install documentation dependencies
         run: pip install -r requirements-docs.txt
 
+      - name: Create schemas folder
+        run: mkdir -p site/schemas
+
       - name: Build Documentation (PR Check)
         if: github.event_name == 'pull_request'
         run: mkdocs build
