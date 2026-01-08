@@ -30,12 +30,12 @@ supports.}
 - {Benefit 2}
 - {Benefit 3}
 
-### 1.2 Quick Start
+### 1.2 Integration Guide
 
-| If you are a... | Start here |
-|:----------------|:-----------|
-| **Merchant** integrating this handler | [Merchant Integration](#3-merchant-integration) |
-| **Agent** using this handler | [4. Agent Integration](#4-agent-integration) |
+| Participant | Integration Section |
+|:------------|:--------------------|
+| **Business** | [3. Business Integration](#3-business-integration) |
+| **Platform**   | [4. Platform Integration](#4-Platform-integration) |
 
 ---
 
@@ -43,17 +43,22 @@ supports.}
 
 {Describe all participants in this handler and their roles.}
 
+> **Note on Terminology:**
+> While this specification refers to the participant as the **"Business,"**
+> technical schema fields may retain the standard industry nomenclature
+> **`merchant_*`** (e.g., `merchant_id`). Mappings are documented below.
+
 | Participant | Role | Prerequisites |
 |:------------|:-----|:--------------|
-| **Merchant** | {role description} | {Yes/No — brief description} |
-| **Agent** | {role description} | {Yes/No — brief description} |
+| **Business** | {role description} | {Yes/No — brief description} |
+| **Platform** | {role description} | {Yes/No — brief description} |
 | **{Other Participant}** | {role description} | {Yes/No — brief description} |
 
 {Optional: ASCII diagram showing participant relationships}
 
 ```
 ┌─────────┐     ┌───────────────┐     ┌────────────┐
-│  Agent  │     │   {Provider}  │     │  Merchant  │
+│Platform │     │   {Provider}  │     │  Business  │
 └────┬────┘     └───────┬───────┘     └──────┬─────┘
      │                  │                    │
      │  {step 1}        │                    │
@@ -70,23 +75,22 @@ supports.}
 
 <!--
   PARTICIPANT INTEGRATION SECTIONS
-  
+
   Include one section per participant. Each section follows the same structure:
   - Prerequisites (onboarding, setup)
   - Configuration or Protocol (what they need to do)
   - Examples
-  
+
   Number sections starting from 3. Add more sections as needed for additional participants.
 -->
 
-## 3. Merchant Integration
+## 3. Business Integration
 
 ### 3.1 Prerequisites
 
-Before advertising this handler, merchants must complete:
+Before advertising this handler, businesses **MUST** complete:
 
-1. {Prerequisite 1, e.g., "Register with {provider} to obtain a merchant
-   identifier"}
+1. {Prerequisite 1, e.g., "Register with {provider} to obtain a business identifier"}
 2. {Prerequisite 2}
 
 **Prerequisites Output:**
@@ -98,7 +102,7 @@ Before advertising this handler, merchants must complete:
 
 ### 3.2 Handler Configuration
 
-Merchants advertise support for this handler in the checkout's
+Businesses advertise support for this handler in the checkout's
 `payment.handlers` array.
 
 #### Configuration Schema
@@ -135,54 +139,58 @@ Merchants advertise support for this handler in the checkout's
 
 ### 3.3 Processing Payments
 
-Upon receiving a payment with this handler's instrument, merchants MUST:
+Upon receiving a payment with this handler's instrument, businesses **MUST**:
 
-1. **Validate Handler:** Confirm `instrument.handler_name` matches an advertised handler
-2. **{Step 2}:** {description}
+1. **Validate Handler:** Confirm `instrument.handler_name` matches an advertised handler.
+2. **Ensure Idempotency:** If the request is a retry (matches a previous
+  `checkout_id` or idempotency key), return the previous result immediately
+  without re-processing funds.
 3. **{Step 3}:** {description}
-4. **Return Response:** Respond with the finalized checkout state
+4. **{Step 4}:** {description}
+5. **Return Response:** Respond with the finalized checkout state.
 
-{Include example request/response if the merchant calls an external service}
+{Include example request/response if the business calls an external service}
 
 ---
 
-## 4. Agent Integration
+## 4. Platform Integration
 
 ### 4.1 Prerequisites
 
-Before using this handler, agents must complete:
+Before using this handler, Platforms **MUST** complete:
 
-1. {Prerequisite 1, e.g., "Register with {provider} to obtain a client identifier"}
+1. {Prerequisite 1, e.g., "Register with {provider} to obtain a Platform identifier"}
 2. {Prerequisite 2}
 
 **Prerequisites Output:**
 
 | Field | Description |
 |:------|:------------|
-| `identity.access_token` | {what identifier is assigned, e.g., client_id} |
+| `identity.access_token` | {what identifier is assigned} |
 | {additional config} | {any additional configuration from onboarding} |
 
 ### 4.2 Payment Protocol
 
-Agents MUST follow this flow to acquire a payment instrument:
+Platforms **MUST** follow this flow to acquire a payment instrument:
 
 #### Step 1: Discover Handler
 
-Agent identifies `{handler_name}` in the merchant's `payment.handlers` array.
+The Platform identifies `{handler_name}` in the business's `payment.handlers`
+array.
 
 ```json
 {
   "id": "{handler_id}",
   "name": "{handler_name}",
   "config": {
-    // Merchant's configuration
+    // Business's configuration
   }
 }
 ```
 
 #### Step 2: {Action Name}
 
-{Description of what the agent does in this step.}
+{Description of what the Platform does in this step.}
 
 {Code example if applicable:}
 
@@ -196,27 +204,25 @@ Agent identifies `{handler_name}` in the merchant's `payment.handlers` array.
 
 #### Step N: Complete Checkout
 
-Agent submits the checkout with the constructed payment instrument.
+The Platform submits the checkout with the constructed payment instrument.
 
 ```json
 POST /checkout-sessions/{checkout_id}/complete
 Content-Type: application/json
 
 {
-  "payment": {
-    "instruments": [
-      {
-        "id": "{instrument_id}",
-        "handler_name": "{handler_name}",
-        "type": "{instrument_type}",
-        "credential": {
-          "type": "{credential_type}",
-          // Credential fields
-        }
-        // Additional instrument fields
-      }
-    ],
-    "selected_instrument_id": "{instrument_id}"
+  "payment_data": {
+    "id": "{instrument_id}",
+    "handler_name": "{handler_name}",
+    "type": "{instrument_type}",
+    "credential": {
+      "type": "{credential_type}",
+      // Credential fields
+    }
+    // Additional instrument fields
+  },
+  "risk_signal": {
+    // risk signal objects here
   }
 }
 ```
@@ -225,16 +231,16 @@ Content-Type: application/json
 
 <!--
   ADDITIONAL PARTICIPANT SECTIONS
-  
+
   Add one section per additional participant (PSP, Tokenizer, Wallet Provider, etc.)
-  following the same pattern as Merchant and Agent integration.
+  following the same pattern as Business and Platform integration.
 -->
 
 ## {N}. {Participant} Integration
 
 ### {N}.1 Prerequisites
 
-Before participating in this handler's flow, {participants} must complete:
+Before participating in this handler's flow, {participants} **MUST** complete:
 
 1. {Prerequisite 1}
 2. {Prerequisite 2}
@@ -258,8 +264,11 @@ Before participating in this handler's flow, {participants} must complete:
 
 | Requirement | Description |
 |:------------|:------------|
-| **Binding required** | Credentials MUST be bound to `checkout_id` and `identity` to prevent reuse |
-| **Binding verified** | Processing participant MUST verify binding matches before processing |
+| **Binding required** | Credentials **MUST** be bound to `checkout_id` and `identity` to prevent reuse. |
+| **Binding placement** | Binding data (e.g., `checkout_id`) SHOULD be included within the `credential` payload to ensure it is covered by the signature, rather than in transport headers. |
+| **Binding verified** | The processing participant **MUST** verify binding matches before processing. |
+| **Token Expiry** | {If using tokens: Tokens **MUST** expire after {duration} or single-use.} |
+| **Data Residency** | {Specify if PII **MUST** be processed/stored in specific geographic regions (e.g., EU, US) to comply with local laws.} |
 | **{Additional requirement}** | {description} |
 
 ---
