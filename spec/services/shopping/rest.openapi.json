@@ -380,7 +380,7 @@
                     "properties": {
                       "event_id": {
                         "type": "string",
-                        "description": "Unique event identifier. Recommended format: gid://merchant.com/Event/{event_id}."
+                        "description": "Unique event identifier."
                       },
                       "created_time": {
                         "type": "string",

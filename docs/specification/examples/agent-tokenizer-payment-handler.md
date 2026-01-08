@@ -221,7 +221,7 @@ Authorization: Bearer {merchant_api_key}
 {
   "token": "atok_x9y8z7w6v5u4",
   "binding": {
-    "checkout_id": "gid://merchant.com/Checkout/order_789"
+    "checkout_id": "checkout_789"
   }
 }
 ```
@@ -340,7 +340,7 @@ Authorization: Bearer {psp_api_key}
 {
   "token": "atok_x9y8z7w6v5u4",
   "binding": {
-    "checkout_id": "gid://merchant.com/Checkout/order_789",
+    "checkout_id": "checkout_789",
     "identity": {
       "access_token": "merchant_abc123"
     }

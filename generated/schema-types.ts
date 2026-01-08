@@ -135,14 +135,17 @@ export type CheckoutWithDiscount = CheckoutResponse & {
  * A destination for fulfillment.
  */
 export type FulfillmentDestinationRequest =
-  | (PostalAddress & {
-      /**
-       * ID specific to this shipping destination.
-       */
-      id?: string;
-      [k: string]: unknown;
-    })
-  | RetailLocationRequest;
+    ShippingDestinationRequest|RetailLocationRequest;
+/**
+ * Shipping destination.
+ */
+export type ShippingDestinationRequest = PostalAddress&{
+  /**
+   * ID specific to this shipping destination.
+   */
+  id: string;
+  [k: string]: unknown;
+};
 /**
  * Checkout extended with hierarchical fulfillment.
  *
@@ -167,14 +170,17 @@ export type CheckoutWithFulfillmentUpdateRequest = CheckoutUpdateRequest & {
  * A destination for fulfillment.
  */
 export type FulfillmentDestinationResponse =
-  | (PostalAddress & {
-      /**
-       * ID specific to this shipping destination.
-       */
-      id: string;
-      [k: string]: unknown;
-    })
-  | RetailLocationResponse;
+    ShippingDestinationResponse|RetailLocationResponse;
+/**
+ * Shipping destination.
+ */
+export type ShippingDestinationResponse = PostalAddress&{
+  /**
+   * ID specific to this shipping destination.
+   */
+  id: string;
+  [k: string]: unknown;
+};
 /**
  * Checkout extended with hierarchical fulfillment.
  *
@@ -218,7 +224,7 @@ export declare interface AP2CompleteRequestObject {
 export declare interface CheckoutResponse {
   ucp: UCPCheckoutResponse;
   /**
-   * Identifier of the checkout session. Recommended format: gid://merchant.com/Checkout/{checkout_id}
+   * Unique identifier of the checkout session.
    */
   id: string;
   /**
@@ -262,7 +268,7 @@ export declare interface CheckoutResponse {
   continue_url?: string;
   payment: PaymentResponse;
   /**
-   * Identifier of the order created based on the checkout session. Recommended format: gid://merchant.com/Order/{order_id}.
+   * Unique identifier of the order created based on the checkout session.
    */
   order_id?: string;
   /**
@@ -760,7 +766,7 @@ export declare interface PaymentCreateRequest {
  */
 export declare interface CheckoutUpdateRequest {
   /**
-   * Identifier of the checkout session. Recommended format: gid://merchant.com/Checkout/{checkout_id}
+   * Unique identifier of the checkout session.
    */
   id: string;
   /**
@@ -1160,7 +1166,7 @@ export declare interface FulfillmentResponse {
 export declare interface Order {
   ucp: UCPOrderResponse;
   /**
-   * Order identifier. Recommended format: gid://merchant.com/Order/{order_id}.
+   * Unique order identifier.
    */
   id: string;
   /**

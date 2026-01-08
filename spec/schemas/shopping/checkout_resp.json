@@ -21,7 +21,7 @@
     },
     "id": {
       "type": "string",
-      "description": "Identifier of the checkout session. Recommended format: gid://merchant.com/Checkout/{checkout_id}"
+      "description": "Unique identifier of the checkout session."
     },
     "line_items": {
       "type": "array",
@@ -86,7 +86,7 @@
     },
     "order_id": {
       "type": "string",
-      "description": "Identifier of the order created based on the checkout session. Recommended format: gid://merchant.com/Order/{order_id}."
+      "description": "Unique identifier of the order created based on the checkout session."
     },
     "order_permalink_url": {
       "type": "string",

@@ -230,7 +230,7 @@ Authorization: Bearer {agent_api_key}
     "name": "John Smith"
   },
   "binding": {
-    "checkout_id": "gid://merchant.com/Checkout/order_456",
+    "checkout_id": "checkout_456",
     "identity": {
       "access_token": "merchant_xyz789"
     }

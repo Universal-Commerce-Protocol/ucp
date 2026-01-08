@@ -46,7 +46,7 @@
                       "name": "Jane Doe"
                     },
                     "binding": {
-                      "checkout_id": "gid://merchant.com/Checkout/abc123",
+                      "checkout_id": "abc123",
                       "identity": {
                         "access_token": "merchant_abc123"
                       }
@@ -66,7 +66,7 @@
                       "name": "Jane Doe"
                     },
                     "binding": {
-                      "checkout_id": "gid://merchant.com/Checkout/xyz789"
+                      "checkout_id": "xyz789"
                     }
                   }
                 },
@@ -84,7 +84,7 @@
                       "name": "Jane Doe"
                     },
                     "binding": {
-                      "checkout_id": "gid://merchant.com/Checkout/abc123",
+                      "checkout_id": "abc123",
                       "identity": {
                         "access_token": "merchant_abc123"
                       }

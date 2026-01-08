@@ -14,7 +14,7 @@
   "properties": {
     "id": {
       "type": "string",
-      "description": "Identifier of the checkout session. Recommended format: gid://merchant.com/Checkout/{checkout_id}"
+      "description": "Unique identifier of the checkout session."
     },
     "line_items": {
       "type": "array",

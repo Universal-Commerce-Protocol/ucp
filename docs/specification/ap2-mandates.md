@@ -141,7 +141,7 @@ Merchants **MUST** embed their signature in the checkout response body under
 **Checkout Response with Embedded Signature:**
 ```json
 {
-  "id": "gid://merchant.com/Checkout/chk_abc123",
+  "id": "chk_abc123",
   "status": "ready_for_complete",
   "currency": "USD",
   "line_items": [...],
@@ -240,7 +240,7 @@ with `ap2.merchant_authorization` embedded in the response body.
 **Example Response:**
 ```json
 {
-  "id": "gid://merchant.com/Checkout/chk_abc123",
+  "id": "chk_abc123",
   "status": "ready_for_complete",
   "currency": "USD",
   "line_items": [

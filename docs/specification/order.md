@@ -164,9 +164,9 @@ Examples: `refund`, `return`, `credit`, `price_adjustment`, `dispute`,
       {"name": "dev.ucp.shopping.order", "version": "2026-01-11"}
     ]
   },
-  "id": "gid://merchant.com/Order/order_abc123",
-  "checkout_id": "gid://merchant.com/Checkout/checkout_xyz789",
-  "permalink_url": "https://merchant.com/orders/abc123",
+  "id": "order_abc123",
+  "checkout_id": "checkout_xyz789",
+  "permalink_url": "https://business.com/orders/abc123",
 
   "line_items": [
     {

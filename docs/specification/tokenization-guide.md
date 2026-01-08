@@ -126,7 +126,7 @@ Content-Type: application/json
     "cvc": "123"
   },
   "binding": {
-    "checkout_id": "gid://merchant.com/Checkout/abc123",
+    "checkout_id": "abc123",
     "identity": {
       "access_token": "merchant_001"
     }
@@ -157,7 +157,7 @@ Authorization: Bearer {caller_access_token}
 {
   "token": "tok_abc123xyz789",
   "binding": {
-    "checkout_id": "gid://merchant.com/Checkout/abc123"
+    "checkout_id": "abc123"
   }
 }
 ```

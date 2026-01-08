@@ -36,7 +36,7 @@
     },
     "id": {
       "type": "string",
-      "description": "Order identifier. Recommended format: gid://merchant.com/Order/{order_id}."
+      "description": "Unique order identifier."
     },
     "checkout_id": {
       "type": "string",

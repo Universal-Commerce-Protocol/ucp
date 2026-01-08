@@ -219,7 +219,7 @@ Authorization: Bearer {agent_api_key}
     "name": "Jane Doe"
   },
   "binding": {
-    "checkout_id": "gid://example.com/Checkout/order_12345"
+    "checkout_id": "checkout_12345"
   }
 }
 ```

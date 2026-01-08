@@ -513,7 +513,7 @@ information:**
                         "type": "card",
                         "status": "created",
                         "handler_id": "merchant_psp_handler",
-                        "id": "gid://host/PaymentInstrument/123",
+                        "id": "payment_instrument_123",
                         "account_info": {
                             "payment_account_reference": "V0010010000000000000000000000",
                             "fingerprint": "xyz_123"
@@ -554,7 +554,7 @@ Signals that checkout is visible and ready for interaction.
     "method": "ec.start",
     "params": {
         "checkout": {
-            "id": "gid://merchant.com/Checkout/123",
+            "id": "checkout_123",
             "status": "incomplete",
             "messages": [
                 {
@@ -592,7 +592,7 @@ Indicates successful checkout completion.
     "method": "ec.complete",
     "params": {
         "checkout": {
-            "id": "gid://merchant.com/Checkout/123",
+            "id": "checkout_123",
             // ... other checkout fields
             "order_id": "987654321",
             "order_permalink_url": "https://shop.com/orders/xyz123"
@@ -625,7 +625,7 @@ checkout UI.
     "method": "ec.line_items.change",
     "params": {
         "checkout": {
-            "id": "gid://merchant.com/Checkout/123",
+            "id": "checkout_123",
             // The entire checkout object is provided, including the updated line items and totals
             "totals": [
                 /* ... */
@@ -656,7 +656,7 @@ Buyer information has been updated in the checkout UI.
     "method": "ec.buyer.change",
     "params": {
         "checkout": {
-            "id": "gid://merchant.com/Checkout/123",
+            "id": "checkout_123",
             // The entire checkout object is provided, including the updated buyer information
             "buyer": {
                 /* ... */
@@ -685,7 +685,7 @@ informational notices about the checkout state.
     "method": "ec.messages.change",
     "params": {
         "checkout": {
-            "id": "gid://merchant.com/Checkout/123",
+            "id": "checkout_123",
             "messages": [
                 {
                     "type": "error",
@@ -767,10 +767,10 @@ checkout UI, such as a new payment method being selected.
     "method": "ec.payment.change",
     "params": {
         "checkout": {
-            "id": "gid://merchant.com/Checkout/123",
+            "id": "checkout_123",
             // The entire checkout object is provided, including the updated payment details
             "payment": {
-                "selected_instrument_id": "gid://agent/PaymentInstrument/123",
+                "selected_instrument_id": "payment_instrument_123",
                 "instruments": [
                     /* ... */
                 ],
@@ -802,7 +802,7 @@ Requests the Host to present payment instrument selection UI.
     "method": "ec.payment.instruments_change_request",
     "params": {
         "checkout": {
-            "id": "gid://merchant.com/Checkout/123",
+            "id": "checkout_123",
             // The entire checkout object is provided, including the current payment details
             "payment": {
                 /* ... */
@@ -835,10 +835,10 @@ existing state.
     "result": {
         "checkout": {
             "payment": {
-                "selected_instrument_id": "gid://host/PaymentInstrument/123",
+                "selected_instrument_id": "payment_instrument_123",
                 "instruments": [
                     {
-                        "id": "gid://host/PaymentInstrument/123",
+                        "id": "payment_instrument_123",
                         "handler_id": "merchant_psp_handler",
                         "type": "card",
                         "brand": "visa",
@@ -888,10 +888,10 @@ submission.
     "method": "ec.payment.credential_request",
     "params": {
         "checkout": {
-            "id": "gid://merchant.com/Checkout/123",
+            "id": "checkout_123",
             // The entire checkout object is provided, including the current payment details
             "payment": {
-                "selected_instrument_id": "gid://agent/PaymentInstrument/123",
+                "selected_instrument_id": "payment_instrument_123",
                 "instruments": [
                     /* ... */
                 ],
@@ -930,7 +930,7 @@ to merge the new data with existing state.
                 "instruments": [
                     // Instrument schema is determined by the payment handler's instrument_schemas
                     {
-                        "id": "gid://host/PaymentInstrument/123",
+                        "id": "payment_instrument_123",
                         "handler_id": "gpay",
                         "type": "card",
                         "brand": "visa",
@@ -1027,7 +1027,7 @@ UI.
     "method": "ec.fulfillment.change",
     "params": {
         "checkout": {
-            "id": "gid://merchant.com/Checkout/123",
+            "id": "checkout_123",
             // The entire checkout object is provided, including the updated fulfillment details
             "fulfillment": {
                 /* ... */
@@ -1057,17 +1057,17 @@ method.
     "method": "ec.fulfillment.address_change_request",
     "params": {
         "checkout": {
-            "id": "gid://merchant.com/Checkout/123",
+            "id": "checkout_123",
             // The entire checkout object is provided, including the current fulfillment details
             "fulfillment": {
                 "methods": [
                     {
                         "id": "method_1",
                         "type": "shipping",
-                        "selected_destination_id": "gid://host/Address/123",
+                        "selected_destination_id": "address_123",
                         "destinations": [
                             {
-                                "id": "gid://host/Address/123",
+                                "id": "address_123",
                                 "address_street": "456 Old Street"
                                 // ...
                             }
@@ -1108,10 +1108,10 @@ rather than attempting to merge the new data with existing state.
                     {
                         "id": "method_1",
                         "type": "shipping",
-                        "selected_destination_id": "gid://host/Address/789",
+                        "selected_destination_id": "address_789",
                         "destinations": [
                             {
-                                "id": "gid://host/Address/789",
+                                "id": "address_789",
                                 "first_name": "John",
                                 "last_name": "Doe",
                                 "address_street": "123 New Street"
