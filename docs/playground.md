@@ -62,7 +62,7 @@
       <div class="twoCol">
         <div class="card">
           <h3 class="cardTitle">Agent profile</h3>
-          <label>
+          <label class="playground-label">
             Select agent type
             <select id="agent-select">
               <option value="basic">Basic agent (core only)</option>
@@ -198,7 +198,7 @@
       <div class="twoCol">
         <div class="card">
           <h3 class="cardTitle">Handler selection</h3>
-          <label>
+          <label class="playground-label">
             Payment handler
             <select id="handler-select">
               <option value="shop_pay">shop_pay (com.shopify.shop_pay)</option>
@@ -1438,7 +1438,7 @@ select:focus {
   box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
 }
 
-label {
+.playground-label {
   display: block;
   font-weight: 500;
   color: var(--text);
