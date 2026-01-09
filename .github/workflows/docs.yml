@@ -83,7 +83,7 @@ jobs:
 
       - name: Check for changed files in spec
         id: spec_files_changed
-        uses: tj-actions/changed-files@v44
+        uses: tj-actions/changed-files@v46
         with:
           files: spec/**
 
