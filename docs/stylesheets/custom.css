@@ -717,7 +717,7 @@ lifecycle-container h2 {
 .get-started-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 60px 0 0 0;
+  padding: 60px 0 60px 0;
   text-align: center;
 }
 .get-started-container__intro {
