@@ -112,7 +112,7 @@ interact.
     Capability.
     *   *Examples:* Discounts (extends Checkout), AP2 Mandates (extends
         Checkout).
-*   **Transports:** The lower-level communication layers used to exchange data.
+*   **Services:** The lower-level communication layers used to exchange data.
     UCP is transport-agnostic but defines specific bindings for
     interoperability.
     *   *Examples:* REST API (primary), MCP (Model Context Protocol), A2A
