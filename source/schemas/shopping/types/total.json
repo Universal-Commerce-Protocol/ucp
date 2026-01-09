@@ -10,7 +10,6 @@
     "type": {
       "type": "string",
       "enum": [
-        "items_base_amount",
         "items_discount",
         "subtotal",
         "discount",
@@ -29,7 +28,7 @@
     },
     "amount": {
       "type": "integer",
-      "description": "If type == subtotal, sums items_base_amount - items_discount. If type == total, sums subtotal - discount + fulfillment + tax + fee. Should be >= 0. Amount in minor (cents) currency units.",
+      "description": "If type == total, sums subtotal - discount + fulfillment + tax + fee. Should be >= 0. Amount in minor (cents) currency units.",
       "minimum": 0,
       "ucp_request": "omit"
     }

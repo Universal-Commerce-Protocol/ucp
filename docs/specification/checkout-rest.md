@@ -113,9 +113,10 @@ Content-Type: application/json
         "price": 2500
       },
       "quantity": 2,
-      "base_amount": 5000,
-      "subtotal": 5000,
-      "total": 5000
+      "totals": [
+        {"type": "subtotal", "amount": 5000},
+        {"type": "total", "amount": 5000}
+      ]
     }
   ],
   "totals": [
@@ -253,9 +254,10 @@ Content-Type: application/json
         "price": 2500
       },
       "quantity": 2,
-      "base_amount": 5000,
-      "subtotal": 5000,
-      "total": 5000
+      "totals": [
+        {"type": "subtotal", "amount": 5000},
+        {"type": "total", "amount": 5000}
+      ]
     }
   ],
   "buyer": {
@@ -405,9 +407,10 @@ Content-Type: application/json
         "price": 2500
       },
       "quantity": 2,
-      "base_amount": 5000,
-      "subtotal": 5000,
-      "total": 5000
+      "totals": [
+        {"type": "subtotal", "amount": 5000},
+        {"type": "total", "amount": 5000}
+      ]
     }
   ],
   "buyer": {
@@ -571,9 +574,10 @@ Content-Type: application/json
         "price": 2500
       },
       "quantity": 2,
-      "base_amount": 5000,
-      "subtotal": 5000,
-      "total": 5000
+      "totals": [
+        {"type": "subtotal", "amount": 5000},
+        {"type": "total", "amount": 5000}
+      ]
     }
   ],
   "buyer": {
@@ -739,9 +743,10 @@ Content-Type: application/json
         "price": 2500
       },
       "quantity": 2,
-      "base_amount": 5000,
-      "subtotal": 5000,
-      "total": 5000
+      "totals": [
+        {"type": "subtotal", "amount": 5000},
+        {"type": "total", "amount": 5000}
+      ]
     }
   ],
   "buyer": {
@@ -879,9 +884,10 @@ Content-Type: application/json
         "price": 2500
       },
       "quantity": 2,
-      "base_amount": 5000,
-      "subtotal": 5000,
-      "total": 5000
+      "totals": [
+        {"type": "subtotal", "amount": 5000},
+        {"type": "total", "amount": 5000}
+      ]
     }
   ],
   "buyer": {
@@ -1017,9 +1023,10 @@ Content-Type: application/json
         "price": 2500
       },
       "quantity": 2,
-      "base_amount": 5000,
-      "subtotal": 5000,
-      "total": 5000
+      "totals": [
+        {"type": "subtotal", "amount": 5000},
+        {"type": "total", "amount": 5000}
+      ]
     }
   ],
   "buyer": {

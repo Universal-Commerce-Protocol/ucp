@@ -7,9 +7,7 @@
     "id",
     "item",
     "quantity",
-    "base_amount",
-    "subtotal",
-    "total"
+    "totals"
   ],
   "properties": {
     "id": {
@@ -27,28 +25,12 @@
       "description": "Quantity of the item being purchased.",
       "minimum": 1
     },
-    "base_amount": {
-      "type": "integer",
-      "description": "Line total before discounts (item.price x item.quantity) in minor (cents) currency units.",
-      "minimum": 0,
-      "ucp_request": "omit"
-    },
-    "discount": {
-      "type": "integer",
-      "description": "Line-level discount amount in minor (cents) currency units.",
-      "minimum": 0,
-      "ucp_request": "omit"
-    },
-    "subtotal": {
-      "type": "integer",
-      "description": "Line total after discounts in minor (cents) currency units.",
-      "minimum": 0,
-      "ucp_request": "omit"
-    },
-    "total": {
-      "type": "integer",
-      "description": "Final line total (same as subtotal) in minor (cents) currency units.",
-      "minimum": 0,
+    "totals": {
+      "type": "array",
+      "items": {
+        "$ref": "total.json"
+      },
+      "description": "Line item totals breakdown.",
       "ucp_request": "omit"
     },
     "parent_id": {

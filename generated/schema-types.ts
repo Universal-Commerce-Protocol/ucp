@@ -325,21 +325,9 @@ export declare interface LineItemResponse {
    */
   quantity: number;
   /**
-   * Line total before discounts (item.price x item.quantity) in minor (cents) currency units.
+   * Line item totals breakdown.
    */
-  base_amount: number;
-  /**
-   * Line-level discount amount in minor (cents) currency units.
-   */
-  discount?: number;
-  /**
-   * Line total after discounts in minor (cents) currency units.
-   */
-  subtotal: number;
-  /**
-   * Final line total (same as subtotal) in minor (cents) currency units.
-   */
-  total: number;
+  totals: TotalResponse[];
   /**
    * Parent line item identifier for any nested structures.
    */
@@ -392,13 +380,13 @@ export declare interface TotalResponse {
   /**
    * Type of total categorization.
    */
-  type: 'items_base_amount' | 'items_discount' | 'subtotal' | 'discount' | 'fulfillment' | 'tax' | 'fee' | 'total';
+  type: 'items_discount' | 'subtotal' | 'discount' | 'fulfillment' | 'tax' | 'fee' | 'total';
   /**
    * Text to display against the amount. Should reflect appropriate method (e.g., 'Shipping', 'Delivery').
    */
   display_text?: string;
   /**
-   * If type == subtotal, sums items_base_amount - items_discount. If type == total, sums subtotal - discount + fulfillment + tax + fee. Should be >= 0. Amount in minor (cents) currency units.
+   * If type == total, sums subtotal - discount + fulfillment + tax + fee. Should be >= 0. Amount in minor (cents) currency units.
    */
   amount: number;
   [k: string]: unknown;
@@ -1274,17 +1262,9 @@ export declare interface OrderLineItem {
     [k: string]: unknown;
   };
   /**
-   * Base price in minor units (cents) before discounts.
+   * Line item totals breakdown.
    */
-  base_amount: number;
-  /**
-   * Subtotal after discounts, before tax.
-   */
-  subtotal: number;
-  /**
-   * Final total including tax.
-   */
-  total: number;
+  totals: TotalResponse[];
   /**
    * Derived status: fulfilled if quantity.fulfilled == quantity.total, partial if quantity.fulfilled > 0, otherwise processing.
    */

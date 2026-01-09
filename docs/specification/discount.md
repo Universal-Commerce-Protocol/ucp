@@ -272,10 +272,12 @@ to line items, and an automatic shipping discount at the order level.
         "title": "T-Shirt",
         "price": 2000
       },
-      "base_amount": 4000,
-      "discount": 800,
-      "subtotal": 3200,
-      "total": 3200
+      "totals": [
+        {"type": "subtotal", "amount": 4000},
+        {"type": "items_discount", "amount": 800},
+        {"type": "total", "amount": 3200}
+
+      ]
     }
   ],
   "discounts": {
@@ -367,10 +369,12 @@ Multiple discounts applied with full allocation breakdown:
         "title": "T-Shirt",
         "price": 6000
       },
-      "base_amount": 6000,
-      "discount": 1500,
-      "subtotal": 4500,
-      "total": 4500
+      "totals": [
+        {"type": "subtotal", "amount": 6000},
+        {"type": "items_discount", "amount": 1500},
+        {"type": "total", "amount": 4500}
+
+      ]
     },
     {
       "id": "li_2",
@@ -378,10 +382,12 @@ Multiple discounts applied with full allocation breakdown:
         "title": "Socks",
         "price": 4000
       },
-      "base_amount": 4000,
-      "discount": 1000,
-      "subtotal": 3000,
-      "total": 3000
+      "totals": [
+        {"type": "subtotal", "amount": 4000},
+        {"type": "items_discount", "amount": 1000},
+        {"type": "total", "amount": 3000}
+
+      ]
     }
   ],
   "discounts": {

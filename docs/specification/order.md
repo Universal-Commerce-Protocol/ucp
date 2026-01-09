@@ -167,28 +167,28 @@ Examples: `refund`, `return`, `credit`, `price_adjustment`, `dispute`,
   "id": "order_abc123",
   "checkout_id": "checkout_xyz789",
   "permalink_url": "https://business.com/orders/abc123",
-
   "line_items": [
     {
       "id": "li_shoes",
       "item": { "id": "prod_shoes", "title": "Running Shoes", "price": 3000 },
       "quantity": { "total": 3, "fulfilled": 3 },
-      "base_amount": 9000,
-      "subtotal": 9000,
-      "total": 9000,
+      "totals": [
+        {"type": "subtotal", "amount": 9000},
+        {"type": "total", "amount": 9000}
+      ],
       "status": "fulfilled"
     },
     {
       "id": "li_shirts",
       "item": { "id": "prod_shirts", "title": "Cotton T-Shirt", "price": 2000 },
       "quantity": { "total": 2, "fulfilled": 0 },
-      "base_amount": 4000,
-      "subtotal": 4000,
-      "total": 4000,
+      "totals": [
+        {"type": "subtotal", "amount": 4000},
+        {"type": "total", "amount": 4000}
+      ],
       "status": "processing"
     }
   ],
-
   "fulfillment": {
     "expectations": [
       {
@@ -220,7 +220,6 @@ Examples: `refund`, `return`, `credit`, `price_adjustment`, `dispute`,
         "fulfillable_on": "2025-01-15T00:00:00Z"
       }
     ],
-
     "events": [
       {
         "id": "evt_1",
@@ -233,7 +232,6 @@ Examples: `refund`, `return`, `credit`, `price_adjustment`, `dispute`,
       }
     ]
   },
-
   "adjustments": [
     {
       "id": "adj_1",
@@ -245,7 +243,6 @@ Examples: `refund`, `return`, `credit`, `price_adjustment`, `dispute`,
       "description": "Defective item"
     }
   ],
-
   "totals": [
     { "type": "subtotal", "amount": 13000 },
     { "type": "shipping", "amount": 1200 },

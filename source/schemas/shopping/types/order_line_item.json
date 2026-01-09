@@ -6,9 +6,7 @@
     "id",
     "item",
     "quantity",
-    "base_amount",
-    "subtotal",
-    "total",
+    "totals",
     "status"
   ],
   "properties": {
@@ -37,17 +35,12 @@
       },
       "description": "Quantity tracking. Both total and fulfilled are derived from events."
     },
-    "base_amount": {
-      "type": "integer",
-      "description": "Base price in minor units (cents) before discounts."
-    },
-    "subtotal": {
-      "type": "integer",
-      "description": "Subtotal after discounts, before tax."
-    },
-    "total": {
-      "type": "integer",
-      "description": "Final total including tax."
+    "totals": {
+      "type": "array",
+      "items": {
+        "$ref": "total.json"
+      },
+      "description": "Line item totals breakdown."
     },
     "status": {
       "type": "string",
