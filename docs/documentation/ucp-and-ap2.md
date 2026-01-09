@@ -16,11 +16,12 @@
 
 # UCP and AP2
 
-UCP is fully compatible with Agent Payments Protocol (AP2). AP2 serves as the
-trustlayer for agent-led transactions completed on behalf of a user, mandating a
-secure, verifiable exchange of intents and authorizations between Platforms and
-businesses. By using Verifiable Digital Credentials (VDCs), AP2 eliminates the
-need for middleman "trust referees." It allows businesses to receive signed
+UCP is fully compatible with
+[Agent Payments Protocol (AP2)](https://ap2-protocol.org/). AP2 serves as the
+trust layer for agent-led transactions completed on behalf of a user, mandating
+a secure, verifiable exchange of intents and authorizations between Platforms
+and businesses. By using Verifiable Digital Credentials (VDCs), AP2 eliminates
+the need for middleman "trust referees." It allows businesses to receive signed
 checkout commitments—ensuring the price and terms don't change mid-flow—and
 allows Platforms to provide cryptographically signed payment authorizations that
 are mathematically tied to the specific state of the cart.
