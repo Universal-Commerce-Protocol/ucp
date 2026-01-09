@@ -112,6 +112,15 @@ def define_env(env):
     Returns:
       Markdown link: [Line Item.Create_Req](#line-item-create_request)
     """
+    # Refer to checkout.json for ap2-mandates.json entities that are not
+    # explicitly defined in ap2-mandates.json.
+    if (
+        spec_file_name == 'ap2-mandates'
+        and 'ap2_mandate' not in ref_string
+        and not ref_string.startswith('#')
+    ):
+      spec_file_name = 'checkout'
+
     filename = os.path.basename(ref_string)
 
     # Check if this reference comes from the core UCP schema
