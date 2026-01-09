@@ -36,10 +36,10 @@
   color: #202124 !important;
 }
 
-/* 4. Ensure the Site Title is dark grey/black */
+/* 4. Ensure the Site Title is dark grey/black and not bold */
 .md-header__title, .md-header__topic {
   color: #202124 !important;
-  font-weight: 500;
+  font-weight: 500 !important;
 }
 
 /* 5. Ensure icons (Menu, GitHub, Search) are grey */
