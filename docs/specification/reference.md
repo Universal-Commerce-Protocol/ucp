@@ -37,17 +37,17 @@ and responses.
 ### Discovery Profile
 The top-level structure of a discovery document (`/.well-known/ucp`).
 
-{{ extension_schema_fields('ucp.json#/$defs/discovery', 'reference') }}
+{{ extension_schema_fields('ucp.json#/$defs/discovery_profile', 'reference') }}
 
 ### Checkout Response Metadata
 The `ucp` object included in checkout responses.
 
-{{ extension_schema_fields('ucp.json#/$defs/checkout_response', 'reference') }}
+{{ extension_schema_fields('ucp.json#/$defs/response_checkout', 'reference') }}
 
 ### Order Response Metadata
 The `ucp` object included in order responses or events.
 
-{{ extension_schema_fields('ucp.json#/$defs/order_response', 'reference') }}
+{{ extension_schema_fields('ucp.json#/$defs/response_order', 'reference') }}
 
 ### Capability
 This object describes a single capability or extension. It appears in the

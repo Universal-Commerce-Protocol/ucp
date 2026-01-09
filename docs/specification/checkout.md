@@ -468,4 +468,4 @@ Businesses **MAY** define custom types for domain-specific needs. Platforms
 
 ### UCP Checkout Response
 
-{{ extension_schema_fields('ucp.json#/$defs/checkout_response', 'checkout') }}
+{{ extension_schema_fields('ucp.json#/$defs/response_checkout', 'checkout') }}

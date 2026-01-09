@@ -358,4 +358,4 @@ rotation:
 
 ### UCP Order Response
 
-{{ extension_schema_fields('ucp.json#/$defs/order_response', 'order') }}
+{{ extension_schema_fields('ucp.json#/$defs/response_order', 'order') }}
