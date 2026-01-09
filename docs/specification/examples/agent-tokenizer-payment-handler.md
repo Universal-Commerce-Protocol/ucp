@@ -379,6 +379,6 @@ The agent's vaulting service verifies that:
 
 ## 7. References
 
-- **Pattern:** [Tokenization Payment Handler](/third_party/ucp/docs/specification/tokenization-guide.md)
+- **Pattern:** [Tokenization Payment Handler](../tokenization-guide.md)
 - **API Pattern:** `https://ucp.dev/handlers/tokenization/openapi.json`
 - **Identity Schema:** `https://ucp.dev/schemas/shopping/types/payment_identity.json`

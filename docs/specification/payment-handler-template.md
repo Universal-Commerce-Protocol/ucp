@@ -35,7 +35,7 @@ supports.}
 | Participant | Integration Section |
 |:------------|:--------------------|
 | **Business** | [3. Business Integration](#3-business-integration) |
-| **Platform**   | [4. Platform Integration](#4-Platform-integration) |
+| **Platform**   | [4. Platform Integration](#4-platform-integration) |
 
 ---
 

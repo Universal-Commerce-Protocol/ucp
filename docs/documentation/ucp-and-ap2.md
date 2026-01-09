@@ -59,7 +59,6 @@ are mathematically tied to the specific state of the cart.
 
 **Dependencies**: Checkout capability
 
-<!-- disableFinding(LINK_RELATIVE_G3DOC) -->
 [See here for full AP2 mandates extension](../specification/ap2-mandates.md)
 
 [Learn more about AP2](http://ap2-protocol.org)
