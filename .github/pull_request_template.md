@@ -9,14 +9,16 @@ Please delete options that are not relevant.
 
 - [ ] Bug fix (non-breaking change which fixes an issue)
 - [ ] New feature (non-breaking change which adds functionality)
-- [ ] **Breaking change** (fix or feature that would cause existing functionality to not work as expected, **including removal of schema files or fields**)
+- [ ] **Breaking change** (fix or feature that would cause existing
+      functionality to not work as expected, **including removal of schema files
+      or fields**)
 - [ ] Documentation update
 
 ---
 ### Is this a Breaking Change or Removal?
 
-<!-- disableFinding(LINE_OVER_80) -->
-If you checked "Breaking change" above, or if you are removing **any** schema files or fields:
+If you checked "Breaking change" above, or if you are removing **any** schema
+files or fields:
 
 - [ ] **I have added `!` to my PR title** (e.g., `feat!: remove field`).
 - [ ] **I have added justification below.**
@@ -24,7 +26,8 @@ If you checked "Breaking change" above, or if you are removing **any** schema fi
 ```
 ## Breaking Changes / Removal Justification
 
-(Please provide a detailed technical and strategic rationale here for why this breaking change or removal is necessary.)
+(Please provide a detailed technical and strategic rationale here for why this
+breaking change or removal is necessary.)
 ```
 ---
 

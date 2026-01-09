@@ -23,8 +23,8 @@ providers, and identity providers operate on different systems, UCP provides
 a standardized common language and functional primitives.
 
 This document provides the detailed technical specification for UCP.
-<!-- disableFinding(LINK_RELATIVE_G3DOC) -->
-For a complete definition of all data models and schemas, see the [Schema Reference](../specification/reference.md).
+For a complete definition of all data models and schemas, see the
+[Schema Reference](../specification/reference.md).
 
 Its primary goal is to enable:
 
