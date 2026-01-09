@@ -54,10 +54,10 @@ Its primary goal is to enable:
 
 The design and evolution of UCP are driven by the following core principles:
 
-*   **Scalability & Universality:** The interface must scale to support diverse
-    commerce entities—from small individual businesses to large enterprise store
-    builders—across various locales, identity providers, and payment ecosystems
-    without friction.
+*   **Scalability & Universality:** The interface **MUST** scale to support
+    diverse commerce entities—from small individual businesses to large
+    enterprise store builders—across various locales, identity providers, and
+    payment ecosystems without friction.
 *   **Simplicity & Developer Experience:** We prioritize a clean, simple
     interface that is easy to implement for businesses and platforms alike.
     Complexity should be opt-in via extensions, not forced upon the core.
@@ -70,7 +70,7 @@ The design and evolution of UCP are driven by the following core principles:
     business retains ownership of the order, financial liability, and customer
     relationship. The platform acts as a facilitator, staying in the loop for
     order events to assist the user.
-*   **Security & Privacy by Design:** The protocol must support strict
+*   **Security & Privacy by Design:** The protocol **MUST** support strict
     enterprise-grade security and privacy standards. It ensures that sensitive
     data (PII, Payment Credentials) is handled securely, leveraging existing
     standards like OAuth 2.0 and minimizing data exposure.
@@ -139,8 +139,9 @@ interact.
 *   **Capabilities:** Standalone core features that a business supports. These
     are the "verbs" of the protocol.
     *   *Examples:* Checkout, Identity Linking, Order.
-*   **Extensions:** Optional modules that augment a specific Capability. They
-    allow for specialized functionality without bloating the core Capability.
+*   **Extensions:** **OPTIONAL** modules that augment a specific Capability.
+    They allow for specialized functionality without bloating the core
+    Capability.
     *   *Examples:* Discounts (extends Checkout), AP2 Mandates (extends
         Checkout).
 *   **Transports:** The lower-level communication layers used to exchange data.
@@ -199,7 +200,7 @@ All capability and service names **MUST** use the format:
 #### 5.1.2 Spec URL Binding
 
 The `spec` and `schema` fields are **REQUIRED** for all capabilities. The origin
-of these URLs **MUST** match the namespace authority:
+of these URLs ****MUST**** match the namespace authority:
 
 | Namespace       | Required Origin           |
 | --------------- | ------------------------- |
@@ -290,7 +291,7 @@ functionality is supported and where to find documentation and schemas.
 
 #### 5.3.2 Extensions
 
-An **extension** is an optional module that augments another capability.
+An **extension** is an **OPTIONAL** module that augments another capability.
 Extensions use the `extends` field to declare their parent:
 
 ```json
@@ -450,8 +451,8 @@ other authenticated messages from the business.
 #### 5.5.2 Platform Profile
 
 Platform profiles are similar and include signing keys for capabilities
-requiring cryptographic verification. Capabilities may include a `config` object
-for capability-specific settings (e.g., callback URLs, feature flags). An
+requiring cryptographic verification. Capabilities **MAY** include a `config`
+object for capability-specific settings (e.g., callback URLs, feature flags). An
 example:
 
 ```json
@@ -488,9 +489,9 @@ example:
       {
         "id": "gpay",
         "name": "com.google.pay",
-        "version": "2024-12-03",
-        "spec": "https://developers.google.com/merchant/ucp/guides/gpay-payment-handler",
-        "config_schema": "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/gpay_config.json",
+        "version": "2026-01-11",
+        "spec": "https://pay.google.com/gp/p/ucp/2026-01-11/",
+        "config_schema": "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/config.json",
         "instrument_schemas": [
           "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/gpay_card_payment_instrument.json"
         ]
@@ -638,891 +639,133 @@ The `capabilities` array in responses indicates active capabilities:
 ## 6. Payment Architecture
 
 UCP adopts a decoupled architecture for payments to solve the "N-to-N"
-complexity problem between Platforms, Businesses, and Payment Providers by
-separating payment methods (what types of payment are accepted) from payment
-handlers (how instruments are acquired). This separation enables critical
-capabilities: businesses can support multiple processing strategies for the same
-payment instrument (e.g., accepting cards via direct tokenization, wallet apps),
-platforms can choose the most appropriate handler based on their capabilities
-and user preferences, and new payment handlers and instruments can be introduced
-and adopted by the ecosystem in a permissionless way.
+complexity problem between platforms, business, and payment credential
+providers. This design separates **Payment Methods** (what is accepted) from
+**Payment Handlers** (how it is processed), ensuring security and scalability.
 
-### 6.1 Payment in the Checkout Lifecycle
+### 6.1. Security and Trust Model
 
-Payment is an integral part of the UCP checkout flow, not a standalone
-transaction. The `payment` field is a required component of every checkout
-response, enabling the following communication pattern between businesses
-and platforms:
+The payment architecture is built on a "Trust-by-Design" philosophy. It assumes
+that while the business and PSP have a trusted legal relationship, the platform
+(Client) acts as an intermediary that **SHOULD NOT** touch raw financial
+credentials unless necessary.
 
-**Step 1: Checkout Creation — Handler Advertisement (Business → Platform)**
+#### 6.1.1. The Trust Triangle
 
-When a platform creates or updates a checkout, the business includes
-available payment handlers in the response:
+1.  **Business ↔ PSP:** A pre-existing legal and technical relationship. The business holds API keys and a contract with the PSP.
+2.  **Platform ↔ PSP (Temporary):** The platform interacts with the PSP's interface (e.g., an iframe or API) to tokenize data but is not the "owner" of the funds.
+3.  **Platform ↔ Business:** The platform passes the result (a token or mandate) to the business to finalize the order.
+
+#### 6.1.2. The Standard for Agents: Agent Payments Protocol (AP2)
+
+While standard tokenization is sufficient for
+traditional "user-in-the-loop" flows, UCP recommends the AP2 as the default
+integration standard when the platform is acting as an Agent (e.g., AI
+Assistants, Search, Autonomous buyers).
+
+AP2 provides the cryptographic guarantees required for secure, non-repudiable
+autonomous commerce where a human **MAY** not be validating every specific step
+in real-time.
+
+| Feature | Legacy Tokenization | **AP2 (Recommended for Agents)** |
+| :--- | :--- | :--- |
+| **Trust Model** | Business trusts the Platform not to misuse credentials. | **Cryptographic Proof:** Business verifies signed User consent. |
+| **Data Security** | Opaque tokens (security relies on bearer token). | **Verifiable Credentials:** Signatures bind payment to specific order terms. |
+| **Liability** | Ambiguous (did the user authorize this specific amount?). | **Non-Repudiation:** Mathematical proof that User authorized Amount X for Items Y. |
+| **Use Case** | Traditional Web/App Checkout (User present). | **Agentic Commerce** (User delegates authority). |
+
+**Recommendation:** Platforms serving as agents and businesses supporting
+autonomous commerce **SHOULD** prioritize the `dev.ucp.shopping.ap2_mandate`.
+
+#### 6.1.3. Credential Flow & PCI Scope
+
+To minimize compliance overhead (PCI-DSS):
+
+1.  **Unidirectional Flow:** Credentials flow **Platform → Business** only. Businesses **MUST NOT** echo credentials back in responses.
+2.  **Opaque Credentials:** Platforms handle tokens (such as network tokens), encrypted payloads, or mandates, not raw PANs (Primary Account Numbers).
+3.  **Handler ID Routing:** The `handler_id` in the payload ensures the Business knows exactly which PSP key to use for decryption/charging, preventing key confusion attacks.
+
+### 6.2. Roles & Responsibilities: Who Implements What?
+
+A common source of confusion is the division of labor. The UCP payment model
+splits responsibilities as follows:
+
+| Role | Responsibility | Action |
+| :--- | :--- | :--- |
+| **PSP / Wallet**(e.g., PSP-X, Google Pay) | **Defines the Spec** | Creates the **Handler Definition**. They publish the "Blueprint" (JSON Schemas) that dictates how to tokenize a card and what config inputs are needed.<br>*Example: "Here is the schema for the 'com.psp-x.tokenization' handler."* |
+| **Business**(e.g., Retailer) | **Configures the Handler** | Selects the Handler they want to use and provides their specific **Configuration** (Public Keys, Merchant IDs) in the UCP Checkout Response. *Example: "I accept Visa using 'com.psp-x.tokenization' with this Publishable Key."* |
+| **Platform**(App, Website, or Agent) | **Executes the Protocol** | Reads the business's config and executes the logic defined by the PSP's Spec to acquire a token. *Example: "I see the Business uses PSP-X. I will call the PSP-X SDK with the Business's Key to get a token."* |
+
+### 6.3. Payment in the Checkout Lifecycle
+
+The payment process follows a standard 3-step lifecycle within UCP:
+**Negotiation**, **Acquisition**, and **Completion**.
+
+![High-level payment flow sequence diagram](site:specification/images/ucp-payment-flow.png)
+
+1.  **Negotiation (Business → Platform):** The business analyzes the cart and advertises available `handlers`. This tells the platform *how* to pay (e.g., "Use this specific PSP endpoint with this public key").
+2.  **Acquisition (Platform ↔ PSP):** The platform executes the handler's logic. This happens client-side or agent-side, directly with the payment credential provider (e.g., exchanging credentials for a network token via a PSP). The business is not involved, ensuring raw data never touches the business's frontend API.
+3.  **Completion (Platform → Business):** The platform submits the opaque credential (token) to the business. The business uses it to capture funds via their backend integration with the PSP.
+
+### 6.4. Payment Handlers
+
+Payment Handlers are the contract that binds the three parties together. This
+setup allows for a variety of different payment methods and token-types to be
+supported, including network tokens. They are standardized definitions
+typically authored by payment credential provider or the UCP governing body.
+
+| Field | Description |
+| :--- | :--- |
+| `name` | The reverse-DNS ID of the handler protocol (e.g., `com.google.pay`). |
+| `spec` | URL to the human-readable documentation for the Platform developer. |
+| `config_schema` | JSON Schema validating the `config` object the Business **MUST** provide. |
+| `instrument_schemas` | JSON Schema validating the payload the Platform **MUST** send to complete. |
+
+**Dynamic Filtering:** Businesses **MUST** filter the `handlers` list based on
+the context of the cart (e.g., removing "Buy Now Pay Later" for subscription
+items, or filtering regional methods based on shipping address).
+
+### 6.5. Risk Signals
+
+To aid in fraud assessment, the Platform **MAY** include additional risk signals
+in the `complete` call, providing the Business with more context about the
+transaction's legitimacy. The structure and content of these risk signals are
+not strictly defined by this specification, allowing flexibility based on the
+agreement between the Platform and Business or specific payment handler
+requirements.
+
+**Example (Flexible Structure):**
 
 ```json
-POST /checkout-sessions HTTP/1.1
-Content-Type: application/json
-UCP-Agent: profile="https://agent.example/profile"
-
 {
-  "ucp": {
-    "version": "2026-01-11",
-    "capabilities": [...]
-  },
-  "id": "chk_123",
-  "status": "incomplete",
-  "line_items": [...],
-  "currency": "USD",
-  "payment": {
-    "handlers": [
-      // Payment handler configurations
-    ]
+  "risk_signals": {
+    "session_id": "abc_123_xyz",
+    "score": 0.95,
   }
 }
 ```
 
-The `payment.handlers` array advertises which payment collection strategies the
-business supports. Each handler tells the platform: "Here's how you can acquire
-a payment instrument for me." This is a **response-only field**—businesses
-advertise handlers, platforms never send them.
+### 6.6. Implementation Scenarios
 
-**Step 2: Instrument Acquisition — Client-Side Processing (Platform)**
+The following scenarios illustrate how different payment methods are negotiated
+and executed using concrete data examples.
 
-The platform selects a compatible handler based on:
+#### 6.6.1. Scenario A: Digital Wallet (Google Pay)
+In this scenario, the platform identifies the `com.google.pay` handler and uses
+the Google Pay API to acquire an encrypted payment token.
 
-- Its own capabilities (e.g., can it execute Google Pay API calls?)
-- User preferences (e.g., saved payment methods)
-- Handler requirements (e.g., supported card networks)
-
-The platform then executes the handler's protocol (defined by its `spec`
-URL) to acquire a payment instrument. This happens **outside the business's
-checkout API**—the handler protocol may involve calling PSP endpoints,
-launching wallet UIs, or delegating to payment platforms. The business is
-not involved in this step.
-
-**Optional: Display Info for Embedded Checkout (Platform → Business)**
-
-For embedded checkout scenarios, platforms **MAY** submit instruments with
-display
-information (WITHOUT credentials) during checkout updates:
-
-```json
-PATCH /checkout-sessions/{id}
-Request:
-{
-  "id": "chk_123",
-  "line_items": [...],
-  "currency": "USD",
-  "payment": {
-    "instruments": [{
-      "id": "instr_1",
-      "handler_id": "card_tokenizer",
-      "type": "card",
-      "brand": "visa",
-      "last_digits": "4242"
-      // Note: NO credential field - display info only
-    }],
-    "selected_instrument_id": "instr_1"
-  }
-}
-```
-
-This allows embedded checkout platforms to show which payment method will be
-used in their UI before the actual completion. The `selected_instrument_id`
-indicates which instrument from the array is selected. Credentials are NOT
-included at this stage.
-
-**Step 3: Checkout Completion — Credential Submission (Platform → Business)**
-
-Once the platform is ready to complete the checkout, it submits the payment
-instrument WITH credentials for payment processing:
-
-```json
-POST /checkout-sessions/{id}/complete
-Content-Type: application/json
-
-{
-  "payment_data": {
-    "id": "instr_1",
-    "handler_id": "card_tokenizer",
-    "type": "card",
-    "brand": "visa",
-    "last_digits": "4242",
-    "credential": {
-      "type": "token",
-      "token": "tok_visa_123"
-    }
-  }
-}
-```
-
-**Important: Display Info vs Credentials in Instruments**
-
-Payment instruments have two distinct components that flow at different stages:
-
--   **Display Information** (brand, last 4 digits, billing address):
-    -   Optional and only needed for **embedded checkout scenarios**
-    -   Submitted by agents during checkout creation/updates (WITHOUT credentials)
-    -   Enables embedded checkout platforms to show which payment method will be
-        used in the UI
-    -   Echoed back by businesses in responses
-    -   Safe to display to users
--   **Credentials** (payment tokens, encrypted data):
-    -   ONLY submitted by agents during checkout **completion**
-    -   Required for payment processing—businesses cannot process payment without
-        credentials
-
-The `handler_id` links the instrument back to a handler configuration, telling
-the business which integration to use for processing (e.g., which PSP endpoint,
-which decryption key).
-
-This architecture allows businesses to remain agnostic about how instruments are
-acquired. The business only needs to:
-1. Advertise which handlers it supports
-2. Process the resulting instruments using its existing PSP integrations
-
-The handler protocol (how instruments are acquired) is defined externally and
-can evolve independently of the checkout API.
-
-#### Example Configuration
-
-This example shows the `payment` field from a checkout response:
-
-```json
-{
-  "payment": {
-    "handlers": [
-      {
-        "id": "merchant_tokenizer",
-        "name": "com.example.merchant_tokenizer",
-        "version": "2026-01-11",
-        "spec": "https://example.com/specs/payments/merchant_tokenizer",
-        "config_schema": "https://example.com/specs/payments/merchant_tokenizer.json",
-        "instrument_schemas": [
-          "https://ucp.dev/schemas/shopping/types/card_payment_instrument.json"
-        ],
-        "config": {
-          "type": "CARD",
-          "tokenization_specification": {
-            "type": "PUSH",
-            "parameters": {
-              "token_retrieval_url": "https://api.psp.com/v1/tokens"
-            }
-          }
-        }
-      },
-      {
-        "id": "gpay",
-        "name": "com.google.pay",
-        "version": "2024-12-03",
-        "spec": "https://developers.google.com/merchant/ucp/guides/gpay-payment-handler",
-        "config_schema": "https://ucp.dev/handlers/google_pay/config.json",
-        "instrument_schemas": [
-          "https://ucp.dev/handlers/google_pay/card_payment_instrument.json"
-        ],
-        "config": {
-          "allowed_payment_methods": [{
-            "type": "CARD",
-            "parameters": {
-              "allowed_card_networks": ["VISA", "MASTERCARD", "AMEX"]
-            }
-          }]
-        }
-      },
-      {
-        "id": "shop_pay",
-        "name": "dev.shopify.shop_pay",
-        "version": "2026-01-11",
-        "spec": "https://shopify.dev/docs/agents/checkout/shop-pay-handler",
-        "config_schema": "https://shopify.dev/ucp/shop-pay-handler/2026-01-11/config.json",
-        "instrument_schemas": [
-          "https://shopify.dev/ucp/shop-pay-handler/2026-01-11/instrument.json"
-        ],
-        "config": {
-          "shop_id": "shopify-559128571"
-        }
-      }
-    ]
-  }
-}
-```
-
-This configuration tells platforms what payment collection strategies the
-business supports: PSP tokenization for direct card tokenization,
-[Google Pay](https://developers.devsite.corp.google.com/merchant/ucp/guides/gpay-payment-handler)
-for wallet payments, and
-[Shop Pay](https://shopify.dev/docs/agents/checkout/shop-pay-handler) for
-Shopify's accelerated checkout.
-
-### 6.2 Payment Handlers
-
-Payment handlers are capability declarations that define how the business can
-collect payment instruments. They form a contract between businesses, platforms,
-and payment providers:
-
--   A payment provider defines the handler specification, exposing a schema for
-    custom payment instruments, token types, and a handler config. The provider
-    also defines a protocol for the platform to execute when processing the
-    handler. This setup allows for a variety of different payment methods and
-    token-types to be supported in the flow, including network tokens.
--   A business must implement support for receiving the defined instruments and
-    tokens, as well as expose the well-structured handler config.
--   A platform must execute the handler's defined protocol to process the
-    business's provided handler config and negotiate the resulting instrument
-    into the business's checkout.
-
-Following the same pattern as other UCP capabilities, handlers are
-self-describing with namespaced identifiers, with independent versioning, and
-external specifications.
-
-#### Handler Structure
-
-Each handler declaration contains:
-
-| Field                | Type   | Required | Description                                                                          |
-| :------------------- | :----- | :------- | :----------------------------------------------------------------------------------- |
-| `id`                 | String | Yes      | Unique identifier for this handler instance (e.g., `gpay_handler`, `network_token`)                   |
-| `name`               | String | Yes      | Handler type name using reverse-DNS identifier (e.g., com.google.pay, com.vendor.custom_handler)      |
-| `version`            | String | Yes      | The version of the handler specification.                                            |
-| `spec`               | String | Yes      | URI to the human-readable documentation for this handler.                            |
-| `config_schema`      | String | Yes      | URI to the JSON schema validating the `config`.                                      |
-| `instrument_schemas` | Array  | Yes      | Array of URIs to JSON schemas defining the payment instruments this handler produces.|
-| `config`             | Object | Yes      | Handler-specific configuration as defined by the handler specification               |
-
-Note: This schema is extensible. Additional fields may be present.
-
-#### Namespace
-
-Handlers follow the same reverse-DNS namespace convention as capabilities:
-
-*   dev.ucp.\*: Core handlers defined by this specification
-*   com.vendor.\*: Extension handlers defined by payment providers
-*   Examples: com.google.pay, dev.shopify.shop_pay, com.stripe.tokenization
-
-#### Example Handler Declarations
-
-```json
-{
-  "payment": {
-    "handlers": [
-      {
-        "id": "merchant_tokenizer",
-        "name": "com.example.merchant_tokenizer",
-        "version": "2026-01-11",
-        "spec": "https://example.com/specs/payments/merchant_tokenizer",
-        "config_schema": "https://example.com/specs/payments/merchant_tokenizer.json",
-        "instrument_schemas": [
-          "https://ucp.dev/schemas/shopping/types/card_payment_instrument.json"
-        ],
-        "config": {
-          "type": "CARD",
-          "tokenization_specification": {
-            "type": "PUSH",
-            "parameters": {
-              "token_retrieval_url": "https://api.psp.com/v1/tokens"
-            }
-          }
-        }
-      },
-      {
-        "id": "gpay",
-        "name": "com.google.pay",
-        "version": "2024-12-03",
-        "spec": "https://developers.google.com/merchant/ucp/guides/gpay-payment-handler.html",
-        "config_schema": "https://ucp.dev/handlers/google_pay/config.json",
-        "instrument_schemas": [
-          "https://ucp.dev/handlers/google_pay/card_payment_instrument.json"
-        ],
-        "config": {
-          "allowed_payment_methods": [{
-            "type": "CARD",
-            "parameters": {
-              "allowed_card_networks": ["VISA", "MASTERCARD"]
-            },
-            "tokenization_specification": {
-              "type": "PAYMENT_GATEWAY",
-              "parameters": {
-                "gateway": "stripe",
-                "gateway_merchant_id": "acme_inc"
-              }
-            }
-          }]
-        }
-      },
-      {
-        "id": "shop_pay",
-        "name": "dev.shopify.shop_pay",
-        "version": "2026-01-11",
-        "spec": "https://shopify.dev/docs/agents/checkout/shop-pay-handler",
-        "config_schema": "https://shopify.dev/ucp/shop-pay-handler/2026-01-11/config.json",
-        "instrument_schemas": [
-          "https://shopify.dev/ucp/shop-pay-handler/2026-01-11/instrument.json"
-        ],
-        "config": {
-          "shop_id": "shopify-559128571"
-        }
-      }
-    ]
-  }
-}
-```
-
-This example illustrates a business supporting multiple payment processing
-strategies. The card_tokenizer handler uses PSP
-for secure tokenization of raw card credentials. The
-[gpay handler](https://developers.google.com/merchant/ucp/guides/gpay-payment-handler.md) integrates
-with Google Pay for wallet-based payments. The [shop_pay handler](https://shopify.dev/docs/agents/checkout/shop-pay-handler) enables
-Shopify's accelerated checkout experience. These handlers would be advertised in
-the business's discovery profile, allowing platforms to understand capabilities
-before starting a transaction. Additionally, the available payment handlers are
-provided in Cart and Checkout responses, where they may be dynamically filtered
-based on cart contents, buyer location, or other transaction-specific factors.
-
-#### Handler Lifecycle and Dynamic Filtering
-
-Payment handlers are not static—they can change during the checkout session as
-conditions evolve. Understanding handler lifecycle is critical for platforms
-implementing robust checkout flows.
-
-**Initial Advertisement**
-
-When a checkout is created, businesses **MUST** provide all potentially
-applicable
-handlers based on the initial checkout state (line items, currency, buyer
-information if known). This initial set represents the broadest possible payment
-options available.
-
-**Dynamic Filtering During Updates**
-
-As the checkout progresses and more information becomes available, businesses
-**MAY** filter the handlers array based on:
-
--   **Cart Contents**: Certain products may restrict payment methods (e.g., age-
-    restricted items, high-value goods, subscriptions requiring recurring
-    payments)
--   **Buyer Location**: Payment methods have geographic availability (e.g.,
-    regional wallet providers, country-specific bank transfers)
--   **Transaction Amount**: Handlers may have minimum/maximum limits (e.g., buy-
-    now-pay-later services with $50-$1000 limits)
--   **Fulfillment Method**: Shipping vs pickup vs digital delivery may affect
-    available payment options
--   **Business Rules**: Time-of-day restrictions, fraud prevention rules, or
-    promotional payment method requirements
-
-**Example: Location-Based Filtering**
-
-```json
-// Initial checkout (no address provided)
-{
-  "payment": {
-    "handlers": [
-      {"id": "card", "name": "com.example.merchant_tokenizer", ...},
-      {"id": "gpay", "name": "com.google.pay", ...},
-      {"id": "shop_pay", "name": "dev.shopify.shop_pay", ...},
-      {"id": "example_pay", "name": "com.example.pay", ...}
-    ]
-  }
-}
-
-// After address update (buyer in Netherlands)
-PATCH /checkout-sessions/{id}
-Request: {
-  "id": "chk_123",
-  "line_items": [...],
-  "currency": "USD",
-  "payment": {...},
-  "fulfillment_address": {"address_country": "NL", ...}
-}
-
-Response: {
-  "ucp": {...},
-  "id": "chk_123",
-  "status": "incomplete",
-  "line_items": [...],
-  "currency": "USD",
-  "payment": {
-    "handlers": [
-      {"id": "card", "name": "com.example.merchant_tokenizer", ...},
-      {"id": "gpay", "name": "com.google.pay", ...},
-      {"id": "shop_pay", "name": "dev.shopify.shop_pay", ...}
-      // example_pay filtered out - not available in Netherlands
-    ]
-  }
-}
-```
-
-**Handler Stability Guarantee**
-
-Once a checkout reaches `ready_for_complete` status, handlers **SHOULD NOT**
-change
-unless the checkout state is modified (e.g., line items updated, address
-changed). This allows platforms to cache handler information and begin
-instrument acquisition with confidence.
-
-If checkout state changes significantly after `ready_for_complete`, businesses
-**MAY** return the checkout to `incomplete` status and update the handlers array
-accordingly.
-
-**Handling Orphaned Instruments**
-
-If a platform submits a completion request with an instrument referencing a
-`handler_id` that is not in the current handlers array, businesses **MUST**
-reject the request with an error:
-
-```json
-{
-  "status": "requires_escalation",
-  "messages": [{
-    "type": "error",
-    "code": "invalid_handler_id",
-    "content": "The handler 'example_pay' is no longer available for this checkout.",
-    "severity": "requires_buyer_input"
-  }]
-}
-```
-
-**Platform Implementation Guidance**
-
-Platforms **SHOULD**:
-1.  Refresh handler information after significant checkout updates (address,
-   line items, totals changes)
-2. Validate that the selected handler is still present before beginning
-   credential acquisition
-3. Handle `invalid_handler_id` errors gracefully by re-fetching checkout state
-   and prompting for new payment method selection
-
-### 6.3 Custom Payment Handlers
-
-Payment providers and businesses can define custom handlers by following the
-capability pattern. Each handler is self-describing through its specification
-URL and can define its own configuration schema.
-
-#### Example: Google Pay Payment Handler
-
-The `com.google.pay` handler demonstrates integration with a
-customized [specification](https://developers.google.com/merchant/ucp/guides/gpay-payment-handler.md):
-
-```json
-{
-  "id": "gpay",
-  "name": "com.google.pay",
-  "version": "2024-12-03",
-  "spec": "https://developers.google.com/merchant/ucp/guides/gpay-payment-handler",
-  "config_schema": "https://ucp.dev/handlers/google_pay/config.json",
-  "instrument_schemas": [
-    "https://ucp.dev/handlers/google_pay/card_payment_instrument.json"
-  ],
-  "config": {
-    "allowed_payment_methods": [
-      {
-        "type": "CARD",
-        "parameters": {
-          "allowed_auth_methods": [
-            "PAN_ONLY",
-            "CRYPTOGRAM_3DS"
-          ],
-          "allowed_card_networks": [
-            "VISA",
-            "MASTERCARD",
-            "AMEX",
-            "DISCOVER"
-          ]
-        },
-        "tokenization_specification": {
-          "type": "PAYMENT_GATEWAY",
-          "parameters": {
-            "gateway": "stripe",
-            "gateway_merchant_id": "acme_inc"
-          }
-        }
-      }
-    ],
-    "merchant_info": {
-      "merchant_id": "BCR2DN4TWXXXXXX",
-      "merchant_name": "Acme Store"
-    },
-    "environment": "PRODUCTION"
-  }
-}
-```
-
-This handler implements Google Pay's configuration standard, showing how
-UCP integrates with payment specifications rather than reinventing them.
-
-#### Creating Your Own Handler
-
-A complete handler definition requires three components: a **handler
-declaration**, a **JSON Schema** for the config, and a **specification
-document** describing the protocol.
-
-##### Step 1: Choose a Namespace
-
-Use your organization's reverse-DNS domain to ensure uniqueness:
-
-```
-{reverse-domain}.{category}.{handler_name}
-```
-
-For example, if ACME Corporation (acme.com) creates a "pay later" handler:
-`com.acme.payments.pay_later`
-
-##### Step 2: Define the Handler Config Schema
-
-Create a JSON Schema that validates the `config` object businesses must provide.
-The schema defines what configuration businesses expose, enabling agents to
-understand how to invoke your payment method.
-
-**Example Schema** (`https://acme.com/ucp/schemas/pay_later_handler.json`):
-
-```json
-{
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://acme.com/ucp/schemas/pay_later_handler.json",
-  "title": "AcmePayLaterHandlerConfig",
-  "description": "Configuration schema for the com.acme.pay_later handler.",
-  "type": "object",
-  "required": ["client_id", "environment", "payment_options"],
-  "properties": {
-    "client_id": {
-      "type": "string",
-      "description": "The merchant's ACME client identifier, obtained from the ACME Merchant Portal."
-    },
-    "environment": {
-      "type": "string",
-      "enum": ["sandbox", "production"],
-      "description": "The ACME environment to use for API calls."
-    },
-    "locale": {
-      "type": "string",
-      "description": "Preferred locale for ACME UI elements (e.g., 'en-US', 'de-DE').",
-      "default": "en-US"
-    },
-    "payment_options": {
-      "type": "array",
-      "description": "Available ACME payment options the business supports.",
-      "minItems": 1,
-      "items": {
-        "type": "object",
-        "required": ["type"],
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": ["pay_in_4", "pay_in_30", "financing"],
-            "description": "The ACME payment option type."
-          },
-          "min_amount": {
-            "type": "integer",
-            "description": "Minimum order amount in minor units (cents)."
-          },
-          "max_amount": {
-            "type": "integer",
-            "description": "Maximum order amount in minor units (cents)."
-          }
-        }
-      }
-    },
-    "session_endpoint": {
-      "type": "string",
-      "format": "uri",
-      "description": "ACME session creation endpoint. Defaults to ACME's standard API."
-    }
-  }
-}
-```
-
-##### Step 3: Define the Instrument Schema (Optional)
-
-If your handler produces custom instrument types, define a schema for the
-payment instrument structure agents will submit:
-
-**Example Instrument Schema**
-(`https://acme.com/ucp/schemas/pay_later_instrument.json`):
-
-```json
-{
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://acme.com/ucp/schemas/pay_later_instrument.json",
-  "title": "AcmePayLaterInstrument",
-  "description": "Payment instrument structure for ACME Pay Later.",
-  "allOf": [
-    {
-      "$ref": "https://ucp.dev/schemas/shopping/types/payment_instrument.json"
-    },
-    {
-      "type": "object",
-      "properties": {
-        "type": {
-          "const": "acme_pay_later"
-        },
-        "credential": {
-          "type": "object",
-          "required": ["type", "token"],
-          "properties": {
-            "type": {
-              "type": "string",
-              "enum": ["acme_session", "acme_authorization"],
-              "description": "Credential type indicating the stage of ACME authorization."
-            },
-            "token": {
-              "type": "string",
-              "description": "The ACME session token or authorization token."
-            }
-          }
-        },
-        "acme_info": {
-          "type": "object",
-          "description": "ACME-specific information for display and processing.",
-          "properties": {
-            "payment_option": {
-              "type": "string",
-              "description": "The selected ACME payment option (e.g., 'pay_in_4')."
-            },
-            "installment_count": {
-              "type": "integer",
-              "description": "Number of installments if applicable."
-            }
-          }
-        }
-      }
-    }
-  ]
-}
-```
-
-##### Step 4: Write the Specification Document
-
-The specification document is human-readable documentation explaining how
-platforms and businesses should implement your handler. It MUST include:
-
-1.  **Introduction**: Purpose and use cases for the handler
-2.  **Handler Configuration**: How businesses configure the handler
-3.  **Agent Protocol**: Step-by-step flow for platforms to acquire tokens
-4.  **Business Processing**: How businesses process the resulting instruments
-5.  **Security Considerations**: Authentication, token handling, and compliance
-
-**Example Specification** (`https://acme.com/ucp/specs/pay_later`):
-
----
-
-**ACME Pay Later Handler Specification**
-
-**Handler Name:** `com.acme.pay_later`
-**Version:** `2025-06-01`
-
-**1. Introduction**
-
-The `com.acme.pay_later` handler enables businesses to offer ACME's
-buy-now-pay-later options through UCP-compatible agents. Supported options
-include Pay in 4, Pay in 30 days, and Financing.
-
-**2. Handler Configuration**
-
-Businesses advertising support for `com.acme.pay_later` **MUST** include the
-handler in their checkout response:
-
-```json
-{
-  "payment": {
-    "handlers": [{
-      "id": "acme",
-      "name": "com.acme.pay_later",
-      "version": "2025-06-01",
-      "spec": "https://acme.com/ucp/specs/pay_later",
-      "config_schema": "https://acme.com/ucp/schemas/pay_later_handler.json",
-      "instrument_schemas": [
-        "https://acme.com/ucp/schemas/pay_later_instrument.json"
-      ],
-      "config": {
-        "client_id": "acme_live_abc123",
-        "environment": "production",
-        "locale": "en-US",
-        "payment_options": [
-          {
-            "type": "pay_in_4",
-            "min_amount": 350,
-            "max_amount": 15000
-          },
-          {
-            "type": "financing",
-            "min_amount": 2000
-          }
-        ]
-      }
-    }]
-  }
-}
-```
-
-**3. Agent Protocol**
-
-Agents **MUST** follow this flow to process a `com.acme.pay_later` handler:
-
-1.  **Discover Handler**: Agent identifies `com.acme.pay_later` in the
-    business's payment handlers array.
-
-2.  **Display Options**: Agent presents available `payment_options` to the user,
-    filtering by order amount eligibility.
-
-3.  **Create Session**: Agent calls the ACME Sessions API:
-    ```
-    POST https://api.acme.com/payments/v1/sessions
-    Authorization: Basic {base64(client_id:client_secret)}
-    Content-Type: application/json
-
-    {
-      "purchase_country": "US",
-      "purchase_currency": "USD",
-      "locale": "en-US",
-      "order_amount": 5000,
-      "order_lines": [...],
-      "merchant_reference1": "{checkout_id}"
-    }
-    ```
-
-4.  **User Authorization**: Agent renders the ACME widget or redirects user
-    to ACME for authorization. Upon success, ACME returns an
-    `authorization_token`.
-
-5.  **Complete Checkout**: Agent submits the authorization token to the
-    business's complete endpoint.
-
-**4. Payment Instrument Structure**
-
-```json
-{
-  "payment": {
-    "instruments": [{
-      "id": "instr_acme",
-      "handler_id": "acme",
-      "type": "acme_pay_later",
-      "credential": {
-        "type": "acme_authorization",
-        "token": "example_token_12345"
-      },
-      "acme_info": {
-        "payment_option": "pay_in_4",
-        "installment_count": 4
-      }
-    }],
-    "selected_instrument_id": "instr_acme"
-  }
-}
-```
-
-**5. Business Processing**
-
-Upon receiving an `acme_pay_later` instrument, businesses **MUST**:
-
-1.  Validate the `handler_id` matches a configured ACME handler
-2.  Extract the `authorization_token` from `token.value`
-3.  Call ACME's Create Order API to capture the payment:
-    ```
-    POST https://api.acme.com/payments/v1/authorizations/{authorization_token}/order
-    ```
-4.  Store the ACME `order_id` for refunds and dispute handling
-
-**6. Security Considerations**
-
--   Authorization tokens are single-use and time-limited (default: 60 minutes)
--   Businesses **MUST NOT** expose `client_secret` in handler configurations
--   All ACME API calls **MUST** use TLS 1.2+
--   Businesses **SHOULD** implement idempotency keys for order creation
-
----
-
-##### Step 5: Publish and Version
-
-1.  **Host Assets**: Publish your schema and specification at stable URLs
-    matching your namespace authority
-2.  **Version Independently**: Your handler version evolves independently of UCP
-3.  **Maintain Backwards Compatibility**: Follow the same compatibility rules as
-    UCP capabilities (see Section 10.4)
-
-##### Complete Handler Declaration
-
-```json
-{
-  "id": "acme",
-  "name": "com.acme.pay_later",
-  "version": "2025-06-01",
-  "spec": "https://acme.com/ucp/specs/pay_later",
-  "config_schema": "https://acme.com/ucp/schemas/pay_later_handler.json",
-  "instrument_schemas": [
-    "https://acme.com/ucp/schemas/pay_later_instrument.json"
-  ],
-  "config": {
-    "client_id": "acme_live_abc123",
-    "environment": "production",
-    "locale": "en-US",
-    "payment_options": [
-      { "type": "pay_in_4", "min_amount": 350, "max_amount": 15000 },
-      { "type": "financing", "min_amount": 2000 }
-    ]
-  }
-}
-```
-
-This extensibility enables the payment ecosystem to innovate while maintaining
-interoperability through the common UCP framework.
-
-### 6.4 Payment Flow End-to-End
-
-The payment flow in UCP is a **2-step process** involving **Token Acquisition**
-(Client-side) and **Order Placement** (Server-side).
-
-1.  **Select:** The Agent/User selects a payment handler from the
-    `payment.handlers` array provided in the checkout response.
-2.  **Acquire:** The Agent uses the handler's `config` to acquire a secure token
-    (e.g., exchanging payment credentials for a network token via a PSP, or
-    requesting a Google Pay payload).
-3.  **Complete:** The Agent submits the instrument to the Business's `complete`
-    endpoint.
-4.  **Challenge (Conditional):** If the bank or PSP requires strong customer
-    authentication (SCA), the business responds with a `requires_escalation`
-    status, and the Agent facilitates the user interaction.
-
-#### 6.4.1 Data Security & Schema Enforcement
-
-To prevent the leakage of sensitive payment data, the handling of
-credentials is strictly enforced at the schema level.
-
-*   **Write-Only Credentials:** The `credential` object within a payment instrument is strictly **Write-Only**.
-    *   It is defined in the JSON Schema using appropriate annotations.
-    *   Agents MUST submit this field during the `complete` phase.
-    *   Businesses **MUST NOT** echo this field in any API response.
-*   **Display Information:** Non-sensitive fields (Brand, Last 4, Billing Address) MAY be echoed by the business in responses to confirm the payment method details for the UI.
-
-**Field Flow Direction:**
-
-| Field | Create/Update Request | Create/Update Response | Complete Request | Complete Response |
-|-------|----------------------|----------------------|------------------|-------------------|
-| `payment.handlers` | ❌ **Omitted** - Agents never send handlers | ✅ **Required** - Business advertises supported handlers | ❌ **Omitted** - Agents never send handlers | ✅ **Optional** - May be included in final state |
-| `payment.instruments` | ✅ **Optional** - Display info only (for embedded checkout UI) | ✅ **Optional** - Echoed display info | ✅ **Required** - Display info + credentials | ✅ **Optional** - Display info only (credentials omitted) |
-| `payment.instruments[].credential` | ❌ **Never included** - Not needed before completion | ❌ **Never included** - Security sensitive | ✅ **Required** - Contains payment token/data | ❌ **Omitted** - Never echoed back for security |
-| `payment.selected_instrument_id` | ✅ **Optional** - May be provided with instruments | ✅ **Optional** - Echoed if provided | ✅ **Omitted** - Currently only provide one instrument instance | ✅ **Required** - Business confirms selected instrument |
-
-#### 6.4.2 Example Flow A: Google Pay
-
-In this scenario, the Agent uses a specific payment handler [Google Pay](https://developers.devsite.corp.google.com/merchant/ucp/guides/gpay-payment-handler).
-The Business configures the handler using Google Pay's standard payment data
-model.
-
-**1. Business Configuration (Response from Create Checkout)**
-
-The checkout response includes Google Pay handler (shown here is the `payment`
-field only):
-
+**1. Business Advertisement (Response from Create Checkout)**
 ```json
 {
   "payment": {
     "handlers": [{
       "id": "gpay",
       "name": "com.google.pay",
-      "version": "2024-12-03",
-      "spec": "https://developers.google.com/merchant/ucp/guides/gpay-payment-handler",
-      "config_schema": "https://ucp.dev/handlers/google_pay/config.json",
+      "version": "2026-01-11",
+      "spec": "https://pay.google.com/gp/p/ucp/2026-01-11/",
+      "config_schema": "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/config.json",
       "instrument_schemas": [
-        "https://ucp.dev/handlers/google_pay/card_payment_instrument.json"
+        "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/gpay_card_payment_instrument.json"
       ],
       "config": {
         "allowed_payment_methods": [{
@@ -1544,20 +787,15 @@ field only):
 }
 ```
 
-**2. Token Execution (Client-Side)**
-The Agent recognizes the `com.google.pay` handler.
-1.  It passes the `config` into the Google Pay API (or executes an Agentic
-    Wallet Request).
-2.  Google Pay returns the encrypted token data.
+**2. Token Execution (Platform Side)**
+The platform recognizes `com.google.pay`. It passes the `config` into the
+Google Pay API. Google Pay returns the encrypted token data.
 
-**3. Complete Checkout**
-The Agent wraps the Google Pay response into a payment instrument for the UCP
-`complete` call.
+**3. Complete Checkout (Request to Business)**
+The Platform wraps the Google Pay response into a payment instrument.
 
 ```json
-POST /checkout-sessions/{checkout_id}/complete
-Content-Type: application/json
-
+POST /checkout-sessions/{id}/complete
 {
   "payment_data": {
     "id": "instr_1",
@@ -1576,7 +814,7 @@ Content-Type: application/json
     },
     "credential": {
       "type": "PAYMENT_GATEWAY",
-      "token": "examplePaymentMethodToken"
+      "token": "examplePaymentMethodToken..."
     }
   },
   "risk_signals": {
@@ -1585,64 +823,44 @@ Content-Type: application/json
 }
 ```
 
-#### 6.4.3 Example Flow B: Direct Card Tokenization
+#### 6.6.2. Scenario B: Direct Tokenization with Challenge (SCA)
+In this scenario, the platform uses a generic tokenizer to request a session
+token or network tokens. The bank requires Strong Customer
+Authentication (SCA/3DS), forcing the business to pause completion and
+request a challenge.
 
-In this scenario, an AI Agent uses a secure vault to retrieve a token from a
-PSP before sending it to the checkout. Transactions sometimes require Strong
-Customer Authentication (SCA), such as a 3DS banking challenge. The Business
-`complete` response utilizes a `status` field to handoff this flow.
-
-**1. Business Configuration (Response from Create Checkout)**
-
-The Business advertises the supported tokenizer in the `payment.handlers` array.
+**1. Business Advertisement**
 
 ```json
 {
   "payment": {
-    "handlers": [
-      {
-        "id": "merchant_tokenizer",
-        "name": "com.example.merchant_tokenizer",
-        "version": "2026-01-11",
-        "config": {
-          "type": "CARD",
-          "tokenization_specification": {
-            "type": "token",
-            "parameters": {
-              "token_retrieval_url": "https://api.psp.com/v1/tokens"
-            }
-          }
-        }
+    "handlers": [{
+      "id": "merchant_tokenizer",
+      "name": "com.example.tokenizer",
+      // ... more handler required field
+      "config": {
+        "token_url": "https://api.psp.com/tokens",
+        "public_key": "pk_123"
       }
-    ]
+    }]
   }
 }
 ```
 
-**2. Token Execution (Client-Side)**
+**2. Token Execution (Platform Side)**
 
-The Agent retrieves a token securely from the PSP's tokenization endpoint
-defined in the handler config. *Example Result:* `tok_visa_123`
+The platform calls `https://api.psp.com/tokens` which identity **SHOULD** have
+previous legal binding connection with them and receives `tok_visa_123`
+(which could represent a vaulted card or network token).
 
 **3. Complete Checkout (Request to Business)**
-
 ```json
-POST /checkout-sessions/{checkout_id}/complete
-Content-Type: application/json
-
+POST /checkout-sessions/{id}/complete
 {
   "payment_data": {
-    "id": "instr_1",
     "handler_id": "merchant_tokenizer",
-    "type": "card",
-    "brand": "visa",
-    "last_digits": "4242",
-    "expiry_month": 12,
-    "expiry_year": 2026,
-    "credential": {
-      "type": "token",
-      "value": "tok_visa_123"
-    }
+    // ... more instrument required field
+    "credential": { "token": "tok_visa_123" }
   },
   "risk_signals": {
     // ... host could send risk_signals here
@@ -1650,248 +868,73 @@ Content-Type: application/json
 }
 ```
 
-**4. Action Required Response (Business to Agent)**
+**4. Challenge Required (Response from Business)**
+
+The business attempts the charge, but the PSP returns a "Soft Decline"
+requiring 3DS.
 
 ```json
 HTTP/1.1 200 OK
-Content-Type: application/json
-
 {
   "status": "requires_escalation",
-  "messages": [
-    {
-      "type": "error",
-      "code": "requires_3ds",
-      "content": "Your bank requires verification to complete this purchase.",
-      "severity": "requires_buyer_input"
+  "messages": [{
+    "type": "error",
+    "code": "requires_3ds",
+    "content": "Your bank requires verification.",
+    "severity": "requires_buyer_input"
+  }],
+  "continue_url": "https://psp.com/challenge/123"
+}
+```
+
+*The platform **MUST** now open `continue_url` in a WebView/Window for the user
+to complete the bank check, then retry the completion.*
+
+#### 6.6.3. Scenario C: Autonomous Agent (AP2)
+
+This scenario demonstrates the **Recommended Flow for Agents**. Instead of a
+session token, the agent generates cryptographic mandates.
+
+**1. Business Advertisement**
+```json
+{
+  "payment": {
+    "handlers": [{
+      "id": "ap2_checkout",
+      "name": "dev.ucp.ap2_mandate_compatible_handlers",
+      // ... other fields handler required
+    }]
+  }
+}
+```
+
+**2. Agent Execution**
+
+The agent cryptographically signs objects using the user's private key on a
+non-agentic surface.
+
+**3. Complete Checkout**
+```json
+POST /checkout-sessions/{id}/complete
+{
+  "payment_data": {
+    "handler_id": "ap2_checkout",
+    "credential": {
+      "type": "card",
+      "token": "eyJhbGciOiJ...", // Token would contain payment_mandate, the signed proof of Funds Auth
     }
-  ],
-  "continue_url": " ... " // this will host the handoff URL
-}
-```
-
-### 6.4.4 Risk Signals
-
-To aid in fraud assessment, the Agent **MAY** include additional risk signals in
-the complete call, providing the Business with more context about the
-transaction's legitimacy. The structure and content of these risk signals are
-not strictly defined by this specification, allowing flexibility based on the
-agreement between the Agent and Business or specific payment handler
-requirements.
-
-**Example (Flexible Structure):**
-
-```json
-{
-  "risk_signal": {
-    "session_id": "abc_123_xyz",
-    "score": 0.95
+  },
+  "risk_signals": {
+    "session_id": "abc_123"
+  },
+  "ap2": {
+    "checkout_mandate": "eyJhbGciOiJ...", // Signed proof of Checkout Terms
   }
 }
 ```
 
-### 6.5 Security and Trust Model
-
-The payment architecture establishes clear security boundaries and trust
-relationships between agents, businesses, and payment providers. Understanding
-this model is essential for secure implementation.
-
-#### Trust Relationships
-
-**Business ↔ Payment Provider**
-
-The foundational trust relationship exists between businesses and payment
-providers (PSPs, wallet providers, payment handlers). This relationship is
-established **outside of UCP** through:
-
--   Business onboarding and KYC processes
--   API credentials and encryption keys
--   Gateway configurations and routing rules
--   Processing agreements and fee structures
-
-The handler configuration in UCP **represents** this existing relationship but
-does not create it. When a business advertises a handler, they are saying: "I
-have an integration with this payment provider and can process instruments from
-it."
-
-**Agent as Untrusted Intermediary**
-
-Agents are deliberately positioned as **untrusted intermediaries** in the
-payment flow. This minimizes security scope and enables diverse agent
-implementations without requiring each agent to become PCI-compliant.
-
-Key principles:
-
--   Agents never see raw payment credentials (card numbers, CVV, bank accounts)
--   Agents forward opaque credentials they cannot use directly (encrypted data,
-    token references, etc.)
--   Agents cannot access the underlying payment data from the credentials they
-    receive
--   Agents do not need to be PCI-DSS certified for most flows
-
-**Handler Provider Trust**
-
-When an agent executes a handler protocol (e.g., Google Pay, PSP Tokenization),
-the agent establishes a temporary trust relationship with the handler provider:
-
--   Agent authenticates to the handler provider (if required)
--   Handler provider validates agent's right to request credentials
--   Handler provider secures credentials for the specific business (via
-    encryption, tokenization, or other methods)
--   Agent receives opaque credentials it cannot use directly
-
-**Agent Authorization with AP2 (Optional)**
-
-For scenarios requiring stronger guarantees of user authorization—such as
-autonomous agents operating without real-time user interaction, recurring
-payments, or high-value transactions—UCP supports the **Agent Payments Protocol
-(AP2)** extension. AP2 adds a cryptographic authorization layer on top of the
-credential security model.
-
-When the `dev.ucp.shopping.ap2_mandate` capability is negotiated:
-
--   **Businesses** sign checkout responses to ensure agents receive
-    authentic transaction terms (price, line items, totals)
--   **Agents** provide cryptographically signed mandates proving the user
-    explicitly authorized both the specific checkout state and the funds
-    transfer
--   **Both parties** create non-repudiable evidence of the transaction
-    terms and authorization
-
-This transforms the trust model from "agent as untrusted intermediary" to "agent
-as verifiable intermediary":
-
-| Without AP2 | With AP2 |
-|-------------|----------|
-| Agent forwards opaque credentials | Agent provides signed authorization proofs |
-| Business trusts payment provider to secure credentials | Business verifies cryptographic proof of user consent |
-| Security through encryption/tokenization | Security through digital signatures and verifiable credentials |
-| Suitable for user-present flows | Enables autonomous agent operations |
-
-**The Dual Mandate System:**
-
-AP2 requires two distinct signed proofs:
-1. **Checkout Mandate**: Proves user authorized the specific checkout terms
-   (items, prices, totals) signed by the business
-2. **Payment Mandate**: Proves user authorized the funds transfer to the
-   business
-
-These mandates can be generated through:
-
--   **Trusted Agent Provider**: Agent provider signs on user's behalf after
-    obtaining explicit user consent through trusted UI
--   **Digital Payment Credential**: User holds a verifiable credential (e.g.,
-    issued by bank/network) and signs directly
-
-**Key Security Properties:**
-
--   **Non-repudiation**: Both parties hold cryptographic proof of transaction
-    terms and authorization
--   **Tamper evidence**: Signatures are invalidated if checkout terms are
-    modified after user consent
--   **Selective disclosure**: SD-JWT format enables minimal data exposure while
-    proving authorization
--   **Trust framework agnostic**: Works with various credential issuers and
-    agent models
-
-For complete AP2 specification including mandate formats, signature
-requirements, and verification procedures, see the
-[AP2 Mandates Extension](site:specification/ap2-mandates).
-
-**Important**: AP2 is an **optional extension** that complements but does not
-replace the base credential security model. Businesses can support both AP2-
-enabled autonomous flows and standard user-present checkout flows
-simultaneously.
-
-#### Credential Processing Model
-
-**Handler ID as Processing Key**
-
-The `handler_id` field in payment instruments tells the business which
-integration to use for processing:
-
-```json
-{
-  "id": "instr_1",
-  "handler_id": "gpay",  // References handler configuration
-  "credential": {
-    "type": "PAYMENT_GATEWAY",
-    "token": "eyJhbGc...encrypted_data"
-  }
-}
-```
-
-The business:
-1. Looks up the handler configuration by `handler_id`
-2. Routes the credential to the appropriate PSP/handler provider endpoint
-3. Processes the credential using the handler-specific method
-4. Completes the payment
-
-Different handlers may route to different PSP endpoints, use different
-credential processing methods, or apply different business rules—all transparent
-to the agent.
-
-**Credential Security Models**
-
-UCP supports multiple approaches for securing payment credentials. The key
-principle is that agents receive **opaque credentials** they cannot use
-directly—only the business (via their payment provider relationship) can process
-them.
-
-**Approach 1: Encrypted Credentials (e.g., Google Pay)**
-
-In this model, raw payment data is encrypted for the specific business:
-
--   **Handler Provider**: Encrypts raw credentials with business's public key or
-    gateway credentials
--   **Agent**: Receives encrypted payload it cannot decrypt
--   **Business**: Decrypts using private key or sends to PSP for decryption
--   **Example**: Google Pay provides encrypted card data that only the
-    business's PSP can decrypt
-
-**Approach 2: Token References (e.g., Tokenization with PSP)**
-
-In this model, a token references the actual credentials held by the payment
-provider:
-
--   **Handler Provider**: Stores raw credentials securely and returns a token
-    reference
--   **Agent**: Receives token it cannot use to access credentials directly
--   **Business**: Exchanges token with PSP to retrieve/process the underlying
-    credentials
--   **Example**: Tokenization with PSP returns a session token
-    that business uses to charge the card
-
-**Approach 3: Handler-Specific Formats**
-
-Custom handlers may define their own credential formats and security models,
-provided they maintain the principle that agents cannot directly access or use
-raw payment data.
-
-**Transport Security**
-
-Regardless of credential format, HTTPS/TLS **MUST** be used for all API calls to
-protect credentials in transit between agent and business.
-
-**Unidirectional Credential Flow**
-
-Credentials flow in ONE direction only: **Agent → Business**
-
-```
-Agent acquires credential → Agent submits to business → Business processes
-                                                      ↓
-                                           Credential destroyed
-```
-
-Businesses **MUST NOT**:
-
--   Echo credentials back in API responses
--   Log raw credentials
--   Store credentials after processing (unless tokenized by PSP)
--   Return credentials in error messages
-
-This is enforced by the schema annotation `"ucp_response": "omit"` on
-credential fields.
+*This provides the business with non-repudiable proof that the user authorized
+this specific transaction, enabling safe autonomous processing.*
 
 #### PCI-DSS Scope Management
 
@@ -1931,11 +974,11 @@ certified and handle:
 
 **For Businesses:**
 
-1.  Validate `handler_id` before processing (ensure handler is in advertised set)
-2.  Use separate PSP credentials for TEST vs PRODUCTION environments.
-3.  Implement idempotency for payment processing (prevent double-charges).
-4.  Log payment events without logging credentials.
-5.  Set appropriate credential timeouts (tokens should expire).
+1.  Validate handler_id before processing (ensure handler is in advertised set)
+2.  Use separate PSP credentials for TEST vs PRODUCTION environments
+3.  Implement idempotency for payment processing (prevent double-charges)
+4.  Log payment events without logging credentials
+5.  Set appropriate credential timeouts
 6.  For highly sensitive transactions, consider supporting the
     `dev.ucp.shopping.ap2_mandate` extension. This allows businesses to
     cryptographically sign checkout terms, providing stronger assurances to
@@ -1984,7 +1027,7 @@ supports fraud signal integration:
 -   Businesses can reject high-risk transactions and request additional
     verification
 
-Future extensions may standardize fraud signal schemas, but the current
+Future extensions **MAY** standardize fraud signal schemas, but the current
 architecture allows flexible integration with existing fraud prevention systems.
 
 ## 7. Transport Layer
@@ -1999,7 +1042,10 @@ patterns.
 
 *   **Content-Type:** Requests and responses **MUST** use `application/json`.
 *   **Methods:** Implementations **MUST** use standard HTTP verbs (POST for
+*   **Content-Type:** Requests and responses **MUST** use `application/json`.
+*   **Methods:** Implementations **MUST** use standard HTTP verbs (POST for
     creation/action, GET for retrieval).
+*   **Status Codes:** Implementations **MUST** use standard HTTP status codes
 *   **Status Codes:** Implementations **MUST** use standard HTTP status codes
     (200, 201, 400, 401, 500).
 
@@ -2069,6 +1115,7 @@ This mechanism, based on the [AP2 Protocol](https://ap2-protocol.org/), provides
 strong, end-to-end cryptographic assurances about the transaction details and
 participant consent, significantly reducing risks of tampering and disputes.
 Implementers **SHOULD** consider supporting this extension for sensitive or
+Implementers **SHOULD** consider supporting this extension for sensitive or
 high-value transactions.
 
 ## 10. Versioning
@@ -2091,7 +1138,7 @@ Business Profile:
 ```json
 {
   "ucp": {
-    "version": "2025-10-21",
+    "version": "2026-01-11",
     "transports": {
       "rest": { "endpoint": "https://example-merchant.com/ucp" }
     },
@@ -2128,7 +1175,7 @@ Client Profile:
 ```json
 {
   "ucp": {
-    "version": "2025-10-21",
+    "version": "2026-01-11",
     "capabilities": []
   },
   "payment": {
@@ -2155,7 +1202,7 @@ Response with version confirmation:
 ```json
 {
   "ucp": {
-    "version": "2025-10-21",
+    "version": "2026-01-11",
     "capabilities": []
   },
   "id": "cart_123",
@@ -2181,8 +1228,8 @@ Version unsupported error:
 Backwards-Compatible Changes: The following changes **MAY** be introduced
 without a new version:
 
-*   Adding new OPTIONAL fields to responses
-*   Adding new OPTIONAL parameters to requests
+*   Adding new **OPTIONAL** fields to responses
+*   Adding new **OPTIONAL** parameters to requests
 *   Adding new endpoints, methods, or operations
 *   Adding new error codes with existing error structures
 *   Adding new values to enums (unless explicitly documented as exhaustive)
@@ -2194,7 +1241,7 @@ version:
 
 *   Removing or renaming existing fields
 *   Changing field types or semantics
-*   Making optional fields required
+*   Making **OPTIONAL** fields required
 *   Removing operations or endpoints
 *   Changing authentication or authorization requirements
 *   Modifying the core protocol flow or state machine
