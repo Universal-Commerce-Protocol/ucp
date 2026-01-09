@@ -175,6 +175,7 @@ plugins:
   - search
   - macros
   - site-urls
+  - social
   - llmstxt:
       full_output: llms-full.txt
       sections:

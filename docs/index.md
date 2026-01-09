@@ -1,6 +1,9 @@
 ---
 hide:
   - toc
+title: Universal Commerce Protocol
+description: The common language for platforms, agents and businesses.
+image: assets/banner.png
 ---
 
 <div class="landing-page">
