@@ -58,7 +58,7 @@ export type Message = MessageError | MessageWarning | MessageInfo;
 /**
  * Matches a specific instrument type based on validation logic.
  */
-export type PaymentInstrument = CardPaymentInstrument | GooglePayCardPaymentInstrument;
+export type PaymentInstrument = CardPaymentInstrument;
 /**
  * A basic card payment instrument with visible card details. Can be inherited by a handler's instrument schema to define handler-specific display details or more complex credential structures.
  */
@@ -96,11 +96,7 @@ export type CardPaymentInstrument = PaymentInstrumentBase & {
 /**
  * Container for sensitive payment data. Use the specific schema matching the 'type' field.
  */
-export type PaymentCredential = TokenCredentialResponse | CardCredential | TokenizationData;
-export type GooglePayCardPaymentInstrument = CardPaymentInstrument & {
-  credential?: TokenizationData;
-  [k: string]: unknown;
-};
+export type PaymentCredential = TokenCredentialResponse | CardCredential;
 /**
  * Buyer object extended with consent tracking.
  *
@@ -134,12 +130,11 @@ export type CheckoutWithDiscount = CheckoutResponse & {
 /**
  * A destination for fulfillment.
  */
-export type FulfillmentDestinationRequest =
-    ShippingDestinationRequest|RetailLocationRequest;
+export type FulfillmentDestinationRequest = ShippingDestinationRequest | RetailLocationRequest;
 /**
  * Shipping destination.
  */
-export type ShippingDestinationRequest = PostalAddress&{
+export type ShippingDestinationRequest = PostalAddress & {
   /**
    * ID specific to this shipping destination.
    */
@@ -169,12 +164,11 @@ export type CheckoutWithFulfillmentUpdateRequest = CheckoutUpdateRequest & {
 /**
  * A destination for fulfillment.
  */
-export type FulfillmentDestinationResponse =
-    ShippingDestinationResponse|RetailLocationResponse;
+export type FulfillmentDestinationResponse = ShippingDestinationResponse | RetailLocationResponse;
 /**
  * Shipping destination.
  */
-export type ShippingDestinationResponse = PostalAddress&{
+export type ShippingDestinationResponse = PostalAddress & {
   /**
    * ID specific to this shipping destination.
    */
@@ -546,7 +540,7 @@ export declare interface PaymentHandlerResponse {
   [k: string]: unknown;
 }
 /**
- * Represents the base definition for a payment instrument. It utilizes a static reference (handler_name) to identify the handler type and a dynamic reference (handler_id) to link the instrument to a specific merchant configuration, while also defining standard fields such as the billing address.
+ * The base definition for any payment instrument. It links the instrument to a specific Merchant configuration (handler_id) and defines common fields like billing address.
  */
 export declare interface PaymentInstrumentBase {
   /**
@@ -554,13 +548,9 @@ export declare interface PaymentInstrumentBase {
    */
   id: string;
   /**
-   * The unique identifier for the handler instance that produced this instrument.
+   * The unique identifier for the handler instance that produced this instrument. This corresponds to the 'id' field in the Payment Handler definition.
    */
   handler_id: string;
-  /**
-   * The name of the handler instance that produced this instrument. This corresponds to the 'name' field in the Payment Handler definition.
-   */
-  handler_name: string;
   /**
    * The broad category of the instrument (e.g., 'card', 'tokenized_card'). Specific schemas will constrain this to a constant value.
    */
@@ -662,14 +652,6 @@ export declare interface CardCredential {
    * Electronic Commerce Indicator / Security Level Indicator provided with network tokens.
    */
   eci_value?: string;
-  [k: string]: unknown;
-}
-export declare interface TokenizationData {
-  /**
-   * The type of tokenization to be applied to the selected payment method. This value matches the type set in tokenization_specification.
-   */
-  type: string;
-  token: string;
   [k: string]: unknown;
 }
 /**
@@ -918,11 +900,8 @@ export declare interface FulfillmentOptionRequest {
  *
  * This interface was referenced by `FulfillmentExtensionCreateRequest`'s JSON-Schema
  * via the `definition` "fulfillment_group".
- *
- * This interface was referenced by `FulfillmentExtensionUpdateRequest`'s JSON-Schema
- * via the `definition` "fulfillment_group".
  */
-export declare interface FulfillmentGroupRequest {
+export declare interface FulfillmentGroupCreateRequest {
   /**
    * ID of the selected fulfillment option for this group.
    */
@@ -934,11 +913,16 @@ export declare interface FulfillmentGroupRequest {
  *
  * This interface was referenced by `FulfillmentExtensionCreateRequest`'s JSON-Schema
  * via the `definition` "fulfillment_method".
- *
- * This interface was referenced by `FulfillmentExtensionUpdateRequest`'s JSON-Schema
- * via the `definition` "fulfillment_method".
  */
-export declare interface FulfillmentMethodRequest {
+export declare interface FulfillmentMethodCreateRequest {
+  /**
+   * Fulfillment method type.
+   */
+  type: 'shipping' | 'pickup';
+  /**
+   * Line item IDs fulfilled via this method.
+   */
+  line_item_ids?: string[];
   /**
    * Available destinations. For shipping: addresses. For pickup: retail locations.
    */
@@ -947,6 +931,10 @@ export declare interface FulfillmentMethodRequest {
    * ID of the selected destination.
    */
   selected_destination_id?: string | null;
+  /**
+   * Fulfillment groups for selecting options. Agent sets selected_option_id on groups to choose shipping method.
+   */
+  groups?: FulfillmentGroupCreateRequest[];
   [k: string]: unknown;
 }
 /**
@@ -985,13 +973,59 @@ export declare interface FulfillmentRequest {
   /**
    * Fulfillment methods for cart items.
    */
-  methods?: FulfillmentMethodRequest[];
+  methods?: FulfillmentMethodCreateRequest[];
   [k: string]: unknown;
 }
 /**
  * Extends Checkout with fulfillment support using methods, destinations, and groups.
  */
 export declare interface FulfillmentExtensionUpdateRequest {
+  [k: string]: unknown;
+}
+/**
+ * A merchant-generated package/group of line items with fulfillment options.
+ *
+ * This interface was referenced by `FulfillmentExtensionUpdateRequest`'s JSON-Schema
+ * via the `definition` "fulfillment_group".
+ */
+export declare interface FulfillmentGroupUpdateRequest {
+  /**
+   * Group identifier for referencing merchant-generated groups in updates.
+   */
+  id: string;
+  /**
+   * ID of the selected fulfillment option for this group.
+   */
+  selected_option_id?: string | null;
+  [k: string]: unknown;
+}
+/**
+ * A fulfillment method (shipping or pickup) with destinations and groups.
+ *
+ * This interface was referenced by `FulfillmentExtensionUpdateRequest`'s JSON-Schema
+ * via the `definition` "fulfillment_method".
+ */
+export declare interface FulfillmentMethodUpdateRequest {
+  /**
+   * Unique fulfillment method identifier.
+   */
+  id: string;
+  /**
+   * Line item IDs fulfilled via this method.
+   */
+  line_item_ids: string[];
+  /**
+   * Available destinations. For shipping: addresses. For pickup: retail locations.
+   */
+  destinations?: FulfillmentDestinationRequest[];
+  /**
+   * ID of the selected destination.
+   */
+  selected_destination_id?: string | null;
+  /**
+   * Fulfillment groups for selecting options. Agent sets selected_option_id on groups to choose shipping method.
+   */
+  groups?: FulfillmentGroupUpdateRequest[];
   [k: string]: unknown;
 }
 /**
@@ -1053,7 +1087,7 @@ export declare interface FulfillmentOptionResponse {
  */
 export declare interface FulfillmentGroupResponse {
   /**
-   * Unique fulfillment group identifier.
+   * Group identifier for referencing merchant-generated groups in updates.
    */
   id: string;
   /**
@@ -1098,7 +1132,7 @@ export declare interface FulfillmentMethodResponse {
    */
   selected_destination_id?: string | null;
   /**
-   * Merchant-computed fulfillment groups (packages) for selected destination.
+   * Fulfillment groups for selecting options. Agent sets selected_option_id on groups to choose shipping method.
    */
   groups?: FulfillmentGroupResponse[];
   [k: string]: unknown;
@@ -1408,142 +1442,5 @@ export declare interface PlatformOrderConfig {
  */
 export declare interface PaymentData {
   payment_data?: PaymentInstrument;
-  [k: string]: unknown;
-}
-/**
- * This object provides information about what validation has been performed on the returned payment credentials so that appropriate instrument risk checks can be applied.
- */
-export declare interface AssuranceDetailsSpecifications {
-  /**
-   * If true, indicates that Cardholder possession validation has been performed on returned payment credential.
-   */
-  account_verified?: boolean;
-  /**
-   * If true, indicates that identification and verifications (ID&V) was performed on the returned payment credential. If false, the same risk-based authentication can be performed as you would for card transactions (e.g. 3D Secure).
-   */
-  card_holder_authenticated?: boolean;
-}
-/**
- * This object provides information about the selected payment card.
- */
-export declare interface GooglePayCardInfo {
-  /**
-   * The details about the card. This value is commonly the last four digits of the selected payment account number.
-   */
-  card_details: string;
-  assurance_details: AssuranceDetailsSpecifications;
-  /**
-   * The payment card network of the selected payment. Returned values match the format of allowedCardNetworks in CardParameters.
-   */
-  card_network: string;
-  billing_address?: PostalAddress;
-  /**
-   * Card funding source for the selected payment method.
-   */
-  card_funding_source: 'UNKNOWN' | 'CREDIT' | 'DEBIT' | 'PREPAID';
-}
-/**
- * Configuration schema for the com.google.pay payment handler.
- */
-export declare interface GooglePayHandlerConfiguration {
-  /**
-   * The major Google Pay API version. Currently, this must be 2.
-   */
-  api_version: 2;
-  /**
-   * The minor Google Pay API version (e.g., 0).
-   */
-  api_version_minor: number;
-  /**
-   * The Google Pay environment.
-   */
-  environment?: 'TEST' | 'PRODUCTION';
-  merchant_info: GooglePayMerchantInfo;
-  /**
-   * The payment methods allowed for this transaction.
-   */
-  allowed_payment_methods: GpayPaymentMethod[];
-  [k: string]: unknown;
-}
-/**
- * Identity details for the merchant as required by the Google Pay UCP handler.
- */
-export declare interface GooglePayMerchantInfo {
-  /**
-   * The user-facing name of the merchant that will appear on the Google Pay payment sheet.
-   */
-  merchant_name: string;
-  /**
-   * The Google Pay Merchant ID. Use a dummy value or 'TEST' for the TEST environment; use the real Merchant ID for PRODUCTION.
-   */
-  merchant_id: string;
-  /**
-   * The fully qualified domain name where the checkout occurs, used for origin validation.
-   */
-  merchant_origin: string;
-  /**
-   * An optional authorization JWT for certain integration contexts.
-   */
-  auth_jwt?: string;
-}
-export declare interface GpayPaymentMethod {
-  /**
-   * A short identifier for the supported payment method. CARD and EWALLET are the only supported values.
-   */
-  type: string;
-  /**
-   * Parameters required to configure the provided payment method type. For the CARD type use CardParameters.
-   */
-  parameters: {
-    [k: string]: unknown;
-  };
-  /**
-   * Configure an account or decryption provider to receive payment information. This property is required for the CARD payment method.
-   */
-  tokenization_specification?: TokenizationSpecification[];
-  /**
-   * Define the information required to process the payment. This property is required for the EWALLET payment method.
-   */
-  processing_specification?: ProcessingSpecification[];
-  [k: string]: unknown;
-}
-export declare interface TokenizationSpecification {
-  /**
-   * A payment method tokenization type is supported for the given PaymentMethod. For the CARD payment method, use PAYMENT_GATEWAY or DIRECT.
-   */
-  type: string;
-  /**
-   * Parameters specific to the selected payment method tokenization type.
-   */
-  parameters: Array<{
-    [k: string]: unknown;
-  }>;
-  [k: string]: unknown;
-}
-export declare interface ProcessingSpecification {
-  /**
-   * An eWallet provider type is supported for latest payment processing.
-   */
-  type: string;
-  /**
-   * Parameters specific to the selected eWallet provider.
-   */
-  parameters: Array<{
-    [k: string]: unknown;
-  }>;
-  [k: string]: unknown;
-}
-/**
- * Order confirmation returned by the merchant.
- */
-export declare interface OrderConfirmation {
-  /**
-   * Order ID.
-   */
-  id: string;
-  /**
-   * Permalink to access the order on merchant site.
-   */
-  permalink_url: string;
   [k: string]: unknown;
 }

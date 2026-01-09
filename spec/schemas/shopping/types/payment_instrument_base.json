@@ -2,12 +2,11 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/shopping/types/payment_instrument_base.json",
   "title": "Payment Instrument Base",
-  "description": "Represents the base definition for a payment instrument. It utilizes a static reference (handler_name) to identify the handler type and a dynamic reference (handler_id) to link the instrument to a specific merchant configuration, while also defining standard fields such as the billing address.",
+  "description": "The base definition for any payment instrument. It links the instrument to a specific Merchant configuration (handler_id) and defines common fields like billing address.",
   "type": "object",
   "required": [
     "id",
     "handler_id",
-    "handler_name",
     "type"
   ],
   "properties": {
@@ -17,11 +16,7 @@
     },
     "handler_id": {
       "type": "string",
-      "description": "The unique identifier for the handler instance that produced this instrument."
-    },
-    "handler_name": {
-      "type": "string",
-      "description": "The name of the handler instance that produced this instrument. This corresponds to the 'name' field in the Payment Handler definition."
+      "description": "The unique identifier for the handler instance that produced this instrument. This corresponds to the 'id' field in the Payment Handler definition."
     },
     "type": {
       "type": "string",

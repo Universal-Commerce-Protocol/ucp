@@ -6,9 +6,6 @@
   "oneOf": [
     {
       "$ref": "card_payment_instrument.json"
-    },
-    {
-      "$ref": "../../../handlers/google_pay/gpay_card_payment_instrument.json"
     }
   ]
 }
