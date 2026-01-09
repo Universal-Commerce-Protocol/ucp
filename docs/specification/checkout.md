@@ -448,13 +448,25 @@ Businesses **MAY** define custom types for domain-specific needs. Platforms
 
 {{ schema_fields('payment_instrument', 'checkout') }}
 
+### Card Payment Instrument
+
+{{ schema_fields('card_payment_instrument', 'checkout') }}
+
+### Payment Credential
+
+{{ schema_fields('payment_credential', 'checkout') }}
+
+### Token Credential Response
+
+{{ schema_fields('token_credential.create_req', 'checkout') }}
+
+### Card Credential
+
+{{ schema_fields('card_credential', 'checkout') }}
+
 ### Postal Address
 
 {{ schema_fields('postal_address', 'checkout') }}
-
-#### Payment Data
-
-{{ schema_fields('payment_data', 'checkout') }}
 
 ### Response
 
