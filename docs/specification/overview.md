@@ -33,7 +33,7 @@ Schema notes:
     unless otherwise specified
 -   Amounts format: Minor units (cents)
 
-## 1 Discovery, Governance, and Negotiation
+## 1. Discovery, Governance, and Negotiation
 
 UCP employs a server-selects architecture where the business (server) chooses
 the protocol version and capabilities from the intersection of both parties'
@@ -72,15 +72,15 @@ All capability and service names **MUST** use the format:
 #### 1.1.2 Spec URL Binding
 
 The `spec` and `schema` fields are **REQUIRED** for all capabilities. The origin
-of these URLs ****MUST**** match the namespace authority:
+of these URLs **MUST** match the namespace authority:
 
 | Namespace       | Required Origin           |
 | --------------- | ------------------------- |
 | `dev.ucp.*`     | `https://ucp.dev/...`     |
 | `com.example.*` | `https://example.com/...` |
 
-Platforms **MUST** validate this binding and **SHOULD** reject capabilities
-where the spec origin does not match the namespace authority.
+Platform **MUST** validate this binding and SHOULD reject capabilities where the
+spec origin does not match the namespace authority.
 
 #### 1.1.3 Governance Model
 
@@ -103,7 +103,7 @@ standard formats:
 -   **REST**: OpenAPI 3.x (JSON format)
 -   **MCP**: OpenRPC (JSON format)
 -   **A2A**: Agent Card Specification
--   **Embedded**: OpenRPC (JSON format)
+-   **EP(embedded)**: OpenRPC (JSON format)
 
 #### 1.2.1 Service Definition
 
@@ -163,7 +163,7 @@ functionality is supported and where to find documentation and schemas.
 
 #### 1.3.2 Extensions
 
-An **extension** is an **OPTIONAL** module that augments another capability.
+An **extension** is an optional module that augments another capability.
 Extensions use the `extends` field to declare their parent:
 
 ```json
@@ -183,17 +183,17 @@ Extensions can be:
 
 ### 1.4 Schema Composition
 
-Extensions can add new fields and modify shared structures (e.g.,
-discounts modify `totals`, fulfillment adds fulfillment to `totals.type`).
+Extensions can add new fields and modify shared structures (e.g., discounts
+modify `totals`, fulfillment adds fulfillment to `totals.type`).
 
 #### 1.4.1 Requirements
 
--   Transport definitions (OpenAPI/OpenRPC) **MUST** reference base schemas
-    only. They **MUST NOT** enumerate fields or define payload shapes inline.
+-   Transport definitions (OpenAPI/OpenRPC) **SHOULD** reference base schemas
+    only. They **SHOULD NOT** enumerate fields or define payload shapes inline.
 -   Extensions **MUST** be self-describing. Each extension schema **MUST**
-    declare the types it introduces and how it modifies base types using
-    `allOf` composition.
--   Clients **MUST** resolve schemas client-side by fetching and composing
+    declare the types it introduces and how it modifies base types using `allOf`
+    composition.
+-   Platforms **MUST** resolve schemas client-side by fetching and composing
     base schemas with active extension schemas.
 
 #### 1.4.2 Extension Schema Pattern
@@ -221,7 +221,7 @@ Extension schemas define composed types using `allOf`. An example is as follows:
 }
 ```
 
-Composed type names **MUST** use the pattern: `{capability-name}.{TypeName}`
+Composed type names MUST use the pattern: `{capability-name}.{TypeName}`
 
 #### 1.4.3 Resolution Flow
 
@@ -255,6 +255,12 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
         "mcp": {
           "schema": "https://ucp.dev/services/shopping/mcp.openrpc.json",
           "endpoint": "https://business.example.com/ucp/mcp"
+        },
+        "a2a": {
+          "endpoint": "https://business.example.com/.well-known/agent-card.json"
+        },
+        "embedded": {
+          "schema": "https://ucp.dev/services/shopping/embedded.openrpc.json"
         }
       }
     },
@@ -284,16 +290,16 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
   "payment": {
     "handlers": [
       {
-        "id": "merchant_tokenizer",
-        "name": "dev.ucp.merchant_tokenizer",
+        "id": "business_tokenizer",
+        "name": "dev.ucp.business_tokenizer",
         "version": "2026-01-11",
-        "spec": "https://example.com/specs/payments/merchant_tokenizer-payment",
+        "spec": "https://example.com/specs/payments/business_tokenizer-payment",
         "config_schema": "https://ucp.dev/schemas/payments/delegate-payment.json",
         "instrument_schemas": [
           "https://ucp.dev/schemas/shopping/types/card_payment_instrument.json"
         ],
         "config": {
-          "endpoint": "https://merchant.example.com/tokenize",
+          "endpoint": "https://business.example.com/tokenize",
           "public_key": "pk_live_abc123",
           "creates": "merchant.token"
         }
@@ -302,7 +308,7 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
   },
   "signing_keys": [
     {
-      "kid": "merchant_2025",
+      "kid": "business_2025",
       "kty": "EC",
       "crv": "P-256",
       "x": "WbbXwVYGdJoP4Xm3qCkGvBRcRvKtEfXDbWvPzpPS8LA",
@@ -361,19 +367,19 @@ example:
       {
         "id": "gpay",
         "name": "com.google.pay",
-        "version": "2026-01-11",
-        "spec": "https://pay.google.com/gp/p/ucp/2026-01-11/",
-        "config_schema": "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/config.json",
+        "version": "2024-12-03",
+        "spec": "https://developers.google.com/merchant/ucp/guides/gpay-payment-handler",
+        "config_schema": "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/gpay_config.json",
         "instrument_schemas": [
           "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/gpay_card_payment_instrument.json"
         ]
       },
-      {
-        "id": "merchant_tokenizer",
-        "name": "com.example.merchant_tokenizer",
+       {
+        "id": "business_tokenizer",
+        "name": "dev.ucp.business_tokenizer",
         "version": "2026-01-11",
-        "spec": "https://example.com/specs/payments/merchant_tokenizer",
-        "config_schema": "https://example.com/specs/payments/merchant_tokenizer.json",
+        "spec": "https://example.com/specs/payments/business_tokenizer-payment",
+        "config_schema": "https://ucp.dev/schemas/payments/delegate-payment.json",
         "instrument_schemas": [
           "https://ucp.dev/schemas/shopping/types/card_payment_instrument.json"
         ]
@@ -382,7 +388,7 @@ example:
   },
   "signing_keys": [
     {
-      "kid": "agent_2025",
+      "kid": "platform_2025",
       "kty": "EC",
       "crv": "P-256",
       "x": "MKBCTNIcKUSDii11ySs3526iDZ8AiTo7Tu6KPAqv7D4",
@@ -440,7 +446,7 @@ Content-Type: application/json
     `/.well-known/ucp` before initiating requests. If fetched, platforms
     **SHOULD** cache the profile according to HTTP cache-control directives.
 3.  **Namespace Validation**: Platforms **MUST** validate that capability `spec`
-    URL origins match namespace authorities.
+    URI origins match namespace authorities.
 4.  **Schema Resolution**: Platforms **MUST** fetch and compose schemas for
     negotiated capabilities before making requests.
 
@@ -481,11 +487,12 @@ If negotiation fails, businesses **MUST** return an error response:
 
 ```json
 {
-  "status": "error",
-  "errors": [{
-    "code": "VERSION_UNSUPPORTED",
-    "message": "Version 2025-11-01 is not supported.",
-    "severity": "critical"
+  "status": "requires_escalation",
+  "messages": [{
+    "type": "error",
+    "code": "version_unsupported",
+    "message": "Version 2026-01-11 is not supported.",
+    "severity": "requires_buyer_input"
   }]
 }
 ```
@@ -505,10 +512,11 @@ The `capabilities` array in responses indicates active capabilities:
   },
   "id": "checkout_123",
   "line_items": [...]
+  ... other fields
 }
 ```
 
-## 2 Payment Architecture
+## 2. Payment Architecture
 
 UCP adopts a decoupled architecture for payments to solve the "N-to-N"
 complexity problem between platforms, business, and payment credential
@@ -808,7 +816,7 @@ POST /checkout-sessions/{id}/complete
 *This provides the business with non-repudiable proof that the user authorized
 this specific transaction, enabling safe autonomous processing.*
 
-### 2.7 PCI-DSS Scope Management
+#### PCI-DSS Scope Management
 
 **Agent Scope**
 
@@ -842,7 +850,7 @@ certified and handle:
 -   Credential validation and processing
 -   PCI-compliant infrastructure
 
-### 2.8 Security Best Practices
+#### Security Best Practices
 
 **For Businesses:**
 
@@ -887,7 +895,7 @@ certified and handle:
 6.  If applicable, provide mechanisms for businesses or PSPs to verify
     `payment_mandate` credentials received through the AP2 flow.
 
-### 2.9 Fraud Prevention Integration
+#### Fraud Prevention Integration
 
 While UCP does not define fraud prevention APIs, the payment architecture
 supports fraud signal integration:
@@ -902,10 +910,10 @@ supports fraud signal integration:
 Future extensions **MAY** standardize fraud signal schemas, but the current
 architecture allows flexible integration with existing fraud prevention systems.
 
-## 3 Transport Layer
+## 3. Transport Layer
 
-UCP supports multiple transport protocols. Agents and businesses effectively
-negotiate the transport via their profiles.
+UCP supports multiple transport protocols. Platforms and businesses effectively
+negotiate the transport via `services` on their profiles.
 
 ### 3.1 REST Transport (Core)
 
@@ -913,39 +921,39 @@ The primary transport for UCP is **HTTP/1.1** (or higher) using RESTful
 patterns.
 
 *   **Content-Type:** Requests and responses **MUST** use `application/json`.
-*   **Methods:** Implementations **MUST** use standard HTTP verbs (POST for
-*   **Content-Type:** Requests and responses **MUST** use `application/json`.
-*   **Methods:** Implementations **MUST** use standard HTTP verbs (POST for
-    creation/action, GET for retrieval).
+*   **Methods:** Implementations **MUST** use standard HTTP verbs (e.g., `POST`
+    for creation, `GET` for retrieval).
 *   **Status Codes:** Implementations **MUST** use standard HTTP status codes
-*   **Status Codes:** Implementations **MUST** use standard HTTP status codes
-    (200, 201, 400, 401, 500).
+    (e.g., 200, 201, 400, 401, 500).
 
 ### 3.2 Model Context Protocol (MCP)
 
-UCP Capabilities map 1:1 to MCP Tools. A business **MAY** expose an MCP server
-that
-wraps their UCP implementation, allowing LLMs to call tools like
-`create_checkout_session` directly.
+UCP capabilities map 1:1 to MCP tools. A business **MAY** expose an MCP server
+that wraps their UCP implementation, allowing LLMs to call tools like
+`create_checkout` directly.
 
-### 3.3 Agent-to-Agent Protocol (A2A)
+### 3.2 Agent-to-Agent Protocol (A2A)
 
-A business **MAY** expose an A2A Agent that supports UCP as an A2A Extension
-allowing integration with client applications with structured UCP data types.
+A business **MAY** expose an A2A agent that supports UCP as an A2A Extension,
+allowing integration with platforms over structured UCP data types.
 
-## 4 Standard Capabilities
+### 3.3 Embedded Protocol (EP)
 
-The Universal Commerce Protocol defines a set of standard capabilities. Each
-capability is identified by a versioned URI and is defined in a separate
-specification document.
+A business **MAY** embed an interface onto an eligible host that would
+receive events as the user interacts with the interface and delegate key user
+actions.
 
-### 4.1 Core Capabilities
+Initiation comes through a `continue_url` that is returned by the business.
+
+## 4. Standard Capabilities
+
+UCP defines a set of standard capabilities:
 
 | Capability Name      | ID (URI)                                         | Description                                                                                                  |
 | :------------------- | :----------------------------------------------- | :----------------------------------------------------------------------------------------------------------- |
-| **Checkout**         | `{{ ucp_url }}/capabilities/checkout/v1`         | Facilitates the creation and management of checkout sessions, including cart management and tax calculation. |
-| **Identity Linking** | `{{ ucp_url }}/capabilities/identity-linking/v1` | Enables platforms to obtain authorization via OAuth 2.0 to perform actions on a user's behalf.               |
-| **Order**            | `{{ ucp_url }}/capabilities/order/v1`            | Allows businesses to push asynchronous updates about an order's lifecycle (shipping, delivery, returns).      |
+| **Checkout**         | `{{ ucp_url }}/schemas/shopping/checkout.json`         | Facilitates the creation and management of checkout sessions, including cart management and tax calculation. |
+| **Identity Linking** | - | Enables platforms to obtain authorization via OAuth 2.0 to perform actions on a user's behalf.               |
+| **Order**            | `{{ ucp_url }}/schemas/shopping/order.json`            | Allows businesses to push asynchronous updates about an order's lifecycle (shipping, delivery, returns).      |
 
 ### 4.2 Definition & Extensions
 
@@ -953,7 +961,7 @@ Detailed definitions for endpoints, schemas, and valid extensions for each
 capability are provided in their respective specification files. Extensions are
 typically versioned and defined alongside their parent capability.
 
-## 5 Security & Authentication
+## 5. Security & Authentication
 
 ### 5.1 Transport Security
 
@@ -961,98 +969,69 @@ All UCP communication **MUST** occur over **HTTPS**.
 
 ### 5.2 Request Authentication
 
-*   **Consumer to Business:** Requests **SHOULD** be authenticated using
-    standard
-    headers (e.g., `Authorization: Bearer <token>`).
-*   **Business to Consumer (Webhooks):** Webhooks **MUST** be signed using a
-    shared
-    secret or asymmetric key to verify integrity and origin.
+*   **Platform to Business:** Requests **SHOULD** be authenticated using
+    standard headers (e.g., `Authorization: Bearer <token>`).
+*   **Business to Platform (Webhooks):** Webhooks **MUST** be signed using a
+    shared secret or asymmetric key to verify integrity and origin.
 
 ### 5.3 Data Privacy
 
 Sensitive data (such as Payment Credentials or PII) **MUST** be handled
-according to
-PCI-DSS and GDPR guidelines. UCP encourages the use of tokenized payment data to
-minimize Business and Platform liability.
+according to PCI-DSS and GDPR guidelines. UCP encourages the use of tokenized
+payment data to minimize business and platform liability.
 
 ### 5.4 Transaction Integrity and Non-Repudiation
 
-For enhanced security and non-repudiation, UCP supports the
-`dev.ucp.shopping.ap2_mandate` extension. When negotiated:
+For enhanced security and non-repudiation, UCP supports AP2 mandates extension.
+When negotiated:
 
 *   Businesses provide a cryptographic signature on the checkout terms (`ap2.merchant_authorization`).
-*   Agents provide a cryptographic mandate from the user, authorizing the payment and a specific checkout state (`ap2.checkout_mandate` and a `payment_mandate`).
+*   Platforms provide a cryptographic mandate from the user, authorizing the payment and a specific checkout state (`ap2.checkout_mandate` and a `payment_mandate`).
 
 This mechanism, based on the [AP2 Protocol](https://ap2-protocol.org/), provides
 strong, end-to-end cryptographic assurances about the transaction details and
 participant consent, significantly reducing risks of tampering and disputes.
 Implementers **SHOULD** consider supporting this extension for sensitive or
-Implementers **SHOULD** consider supporting this extension for sensitive or
 high-value transactions.
 
-## 6 Versioning
+## 6. Versioning
 
 ### 6.1 Version Format
 
-UCP uses date-based versioning in the format YYYY-MM-DD. This provides
+UCP uses date-based versioning in the format `YYYY-MM-DD`. This provides
 clear chronological ordering and unambiguous version comparison.
 
 ### 6.2 Version Discovery and Negotiation
 
 UCP prioritizes strong backwards compatibility. Businesses implementing a
-version **SHOULD** handle requests from agents using that version or older
-versions.
+version **SHOULD** handle requests from platforms using that version or older.
 
-Both businesses and agents declare a single version in their profiles:
+Both businesses and platforms declare a single version in their profiles:
 
-Business Profile:
+#### Example
+
+=== Business Profile:
 
 ```json
 {
   "ucp": {
     "version": "2026-01-11",
-    "transports": {
-      "rest": { "endpoint": "https://example-merchant.com/ucp" }
-    },
-    "capabilities": []
+    "services": { ... },
+    "capabilities": [ ... ]
   },
-  "payment": {
-    "handlers": [
-      {
-        "id": "merchant_tokenizer",
-        "name": "com.example.merchant_tokenizer",
-        "version": "2026-01-11",
-        "spec": "https://example.com/specs/payments/merchant_tokenizer",
-        "config_schema": "https://example.com/specs/payments/merchant_tokenizer.json",
-        "instrument_schemas": [
-          "https://ucp.dev/schemas/shopping/types/card_payment_instrument.json"
-        ],
-        "config": {
-          "type": "CARD",
-          "tokenization_specification": {
-            "type": "PUSH",
-            "parameters": {
-              "token_retrieval_url": "https://api.psp.com/v1/tokens"
-            }
-          }
-        }
-      }
-    ]
-  }
+  "payment": { ... }
 }
 ```
 
-Client Profile:
+=== Platform Profile:
 
 ```json
 {
   "ucp": {
     "version": "2026-01-11",
-    "capabilities": []
+    "capabilities": [ ... ]
   },
-  "payment": {
-    "handlers": []
-  }
+  "payment": { ... }
 }
 ```
 
@@ -1060,14 +1039,16 @@ Client Profile:
 
 ![High-level resolution flow sequence diagram](site:specification/images/ucp-discovery-negotiation.png)
 
-Businesses **MUST** validate the client's version and determine compatibility:
+Businesses MUST validate the platform's version and determine compatibility:
 
-1.  Client declares version via profile referenced in request
+1.  Platform declares version via profile referenced in request
 2.  Business validates:
-    *   If client version ≤ business version: Business **MUST** process the request
-    *   If client version > business version: Business **MUST** return
-        VERSION_UNSUPPORTED error
-3.  Businesses **MUST** include the version used for processing in every response
+    *   If platform version ≤ business version: Business **MUST**
+        process the request
+    *   If platform version > business version: Business **MUST** return
+        `version_unsupported` error
+3.  Businesses **MUST** include the version used for processing in every
+    response.
 
 Response with version confirmation:
 
@@ -1075,10 +1056,11 @@ Response with version confirmation:
 {
   "ucp": {
     "version": "2026-01-11",
-    "capabilities": []
+    "capabilities": [ ... ]
   },
-  "id": "cart_123",
-  "status": "ok"
+  "id": "checkout_123",
+  "status": "incomplete"
+  ...other checkout fields
 }
 ```
 
@@ -1086,59 +1068,62 @@ Version unsupported error:
 
 ```json
 {
-  "status": "error",
-  "errors": [{
-    "code": "VERSION_UNSUPPORTED",
-    "message": "Version 2025-11-01 is not supported. This business implements version 2025-10-21.",
-    "severity": "critical"
+  "status": "requires_escalation",
+  "messages": [{
+    "type": "error",
+    "code": "version_unsupported",
+    "message": "Version 2026-01-12 is not supported. This business implements version 2026-01-11.",
+    "severity": "requires_buyer_input"
   }]
 }
 ```
 
 ### 6.4 Backwards Compatibility
 
-Backwards-Compatible Changes: The following changes **MAY** be introduced
-without a new version:
+#### Backwards-Compatible Changes
 
-*   Adding new **OPTIONAL** fields to responses
-*   Adding new **OPTIONAL** parameters to requests
-*   Adding new endpoints, methods, or operations
+The following changes **MAY** be introduced without a new version:
+
+*   Adding new non-required fields to responses
+*   Adding new non-required parameters to requests
+*   Adding new endpoints, methods, or operations to a transport
 *   Adding new error codes with existing error structures
 *   Adding new values to enums (unless explicitly documented as exhaustive)
 *   Changing the order of fields in responses
 *   Changing the length or format of opaque strings (IDs, tokens)
 
-Breaking Changes: The following changes **MUST NOT** be introduced without a new
-version:
+#### Breaking Changes:
+
+The following changes **MUST NOT** be introduced without a new version:
 
 *   Removing or renaming existing fields
 *   Changing field types or semantics
-*   Making **OPTIONAL** fields required
-*   Removing operations or endpoints
+*   Making non-required fields required
+*   Removing operations, methods, or endpoints
 *   Changing authentication or authorization requirements
-*   Modifying the core protocol flow or state machine
+*   Modifying existing protocol flow or state machine
 *   Changing the meaning of existing error codes
 
 ### 6.5 Independent Component Versioning
 
-*   The core UCP protocol versions independently from capabilities.
+*   UCP protocol versions independently from capabilities.
 *   Each capability versions independently from other capabilities.
 *   Capabilities **MUST** follow the same backwards compatibility rules as the
-    core protocol.
+    protocol.
 *   Businesses **MUST** validate capability version compatibility using the same
-    logic as core version validation.
+    logic as what's described above.
 *   Transports **MAY** define their own version handling mechanisms.
 
-## 7 Glossary
+## 7. Glossary
 
 | Term                              | Acronym | Definition                                                                                                                                                    |
 | :-------------------------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **Agent Payments Protocol**       | AP2     | An open protocol designed to enable AI agents to securely interoperate and complete payments autonomously. UCP leverages AP2 for secure payment mandates.     |
 | **Agent2Agent Protocol**          | A2A     | An open standard for secure, collaborative communication between diverse AI agents. UCP can use A2A as a transport layer.                                     |
-| **Capability**                    | -       | A standalone core feature that a business supports (e.g., Checkout, IdentityLinking). Capabilities are the fundamental "verbs" of UCP.                        |
+| **Capability**                    | -       | A standalone core feature that a business supports (e.g., Checkout, Identity Linking). Capabilities are the fundamental "verbs" of UCP.                       |
 | **Credential Provider**           | CP      | A trusted entity (like a digital wallet) responsible for securely managing and executing the user's payment and identity credentials.                         |
 | **Extension**                     | -       | An optional module that augments a specific UCP Capability, allowing for specialized functionality (e.g., Discounts) without bloating the core specification. |
-| **Profile**                       | -       | A JSON document hosted by businesses and platforms at a well-known URI, declaring their identity, supported capabilities, and endpoints.                        |
+| **Profile**                       | -       | A JSON document hosted by businesses and platforms at a well-known URI, declaring their identity, supported capabilities, and endpoints.                      |
 | **Business**                      | -       | The entity selling goods or services. In UCP, they act as the **Merchant of Record (MoR)**, retaining financial liability and ownership of the order.         |
 | **Model Context Protocol**        | MCP     | A protocol standardizing how AI models connect to external data and tools. UCP capabilities map 1:1 to MCP tools.                                             |
 | **Universal Commerce Protocol**   | UCP     | The standard defined in this document, enabling interoperability between commerce entities via standardized capabilities and discovery.                       |

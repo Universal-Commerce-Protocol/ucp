@@ -126,9 +126,10 @@ declares **who resolves the error**:
 
 Errors with `requires_*` severity contribute to `status: requires_escalation`.
 Both result in buyer handoff, but represent different checkout states.
-`requires_buyer_input` means the checkout is **incomplete** — the business
+
+- `requires_buyer_input` means the checkout is **incomplete** — the business
 requires information their API doesn't support collecting programmatically.
-`requires_buyer_review` means the checkout is **complete** — but policy,
+- `requires_buyer_review` means the checkout is **complete** — but policy,
 regulatory, or entitlement rules require buyer authorization before order
 placement (e.g., high-value order approval, first-purchase policy).
 
@@ -266,7 +267,7 @@ platform can prefill checkout state when initiating a buy-now flow.
 *   After a checkout session reaches the state "completed", it is considered
     immutable.
 
-## Capability Definition
+## Capability Schema Definition
 
 {{ schema_fields('checkout_resp', 'checkout') }}
 

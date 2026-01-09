@@ -22,17 +22,10 @@
 ## 1. Introduction
 
 Embedded Checkout Protocol (ECP) is a UCP transport binding that enables a
-**Host** to embed a **Merchant's** checkout interface, receive events as the
+**Host** to embed a **Business's** checkout interface, receive events as the
 buyer interacts with the checkout, and delegate key user actions such as address
 and payment selection. ECP is a transport binding (like REST)—it defines **how**
 to communicate, not **what** data exists.
-
-### 1.1 Conformance & Standards
-
-The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHOULD", "SHOULD NOT",
-"RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as
-described in
- **[RFC 2119](https://www.rfc-editor.org/rfc/rfc2119){ target="_blank" }**.
 
 #### W3C Payment Request Conceptual Alignment
 
