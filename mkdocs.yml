@@ -27,6 +27,7 @@ edit_uri: edit/main/docs/
 nav:
   - Home: index.md
   - Core Concepts: documentation/core-concepts.md
+  - Playground: playground.md
   - Specification:
     - Overview: specification/overview.md
     - Checkout Capability:
