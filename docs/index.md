@@ -158,7 +158,7 @@ hide:
           </div>
           <div class="pane-eyebrow">SEE IT IN ACTION</div>
           <h3>Checkout</h3>
-          <p>Support complex cart logic, dynamic pricing, and tax calculations and more across millions of merchants through unified checkout sessions.</p>
+          <p>Support complex cart logic, dynamic pricing, and tax calculations and more across millions of businesses through unified checkout sessions.</p>
           <a href="specification/checkout-rest/" class="learn-more-btn">Learn more</a>
         </div>
         <div class="pane-visuals">
@@ -309,7 +309,7 @@ hide:
       </div>
       <h3>Power native checkout</h3>
       <p>
-        Integrate and negotiate directly with the merchant checkout API to power native UI and workflows for your platform.
+        Integrate and negotiate directly with a seller's checkout API to power native UI and workflows for your platform.
       </p>
       <a href="specification/checkout-rest/" class="promo-button">See how it works</a>
     </div>
@@ -320,7 +320,7 @@ hide:
       </div>
       <h3>Embed business checkout</h3>
       <p>
-        As an optional mechanism, embed your checkout UI within an iframe to support more complex checkout flows, with advanced capabilities like bidirectional communication, payments and shipping address delegation.
+        As an optional customization, embed your checkout UI to support more complex flows. This includes advanced capabilities like bidirectional communication, payments and shipping address delegation.
       </p>
       <a href="specification/embedded-checkout/" class="promo-button">Learn more</a>
     </div>
@@ -360,7 +360,7 @@ hide:
         </div>
         <h3>For AI Platforms</h3>
         <p>
-          Simplify merchant onboarding with standardized APIs and provide your audience with an integrated shopping experience. Compatible with MCP, A2A, and existing agent frameworks.
+          Simplify business onboarding with standardized APIs and provide your audience with an integrated shopping experience. Compatible with MCP, A2A, and existing agent frameworks.
         </p>
         <a href="documentation/core-concepts/" class="lifecycle-container__item-link">Learn more about UCP core concepts</a>
       </div>
@@ -564,7 +564,7 @@ hide:
       <h2>Get started today</h2>
 
       <p>
-        UCP is an open standard designed to let AI agents, apps, merchants, and payment providers interact seamlessly without needing custom, one-off integrations for every connection. We actively seek your feedback and contributions to help build the future of commerce.
+        UCP is an open standard designed to let AI agents, apps, businesses, and payment providers interact seamlessly without needing custom, one-off integrations for every connection. We actively seek your feedback and contributions to help build the future of commerce.
       </p>
       <p>
         The complete technical specification, documentation, and reference implementations are hosted in our public GitHub repository.
