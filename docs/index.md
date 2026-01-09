@@ -305,7 +305,7 @@ hide:
 
     <div class="two-column-promo-item">
       <div class="two-column-promo-item__icon-wrapper">
-        <img src="assets/Icon=Native_Checkout.svg" alt="Native Checkout feature icon" width="96" class="two-column-promo-item__icon">
+        <img src="assets/native_checkout.svg" alt="Native Checkout feature icon" width="96" class="two-column-promo-item__icon">
       </div>
       <h3>Power native checkout</h3>
       <p>
@@ -316,7 +316,7 @@ hide:
 
     <div class="two-column-promo-item">
       <div class="two-column-promo-item__icon-wrapper">
-        <img src="assets/Icon=Embedded_Option.svg" alt="Embedded Option feature icon" width="96" class="two-column-promo-item__icon">
+        <img src="assets/embedded_checkout.svg" alt="Embedded Option feature icon" width="96" class="two-column-promo-item__icon">
       </div>
       <h3>Embed business checkout</h3>
       <p>
@@ -362,7 +362,7 @@ hide:
         <p>
           Simplify merchant onboarding with standardized APIs and provide your audience with an integrated shopping experience. Compatible with MCP, A2A, and existing agent frameworks.
         </p>
-        <a href="documentation/core-concepts/" class="lifecycle-container__item-link">Learn more UCP core concepts</a>
+        <a href="documentation/core-concepts/" class="lifecycle-container__item-link">Learn more about UCP core concepts</a>
       </div>
       <div class="lifecycle-container__item">
         <div class="lifecycle-container__item-img-wrapper">

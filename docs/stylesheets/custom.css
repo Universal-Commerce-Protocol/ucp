@@ -62,7 +62,7 @@ label.md-search__icon {
 
 .landing-page h2 {
   font-size: 2.0rem;
-  font-weight: 700;
+  font-weight: 450;
   color: #202124;
   margin: 0 auto 36px 0;
 }
@@ -70,6 +70,7 @@ label.md-search__icon {
 .landing-page h3 {
   font-size: 1rem;
   margin: 0 0 16px 0;
+  font-weight: 450;
 }
 
 /* --- HERO SECTION --- */
@@ -90,7 +91,7 @@ label.md-search__icon {
 .hero-content h1 {
   font-size: 3.0rem;
   line-height: 1.12;
-  font-weight: 700;
+  font-weight: 450;
   color: #202124;
   margin-bottom: 0.5rem;
   letter-spacing: -0.02em;
@@ -144,7 +145,6 @@ p.hero-description {
 }
 
 .promo-card h3 {
-  font-weight: 400;
   color: #202124;
   margin-top: 0;
   margin-bottom: 12px;
@@ -414,7 +414,6 @@ p.hero-description {
 
 .pane-text h3 {
   margin: 0 0 16px 0;
-  font-weight: 500;
   color: #202124;
   line-height: 1.2;
 }
@@ -688,9 +687,8 @@ lifecycle-container h2 {
   max-height: 100%;
   width: auto;
 }
-h3.lifecycle-container__item h3 {
+.lifecycle-container__item h3 {
   margin: 0 0 16px 0;
-  font-weight: 500;
   color: #202124;
 }
 .lifecycle-container__item p {
