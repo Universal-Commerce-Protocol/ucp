@@ -327,7 +327,7 @@ Content-Type: application/json
 
 #### Update Fulfillment Address
 
-Fulfillment is an extension on the checkout capability and contains a
+Fulfillment is an extension to the checkout capability and contains a
 `fulfillment_address`. All fields are optional, enabling progressive data
 collection. Each PUT replaces the entire session, so include all fields to
 retain.
@@ -1006,7 +1006,7 @@ Content-Type: application/json
     ],
   },
   "id": "chk_123456789",
-  "status": "canceled", // Status need to be updated.
+  "status": "canceled", // Status is updated to canceled.
   "currency": "USD",
   "line_items": [
     {

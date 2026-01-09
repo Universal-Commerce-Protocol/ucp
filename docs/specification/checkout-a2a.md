@@ -105,7 +105,7 @@ An example:
 
 The business agents can leverage A2A `Message` objects for allowing interaction
 with shopping agents/platforms. The A2A `Message` object returned by
-the agent will return structured data as DataParts part of the message.
+the agent will return structured data in `DataPart` objects within the message.
 Platforms must pass the business agent generated `contextId` for
 subsequent turns in a session to preserve the current context.
 
@@ -334,8 +334,8 @@ checkout and payment mandate objects must be sent as `DataPart`s
 to the business agent for completing checkout. The `payment_data` which
 includes the payment mandate must be submitted as part of a `DataPart`
 with attribute name `a2a.ucp.checkout.payment_data`. Signed checkout mandate
-must be specified in the `DataPart` as`ap2.checkout_mandate`. The `token`
-attribute part of `payment_data` contains the payment mandate. Refer to
+must be specified in the `DataPart` as `ap2.checkout_mandate`. The `token`
+attribute of `payment_data` contains the payment mandate. Refer to
 [AP2 Mandates Extension](ap2-mandates.md) documentation for more details
 about verification and processing of the mandates to complete the checkout.
 

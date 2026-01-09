@@ -31,7 +31,7 @@ within the UCP.
 
 ## UCP Metadata
 
-The following schemas define the structure of UCP metadata used in dis`co`very
+The following schemas define the structure of UCP metadata used in discovery
 and responses.
 
 ### Discovery Profile

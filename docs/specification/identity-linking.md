@@ -25,7 +25,7 @@ The Identity Linking capability enables a **Platform** (e.g., Google, an agentic
 service) to obtain authorization to perform actions on behalf of a user on a
 **Merchant**'s site.
 
-This linkage enables foundational for commerce experiences, such as accessing
+This linkage is foundational for commerce experiences, such as accessing
 loyalty benefits, utilizing personalized offers, managing wishlists, and
 executing authenticated checkouts.
 

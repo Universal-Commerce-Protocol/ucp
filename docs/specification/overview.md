@@ -573,7 +573,7 @@ Content-Type: application/json
 
 #### 5.7.2 Business Requirements
 
-1.  **Profile Resolution**: Upon receiving a request with an platform profile
+1.  **Profile Resolution**: Upon receiving a request with a platform profile
     URI, businesses MUST fetch and validate the platform profile unless already
     cached.
 2.  **Capability Intersection**: Businesses MUST compute the intersection of

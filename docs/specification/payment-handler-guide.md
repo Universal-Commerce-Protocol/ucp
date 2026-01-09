@@ -52,7 +52,7 @@ This guide applies to:
 Every payment handler specification MUST define the core elements below.
 
 **Note on Protocol Signatures:**: The function signatures provided in this
-section (e.g., `PROCESSING(...)`) epresent **logical data flows**, not literal
+section (e.g., `PROCESSING(...)`) represent **logical data flows**, not literal
 function calls. Spec authors must map these logical flows to the actual
 transport protocol used by their implementation.
 
