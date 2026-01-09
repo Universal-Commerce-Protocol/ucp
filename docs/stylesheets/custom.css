@@ -321,6 +321,12 @@ p.hero-description {
   .partner-track {
     gap: 40px; /* Tighter spacing on phone */
   }
+  .partners-logo-row {
+    gap: 30px; /* Less space between logos on phone */
+  }
+  .flexibility-section {
+    margin: 0 0 60px !important; /* Less space below logo section on phone */
+  }
 }
 
 /* --- ACTION CAROUSEL SECTION --- */
