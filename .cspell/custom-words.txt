@@ -13,6 +13,7 @@ checkout
 Credentialless
 credentialless
 credentialization
+datamodel
 dpan
 EWALLET
 ewallet

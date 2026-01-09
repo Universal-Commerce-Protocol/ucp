@@ -76,6 +76,23 @@ jobs:
       - name: Install documentation dependencies
         run: pip install -r requirements-docs.txt
 
+      - name: Install uv
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+      - name: Check for changed files in spec
+        id: spec_files_changed
+        uses: tj-actions/changed-files@v44
+        with:
+          files: spec/**
+
+      - name: Check Python SDK Models Consistency
+        if: steps.spec_files_changed.outputs.any_changed == 'true'
+        run: |
+          chmod +x scripts/ci_check_models.sh
+          scripts/ci_check_models.sh
+
       - name: Create specs folders for JSON publishing
         run: |
           mkdir -p site/schemas
@@ -85,7 +102,7 @@ jobs:
 
       - name: Build Documentation (PR Check)
         if: github.event_name == 'pull_request'
-        run: mkdocs build
+        run: mkdocs build --strict
 
       - name: Deploy development version from main branch
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
