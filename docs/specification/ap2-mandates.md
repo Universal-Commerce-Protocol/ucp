@@ -23,7 +23,7 @@
 The AP2 Mandates extension enables the secure exchange of user intents and
 authorizations using **Verifiable Digital Credentials**. It extends the
 standard Shopping Service Checkout capability to support the
-**[AP2 Protocol](https://ap2-protocol.org/)**.
+**[AP2 Protocol](https://ap2-protocol.org/){ target="_blank" }**.
 
 When this capability is negotiated and active, it transforms a standard
 checkout session into a cryptographically bound agreement:
@@ -136,7 +136,7 @@ All signatures **MUST** use one of the following algorithms:
 
 Merchants **MUST** embed their signature in the checkout response body under
 `ap2.merchant_authorization` using **JWS Detached Content** format
-([RFC 7515 Appendix F](https://datatracker.ietf.org/doc/html/rfc7515#appendix-F)).
+([RFC 7515 Appendix F](https://datatracker.ietf.org/doc/html/rfc7515#appendix-F){target="_blank"}).
 
 **Checkout Response with Embedded Signature:**
 ```json

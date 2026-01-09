@@ -64,10 +64,10 @@ to communicate UCP data types with platforms.
 ## A2A Interactions
 
 The A2A Protocol provides a strong foundation for inter-agent communication.
-[A2A extensions](https://a2a-protocol.org/latest/topics/extensions/) enable
-communication between agents with structured data types. This enables businesses
-to build AI applications to leverage UCP data types for communication with
-platforms.
+[A2A extensions](https://a2a-protocol.org/latest/topics/extensions/)
+{ target="_blank" } enable communication between agents with structured data
+types. This enables businesses to build AI applications to leverage UCP data
+types for communication with platforms.
 
 The URI for UCP spec: `https://ucp.dev/specification/reference?v=2026-01-11`
 

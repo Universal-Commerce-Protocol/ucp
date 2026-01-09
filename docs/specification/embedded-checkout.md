@@ -31,14 +31,15 @@ to communicate, not **what** data exists.
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHOULD", "SHOULD NOT",
 "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as
-described in **[RFC 2119](https://www.rfc-editor.org/rfc/rfc2119)**.
+described in
+ **[RFC 2119](https://www.rfc-editor.org/rfc/rfc2119){ target="_blank" }**.
 
 #### W3C Payment Request Conceptual Alignment
 
 ECP draws inspiration from the
-**[W3C Payment Request API](https://www.w3.org/TR/payment-request/)**, adapting
-its mental model for embedded checkout scenarios. Developers familiar with
-Payment Request will recognize similar patterns, though the execution model
+**[W3C Payment Request API](https://www.w3.org/TR/payment-request/){ target="_blank" }**,
+adapting its mental model for embedded checkout scenarios. Developers familiar
+with Payment Request will recognize similar patterns, though the execution model
 differs:
 
 **W3C Payment Request:** Browser-controlled. The merchant calls `show()` and the

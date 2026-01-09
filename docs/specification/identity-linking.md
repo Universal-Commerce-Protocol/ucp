@@ -30,7 +30,7 @@ loyalty benefits, utilizing personalized offers, managing wishlists, and
 executing authenticated checkouts.
 
 **This specification leverages
-[OAuth 2.0](https://datatracker.ietf.org/doc/html/rfc6749)** as the mechanism
+[OAuth 2.0](https://datatracker.ietf.org/doc/html/rfc6749){ target="_blank" }** as the mechanism
 for securely linking a user's Platform account with their Merchant account.
 
 ## General guidelines
@@ -40,9 +40,9 @@ for securely linking a user's Platform account with their Merchant account.
 **For Platforms**
 
 *   MUST authenticate using their `client_id` and `client_secret`
-    ([RFC 6749 2.3.1](https://datatracker.ietf.org/doc/html/rfc6749#section-2.3.1))
+    ([RFC 6749 2.3.1](https://datatracker.ietf.org/doc/html/rfc6749#section-2.3.1){target="_blank"})
     through HTTP Basic Authentication
-    ([RFC 7617](https://datatracker.ietf.org/doc/html/rfc7617))
+    ([RFC 7617](https://datatracker.ietf.org/doc/html/rfc7617){target="_blank"})
     when exchanging codes for tokens.
     *   MAY support Client Metadata
     *   MAY support Dynamic Client Registration mechanisms to supersede static
@@ -50,17 +50,17 @@ for securely linking a user's Platform account with their Merchant account.
 *   The Platform must include the token in the HTTP Authorization header using
     the Bearer schema (`Authorization: Bearer <access_token>`)
 *   MUST implement the OAuth 2.0 Authorization Code flow
-    ([RFC 6749 4.1](https://datatracker.ietf.org/doc/html/rfc6749#section-4.1))
+    ([RFC 6749 4.1](https://datatracker.ietf.org/doc/html/rfc6749#section-4.1){target="_blank"})
     as the primary linking mechanism.
 *   SHOULD include a unique, unguessable state parameter in the authorization
     request to prevent Cross-Site Request Forgery (CSRF)
-    ([RFC 6749 10.12](https://datatracker.ietf.org/doc/html/rfc6749#section-10.12))
+    ([RFC 6749 10.12](https://datatracker.ietf.org/doc/html/rfc6749#section-10.12){target="_blank"})
     (part of
-    [OAuth 2.1 draft](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-14#name-preventing-csrf-attacks))
+    [OAuth 2.1 draft](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-14#name-preventing-csrf-attacks){target="_blank"})
     .
 *   Revocation and security events
     *   SHOULD call the Merchant's revocation endpoint
-        ([RFC 7009](https://datatracker.ietf.org/doc/html/rfc7009)) when a user
+        ([RFC 7009](https://datatracker.ietf.org/doc/html/rfc7009){target="_blank"}) when a user
         initiates an unlink action on the Platform side.
     *   SHOULD support
         [OpenID RISC Profile 1.0](https://openid.net/specs/openid-risc-1_0-final.html)
@@ -133,9 +133,9 @@ Get, Create, Update, Delete, Cancel, Complete.
 
 ### Authorization server metadata
 
-Example of [metadata](https://datatracker.ietf.org/doc/html/rfc8414#section-2)
+Example of [metadata](https://datatracker.ietf.org/doc/html/rfc8414#section-2){target="_blank"}
 supposed to be hosted in /.well-known/oauth-authorization-server as per
-[RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414):
+[RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414){target="_blank"}:
 
 ```json
 {

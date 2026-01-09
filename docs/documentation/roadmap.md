@@ -63,4 +63,4 @@ developers, and payment providers to join us in refining these specifications.
 Your feedback on our early builds helps us shape the standards that will power
 the next generation of global commerce.
 
-[Become a UCP contributor](https://github.com/Universal-Commerce-Protocol/ucp?tab=contributing-ov-file)
+[Become a UCP contributor](https://github.com/Universal-Commerce-Protocol/ucp?tab=contributing-ov-file){ target="_blank" }

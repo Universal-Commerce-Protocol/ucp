@@ -461,6 +461,9 @@ specifications:
 
 ## 6. See Also
 
-- **[Tokenization Guide](tokenization-guide.md)** — Guide for building tokenization payment handlers
-- **[Google Pay Handler](https://developers.google.com/merchant/ucp/guides/gpay_payment_handler.md)** — Handler for Google Pay integration
-- **[Shop Pay Handler](https://shopify.dev/docs/agents/checkout/shop-pay-handler)** — Handler for Shop Pay integration
+- **[Tokenization Guide](tokenization-guide.md)** — Guide for building
+  tokenization payment handlers
+- **[Google Pay Handler](https://developers.google.com/merchant/ucp/guides/gpay_payment_handler.md){ target="_blank" }**
+  — Handler for Google Pay integration
+- **[Shop Pay Handler](https://shopify.dev/docs/agents/checkout/shop-pay-handler){ target="_blank" }**
+  — Handler for Shop Pay integration

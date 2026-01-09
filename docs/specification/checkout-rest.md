@@ -33,7 +33,7 @@ merchant profile.
 *   **Response**: `application/json`
 
 All request and response bodies **MUST** be valid JSON as specified in
-[RFC 8259](https://tools.ietf.org/html/rfc8259).
+[RFC 8259](https://tools.ietf.org/html/rfc8259){ target="_blank" }.
 
 ### Transport Security
 All REST endpoints **MUST** be served over HTTPS with minimum TLS version
@@ -1196,8 +1196,8 @@ operations unless otherwise noted.
 
 *   **UCP-Agent**: All requests **MUST** include the `UCP-Agent` header
     containing the Agent profile URI using Dictionary Structured Field syntax
-    ([RFC 8941](https://datatracker.ietf.org/doc/html/rfc8941)). Format:
-    `profile="https://agent.example/profile"`.
+    ([RFC 8941](https://datatracker.ietf.org/doc/html/rfc8941){target="_blank"}).
+    Format: `profile="https://agent.example/profile"`.
 *   **Idempotency-Key**: Operations that modify state **SHOULD** support
     idempotency. When provided, the server **MUST**:
     1.  Store the key with the operation result for at least 24 hours.
