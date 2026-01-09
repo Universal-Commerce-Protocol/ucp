@@ -28,12 +28,32 @@ Merchants advertise MCP transport availability through their UCP profile at
 ```json
 {
   "ucp": {
-    "version": "2025-10-21"
-  },
-  "transports": {
-    "mcp": {
-      "endpoint": "https://example-merchant.com/ucp/mcp"
-    }
+    "version": "2026-01-11",
+    "services": {
+      "dev.ucp.shopping": {
+        "version": "2026-01-11",
+        "spec": "https://ucp.dev/specs/shopping",
+        "mcp": {
+          "schema": "https://ucp.dev/services/shopping/mcp.openrpc.json",
+          "endpoint": "https://example-merchant.com/ucp/mcp"
+        }
+      }
+    },
+    "capabilities": [
+      {
+        "name": "dev.ucp.shopping.checkout",
+        "version": "2026-01-11",
+        "spec": "https://ucp.dev/specs/shopping/checkout",
+        "schema": "https://ucp.dev/schemas/shopping/checkout.json"
+      },
+      {
+        "name": "dev.ucp.shopping.fulfillment",
+        "version": "2026-01-11",
+        "spec": "https://ucp.dev/specs/shopping/fulfillment",
+        "schema": "https://ucp.dev/schemas/shopping/fulfillment.json",
+        "extends": "dev.ucp.shopping.checkout"
+      }
+    ]
   }
 }
 ```
@@ -62,55 +82,20 @@ parameters:
 The `_meta.ucp.profile` field **MUST** be present in every MCP tool invocation
 to enable version compatibility checking and capability negotiation.
 
-## Protocol Mapping & Data Visibility
-
-To ensure strict security and correct Agentic reasoning, integrators must map
-standard parameters into the MCP architecture using the following
-categorization.
-
-### Data Visibility Model
-
-*   **Transport Scope**: Metadata required for network routing,
-    security, and observability. These are handled by the Client Infrastructure
-    and Server Gateway. They are **NOT** visible to the LLM/Agent.
-*   **Logic Scope**: Data required for business logic, transaction
-    identity, and decision making. These must be exposed as **Tool Arguments**
-    so the Agent can utilize them.
-
-### Header Mapping Reference
-
-The following table dictates where standard headers must be implemented in an
-MCP environment when transported over HTTP.
-
-| Parameter Name | Protocol Location | Implementation Requirement |
-| :--- | :--- | :--- |
-| `Authorization` | Transport Config | **DO NOT expose to Agent**. Configure in the MCP Client. |
-| `X-API-Key` | Transport Config | Authenticates the tenant/platform. Handled by Client/Gateway. |
-| `Request-Signature` | Transport Config | Verified by Gateway. Reject before MCP processing if invalid. |
-| `User-Agent` | Transport Config | Identifies the calling software. |
-| `Request-Id` | Transport Config | Used for distributed tracing. |
-| `Accept-Language` | Context Injection | Server extracts this to localize Tool responses. |
-| `Idempotency-Key` | Tool Argument | Must be defined as a property in the Tool Input Schema. |
-
-### Context Injection Strategy
-
-The MCP Server Implementation must "bridge" specific Transport Headers into the
-Tool Execution Context. The Agent does not need to manually request these
-values.
-
-*   **Localization**: If `Accept-Language` is `es-MX`, the Server should
-    format monetary values and translate error messages automatically.
-
-### Security Warning
-
-**CRITICAL**: `Authorization` (OAuth) and `X-API-Key` headers must **never** be
-defined as arguments in the Tool Schema. Passing credentials through the LLM
-context window creates a severe security risk (Leakage/Prompt Injection). These
-values must remain strictly in the Transport layer.
-
 ## Tools
 
 UCP Capabilities map 1:1 to MCP Tools.
+
+### Identifier Pattern
+
+MCP tools separate resource identification from payload data:
+
+*   **Requests:** For operations on existing checkouts (`get`, `update`,
+    `complete`, `cancel`), a top-level `id` parameter identifies the target
+    resource. The `checkout` object in the request payload never contains
+    an `id` field.
+*   **Responses:** All responses include `checkout.id` as part of the full resource state.
+*   **Create:** The `create_checkout` operation does not require an `id` in the request, and the response includes the newly assigned `checkout.id`.
 
 | Tool | Operation | Description |
 | :---- | :---- | :---- |
@@ -126,44 +111,200 @@ Maps to the [Create Checkout](checkout.md#create-checkout) operation.
 
 #### Input Schema
 
-*   [Checkout](checkout.md#checkout) object.
-*   Extensions (Optional):
-    *   `dev.ucp.shopping.buyer_consent`: [Buyer Consent](buyer-consent.md)
-    *   `dev.ucp.shopping.fulfillment`: [Fulfillment](fulfillment.md)
-    *   `dev.ucp.shopping.discount`: [Discount](discount.md)
+*   [Checkout](checkout.md#response-body) object.
+    *   Extensions (Optional):
+        *   `dev.ucp.shopping.buyer_consent`: [Buyer Consent](buyer-consent.md)
+        *   `dev.ucp.shopping.fulfillment`: [Fulfillment](fulfillment.md)
+        *   `dev.ucp.shopping.discount`: [Discount](discount.md)
+        *   `dev.ucp.shopping.ap2_mandate`: [AP2 Mandates](ap2-mandates.md)
 
 **Output:**
 
-*   [Checkout](checkout.md#checkout) object.
+*   [Checkout](checkout.md#response-body) object.
 
-#### Example Request (JSON-RPC)
+#### Example
 
-```json
-{
-  "jsonrpc": "2.0",
-  "method": "create_checkout",
-  "params": {
-    "_meta": {
-      "ucp": {
-        "profile": "https://agent.example/profiles/v2025-11/shopping-agent.json"
-      }
-    },
-    "idempotency_key": "550e8400-e29b-41d4-a716-446655440000",
-    "line_items": [
-      {
-        "item": {
-          "id": "item_123",
-          "title": "Blue Jeans",
-          "price": 5000
+=== "Request"
+
+    ```json
+    {
+      "jsonrpc": "2.0",
+      "method": "create_checkout",
+      "params": {
+        "_meta": {
+          "ucp": {
+            "profile": "https://agent.example/profiles/v2025-11/shopping-agent.json"
+          }
         },
-        "id": "li_1",
-        "quantity": 1,
+        "idempotency_key": "550e8400-e29b-41d4-a716-446655440000",
+        "buyer": {
+          "email": "jane.doe@example.com",
+          "first_name": "Jane",
+          "last_name": "Doe"
+        },
+        "line_items": [
+          {
+            "item": {
+              "id": "item_123"
+            },
+            "quantity": 1
+          }
+        ],
+        "currency": "USD",
+        "fulfillment": {
+          "methods": [
+            {
+              "type": "shipping",
+              "destinations": [
+                {
+                  "street_address": "123 Main St",
+                  "address_locality": "Springfield",
+                  "address_region": "IL",
+                  "postal_code": "62701",
+                  "address_country": "US"
+                }
+              ]
+            }
+          ]
+        },
+        "payment": {}
+      },
+      "id": 1
+    }
+    ```
+
+=== "Response"
+
+    ```json
+    {
+      "jsonrpc": "2.0",
+      "id": 1,
+      "result": {
+        "ucp": {
+          "version": "2026-01-11",
+          "capabilities": [
+            {
+              "name": "dev.ucp.shopping.checkout",
+              "version": "2026-01-11"
+            },
+            {
+              "name": "dev.ucp.shopping.fulfillment",
+              "version": "2026-01-11"
+            }
+          ]
+        },
+        "id": "gid://example-merchant.com/Checkout/checkout_abc123",
+        "status": "incomplete",
+        "buyer": {
+          "email": "jane.doe@example.com",
+          "first_name": "Jane",
+          "last_name": "Doe"
+        },
+        "line_items": [
+          {
+            "id": "item_123",
+            "item": {
+              "id": "item_123",
+              "title": "Blue Jeans",
+              "price": 5000
+            },
+            "quantity": 1,
+            "base_amount": 5000,
+            "subtotal": 5000,
+            "total": 5000
+          }
+        ],
+        "currency": "USD",
+        "totals": [
+          {
+            "type": "items_base_amount",
+            "amount": 5000
+          },
+          {
+            "type": "subtotal",
+            "amount": 5000
+          },
+          {
+            "type": "fulfillment",
+            "display_text": "Shipping",
+            "amount": 500
+          },
+          {
+            "type": "total",
+            "amount": 5500
+          }
+        ],
+        "fulfillment": {
+          "methods": [
+            {
+              "id": "shipping_1",
+              "type": "shipping",
+              "line_item_ids": ["item_123"],
+              "selected_destination_id": "dest_home",
+              "destinations": [
+                {
+                  "id": "dest_home",
+                  "street_address": "123 Main St",
+                  "address_locality": "Springfield",
+                  "address_region": "IL",
+                  "postal_code": "62701",
+                  "address_country": "US"
+                }
+              ],
+              "groups": [
+                {
+                  "id": "package_1",
+                  "line_item_ids": ["item_123"],
+                  "selected_option_id": "standard",
+                  "options": [
+                    {
+                      "id": "standard",
+                      "title": "Standard Shipping",
+                      "description": "Arrives in 5-7 business days",
+                      "total": 500
+                    },
+                    {
+                      "id": "express",
+                      "title": "Express Shipping",
+                      "description": "Arrives in 2-3 business days",
+                      "total": 1000
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "payment": {
+          "handlers": [
+            {
+              "id": "handler_1",
+              "name": "dev.ucp.delegate_payment",
+              "version": "2025-10-21",
+              "spec": "https://ucp.dev/specs/delegate-payment",
+              "config_schema": "https://ucp.dev/schemas/delegate-payment-config.json",
+              "instrument_schemas": [
+                "https://ucp.dev/schemas/delegate-payment-instrument.json"
+              ],
+              "config": {}
+            }
+          ]
+        },
+        "links": [
+          {
+            "type": "privacy_policy",
+            "url": "https://example-merchant.com/privacy"
+          },
+          {
+            "type": "terms_of_service",
+            "url": "https://example-merchant.com/terms"
+          }
+        ],
+        "continue_url": "https://example-merchant.com/checkout-sessions/checkout_abc123",
+        "expires_at": "2026-01-08T18:30:00Z"
       }
-    ]
-  },
-  "id": 1
-}
-```
+    }
+    ```
 
 ### `get_checkout`
 
@@ -171,11 +312,11 @@ Maps to the [Get Checkout](checkout.md#get-checkout) operation.
 
 #### Input Schema
 
-*   `checkout_id` (String): The ID of the checkout session.
+*   `id` (String): The ID of the checkout session.
 
 **Output:**
 
-*   [Checkout](checkout.md#checkout) object.
+*   [Checkout](checkout.md#response-body) object.
 
 ### `update_checkout`
 
@@ -183,15 +324,199 @@ Maps to the [Update Checkout](checkout.md#update-checkout) operation.
 
 #### Input Schema
 
-*   [Checkout](checkout.md#checkout) object.
-*   Extensions (Optional):
-    *   `dev.ucp.shopping.buyer_consent`: [Buyer Consent](buyer-consent.md)
-    *   `dev.ucp.shopping.fulfillment`: [Fulfillment](fulfillment.md)
-    *   `dev.ucp.shopping.discount`: [Discount](discount.md)
+*   `id` (String): The ID of the checkout session to update.
+*   [Checkout](checkout.md#response-body) object.
+    *   Extensions (Optional):
+        *   `dev.ucp.shopping.buyer_consent`: [Buyer Consent](buyer-consent.md)
+        *   `dev.ucp.shopping.fulfillment`: [Fulfillment](fulfillment.md)
+        *   `dev.ucp.shopping.discount`: [Discount](discount.md)
+        *   `dev.ucp.shopping.ap2_mandate`: [AP2 Mandates](ap2-mandates.md)
 
 **Output:**
 
-*   [Checkout](checkout.md#checkout) object.
+*   [Checkout](checkout.md#response-body) object.
+
+#### Example
+
+=== "Request"
+
+    ```json
+    {
+      "jsonrpc": "2.0",
+      "method": "update_checkout",
+      "params": {
+        "_meta": {
+          "ucp": {
+            "profile": "https://agent.example/profiles/v2025-11/shopping-agent.json"
+          }
+        },
+        "id": "gid://example-merchant.com/Checkout/checkout_abc123",
+        "buyer": {
+          "email": "jane.doe@example.com",
+          "first_name": "Jane",
+          "last_name": "Doe"
+        },
+        "line_items": [
+          {
+            "item": {
+              "id": "item_123"
+            },
+            "quantity": 1
+          }
+        ],
+        "currency": "USD",
+        "fulfillment": {
+          "methods": [
+            {
+              "id": "shipping_1",
+              "line_item_ids": ["item_123"],
+              "groups": [
+                {
+                  "id": "package_1",
+                  "selected_option_id": "express"
+                }
+              ]
+            }
+          ]
+        },
+        "payment": {}
+      },
+      "id": 2
+    }
+    ```
+
+=== "Response"
+
+    ```json
+    {
+      "jsonrpc": "2.0",
+      "id": 2,
+      "result": {
+        "ucp": {
+          "version": "2026-01-11",
+          "capabilities": [
+            {
+              "name": "dev.ucp.shopping.checkout",
+              "version": "2026-01-11"
+            },
+            {
+              "name": "dev.ucp.shopping.fulfillment",
+              "version": "2026-01-11"
+            }
+          ]
+        },
+        "id": "gid://example-merchant.com/Checkout/checkout_abc123",
+        "status": "incomplete",
+        "buyer": {
+          "email": "jane.doe@example.com",
+          "first_name": "Jane",
+          "last_name": "Doe"
+        },
+        "line_items": [
+          {
+            "id": "item_123",
+            "item": {
+              "id": "item_123",
+              "title": "Blue Jeans",
+              "price": 5000
+            },
+            "quantity": 1,
+            "base_amount": 5000,
+            "subtotal": 5000,
+            "total": 5000
+          }
+        ],
+        "currency": "USD",
+        "totals": [
+          {
+            "type": "items_base_amount",
+            "amount": 5000
+          },
+          {
+            "type": "subtotal",
+            "amount": 5000
+          },
+          {
+            "type": "fulfillment",
+            "display_text": "Shipping",
+            "amount": 1000
+          },
+          {
+            "type": "total",
+            "amount": 6000
+          }
+        ],
+        "fulfillment": {
+          "methods": [
+            {
+              "id": "shipping_1",
+              "type": "shipping",
+              "line_item_ids": ["item_123"],
+              "selected_destination_id": "dest_home",
+              "destinations": [
+                {
+                  "id": "dest_home",
+                  "street_address": "123 Main St",
+                  "address_locality": "Springfield",
+                  "address_region": "IL",
+                  "postal_code": "62701",
+                  "address_country": "US"
+                }
+              ],
+              "groups": [
+                {
+                  "id": "package_1",
+                  "line_item_ids": ["item_123"],
+                  "selected_option_id": "express",
+                  "options": [
+                    {
+                      "id": "standard",
+                      "title": "Standard Shipping",
+                      "description": "Arrives in 5-7 business days",
+                      "total": 500
+                    },
+                    {
+                      "id": "express",
+                      "title": "Express Shipping",
+                      "description": "Arrives in 2-3 business days",
+                      "total": 1000
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "payment": {
+          "handlers": [
+            {
+              "id": "handler_1",
+              "name": "dev.ucp.delegate_payment",
+              "version": "2025-10-21",
+              "spec": "https://ucp.dev/specs/delegate-payment",
+              "config_schema": "https://ucp.dev/schemas/delegate-payment-config.json",
+              "instrument_schemas": [
+                "https://ucp.dev/schemas/delegate-payment-instrument.json"
+              ],
+              "config": {}
+            }
+          ]
+        },
+        "links": [
+          {
+            "type": "privacy_policy",
+            "url": "https://example-merchant.com/privacy"
+          },
+          {
+            "type": "terms_of_service",
+            "url": "https://example-merchant.com/terms"
+          }
+        ],
+        "continue_url": "https://example-merchant.com/checkout-sessions/checkout_abc123",
+        "expires_at": "2026-01-08T18:30:00Z"
+      }
+    }
+    ```
 
 ### `complete_checkout`
 
@@ -199,16 +524,15 @@ Maps to the [Complete Checkout](checkout.md#complete-checkout) operation.
 
 #### Input Schema
 
-*   `checkout_id` (String): The ID of the checkout session.
-*   `payment_data` ([Payment Data](checkout.md#payment_data)): Payment instrument instance submitted
+*   `id` (String): The ID of the checkout session.
+*   `payment` ([Payment](checkout.md#payment_data), Optional): Payment instrument instance submitted
     by the buyer.
-*   `risk_signals` (Object, Optional): Associated risk signals.
 *   `idempotency_key` (String, UUID): **Required**. Unique key for retry
     safety.
 
 **Output:**
 
-*   [Checkout](checkout.md#checkout) object, containing `order_id` and
+*   [Checkout](checkout.md#response-body) object, containing `order_id` and
     `order_permalink_url`.
 
 ### `cancel_checkout`
@@ -217,12 +541,12 @@ Maps to the [Cancel Checkout](checkout.md#cancel-checkout) operation.
 
 #### Input Schema
 
-*   `checkout_id` (String): The ID of the checkout session.
+*   `id` (String): The ID of the checkout session.
 *   `idempotency_key` (String, UUID): **Required**. Unique key for retry safety.
 
 **Output:**
 
-*   [Checkout](checkout.md#checkout) object with `status: canceled`.
+*   [Checkout](checkout.md#response-body) object with `status: canceled`.
 
 ## Error Handling
 

@@ -46,7 +46,7 @@
     },
     "groups": {
       "type": "array",
-      "description": "Merchant-computed fulfillment groups (packages) for selected destination.",
+      "description": "Fulfillment groups for selecting options. Agent sets selected_option_id on groups to choose shipping method.",
       "items": {
         "$ref": "fulfillment_group_resp.json"
       }

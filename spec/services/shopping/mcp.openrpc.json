@@ -84,9 +84,9 @@
           "schema": {"$ref": "https://ucp.dev/schemas/shopping/payment.json"}
         },
         {
-          "name": "risk_signals",
+          "name": "idempotency_key",
           "required": true,
-          "schema": {"type": "object", "additionalProperties": true}
+          "schema": {"type": "string", "format": "uuid"}
         }
       ],
       "result": {
@@ -102,6 +102,11 @@
           "name": "id",
           "required": true,
           "schema": {"type": "string"}
+        },
+        {
+          "name": "idempotency_key",
+          "required": true,
+          "schema": {"type": "string", "format": "uuid"}
         }
       ],
       "result": {

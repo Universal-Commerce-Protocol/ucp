@@ -100,7 +100,7 @@ method.
         "destinations": [
           {
             "id": "dest_1",
-            "address_street": "123 Main St",
+            "street_address": "123 Main St",
             "address_locality": "Springfield",
             "address_region": "IL",
             "postal_code": "62701",
@@ -339,7 +339,7 @@ so no extension needed.
         "destinations": [
           {
             "id": "dest_1",
-            "address_street": "123 Main St",
+            "street_address": "123 Main St",
             "address_locality": "Springfield",
             "address_region": "IL",
             "postal_code": "62701",
@@ -392,7 +392,7 @@ package.
         "destinations": [
           {
             "id": "dest_1",
-            "address_street": "123 Main St",
+            "street_address": "123 Main St",
             "address_locality": "Springfield",
             "address_region": "IL",
             "postal_code": "62701",
@@ -445,7 +445,7 @@ same type, each with its own destination.
         "destinations": [
           {
             "id": "dest_mom",
-            "address_street": "123 Mom St",
+            "street_address": "123 Mom St",
             "address_locality": "Springfield",
             "address_region": "IL",
             "postal_code": "62701",
@@ -480,7 +480,7 @@ same type, each with its own destination.
         "destinations": [
           {
             "id": "dest_grandma",
-            "address_street": "88 Queensway",
+            "street_address": "88 Queensway",
             "address_locality": "Hong Kong",
             "address_country": "HK"
           }

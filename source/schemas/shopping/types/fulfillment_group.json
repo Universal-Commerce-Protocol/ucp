@@ -4,14 +4,13 @@
   "title": "Fulfillment Group",
   "description": "A merchant-generated package/group of line items with fulfillment options.",
   "type": "object",
-  "ucp_shared_request": true,
   "required": ["id", "line_item_ids"],
   "additionalProperties": true,
   "properties": {
     "id": {
       "type": "string",
-      "description": "Unique fulfillment group identifier.",
-      "ucp_request": "omit"
+      "description": "Group identifier for referencing merchant-generated groups in updates.",
+      "ucp_request": {"create": "omit", "update": "required"}
     },
     "line_item_ids": {
       "type": "array",

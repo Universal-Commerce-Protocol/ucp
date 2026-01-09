@@ -1114,7 +1114,7 @@ rather than attempting to merge the new data with existing state.
                                 "id": "address_789",
                                 "first_name": "John",
                                 "last_name": "Doe",
-                                "address_street": "123 New Street"
+                                "street_address": "123 New Street"
                             }
                         ]
                     }

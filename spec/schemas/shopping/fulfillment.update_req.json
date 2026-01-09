@@ -8,10 +8,10 @@
       "$ref": "types/fulfillment_option_req.json"
     },
     "fulfillment_group": {
-      "$ref": "types/fulfillment_group_req.json"
+      "$ref": "types/fulfillment_group.update_req.json"
     },
     "fulfillment_method": {
-      "$ref": "types/fulfillment_method_req.json"
+      "$ref": "types/fulfillment_method.update_req.json"
     },
     "fulfillment_available_method": {
       "$ref": "types/fulfillment_available_method_req.json"
