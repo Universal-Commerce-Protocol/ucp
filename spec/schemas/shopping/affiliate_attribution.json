@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/affiliate_attribution.json",
+  "name": "dev.ucp.shopping.affiliate_attribution",
+  "version": "2026-01-11",
+  "title": "Affiliate Attribution Extension",
+  "description": "Extends the complete checkout request with affiliate attribution tracking, enabling agents to transmit fraud-resistant attribution claims for crediting third-party publishers without relying on cookies, redirects, or client-side tracking.",
+  "$defs": {
+    "affiliate_attribution_source": {
+      "type": "string",
+      "description": "Indicates how the attribution was captured.",
+      "enum": [
+        "click",
+        "impression",
+        "api",
+        "agent_recommendation",
+        "comparison_result"
+      ],
+      "enumDescriptions": {
+        "click": "User clicked an affiliate link.",
+        "impression": "Attribution based on ad/content impression.",
+        "api": "Attribution passed programmatically via API.",
+        "agent_recommendation": "Agent recommended the merchant/product.",
+        "comparison_result": "Attribution from a comparison or discovery flow."
+      }
+    },
+    "affiliate_attribution_metadata": {
+      "type": "object",
+      "description": "Provider-specific metadata. Extensible for network-specific fields.",
+      "additionalProperties": true
+    },
+    "affiliate_attribution": {
+      "type": "object",
+      "description": "Affiliate attribution data for crediting third-party publishers. Write-only: not returned in responses.",
+      "required": [
+        "provider"
+      ],
+      "anyOf": [
+        {
+          "required": [
+            "token"
+          ]
+        },
+        {
+          "required": [
+            "publisher_id"
+          ]
+        }
+      ],
+      "properties": {
+        "provider": {
+          "type": "string",
+          "description": "Attribution provider namespace (e.g., 'impact.com', 'cj.com', 'rakuten.com'). Servers SHOULD accept unknown providers for extensibility.",
+          "examples": [
+            "impact.com",
+            "cj.com",
+            "rakuten.com",
+            "awin.com"
+          ]
+        },
+        "token": {
+          "type": "string",
+          "description": "Opaque provider-issued token for fraud-resistant validation. Merchants validate out-of-band with the provider. SHOULD be treated as a secret and not logged in plaintext."
+        },
+        "publisher_id": {
+          "type": "string",
+          "description": "Provider-scoped affiliate identifier. Required if token is omitted."
+        },
+        "campaign_id": {
+          "type": "string",
+          "description": "Provider-scoped campaign identifier."
+        },
+        "creative_id": {
+          "type": "string",
+          "description": "Provider-scoped creative/ad unit identifier."
+        },
+        "sub_id": {
+          "type": "string",
+          "description": "Publisher-defined sub-tracking identifier for granular attribution."
+        },
+        "source": {
+          "$ref": "#/$defs/affiliate_attribution_source",
+          "description": "How the attribution was captured."
+        },
+        "issued_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the attribution token/claim was issued (ISO 8601)."
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the attribution claim expires (ISO 8601). Merchants MAY reject expired claims."
+        },
+        "metadata": {
+          "$ref": "#/$defs/affiliate_attribution_metadata",
+          "description": "Provider-specific metadata. MUST NOT contain user PII."
+        }
+      }
+    },
+    "complete_request_with_affiliate_attribution": {
+      "title": "Complete Checkout Request with Affiliate Attribution",
+      "description": "Extension fields for complete_checkout when affiliate attribution is provided.",
+      "type": "object",
+      "properties": {
+        "affiliate_attribution": {
+          "$ref": "#/$defs/affiliate_attribution",
+          "description": "Affiliate attribution for crediting third-party publishers. Write-only: accepted on complete but not returned in responses. First valid claim wins; subsequent claims with different provider/publisher_id are silently ignored."
+        }
+      }
+    }
+  }
+}
