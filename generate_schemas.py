@@ -50,6 +50,30 @@ ECP_SCHEMAS_DIR = "source/schemas/shopping"
 ECP_VERSION = "2026-01-11"
 
 
+def replace_json_suffix(value: str, new_suffix: str) -> str:
+  """Safely replaces .json suffix only, not occurrences in the middle of string.
+
+  This fixes a bug where str.replace(".json", ...) would replace ALL occurrences
+  of ".json" in a path, including directory names like "json.schemas/".
+
+  Args:
+    value: The string to modify (e.g., "schemas/checkout.json").
+    new_suffix: The new suffix to use (e.g., "_req.json", ".create_req.json").
+
+  Returns:
+    The modified string with only the .json suffix replaced.
+
+  Example:
+    >>> replace_json_suffix("checkout.json", "_req.json")
+    'checkout_req.json'
+    >>> replace_json_suffix("json.data/item.json", "_resp.json")
+    'json.data/item_resp.json'
+  """
+  if value.endswith(".json"):
+    return value[:-5] + new_suffix
+  return value
+
+
 def get_visibility(prop: Any, operation: Optional[str]) -> tuple[str, bool]:
   """Returns (visibility, has_explicit_annotation) for a field."""
   if not isinstance(prop, dict):
@@ -336,7 +360,7 @@ def process_schema(
           copy.deepcopy(data), "create", source_path, annotated_schemas, suffix
       )
       if "$id" in transformed:
-        transformed["$id"] = transformed["$id"].replace(".json", "_req.json")
+        transformed["$id"] = replace_json_suffix(transformed["$id"], "_req.json")
       write_json(transformed, out_path)
       generated.append(os.path.join(dir_path, out_name))
     else:
@@ -349,8 +373,8 @@ def process_schema(
             copy.deepcopy(data), op, source_path, annotated_schemas, suffix
         )
         if "$id" in transformed:
-          transformed["$id"] = transformed["$id"].replace(
-              ".json", f".{op}_req.json"
+          transformed["$id"] = replace_json_suffix(
+              transformed["$id"], f".{op}_req.json"
           )
         write_json(transformed, out_path)
         generated.append(os.path.join(dir_path, out_name))

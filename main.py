@@ -18,16 +18,62 @@ This module defines custom macros for MkDocs (`schema_fields` and
 `method_fields`) that parse OpenAPI specifications and JSON schema files
 to automatically generate Markdown tables for API request and response
 bodies.
+
+Macros Available:
+  - schema_fields: Renders tables from standalone JSON Schema files
+  - method_fields: Renders request/response tables from OpenAPI operations
+  - extension_fields: Renders tables from extension schema $defs
+  - extension_schema_fields: Renders tables from embedded schema definitions
+  - auto_generate_schema_reference: Auto-generates docs from schema directories
+  - header_fields: Renders HTTP header tables from OpenAPI operations
 """
 
 import json
+import logging
 import os
 import sys
+from typing import Any, Callable, Optional
 
 # Modify sys.path to include the current directory so schema_utils can be found.
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 import schema_utils  # pylint: disable=g-import-not-at-top
+
+# Configure logging for the plugin
+logger = logging.getLogger('mkdocs.plugins.ucp_macros')
+
+
+class SchemaLoadError(Exception):
+  """Raised when a JSON schema file cannot be loaded or parsed."""
+
+  def __init__(self, path: str, cause: Optional[Exception] = None):
+    self.path = path
+    self.cause = cause
+    message = f"Failed to load schema: {path}"
+    if cause:
+      message += f" - {type(cause).__name__}: {cause}"
+    super().__init__(message)
+
+
+class SchemaReferenceError(Exception):
+  """Raised when a $ref cannot be resolved."""
+
+  def __init__(self, ref: str, context: str = ''):
+    self.ref = ref
+    self.context = context
+    message = f"Unresolved reference: {ref}"
+    if context:
+      message += f" (in {context})"
+    super().__init__(message)
+
+
+class OperationNotFoundError(Exception):
+  """Raised when an OpenAPI operationId is not found."""
+
+  def __init__(self, operation_id: str, file_path: str):
+    self.operation_id = operation_id
+    self.file_path = file_path
+    super().__init__(f"Operation '{operation_id}' not found in '{file_path}'")
 
 
 def define_env(env):
@@ -50,19 +96,90 @@ def define_env(env):
       'spec/schemas/shopping/types/',
   ]
 
-  def _load_json_file(entity_name):
-    """Helper to try loading a JSON file from the configured directories."""
+  def _format_error(
+      error_type: str, message: str, context: Optional[str] = None
+  ) -> str:
+    """Formats an error message for display in documentation.
+
+    Args:
+      error_type: Category of error (e.g., 'Schema', 'Reference', 'Parse').
+      message: Human-readable error description.
+      context: Optional additional context (e.g., file path, operation ID).
+
+    Returns:
+      Markdown-formatted error message suitable for documentation.
+    """
+    log_msg = f"[{error_type}] {message}"
+    if context:
+      log_msg += f" | Context: {context}"
+    logger.warning(log_msg)
+
+    display_msg = f"**Error ({error_type}):** {message}"
+    if context:
+      display_msg += f" _(context: {context})_"
+    return display_msg
+
+  def _safe_load_json(file_path: str) -> tuple[Optional[dict], Optional[str]]:
+    """Safely loads a JSON file with comprehensive error handling.
+
+    Args:
+      file_path: Path to the JSON file.
+
+    Returns:
+      Tuple of (data, error_message). If successful, error_message is None.
+      If failed, data is None and error_message contains the formatted error.
+    """
+    try:
+      with open(file_path, 'r', encoding='utf-8') as f:
+        return json.load(f), None
+    except FileNotFoundError:
+      logger.debug(f"File not found: {file_path}")
+      return None, None  # Not finding a file in search is not an error
+    except json.JSONDecodeError as e:
+      error_msg = f"Invalid JSON syntax at line {e.lineno}, column {e.colno}"
+      logger.error(f"JSON parse error in {file_path}: {e}")
+      return None, _format_error('Parse', error_msg, file_path)
+    except PermissionError:
+      logger.error(f"Permission denied: {file_path}")
+      return None, _format_error('Access', 'Permission denied', file_path)
+    except OSError as e:
+      logger.error(f"OS error reading {file_path}: {e}")
+      return None, _format_error('IO', str(e), file_path)
+
+  def _load_json_file(entity_name: str) -> Optional[dict[str, Any]]:
+    """Loads a JSON schema file from configured directories.
+
+    Searches through all configured schema directories to find and load
+    the specified entity's JSON schema file.
+
+    Args:
+      entity_name: The name of the schema entity (without .json extension).
+
+    Returns:
+      The parsed JSON data as a dictionary, or None if not found in any
+      directory. Logs warnings if JSON parsing fails.
+    """
     for schemas_dir in schemas_dirs:
-      full_path = schemas_dir + entity_name + '.json'
-      try:
-        with open(full_path, 'r', encoding='utf-8') as f:
-          return json.load(f)
-      except FileNotFoundError:
+      full_path = os.path.join(schemas_dir, f"{entity_name}.json")
+      data, error = _safe_load_json(full_path)
+      if error:
+        # Log parse errors but continue searching other directories
+        logger.warning(f"Error loading {full_path}: {error}")
         continue
+      if data is not None:
+        logger.debug(f"Loaded schema from: {full_path}")
+        return data
+    logger.debug(f"Schema '{entity_name}' not found in any configured directory")
     return None
 
-  def _load_schema_variant(entity_name, context):
+  def _load_schema_variant(
+      entity_name: str, context: Optional[dict[str, str]] = None
+  ) -> Optional[dict[str, Any]]:
     """Loads the specific schema variant (create/update/resp) if available.
+
+    Based on the context (request vs response, create vs update operations),
+    this function attempts to load the most specific schema variant first,
+    falling back to the base entity schema if no variant exists.
 
     Args:
       entity_name: The base name (e.g., 'checkout').
@@ -70,6 +187,12 @@ def define_env(env):
 
     Returns:
       The loaded schema data as a dictionary, or None if not found.
+
+    Examples:
+      >>> _load_schema_variant('checkout', {'io_type': 'response'})
+      # Attempts: checkout_resp.json, then checkout.json
+      >>> _load_schema_variant('checkout', {'io_type': 'request', 'operation_id': 'createCheckout'})
+      # Attempts: checkout.create_req.json, then checkout.json
     """
     if not context:
       return _load_json_file(entity_name)
@@ -83,19 +206,23 @@ def define_env(env):
     if io_type == 'response':
       # e.g., checkout -> checkout_resp
       variant_name = f'{entity_name}_resp'
+      logger.debug(f"Trying response variant: {variant_name}")
 
     elif io_type == 'request':
       # Heuristic: Determine if this is a create or update operation
       if 'create' in op_id:
         variant_name = f'{entity_name}.create_req'
+        logger.debug(f"Trying create request variant: {variant_name}")
       elif 'update' in op_id or 'patch' in op_id:
         variant_name = f'{entity_name}.update_req'
+        logger.debug(f"Trying update request variant: {variant_name}")
 
     # 2. Try to load the variant
     if variant_name:
       data = _load_json_file(variant_name)
       if data:
         return data
+      logger.debug(f"Variant not found, falling back to base: {entity_name}")
 
     return _load_json_file(entity_name)
 
@@ -523,36 +650,57 @@ def define_env(env):
 
   # --- MACRO 1: For Standalone JSON Schemas ---
   @env.macro
-  def schema_fields(entity_name, spec_file_name):
+  def schema_fields(entity_name: str, spec_file_name: str) -> str:
     """Parses a standalone JSON Schema file and renders a table.
 
-    Usage: {{ schema_fields('buyer') }}  (assumes .json extension)
+    Usage: {{ schema_fields('buyer', 'checkout') }}  (assumes .json extension)
 
     Args:
       entity_name: The name of the schema entity (e.g., 'buyer').
       spec_file_name: The name of the spec file indicating where the dictionary
         should be rendered (e.g., "checkout", "fulfillment").
+
+    Returns:
+      Markdown table representing the schema fields, or an error message
+      if the schema cannot be loaded or processed.
     """
+    if not entity_name:
+      return _format_error('Input', 'entity_name is required')
+    if not spec_file_name:
+      return _format_error('Input', 'spec_file_name is required')
+
     data = None
     loaded_path = None
+    parse_errors = []
+
     for schemas_dir in schemas_dirs:
-      full_path = schemas_dir + entity_name + '.json'
-      try:
-        with open(full_path, 'r') as f:
-          data = json.load(f)
-          loaded_path = full_path
-          break
-      except FileNotFoundError:
+      full_path = os.path.join(schemas_dir, f"{entity_name}.json")
+      result, error = _safe_load_json(full_path)
+      if error:
+        parse_errors.append(error)
         continue
-      except json.JSONDecodeError as e:
-        return f"**Error parsing schema '{full_path}':** {e}"
+      if result is not None:
+        data = result
+        loaded_path = full_path
+        logger.info(f"schema_fields: Loaded '{entity_name}' from {full_path}")
+        break
 
     if data and loaded_path:
-      file_loader = _create_file_loader(loaded_path)
-      resolved_schema = schema_utils.resolve_schema(data, data, file_loader)
-      return _render_table_from_schema(resolved_schema, spec_file_name)
-    return (
-        f"**Error:** Schema '{entity_name}' not found in any schema directory."
+      try:
+        file_loader = _create_file_loader(loaded_path)
+        resolved_schema = schema_utils.resolve_schema(data, data, file_loader)
+        return _render_table_from_schema(resolved_schema, spec_file_name)
+      except Exception as e:
+        logger.exception(f"Error resolving schema '{entity_name}': {e}")
+        return _format_error('Schema', f"Failed to resolve: {e}", entity_name)
+
+    # If we have parse errors, report them
+    if parse_errors:
+      return '\n'.join(parse_errors)
+
+    return _format_error(
+        'NotFound',
+        f"Schema '{entity_name}' not found in any schema directory"
     )
 
   @env.macro
@@ -692,8 +840,11 @@ def define_env(env):
 
   # --- MACRO 2: For Standalone JSON Extensions ---
   @env.macro
-  def extension_fields(entity_name, spec_file_name):
+  def extension_fields(entity_name: str, spec_file_name: str) -> str:
     """Parses an extension schema file and renders a table from its $defs.
+
+    Extension schemas define composed types that extend core UCP entities
+    (like checkout or order_line_item) with additional properties.
 
     Usage: {{ extension_fields('discount', 'checkout') }}
 
@@ -701,81 +852,155 @@ def define_env(env):
       entity_name: The name of the extension schema (e.g., 'discount').
       spec_file_name: The name of the spec file indicating where the dictionary
         should be rendered (e.g., "checkout", "fulfillment").
+
+    Returns:
+      Markdown table of extension properties, or error message if not found.
     """
-    # Construct full path based on new structure
-    full_path = 'spec/schemas/shopping/' + entity_name + '.json'
-    try:
-      with open(full_path, 'r', encoding='utf-8') as f:
-        data = json.load(f)
+    if not entity_name:
+      return _format_error('Input', 'entity_name is required')
 
-      # Extension schemas have their composed type in $defs.checkout
-      # or $defs.order_line_item.
-      defs = data.get('$defs', {})
-      # Find the composed type (checkout or order_line_item)
-      composed_type = defs.get('checkout') or defs.get('order_line_item')
-      if composed_type and 'allOf' in composed_type:
-        # Get the extension-specific properties (second element of allOf)
-        for item in composed_type['allOf']:
-          if 'properties' in item:
-            return _render_table_from_schema(item, spec_file_name)
+    full_path = os.path.join('spec/schemas/shopping/', f"{entity_name}.json")
+    data, error = _safe_load_json(full_path)
 
-      return (
-          f"**Error:** Could not find extension properties in '{entity_name}'"
+    if error:
+      return error
+    if data is None:
+      return _format_error(
+          'NotFound', f"Extension schema not found", entity_name
       )
-    except (FileNotFoundError, json.JSONDecodeError) as e:
-      return f"**Error loading extension '{entity_name}':** {e}"
+
+    logger.debug(f"extension_fields: Processing '{entity_name}'")
+
+    # Extension schemas have their composed type in $defs.checkout
+    # or $defs.order_line_item.
+    defs = data.get('$defs', {})
+    if not defs:
+      return _format_error(
+          'Schema', "No $defs found in extension schema", entity_name
+      )
+
+    # Find the composed type (checkout or order_line_item)
+    composed_type = defs.get('checkout') or defs.get('order_line_item')
+    if not composed_type:
+      available_defs = ', '.join(defs.keys()) if defs else 'none'
+      return _format_error(
+          'Schema',
+          f"Expected 'checkout' or 'order_line_item' in $defs, found: {available_defs}",
+          entity_name
+      )
+
+    if 'allOf' not in composed_type:
+      return _format_error(
+          'Schema', "Composed type missing 'allOf' composition", entity_name
+      )
+
+    # Get the extension-specific properties (second element of allOf)
+    for item in composed_type['allOf']:
+      if 'properties' in item:
+        logger.info(f"extension_fields: Rendering properties for '{entity_name}'")
+        return _render_table_from_schema(item, spec_file_name)
+
+    return _format_error(
+        'Schema', "No properties found in allOf composition", entity_name
+    )
 
   # --- MACRO 3: For Transport Operations ---
   @env.macro
-  def method_fields(operation_id, file_name, spec_file_name, io_type=None):
+  def method_fields(
+      operation_id: str,
+      file_name: str,
+      spec_file_name: str,
+      io_type: Optional[str] = None
+  ) -> str:
     """Extracts Request/Response schemas for a specific OpenAPI operationId.
+
+    This macro searches for an operation by its operationId in the OpenAPI
+    specification and renders Markdown tables for its request body parameters
+    and response schema.
 
     Args:
       operation_id: The `operationId` of the OpenAPI operation to document.
-      file_name: The name of the OpenAPI file to read.
+      file_name: The name of the OpenAPI file to read (relative to openapi_dir).
       spec_file_name: The name of the spec file indicating where the dictionary
         should be rendered (e.g., "checkout", "fulfillment").
       io_type: Optional. Specifies whether to render 'request', 'response', or
         both (if None).
+
+    Returns:
+      Markdown formatted request/response documentation, or error message.
+
+    Raises:
+      No exceptions are raised; errors are returned as formatted strings.
     """
-    full_path = openapi_dir + file_name
+    if not operation_id:
+      return _format_error('Input', 'operation_id is required')
+    if not file_name:
+      return _format_error('Input', 'file_name is required')
+    if io_type and io_type not in ('request', 'response'):
+      return _format_error(
+          'Input', f"io_type must be 'request', 'response', or None, got: {io_type}"
+      )
 
-    try:
-      with open(full_path, 'r', encoding='utf-8') as f:
-        data = json.load(f)
+    full_path = os.path.join(openapi_dir, file_name)
+    data, error = _safe_load_json(full_path)
 
-      # 1. Find the Operation Object by ID (search paths first, then webhooks)
-      operation = None
-      path_parameters = []
+    if error:
+      return error
+    if data is None:
+      return _format_error('NotFound', f"OpenAPI file not found", full_path)
 
-      # Search in paths
-      paths = data.get('paths', {})
-      for _, path_item in paths.items():
-        for _, op_data in path_item.items():
+    logger.debug(f"method_fields: Processing '{operation_id}' from {file_name}")
+
+    # 1. Find the Operation Object by ID (search paths first, then webhooks)
+    operation = None
+    path_parameters = []
+    found_in = None
+
+    # Search in paths
+    paths = data.get('paths', {})
+    for path_key, path_item in paths.items():
+      for method, op_data in path_item.items():
+        if not isinstance(op_data, dict):
+          continue
+        if op_data.get('operationId') == operation_id:
+          operation = op_data
+          path_parameters = path_item.get('parameters', [])
+          found_in = f"paths.{path_key}.{method}"
+          break
+      if operation:
+        break
+
+    # If not found in paths, search in webhooks (OpenAPI 3.1+)
+    if not operation:
+      webhooks = data.get('webhooks', {})
+      for webhook_key, webhook_item in webhooks.items():
+        for method, op_data in webhook_item.items():
           if not isinstance(op_data, dict):
             continue
           if op_data.get('operationId') == operation_id:
             operation = op_data
-            path_parameters = path_item.get('parameters', [])
+            found_in = f"webhooks.{webhook_key}.{method}"
             break
         if operation:
           break
 
-      # If not found in paths, search in webhooks (OpenAPI 3.1+)
-      if not operation:
-        webhooks = data.get('webhooks', {})
-        for _, webhook_item in webhooks.items():
-          for _, op_data in webhook_item.items():
-            if not isinstance(op_data, dict):
-              continue
-            if op_data.get('operationId') == operation_id:
-              operation = op_data
-              break
-          if operation:
-            break
+    if not operation:
+      # Provide helpful context about available operations
+      available_ops = []
+      for _, path_item in paths.items():
+        for _, op_data in path_item.items():
+          if isinstance(op_data, dict) and 'operationId' in op_data:
+            available_ops.append(op_data['operationId'])
+      hint = ""
+      if available_ops:
+        hint = f" Available operations: {', '.join(available_ops[:5])}"
+        if len(available_ops) > 5:
+          hint += f" ... and {len(available_ops) - 5} more"
+      return _format_error(
+          'NotFound', f"Operation ID '{operation_id}' not found.{hint}", file_name
+      )
 
-      if not operation:
-        return f'**Error:** Operation ID `{operation_id}` not found.'
+    logger.info(f"method_fields: Found '{operation_id}' at {found_in}")
 
       # 2. Extract Request Schema
       req_content = operation.get('requestBody', {}).get('content', {})
@@ -909,30 +1134,42 @@ def define_env(env):
 
       return output
 
-    except (FileNotFoundError, json.JSONDecodeError) as e:
-      return f'**Error processing OpenAPI:** {e}'
-
   # --- MACRO 4: For HTTP Headers ---
   @env.macro
-  def header_fields(operation_id, file_name):
+  def header_fields(operation_id: str, file_name: str) -> str:
     """Extracts HTTP headers for a specific OpenAPI operationId.
+
+    Parses the OpenAPI specification to extract request and response headers
+    defined for the specified operation.
 
     Args:
       operation_id: The `operationId` of the OpenAPI operation.
-      file_name: The name of the OpenAPI file to read.
+      file_name: The name of the OpenAPI file to read (relative to openapi_dir).
+
+    Returns:
+      Markdown table of request and response headers, or error message.
     """
-    full_path = openapi_dir + file_name
+    if not operation_id:
+      return _format_error('Input', 'operation_id is required')
+    if not file_name:
+      return _format_error('Input', 'file_name is required')
 
-    try:
-      with open(full_path, 'r', encoding='utf-8') as f:
-        data = json.load(f)
+    full_path = os.path.join(openapi_dir, file_name)
+    data, error = _safe_load_json(full_path)
 
-      # 1. Find the Operation Object by ID
-      operation = None
-      path_parameters = []
-      paths = data.get('paths', {})
-      for _, path_item in paths.items():
-        for _, op_data in path_item.items():
+    if error:
+      return error
+    if data is None:
+      return _format_error('NotFound', f"OpenAPI file not found", full_path)
+
+    logger.debug(f"header_fields: Processing '{operation_id}' from {file_name}")
+
+    # 1. Find the Operation Object by ID
+    operation = None
+    path_parameters = []
+    paths = data.get('paths', {})
+    for _, path_item in paths.items():
+      for _, op_data in path_item.items():
 
           if not isinstance(op_data, dict):
             continue
@@ -978,8 +1215,9 @@ def define_env(env):
             h['name'] = name
             res_headers.append(h)
           else:
-            # If ref not resolved, just use name
-            h = {'name': name, 'description': 'Ref not resolved'}
+            # If ref not resolved, log warning but continue
+            logger.warning(f"header_fields: Unresolved $ref in header '{name}'")
+            h = {'name': name, 'description': '_Reference not resolved_'}
             res_headers.append(h)
         else:
           h = header.copy()
@@ -987,32 +1225,39 @@ def define_env(env):
           res_headers.append(h)
 
       if not req_headers and not res_headers:
+        logger.debug(f"header_fields: No headers found for '{operation_id}'")
         return '_No headers defined._'
 
-      def render_headers_table(headers_list):
-        """Renders a list of headers into a Markdown table."""
+      def render_headers_table(headers_list: list[dict]) -> str:
+        """Renders a list of headers into a Markdown table.
+
+        Args:
+          headers_list: List of header definition dictionaries.
+
+        Returns:
+          Markdown formatted table string.
+        """
         md_table = ['| Header | Required | Description |']
         md_table.append('| :--- | :--- | :--- |')
         for h in headers_list:
-          name = f"`{h.get('name')}`"
+          name = f"`{h.get('name', 'unknown')}`"
           required = '**Yes**' if h.get('required') else 'No'
           desc = h.get('description', '')
-          # Handle line breaks in description
-          desc = desc.replace('\n', '<br>')
+          # Handle line breaks in description for table compatibility
+          desc = desc.replace('\n', '<br>').replace('|', '\\|')
           md_table.append(f'| {name} | {required} | {desc} |')
         return '\n'.join(md_table)
 
       output_parts = []
       if req_headers:
+        logger.debug(f"header_fields: Found {len(req_headers)} request headers")
         output_parts.append(
             '**Request Headers**\n\n' + render_headers_table(req_headers)
         )
       if res_headers:
+        logger.debug(f"header_fields: Found {len(res_headers)} response headers")
         output_parts.append(
             '**Response Headers**\n\n' + render_headers_table(res_headers)
         )
 
       return '\n\n'.join(output_parts)
-
-    except (FileNotFoundError, json.JSONDecodeError) as e:
-      return f'**Error processing OpenAPI:** {e}'
