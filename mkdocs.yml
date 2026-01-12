@@ -27,6 +27,10 @@ edit_uri: edit/main/docs/
 nav:
   - Home: index.md
   - Core Concepts: documentation/core-concepts.md
+  - Agent Checkout Quickstart: documentation/agent-checkout-quickstart.md
+  - Cart and Basket Building: documentation/cart-and-basket-building.md
+  - Loyalty and Member Benefits: documentation/loyalty-and-member-benefits.md
+  - Post-Order Management: documentation/post-order-management.md
   - Playground: playground.md
   - Specification:
     - Overview: specification/overview.md
@@ -210,6 +214,11 @@ plugins:
           - specification/examples/business-tokenizer-payment-handler.md
           - specification/examples/platform-tokenizer-payment-handler.md
           - specification/examples/encrypted-credential-handler.md
+        Guides:
+          - documentation/agent-checkout-quickstart.md
+          - documentation/cart-and-basket-building.md
+          - documentation/loyalty-and-member-benefits.md
+          - documentation/post-order-management.md
         Schema Authoring:
           - documentation/schema-authoring.md
         Reference:
