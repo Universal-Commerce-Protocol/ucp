@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/cart.json",
+  "name": "dev.ucp.shopping.cart",
+  "version": "2026-01-11",
+  "title": "Cart Response",
+  "description": "Cart schema for multi-item baskets prior to checkout.",
+  "type": "object",
+  "required": [
+    "ucp",
+    "id",
+    "line_items",
+    "status",
+    "currency",
+    "totals"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "ucp": {
+      "$ref": "../ucp.json#/$defs/response_cart"
+    },
+    "id": {
+      "type": "string",
+      "description": "Unique cart identifier."
+    },
+    "line_items": {
+      "type": "array",
+      "items": {
+        "$ref": "types/line_item_resp.json"
+      },
+      "description": "List of line items in the cart."
+    },
+    "buyer": {
+      "$ref": "types/buyer.json",
+      "description": "Representation of the buyer."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "ready_for_checkout",
+        "converted",
+        "abandoned",
+        "expired"
+      ],
+      "description": "Cart lifecycle status."
+    },
+    "currency": {
+      "type": "string",
+      "description": "ISO 4217 currency code."
+    },
+    "totals": {
+      "type": "array",
+      "items": {
+        "$ref": "types/total_resp.json"
+      },
+      "description": "Different cart totals."
+    },
+    "messages": {
+      "type": "array",
+      "items": {
+        "$ref": "types/message.json"
+      },
+      "description": "Messages about cart state."
+    },
+    "links": {
+      "type": "array",
+      "items": {
+        "$ref": "types/link.json"
+      },
+      "description": "Links to policies and terms."
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC 3339 expiry timestamp."
+    },
+    "checkout_id": {
+      "type": "string",
+      "description": "Checkout session created from this cart, if converted."
+    }
+  }
+}
