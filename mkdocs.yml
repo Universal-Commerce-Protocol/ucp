@@ -43,7 +43,9 @@ nav:
       - Discounts Extension: specification/discount.md
       - Fulfillment Extension: specification/fulfillment.md
       - Loyalty Extension: specification/loyalty.md
-    - Order Capability: specification/order.md
+    - Order Capability:
+      - Overview: specification/order.md
+      - Post-Order Extension: specification/post-order.md
     - Identity Linking Capability: specification/identity-linking.md
     - Payment Handlers:
       - Guide: specification/payment-handler-guide.md
@@ -206,6 +208,7 @@ plugins:
           - specification/loyalty.md
         Order Capability:
           - specification/order.md
+          - specification/post-order.md
         Identity Linking Capability:
           - specification/identity-linking.md
         Payment Handlers:

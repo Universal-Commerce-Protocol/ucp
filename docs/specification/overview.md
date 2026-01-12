@@ -182,7 +182,7 @@ Extensions can be:
 -   **Vendor**: `com.example.installments` extends `dev.ucp.shopping.checkout`
 
 Common extensions include `dev.ucp.shopping.discount`, `dev.ucp.shopping.fulfillment`,
-and `dev.ucp.shopping.loyalty`.
+`dev.ucp.shopping.loyalty`, and `dev.ucp.shopping.post_order`.
 
 ### Schema Composition
 

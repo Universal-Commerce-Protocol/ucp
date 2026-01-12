@@ -1,0 +1,218 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/post_order.update_req.json",
+  "name": "dev.ucp.shopping.post_order",
+  "version": "2026-01-11",
+  "title": "Post-Order Extension Update Request",
+  "description": "Extends Order with standardized return, exchange, and refund events.",
+  "$defs": {
+    "line_item_reference": {
+      "type": "object",
+      "required": [
+        "id",
+        "quantity"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Line item ID reference."
+        },
+        "quantity": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Quantity affected by this event."
+        }
+      }
+    },
+    "return_event": {
+      "type": "object",
+      "description": "Return event for items after purchase.",
+      "required": [
+        "id",
+        "status",
+        "occurred_at"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Return event identifier."
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "requested",
+            "approved",
+            "rejected",
+            "in_progress",
+            "completed",
+            "canceled"
+          ],
+          "description": "Return status."
+        },
+        "occurred_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "RFC 3339 timestamp when this event occurred."
+        },
+        "line_items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/line_item_reference"
+          },
+          "description": "Line items and quantities included in the return."
+        },
+        "reason_code": {
+          "type": "string",
+          "description": "Machine-readable return reason (e.g., defective, wrong_size)."
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable return reason."
+        }
+      }
+    },
+    "exchange_event": {
+      "type": "object",
+      "description": "Exchange event for swapping items post-purchase.",
+      "required": [
+        "id",
+        "status",
+        "occurred_at"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Exchange event identifier."
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "requested",
+            "approved",
+            "rejected",
+            "in_progress",
+            "completed",
+            "canceled"
+          ],
+          "description": "Exchange status."
+        },
+        "occurred_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "RFC 3339 timestamp when this event occurred."
+        },
+        "line_items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/line_item_reference"
+          },
+          "description": "Line items and quantities being exchanged."
+        },
+        "replacement_items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/line_item_reference"
+          },
+          "description": "Replacement line items and quantities."
+        },
+        "reason_code": {
+          "type": "string",
+          "description": "Machine-readable exchange reason (e.g., wrong_size, color_change)."
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable exchange reason."
+        }
+      }
+    },
+    "refund_event": {
+      "type": "object",
+      "description": "Refund event for returned or canceled items.",
+      "required": [
+        "id",
+        "status",
+        "occurred_at",
+        "amount"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Refund event identifier."
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "completed",
+            "failed"
+          ],
+          "description": "Refund status."
+        },
+        "occurred_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "RFC 3339 timestamp when this refund occurred."
+        },
+        "amount": {
+          "type": "integer",
+          "description": "Refund amount in minor (cents) currency units."
+        },
+        "line_items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/line_item_reference"
+          },
+          "description": "Line items and quantities included in the refund."
+        },
+        "reason_code": {
+          "type": "string",
+          "description": "Machine-readable refund reason (e.g., return_completed)."
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable refund reason."
+        }
+      }
+    },
+    "post_order_object": {
+      "type": "object",
+      "description": "Structured post-order events for returns, exchanges, and refunds.",
+      "properties": {
+        "returns": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/return_event"
+          },
+          "description": "Return events for the order."
+        },
+        "exchanges": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/exchange_event"
+          },
+          "description": "Exchange events for the order."
+        },
+        "refunds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/refund_event"
+          },
+          "description": "Refund events for the order."
+        }
+      }
+    },
+    "order": {
+      "title": "Order with Post-Order Events Update Request",
+      "description": "Order extended with post-order management data.",
+      "allOf": [
+        {
+          "$ref": "order.json"
+        },
+        {
+          "type": "object",
+          "properties": {}
+        }
+      ]
+    }
+  }
+}
