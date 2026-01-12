@@ -105,6 +105,10 @@ The initial release focuses on the essential primitives for transacting:
     to start building your own integrations.
 *   📝 **Check conformance** with our [conformance tests](https://github.com/Universal-Commerce-Protocol/conformance).
 
+## Community Resources
+
+*   🌟 **[Awesome UCP](https://github.com/Upsonic/awesome-ucp)** - A curated list of awesome UCP resources, tools, and implementations.
+
 ## Contributing
 
 We welcome community contributions to enhance and evolve UCP.
