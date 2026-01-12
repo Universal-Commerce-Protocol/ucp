@@ -24,7 +24,10 @@ on:
       - "mkdocs.yml"
       - "main.py"
       - "docs/**"
+      - "source/**"
       - "spec/**"
+      - "generate_schemas.py"
+      - "validate_specs.py"
   pull_request:
     branches:
       - main
@@ -34,7 +37,10 @@ on:
       - "mkdocs.yml"
       - "main.py"
       - "docs/**"
+      - "source/**"
       - "spec/**"
+      - "generate_schemas.py"
+      - "validate_specs.py"
 
 jobs:
   build_and_deploy:
@@ -78,6 +84,27 @@ jobs:
 
       - name: Lint YAML files
         run: yamllint -c .github/linters/.yamllint.yml .
+
+      - name: Generate schemas from source
+        run: python generate_schemas.py
+
+      - name: Validate generated schemas
+        run: python validate_specs.py
+
+      - name: Check for uncommitted spec changes
+        run: |
+          if ! git diff --exit-code spec/; then
+            echo "Error: Generated schemas in spec/ don't match source/"
+            echo ""
+            echo "The following files have uncommitted changes:"
+            git diff --name-only spec/
+            echo ""
+            echo "Please regenerate schemas locally and commit the changes:"
+            echo "  python generate_schemas.py  # or python3 if needed"
+            echo ""
+            echo "Then commit the updated spec/ files."
+            exit 1
+          fi
 
       - name: Install uv
         run: |
