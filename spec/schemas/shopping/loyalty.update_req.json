@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/loyalty.update_req.json",
+  "name": "dev.ucp.shopping.loyalty",
+  "version": "2026-01-11",
+  "title": "Loyalty Extension Update Request",
+  "description": "Extends Checkout with loyalty program linkage and benefit application.",
+  "$defs": {
+    "benefit": {
+      "type": "object",
+      "description": "A loyalty benefit applied to the checkout.",
+      "required": [
+        "type",
+        "amount"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Benefit type (e.g., points_redemption, member_discount, free_shipping)."
+        },
+        "amount": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Benefit value in minor (cents) currency units or points, depending on type."
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable description of the applied benefit."
+        }
+      }
+    },
+    "redemption": {
+      "type": "object",
+      "description": "Requested redemption inputs from the platform.",
+      "properties": {
+        "points": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of points to redeem."
+        }
+      }
+    },
+    "loyalty_object": {
+      "type": "object",
+      "description": "Loyalty program linkage and benefit application state.",
+      "required": [
+        "program_id"
+      ],
+      "properties": {
+        "program_id": {
+          "type": "string",
+          "description": "Identifier for the loyalty program."
+        },
+        "member_id": {
+          "type": "string",
+          "description": "Member identifier for the linked account."
+        },
+        "redemption": {
+          "$ref": "#/$defs/redemption",
+          "description": "Requested redemptions submitted by the platform."
+        }
+      }
+    },
+    "checkout": {
+      "title": "Checkout with Loyalty Update Request",
+      "description": "Checkout extended with loyalty capability.",
+      "allOf": [
+        {
+          "$ref": "checkout.update_req.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "loyalty": {
+              "$ref": "#/$defs/loyalty_object"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

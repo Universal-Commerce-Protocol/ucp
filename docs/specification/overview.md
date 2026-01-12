@@ -181,6 +181,9 @@ Extensions can be:
 -   **Official**: `dev.ucp.shopping.fulfillment` extends `dev.ucp.shopping.checkout`
 -   **Vendor**: `com.example.installments` extends `dev.ucp.shopping.checkout`
 
+Common extensions include `dev.ucp.shopping.discount`, `dev.ucp.shopping.fulfillment`,
+and `dev.ucp.shopping.loyalty`.
+
 ### Schema Composition
 
 Extensions can add new fields and modify shared structures (e.g., discounts
