@@ -123,6 +123,13 @@ interact.
     *   *Examples:* REST API (primary), MCP (Model Context Protocol), A2A
         (Agent2Agent).
 
+## Related guides
+
+*   [Agent Checkout Quickstart](agent-checkout-quickstart.md)
+*   [Cart and Basket Building](cart-and-basket-building.md)
+*   [Loyalty and Member Benefits](loyalty-and-member-benefits.md)
+*   [Post-Order Management](post-order-management.md)
+
 ## Samples and SDKs for checkout integrations
 
 If you are building an agent or assistant that can checkout across any
