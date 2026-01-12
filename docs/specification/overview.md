@@ -330,6 +330,19 @@ capabilities. Payment configuration is a sibling—see
 contains public keys (JWK format) used to verify signatures on webhooks and
 other authenticated messages from the business.
 
+#### Profile Validation Rules
+
+Profiles **MUST** conform to the discovery schema and follow these rules:
+
+- `ucp.version` **MUST** be a valid `YYYY-MM-DD` version string.
+- `ucp.services` **MUST** include a `dev.ucp.shopping` entry for Shopping use
+  cases.
+- Service `endpoint` values **MUST NOT** include a trailing slash.
+- If `rest` is present, both `schema` and `endpoint` **MUST** be provided.
+- Capability `spec` and `schema` URLs **MUST** be absolute and HTTPS.
+- Capabilities that declare `extends` **MUST** reference a capability present
+  in the same profile.
+
 #### Platform Profile
 
 Platform profiles are similar and include signing keys for capabilities
