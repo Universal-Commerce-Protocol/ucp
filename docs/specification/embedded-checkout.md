@@ -1141,7 +1141,7 @@ rather than attempting to merge the new data with existing state.
 ### Address Format
 
 The address object uses the UCP
-[PostalAddress](site:specification/checkout/#postal-address) format:
+[PostalAddress](checkout.md#postal-address) format:
 
 {{ schema_fields('postal_address', 'embedded-checkout') }}
 
