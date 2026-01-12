@@ -122,3 +122,18 @@ interact.
     interoperability.
     *   *Examples:* REST API (primary), MCP (Model Context Protocol), A2A
         (Agent2Agent).
+
+## Samples and SDKs for checkout integrations
+
+If you are building an agent or assistant that can checkout across any
+UCP-compatible merchant, start with the official samples and SDKs. The samples
+show end-to-end checkout flows, and the SDKs provide client helpers to build
+requests and handle protocol details.
+
+*   **UCP Samples:** End-to-end examples, including checkout flows.
+    <https://github.com/Universal-Commerce-Protocol/samples>
+*   **UCP Python SDK:** Client library for UCP integrations.
+    <https://github.com/Universal-Commerce-Protocol/python-sdk>
+
+If you need a specific language or framework, open a GitHub Discussion and
+share your stack so the community can point you to the best example.
