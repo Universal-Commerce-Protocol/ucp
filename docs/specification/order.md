@@ -281,6 +281,7 @@ platform's profile and uses it to send order lifecycle events.
 {
   "name": "dev.ucp.shopping.order",
   "version": "2026-01-11",
+  "config_schema": "https://ucp.dev/schemas/shopping/order.json#/$defs/platform_config",
   "config": {
     "webhook_url": "https://platform.example.com/webhooks/ucp/orders"
   }

@@ -360,6 +360,7 @@ example:
         "version": "2026-01-11",
         "spec": "https://ucp.dev/specification/order",
         "schema": "https://ucp.dev/schemas/shopping/order.json",
+        "config_schema": "https://ucp.dev/schemas/shopping/order.json#/$defs/platform_config",
         "config": {
           "webhook_url": "https://platform.example.com/webhooks/ucp/orders"
         }
@@ -730,7 +731,8 @@ request a challenge.
     "handlers": [{
       "id": "merchant_tokenizer",
       "name": "com.example.tokenizer",
-      // ... more handler required field
+      // ... more handler required fields
+      "config_schema": "https://example.com/ucp/tokenizer/config.json",
       "config": {
         "token_url": "https://api.psp.com/tokens",
         "public_key": "pk_123"

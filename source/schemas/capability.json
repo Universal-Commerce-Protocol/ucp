@@ -25,16 +25,21 @@
         "schema": {
           "type": "string",
           "format": "uri",
-          "description": "URL to JSON Schema for this capability's payload."
+          "description": "URL to JSON Schema for types this capability defines or extends."
         },
         "extends": {
           "type": "string",
           "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9_]*)+$",
           "description": "Parent capability this extends. Present for extensions, absent for root capabilities."
         },
+        "config_schema": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL to JSON Schema that validates the config object."
+        },
         "config": {
           "type": "object",
-          "description": "Capability-specific configuration (structure defined by each capability)."
+          "description": "Capability-specific configuration (structure defined by config_schema)."
         }
       }
     },
@@ -44,7 +49,12 @@
       "description": "Full capability declaration for discovery profiles. Includes spec/schema URLs for agent fetching.",
       "allOf": [
         {"$ref": "#/$defs/base"},
-        {"required": ["name", "version", "spec", "schema"]}
+        {
+          "required": ["name", "version", "spec", "schema"],
+          "dependentRequired": {
+            "config": ["config_schema"]
+          }
+        }
       ]
     },
 

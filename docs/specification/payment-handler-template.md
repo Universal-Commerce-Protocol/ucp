@@ -182,6 +182,7 @@ array.
 {
   "id": "{handler_id}",
   "name": "{handler_name}",
+  "config_schema": "{config_schema_url}",
   "config": {
     // Business's configuration
   }

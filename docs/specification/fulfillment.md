@@ -287,7 +287,12 @@ within each method.
 { "name": "dev.ucp.shopping.fulfillment", "version": "2026-01-11" }
 
 // Opt-in: business MAY return multiple groups per method
-{ "name": "dev.ucp.shopping.fulfillment", "version": "2026-01-11", "config": { "supports_multi_group": true } }
+{
+  "name": "dev.ucp.shopping.fulfillment",
+  "version": "2026-01-11",
+  "config_schema": "https://ucp.dev/schemas/shopping/types/platform_fulfillment_config.json",
+  "config": { "supports_multi_group": true }
+}
 ```
 
 ### Business Profile
@@ -302,6 +307,7 @@ Businesses declare what fulfillment configurations they support using
   "capabilities": [{
     "name": "dev.ucp.shopping.fulfillment",
     "version": "2026-01-11",
+    "config_schema": "https://ucp.dev/schemas/shopping/types/merchant_fulfillment_config.json",
     "config": {
       "allows_multi_destination": {
         "shipping": true
