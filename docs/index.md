@@ -528,6 +528,10 @@ image: assets/banner.png
         <span>Paypal</span>
       </div>
       <div class="partner-logo">
+        <img src="assets/partner/endorsed/Salesforce.svg" alt="Salesforce" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+        <span>Salesforce</span>
+      </div>
+      <div class="partner-logo">
         <img src="assets/partner/endorsed/Sephora.svg" alt="Sephora" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
         <span>Sephora</span>
       </div>
@@ -614,6 +618,10 @@ image: assets/banner.png
       <div class="partner-logo">
         <img src="assets/partner/endorsed/Paypal.svg" alt="Paypal" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
         <span>Paypal</span>
+      </div>
+      <div class="partner-logo">
+        <img src="assets/partner/endorsed/Salesforce.svg" alt="Salesforce" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+        <span>Salesforce</span>
       </div>
       <div class="partner-logo">
         <img src="assets/partner/endorsed/Sephora.svg" alt="Sephora" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
