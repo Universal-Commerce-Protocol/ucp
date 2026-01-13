@@ -112,7 +112,7 @@ creates a permanent, public design record for the project's evolution.
 The path below should be followed for resolving issues that are technical in
 nature.
 
-*   **L1:** routine changes Require active sign-off from 1+ Maintainer(s).
+*   **L1:** Routine changes Require active sign-off from 1+ Maintainer(s).
 *   **L2:** If a Maintainer requests changes, the contributor has a window
     to resolve feedback before a final decision.
 *   **L3:** If unresolved after 5 business days, the relevant maintainer makes a
