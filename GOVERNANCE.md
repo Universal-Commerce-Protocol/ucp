@@ -112,13 +112,9 @@ creates a permanent, public design record for the project's evolution.
 The path below should be followed for resolving issues that are technical in
 nature.
 
-*   **L1:** routine changes (bug fixes, documentation, minor improvements) are
-    auto-approved after 1 business day if no blocks are raised (silence =
-    consent).
-*   **L2:** For non-major version increments and standard changes, proposals are
-    auto-approved after 5 business days if no objections are raised and there is
-    at least one +1 from a maintainer. If objections are raised, contributors
-    have 3 business days to reach a resolution.
+*   **L1:** routine changes Require active sign-off from 1+ Maintainer(s).
+*   **L2:** If a Maintainer requests changes, the contributor has a window
+    to resolve feedback before a final decision.
 *   **L3:** If unresolved after 5 business days, the relevant maintainer makes a
     binding decision based on technical merit and speed.
 *   **L4:** Any technical issues that span across topics and cannot be resolved
