@@ -40,7 +40,9 @@ def _process_refs(data, file_rel_path):
         new_ref = value.replace('_resp.json', '.json')
 
         # 2. Replace relative paths with absolute paths
-        if not new_ref.startswith(('https://', '#')):
+        if new_ref.startswith('#'):
+          data[key] = f'https://ucp.dev/{file_rel_path}{new_ref}'
+        elif not new_ref.startswith('https://'):
           base_path = os.path.dirname(file_rel_path)
           # normpath will resolve ../ and ./
           resolved_path = os.path.normpath(os.path.join(base_path, new_ref))
@@ -62,6 +64,13 @@ def on_post_build(config):
     response file names. Non-JSON files are copied as-is.
     """
 
+  """
+    Copies and processes spec files into the site directory.
+
+    For JSON files, it resolves $ref paths to absolute URLs and standardizes
+    response file names. Non-JSON files are copied as-is.
+    """
+
   base_src_path = os.path.join(os.getcwd(), 'spec')
   if not os.path.exists(base_src_path):
     log.warning('Spec source directory not found: %s', base_src_path)
@@ -71,10 +80,9 @@ def on_post_build(config):
     for filename in files:
       src_file = os.path.join(root, filename)
       rel_path = os.path.relpath(src_file, base_src_path)
-      dest_rel_path = rel_path  # Default destination path
 
       if not filename.endswith('.json'):
-        dest_file = os.path.join(config['site_dir'], dest_rel_path)
+        dest_file = os.path.join(config['site_dir'], rel_path)
         dest_dir = os.path.dirname(dest_file)
         os.makedirs(dest_dir, exist_ok=True)
         shutil.copy2(src_file, dest_file)
@@ -86,15 +94,18 @@ def on_post_build(config):
         with open(src_file, 'r', encoding='utf-8') as f:
           data = json.load(f)
 
-        # Process refs before determining destination
-        _process_refs(data, rel_path)
-
+        # Determine the final relative path for the destination
         file_id = data.get('$id')
         prefix = 'https://ucp.dev'
         if file_id and file_id.startswith(prefix):
-          dest_rel_path = file_id[len(prefix) :].lstrip('/')
+          file_rel_path = file_id[len(prefix) :].lstrip('/')
+        else:
+          file_rel_path = rel_path.replace('_resp.json', '.json')
 
-        dest_file = os.path.join(config['site_dir'], dest_rel_path)
+        # Process refs using the final path
+        _process_refs(data, file_rel_path)
+
+        dest_file = os.path.join(config['site_dir'], file_rel_path)
         dest_dir = os.path.dirname(dest_file)
 
         os.makedirs(dest_dir, exist_ok=True)
@@ -103,6 +114,13 @@ def on_post_build(config):
         log.info('Processed and copied %s to %s', src_file, dest_file)
 
       except (json.JSONDecodeError, UnicodeDecodeError, OSError) as e:
+        log.error('Failed to process JSON file %s, copying as-is: %s', src_file,
+                  e)
+        # Fallback to copying if processing fails
+        dest_file = os.path.join(config['site_dir'], rel_path)
+        dest_dir = os.path.dirname(dest_file)
+        os.makedirs(dest_dir, exist_ok=True)
+        shutil.copy2(src_file, dest_file)
         log.error('Failed to process JSON file %s, copying as-is: %s', src_file,
                   e)
         # Fallback to copying if processing fails
