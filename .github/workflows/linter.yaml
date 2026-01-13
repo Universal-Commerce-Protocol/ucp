@@ -18,6 +18,11 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read      # Required to checkout the code
+  packages: read      # Required to pull the Super-Linter docker image
+  statuses: write     # Required to fix the 403 error (updating status checks)
+
 jobs:
   build:
     name: Lint Code Base
@@ -32,8 +37,10 @@ jobs:
       - name: Lint Code Base
         uses: super-linter/super-linter/slim@v8
         env:
-          DEFAULT_BRANCH: main
+          DEFAULT_BRANCH: origin/main
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MARKDOWN_CONFIG_FILE: ".markdownlint.json"
+          PYTHON_RUFF_CONFIG_FILE: ../../pyproject.toml
           LOG_LEVEL: INFO
           SHELLCHECK_OPTS: -e SC1091 -e 2086
           VALIDATE_ALL_CODEBASE: false
@@ -46,7 +53,6 @@ jobs:
           VALIDATE_PYTHON_PYLINT: false
           VALIDATE_CHECKOV: false
           VALIDATE_NATURAL_LANGUAGE: false
-          MARKDOWN_CONFIG_FILE: ".markdownlint.json"
           VALIDATE_MARKDOWN_PRETTIER: false
           VALIDATE_JAVASCRIPT_PRETTIER: false
           VALIDATE_JSON_PRETTIER: false
