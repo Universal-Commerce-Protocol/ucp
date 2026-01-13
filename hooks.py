@@ -63,14 +63,6 @@ def on_post_build(config):
     For JSON files, it resolves $ref paths to absolute URLs and standardizes
     response file names. Non-JSON files are copied as-is.
     """
-
-    """
-    Copies and processes spec files into the site directory.
-
-    For JSON files, it resolves $ref paths to absolute URLs and standardizes
-    response file names. Non-JSON files are copied as-is.
-    """
-
     base_src_path = os.path.join(os.getcwd(), "spec")
     if not os.path.exists(base_src_path):
         log.warning("Spec source directory not found: %s", base_src_path)
