@@ -9,7 +9,8 @@
     ".gemini/**",
     ".vscode/**",
     ".cspell.json",
-    "**/*.svg"
+    "**/*.svg",
+    ".gitignore"
   ],
   "dictionaryDefinitions": [
     {
