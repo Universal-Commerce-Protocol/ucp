@@ -246,7 +246,7 @@
             "application/json": {
               "schema": {
                 "allOf": [
-                  { "$ref": "#/components/schemas/payment_data" },
+                  { "$ref": "#/components/schemas/checkout" },
                   {
                     "title": "Risk Signals",
                     "description": "Optional risk signals for fraud detection.",
@@ -520,9 +520,6 @@
       },
       "payment": {
         "$ref": "https://ucp.dev/schemas/shopping/payment.json"
-      },
-      "payment_data": {
-        "$ref": "https://ucp.dev/schemas/shopping/payment_data.json"
       },
       "ucp": {
         "$ref": "https://ucp.dev/schemas/ucp.json"

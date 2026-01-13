@@ -32,7 +32,11 @@
             "fulfillment": {
               "$ref": "#/$defs/fulfillment",
               "description": "Fulfillment details.",
-              "ucp_request": "optional"
+              "ucp_request": {
+                "create": "optional",
+                "update": "optional",
+                "complete": "omit"
+              }
             }
           }
         }

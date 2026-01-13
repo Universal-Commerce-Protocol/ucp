@@ -761,25 +761,29 @@ place to set these expectations via `messages`.
     Content-Type: application/json
 
     {
-      "payment_data": {
-        "id": "pi_gpay_5678",
-        "handler_id": "com.google.pay",
-        "type": "card",
-        "brand": "mastercard",
-        "last_digits": "5678",
-        "rich_card_art": "https://cart-art-1.html",
-        "rich_text_description": "Google Pay •••• 5678",
-        "billing_address": {
-          "street_address": "123 Main St",
-          "address_locality": "Anytown",
-          "address_region": "CA",
-          "address_country": "US",
-          "postal_code": "12345"
-        },
-        "credential": {
-          "type": "PAYMENT_GATEWAY",
-          "token": "examplePaymentMethodToken"
-        }
+      "payment": {
+        "instruments": [
+          {
+            "id": "pi_gpay_5678",
+            "handler_id": "com.google.pay",
+            "type": "card",
+            "brand": "mastercard",
+            "last_digits": "5678",
+            "rich_card_art": "https://cart-art-1.html",
+            "rich_text_description": "Google Pay •••• 5678",
+            "billing_address": {
+              "street_address": "123 Main St",
+              "address_locality": "Anytown",
+              "address_region": "CA",
+              "address_country": "US",
+              "postal_code": "12345"
+            },
+            "credential": {
+              "type": "PAYMENT_GATEWAY",
+              "token": "examplePaymentMethodToken"
+            }
+          }
+        ]
       },
       "risk_signals": {
         //... risk signal related data (device fingerprint / risk token)

@@ -57,7 +57,11 @@
             "buyer": {
               "$ref": "#/$defs/buyer",
               "description": "Buyer with consent tracking.",
-              "ucp_request": "optional"
+              "ucp_request": {
+                "create": "optional",
+                "update": "optional",
+                "complete": "omit"
+              }
             }
           }
         }

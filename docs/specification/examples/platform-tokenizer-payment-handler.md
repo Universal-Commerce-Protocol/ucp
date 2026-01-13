@@ -280,18 +280,22 @@ POST /checkout-sessions/{checkout_id}/complete
 Content-Type: application/json
 
 {
-  "payment_data": {
-    "id": "instr_1",
-    "handler_id": "platform_wallet",
-    "type": "card",
-    "brand": "visa",
-    "last_digits": "4242",
-    "credential": {
-      "type": "token",
-      "token": "ptok_x9y8z7w6v5u4"
-    }
+  "payment": {
+    "instruments": [
+      {
+        "id": "instr_1",
+        "handler_id": "platform_wallet",
+        "type": "card",
+        "brand": "visa",
+        "last_digits": "4242",
+        "credential": {
+          "type": "token",
+          "token": "ptok_x9y8z7w6v5u4"
+        }
+      }
+    ]
   },
-  "risk_signal": {
+  "risk_signals": {
     // ... the key value pair for potential risk signal data
   }
 }
