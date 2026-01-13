@@ -31,49 +31,82 @@ import shutil
 log = logging.getLogger('mkdocs')
 
 
+def _process_refs(data, file_rel_path):
+  """Recursively processes $ref fields in a JSON object."""
+  if isinstance(data, dict):
+    for key, value in data.items():
+      if key == '$ref' and isinstance(value, str):
+        # 1. Replace _resp.json with .json
+        new_ref = value.replace('_resp.json', '.json')
+
+        # 2. Replace relative paths with absolute paths
+        if not new_ref.startswith(('https://', '#')):
+          base_path = os.path.dirname(file_rel_path)
+          # normpath will resolve ../ and ./
+          resolved_path = os.path.normpath(os.path.join(base_path, new_ref))
+          data[key] = f'https://ucp.dev/{resolved_path}'
+        else:
+          data[key] = new_ref
+      else:
+        _process_refs(value, file_rel_path)
+  elif isinstance(data, list):
+    for item in data:
+      _process_refs(item, file_rel_path)
+
+
 def on_post_build(config):
-  """Moves files from the spec/ directory to the site directory based on their $id.
-
-  Args:
-      config: The mkdocs config object.
   """
+    Copies and processes spec files into the site directory.
 
-  # Base path for the source directories
+    For JSON files, it resolves $ref paths to absolute URLs and standardizes
+    response file names. Non-JSON files are copied as-is.
+    """
+
   base_src_path = os.path.join(os.getcwd(), 'spec')
-
-  # Check if the parent 'spec' folder exists first
   if not os.path.exists(base_src_path):
     log.warning('Spec source directory not found: %s', base_src_path)
     return
 
-  # Iterate over everything inside 'spec'
   for root, _, files in os.walk(base_src_path):
     for filename in files:
       src_file = os.path.join(root, filename)
-
-      # Default to relative path (copy as-is)
       rel_path = os.path.relpath(src_file, base_src_path)
+      dest_rel_path = rel_path  # Default destination path
 
+      if not filename.endswith('.json'):
+        dest_file = os.path.join(config['site_dir'], dest_rel_path)
+        dest_dir = os.path.dirname(dest_file)
+        os.makedirs(dest_dir, exist_ok=True)
+        shutil.copy2(src_file, dest_file)
+        log.info('Copied %s to %s', src_file, dest_file)
+        continue
+
+      # Process JSON files
       try:
-        with open(src_file, 'r') as f:
+        with open(src_file, 'r', encoding='utf-8') as f:
           data = json.load(f)
-          file_id = data.get('$id')
 
-          # If the file has a valid $id, use it to generate a destination path.
-          prefix = 'https://ucp.dev'
-          if file_id and file_id.startswith(prefix):
-            rel_path = file_id[len(prefix) :].lstrip('/')
+        # Process refs before determining destination
+        _process_refs(data, rel_path)
+
+        file_id = data.get('$id')
+        prefix = 'https://ucp.dev'
+        if file_id and file_id.startswith(prefix):
+          dest_rel_path = file_id[len(prefix) :].lstrip('/')
+
+        dest_file = os.path.join(config['site_dir'], dest_rel_path)
+        dest_dir = os.path.dirname(dest_file)
+
+        os.makedirs(dest_dir, exist_ok=True)
+        with open(dest_file, 'w', encoding='utf-8') as f:
+          json.dump(data, f, indent=2, ensure_ascii=False)
+        log.info('Processed and copied %s to %s', src_file, dest_file)
 
       except (json.JSONDecodeError, UnicodeDecodeError, OSError) as e:
-        log.error(
-            'Failed to parse or read JSON file %s (copying as-is): %s',
-            src_file,
-            e,
-        )
-
-      dest_file = os.path.join(config['site_dir'], rel_path)
-      dest_dir = os.path.dirname(dest_file)
-
-      os.makedirs(dest_dir, exist_ok=True)
-      shutil.copy2(src_file, dest_file)
-      log.info('Copied %s to %s', src_file, dest_file)
+        log.error('Failed to process JSON file %s, copying as-is: %s', src_file,
+                  e)
+        # Fallback to copying if processing fails
+        dest_file = os.path.join(config['site_dir'], rel_path)
+        dest_dir = os.path.dirname(dest_file)
+        os.makedirs(dest_dir, exist_ok=True)
+        shutil.copy2(src_file, dest_file)
