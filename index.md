@@ -296,6 +296,8 @@ Mastercard
 
 Paypal
 
+Salesforce
+
 Sephora
 
 Shopee
@@ -339,6 +341,8 @@ Macy's
 Mastercard
 
 Paypal
+
+Salesforce
 
 Sephora
 
