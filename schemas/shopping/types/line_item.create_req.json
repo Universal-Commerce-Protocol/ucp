@@ -10,7 +10,7 @@
   ],
   "properties": {
     "item": {
-      "$ref": "item.create_req.json"
+      "$ref": "https://ucp.dev/schemas/shopping/types/item.create_req.json"
     },
     "quantity": {
       "type": "integer",

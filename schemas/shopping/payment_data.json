@@ -9,7 +9,7 @@
   ],
   "properties": {
     "payment_data": {
-      "$ref": "types/payment_instrument.json"
+      "$ref": "https://ucp.dev/schemas/shopping/types/payment_instrument.json"
     }
   }
 }

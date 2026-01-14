@@ -6,7 +6,7 @@
   "type": "object",
   "allOf": [
     {
-      "$ref": "postal_address.json"
+      "$ref": "https://ucp.dev/schemas/shopping/types/postal_address.json"
     },
     {
       "type": "object",

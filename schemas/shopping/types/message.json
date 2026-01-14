@@ -6,13 +6,13 @@
   "description": "Container for error, warning, or info messages.",
   "oneOf": [
     {
-      "$ref": "message_error.json"
+      "$ref": "https://ucp.dev/schemas/shopping/types/message_error.json"
     },
     {
-      "$ref": "message_warning.json"
+      "$ref": "https://ucp.dev/schemas/shopping/types/message_warning.json"
     },
     {
-      "$ref": "message_info.json"
+      "$ref": "https://ucp.dev/schemas/shopping/types/message_info.json"
     }
   ]
 }

@@ -23,11 +23,11 @@
       "description": "The broad category of the instrument (e.g., 'card', 'tokenized_card'). Specific schemas will constrain this to a constant value."
     },
     "billing_address": {
-      "$ref": "postal_address.json",
+      "$ref": "https://ucp.dev/schemas/shopping/types/postal_address.json",
       "description": "The billing address associated with this payment method."
     },
     "credential": {
-      "$ref": "payment_credential.json"
+      "$ref": "https://ucp.dev/schemas/shopping/types/payment_credential.json"
     }
   }
 }

@@ -5,7 +5,7 @@
   "description": "Matches a specific instrument type based on validation logic.",
   "oneOf": [
     {
-      "$ref": "card_payment_instrument.json"
+      "$ref": "https://ucp.dev/schemas/shopping/types/card_payment_instrument.json"
     }
   ]
 }

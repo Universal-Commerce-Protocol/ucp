@@ -10,7 +10,7 @@
   ],
   "properties": {
     "ucp": {
-      "$ref": "../schemas/ucp.json#/$defs/discovery_profile"
+      "$ref": "https://ucp.dev/schemas/schemas/ucp.json#/$defs/discovery_profile"
     },
     "payment": {
       "type": "object",
@@ -20,7 +20,7 @@
           "type": "array",
           "description": "Payment handler definitions that describe how instruments can be collected",
           "items": {
-            "$ref": "../schemas/shopping/types/payment_handler_resp.json"
+            "$ref": "https://ucp.dev/schemas/schemas/shopping/types/payment_handler.json"
           }
         }
       }

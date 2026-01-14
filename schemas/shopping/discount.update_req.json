@@ -67,7 +67,7 @@
         "allocations": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/allocation"
+            "$ref": "https://ucp.dev/schemas/shopping/discount.update_req.json#/$defs/allocation"
           },
           "description": "Breakdown of where this discount was allocated. Sum of allocation amounts equals total amount."
         }
@@ -88,7 +88,7 @@
           "type": "array",
           "readOnly": true,
           "items": {
-            "$ref": "#/$defs/applied_discount"
+            "$ref": "https://ucp.dev/schemas/shopping/discount.update_req.json#/$defs/applied_discount"
           },
           "description": "Discounts successfully applied (code-based and automatic)."
         }
@@ -99,13 +99,13 @@
       "description": "Checkout extended with discount capability.",
       "allOf": [
         {
-          "$ref": "checkout.update_req.json"
+          "$ref": "https://ucp.dev/schemas/shopping/checkout.update_req.json"
         },
         {
           "type": "object",
           "properties": {
             "discounts": {
-              "$ref": "#/$defs/discounts_object"
+              "$ref": "https://ucp.dev/schemas/shopping/discount.update_req.json#/$defs/discounts_object"
             }
           }
         }

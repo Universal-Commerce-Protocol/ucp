@@ -33,13 +33,13 @@
       "description": "Buyer object extended with consent tracking.",
       "allOf": [
         {
-          "$ref": "types/buyer.json"
+          "$ref": "https://ucp.dev/schemas/shopping/types/buyer.json"
         },
         {
           "type": "object",
           "properties": {
             "consent": {
-              "$ref": "#/$defs/consent",
+              "$ref": "https://ucp.dev/schemas/shopping/buyer_consent.json#/$defs/consent",
               "description": "Consent tracking fields."
             }
           }
@@ -51,13 +51,13 @@
       "description": "Checkout extended with consent tracking via buyer object.",
       "allOf": [
         {
-          "$ref": "checkout_resp.json"
+          "$ref": "https://ucp.dev/schemas/shopping/checkout.json"
         },
         {
           "type": "object",
           "properties": {
             "buyer": {
-              "$ref": "#/$defs/buyer",
+              "$ref": "https://ucp.dev/schemas/shopping/buyer_consent.json#/$defs/buyer",
               "description": "Buyer with consent tracking."
             }
           }

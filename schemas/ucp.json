@@ -13,7 +13,7 @@
       "type": "object",
       "description": "Service definitions keyed by reverse-domain service name.",
       "additionalProperties": {
-        "$ref": "../services/service_schema.json"
+        "$ref": "https://ucp.dev/services/service.json"
       }
     },
     "discovery_profile": {
@@ -27,16 +27,16 @@
       ],
       "properties": {
         "version": {
-          "$ref": "#/$defs/version"
+          "$ref": "https://ucp.dev/schemas/ucp.json#/$defs/version"
         },
         "services": {
-          "$ref": "#/$defs/services"
+          "$ref": "https://ucp.dev/schemas/ucp.json#/$defs/services"
         },
         "capabilities": {
           "type": "array",
           "description": "Supported capabilities and extensions.",
           "items": {
-            "$ref": "capability.json#/$defs/discovery"
+            "$ref": "https://ucp.dev/schemas/capability.json#/$defs/discovery"
           }
         }
       }
@@ -51,13 +51,13 @@
       ],
       "properties": {
         "version": {
-          "$ref": "#/$defs/version"
+          "$ref": "https://ucp.dev/schemas/ucp.json#/$defs/version"
         },
         "capabilities": {
           "type": "array",
           "description": "Active capabilities for this response.",
           "items": {
-            "$ref": "capability.json#/$defs/response"
+            "$ref": "https://ucp.dev/schemas/capability.json#/$defs/response"
           }
         }
       }
@@ -72,13 +72,13 @@
       ],
       "properties": {
         "version": {
-          "$ref": "#/$defs/version"
+          "$ref": "https://ucp.dev/schemas/ucp.json#/$defs/version"
         },
         "capabilities": {
           "type": "array",
           "description": "Active capabilities for this response.",
           "items": {
-            "$ref": "capability.json#/$defs/response"
+            "$ref": "https://ucp.dev/schemas/capability.json#/$defs/response"
           }
         }
       }

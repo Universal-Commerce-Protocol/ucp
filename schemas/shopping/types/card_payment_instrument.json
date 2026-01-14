@@ -5,7 +5,7 @@
   "description": "A basic card payment instrument with visible card details. Can be inherited by a handler's instrument schema to define handler-specific display details or more complex credential structures.",
   "allOf": [
     {
-      "$ref": "payment_instrument_base.json"
+      "$ref": "https://ucp.dev/schemas/shopping/types/payment_instrument_base.json"
     },
     {
       "type": "object",

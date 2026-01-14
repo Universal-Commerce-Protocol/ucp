@@ -40,7 +40,7 @@
     "totals": {
       "type": "array",
       "items": {
-        "$ref": "total_resp.json"
+        "$ref": "https://ucp.dev/schemas/shopping/types/total.json"
       },
       "description": "Fulfillment option totals breakdown."
     }

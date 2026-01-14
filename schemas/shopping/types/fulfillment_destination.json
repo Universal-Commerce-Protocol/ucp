@@ -6,10 +6,10 @@
   "type": "object",
   "oneOf": [
     {
-      "$ref": "shipping_destination_resp.json"
+      "$ref": "https://ucp.dev/schemas/shopping/types/shipping_destination.json"
     },
     {
-      "$ref": "retail_location_resp.json"
+      "$ref": "https://ucp.dev/schemas/shopping/types/retail_location.json"
     }
   ]
 }

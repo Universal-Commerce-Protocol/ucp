@@ -9,7 +9,7 @@
       "type": "array",
       "description": "Fulfillment methods for cart items.",
       "items": {
-        "$ref": "fulfillment_method.create_req.json"
+        "$ref": "https://ucp.dev/schemas/shopping/types/fulfillment_method.create_req.json"
       }
     }
   }

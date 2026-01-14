@@ -15,7 +15,7 @@
       "type": "string"
     },
     "item": {
-      "$ref": "item_resp.json"
+      "$ref": "https://ucp.dev/schemas/shopping/types/item.json"
     },
     "quantity": {
       "type": "integer",
@@ -25,7 +25,7 @@
     "totals": {
       "type": "array",
       "items": {
-        "$ref": "total_resp.json"
+        "$ref": "https://ucp.dev/schemas/shopping/types/total.json"
       },
       "description": "Line item totals breakdown."
     },

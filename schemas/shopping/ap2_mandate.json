@@ -27,7 +27,7 @@
       ],
       "properties": {
         "merchant_authorization": {
-          "$ref": "#/$defs/merchant_authorization",
+          "$ref": "https://ucp.dev/schemas/shopping/ap2_mandate.json#/$defs/merchant_authorization",
           "description": "Merchant's signature proving checkout terms are authentic."
         }
       }
@@ -41,7 +41,7 @@
       ],
       "properties": {
         "checkout_mandate": {
-          "$ref": "#/$defs/checkout_mandate",
+          "$ref": "https://ucp.dev/schemas/shopping/ap2_mandate.json#/$defs/checkout_mandate",
           "description": "SD-JWT+kb proving user authorized this checkout."
         }
       }
@@ -65,13 +65,13 @@
       "description": "Checkout extended with AP2 embedded signature support.",
       "allOf": [
         {
-          "$ref": "checkout_resp.json"
+          "$ref": "https://ucp.dev/schemas/shopping/checkout.json"
         },
         {
           "type": "object",
           "properties": {
             "ap2": {
-              "$ref": "#/$defs/ap2_checkout_response",
+              "$ref": "https://ucp.dev/schemas/shopping/ap2_mandate.json#/$defs/ap2_checkout_response",
               "description": "AP2 extension data including merchant authorization."
             }
           }
@@ -84,7 +84,7 @@
       "type": "object",
       "properties": {
         "ap2": {
-          "$ref": "#/$defs/ap2_complete_request",
+          "$ref": "https://ucp.dev/schemas/shopping/ap2_mandate.json#/$defs/ap2_complete_request",
           "description": "AP2 extension data including checkout mandate."
         }
       }

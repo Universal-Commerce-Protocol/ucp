@@ -21,12 +21,12 @@
     "line_items": {
       "type": "array",
       "items": {
-        "$ref": "types/line_item.update_req.json"
+        "$ref": "https://ucp.dev/schemas/shopping/types/line_item.update_req.json"
       },
       "description": "List of line items being checked out."
     },
     "buyer": {
-      "$ref": "types/buyer.json",
+      "$ref": "https://ucp.dev/schemas/shopping/types/buyer.json",
       "description": "Representation of the buyer."
     },
     "currency": {
@@ -34,7 +34,7 @@
       "description": "ISO 4217 currency code."
     },
     "payment": {
-      "$ref": "payment.update_req.json"
+      "$ref": "https://ucp.dev/schemas/shopping/payment.update_req.json"
     }
   }
 }

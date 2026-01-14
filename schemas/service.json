@@ -11,7 +11,7 @@
   ],
   "properties": {
     "version": {
-      "$ref": "../schemas/ucp.json#/$defs/version",
+      "$ref": "https://ucp.dev/schemas/ucp.json#/$defs/version",
       "description": "Service version in YYYY-MM-DD format."
     },
     "spec": {

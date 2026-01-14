@@ -13,7 +13,7 @@
       "type": "string"
     },
     "item": {
-      "$ref": "item.update_req.json"
+      "$ref": "https://ucp.dev/schemas/shopping/types/item.update_req.json"
     },
     "quantity": {
       "type": "integer",

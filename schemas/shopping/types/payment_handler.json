@@ -22,7 +22,7 @@
       "description": "The specification name using reverse-DNS format. For example, dev.ucp.delegate_payment."
     },
     "version": {
-      "$ref": "../../ucp.json#/$defs/version",
+      "$ref": "https://ucp.dev/schemas/ucp.json#/$defs/version",
       "description": "Handler version in YYYY-MM-DD format."
     },
     "spec": {

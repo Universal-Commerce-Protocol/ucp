@@ -13,7 +13,7 @@
           "description": "Stable capability identifier in reverse-domain notation (e.g., dev.ucp.shopping.checkout). Used in capability negotiation."
         },
         "version": {
-          "$ref": "ucp.json#/$defs/version",
+          "$ref": "https://ucp.dev/schemas/ucp.json#/$defs/version",
           "description": "Capability version in YYYY-MM-DD format."
         },
         "spec": {
@@ -42,7 +42,7 @@
       "description": "Full capability declaration for discovery profiles. Includes spec/schema URLs for agent fetching.",
       "allOf": [
         {
-          "$ref": "#/$defs/base"
+          "$ref": "https://ucp.dev/schemas/capability.json#/$defs/base"
         },
         {
           "required": [
@@ -59,7 +59,7 @@
       "description": "Capability reference in responses. Only name/version required to confirm active capabilities.",
       "allOf": [
         {
-          "$ref": "#/$defs/base"
+          "$ref": "https://ucp.dev/schemas/capability.json#/$defs/base"
         },
         {
           "required": [
