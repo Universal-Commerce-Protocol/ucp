@@ -674,7 +674,7 @@ image: assets/banner.png
         UCP is an open standard designed to let AI agents, apps, businesses, and payment providers interact seamlessly without needing custom, one-off integrations for every connection. We actively seek your feedback and contributions to help build the future of commerce.
       </p>
       <p>
-        The complete technical specification, documentation, and reference implementations are hosted in our public GitHub repository. For a quick start, you can use our <a href="https://github.com/Universal-Commerce-Protocol/samples/tree/main/rest/docker" target="_blank">Docker examples</a> to run the reference servers without installing dependencies locally.
+        The complete technical specification, documentation, and reference implementations are hosted in our public GitHub repository. For a quick start, you can use our <a href="https://github.com/Universal-Commerce-Protocol/samples/tree/main/docker" target="_blank">Docker examples</a> to run the reference servers without installing dependencies locally.
       </p>
     </div>
 
