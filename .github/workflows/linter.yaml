@@ -41,7 +41,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           MARKDOWN_CONFIG_FILE: ".markdownlint.json"
           PYTHON_RUFF_CONFIG_FILE: ../../pyproject.toml
-          PYTHON_RUFF_FORMAT_ARGS: "--diff"
+          PYTHON_RUFF_FORMAT_CONFIG_FILE: ../../pyproject.toml
+          PYTHON_RUFF_FORMAT_CHECK_ONLY_MODE_OPTIONS: "--check --diff"
           LOG_LEVEL: INFO
           SHELLCHECK_OPTS: -e SC1091 -e 2086
           VALIDATE_ALL_CODEBASE: false
