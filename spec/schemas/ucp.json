@@ -12,6 +12,11 @@
     "services": {
       "type": "object",
       "description": "Service definitions keyed by reverse-domain service name.",
+      "properties": {
+        "com.example.service": {
+          "$ref": "../services/service_schema.json"
+        }
+      },
       "additionalProperties": {
         "$ref": "../services/service_schema.json"
       }
