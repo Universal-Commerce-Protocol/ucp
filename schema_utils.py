@@ -95,7 +95,7 @@ def resolve_internal_ref(ref: str, root_data: Any) -> Optional[Any]:
 
 
 def merge_schemas(
-    base: dict[str, Any], overlay: dict[str, Any]
+  base: dict[str, Any], overlay: dict[str, Any]
 ) -> dict[str, Any]:
   """Merges two JSON schemas, with overlay taking precedence.
 
@@ -129,10 +129,10 @@ def merge_schemas(
 
 
 def resolve_schema(
-    schema: dict[str, Any],
-    root_data: dict[str, Any],
-    file_loader: Optional[callable] = None,
-    visited: Optional[set[str]] = None,
+  schema: dict[str, Any],
+  root_data: dict[str, Any],
+  file_loader: Optional[callable] = None,
+  visited: Optional[set[str]] = None,
 ) -> dict[str, Any]:
   """Recursively resolves $ref and allOf in a JSON schema.
 

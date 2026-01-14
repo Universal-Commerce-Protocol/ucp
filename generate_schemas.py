@@ -130,9 +130,9 @@ def collect_annotated_schemas(source_dir: str) -> dict[str, bool]:
       data = schema_utils.load_json(filepath)
       if data and has_ucp_annotations(data):
         is_shared = (
-            data.get("ucp_shared_request", False)
-            if isinstance(data, dict)
-            else False
+          data.get("ucp_shared_request", False)
+          if isinstance(data, dict)
+          else False
         )
         annotated[os.path.normpath(filepath)] = is_shared
   return annotated
@@ -142,10 +142,10 @@ def collect_annotated_schemas(source_dir: str) -> dict[str, bool]:
 
 
 def rewrite_ref(
-    ref: str,
-    current_file: str,
-    annotated_schemas: dict[str, bool],
-    operation: Optional[str],
+  ref: str,
+  current_file: str,
+  annotated_schemas: dict[str, bool],
+  operation: Optional[str],
 ) -> str:
   """Rewrites $ref if target is an annotated schema.
 
@@ -188,11 +188,11 @@ def rewrite_ref(
 
 
 def transform_schema(
-    data: Any,
-    operation: Optional[str],
-    current_file: str,
-    annotated_schemas: dict[str, bool],
-    title_suffix: str = "",
+  data: Any,
+  operation: Optional[str],
+  current_file: str,
+  annotated_schemas: dict[str, bool],
+  title_suffix: str = "",
 ) -> Any:
   """Transforms schema for a specific operation (or response if None).
 
@@ -216,7 +216,7 @@ def transform_schema(
     # Handle $ref rewriting
     if "$ref" in data:
       new_ref = rewrite_ref(
-          data["$ref"], current_file, annotated_schemas, operation
+        data["$ref"], current_file, annotated_schemas, operation
       )
       result = {}
       for k, v in data.items():
@@ -224,17 +224,17 @@ def transform_schema(
           result[k] = new_ref
         elif k not in UCP_ANNOTATIONS:
           result[k] = transform_schema(
-              v, operation, current_file, annotated_schemas, title_suffix
+            v, operation, current_file, annotated_schemas, title_suffix
           )
       return result
 
     if "properties" not in data:
       result = {
-          k: transform_schema(
-              v, operation, current_file, annotated_schemas, title_suffix
-          )
-          for k, v in data.items()
-          if k not in UCP_ANNOTATIONS
+        k: transform_schema(
+          v, operation, current_file, annotated_schemas, title_suffix
+        )
+        for k, v in data.items()
+        if k not in UCP_ANNOTATIONS
       }
       # Update title if we are in a definition context (heuristic: has title and
       # type/properties or is inside $defs) Actually, we just update any title
@@ -255,7 +255,7 @@ def transform_schema(
         continue
 
       new_props[name] = transform_schema(
-          field, operation, current_file, annotated_schemas, title_suffix
+        field, operation, current_file, annotated_schemas, title_suffix
       )
 
       if visibility == "required":
@@ -276,7 +276,7 @@ def transform_schema(
           result["required"] = new_required
       else:
         result[k] = transform_schema(
-            v, operation, current_file, annotated_schemas, title_suffix
+          v, operation, current_file, annotated_schemas, title_suffix
         )
 
     if "title" in result and title_suffix:
@@ -286,10 +286,10 @@ def transform_schema(
 
   if isinstance(data, list):
     return [
-        transform_schema(
-            item, operation, current_file, annotated_schemas, title_suffix
-        )
-        for item in data
+      transform_schema(
+        item, operation, current_file, annotated_schemas, title_suffix
+      )
+      for item in data
     ]
 
   return data
@@ -303,10 +303,10 @@ def write_json(data: dict[str, Any], path: str) -> None:
 
 
 def process_schema(
-    source_path: str,
-    dest_dir: str,
-    rel_path: str,
-    annotated_schemas: dict[str, bool],
+  source_path: str,
+  dest_dir: str,
+  rel_path: str,
+  annotated_schemas: dict[str, bool],
 ) -> tuple[list[str], list[str]]:
   """Processes schema file. Returns (generated_paths, validation_errors)."""
   data = schema_utils.load_json(source_path)
@@ -333,7 +333,7 @@ def process_schema(
       # Use 'create' as representative operation for shared request
       suffix = " Request"
       transformed = transform_schema(
-          copy.deepcopy(data), "create", source_path, annotated_schemas, suffix
+        copy.deepcopy(data), "create", source_path, annotated_schemas, suffix
       )
       if "$id" in transformed:
         transformed["$id"] = transformed["$id"].replace(".json", "_req.json")
@@ -346,11 +346,11 @@ def process_schema(
         out_path = os.path.join(dest_dir, dir_path, out_name)
         suffix = f" {op.capitalize()} Request"
         transformed = transform_schema(
-            copy.deepcopy(data), op, source_path, annotated_schemas, suffix
+          copy.deepcopy(data), op, source_path, annotated_schemas, suffix
         )
         if "$id" in transformed:
           transformed["$id"] = transformed["$id"].replace(
-              ".json", f".{op}_req.json"
+            ".json", f".{op}_req.json"
           )
         write_json(transformed, out_path)
         generated.append(os.path.join(dir_path, out_name))
@@ -360,7 +360,7 @@ def process_schema(
     out_path = os.path.join(dest_dir, dir_path, out_name)
     suffix = " Response"
     transformed = transform_schema(
-        data, None, source_path, annotated_schemas, suffix
+      data, None, source_path, annotated_schemas, suffix
     )
     write_json(transformed, out_path)
     generated.append(os.path.join(dir_path, out_name))
@@ -368,7 +368,7 @@ def process_schema(
     # Non-annotated: copy with refs potentially rewritten
     out_path = os.path.join(dest_dir, rel_path)
     transformed = transform_schema(
-        data, None, source_path, annotated_schemas, ""
+      data, None, source_path, annotated_schemas, ""
     )
     write_json(transformed, out_path)
     generated.append(rel_path)
@@ -377,7 +377,7 @@ def process_schema(
 
 
 def process_openapi(
-    source_path: str, dest_path: str, annotated_schemas: dict[str, bool]
+  source_path: str, dest_path: str, annotated_schemas: dict[str, bool]
 ) -> None:
   """Splits components and converts refs. Preserves absolute URLs if present."""
   spec = schema_utils.load_json(source_path)
@@ -423,7 +423,7 @@ def process_openapi(
         req_comp = f"{name}_request"
         schemas[req_comp] = {"$ref": f"{base_ref}_req.json"}
         req_refs["create"] = req_refs["update"] = (
-            f"#/components/schemas/{req_comp}"
+          f"#/components/schemas/{req_comp}"
         )
       else:
         create_comp = f"{name}_create_request"
@@ -437,8 +437,8 @@ def process_openapi(
 
       # 4. Map Old -> New and Delete
       ref_map[f"#/components/schemas/{name}"] = {
-          "response": f"#/components/schemas/{resp_comp}",
-          **req_refs,
+        "response": f"#/components/schemas/{resp_comp}",
+        **req_refs,
       }
       del schemas[name]
 
@@ -507,7 +507,7 @@ def rewrite_refs_for_ecp(data: Any, annotated_schemas: set[str]) -> Any:
               anchor_part = "#" + anchor_part
             # Add _resp suffix if schema has ucp annotations
             if schema_path in annotated_schemas and schema_path.endswith(
-                ".json"
+              ".json"
             ):
               schema_path = schema_path[:-5] + "_resp.json"
             result[k] = f"../../schemas/shopping/{schema_path}{anchor_part}"
@@ -524,12 +524,12 @@ def rewrite_refs_for_ecp(data: Any, annotated_schemas: set[str]) -> Any:
 
 
 def transform_ecp_method(
-    method: dict[str, Any], annotated_schemas: set[str]
+  method: dict[str, Any], annotated_schemas: set[str]
 ) -> dict[str, Any]:
   """Transform an ECP method definition to OpenRPC format."""
   openrpc_method = {
-      "name": method["name"],
-      "summary": method.get("summary", ""),
+    "name": method["name"],
+    "summary": method.get("summary", ""),
   }
   if method.get("description"):
     openrpc_method["description"] = method["description"]
@@ -538,9 +538,9 @@ def transform_ecp_method(
     openrpc_method["params"] = []
     for param in method["params"]:
       openrpc_param = {
-          "name": param["name"],
-          "required": param.get("required", False),
-          "schema": rewrite_refs_for_ecp(param["schema"], annotated_schemas),
+        "name": param["name"],
+        "required": param.get("required", False),
+        "schema": rewrite_refs_for_ecp(param["schema"], annotated_schemas),
       }
       if "description" in param.get("schema", {}):
         openrpc_param["description"] = param["schema"]["description"]
@@ -549,8 +549,8 @@ def transform_ecp_method(
   if "result" in method:
     result = method["result"]
     openrpc_method["result"] = {
-        "name": result.get("name", "result"),
-        "schema": rewrite_refs_for_ecp(result["schema"], annotated_schemas),
+      "name": result.get("name", "result"),
+      "schema": rewrite_refs_for_ecp(result["schema"], annotated_schemas),
     }
 
   if "errors" in method:
@@ -569,8 +569,8 @@ def generate_ecp_spec(annotated_schemas: set[str]) -> int:
     number of files generated.
   """
   print(
-      f"\n{schema_utils.Colors.CYAN}Pass 3: Generating ECP OpenRPC"
-      f" spec...{schema_utils.Colors.RESET}\n"
+    f"\n{schema_utils.Colors.CYAN}Pass 3: Generating ECP OpenRPC"
+    f" spec...{schema_utils.Colors.RESET}\n"
   )
 
   methods = []
@@ -620,22 +620,22 @@ def generate_ecp_spec(annotated_schemas: set[str]) -> int:
 
   # Generate OpenRPC spec
   spec = {
-      "openrpc": "1.3.2",
-      "info": {
-          "title": ep_title,
-          "description": ep_description,
-          "version": ECP_VERSION,
-      },
-      "x-delegations": sorted(set(delegations)),
-      "methods": methods,
+    "openrpc": "1.3.2",
+    "info": {
+      "title": ep_title,
+      "description": ep_description,
+      "version": ECP_VERSION,
+    },
+    "x-delegations": sorted(set(delegations)),
+    "methods": methods,
   }
 
   out_path = os.path.join(SPEC_DIR, "services/shopping/embedded.openrpc.json")
   os.makedirs(os.path.dirname(out_path), exist_ok=True)
   write_json(spec, out_path)
   print(
-      f"{schema_utils.Colors.GREEN}✓{schema_utils.Colors.RESET}"
-      " services/shopping/embedded.openrpc.json"
+    f"{schema_utils.Colors.GREEN}✓{schema_utils.Colors.RESET}"
+    " services/shopping/embedded.openrpc.json"
   )
 
   return 1
@@ -644,30 +644,30 @@ def generate_ecp_spec(annotated_schemas: set[str]) -> int:
 def main() -> None:
   if not os.path.exists(SOURCE_DIR):
     print(
-        f"{schema_utils.Colors.RED}Error: '{SOURCE_DIR}' not"
-        f" found.{schema_utils.Colors.RESET}"
+      f"{schema_utils.Colors.RED}Error: '{SOURCE_DIR}' not"
+      f" found.{schema_utils.Colors.RESET}"
     )
     sys.exit(1)
 
   # Pass 1: Collect annotated schemas
   print(
-      f"{schema_utils.Colors.CYAN}Pass 1: Scanning for annotated"
-      f" schemas...{schema_utils.Colors.RESET}"
+    f"{schema_utils.Colors.CYAN}Pass 1: Scanning for annotated"
+    f" schemas...{schema_utils.Colors.RESET}"
   )
   annotated_schemas = collect_annotated_schemas(SOURCE_DIR)
   print(f"  Found {len(annotated_schemas)} annotated schema(s)\n")
 
   if os.path.exists(SPEC_DIR):
     print(
-        f"{schema_utils.Colors.YELLOW}Removing existing {SPEC_DIR}/"
-        f" ...{schema_utils.Colors.RESET}"
+      f"{schema_utils.Colors.YELLOW}Removing existing {SPEC_DIR}/"
+      f" ...{schema_utils.Colors.RESET}"
     )
     shutil.rmtree(SPEC_DIR)
 
   # Pass 2: Transform and generate
   print(
-      f"{schema_utils.Colors.CYAN}Pass 2: Generating {SOURCE_DIR}/ ->"
-      f" {SPEC_DIR}/{schema_utils.Colors.RESET}\n"
+    f"{schema_utils.Colors.CYAN}Pass 2: Generating {SOURCE_DIR}/ ->"
+    f" {SPEC_DIR}/{schema_utils.Colors.RESET}\n"
   )
 
   generated_count = 0
@@ -685,11 +685,10 @@ def main() -> None:
       if filename == "openapi.json" and rel_path.startswith("services/"):
         dest_rel = os.path.join(os.path.dirname(rel_path), "rest.openapi.json")
         process_openapi(
-            source_path, os.path.join(SPEC_DIR, dest_rel), annotated_schemas
+          source_path, os.path.join(SPEC_DIR, dest_rel), annotated_schemas
         )
         print(
-            f"{schema_utils.Colors.GREEN}✓{schema_utils.Colors.RESET}"
-            f" {dest_rel}"
+          f"{schema_utils.Colors.GREEN}✓{schema_utils.Colors.RESET} {dest_rel}"
         )
         generated_count += 1
 
@@ -700,7 +699,7 @@ def main() -> None:
       # 3. Standard Handling: JSON Schemas (The Generator)
       elif filename.endswith(".json") and filename != "openrpc.json":
         generated, errors = process_schema(
-            source_path, SPEC_DIR, rel_path, annotated_schemas
+          source_path, SPEC_DIR, rel_path, annotated_schemas
         )
         for g in generated:
           print(f"{schema_utils.Colors.GREEN}✓{schema_utils.Colors.RESET} {g}")
@@ -710,7 +709,7 @@ def main() -> None:
       # 4. Fallback: Copy other files (e.g. openrpc.json)
       else:
         dest_name = (
-            "mcp.openrpc.json" if filename == "openrpc.json" else filename
+          "mcp.openrpc.json" if filename == "openrpc.json" else filename
         )
         dest_rel_path = os.path.join(os.path.dirname(rel_path), dest_name)
         dest_path = os.path.join(SPEC_DIR, os.path.dirname(rel_path), dest_name)
@@ -718,8 +717,8 @@ def main() -> None:
           os.makedirs(os.path.dirname(dest_path), exist_ok=True)
           shutil.copy2(source_path, dest_path)
           print(
-              f"{schema_utils.Colors.GREEN}✓{schema_utils.Colors.RESET}"
-              f" {dest_rel_path}"
+            f"{schema_utils.Colors.GREEN}✓{schema_utils.Colors.RESET}"
+            f" {dest_rel_path}"
           )
           generated_count += 1
         except OSError as e:
@@ -742,14 +741,14 @@ def main() -> None:
     for err in all_errors:
       print(f"  {schema_utils.Colors.RED}✗{schema_utils.Colors.RESET} {err}")
     print(
-        f"\n{schema_utils.Colors.RED}🚨 Failed with"
-        f" {len(all_errors)} errors.{schema_utils.Colors.RESET}"
+      f"\n{schema_utils.Colors.RED}🚨 Failed with"
+      f" {len(all_errors)} errors.{schema_utils.Colors.RESET}"
     )
     sys.exit(1)
   else:
     print(
-        f"{schema_utils.Colors.GREEN}✅ Generated"
-        f" {generated_count} files.{schema_utils.Colors.RESET}"
+      f"{schema_utils.Colors.GREEN}✅ Generated"
+      f" {generated_count} files.{schema_utils.Colors.RESET}"
     )
     sys.exit(0)
 

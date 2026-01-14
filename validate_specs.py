@@ -39,14 +39,14 @@ class Colors:
 
 
 def check_ref(
-    ref: str, current_file: str, root_data: Optional[Any] = None
+  ref: str, current_file: str, root_data: Optional[Any] = None
 ) -> Optional[str]:
   """Checks if a reference exists."""
   if ref.startswith("#"):
     if ref != "#" and not ref.startswith("#/"):
       return (
-          f"Invalid internal reference format in {current_file}: {ref} (Must"
-          " start with '#/')"
+        f"Invalid internal reference format in {current_file}: {ref} (Must"
+        " start with '#/')"
       )
     if root_data is not None:
       if schema_utils.resolve_internal_ref(ref, root_data) is None:
@@ -71,8 +71,8 @@ def check_ref(
   if anchor_part:
     if not anchor_part.startswith("/"):
       return (
-          f"Invalid anchor format in {current_file}: {ref} (Anchor must start"
-          " with '/')"
+        f"Invalid anchor format in {current_file}: {ref} (Anchor must start"
+        " with '/')"
       )
     try:
       with open(referenced_path, "r", encoding="utf-8") as f:
@@ -87,8 +87,8 @@ def check_ref(
       # Validate the anchor using resolve_internal_ref logic
       # We verify if '#/anchor' resolves in referenced_data
       if (
-          schema_utils.resolve_internal_ref("#" + anchor_part, referenced_data)
-          is None
+        schema_utils.resolve_internal_ref("#" + anchor_part, referenced_data)
+        is None
       ):
         return f"Broken anchor in external reference in {current_file}: {ref}"
 
@@ -98,15 +98,15 @@ def check_ref(
       # Ideally we should report a warning or error here, but for now
       # we'll assume it's fine or caught by other validation.
       return (
-          f"Could not parse referenced file for reference validation:"
-          f" {referenced_path}"
+        f"Could not parse referenced file for reference validation:"
+        f" {referenced_path}"
       )
 
   return None
 
 
 def check_refs(
-    data: Any, current_file: str, root_data: Optional[Any] = None
+  data: Any, current_file: str, root_data: Optional[Any] = None
 ) -> List[str]:
   """Recursively checks for broken references in a JSON/YAML object."""
   errors = []
@@ -169,8 +169,7 @@ def validate_file(filepath: str) -> Tuple[bool, Optional[str]]:
 def main() -> None:
   if not os.path.exists(SPEC_DIR):
     print(
-        f"{Colors.YELLOW}Warning: Directory '{SPEC_DIR}' not"
-        f" found.{Colors.RESET}"
+      f"{Colors.YELLOW}Warning: Directory '{SPEC_DIR}' not found.{Colors.RESET}"
     )
     sys.exit(0)
 
@@ -185,7 +184,7 @@ def main() -> None:
 
       # Skip hidden files or unrelated types
       if filename.startswith(".") or not filename.endswith(
-          (".json", ".yaml", ".yml")
+        (".json", ".yaml", ".yml")
       ):
         continue
 
@@ -207,8 +206,8 @@ def main() -> None:
   print("\n")
   if error_count == 0:
     print(
-        f"{Colors.GREEN}✅ Success! Scanned {file_count} files. No errors"
-        f" found.{Colors.RESET}"
+      f"{Colors.GREEN}✅ Success! Scanned {file_count} files. No errors"
+      f" found.{Colors.RESET}"
     )
     sys.exit(0)
   else:
