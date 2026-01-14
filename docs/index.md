@@ -193,6 +193,7 @@ image: assets/banner.png
             <img src="assets/checkout.png" alt="Example checkout screen with address details" class="phone-mockup" onerror="this.src='https://placehold.co/260x500/EEE/31343C?text=Checkout+UI'">
           </div>
           <div class="code-block-placeholder">
+
   ```json {.yaml .no-copy}
   {
     "ucp": { ... },
@@ -256,6 +257,7 @@ image: assets/banner.png
     }
   }
   ```
+
           </div>
         </div>
       </div>
@@ -274,6 +276,7 @@ image: assets/banner.png
             <img src="assets/identity.png" alt="Example user interface for identity linking" class="phone-mockup" onerror="this.src='https://placehold.co/260x500/EEE/31343C?text=Identity+UI'">
           </div>
           <div class="code-block-placeholder">
+
   ```json {.yaml .no-copy}
   Sample of /.well-known/oauth-authorization-server
 
@@ -298,6 +301,7 @@ image: assets/banner.png
     "service_documentation": "https://example.com/docs/oauth2"
   }
   ```
+
           </div>
         </div>
       </div>
@@ -316,6 +320,7 @@ image: assets/banner.png
             <img src="assets/order.png" alt="Example user interface showing order confirmation details" class="phone-mockup" onerror="this.src='https://placehold.co/260x500/EEE/31343C?text=Order+UI'">
           </div>
           <div class="code-block-placeholder">
+  
   ```json {.yaml .no-copy}
   {
     "ucp": { ... },
@@ -368,6 +373,7 @@ image: assets/banner.png
     "totals": [ ... ]
   }
   ```
+
           </div>
         </div>
       </div>
