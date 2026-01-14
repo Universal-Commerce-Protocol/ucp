@@ -335,8 +335,8 @@ def process_schema(
       transformed = transform_schema(
           copy.deepcopy(data), "create", source_path, annotated_schemas, suffix
       )
-      if "$id" in transformed:
-        transformed["$id"] = transformed["$id"].replace(".json", "_req.json")
+      if "$id" in transformed and transformed["$id"].endswith(".json"):
+        transformed["$id"] = transformed["$id"][:-5] + "_req.json"
       write_json(transformed, out_path)
       generated.append(os.path.join(dir_path, out_name))
     else:
@@ -348,10 +348,8 @@ def process_schema(
         transformed = transform_schema(
             copy.deepcopy(data), op, source_path, annotated_schemas, suffix
         )
-        if "$id" in transformed:
-          transformed["$id"] = transformed["$id"].replace(
-              ".json", f".{op}_req.json"
-          )
+        if "$id" in transformed and transformed["$id"].endswith(".json"):
+          transformed["$id"] = transformed["$id"][:-5] + f".{op}_req.json"
         write_json(transformed, out_path)
         generated.append(os.path.join(dir_path, out_name))
 
