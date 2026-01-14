@@ -12,7 +12,7 @@ preview = false
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "B", "C4", "SIM", "N", "UP", "D", "PTH", "T20"]
-ignore = ["D203", "D213"]
+ignore = ["D203", "D213", "T201"]
 
 [tool.ruff.lint.isort]
 combine-as-imports = true

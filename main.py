@@ -23,9 +23,10 @@ bodies.
 import json
 import os
 import sys
+from pathlib import Path
 
 # Modify sys.path to include the current directory so schema_utils can be found.
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(str(Path(__file__).resolve().parent))
 
 import schema_utils  # pylint: disable=g-import-not-at-top
 
@@ -39,8 +40,8 @@ def define_env(env):
 
   Args:
     env: The MkDocs environment object.
-  """
 
+  """
   # --- CONFIGURATION ---
   openapi_dir = "spec/services/shopping/"
   schemas_dirs = [
@@ -51,18 +52,18 @@ def define_env(env):
   ]
 
   def _load_json_file(entity_name):
-    """Helper to try loading a JSON file from the configured directories."""
+    """Try loading a JSON file from the configured directories."""
     for schemas_dir in schemas_dirs:
-      full_path = schemas_dir + entity_name + ".json"
+      full_path = Path(schemas_dir) / (entity_name + ".json")
       try:
-        with open(full_path, "r", encoding="utf-8") as f:
+        with full_path.open(encoding="utf-8") as f:
           return json.load(f)
       except FileNotFoundError:
         continue
     return None
 
   def _load_schema_variant(entity_name, context):
-    """Loads the specific schema variant (create/update/resp) if available.
+    """Load the specific schema variant (create/update/resp) if available.
 
     Args:
       entity_name: The base name (e.g., 'checkout').
@@ -70,6 +71,7 @@ def define_env(env):
 
     Returns:
       The loaded schema data as a dictionary, or None if not found.
+
     """
     if not context:
       return _load_json_file(entity_name)
@@ -100,8 +102,9 @@ def define_env(env):
     return _load_json_file(entity_name)
 
   def create_link(ref_string, spec_file_name):
-    """Transforms paths like "types/line_item.create_req.json" into Markdown links.
+    """Transform schema paths into Markdown links.
 
+    Transforms paths like "types/line_item.create_req.json" into Markdown links.
     This function is used to generate links to specific schema entities within
     the same specification file.
 
@@ -111,6 +114,7 @@ def define_env(env):
 
     Returns:
       Markdown link: [Line Item.Create_Req](#line-item-create_request)
+
     """
     # Refer to checkout.json for ap2-mandates.json entities that are not
     # explicitly defined in ap2-mandates.json.
@@ -121,7 +125,7 @@ def define_env(env):
     ):
       spec_file_name = "checkout"
 
-    filename = os.path.basename(ref_string)
+    filename = Path(ref_string).name
 
     # Check if this reference comes from the core UCP schema
     is_ucp = "ucp.json" in ref_string
@@ -179,7 +183,7 @@ def define_env(env):
   def _render_table_from_ref(
     properties_ref, required_list, spec_file_name, context=None
   ):
-    """Helper function to further inline fields from a given list of properties.
+    """Inline fields from a given list of properties.
 
     Args:
       properties_ref: The reference JSON file.
@@ -193,14 +197,14 @@ def define_env(env):
     Returns:
       A string containing a Markdown table representing the schema properties,
       or a message indicating why a table could not be rendered.
-    """
 
+    """
     # Clean up ref to get entity name
     ref_clean = properties_ref.split("#")[0]
     if ref_clean.endswith("/schema"):
       ref_clean = ref_clean.replace("/schema", "")
 
-    ref_entity_name = os.path.basename(ref_clean).replace(".json", "")
+    ref_entity_name = Path(ref_clean).stem
 
     # LOAD DATA WITH CONTEXT
     ref_schema_data = _load_schema_variant(ref_entity_name, context)
@@ -228,7 +232,7 @@ def define_env(env):
   def _render_embedded_table(
     properties_list, required_list, spec_file_name, context=None
   ):
-    """Helper function to further inline fields from a given list of properties.
+    """Inline fields from a given list of properties.
 
     Args:
       properties_list: A list containing properties JSON.
@@ -242,6 +246,7 @@ def define_env(env):
     Returns:
       A string containing a Markdown table representing the schema properties,
       or a message indicating why a table could not be rendered.
+
     """
     if not properties_list:
       return "_No content fields defined._"
@@ -250,7 +255,7 @@ def define_env(env):
     if (
       len(properties_list) == 2
       and len(properties_list[1].keys()) == 1
-      and "required" in properties_list[1].keys()
+      and "required" in properties_list[1]
     ):
       return _read_schema_from_defs(
         "capability.json" + properties_list[0].get("$ref", ""),
@@ -261,7 +266,7 @@ def define_env(env):
 
     md = []
     for properties in properties_list:
-      if len(properties) == 1 and "$ref" in properties.keys():
+      if len(properties) == 1 and "$ref" in properties:
         embedded_data = _render_table_from_ref(
           properties["$ref"], required_list, spec_file_name, context
         )
@@ -282,7 +287,7 @@ def define_env(env):
     parent_required_list=None,
     context=None,
   ):
-    """Shared logic to render a Markdown table from a schema dictionary.
+    """Render a Markdown table from a schema dictionary.
 
     Schema dictionary must contain 'properties'. 'required' list is optional.
 
@@ -300,6 +305,7 @@ def define_env(env):
     Returns:
       A string containing a Markdown table representing the schema properties,
       or a message indicating why a table could not be rendered.
+
     """
     if not schema_data:
       return "_No content fields defined._"
@@ -359,7 +365,7 @@ def define_env(env):
       md = ["| Name | Type | Required | Description |"]
       md.append("| :--- | :--- | :--- | :--- |")
 
-    if "allOf" in properties.keys():
+    if "allOf" in properties:
       md.append(
         _render_embedded_table(
           properties.get("allOf", []),
@@ -404,18 +410,18 @@ def define_env(env):
         version_data = None
         if ref and ref.endswith("#/$defs/version"):
           try:
-            with open("spec/schemas/ucp.json", "r", encoding="utf-8") as f:
+            with Path("spec/schemas/ucp.json").open(encoding="utf-8") as f:
               data = json.load(f)
               version_data = data.get("$defs", {}).get("version", {})
           except json.JSONDecodeError as e:
             print(f"**Error loading schema {'ucp.json' + ref}':** {e}")
 
         # --- Logic to determine Display Type ---
-        if "oneOf" in details.keys():
+        if "oneOf" in details:
           # List of values embedded within an oneOf
           f_type = "OneOf["
           for idx, one_of_type in enumerate(details.get("oneOf", [])):
-            if "$ref" in one_of_type.keys():
+            if "$ref" in one_of_type:
               f_type += create_link(one_of_type["$ref"], spec_file_name)
               if idx < len(details.get("oneOf", [])) - 1:
                 f_type += ", "
@@ -438,7 +444,7 @@ def define_env(env):
         # --- Handle Description ---
         desc = ""
         # Handle additional description text for constant
-        if "const" in details.keys():
+        if "const" in details:
           desc += f"**Constant = {details.get('const')}**. "
         # Special handling for UCP version
         elif version_data and ref == "#/$defs/version":
@@ -457,32 +463,32 @@ def define_env(env):
           desc += f"**Enum:** {formatted_enums}"
 
         # --- Handle Required ---
-        if field_name in required_list:
-          req_display = "**Yes**"
-        else:
-          req_display = "No"
+        req_display = "**Yes**" if field_name in required_list else "No"
 
         md.append(f"| {field_name} | {f_type} | {req_display} | {desc} |")
 
     return "\n".join(md)
 
   def _resolve_ref(ref, root_data):
-    """Resolves a local reference (e.g., '#/components/parameters/id')."""
+    """Resolve a local reference (e.g., '#/components/parameters/id')."""
     return schema_utils.resolve_internal_ref(ref, root_data)
 
   def _create_file_loader(schema_path):
-    """Creates a file loader closure for a given base path."""
+    """Create a file loader closure for a given base path."""
 
     def _loader(filename):
-      dir_path = os.path.dirname(schema_path)
-      return schema_utils.load_json(os.path.join(dir_path, filename))
+      dir_path = Path(schema_path).parent
+      return schema_utils.load_json(dir_path / filename)
 
     return _loader
 
   def _read_schema_from_defs(
     entity_name, spec_file_name, need_header=True, parent_required_list=None
   ):
-    """Parse a standalone JSON Schema file with ref definitions, render a table."""
+    """Parse a standalone JSON Schema file with ref definitions.
+
+    Render a table.
+    """
     if ".json#/" not in entity_name:
       return f"**Error:** Invalid entity name format for def: {entity_name}"
 
@@ -494,7 +500,7 @@ def define_env(env):
       return f"**Error:** Malformed entity name: {entity_name}"
 
     for schemas_dir in schemas_dirs:
-      full_path = os.path.join(schemas_dir, core_entity_name)
+      full_path = Path(schemas_dir) / core_entity_name
       data = schema_utils.load_json(full_path)
       if data:
         file_loader = _create_file_loader(full_path)
@@ -524,7 +530,7 @@ def define_env(env):
   # --- MACRO 1: For Standalone JSON Schemas ---
   @env.macro
   def schema_fields(entity_name, spec_file_name):
-    """Parses a standalone JSON Schema file and renders a table.
+    """Parse a standalone JSON Schema file and render a table.
 
     Usage: {{ schema_fields('buyer') }}  (assumes .json extension)
 
@@ -532,13 +538,14 @@ def define_env(env):
       entity_name: The name of the schema entity (e.g., 'buyer').
       spec_file_name: The name of the spec file indicating where the dictionary
         should be rendered (e.g., "checkout", "fulfillment").
+
     """
     data = None
     loaded_path = None
     for schemas_dir in schemas_dirs:
-      full_path = schemas_dir + entity_name + ".json"
+      full_path = Path(schemas_dir) / (entity_name + ".json")
       try:
-        with open(full_path, "r") as f:
+        with full_path.open() as f:
           data = json.load(f)
           loaded_path = full_path
           break
@@ -557,7 +564,7 @@ def define_env(env):
 
   @env.macro
   def extension_schema_fields(entity_name, spec_file_name):
-    """Parses a standalone JSON Schema file and renders a table.
+    """Parse a standalone JSON Schema file and render a table.
 
     Usage: {{ extension_schema_fields('fulfillment_option') }}
 
@@ -566,6 +573,7 @@ def define_env(env):
         (e.g., 'fulfillment.json#/$defs/fulfillment_option').
       spec_file_name: The name of the spec file indicating where the dictionary
         should be rendered (e.g., "checkout", "fulfillment").
+
     """
     return _read_schema_from_defs(entity_name, spec_file_name)
 
@@ -576,10 +584,10 @@ def define_env(env):
     include_extensions=True,
     include_capability=True,
   ):
-    """Scans a dir for JSON schemas and generates documentation.
+    """Scan a dir for JSON schemas and generate documentation.
 
-    Scans a subdirectory within spec/schemas/shopping/ for .json files
-    and generates documentation for each schema found.
+    Scan a subdirectory within spec/schemas/shopping/ for .json files
+    and generate documentation for each schema found.
 
     Args:
       sub_dir: The subdirectory to scan, relative to spec/schemas/shopping/.
@@ -587,21 +595,20 @@ def define_env(env):
       include_extensions: If true, includes schemas with 'Extension' in title.
       include_capability: If true, includes schemas without 'Extension' in
         title.
+
     """
-    schema_base_path = "spec/schemas/shopping"
+    schema_base_path = Path("spec/schemas/shopping")
     scan_path = (
-      os.path.join(schema_base_path, sub_dir)
-      if sub_dir != "."
-      else schema_base_path
+      schema_base_path / sub_dir if sub_dir != "." else schema_base_path
     )
 
-    if not os.path.isdir(scan_path):
+    if not scan_path.is_dir():
       return f"<p><em>Schema directory not found: {scan_path}</em></p>"
 
     output = []
     try:
       schema_files = sorted(
-        [f for f in os.listdir(scan_path) if f.endswith(".json")]
+        [f for f in scan_path.iterdir() if f.suffix == ".json"]
       )
     except FileNotFoundError:
       return f"<p><em>Schema directory not found: {scan_path}</em></p>"
@@ -610,7 +617,7 @@ def define_env(env):
       return f"<p><em>No schema files found in {scan_path}</em></p>"
 
     for schema_file in schema_files:
-      entity_name_base = os.path.splitext(schema_file)[0]
+      entity_name_base = schema_file.stem
       if sub_dir == ".":
         entity_name = entity_name_base
       else:
@@ -693,7 +700,7 @@ def define_env(env):
   # --- MACRO 2: For Standalone JSON Extensions ---
   @env.macro
   def extension_fields(entity_name, spec_file_name):
-    """Parses an extension schema file and renders a table from its $defs.
+    """Parse an extension schema file and render a table from its $defs.
 
     Usage: {{ extension_fields('discount', 'checkout') }}
 
@@ -701,11 +708,12 @@ def define_env(env):
       entity_name: The name of the extension schema (e.g., 'discount').
       spec_file_name: The name of the spec file indicating where the dictionary
         should be rendered (e.g., "checkout", "fulfillment").
+
     """
     # Construct full path based on new structure
-    full_path = "spec/schemas/shopping/" + entity_name + ".json"
+    full_path = Path("spec/schemas/shopping") / (entity_name + ".json")
     try:
-      with open(full_path, "r", encoding="utf-8") as f:
+      with full_path.open(encoding="utf-8") as f:
         data = json.load(f)
 
       # Extension schemas have their composed type in $defs.checkout
@@ -728,7 +736,7 @@ def define_env(env):
   # --- MACRO 3: For Transport Operations ---
   @env.macro
   def method_fields(operation_id, file_name, spec_file_name, io_type=None):
-    """Extracts Request/Response schemas for a specific OpenAPI operationId.
+    """Extract Request/Response schemas for a specific OpenAPI operationId.
 
     Args:
       operation_id: The `operationId` of the OpenAPI operation to document.
@@ -737,11 +745,12 @@ def define_env(env):
         should be rendered (e.g., "checkout", "fulfillment").
       io_type: Optional. Specifies whether to render 'request', 'response', or
         both (if None).
+
     """
-    full_path = openapi_dir + file_name
+    full_path = Path(openapi_dir) / file_name
 
     try:
-      with open(full_path, "r", encoding="utf-8") as f:
+      with full_path.open(encoding="utf-8") as f:
         data = json.load(f)
 
       # 1. Find the Operation Object by ID (search paths first, then webhooks)
@@ -790,7 +799,7 @@ def define_env(env):
       res_schema = {}
       res = operation.get("responses", {})
       for code in success_response_codes:
-        if code in res.keys():
+        if code in res:
           res_content = res.get(code, {}).get("content", {})
           res_schema = res_content.get("application/json", {}).get("schema", {})
           break
@@ -915,16 +924,17 @@ def define_env(env):
   # --- MACRO 4: For HTTP Headers ---
   @env.macro
   def header_fields(operation_id, file_name):
-    """Extracts HTTP headers for a specific OpenAPI operationId.
+    """Extract HTTP headers for a specific OpenAPI operationId.
 
     Args:
       operation_id: The `operationId` of the OpenAPI operation.
       file_name: The name of the OpenAPI file to read.
+
     """
-    full_path = openapi_dir + file_name
+    full_path = Path(openapi_dir) / file_name
 
     try:
-      with open(full_path, "r", encoding="utf-8") as f:
+      with full_path.open(encoding="utf-8") as f:
         data = json.load(f)
 
       # 1. Find the Operation Object by ID
@@ -989,7 +999,7 @@ def define_env(env):
         return "_No headers defined._"
 
       def render_headers_table(headers_list):
-        """Renders a list of headers into a Markdown table."""
+        """Render a list of headers into a Markdown table."""
         md_table = ["| Header | Required | Description |"]
         md_table.append("| :--- | :--- | :--- |")
         for h in headers_list:
