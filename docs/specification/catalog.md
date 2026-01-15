@@ -146,6 +146,17 @@ as the first element. Platforms SHOULD treat the first element as featured.
 
 {{ schema_fields('types/rating', 'catalog') }}
 
+### Search Filters
+
+Filter criteria for narrowing search results. Standard filters are defined below;
+merchants MAY support additional custom filters via `additionalProperties`.
+
+{{ schema_fields('types/search_filters', 'catalog') }}
+
+### Price Filter
+
+{{ schema_fields('types/price_filter', 'catalog') }}
+
 ### Pagination
 
 Cursor-based pagination for list operations.

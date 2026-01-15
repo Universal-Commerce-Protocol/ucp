@@ -38,31 +38,7 @@
           "$ref": "#/$defs/context"
         },
         "filters": {
-          "type": "object",
-          "description": "Filter criteria to narrow results. All specified filters combine with AND logic.",
-          "properties": {
-            "category": {
-              "type": "string",
-              "description": "Filter by product category. Categories are merchant-defined strings representing product taxonomy. Valid values can be discovered from the category field in search results, merchant documentation, or standard taxonomies that businesses may align with."
-            },
-            "price": {
-              "type": "object",
-              "description": "Price range filter in minor currency units. Currency determined by country.",
-              "properties": {
-                "min": {
-                  "type": "integer",
-                  "minimum": 0,
-                  "description": "Minimum price in minor units."
-                },
-                "max": {
-                  "type": "integer",
-                  "minimum": 0,
-                  "description": "Maximum price in minor units."
-                }
-              }
-            }
-          },
-          "additionalProperties": true
+          "$ref": "types/search_filters.json"
         },
         "pagination": {
           "$ref": "types/pagination.json#/$defs/request"
