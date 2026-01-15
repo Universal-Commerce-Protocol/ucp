@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/catalog.json",
+  "name": "dev.ucp.shopping.catalog",
+  "version": "2026-01-11",
+  "title": "Catalog",
+  "description": "Product catalog search and item retrieval capability.",
+  "type": "object",
+  "$defs": {
+    "context": {
+      "allOf": [
+        { "$ref": "types/context.json" },
+        {
+          "type": "object",
+          "properties": {
+            "intent": {
+              "type": "string",
+              "description": "Background context for semantic search (e.g., 'looking for gift under $50', 'need something durable for outdoor use')."
+            }
+          }
+        }
+      ],
+      "description": "Location and market context for catalog operations. Extends base context with 'intent' for semantic search."
+    },
+    "search_request": {
+      "type": "object",
+      "required": ["query"],
+      "properties": {
+        "query": {
+          "type": "string",
+          "description": "Free-text search query."
+        },
+        "context": {
+          "$ref": "#/$defs/context"
+        },
+        "filters": {
+          "type": "object",
+          "description": "Filter criteria to narrow results. All specified filters combine with AND logic.",
+          "properties": {
+            "category": {
+              "type": "string",
+              "description": "Filter by product category. Categories are merchant-defined strings representing product taxonomy. Valid values can be discovered from the category field in search results, merchant documentation, or standard taxonomies that businesses may align with."
+            },
+            "price": {
+              "type": "object",
+              "description": "Price range filter in minor currency units. Currency determined by country.",
+              "properties": {
+                "min": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "Minimum price in minor units."
+                },
+                "max": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "Maximum price in minor units."
+                }
+              }
+            }
+          },
+          "additionalProperties": true
+        },
+        "pagination": {
+          "$ref": "types/pagination.json#/$defs/request"
+        }
+      }
+    },
+    "search_response": {
+      "type": "object",
+      "required": [
+        "ucp",
+        "products"
+      ],
+      "properties": {
+        "ucp": {
+          "$ref": "../ucp.json#/$defs/response"
+        },
+        "products": {
+          "type": "array",
+          "items": {
+            "$ref": "types/product.json"
+          },
+          "description": "Products matching the search criteria."
+        },
+        "pagination": {
+          "$ref": "types/pagination.json#/$defs/response"
+        },
+        "messages": {
+          "type": "array",
+          "items": {
+            "$ref": "types/message.json"
+          },
+          "description": "Errors, warnings, or informational messages about the search results."
+        }
+      }
+    },
+    "get_item_response": {
+      "type": "object",
+      "required": [
+        "ucp"
+      ],
+      "properties": {
+        "ucp": {
+          "$ref": "../ucp.json#/$defs/response"
+        },
+        "product": {
+          "$ref": "types/product.json",
+          "description": "The product containing the requested ID. For product ID lookups, variants may contain a representative set. For variant ID lookups, variants contains only the requested variant."
+        },
+        "messages": {
+          "type": "array",
+          "items": {
+            "$ref": "types/message.json"
+          },
+          "description": "Errors, warnings, or informational messages about the requested item."
+        }
+      }
+    }
+  }
+}

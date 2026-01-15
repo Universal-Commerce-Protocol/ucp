@@ -263,6 +263,41 @@
         "name": "cart",
         "schema": {"$ref": "../../schemas/shopping/cart.json"}
       }
+    },
+    {
+      "name": "search_catalog",
+      "summary": "Search for products in the catalog",
+      "params": [
+        {
+          "name": "request",
+          "required": true,
+          "schema": {"$ref": "https://ucp.dev/schemas/shopping/catalog.json#/$defs/search_request"}
+        }
+      ],
+      "result": {
+        "name": "response",
+        "schema": {"$ref": "https://ucp.dev/schemas/shopping/catalog.json#/$defs/search_response"}
+      }
+    },
+    {
+      "name": "get_catalog_item",
+      "summary": "Get a product or variant by ID",
+      "description": "Returns the parent product with context. For product IDs, variants may contain a representative set. For variant IDs, variants contains only the requested variant.",
+      "params": [
+        {
+          "name": "id",
+          "required": true,
+          "schema": {"type": "string", "description": "Global ID (GID) of product or variant."}
+        },
+        {
+          "name": "context",
+          "schema": {"$ref": "https://ucp.dev/schemas/shopping/types/context.json", "description": "Location and market context. Platforms MAY geo-detect from request; provided fields MUST override."}
+        }
+      ],
+      "result": {
+        "name": "response",
+        "schema": {"$ref": "https://ucp.dev/schemas/shopping/catalog.json#/$defs/get_item_response"}
+      }
     }
   ]
 }

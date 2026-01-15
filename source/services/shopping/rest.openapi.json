@@ -578,6 +578,76 @@
           }
         }
       }
+    },
+    "/catalog/search": {
+      "post": {
+        "operationId": "search_catalog",
+        "summary": "Search Catalog",
+        "description": "Search for products in the business's catalog.",
+        "parameters": [
+          { "$ref": "#/components/parameters/authorization" },
+          { "$ref": "#/components/parameters/x_api_key" },
+          { "$ref": "#/components/parameters/request_signature" },
+          { "$ref": "#/components/parameters/request_id" },
+          { "$ref": "#/components/parameters/user_agent" },
+          { "$ref": "#/components/parameters/content_type" },
+          { "$ref": "#/components/parameters/accept" },
+          { "$ref": "#/components/parameters/accept_language" },
+          { "$ref": "#/components/parameters/accept_encoding" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/catalog_search_request" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Search results",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/catalog_search_response" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/item/{id}": {
+      "get": {
+        "operationId": "get_catalog_item",
+        "summary": "Get Catalog Item",
+        "description": "Get a product or variant by ID. Returns the parent product with context.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "Global ID (GID) of product or variant."
+          },
+          { "$ref": "#/components/parameters/authorization" },
+          { "$ref": "#/components/parameters/x_api_key" },
+          { "$ref": "#/components/parameters/request_signature" },
+          { "$ref": "#/components/parameters/request_id" },
+          { "$ref": "#/components/parameters/user_agent" },
+          { "$ref": "#/components/parameters/accept" },
+          { "$ref": "#/components/parameters/accept_language" },
+          { "$ref": "#/components/parameters/accept_encoding" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Item details",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/catalog_get_item_response" }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "webhooks": {
