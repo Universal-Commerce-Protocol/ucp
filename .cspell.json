@@ -10,7 +10,8 @@
     ".vscode/**",
     ".cspell.json",
     "**/*.svg",
-    ".gitignore"
+    ".gitignore",
+    "package.json"
   ],
   "dictionaryDefinitions": [
     {
