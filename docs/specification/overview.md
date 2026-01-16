@@ -373,10 +373,10 @@ example:
         "id": "gpay",
         "name": "com.google.pay",
         "version": "2024-12-03",
-        "spec": "https://developers.google.com/merchant/ucp/guides/gpay-payment-handler",
-        "config_schema": "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/gpay_config.json",
+        "spec": "https://pay.google.com/gp/p/ucp/2026-01-11/",
+        "config_schema": "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/config.json",
         "instrument_schemas": [
-          "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/gpay_card_payment_instrument.json"
+          "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/card_payment_instrument.json"
         ]
       },
       {
@@ -591,8 +591,8 @@ participants together.
 
 **Important distinction:**
 
-- **Payment Credential Provider** = The participant (entity like Google Pay, Stripe)
-- **Payment Handler** = The specification the provider authors (e.g., `com.google.pay`)
+- **Payment Credential Provider** = The participant (entity like Google Pay, Shop Pay)
+- **Payment Handler** = The specification the provider authors (e.g., `com.google.pay`, `dev.shopify.shop_pay`)
 
 Payment handlers allow for a variety of different payment instruments and
 token-types to be supported, including network tokens. They are standardized
@@ -630,8 +630,8 @@ instruments are negotiated and executed using concrete data examples.
 
 #### Scenario A: Digital Wallet
 
-In this scenario, the platform identifies a digital wallet handler (e.g.,
-`com.google.pay`, `dev.shopify.shop_pay`) and uses the wallet's API to acquire
+In this scenario, the platform identifies a payment credential provider (e.g.,
+`com.google.pay`, `dev.shopify.shop_pay`) and uses their API to acquire
 an encrypted payment token.
 
 ##### 1. Business Advertisement (Response from Create Checkout)
@@ -700,8 +700,11 @@ POST /checkout-sessions/{id}/complete
         "id": "pm_1234567890abc",
         "handler_id": "8c9202bd-63cc-4241-8d24-d57ce69ea31c",
         "type": "card",
-        "brand": "visa",
-        "last_digits": "4242",
+        "selected": true,
+        "display": {
+          "brand": "visa",
+          "last_digits": "4242"
+        },
         "billing_address": {
           "street_address": "123 Main Street",
           "extended_address": "Suite 400",

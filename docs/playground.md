@@ -426,9 +426,9 @@ const UcpData = {
       id: "shop_pay",
       name: "com.shopify.shop_pay",
       version: "2025-12-08",
-      spec: "https://shopify.dev/ucp/shop_pay",
-      config_schema: "https://shopify.dev/ucp/handlers/shop_pay/config.json",
-      instrument_schemas: ["https://shopify.dev/ucp/handlers/shop_pay/instrument.json"],
+      spec: "https://shopify.dev/docs/agents/checkout/shop-pay-handler",
+      config_schema: "https://shopify.dev/ucp/shop-pay-handler/2026-01-11/config.json",
+      instrument_schemas: ["https://shopify.dev/ucp/shop-pay-handler/2026-01-11/instrument.json"],
       config: { shop_id: "shopify-559128571" }
     },
     {
@@ -540,8 +540,10 @@ const UcpData = {
     gpay: {
       "handler_id": "gpay",
       "type": "card",
-      "brand": "visa",
-      "last_digits": "4242",
+      "display": {
+        "brand": "visa",
+        "last_digits": "4242"
+      },
       "billing_address": {
         "street_address": "123 Main Street",
         "extended_address": "Suite 400",
@@ -731,8 +733,7 @@ class UcpBackend {
       line_items: orderLineItems,
       fulfillment: fulfillmentObj,
       adjustments: [],
-      totals: this.session.totals,
-      payment: { selected_instrument_id: paymentInstrument.id }
+      totals: this.session.totals
     };
 
     this.session.status = "completed";
@@ -991,6 +992,8 @@ class UcpApp {
     } else if (handlerId === 'shop_pay') {
       instrument.credential = { type: "ShopPayToken", token: "shoppay_tok_" + tokenStr };
     }
+
+    instrument.selected = true;
 
     this.state.lastRequests.instrument = instrument;
     this.setJson('json-mint-res', instrument);

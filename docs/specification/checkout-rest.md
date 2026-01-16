@@ -143,39 +143,28 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
       "payment": {
         "handlers": [
           {
-            "id": "com.google.pay",
-            "name": "gpay",
-            "version": "2024-12-03",
-            "spec": "https://developers.google.com/merchant/ucp/guides/gpay-payment-handler",
-            "config_schema": "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/gpay_config.json",
+            "id": "shop_pay",
+            "name": "com.shopify.shop_pay",
+            "version": "2026-01-11",
+            "spec": "https://shopify.dev/docs/agents/checkout/shop-pay-handler",
+            "config_schema": "https://shopify.dev/ucp/shop-pay-handler/2026-01-11/config.json",
             "instrument_schemas": [
-              "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/gpay_card_payment_instrument.json"
+              "https://shopify.dev/ucp/shop-pay-handler/2026-01-11/instrument.json"
             ],
             "config": {
-              "allowed_payment_methods": [
-                {
-                  "type": "CARD",
-                  "parameters": {
-                    "allowed_card_networks": [
-                      "VISA",
-                      "MASTERCARD",
-                      "AMEX"
-                    ]
-                  }
-                }
-              ]
+              "shop_id": "shop_merchant_123"
             }
           }
         ],
-        "selected_instrument_id": "pi_gpay_5678",
         "instruments": [
           {
-            "id": "pi_gpay_5678",
-            "handler_id": "com.google.pay",
-            "type": "card",
-            "brand": "mastercard",
-            "last_digits": "5678",
-            "rich_text_description": "Google Pay •••• 5678"
+            "id": "instr_shop_pay_1",
+            "handler_id": "shop_pay",
+            "type": "shop_pay",
+            "selected": true,
+            "display": {
+              "email": "buyer@example.com"
+            }
           }
         ]
       }
@@ -289,39 +278,28 @@ so clients must include all previously set fields they wish to retain.
       "payment": {
         "handlers": [
           {
-            "id": "com.google.pay",
-            "name": "gpay",
-            "version": "2024-12-03",
-            "spec": "https://ucp.dev/handlers/google_pay",
-            "config_schema": "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/gpay_config.json",
+            "id": "shop_pay",
+            "name": "com.shopify.shop_pay",
+            "version": "2026-01-11",
+            "spec": "https://shopify.dev/docs/agents/checkout/shop-pay-handler",
+            "config_schema": "https://shopify.dev/ucp/shop-pay-handler/2026-01-11/config.json",
             "instrument_schemas": [
-              "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/gpay_card_payment_instrument.json"
+              "https://shopify.dev/ucp/shop-pay-handler/2026-01-11/instrument.json"
             ],
             "config": {
-              "allowed_payment_methods": [
-                {
-                  "type": "CARD",
-                  "parameters": {
-                    "allowed_card_networks": [
-                      "VISA",
-                      "MASTERCARD",
-                      "AMEX"
-                    ]
-                  }
-                }
-              ]
+              "shop_id": "shop_merchant_123"
             }
           }
         ],
-        "selected_instrument_id": "pi_gpay_5678",
         "instruments": [
           {
-            "id": "pi_gpay_5678",
-            "handler_id": "com.google.pay",
-            "type": "card",
-            "brand": "mastercard",
-            "last_digits": "5678",
-            "rich_text_description": "Google Pay •••• 5678"
+            "id": "instr_shop_pay_1",
+            "handler_id": "shop_pay",
+            "type": "shop_pay",
+            "selected": true,
+            "display": {
+              "email": "buyer@example.com"
+            }
           }
         ]
       }
@@ -500,13 +478,13 @@ type & addresses.
       "payment": {
         "handlers": [
           {
-            "id": "com.google.pay",
-            "name": "gpay",
-            "version": "2024-12-03",
-            "spec": "https://ucp.dev/handlers/google_pay",
-            "config_schema": "https://ucp.dev/handlers/google_pay/config.json",
+            "id": "gpay",
+            "name": "com.google.pay",
+            "version": "2026-01-11",
+            "spec": "https://pay.google.com/gp/p/ucp/2026-01-11/",
+            "config_schema": "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/config.json",
             "instrument_schemas": [
-              "https://ucp.dev/handlers/google_pay/card_payment_instrument.json"
+              "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/card_payment_instrument.json"
             ],
             "config": {
               "allowed_payment_methods": [
@@ -524,15 +502,17 @@ type & addresses.
             }
           }
         ],
-        "selected_instrument_id": "pi_gpay_5678",
         "instruments": [
           {
             "id": "pi_gpay_5678",
-            "handler_id": "com.google.pay",
+            "handler_id": "gpay",
             "type": "card",
-            "brand": "mastercard",
-            "last_digits": "5678",
-            "rich_text_description": "Google Pay •••• 5678"
+            "selected": true,
+            "display": {
+              "brand": "mastercard",
+              "last_digits": "5678",
+              "description": "Google Pay •••• 5678"
+            }
           }
         ]
       }
@@ -710,39 +690,28 @@ Follow-up calls after initial `fulfillment` data to update selection.
       "payment": {
         "handlers": [
           {
-            "id": "com.google.pay",
-            "name": "gpay",
-            "version": "2024-12-03",
-            "spec": "https://ucp.dev/handlers/google_pay",
-            "config_schema": "https://ucp.dev/handlers/google_pay/config.json",
+            "id": "shop_pay",
+            "name": "com.shopify.shop_pay",
+            "version": "2026-01-11",
+            "spec": "https://shopify.dev/docs/agents/checkout/shop-pay-handler",
+            "config_schema": "https://shopify.dev/ucp/shop-pay-handler/2026-01-11/config.json",
             "instrument_schemas": [
-              "https://ucp.dev/handlers/google_pay/card_payment_instrument.json"
+              "https://shopify.dev/ucp/shop-pay-handler/2026-01-11/instrument.json"
             ],
             "config": {
-              "allowed_payment_methods": [
-                {
-                  "type": "CARD",
-                  "parameters": {
-                    "allowed_card_networks": [
-                      "VISA",
-                      "MASTERCARD",
-                      "AMEX"
-                    ]
-                  }
-                }
-              ]
+              "shop_id": "shop_merchant_123"
             }
           }
         ],
-        "selected_instrument_id": "pi_gpay_5678",
         "instruments": [
           {
-            "id": "pi_gpay_5678",
-            "handler_id": "com.google.pay",
-            "type": "card",
-            "brand": "mastercard",
-            "last_digits": "5678",
-            "rich_text_description": "Google Pay •••• 5678"
+            "id": "instr_shop_pay_1",
+            "handler_id": "shop_pay",
+            "type": "shop_pay",
+            "selected": true,
+            "display": {
+              "email": "buyer@example.com"
+            }
           }
         ]
       }
@@ -769,10 +738,13 @@ place to set these expectations via `messages`.
             "id": "pi_gpay_5678",
             "handler_id": "com.google.pay",
             "type": "card",
-            "brand": "mastercard",
-            "last_digits": "5678",
-            "rich_card_art": "https://cart-art-1.html",
-            "rich_text_description": "Google Pay •••• 5678",
+            "selected": true,
+            "display": {
+              "brand": "mastercard",
+              "last_digits": "5678",
+              "card_art": "https://cart-art-1.html",
+              "description": "Google Pay •••• 5678"
+            },
             "billing_address": {
               "street_address": "123 Main St",
               "address_locality": "Anytown",
@@ -910,13 +882,13 @@ place to set these expectations via `messages`.
       "payment": {
         "handlers": [
           {
-            "id": "com.google.pay",
-            "name": "gpay",
-            "version": "2024-12-03",
-            "spec": "https://ucp.dev/handlers/google_pay",
-            "config_schema": "https://ucp.dev/handlers/google_pay/config.json",
+            "id": "gpay",
+            "name": "com.google.pay",
+            "version": "2026-01-11",
+            "spec": "https://pay.google.com/gp/p/ucp/2026-01-11/",
+            "config_schema": "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/config.json",
             "instrument_schemas": [
-              "https://ucp.dev/handlers/google_pay/card_payment_instrument.json"
+              "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/card_payment_instrument.json"
             ],
             "config": {
               "allowed_payment_methods": [
@@ -934,15 +906,17 @@ place to set these expectations via `messages`.
             }
           }
         ],
-        "selected_instrument_id": "pi_gpay_5678",
         "instruments": [
           {
             "id": "pi_gpay_5678",
-            "handler_id": "com.google.pay",
+            "handler_id": "gpay",
             "type": "card",
-            "brand": "mastercard",
-            "last_digits": "5678",
-            "rich_text_description": "Google Pay •••• 5678"
+            "selected": true,
+            "display": {
+              "brand": "mastercard",
+              "last_digits": "5678",
+              "description": "Google Pay •••• 5678"
+            }
           }
         ]
       }
@@ -1078,39 +1052,28 @@ place to set these expectations via `messages`.
       "payment": {
         "handlers": [
           {
-            "id": "com.google.pay",
-            "name": "gpay",
-            "version": "2024-12-03",
-            "spec": "https://ucp.dev/handlers/google_pay",
-            "config_schema": "https://ucp.dev/handlers/google_pay/config.json",
+            "id": "shop_pay",
+            "name": "com.shopify.shop_pay",
+            "version": "2026-01-11",
+            "spec": "https://shopify.dev/docs/agents/checkout/shop-pay-handler",
+            "config_schema": "https://shopify.dev/ucp/shop-pay-handler/2026-01-11/config.json",
             "instrument_schemas": [
-              "https://ucp.dev/handlers/google_pay/card_payment_instrument.json"
+              "https://shopify.dev/ucp/shop-pay-handler/2026-01-11/instrument.json"
             ],
             "config": {
-              "allowed_payment_methods": [
-                {
-                  "type": "CARD",
-                  "parameters": {
-                    "allowed_card_networks": [
-                      "VISA",
-                      "MASTERCARD",
-                      "AMEX"
-                    ]
-                  }
-                }
-              ]
+              "shop_id": "shop_merchant_123"
             }
           }
         ],
-        "selected_instrument_id": "pi_gpay_5678",
         "instruments": [
           {
-            "id": "pi_gpay_5678",
-            "handler_id": "com.google.pay",
-            "type": "card",
-            "brand": "mastercard",
-            "last_digits": "5678",
-            "rich_text_description": "Google Pay •••• 5678"
+            "id": "instr_shop_pay_1",
+            "handler_id": "shop_pay",
+            "type": "shop_pay",
+            "selected": true,
+            "display": {
+              "email": "buyer@example.com"
+            }
           }
         ]
       }
@@ -1242,13 +1205,13 @@ place to set these expectations via `messages`.
       "payment": {
         "handlers": [
           {
-            "id": "com.google.pay",
-            "name": "gpay",
-            "version": "2024-12-03",
-            "spec": "https://ucp.dev/handlers/google_pay",
-            "config_schema": "https://ucp.dev/handlers/google_pay/config.json",
+            "id": "gpay",
+            "name": "com.google.pay",
+            "version": "2026-01-11",
+            "spec": "https://pay.google.com/gp/p/ucp/2026-01-11/",
+            "config_schema": "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/config.json",
             "instrument_schemas": [
-              "https://ucp.dev/handlers/google_pay/card_payment_instrument.json"
+              "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/card_payment_instrument.json"
             ],
             "config": {
               "allowed_payment_methods": [
@@ -1266,15 +1229,17 @@ place to set these expectations via `messages`.
             }
           }
         ],
-        "selected_instrument_id": "pi_gpay_5678",
         "instruments": [
           {
             "id": "pi_gpay_5678",
-            "handler_id": "com.google.pay",
+            "handler_id": "gpay",
             "type": "card",
-            "brand": "mastercard",
-            "last_digits": "5678",
-            "rich_text_description": "Google Pay •••• 5678"
+            "selected": true,
+            "display": {
+              "brand": "mastercard",
+              "last_digits": "5678",
+              "description": "Google Pay •••• 5678"
+            }
           }
         ]
       }

@@ -225,8 +225,8 @@ vs. Production). It is recommended to include this in the config schema to
 
 | Schema                                                                                                | Description                                             |
 | :---------------------------------------------------------------------------------------------------- | :------------------------------------------------------ |
-| [`payment_instrument.json`](https://ucp.dev/schemas/shopping/types/payment_instrument.json)           | Base: id, handler_id, type, credential, billing_address |
-| [`card_payment_instrument.json`](https://ucp.dev/schemas/shopping/types/card_payment_instrument.json) | Card display: brand, last_digits, expiry                |
+| [`payment_instrument.json`](https://ucp.dev/schemas/shopping/types/payment_instrument.json)           | Base: id, handler_id, type, credential, billing_address, selected, display |
+| [`card_payment_instrument.json`](https://ucp.dev/schemas/shopping/types/card_payment_instrument.json) | Card display: brand, last_digits, expiry, card art |
 
 UCP provides base schemas for universal payment instruments like `card`. Spec
 authors **MAY** extend any of the basic payment instruments to add additional

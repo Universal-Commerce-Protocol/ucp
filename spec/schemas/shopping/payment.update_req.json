@@ -5,10 +5,6 @@
   "description": "Payment configuration containing handlers.",
   "type": "object",
   "properties": {
-    "selected_instrument_id": {
-      "type": "string",
-      "description": "The id of the currently selected payment instrument from the instruments array. Set by the agent when submitting payment, and echoed back by the merchant in finalized state."
-    },
     "instruments": {
       "type": "array",
       "items": {

@@ -193,10 +193,13 @@ Content-Type: application/json
         "id": "instr_1",
         "handler_id": "processor_tokenizer",
         "type": "card",
-        "brand": "visa",
-        "last_digits": "1111",
-        "expiry_month": 12,
-        "expiry_year": 2026,
+        "selected": true,
+        "display": {
+          "brand": "visa",
+          "last_digits": "1111",
+          "expiry_month": 12,
+          "expiry_year": 2026
+        },
         "credential": {
           "type": "token",
           "token": "tok_a1b2c3d4e5f6"

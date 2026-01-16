@@ -506,19 +506,21 @@ information:**
     "result": {
         "checkout": {
             "payment": {
-                "selected_instrument_id": "payment_instrument_123",
                 // The instrument structure is defined by the handler's instrument schema
                 "instruments": [
                     {
                         "id": "payment_instrument_123",
                         "handler_id": "merchant_psp_handler_123",
                         "type": "card",
-                        "brand": "visa",
-                        "expiry_month": 12,
-                        "expiry_year": 2026,
-                        "last_digits": "1111",
-                        "rich_text_description": "Visa •••• 1111",
-                        "rich_card_art": "https://host.com/cards/visa-gold.png"
+                        "selected": true,
+                        "display": {
+                            "brand": "visa",
+                            "expiry_month": 12,
+                            "expiry_year": 2026,
+                            "last_digits": "1111",
+                            "description": "Visa •••• 1111",
+                            "card_art": "https://host.com/cards/visa-gold.png"
+                        }
                     }
                 ]
             }
@@ -765,7 +767,6 @@ checkout UI, such as a new payment method being selected.
             "id": "checkout_123",
             // The entire checkout object is provided, including the updated payment details
             "payment": {
-                "selected_instrument_id": "payment_instrument_123",
                 "instruments": [
                     /* ... */
                 ],
@@ -810,8 +811,7 @@ Requests the host to present payment instrument selection UI.
 
 The host **MUST** respond with either an error, or the newly-selected payment
 instruments. In successful responses, the host **MUST** respond with a partial
-update to the `checkout` object, with only the `payment.instruments` and
-`payment.selected_instrument_id` fields updated. The Embedded Checkout **MUST**
+update to the `checkout` object, with only the `payment.instruments` field updated. The Embedded Checkout **MUST**
 treat this update as a PUT-style change by entirely replacing the existing state
 for the provided fields, rather than attempting to merge the new data with
 existing state.
@@ -830,19 +830,21 @@ existing state.
     "result": {
         "checkout": {
             "payment": {
-                "selected_instrument_id": "payment_instrument_123",
                 // The instrument structure is defined by the handler's instrument schema
                 "instruments": [
                     {
                         "id": "payment_instrument_123",
                         "handler_id": "merchant_psp_handler_123",
                         "type": "card",
-                        "brand": "visa",
-                        "expiry_month": 12,
-                        "expiry_year": 2026,
-                        "last_digits": "1111",
-                        "rich_text_description": "Visa •••• 1111",
-                        "rich_card_art": "https://host.com/cards/visa-gold.png"
+                        "selected": true,
+                        "display": {
+                            "brand": "visa",
+                            "expiry_month": 12,
+                            "expiry_year": 2026,
+                            "last_digits": "1111",
+                            "description": "Visa •••• 1111",
+                            "card_art": "https://host.com/cards/visa-gold.png"
+                        }
                         // No `credential` yet; it will be attached in the `ec.payment.credential_request` response
                     }
                 ]
@@ -887,7 +889,6 @@ submission.
             "id": "checkout_123",
             // The entire checkout object is provided, including the current payment details
             "payment": {
-                "selected_instrument_id": "payment_instrument_123",
                 "instruments": [
                     /* ... */
                 ],
@@ -903,11 +904,11 @@ submission.
 
 The host **MUST** respond with either an error, or the credential for the
 selected payment instrument. In successful responses, the host **MUST** supply a
-partial update to the `checkout` object, updating only the instrument indicated
-by `payment.selected_instrument_id` with the new `credentials` field. The
-Embedded Checkout **MUST** treat this update as a PUT-style change by entirely
-replacing the existing state for `payment.instruments`, rather than attempting
-to merge the new data with existing state.
+partial update to the `checkout` object, updating the instrument with
+`selected: true` with the new `credentials` field. The Embedded Checkout
+**MUST** treat this update as a PUT-style change by entirely replacing the
+existing state for `payment.instruments`, rather than attempting to merge the
+new data with existing state.
 
 - **Direction:** host → Embedded Checkout
 - **Type:** Response
@@ -923,18 +924,20 @@ to merge the new data with existing state.
     "result": {
         "checkout": {
             "payment": {
-                "selected_instrument_id": "payment_instrument_123",
                 "instruments": [
                     {
                         "id": "payment_instrument_123",
                         "handler_id": "merchant_psp_handler_123",
                         "type": "card",
-                        "brand": "visa",
-                        "expiry_month": 12,
-                        "expiry_year": 2026,
-                        "last_digits": "1111",
-                        "rich_text_description": "Visa •••• 1111",
-                        "rich_card_art": "https://host.com/cards/visa-gold.png",
+                        "selected": true,
+                        "display": {
+                            "brand": "visa",
+                            "expiry_month": 12,
+                            "expiry_year": 2026,
+                            "last_digits": "1111",
+                            "description": "Visa •••• 1111",
+                            "card_art": "https://host.com/cards/visa-gold.png"
+                        },
                         // The credential structure is defined by the handler's instrument schema
                         "credential": {
                             "type": "token",

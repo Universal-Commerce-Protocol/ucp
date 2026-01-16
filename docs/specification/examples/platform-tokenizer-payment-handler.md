@@ -286,8 +286,11 @@ Content-Type: application/json
         "id": "instr_1",
         "handler_id": "platform_wallet",
         "type": "card",
-        "brand": "visa",
-        "last_digits": "4242",
+        "selected": true,
+        "display": {
+          "brand": "visa",
+          "last_digits": "4242"
+        },
         "credential": {
           "type": "token",
           "token": "ptok_x9y8z7w6v5u4"
