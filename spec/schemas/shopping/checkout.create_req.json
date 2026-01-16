@@ -8,8 +8,7 @@
   "type": "object",
   "required": [
     "line_items",
-    "currency",
-    "payment"
+    "currency"
   ],
   "additionalProperties": true,
   "properties": {

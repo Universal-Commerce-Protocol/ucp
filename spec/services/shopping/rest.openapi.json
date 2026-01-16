@@ -255,7 +255,7 @@
               "schema": {
                 "allOf": [
                   {
-                    "$ref": "#/components/schemas/payment_data"
+                    "$ref": "#/components/schemas/checkout_complete_request"
                   },
                   {
                     "title": "Risk Signals",
@@ -540,9 +540,6 @@
       "order": {
         "$ref": "https://ucp.dev/schemas/shopping/order.json"
       },
-      "payment_data": {
-        "$ref": "https://ucp.dev/schemas/shopping/payment_data.json"
-      },
       "ucp": {
         "$ref": "https://ucp.dev/schemas/ucp.json"
       },
@@ -555,6 +552,9 @@
       "checkout_update_request": {
         "$ref": "https://ucp.dev/schemas/shopping/checkout.update_req.json"
       },
+      "checkout_complete_request": {
+        "$ref": "https://ucp.dev/schemas/shopping/checkout.complete_req.json"
+      },
       "payment_response": {
         "$ref": "https://ucp.dev/schemas/shopping/payment_resp.json"
       },
@@ -563,6 +563,9 @@
       },
       "payment_update_request": {
         "$ref": "https://ucp.dev/schemas/shopping/payment.update_req.json"
+      },
+      "payment_complete_request": {
+        "$ref": "https://ucp.dev/schemas/shopping/payment.complete_req.json"
       }
     }
   }

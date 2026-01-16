@@ -38,7 +38,7 @@ import schema_utils
 
 SOURCE_DIR = "source"
 SPEC_DIR = "spec"
-REQUEST_OPERATIONS = ["create", "update"]
+REQUEST_OPERATIONS = ["create", "update", "complete"]
 UCP_ANNOTATIONS = {"ucp_request", "ucp_response", "ucp_shared_request"}
 
 # Valid annotation values
@@ -308,7 +308,7 @@ def write_json(data: dict[str, Any], path: str | Path) -> None:
     f.write("\n")
 
 
-def process_schema(
+def process_openapi_schema_schema(
   source_path: str,
   dest_dir: str,
   rel_path: str,
@@ -382,7 +382,12 @@ def process_schema(
   return generated, []
 
 
-def process_openapi(
+# =============================================================================
+# OpenAPI Schema Generation
+# =============================================================================
+
+
+def process_openapi_schema(
   source_path: str, dest_path: str, annotated_schemas: dict[str, bool]
 ) -> None:
   """Split components and convert refs. Preserve absolute URLs if present."""
@@ -430,7 +435,7 @@ def process_openapi(
       if is_shared:
         req_comp = f"{name}_request"
         schemas[req_comp] = {"$ref": f"{base_ref}_req.json"}
-        req_refs["create"] = req_refs["update"] = (
+        req_refs["create"] = req_refs["update"] = req_refs["complete"] = (
           f"#/components/schemas/{req_comp}"
         )
       else:
@@ -440,8 +445,12 @@ def process_openapi(
         update_comp = f"{name}_update_request"
         schemas[update_comp] = {"$ref": f"{base_ref}.update_req.json"}
 
+        complete_comp = f"{name}_complete_request"
+        schemas[complete_comp] = {"$ref": f"{base_ref}.complete_req.json"}
+
         req_refs["create"] = f"#/components/schemas/{create_comp}"
         req_refs["update"] = f"#/components/schemas/{update_comp}"
+        req_refs["complete"] = f"#/components/schemas/{complete_comp}"
 
       # 4. Map Old -> New and Delete
       ref_map[f"#/components/schemas/{name}"] = {
@@ -466,13 +475,20 @@ def process_openapi(
         update_node(v, ctx)
 
   for root in [spec.get("paths", {}), spec.get("webhooks", {})]:
-    for path_item in root.values():
+    for path, path_item in root.items():
       for method, op in path_item.items():
         if method in ["parameters", "summary", "description", "$ref"]:
           continue
 
+        # Determine request context based on method and path
         if method == "post":
-          req_ctx = "create"
+          # Check if this is a complete operation
+          if path.endswith("/complete") or op.get("operationId", "").startswith(
+            "complete_"
+          ):
+            req_ctx = "complete"
+          else:
+            req_ctx = "create"
         elif method in ["put", "patch"]:
           req_ctx = "update"
         else:
@@ -482,6 +498,87 @@ def process_openapi(
           update_node(op["requestBody"], req_ctx)
         if "responses" in op:
           update_node(op["responses"], "response")
+
+  write_json(spec, dest_path)
+
+
+# =============================================================================
+# OpenRPC Schema Generation
+# =============================================================================
+
+
+def process_openrpc_schema(
+  source_path: str, dest_path: str, annotated_schemas: dict[str, bool]
+) -> None:
+  """Rewrites refs in OpenRPC methods to use operation-specific schemas."""
+  spec = schema_utils.load_json(source_path)
+  if not spec or "methods" not in spec:
+    return
+
+  def rewrite_schema_ref(schema: Any, operation: str) -> Any:
+    """Recursively rewrite $refs in schema based on operation type."""
+    if isinstance(schema, dict):
+      if "$ref" in schema:
+        ref = schema["$ref"]
+        # Find if this ref points to an annotated schema
+        found_path = None
+        for path in annotated_schemas:
+          path_suffix = os.path.relpath(path, SOURCE_DIR).replace(os.sep, "/")
+          if ref.endswith(path_suffix) or path_suffix in ref:
+            found_path = path
+            break
+
+        if found_path:
+          is_shared = annotated_schemas[found_path]
+          # Rewrite the ref to point to the operation-specific schema
+          if ref.startswith("http:") or ref.startswith("https:"):
+            base_ref, ext = ref.rsplit(".", 1) if "." in ref else (ref, "json")
+          else:
+            p_ref = Path(ref)
+            base_ref, ext = str(p_ref.with_suffix("")), p_ref.suffix
+            ext = ext[1:] if ext.startswith(".") else ext
+
+          if operation in ["create", "update", "complete"]:
+            if is_shared:
+              new_ref = f"{base_ref}_req.{ext}"
+            else:
+              new_ref = f"{base_ref}.{operation}_req.{ext}"
+          else:
+            new_ref = f"{base_ref}_resp.{ext}"
+
+          return {**schema, "$ref": new_ref}
+
+      # Recursively process nested schemas
+      return {k: rewrite_schema_ref(v, operation) for k, v in schema.items()}
+    elif isinstance(schema, list):
+      return [rewrite_schema_ref(item, operation) for item in schema]
+    return schema
+
+  # Process each method
+  for method in spec.get("methods", []):
+    method_name = method.get("name", "")
+
+    # Determine operation type from method name
+    if "complete" in method_name or method_name.endswith(".complete"):
+      operation = "complete"
+    elif "create" in method_name:
+      operation = "create"
+    elif "update" in method_name:
+      operation = "update"
+    else:
+      operation = "read"
+
+    # Rewrite refs in params
+    if "params" in method:
+      for param in method["params"]:
+        if "schema" in param:
+          param["schema"] = rewrite_schema_ref(param["schema"], operation)
+
+    # Rewrite refs in result (always response)
+    if "result" in method and "schema" in method["result"]:
+      method["result"]["schema"] = rewrite_schema_ref(
+        method["result"]["schema"], "response"
+      )
 
   write_json(spec, dest_path)
 
@@ -695,7 +792,7 @@ def main() -> None:
       # 1. Special Handling: OpenAPI Spec (The Linker)
       if filename == "openapi.json" and str(rel_path).startswith("services/"):
         dest_rel = rel_path.parent / "rest.openapi.json"
-        process_openapi(
+        process_openapi_schema(
           str(source_path), str(Path(SPEC_DIR) / dest_rel), annotated_schemas
         )
         print(
@@ -707,9 +804,20 @@ def main() -> None:
       elif filename == "embedded.json":
         pass
 
-      # 3. Standard Handling: JSON Schemas (The Generator)
-      elif filename.endswith(".json") and filename != "openrpc.json":
-        generated, errors = process_schema(
+      # 3. Special Handling: OpenRPC (The Linker for MCP)
+      elif filename == "openrpc.json" and str(rel_path).startswith("services/"):
+        dest_rel = rel_path.parent / "mcp.openrpc.json"
+        process_openrpc_schema(
+          str(source_path), str(Path(SPEC_DIR) / dest_rel), annotated_schemas
+        )
+        print(
+          f"{schema_utils.Colors.GREEN}✓{schema_utils.Colors.RESET} {dest_rel}"
+        )
+        generated_count += 1
+
+      # 4. Standard Handling: JSON Schemas (The Generator)
+      elif filename.endswith(".json"):
+        generated, errors = process_openapi_schema_schema(
           str(source_path), SPEC_DIR, str(rel_path), annotated_schemas
         )
         for g in generated:
@@ -717,7 +825,7 @@ def main() -> None:
         generated_count += len(generated)
         all_errors.extend(errors)
 
-      # 4. Fallback: Copy other files (e.g. openrpc.json)
+      # 5. Fallback: Copy other files
       else:
         dest_name = (
           "mcp.openrpc.json" if filename == "openrpc.json" else filename
