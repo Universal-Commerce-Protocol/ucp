@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/intent_trace.json",
+  "name": "dev.ucp.shopping.intent_trace",
+  "version": "2026-01-11",
+  "title": "Intent Trace Extension",
+  "description": "Extends the cancel checkout request with structured abandonment context, enabling agents to transmit data about why a checkout session was abandoned.",
+  "$defs": {
+    "reason_code": {
+      "type": "string",
+      "description": "Structured reason for cancellation. Servers SHOULD accept unrecognized values and treat them as 'other' for forward compatibility.",
+      "enum": [
+        "price_sensitivity",
+        "shipping_cost",
+        "shipping_speed",
+        "product_fit",
+        "trust_security",
+        "returns_policy",
+        "payment_options",
+        "comparison",
+        "timing_deferred",
+        "other"
+      ],
+      "enumDescriptions": {
+        "price_sensitivity": "Total price was too high or exceeded budget.",
+        "shipping_cost": "Shipping fees were unacceptable.",
+        "shipping_speed": "Delivery timeframe did not meet requirements.",
+        "product_fit": "Product specifications, size, or features did not match needs.",
+        "trust_security": "Concerns about merchant trustworthiness or payment security.",
+        "returns_policy": "Return/refund policy was unsatisfactory.",
+        "payment_options": "Preferred payment method was not available.",
+        "comparison": "User chose to purchase from a different merchant.",
+        "timing_deferred": "User intends to complete purchase later.",
+        "other": "Reason does not fit other categories or was not specified."
+      }
+    },
+
+    "intent_trace_metadata": {
+      "type": "object",
+      "description": "Flat key-value object for additional context. Arrays and nested objects are NOT permitted. Monetary values SHOULD be integers in minor currency units.",
+      "additionalProperties": {
+        "oneOf": [
+          { "type": "string" },
+          { "type": "number" },
+          { "type": "boolean" }
+        ]
+      }
+    },
+
+    "intent_trace": {
+      "type": "object",
+      "description": "Structured abandonment context. Write-only: not returned in responses.",
+      "required": ["reason_code"],
+      "properties": {
+        "reason_code": {
+          "$ref": "#/$defs/reason_code",
+          "description": "Primary reason for abandonment."
+        },
+        "trace_summary": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "Human-readable summary of the objection. Agents SHOULD NOT include PII unless authorized by the user."
+        },
+        "metadata": {
+          "$ref": "#/$defs/intent_trace_metadata",
+          "description": "Additional structured context (e.g., price_threshold, competitor_name)."
+        }
+      }
+    },
+
+    "cancel_request_with_intent_trace": {
+      "title": "Cancel Checkout Request with Intent Trace",
+      "description": "Extension fields for cancel_checkout when intent trace is provided.",
+      "type": "object",
+      "properties": {
+        "intent_trace": {
+          "$ref": "#/$defs/intent_trace",
+          "description": "Structured abandonment context. Write-only: accepted on cancel but not returned in responses."
+        }
+      }
+    }
+  }
+}
