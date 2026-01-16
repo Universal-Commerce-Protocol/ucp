@@ -98,8 +98,9 @@ nature.
   amongst maintainers and DWGs will be escalated to the TC. Significant changes
   affecting core protocol architecture must follow the Enhancement Proposal
   process, requiring TC approval before implementation.
-* L3: If a conflict impacts the core protocol’s scope or business strategy, it
-  escalates to the Governing Council.
+* L3: Any changes made to the Governance process (e.g updating the
+  Goverenance.md file) or any changes that impact the core protocol’s scope or
+  adoption, must be approved by Governance Council (GC).
 
 The TC reserves the right to stop any discussions deemed non-critical to the
 protocol.
@@ -113,6 +114,19 @@ representatives) to be present for decision-making. New features should
 typically be attempted through the extensions framework first. If an extension
 achieves significant usage, it can be considered for adoption into the next
 minor version of the core.
+
+### Adding new extenstions and capabilities to the core protocol
+
+UCP is designed to be very extensible while keeping the core protocol light. A
+core principle of UCP is to ensure that the set of extensions and capabilties
+defined in UCP have broad ecosystem support. Vendors should first create
+capabilties & extensions in vendor-specific namespace pattern
+(e.g. com.{vendor}.*) for new use cases. Requests to add new capabilties and
+extensions should only be submitted when there is proven widespread adoption of
+vendor-specific capabilities and extensions. See the
+[Spec URL Binding section](https://ucp.dev/specification/overview/#spec-url-binding)
+for more details on using namespace pattern for creating vendor-specific
+capabilities and extensions.
 
 ### Code Reviews
 
