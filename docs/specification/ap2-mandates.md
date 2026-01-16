@@ -235,7 +235,7 @@ a completion request without mandates **MUST** result in a session failure.
 The platform initiates the session. The business returns the `Checkout` object
 with `ap2.merchant_authorization` embedded in the response body.
 
-{{ extension_schema_fields('ap2_mandate.json#/$defs/checkout_response_with_ap2', 'ap2-mandates') }}
+{{ extension_schema_fields('ap2_mandate.json#/$defs/checkout', 'ap2-mandates') }}
 
 **Example Response:**
 ```json
@@ -321,7 +321,7 @@ Binding (+kb) signature.
 Once the mandates are generated, the platform submits them in the completion
 request:
 
-{{ extension_schema_fields('ap2_mandate.json#/$defs/complete_request_with_ap2', 'ap2-mandates') }}
+{{ extension_schema_fields('ap2_mandate.json#/$defs/ap2_with_checkout_mandate', 'ap2-mandates') }}
 
 ```json
 {
@@ -347,7 +347,7 @@ request:
     ]
   },
   "ap2": {
-     "checkout_mandate": "eyJhbGciOiJFUzI1NiIsInR5cCI6InZjK3NkLWp3dCJ9..." // The User-Signed SD-JWT+kb / platform provider signed SD-JWT / delegated SD-JWT-KB
+    "checkout_mandate": "eyJhbGciOiJFUzI1NiIsInR5cCI6InZjK3NkLWp3dCJ9..." // The User-Signed SD-JWT+kb / platform provider signed SD-JWT / delegated SD-JWT-KB
   }
 }
 ```
@@ -409,19 +409,19 @@ checkout.
 
 ### AP2 Checkout Response
 
-The `ap2` object included in CREATE / UPDATE checkout responses.
+The `ap2` object included in checkout responses.
 
-{{ extension_schema_fields('ap2_mandate.json#/$defs/ap2_checkout_response', 'ap2-mandates') }}
+{{ extension_schema_fields('ap2_mandate.json#/$defs/ap2_with_merchant_authorization', 'ap2-mandates') }}
+
+### Checkout Mandate
+
+{{ extension_schema_fields('ap2_mandate.json#/$defs/checkout_mandate', 'ap2-mandates') }}
 
 ### AP2 Complete Request
 
 The `ap2` object included in COMPLETE checkout requests.
 
-{{ extension_schema_fields('ap2_mandate.json#/$defs/ap2_complete_request', 'ap2-mandates') }}
-
-### Checkout Mandate
-
-{{ extension_schema_fields('ap2_mandate.json#/$defs/checkout_mandate', 'ap2-mandates') }}
+{{ extension_schema_fields('ap2_mandate.json#/$defs/ap2_with_checkout_mandate', 'ap2-mandates') }}
 
 ### Error Codes
 
