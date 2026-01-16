@@ -198,7 +198,7 @@ Mandates are **SD-JWT** credentials with Key Binding (`+kb`). The platform
 | Mandate | UCP Placement | Purpose |
 | :------ | :------------ | :------ |
 | **checkout_mandate** | `ap2.checkout_mandate` | Proof bound to checkout terms, protects business |
-| **payment_mandate** | `payment_data.token` | Proof bound to payment authorization, protects funds |
+| **payment_mandate** | `payment.instruments[*].credential.token` | Proof bound to payment authorization, protects funds |
 
 The checkout mandate **MUST** contain the full checkout response including the
 `ap2.merchant_authorization` field. This creates a nested cryptographic binding
@@ -325,22 +325,26 @@ request:
 
 ```json
 {
-  "payment_data": {
-      "id": "instr_1",
-      "handler_id": "gpay",
-      "type": "card",
-      "description": "Visa •••• 1234",
-      "billing_address": {
-        "street_address": "123 Main St",
-        "address_locality": "Anytown",
-        "address_region": "CA",
-        "address_country": "US",
-        "postal_code": "12345"
-      },
-      "credential": {
-        "type": "PAYMENT_GATEWAY",
-        "token": "examplePaymentMethodToken"
+  "payment": {
+    "instruments": [
+      {
+        "id": "instr_1",
+        "handler_id": "gpay",
+        "type": "card",
+        "rich_text_description": "Visa •••• 1234",
+        "billing_address": {
+          "street_address": "123 Main St",
+          "address_locality": "Anytown",
+          "address_region": "CA",
+          "address_country": "US",
+          "postal_code": "12345"
+        },
+        "credential": {
+          "type": "PAYMENT_GATEWAY",
+          "token": "examplePaymentMethodToken"
+        }
       }
+    ]
   },
   "ap2": {
      "checkout_mandate": "eyJhbGciOiJFUzI1NiIsInR5cCI6InZjK3NkLWp3dCJ9..." // The User-Signed SD-JWT+kb / platform provider signed SD-JWT / delegated SD-JWT-KB
@@ -350,7 +354,7 @@ request:
 
 *   `ap2.checkout_mandate`: The SD-JWT+kb checkout mandate containing the
     full checkout (with `ap2.merchant_authorization`)
-*   `payment_data.token`: Contains the payment mandate (composite token)
+*   `payment.instruments[*].credential.token`: Contains the payment mandate (composite token)
 
 ## Verification & Processing
 

@@ -1,51 +1,44 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/schemas/shopping/fulfillment.json",
+  "$id": "https://ucp.dev/schemas/shopping/fulfillment.complete_req.json",
   "name": "dev.ucp.shopping.fulfillment",
   "version": "2026-01-11",
-  "title": "Fulfillment Extension",
+  "title": "Fulfillment Extension Complete Request",
   "description": "Extends Checkout with fulfillment support using methods, destinations, and groups.",
   "$defs": {
     "fulfillment_option": {
-      "$ref": "types/fulfillment_option.json"
+      "$ref": "types/fulfillment_option_req.json"
     },
     "fulfillment_group": {
-      "$ref": "types/fulfillment_group.json"
+      "$ref": "types/fulfillment_group.complete_req.json"
     },
     "fulfillment_method": {
-      "$ref": "types/fulfillment_method.json"
+      "$ref": "types/fulfillment_method.complete_req.json"
     },
     "fulfillment_available_method": {
-      "$ref": "types/fulfillment_available_method.json"
+      "$ref": "types/fulfillment_available_method_req.json"
     },
     "fulfillment": {
-      "$ref": "types/fulfillment.json"
+      "$ref": "types/fulfillment_req.json"
     },
     "checkout": {
-      "title": "Checkout with Fulfillment",
+      "title": "Checkout with Fulfillment Complete Request",
       "description": "Checkout extended with hierarchical fulfillment.",
       "allOf": [
-        { "$ref": "checkout.json" },
+        {
+          "$ref": "checkout.complete_req.json"
+        },
         {
           "type": "object",
-          "properties": {
-            "fulfillment": {
-              "$ref": "#/$defs/fulfillment",
-              "description": "Fulfillment details.",
-              "ucp_request": {
-                "create": "optional",
-                "update": "optional",
-                "complete": "omit"
-              }
-            }
-          }
+          "properties": {}
         }
       ]
     }
   },
-
   "embedded": {
-    "delegations": ["fulfillment.address_change"],
+    "delegations": [
+      "fulfillment.address_change"
+    ],
     "methods": [
       {
         "name": "ec.fulfillment.change",
@@ -56,7 +49,7 @@
             "name": "checkout",
             "required": true,
             "schema": {
-              "$ref": "../../schemas/shopping/checkout.json",
+              "$ref": "../../schemas/shopping/checkout.complete_req.json",
               "description": "Current checkout state with updated fulfillment."
             }
           }
@@ -71,7 +64,7 @@
             "name": "checkout",
             "required": true,
             "schema": {
-              "$ref": "../../schemas/shopping/checkout.json",
+              "$ref": "../../schemas/shopping/checkout.complete_req.json",
               "description": "Current checkout state with fulfillment context."
             }
           }
@@ -81,14 +74,16 @@
           "schema": {
             "type": "object",
             "description": "Checkout state with updated fulfillment address.",
-            "required": ["checkout"],
+            "required": [
+              "checkout"
+            ],
             "properties": {
               "checkout": {
                 "type": "object",
                 "description": "Partial checkout update with fulfillment address selection.",
                 "properties": {
                   "fulfillment": {
-                    "$ref": "../../schemas/shopping/types/fulfillment.json",
+                    "$ref": "../../schemas/shopping/types/fulfillment_req.json",
                     "description": "Fulfillment with updated destinations and selected_destination_id."
                   }
                 }

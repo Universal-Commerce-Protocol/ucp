@@ -211,17 +211,22 @@ POST /checkout-sessions/{checkout_id}/complete
 Content-Type: application/json
 
 {
-  "payment_data": {
-    "id": "{instrument_id}",
-    "handler_name": "{handler_name}",
-    "type": "{instrument_type}",
-    "credential": {
-      "type": "{credential_type}",
-      // Credential fields
-    }
-    // Additional instrument fields
+  "payment": {
+    "instruments": [
+      {
+        "id": "{instrument_id}",
+        "handler_id": "{handler_id}",
+        "type": "{instrument_type}",
+        "credential": {
+          "type": "{credential_type}",
+          "token": "{credential_token}",
+          // Credential fields
+        }
+        // Additional instrument fields
+      }
+    ]
   },
-  "risk_signal": {
+  "risk_signals": {
     // risk signal objects here
   }
 }

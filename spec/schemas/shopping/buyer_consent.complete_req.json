@@ -1,9 +1,9 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/schemas/shopping/buyer_consent.json",
+  "$id": "https://ucp.dev/schemas/shopping/buyer_consent.complete_req.json",
   "name": "dev.ucp.shopping.buyer_consent",
   "version": "2026-01-11",
-  "title": "Buyer Consent Extension",
+  "title": "Buyer Consent Extension Complete Request",
   "description": "Extends Checkout with buyer consent tracking for privacy compliance via the buyer object.",
   "$defs": {
     "consent": {
@@ -28,12 +28,13 @@
         }
       }
     },
-
     "buyer": {
-      "title": "Buyer with Consent",
+      "title": "Buyer with Consent Complete Request",
       "description": "Buyer object extended with consent tracking.",
       "allOf": [
-        {"$ref": "types/buyer.json"},
+        {
+          "$ref": "types/buyer.json"
+        },
         {
           "type": "object",
           "properties": {
@@ -45,25 +46,16 @@
         }
       ]
     },
-
     "checkout": {
-      "title": "Checkout with Buyer Consent",
+      "title": "Checkout with Buyer Consent Complete Request",
       "description": "Checkout extended with consent tracking via buyer object.",
       "allOf": [
-        {"$ref": "checkout.json"},
+        {
+          "$ref": "checkout.complete_req.json"
+        },
         {
           "type": "object",
-          "properties": {
-            "buyer": {
-              "$ref": "#/$defs/buyer",
-              "description": "Buyer with consent tracking.",
-              "ucp_request": {
-                "create": "optional",
-                "update": "optional",
-                "complete": "omit"
-              }
-            }
-          }
+          "properties": {}
         }
       ]
     }

@@ -98,19 +98,24 @@ export type CardPaymentInstrument = PaymentInstrumentBase & {
  */
 export type PaymentCredential = TokenCredentialResponse | CardCredential;
 /**
- * Order details available at the time of checkout completion.
+ * Buyer object extended with consent tracking.
+ *
+ * This interface was referenced by `BuyerConsentExtensionCompleteRequest`'s JSON-Schema
+ * via the `definition` "buyer".
  */
-export type OrderConfirmation = {
-  /**
-   * Unique order identifier.
-   */
-  id: string;
-  /**
-   * Permalink to access the order on merchant site.
-   */
-  permalink_url: string;
+export type BuyerWithConsentCompleteRequest = Buyer & {
+  consent?: Consent;
   [k: string]: unknown;
-} & string;
+};
+/**
+ * Checkout extended with consent tracking via buyer object.
+ *
+ * This interface was referenced by `BuyerConsentExtensionCompleteRequest`'s JSON-Schema
+ * via the `definition` "checkout".
+ */
+export type CheckoutWithBuyerConsentCompleteRequest = CheckoutCompleteRequest & {
+  [k: string]: unknown;
+};
 /**
  * Buyer object extended with consent tracking.
  *
@@ -118,7 +123,7 @@ export type OrderConfirmation = {
  * via the `definition` "buyer".
  */
 export type BuyerWithConsentCreateRequest = Buyer & {
-  consent?: Consent;
+  consent?: Consent1;
   [k: string]: unknown;
 };
 /**
@@ -138,7 +143,7 @@ export type CheckoutWithBuyerConsentCreateRequest = CheckoutCreateRequest & {
  * via the `definition` "buyer".
  */
 export type BuyerWithConsentUpdateRequest = Buyer & {
-  consent?: Consent1;
+  consent?: Consent2;
   [k: string]: unknown;
 };
 /**
@@ -158,7 +163,7 @@ export type CheckoutWithBuyerConsentUpdateRequest = CheckoutUpdateRequest & {
  * via the `definition` "buyer".
  */
 export type BuyerWithConsentResponse = Buyer & {
-  consent?: Consent2;
+  consent?: Consent3;
   [k: string]: unknown;
 };
 /**
@@ -169,6 +174,15 @@ export type BuyerWithConsentResponse = Buyer & {
  */
 export type CheckoutWithBuyerConsentResponse = CheckoutResponse & {
   buyer?: BuyerWithConsentResponse;
+  [k: string]: unknown;
+};
+/**
+ * Checkout extended with discount capability.
+ *
+ * This interface was referenced by `DiscountExtensionCompleteRequest`'s JSON-Schema
+ * via the `definition` "checkout".
+ */
+export type CheckoutWithDiscountCompleteRequest = CheckoutCompleteRequest & {
   [k: string]: unknown;
 };
 /**
@@ -209,6 +223,19 @@ export type FulfillmentDestinationRequest = ShippingDestinationRequest | RetailL
  * Shipping destination.
  */
 export type ShippingDestinationRequest = PostalAddress & {
+  /**
+   * ID specific to this shipping destination.
+   */
+  id?: string;
+  [k: string]: unknown;
+};
+/**
+ * Checkout extended with hierarchical fulfillment.
+ *
+ * This interface was referenced by `FulfillmentExtensionCompleteRequest`'s JSON-Schema
+ * via the `definition` "checkout".
+ */
+export type CheckoutWithFulfillmentCompleteRequest = CheckoutCompleteRequest & {
   [k: string]: unknown;
 };
 /**
@@ -706,6 +733,20 @@ export declare interface CardCredential {
   [k: string]: unknown;
 }
 /**
+ * Order details available at the time of checkout completion.
+ */
+export declare interface OrderConfirmation {
+  /**
+   * Unique order identifier.
+   */
+  id: string;
+  /**
+   * Permalink to access the order on merchant site.
+   */
+  permalink_url: string;
+  [k: string]: unknown;
+}
+/**
  * Extension fields for complete_checkout when AP2 is negotiated.
  *
  * This interface was referenced by `AP2MandateExtension`'s JSON-Schema
@@ -713,6 +754,58 @@ export declare interface CardCredential {
  */
 export declare interface CompleteCheckoutRequestWithAP2 {
   ap2?: AP2CompleteRequestObject;
+  [k: string]: unknown;
+}
+/**
+ * Extends Checkout with buyer consent tracking for privacy compliance via the buyer object.
+ */
+export declare interface BuyerConsentExtensionCompleteRequest {
+  [k: string]: unknown;
+}
+/**
+ * User consent states for data processing
+ *
+ * This interface was referenced by `BuyerConsentExtensionCompleteRequest`'s JSON-Schema
+ * via the `definition` "consent".
+ */
+export declare interface Consent {
+  /**
+   * Consent for analytics and performance tracking.
+   */
+  analytics?: boolean;
+  /**
+   * Consent for storing user preferences.
+   */
+  preferences?: boolean;
+  /**
+   * Consent for marketing communications.
+   */
+  marketing?: boolean;
+  /**
+   * Consent for selling data to third parties (CCPA).
+   */
+  sale_of_data?: boolean;
+  [k: string]: unknown;
+}
+/**
+ * Base checkout schema. Extensions compose onto this using allOf.
+ */
+export declare interface CheckoutCompleteRequest {
+  payment: PaymentCompleteRequest;
+  [k: string]: unknown;
+}
+/**
+ * Payment configuration containing handlers.
+ */
+export declare interface PaymentCompleteRequest {
+  /**
+   * The id of the currently selected payment instrument from the instruments array. Set by the agent when submitting payment, and echoed back by the merchant in finalized state.
+   */
+  selected_instrument_id?: string;
+  /**
+   * The payment instruments available for this payment. Each instrument is associated with a specific handler via the handler_id field. Handlers can extend the base payment_instrument schema to add handler-specific fields.
+   */
+  instruments?: PaymentInstrument[];
   [k: string]: unknown;
 }
 /**
@@ -727,7 +820,7 @@ export declare interface BuyerConsentExtensionCreateRequest {
  * This interface was referenced by `BuyerConsentExtensionCreateRequest`'s JSON-Schema
  * via the `definition` "consent".
  */
-export declare interface Consent {
+export declare interface Consent1 {
   /**
    * Consent for analytics and performance tracking.
    */
@@ -759,7 +852,7 @@ export declare interface CheckoutCreateRequest {
    * ISO 4217 currency code.
    */
   currency: string;
-  payment: PaymentCreateRequest;
+  payment?: PaymentCreateRequest;
   [k: string]: unknown;
 }
 /**
@@ -806,7 +899,7 @@ export declare interface BuyerConsentExtensionUpdateRequest {
  * This interface was referenced by `BuyerConsentExtensionUpdateRequest`'s JSON-Schema
  * via the `definition` "consent".
  */
-export declare interface Consent1 {
+export declare interface Consent2 {
   /**
    * Consent for analytics and performance tracking.
    */
@@ -842,7 +935,7 @@ export declare interface CheckoutUpdateRequest {
    * ISO 4217 currency code.
    */
   currency: string;
-  payment: PaymentUpdateRequest;
+  payment?: PaymentUpdateRequest;
   [k: string]: unknown;
 }
 /**
@@ -894,7 +987,7 @@ export declare interface BuyerConsentExtensionResponse {
  * This interface was referenced by `BuyerConsentExtensionResponse`'s JSON-Schema
  * via the `definition` "consent".
  */
-export declare interface Consent2 {
+export declare interface Consent3 {
   /**
    * Consent for analytics and performance tracking.
    */
@@ -916,13 +1009,13 @@ export declare interface Consent2 {
 /**
  * Extends Checkout with discount code support, enabling agents to apply promotional, loyalty, referral, and other discount codes.
  */
-export declare interface DiscountExtensionCreateRequest {
+export declare interface DiscountExtensionCompleteRequest {
   [k: string]: unknown;
 }
 /**
  * Breakdown of how a discount amount was allocated to a specific target.
  *
- * This interface was referenced by `DiscountExtensionCreateRequest`'s JSON-Schema
+ * This interface was referenced by `DiscountExtensionCompleteRequest`'s JSON-Schema
  * via the `definition` "allocation".
  */
 export declare interface Allocation {
@@ -939,7 +1032,7 @@ export declare interface Allocation {
 /**
  * A discount that was successfully applied.
  *
- * This interface was referenced by `DiscountExtensionCreateRequest`'s JSON-Schema
+ * This interface was referenced by `DiscountExtensionCompleteRequest`'s JSON-Schema
  * via the `definition` "applied_discount".
  */
 export declare interface AppliedDiscount {
@@ -974,32 +1067,15 @@ export declare interface AppliedDiscount {
   [k: string]: unknown;
 }
 /**
- * Discount codes input and applied discounts output.
- *
- * This interface was referenced by `DiscountExtensionCreateRequest`'s JSON-Schema
- * via the `definition` "discounts_object".
- */
-export declare interface DiscountsObject {
-  /**
-   * Discount codes to apply. Case-insensitive. Replaces previously submitted codes. Send empty array to clear.
-   */
-  codes?: string[];
-  /**
-   * Discounts successfully applied (code-based and automatic).
-   */
-  applied?: AppliedDiscount[];
-  [k: string]: unknown;
-}
-/**
  * Extends Checkout with discount code support, enabling agents to apply promotional, loyalty, referral, and other discount codes.
  */
-export declare interface DiscountExtensionUpdateRequest {
+export declare interface DiscountExtensionCreateRequest {
   [k: string]: unknown;
 }
 /**
  * Breakdown of how a discount amount was allocated to a specific target.
  *
- * This interface was referenced by `DiscountExtensionUpdateRequest`'s JSON-Schema
+ * This interface was referenced by `DiscountExtensionCreateRequest`'s JSON-Schema
  * via the `definition` "allocation".
  */
 export declare interface Allocation1 {
@@ -1016,7 +1092,7 @@ export declare interface Allocation1 {
 /**
  * A discount that was successfully applied.
  *
- * This interface was referenced by `DiscountExtensionUpdateRequest`'s JSON-Schema
+ * This interface was referenced by `DiscountExtensionCreateRequest`'s JSON-Schema
  * via the `definition` "applied_discount".
  */
 export declare interface AppliedDiscount1 {
@@ -1053,10 +1129,10 @@ export declare interface AppliedDiscount1 {
 /**
  * Discount codes input and applied discounts output.
  *
- * This interface was referenced by `DiscountExtensionUpdateRequest`'s JSON-Schema
+ * This interface was referenced by `DiscountExtensionCreateRequest`'s JSON-Schema
  * via the `definition` "discounts_object".
  */
-export declare interface DiscountsObject1 {
+export declare interface DiscountsObject {
   /**
    * Discount codes to apply. Case-insensitive. Replaces previously submitted codes. Send empty array to clear.
    */
@@ -1070,13 +1146,13 @@ export declare interface DiscountsObject1 {
 /**
  * Extends Checkout with discount code support, enabling agents to apply promotional, loyalty, referral, and other discount codes.
  */
-export declare interface DiscountExtensionResponse {
+export declare interface DiscountExtensionUpdateRequest {
   [k: string]: unknown;
 }
 /**
  * Breakdown of how a discount amount was allocated to a specific target.
  *
- * This interface was referenced by `DiscountExtensionResponse`'s JSON-Schema
+ * This interface was referenced by `DiscountExtensionUpdateRequest`'s JSON-Schema
  * via the `definition` "allocation".
  */
 export declare interface Allocation2 {
@@ -1093,7 +1169,7 @@ export declare interface Allocation2 {
 /**
  * A discount that was successfully applied.
  *
- * This interface was referenced by `DiscountExtensionResponse`'s JSON-Schema
+ * This interface was referenced by `DiscountExtensionUpdateRequest`'s JSON-Schema
  * via the `definition` "applied_discount".
  */
 export declare interface AppliedDiscount2 {
@@ -1130,10 +1206,10 @@ export declare interface AppliedDiscount2 {
 /**
  * Discount codes input and applied discounts output.
  *
- * This interface was referenced by `DiscountExtensionResponse`'s JSON-Schema
+ * This interface was referenced by `DiscountExtensionUpdateRequest`'s JSON-Schema
  * via the `definition` "discounts_object".
  */
-export declare interface DiscountsObject2 {
+export declare interface DiscountsObject1 {
   /**
    * Discount codes to apply. Case-insensitive. Replaces previously submitted codes. Send empty array to clear.
    */
@@ -1145,13 +1221,93 @@ export declare interface DiscountsObject2 {
   [k: string]: unknown;
 }
 /**
+ * Extends Checkout with discount code support, enabling agents to apply promotional, loyalty, referral, and other discount codes.
+ */
+export declare interface DiscountExtensionResponse {
+  [k: string]: unknown;
+}
+/**
+ * Breakdown of how a discount amount was allocated to a specific target.
+ *
+ * This interface was referenced by `DiscountExtensionResponse`'s JSON-Schema
+ * via the `definition` "allocation".
+ */
+export declare interface Allocation3 {
+  /**
+   * JSONPath to the allocation target (e.g., '$.line_items[0]', '$.totals.shipping').
+   */
+  path: string;
+  /**
+   * Amount allocated to this target in minor (cents) currency units.
+   */
+  amount: number;
+  [k: string]: unknown;
+}
+/**
+ * A discount that was successfully applied.
+ *
+ * This interface was referenced by `DiscountExtensionResponse`'s JSON-Schema
+ * via the `definition` "applied_discount".
+ */
+export declare interface AppliedDiscount3 {
+  /**
+   * The discount code. Omitted for automatic discounts.
+   */
+  code?: string;
+  /**
+   * Human-readable discount name (e.g., 'Summer Sale 20% Off').
+   */
+  title: string;
+  /**
+   * Total discount amount in minor (cents) currency units.
+   */
+  amount: number;
+  /**
+   * True if applied automatically by merchant rules (no code required).
+   */
+  automatic?: boolean;
+  /**
+   * Allocation method. 'each' = applied independently per item. 'across' = split proportionally by value.
+   */
+  method?: 'each' | 'across';
+  /**
+   * Stacking order for discount calculation. Lower numbers applied first (1 = first).
+   */
+  priority?: number;
+  /**
+   * Breakdown of where this discount was allocated. Sum of allocation amounts equals total amount.
+   */
+  allocations?: Allocation3[];
+  [k: string]: unknown;
+}
+/**
+ * Discount codes input and applied discounts output.
+ *
+ * This interface was referenced by `DiscountExtensionResponse`'s JSON-Schema
+ * via the `definition` "discounts_object".
+ */
+export declare interface DiscountsObject2 {
+  /**
+   * Discount codes to apply. Case-insensitive. Replaces previously submitted codes. Send empty array to clear.
+   */
+  codes?: string[];
+  /**
+   * Discounts successfully applied (code-based and automatic).
+   */
+  applied?: AppliedDiscount3[];
+  [k: string]: unknown;
+}
+/**
  * Extends Checkout with fulfillment support using methods, destinations, and groups.
  */
-export declare interface FulfillmentExtensionCreateRequest {
+export declare interface FulfillmentExtensionCompleteRequest {
   [k: string]: unknown;
 }
 /**
  * A fulfillment option within a group (e.g., Standard Shipping $5, Express $15).
+ *
+ * This interface was referenced by `FulfillmentExtensionCompleteRequest`'s JSON-Schema
+ * via the `definition` "fulfillment_option".
  *
  * This interface was referenced by `FulfillmentExtensionCreateRequest`'s JSON-Schema
  * via the `definition` "fulfillment_option".
@@ -1165,14 +1321,96 @@ export declare interface FulfillmentOptionRequest {
 /**
  * A merchant-generated package/group of line items with fulfillment options.
  *
- * This interface was referenced by `FulfillmentExtensionCreateRequest`'s JSON-Schema
+ * This interface was referenced by `FulfillmentExtensionCompleteRequest`'s JSON-Schema
  * via the `definition` "fulfillment_group".
  */
-export declare interface FulfillmentGroupCreateRequest {
+export declare interface FulfillmentGroupCompleteRequest {
+  /**
+   * Group identifier for referencing merchant-generated groups in updates.
+   */
+  id: string;
   /**
    * ID of the selected fulfillment option for this group.
    */
   selected_option_id?: string | null;
+  [k: string]: unknown;
+}
+/**
+ * A fulfillment method (shipping or pickup) with destinations and groups.
+ *
+ * This interface was referenced by `FulfillmentExtensionCompleteRequest`'s JSON-Schema
+ * via the `definition` "fulfillment_method".
+ */
+export declare interface FulfillmentMethodCompleteRequest {
+  /**
+   * Unique fulfillment method identifier.
+   */
+  id: string;
+  /**
+   * Fulfillment method type.
+   */
+  type: 'shipping' | 'pickup';
+  /**
+   * Line item IDs fulfilled via this method.
+   */
+  line_item_ids: string[];
+  /**
+   * Available destinations. For shipping: addresses. For pickup: retail locations.
+   */
+  destinations?: FulfillmentDestinationRequest[];
+  /**
+   * ID of the selected destination.
+   */
+  selected_destination_id?: string | null;
+  /**
+   * Fulfillment groups for selecting options. Agent sets selected_option_id on groups to choose shipping method.
+   */
+  groups?: FulfillmentGroupCompleteRequest[];
+  [k: string]: unknown;
+}
+/**
+ * A pickup location (retail store, locker, etc.).
+ */
+export declare interface RetailLocationRequest {
+  /**
+   * Location name (e.g., store name).
+   */
+  name: string;
+  address?: PostalAddress;
+  [k: string]: unknown;
+}
+/**
+ * Inventory availability hint for a fulfillment method type.
+ *
+ * This interface was referenced by `FulfillmentExtensionCompleteRequest`'s JSON-Schema
+ * via the `definition` "fulfillment_available_method".
+ *
+ * This interface was referenced by `FulfillmentExtensionCreateRequest`'s JSON-Schema
+ * via the `definition` "fulfillment_available_method".
+ *
+ * This interface was referenced by `FulfillmentExtensionUpdateRequest`'s JSON-Schema
+ * via the `definition` "fulfillment_available_method".
+ */
+export declare interface FulfillmentAvailableMethodRequest {
+  [k: string]: unknown;
+}
+/**
+ * Container for fulfillment methods and availability.
+ *
+ * This interface was referenced by `FulfillmentExtensionCompleteRequest`'s JSON-Schema
+ * via the `definition` "fulfillment".
+ *
+ * This interface was referenced by `FulfillmentExtensionCreateRequest`'s JSON-Schema
+ * via the `definition` "fulfillment".
+ *
+ * This interface was referenced by `FulfillmentExtensionUpdateRequest`'s JSON-Schema
+ * via the `definition` "fulfillment".
+ */
+export declare interface FulfillmentRequest {
+  /**
+   * Fulfillment methods for cart items.
+   */
+  methods?: FulfillmentMethodCreateRequest[];
   [k: string]: unknown;
 }
 /**
@@ -1205,42 +1443,22 @@ export declare interface FulfillmentMethodCreateRequest {
   [k: string]: unknown;
 }
 /**
- * A pickup location (retail store, locker, etc.).
+ * A merchant-generated package/group of line items with fulfillment options.
+ *
+ * This interface was referenced by `FulfillmentExtensionCreateRequest`'s JSON-Schema
+ * via the `definition` "fulfillment_group".
  */
-export declare interface RetailLocationRequest {
+export declare interface FulfillmentGroupCreateRequest {
   /**
-   * Location name (e.g., store name).
+   * ID of the selected fulfillment option for this group.
    */
-  name: string;
-  address?: PostalAddress;
+  selected_option_id?: string | null;
   [k: string]: unknown;
 }
 /**
- * Inventory availability hint for a fulfillment method type.
- *
- * This interface was referenced by `FulfillmentExtensionCreateRequest`'s JSON-Schema
- * via the `definition` "fulfillment_available_method".
- *
- * This interface was referenced by `FulfillmentExtensionUpdateRequest`'s JSON-Schema
- * via the `definition` "fulfillment_available_method".
+ * Extends Checkout with fulfillment support using methods, destinations, and groups.
  */
-export declare interface FulfillmentAvailableMethodRequest {
-  [k: string]: unknown;
-}
-/**
- * Container for fulfillment methods and availability.
- *
- * This interface was referenced by `FulfillmentExtensionCreateRequest`'s JSON-Schema
- * via the `definition` "fulfillment".
- *
- * This interface was referenced by `FulfillmentExtensionUpdateRequest`'s JSON-Schema
- * via the `definition` "fulfillment".
- */
-export declare interface FulfillmentRequest {
-  /**
-   * Fulfillment methods for cart items.
-   */
-  methods?: FulfillmentMethodCreateRequest[];
+export declare interface FulfillmentExtensionCreateRequest {
   [k: string]: unknown;
 }
 /**
@@ -1333,17 +1551,9 @@ export declare interface FulfillmentOptionResponse {
    */
   latest_fulfillment_time?: string;
   /**
-   * Fulfillment cost before tax in minor currency units.
+   * Fulfillment option totals breakdown.
    */
-  subtotal?: number;
-  /**
-   * Tax amount in minor currency units.
-   */
-  tax?: number;
-  /**
-   * Total cost (subtotal + tax) in minor currency units.
-   */
-  total: number;
+  totals: TotalResponse[];
   [k: string]: unknown;
 }
 /**
@@ -1694,12 +1904,5 @@ export declare interface PlatformOrderConfig {
    * URL where merchant sends order lifecycle events (webhooks).
    */
   webhook_url: string;
-  [k: string]: unknown;
-}
-/**
- * The data that will used to submit payment to the merchant.
- */
-export declare interface PaymentData {
-  payment_data: PaymentInstrument;
   [k: string]: unknown;
 }

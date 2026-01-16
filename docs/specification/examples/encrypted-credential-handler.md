@@ -208,20 +208,24 @@ UCP-Agent: profile="https://platform.example/profile"
 Content-Type: application/json
 
 {
-  "payment_data": {
-    "id": "instr_1",
-    "handler_id": "platform_encrypted",
-    "type": "card",
-    "brand": "visa",
-    "last_digits": "1111",
-    "expiry_month": 12,
-    "expiry_year": 2026,
-    "credential": {
-      "type": "encrypted",
-      "encrypted_data": "base64-encoded-encrypted-payload..."
-    }
+  "payment": {
+    "instruments": [
+      {
+        "id": "instr_1",
+        "handler_id": "platform_encrypted",
+        "type": "card",
+        "brand": "visa",
+        "last_digits": "1111",
+        "expiry_month": 12,
+        "expiry_year": 2026,
+        "credential": {
+          "type": "encrypted",
+          "encrypted_data": "base64-encoded-encrypted-payload..."
+        }
+      }
+    ]
   },
-  "risk_signal": {
+  "risk_signals": {
     // ... the key value pair for potential risk signal data
   }
 }
