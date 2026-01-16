@@ -360,6 +360,15 @@ defined below:
 
 {{ schema_fields('buyer', 'checkout') }}
 
+### Context
+
+Context signals are provisional hints. Businesses SHOULD use these values when
+authoritative data (e.g. address) is absent, and MAY ignore unsupported values
+without returning errors. This differs from authoritative selections which
+require explicit validation and error feedback.
+
+{{ schema_fields('context', 'checkout') }}
+
 ### Fulfillment Option
 
 {{ extension_schema_fields('fulfillment_resp.json#/$defs/fulfillment_option', 'checkout') }}
