@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/context.json",
+  "title": "Context",
+  "description": "Buyer signals that help the business tailor responses for relevance and localization: product availability, pricing, currency, tax, shipping, payment methods, and eligibility (e.g., student or affiliation discounts). Context can be disclosed progressively—coarse signals early in the journey, finer resolution as the session progresses to improve relevance and accuracy. Higher-resolution data provided elsewhere (shipping address, billing address) supersedes provided context. Platforms SHOULD provide and progressively enhance context throughout the buyer journey to optimize relevance and localization.",
+  "type": "object",
+  "properties": {
+    "country": {
+      "type": "string",
+      "pattern": "^[A-Z]{2}$",
+      "description": "ISO 3166-1 alpha-2 country code (e.g., 'US', 'CA'). Informs product availability, pricing, and currency. Detected from request if omitted."
+    },
+    "region": {
+      "type": "string",
+      "description": "State, province, emirate, or district (e.g., 'CA', 'ON', 'Dubai'). Format varies by country."
+    },
+    "postal_code": {
+      "type": "string",
+      "description": "Postal or ZIP code for regional refinement. Not applicable in all countries."
+    }
+  }
+}
