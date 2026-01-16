@@ -51,6 +51,14 @@
         "complete": "omit"
       }
     },
+    "context": {
+      "$ref": "types/context.json",
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional",
+        "complete": "omit"
+      }
+    },
     "status": {
       "type": "string",
       "enum": [
@@ -66,10 +74,10 @@
     },
     "currency": {
       "type": "string",
-      "description": "ISO 4217 currency code.",
+      "description": "ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.",
       "ucp_request": {
-        "create": "required",
-        "update": "required",
+        "create": "omit",
+        "update": "omit",
         "complete": "omit"
       }
     },
