@@ -99,8 +99,8 @@ nature.
   affecting core protocol architecture must follow the Enhancement Proposal
   process, requiring TC approval before implementation.
 * L3: Any changes made to the Governance process (e.g updating the
-  Goverenance.md file) or any changes that impact the core protocol’s scope or
-  adoption, must be approved by Governance Council (GC).
+  [GOVERNANCE.md](GOVERNANCE.md) file) or any changes that impact the core
+  protocol’s scope or adoption, must be approved by Governance Council (GC).
 
 The TC reserves the right to stop any discussions deemed non-critical to the
 protocol.
