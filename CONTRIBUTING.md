@@ -103,14 +103,14 @@ This will set up pre-commit hooks to run automatically when you `git commit`.
 
 ### Submitting a Pull Request
 
-1.  Fork the repository and create your branch from `main`.
-2.  Make your changes, ensuring you follow the setup instructions below.
-3.  If you've installed `pre-commit`, it will run checks as you commit.
-4.  Ensure your pull request title follows the Conventional Commits format.
-5.  Fill out the pull request template in GitHub, providing details about
+1. Fork the repository and create your branch from `main`.
+2. Make your changes, ensuring you follow the setup instructions below.
+3. If you've installed `pre-commit`, it will run checks as you commit.
+4. Ensure your pull request title follows the Conventional Commits format.
+5. Fill out the pull request template in GitHub, providing details about
     your change.
-6.  Push your branch to GitHub and open a pull request.
-7.  Address any automated check failures or reviewer feedback.
+6. Push your branch to GitHub and open a pull request.
+7. Address any automated check failures or reviewer feedback.
 
 ## Local Development Setup
 
@@ -135,10 +135,10 @@ are updated to ensure there are no broken references or stale/missing contents.
 
 ### Documentation Development
 
-1.  Ensure dependencies are installed: `pip install -r requirements-docs.txt`
-2.  Run the development server: `mkdocs serve --watch spec`
-3.  Open **http://127.0.0.1:8000** in your browser
-4.  Before submitting a pull request with documentation changes, run
+1. Ensure dependencies are installed: `pip install -r requirements-docs.txt`
+2. Run the development server: `mkdocs serve --watch spec`
+3. Open **<http://127.0.0.1:8000>** in your browser
+4. Before submitting a pull request with documentation changes, run
     `mkdocs build --strict` to ensure there are no warnings or errors. Our CI
     build uses this command and will fail if warnings are present (e.g.,
     broken links).

@@ -26,16 +26,16 @@ supports.}
 
 ### Key Benefits
 
-- {Benefit 1}
-- {Benefit 2}
-- {Benefit 3}
+* {Benefit 1}
+* {Benefit 2}
+* {Benefit 3}
 
 ### Integration Guide
 
-| Participant | Integration Section |
-|:------------|:--------------------|
+| Participant  | Integration Section                           |
+| :----------- | :-------------------------------------------- |
 | **Business** | [Business Integration](#business-integration) |
-| **Platform**   | [Platform Integration](#platform-integration) |
+| **Platform** | [Platform Integration](#platform-integration) |
 
 ---
 
@@ -48,15 +48,15 @@ supports.}
 > technical schema fields may retain the standard industry nomenclature
 > **`merchant_*`** (e.g., `merchant_id`). Mappings are documented below.
 
-| Participant | Role | Prerequisites |
-|:------------|:-----|:--------------|
-| **Business** | {role description} | {Yes/No — brief description} |
-| **Platform** | {role description} | {Yes/No — brief description} |
+| Participant             | Role               | Prerequisites                |
+| :---------------------- | :----------------- | :--------------------------- |
+| **Business**            | {role description} | {Yes/No — brief description} |
+| **Platform**            | {role description} | {Yes/No — brief description} |
 | **{Other Participant}** | {role description} | {Yes/No — brief description} |
 
 {Optional: ASCII diagram showing participant relationships}
 
-```
+```text
 ┌─────────┐     ┌───────────────┐     ┌────────────┐
 │Platform │     │   {Provider}  │     │  Business  │
 └────┬────┘     └───────┬───────┘     └──────┬─────┘
@@ -95,10 +95,10 @@ Before advertising this handler, businesses **MUST** complete:
 
 **Prerequisites Output:**
 
-| Field | Description |
-|:------|:------------|
+| Field                   | Description                                      |
+| :---------------------- | :----------------------------------------------- |
 | `identity.access_token` | {what identifier is assigned, e.g., business_id} |
-| {additional config} | {any additional configuration from onboarding} |
+| {additional config}     | {any additional configuration from onboarding}   |
 
 ### Handler Configuration
 
@@ -109,8 +109,8 @@ Businesses advertise support for this handler in the checkout's
 
 **Schema URL:** `{url to config JSON schema}`
 
-| Field | Type | Required | Description |
-|:------|:-----|:---------|:------------|
+| Field   | Type   | Required | Description   |
+| :------ | :----- | :------- | :------------ |
 | {field} | {type} | {Yes/No} | {description} |
 
 #### Example Handler Declaration
@@ -164,10 +164,10 @@ Before using this handler, Platforms **MUST** complete:
 
 **Prerequisites Output:**
 
-| Field | Description |
-|:------|:------------|
-| `identity.access_token` | {what identifier is assigned} |
-| {additional config} | {any additional configuration from onboarding} |
+| Field                   | Description                                    |
+| :---------------------- | :--------------------------------------------- |
+| `identity.access_token` | {what identifier is assigned}                  |
+| {additional config}     | {any additional configuration from onboarding} |
 
 ### Payment Protocol
 
@@ -252,10 +252,10 @@ Before participating in this handler's flow, {participants} **MUST** complete:
 
 **Prerequisites Output:**
 
-| Field | Description |
-|:------|:------------|
-| `identity.access_token` | {what identifier is assigned} |
-| {additional config} | {any additional configuration from onboarding} |
+| Field                   | Description                                    |
+| :---------------------- | :--------------------------------------------- |
+| `identity.access_token` | {what identifier is assigned}                  |
+| {additional config}     | {any additional configuration from onboarding} |
 
 ### {Action or Configuration}
 
@@ -267,20 +267,20 @@ Before participating in this handler's flow, {participants} **MUST** complete:
 
 ## Security Considerations
 
-| Requirement | Description |
-|:------------|:------------|
-| **Binding required** | Credentials **MUST** be bound to `checkout_id` and `identity` to prevent reuse. |
-| **Binding placement** | Binding data (e.g., `checkout_id`) **SHOULD** be included within the `credential` payload to ensure it is covered by the signature, rather than in transport headers. |
-| **Binding verified** | The processing participant **MUST** verify binding matches before processing. |
-| **Token Expiry** | {If using tokens: Tokens **MUST** expire after {duration} or single-use.} |
-| **Data Residency** | {Specify if PII **MUST** be processed/stored in specific geographic regions (e.g., EU, US) to comply with local laws.} |
-| **{Additional requirement}** | {description} |
+| Requirement                  | Description                                                                                                                                                           |
+| :--------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Binding required**         | Credentials **MUST** be bound to `checkout_id` and `identity` to prevent reuse.                                                                                       |
+| **Binding placement**        | Binding data (e.g., `checkout_id`) **SHOULD** be included within the `credential` payload to ensure it is covered by the signature, rather than in transport headers. |
+| **Binding verified**         | The processing participant **MUST** verify binding matches before processing.                                                                                         |
+| **Token Expiry**             | {If using tokens: Tokens **MUST** expire after {duration} or single-use.}                                                                                             |
+| **Data Residency**           | {Specify if PII **MUST** be processed/stored in specific geographic regions (e.g., EU, US) to comply with local laws.}                                                |
+| **{Additional requirement}** | {description}                                                                                                                                                         |
 
 ---
 
 ## References
 
-- **Handler Spec:** `{spec_url}`
-- **Config Schema:** `{config_schema_url}`
-- **Instrument Schema:** `{instrument_schema_url}`
-- **Credential Schema:** `{credential_schema_url}`
+* **Handler Spec:** `{spec_url}`
+* **Config Schema:** `{config_schema_url}`
+* **Instrument Schema:** `{instrument_schema_url}`
+* **Credential Schema:** `{credential_schema_url}`

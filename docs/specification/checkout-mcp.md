@@ -22,6 +22,7 @@ This document specifies the Model Context Protocol (MCP) binding for the
 ## Protocol Fundamentals
 
 ### Discovery
+
 Businesses advertise MCP transport availability through their UCP profile at
 `/.well-known/ucp`.
 
@@ -59,6 +60,7 @@ Businesses advertise MCP transport availability through their UCP profile at
 ```
 
 ### Platform Profile Advertisement
+
 MCP clients **MUST** include the UCP platform profile URI with every request.
 The platform profile is included in the `_meta.ucp` structure within the request
 parameters:
@@ -90,20 +92,20 @@ UCP Capabilities map 1:1 to MCP Tools.
 
 MCP tools separate resource identification from payload data:
 
-*   **Requests:** For operations on existing checkouts (`get`, `update`,
+* **Requests:** For operations on existing checkouts (`get`, `update`,
     `complete`, `cancel`), a top-level `id` parameter identifies the target
     resource. The `checkout` object in the request payload **MUST NOT** contain
     an `id` field.
-*   **Responses:** All responses include `checkout.id` as part of the full resource state.
-*   **Create:** The `create_checkout` operation does not require an `id` in the request, and the response includes the newly assigned `checkout.id`.
+* **Responses:** All responses include `checkout.id` as part of the full resource state.
+* **Create:** The `create_checkout` operation does not require an `id` in the request, and the response includes the newly assigned `checkout.id`.
 
-| Tool | Operation | Description |
-| :---- | :---- | :---- |
-| `create_checkout` | [Create Checkout](checkout.md#create-checkout) | Create a checkout session. |
-| `get_checkout` | [Get Checkout](checkout.md#get-checkout) | Get a checkout session. |
-| `update_checkout` | [Update Checkout](checkout.md#update-checkout) | Update a checkout session. |
-| `complete_checkout` | [Complete Checkout](checkout.md#complete-checkout) | Place the order. |
-| `cancel_checkout` | [Cancel Checkout](checkout.md#cancel-checkout) | Cancel a checkout session. |
+| Tool                | Operation                                          | Description                |
+| :------------------ | :------------------------------------------------- | :------------------------- |
+| `create_checkout`   | [Create Checkout](checkout.md#create-checkout)     | Create a checkout session. |
+| `get_checkout`      | [Get Checkout](checkout.md#get-checkout)           | Get a checkout session.    |
+| `update_checkout`   | [Update Checkout](checkout.md#update-checkout)     | Update a checkout session. |
+| `complete_checkout` | [Complete Checkout](checkout.md#complete-checkout) | Place the order.           |
+| `cancel_checkout`   | [Cancel Checkout](checkout.md#cancel-checkout)     | Cancel a checkout session. |
 
 ### `create_checkout`
 
@@ -111,17 +113,17 @@ Maps to the [Create Checkout](checkout.md#create-checkout) operation.
 
 #### Input Schema
 
-*   `checkout` ([Checkout](checkout.md#create-checkout)): **Required**. Contains
+* `checkout` ([Checkout](checkout.md#create-checkout)): **Required**. Contains
     the initial checkout session data and optional extensions.
-    *   Extensions (Optional):
-        *   `dev.ucp.shopping.buyer_consent`: [Buyer Consent](buyer-consent.md)
-        *   `dev.ucp.shopping.fulfillment`: [Fulfillment](fulfillment.md)
-        *   `dev.ucp.shopping.discount`: [Discount](discount.md)
-        *   `dev.ucp.shopping.ap2_mandate`: [AP2 Mandates](ap2-mandates.md)
+    * Extensions (Optional):
+        * `dev.ucp.shopping.buyer_consent`: [Buyer Consent](buyer-consent.md)
+        * `dev.ucp.shopping.fulfillment`: [Fulfillment](fulfillment.md)
+        * `dev.ucp.shopping.discount`: [Discount](discount.md)
+        * `dev.ucp.shopping.ap2_mandate`: [AP2 Mandates](ap2-mandates.md)
 
 #### Output Schema
 
-*   [Checkout](checkout.md#create-checkout) object.
+* [Checkout](checkout.md#create-checkout) object.
 
 #### Example
 
@@ -320,11 +322,11 @@ Maps to the [Get Checkout](checkout.md#get-checkout) operation.
 
 #### Input Schema
 
-*   `id` (String): **Required**. The ID of the checkout session.
+* `id` (String): **Required**. The ID of the checkout session.
 
 #### Output Schema
 
-*   [Checkout](checkout.md#get-checkout) object.
+* [Checkout](checkout.md#get-checkout) object.
 
 ### `update_checkout`
 
@@ -332,18 +334,18 @@ Maps to the [Update Checkout](checkout.md#update-checkout) operation.
 
 #### Input Schema
 
-*   `id` (String): **Required**. The ID of the checkout session to update.
-*   `checkout` ([Checkout](checkout.md#update-checkout)): **Required**.
+* `id` (String): **Required**. The ID of the checkout session to update.
+* `checkout` ([Checkout](checkout.md#update-checkout)): **Required**.
     Contains the updated checkout session data.
-    *   Extensions (Optional):
-        *   `dev.ucp.shopping.buyer_consent`: [Buyer Consent](buyer-consent.md)
-        *   `dev.ucp.shopping.fulfillment`: [Fulfillment](fulfillment.md)
-        *   `dev.ucp.shopping.discount`: [Discount](discount.md)
-        *   `dev.ucp.shopping.ap2_mandate`: [AP2 Mandates](ap2-mandates.md)
+    * Extensions (Optional):
+        * `dev.ucp.shopping.buyer_consent`: [Buyer Consent](buyer-consent.md)
+        * `dev.ucp.shopping.fulfillment`: [Fulfillment](fulfillment.md)
+        * `dev.ucp.shopping.discount`: [Discount](discount.md)
+        * `dev.ucp.shopping.ap2_mandate`: [AP2 Mandates](ap2-mandates.md)
 
 #### Output Schema
 
-*   [Checkout](checkout.md#update-checkout) object.
+* [Checkout](checkout.md#update-checkout) object.
 
 #### Example
 
@@ -540,15 +542,15 @@ Maps to the [Complete Checkout](checkout.md#complete-checkout) operation.
 
 #### Input Schema
 
-*   `id` (String): **Required**. The ID of the checkout session.
-*   `checkout` ([Checkout](checkout.md#complete-checkout)): **Required**.
+* `id` (String): **Required**. The ID of the checkout session.
+* `checkout` ([Checkout](checkout.md#complete-checkout)): **Required**.
     Contains payment credentials and other finalization data to execute the transaction.
- *  `idempotency_key` (String, UUID): **Required**. Unique key for retry
+* `idempotency_key` (String, UUID): **Required**. Unique key for retry
     safety.
 
 #### Output Schema
 
-*   [Checkout](checkout.md#complete-checkout) object, containing a partial
+* [Checkout](checkout.md#complete-checkout) object, containing a partial
    `order` that holds only `id` and `permalink_url`.
 
 ### `cancel_checkout`
@@ -557,12 +559,12 @@ Maps to the [Cancel Checkout](checkout.md#cancel-checkout) operation.
 
 #### Input Schema
 
-*   `id` (String): The ID of the checkout session.
-*   `idempotency_key` (String, UUID): **Required**. Unique key for retry safety.
+* `id` (String): The ID of the checkout session.
+* `idempotency_key` (String, UUID): **Required**. Unique key for retry safety.
 
 #### Output Schema
 
-*   [Checkout](checkout.md#cancel-checkout) object with `status: canceled`.
+* [Checkout](checkout.md#cancel-checkout) object with `status: canceled`.
 
 ## Error Handling
 
@@ -598,9 +600,9 @@ embedded in the JSON-RPC error's `data` field:
 
 A conforming MCP transport implementation **MUST**:
 
-1.  Implement JSON-RPC 2.0 protocol correctly.
-2.  Provide all core checkout tools defined in this specification.
-3.  Handle errors with UCP-specific error codes embedded in the JSON-RPC error
+1. Implement JSON-RPC 2.0 protocol correctly.
+2. Provide all core checkout tools defined in this specification.
+3. Handle errors with UCP-specific error codes embedded in the JSON-RPC error
     object.
-4.  Validate tool inputs against UCP schemas.
-5.  Support HTTP transport with streaming.
+4. Validate tool inputs against UCP schemas.
+5. Support HTTP transport with streaming.

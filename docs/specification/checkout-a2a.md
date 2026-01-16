@@ -24,6 +24,7 @@ This document specifies the Agent2Agent Protocol (A2A) binding for
 Businesses that support A2A transport must specify the agent card endpoint as
 part of `services` in UCP Profile at `/.well-known/ucp`. This allows capable
 platforms to interact with the business services over A2A Protocol.
+
 ```json
 {
   "ucp": {
@@ -46,7 +47,7 @@ platforms to interact with the business services over A2A Protocol.
 Shopping platforms interacting with the business agent must
 send their profile URI as `UCP-Agent` request headers with every request.
 
-```
+```text
 UCP-Agent: profile="https://agent.example/profiles/v2025-11/shopping-agent.json"
 Content-Type: application/json
 ```
@@ -56,10 +57,10 @@ Content-Type: application/json
 The following table defines the required headers for enabling an A2A Agent
 to communicate UCP data types with platforms.
 
-| Header Name | Description |
-| :--- | :--- |
-| `UCP-Agent` | Shopping platform application profile URI. |
-| `X-A2A-Extensions` | UCP Extension URI (specified below). |
+| Header Name        | Description                                |
+| :----------------- | :----------------------------------------- |
+| `UCP-Agent`        | Shopping platform application profile URI. |
+| `X-A2A-Extensions` | UCP Extension URI (specified below).       |
 
 ## A2A Interactions
 

@@ -14,6 +14,8 @@
    limitations under the License.
 -->
 
+<!-- markdownlint-disable-file MD041 -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -567,7 +569,7 @@ class UcpBackend {
   }
 
   genId(prefix) {
-    const r = crypto.randomUUID ? crypto.randomUUID().split('-')[0] : Math.random().toString(36).substr(2, 9);
+    const r = crypto.randomUUID ? crypto.randomUUID().split['-'](0) : Math.random().toString(36).substr(2, 9);
     return `${prefix}_${r}`;
   }
 

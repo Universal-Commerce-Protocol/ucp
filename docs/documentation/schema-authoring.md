@@ -24,14 +24,14 @@ required metadata fields and versioning strategy.
 UCP schemas use a combination of standard JSON Schema fields and
 UCP-specific metadata:
 
-| Field | Standard | Purpose | Required For |
-|-------|----------|---------|--------------|
-| `$schema` | JSON Schema | Declares JSON Schema draft version (**SHOULD** use `draft/2020-12`) | All schemas |
-| `$id` | JSON Schema | Schema's canonical URI for `$ref` resolution | All schemas |
-| `title` | JSON Schema | Human-readable display name | All schemas |
-| `description` | JSON Schema | Schema purpose and usage | All schemas |
-| `name` | UCP | Reverse-domain capability identifier | Capability schemas only |
-| `version` | UCP | Capability version (YYYY-MM-DD format) | Capability schemas only |
+| Field         | Standard    | Purpose                                                             | Required For            |
+| :------------ | :---------- | :------------------------------------------------------------------ | :---------------------- |
+| `$schema`     | JSON Schema | Declares JSON Schema draft version (**SHOULD** use `draft/2020-12`) | All schemas             |
+| `$id`         | JSON Schema | Schema's canonical URI for `$ref` resolution                        | All schemas             |
+| `title`       | JSON Schema | Human-readable display name                                         | All schemas             |
+| `description` | JSON Schema | Schema purpose and usage                                            | All schemas             |
+| `name`        | UCP         | Reverse-domain capability identifier                                | Capability schemas only |
+| `version`     | UCP         | Capability version (YYYY-MM-DD format)                              | Capability schemas only |
 
 ## Self-Describing Schemas
 
@@ -57,10 +57,10 @@ represents without cross-referencing other documents.
 
 ### Why both `$id` and `name`?
 
-| Field | Role | Format |
-|-------|------|--------|
-| `$id` | JSON Schema primitive for `$ref` resolution and tooling | URI (required by spec) |
-| `name` | Stable capability identity, independent of hosting | Reverse-domain |
+| Field  | Role                                                    | Format                 |
+| :----- | :------------------------------------------------------ | :--------------------- |
+| `$id`  | JSON Schema primitive for `$ref` resolution and tooling | URI (required by spec) |
+| `name` | Stable capability identity, independent of hosting      | Reverse-domain         |
 
 `$id` must be a valid URI per JSON Schema spec. `name` is the wire protocol
 identifier used in capability declarations and negotiation, decoupled from
@@ -90,7 +90,7 @@ capability negotiation.
 
 The `name` field uses reverse-domain notation for capability identification:
 
-```
+```text
 dev.ucp.shopping.checkout        # UCP checkout capability
 dev.ucp.shopping.fulfillment     # UCP fulfillment extension
 com.shopify.loyalty              # Vendor capability

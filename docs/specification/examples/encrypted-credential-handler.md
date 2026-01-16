@@ -33,29 +33,29 @@ tokenizer at payment time.
 
 ### Key Benefits
 
-- **No runtime round-trips:** Business decrypts locally, no `/detokenize` call needed
-- **Simpler architecture:** No token storage or token-to-credential mapping
-- **Business-controlled keys:** Business manages their own decryption keys
+* **No runtime round-trips:** Business decrypts locally, no `/detokenize` call needed
+* **Simpler architecture:** No token storage or token-to-credential mapping
+* **Business-controlled keys:** Business manages their own decryption keys
 
 ### Quick Start
 
-| If you are a... | Start here |
-|:----------------|:-----------|
-| **Business** accepting this handler | [Business Integration](#business-integration) |
+| If you are a...                        | Start here                                    |
+| :------------------------------------- | :-------------------------------------------- |
+| **Business** accepting this handler    | [Business Integration](#business-integration) |
 | **Platform** implementing this handler | [Platform Integration](#platform-integration) |
 
 ---
 
 ## Participants
 
-| Participant | Role | Prerequisites |
-|:------------|:-----|:--------------|
-| **Business** | Registers public key, receives encrypted credentials, decrypts locally | Yes — registers with platform |
-| **Platform** | Operates PCI-compliant credential vault, encrypts for business using their public key | Yes — implements encryption |
+| Participant  | Role                                                                                  | Prerequisites                 |
+| :----------- | :------------------------------------------------------------------------------------ | :---------------------------- |
+| **Business** | Registers public key, receives encrypted credentials, decrypts locally                | Yes — registers with platform |
+| **Platform** | Operates PCI-compliant credential vault, encrypts for business using their public key | Yes — implements encryption   |
 
 ### Pattern Flow
 
-```
+```text
 ┌─────────────────┐                              ┌────────────┐
 │  Platform       │                              │  Business  │
 │                 │                              │            │
@@ -91,7 +91,7 @@ tokenizer at payment time.
 
 ### Prerequisites
 
-**CRITICAL: PCI DSS Compliance Required**
+#### CRITICAL: PCI DSS Compliance Required
 
 Before accepting this handler, businesses must register their public encryption
 key with the platform.
@@ -100,16 +100,16 @@ While businesses receive only encrypted `EncryptedCredential` payloads during
 checkout, they MUST be **PCI DSS compliant** because they decrypt these payloads
 locally to obtain raw `CardCredential` for payment processing. This includes:
 
-- Secure key management for decryption keys
-- Secure handling of raw credentials after decryption
-- Compliance with all PCI DSS requirements for handling Primary Account Numbers (PANs)
+* Secure key management for decryption keys
+* Secure handling of raw credentials after decryption
+* Compliance with all PCI DSS requirements for handling Primary Account Numbers (PANs)
 
 **Prerequisites Output:**
 
-| Field | Description |
-|:------|:------------|
+| Field                   | Description                                                |
+| :---------------------- | :--------------------------------------------------------- |
 | `identity.access_token` | Business identifier assigned by platform during onboarding |
-| Public key registered | Platform stores business's public key for encryption |
+| Public key registered   | Platform stores business's public key for encryption       |
 
 ### Handler Configuration
 
@@ -177,10 +177,10 @@ platforms must:
 
 **Implementation Requirements:**
 
-| Requirement | Description |
-|:------------|:------------|
-| Key storage | Map business identities to their public keys |
-| Encryption | Encrypt credentials + binding context with business's public key |
+| Requirement | Description                                                      |
+| :---------- | :--------------------------------------------------------------- |
+| Key storage | Map business identities to their public keys                     |
+| Encryption  | Encrypt credentials + binding context with business's public key |
 
 ### Credential Encryption
 
@@ -235,20 +235,20 @@ Content-Type: application/json
 
 ## Security Considerations
 
-| Requirement | Description |
-|:------------|:------------|
-| **PCI DSS compliance (Platform)** | Platform vaulting services MUST be PCI DSS compliant when handling and encrypting raw PANs (Primary Account Numbers) |
-| **PCI DSS compliance (Business)** | Businesses MUST be PCI DSS compliant for decryption and handling of raw credentials locally |
-| **No platform app credential access** | Platform applications MUST NOT handle raw credentials—only the PCI-compliant vaulting service does |
-| **Asymmetric encryption** | Platform's credential vault encrypts with business's public key; only business can decrypt |
-| **Binding embedded** | `checkout_id` MUST be included in encrypted payload to prevent replay |
-| **Key rotation** | Businesses SHOULD rotate keys periodically; platform must support key updates |
-| **No credential storage** | Platform does not store encrypted credentials; encryption is one-way |
-| **HTTPS required** | All checkout submissions must use TLS |
+| Requirement                           | Description                                                                                                          |
+| :------------------------------------ | :------------------------------------------------------------------------------------------------------------------- |
+| **PCI DSS compliance (Platform)**     | Platform vaulting services MUST be PCI DSS compliant when handling and encrypting raw PANs (Primary Account Numbers) |
+| **PCI DSS compliance (Business)**     | Businesses MUST be PCI DSS compliant for decryption and handling of raw credentials locally                          |
+| **No platform app credential access** | Platform applications MUST NOT handle raw credentials—only the PCI-compliant vaulting service does                   |
+| **Asymmetric encryption**             | Platform's credential vault encrypts with business's public key; only business can decrypt                           |
+| **Binding embedded**                  | `checkout_id` MUST be included in encrypted payload to prevent replay                                                |
+| **Key rotation**                      | Businesses SHOULD rotate keys periodically; platform must support key updates                                        |
+| **No credential storage**             | Platform does not store encrypted credentials; encryption is one-way                                                 |
+| **HTTPS required**                    | All checkout submissions must use TLS                                                                                |
 
 ---
 
 ## References
 
-- **Identity Schema:** `https://ucp.dev/schemas/shopping/types/payment_identity.json`
-- **Instrument Schema:** `https://ucp.dev/schemas/shopping/types/card_payment_instrument.json`
+* **Identity Schema:** `https://ucp.dev/schemas/shopping/types/payment_identity.json`
+* **Instrument Schema:** `https://ucp.dev/schemas/shopping/types/card_payment_instrument.json`

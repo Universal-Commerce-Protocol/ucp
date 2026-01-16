@@ -20,9 +20,11 @@ This page provides a reference for all the capability data models and types used
 within the UCP.
 
 ## Capability Schemas
+
 {{ auto_generate_schema_reference('.', 'reference', include_extensions=False) }}
 
 ## Type Schemas
+
 {{ auto_generate_schema_reference('types', 'reference', include_extensions=False) }}
 
 ## Extension Schemas
@@ -35,31 +37,37 @@ The following schemas define the structure of UCP metadata used in discovery
 and responses.
 
 ### Discovery Profile
+
 The top-level structure of a discovery document (`/.well-known/ucp`).
 
 {{ extension_schema_fields('ucp.json#/$defs/discovery_profile', 'reference') }}
 
 ### Checkout Response Metadata
+
 The `ucp` object included in checkout responses.
 
 {{ extension_schema_fields('ucp.json#/$defs/response_checkout', 'reference') }}
 
 ### Order Response Metadata
+
 The `ucp` object included in order responses or events.
 
 {{ extension_schema_fields('ucp.json#/$defs/response_order', 'reference') }}
 
 ### Capability
+
 This object describes a single capability or extension. It appears in the
 `capabilities` array in discovery profiles and responses, with slightly
 different required fields in each context.
 
 #### Capability (Discovery)
+
 As seen in discovery profiles.
 
 {{ extension_schema_fields('capability.json#/$defs/discovery', 'reference') }}
 
 #### Capability (Response)
+
 As seen in response messages.
 
 {{ extension_schema_fields('capability.json#/$defs/response', 'reference') }}
