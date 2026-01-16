@@ -123,8 +123,9 @@ defined in UCP have broad ecosystem support. Vendors should first create
 capabilities & extensions in vendor-specific namespace pattern
 (e.g. com.{vendor}.*) for new use cases. Requests to add new capabilities and
 extensions should only be submitted when there is proven widespread adoption of
-vendor-specific capabilities and extensions. See the
-[Spec URL Binding section](https://ucp.dev/specification/overview/#spec-url-binding)
+vendor-specific capabilities and extensions. See
+[Spec URL Binding](https://ucp.dev/specification/overview/#spec-url-binding)
+and [Governance Model](https://ucp.dev/specification/overview/#governance-model)
 for more details on using namespace pattern for creating vendor-specific
 capabilities and extensions.
 
