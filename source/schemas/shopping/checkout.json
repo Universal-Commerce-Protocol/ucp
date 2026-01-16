@@ -57,7 +57,8 @@
         "create": "optional",
         "update": "optional",
         "complete": "omit"
-      }
+      },
+      "ucp_response": "omit"
     },
     "status": {
       "type": "string",

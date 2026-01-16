@@ -35,9 +35,6 @@
       "$ref": "types/buyer.json",
       "description": "Representation of the buyer."
     },
-    "context": {
-      "$ref": "types/context.json"
-    },
     "status": {
       "type": "string",
       "enum": [
@@ -52,7 +49,7 @@
     },
     "currency": {
       "type": "string",
-      "description": "ISO 4217 currency code. Merchant determines based on buyer location: billing address, then context, then GeoIP."
+      "description": "ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency."
     },
     "totals": {
       "type": "array",
