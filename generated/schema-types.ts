@@ -495,10 +495,6 @@ export declare interface PostalAddress {
    */
   last_name?: string;
   /**
-   * Optional. Full name of the contact associated with the address (if first_name or last_name fields are present they take precedence).
-   */
-  full_name?: string;
-  /**
    * Optional. Phone number of the contact associated with the address.
    */
   phone_number?: string;
@@ -605,10 +601,6 @@ export declare interface Buyer {
    * Last name of the buyer.
    */
   last_name?: string;
-  /**
-   * Optional, buyer's full name (if first_name or last_name fields are present they take precedence).
-   */
-  full_name?: string;
   /**
    * Email of the buyer.
    */

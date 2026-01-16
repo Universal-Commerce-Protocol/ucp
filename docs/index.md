@@ -230,7 +230,8 @@ image: assets/banner.png
           "destinations": [
             {
               "id": "dest_1",
-              "full_name": "Elisa Beckett",
+              "first_name": "Elisa",
+              "last_name": "Beckett",
               "street_address": "1600 Amphitheatre Pkwy",
               "address_locality": "Mountain View",
               "address_region": "CA",
@@ -335,7 +336,8 @@ image: assets/banner.png
           "line_items": [{ "id": "li_1", "quantity": 1 }],
           "method_type": "shipping",
           "destination": {
-            "full_name": "Elisa Beckett",
+            "first_name": "Elisa",
+            "last_name": "Beckett",
             "street_address": "1600 Amphitheatre Pkwy",
             "address_locality": "Mountain View",
             "address_region": "CA",
