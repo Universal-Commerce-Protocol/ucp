@@ -115,13 +115,13 @@ typically be attempted through the extensions framework first. If an extension
 achieves significant usage, it can be considered for adoption into the next
 minor version of the core.
 
-### Adding new extenstions and capabilities to the core protocol
+### Adding new extensions and capabilities to the core protocol
 
 UCP is designed to be very extensible while keeping the core protocol light. A
-core principle of UCP is to ensure that the set of extensions and capabilties
+core principle of UCP is to ensure that the set of extensions and capabilities
 defined in UCP have broad ecosystem support. Vendors should first create
-capabilties & extensions in vendor-specific namespace pattern
-(e.g. com.{vendor}.*) for new use cases. Requests to add new capabilties and
+capabilities & extensions in vendor-specific namespace pattern
+(e.g. com.{vendor}.*) for new use cases. Requests to add new capabilities and
 extensions should only be submitted when there is proven widespread adoption of
 vendor-specific capabilities and extensions. See the
 [Spec URL Binding section](https://ucp.dev/specification/overview/#spec-url-binding)
