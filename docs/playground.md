@@ -473,13 +473,13 @@ const UcpData = {
       {
         name: "dev.ucp.shopping.checkout",
         version: "2026-01-11",
-        spec: "https://ucp.dev/specs/checkout",
+        spec: "https://ucp.dev/specification/checkout",
         schema: "https://ucp.dev/schemas/shopping/checkout.json"
       },
       {
         name: "dev.ucp.shopping.order",
         version: "2026-01-11",
-        spec: "https://ucp.dev/specs/order",
+        spec: "https://ucp.dev/specification/order",
         schema: "https://ucp.dev/schemas/shopping/order.json"
       }
     ],
@@ -488,29 +488,29 @@ const UcpData = {
         name: "dev.ucp.shopping.fulfillment",
         extends: "dev.ucp.shopping.checkout",
         version: "2026-01-11",
-        spec: "https://ucp.dev/specs/fulfillment",
+        spec: "https://ucp.dev/specification/fulfillment",
         schema: "https://ucp.dev/schemas/shopping/fulfillment.json"
       },
       {
         name: "dev.ucp.shopping.discount",
         extends: "dev.ucp.shopping.checkout",
         version: "2026-01-11",
-        spec: "https://ucp.dev/specs/discount",
+        spec: "https://ucp.dev/specification/discount",
         schema: "https://ucp.dev/schemas/shopping/discount.json"
       },
       {
         name: "dev.ucp.shopping.buyer_consent",
         extends: "dev.ucp.shopping.checkout",
         version: "2026-01-11",
-        spec: "https://ucp.dev/specs/buyer_consent",
+        spec: "https://ucp.dev/specification/buyer-consent",
         schema: "https://ucp.dev/schemas/shopping/buyer_consent.json"
       },
       {
         name: "dev.ucp.shopping.ap2_mandates",
         extends: "dev.ucp.shopping.checkout",
         version: "2026-01-11",
-        spec: "https://ucp.dev/specs/ap2_mandates",
-        schema: "https://ucp.dev/schemas/shopping/ap2_mandates.json"
+        spec: "https://ucp.dev/specification/ap2-mandates",
+        schema: "https://ucp.dev/schemas/shopping/ap2_mandate.json"
       },
     ]
   },
