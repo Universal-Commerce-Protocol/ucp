@@ -82,65 +82,6 @@
 *   May choose to review and veto TC decision or recommendation.
 *   Decisions are made with a majority vote.
 
-## Operational Rules and Process
-
-### Enhancement proposals
-
-For any significant change to the protocol, such as adding a new capability,
-altering a core construct, or changing a fundamental behavior, a written
-enhancement proposal must be submitted to the TC.
-
-An enhancement proposal is a living artifact that tracks a proposal through its
-lifecycle:
-
-*   **Provisional:** The initial stage where the idea is proposed and debated
-    within the community. In order to move to the next stage, the enhancement
-    proposal will need to be approved by a simple majority of the TC.
-*   **Implementable:** The stage after the design has been finalized and has
-    received formal approval from at least one maintainer and one member of the
-    TC.
-*   **Implemented:** The final stage, reached when the code for the feature is
-    complete, tested, documented, and merged.
-
-Every enhancement proposal must follow a standard template requiring sections
-for a Summary, Motivation, Detailed Design, Risks, a Test Plan, and Graduation
-Criteria (defining the path from Alpha to Beta to General Availability). This
-creates a permanent, public design record for the project's evolution.
-
-### Voting and decision making
-
-The path below should be followed for resolving issues that are technical in
-nature.
-
-*   **L1:** routine changes (bug fixes, documentation, minor improvements) are
-    auto-approved after 1 business day if no blocks are raised (silence =
-    consent).
-*   **L2:** For non-major version increments and standard changes, proposals are
-    auto-approved after 5 business days if no objections are raised and there is
-    at least one +1 from a maintainer. If objections are raised, contributors
-    have 3 business days to reach a resolution.
-*   **L3:** If unresolved after 5 business days, the relevant maintainer makes a
-    binding decision based on technical merit and speed.
-*   **L4:** Any technical issues that span across topics and cannot be resolved
-    amongst maintainers and DWGs will be escalated to the TC. Significant
-    changes affecting core protocol architecture must follow the Enhancement
-    Proposal process, requiring TC approval before implementation.
-*   **L5:** If a conflict impacts the core protocol’s scope or business
-    strategy, it escalates to the Governing Council.
-
-The TC reserves the right to stop any discussions deemed non-critical to the
-protocol.
-
-### Versioning
-
-The base protocol uses date based versioning. Major version increments (breaking
-changes) require a majority Governing Council approval due to the high cost
-to the ecosystem. A quorum requires all Governing Council members (or
-appropriate representatives) to be present for decision-making. New features
-should typically be attempted through the extensions framework first. If an
-extension achieves significant usage, it can be considered for adoption into the
-next minor version of the core.
-
 ## Communication
 
 To ensure the protocol remains open and agnostic, all governance activities must
