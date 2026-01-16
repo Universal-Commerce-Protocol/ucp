@@ -145,7 +145,6 @@ independently negotiated.
 Examples:
 
 - `schemas/shopping/payment.json` — Payment configuration (part of checkout)
-- `schemas/shopping/payment_data.json` — Payment submission data
 
 ### Type Schemas
 

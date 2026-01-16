@@ -26,12 +26,16 @@
         {
           "name": "checkout",
           "required": true,
-          "schema": {"$ref": "https://ucp.dev/schemas/shopping/checkout.json"}
+          "schema": {
+            "$ref": "https://ucp.dev/schemas/shopping/checkout.create_req.json"
+          }
         }
       ],
       "result": {
         "name": "checkout",
-        "schema": {"$ref": "https://ucp.dev/schemas/shopping/checkout.json"}
+        "schema": {
+          "$ref": "https://ucp.dev/schemas/shopping/checkout_resp.json"
+        }
       }
     },
     {
@@ -41,12 +45,16 @@
         {
           "name": "id",
           "required": true,
-          "schema": {"type": "string"}
+          "schema": {
+            "type": "string"
+          }
         }
       ],
       "result": {
         "name": "checkout",
-        "schema": {"$ref": "https://ucp.dev/schemas/shopping/checkout.json"}
+        "schema": {
+          "$ref": "https://ucp.dev/schemas/shopping/checkout_resp.json"
+        }
       }
     },
     {
@@ -56,17 +64,23 @@
         {
           "name": "id",
           "required": true,
-          "schema": {"type": "string"}
+          "schema": {
+            "type": "string"
+          }
         },
         {
           "name": "checkout",
           "required": true,
-          "schema": {"$ref": "https://ucp.dev/schemas/shopping/checkout.json"}
+          "schema": {
+            "$ref": "https://ucp.dev/schemas/shopping/checkout.update_req.json"
+          }
         }
       ],
       "result": {
         "name": "checkout",
-        "schema": {"$ref": "https://ucp.dev/schemas/shopping/checkout.json"}
+        "schema": {
+          "$ref": "https://ucp.dev/schemas/shopping/checkout_resp.json"
+        }
       }
     },
     {
@@ -76,22 +90,31 @@
         {
           "name": "id",
           "required": true,
-          "schema": {"type": "string"}
+          "schema": {
+            "type": "string"
+          }
         },
         {
-          "name": "payment",
-          "required": false,
-          "schema": {"$ref": "https://ucp.dev/schemas/shopping/payment.json"}
+          "name": "checkout",
+          "required": true,
+          "schema": {
+            "$ref": "https://ucp.dev/schemas/shopping/checkout.complete_req.json"
+          }
         },
         {
           "name": "idempotency_key",
           "required": true,
-          "schema": {"type": "string", "format": "uuid"}
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
         }
       ],
       "result": {
         "name": "checkout",
-        "schema": {"$ref": "https://ucp.dev/schemas/shopping/checkout.json"}
+        "schema": {
+          "$ref": "https://ucp.dev/schemas/shopping/checkout_resp.json"
+        }
       }
     },
     {
@@ -101,17 +124,24 @@
         {
           "name": "id",
           "required": true,
-          "schema": {"type": "string"}
+          "schema": {
+            "type": "string"
+          }
         },
         {
           "name": "idempotency_key",
           "required": true,
-          "schema": {"type": "string", "format": "uuid"}
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
         }
       ],
       "result": {
         "name": "checkout",
-        "schema": {"$ref": "https://ucp.dev/schemas/shopping/checkout.json"}
+        "schema": {
+          "$ref": "https://ucp.dev/schemas/shopping/checkout_resp.json"
+        }
       }
     }
   ]

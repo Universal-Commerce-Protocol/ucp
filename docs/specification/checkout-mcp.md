@@ -111,7 +111,8 @@ Maps to the [Create Checkout](checkout.md#create-checkout) operation.
 
 #### Input Schema
 
-*   [Checkout](checkout.md#create-checkout) object.
+*   `checkout` ([Checkout](checkout.md#create-checkout)): **Required**. Contains
+    the initial checkout session data and optional extensions.
     *   Extensions (Optional):
         *   `dev.ucp.shopping.buyer_consent`: [Buyer Consent](buyer-consent.md)
         *   `dev.ucp.shopping.fulfillment`: [Fulfillment](fulfillment.md)
@@ -319,7 +320,7 @@ Maps to the [Get Checkout](checkout.md#get-checkout) operation.
 
 #### Input Schema
 
-*   `id` (String): The ID of the checkout session.
+*   `id` (String): **Required**. The ID of the checkout session.
 
 #### Output Schema
 
@@ -331,8 +332,9 @@ Maps to the [Update Checkout](checkout.md#update-checkout) operation.
 
 #### Input Schema
 
-*   `id` (String): The ID of the checkout session to update.
-*   [Checkout](checkout.md#update-checkout) object.
+*   `id` (String): **Required**. The ID of the checkout session to update.
+*   `checkout` ([Checkout](checkout.md#update-checkout)): **Required**.
+    Contains the updated checkout session data.
     *   Extensions (Optional):
         *   `dev.ucp.shopping.buyer_consent`: [Buyer Consent](buyer-consent.md)
         *   `dev.ucp.shopping.fulfillment`: [Fulfillment](fulfillment.md)
@@ -538,10 +540,10 @@ Maps to the [Complete Checkout](checkout.md#complete-checkout) operation.
 
 #### Input Schema
 
-*   `id` (String): The ID of the checkout session.
-*   `payment` ([Payment](checkout.md#payment), Optional): Payment instrument instance submitted
-    by the buyer.
-*   `idempotency_key` (String, UUID): **Required**. Unique key for retry
+*   `id` (String): **Required**. The ID of the checkout session.
+*   `checkout` ([Checkout](checkout.md#complete-checkout)): **Required**.
+    Contains payment credentials and other finalization data to execute the transaction.
+ *  `idempotency_key` (String, UUID): **Required**. Unique key for retry
     safety.
 
 #### Output Schema

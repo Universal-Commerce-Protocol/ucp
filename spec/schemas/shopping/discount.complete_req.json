@@ -1,15 +1,18 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/schemas/shopping/discount.json",
+  "$id": "https://ucp.dev/schemas/shopping/discount.complete_req.json",
   "name": "dev.ucp.shopping.discount",
   "version": "2026-01-11",
-  "title": "Discount Extension",
+  "title": "Discount Extension Complete Request",
   "description": "Extends Checkout with discount code support, enabling agents to apply promotional, loyalty, referral, and other discount codes.",
   "$defs": {
     "allocation": {
       "type": "object",
       "description": "Breakdown of how a discount amount was allocated to a specific target.",
-      "required": ["path", "amount"],
+      "required": [
+        "path",
+        "amount"
+      ],
       "properties": {
         "path": {
           "type": "string",
@@ -22,11 +25,13 @@
         }
       }
     },
-
     "applied_discount": {
       "type": "object",
       "description": "A discount that was successfully applied.",
-      "required": ["title", "amount"],
+      "required": [
+        "title",
+        "amount"
+      ],
       "properties": {
         "code": {
           "type": "string",
@@ -48,7 +53,10 @@
         },
         "method": {
           "type": "string",
-          "enum": ["each", "across"],
+          "enum": [
+            "each",
+            "across"
+          ],
           "description": "Allocation method. 'each' = applied independently per item. 'across' = split proportionally by value."
         },
         "priority": {
@@ -58,47 +66,44 @@
         },
         "allocations": {
           "type": "array",
-          "items": { "$ref": "#/$defs/allocation" },
+          "items": {
+            "$ref": "#/$defs/allocation"
+          },
           "description": "Breakdown of where this discount was allocated. Sum of allocation amounts equals total amount."
         }
       }
     },
-
     "discounts_object": {
       "type": "object",
       "description": "Discount codes input and applied discounts output.",
       "properties": {
         "codes": {
           "type": "array",
-          "items": { "type": "string" },
+          "items": {
+            "type": "string"
+          },
           "description": "Discount codes to apply. Case-insensitive. Replaces previously submitted codes. Send empty array to clear."
         },
         "applied": {
           "type": "array",
           "readOnly": true,
-          "items": { "$ref": "#/$defs/applied_discount" },
+          "items": {
+            "$ref": "#/$defs/applied_discount"
+          },
           "description": "Discounts successfully applied (code-based and automatic)."
         }
       }
     },
-
     "checkout": {
-      "title": "Checkout with Discount",
+      "title": "Checkout with Discount Complete Request",
       "description": "Checkout extended with discount capability.",
       "allOf": [
-        { "$ref": "checkout.json" },
+        {
+          "$ref": "checkout.complete_req.json"
+        },
         {
           "type": "object",
-          "properties": {
-            "discounts": { 
-              "$ref": "#/$defs/discounts_object",
-              "ucp_request": {
-                "create": "optional",
-                "update": "optional",
-                "complete": "omit"
-              }
-            }
-          }
+          "properties": {}
         }
       ]
     }
