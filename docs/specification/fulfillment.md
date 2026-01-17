@@ -299,16 +299,24 @@ Businesses declare what fulfillment configurations they support using
 
 ```json
 {
-  "capabilities": [{
-    "name": "dev.ucp.shopping.fulfillment",
+  "ucp": {
     "version": "2026-01-11",
-    "config": {
-      "allows_multi_destination": {
-        "shipping": true
-      },
-      "allows_method_combinations": [["shipping", "pickup"]]
-    }
-  }]
+    "capabilities": [
+      {
+        "name": "dev.ucp.shopping.fulfillment",
+        "version": "2026-01-11",
+        "spec": "https://ucp.dev/specification/fulfillment",
+        "schema": "https://ucp.dev/schemas/shopping/fulfillment.json",
+        "extends": "dev.ucp.shopping.checkout",
+        "config": {
+          "allows_multi_destination": {
+            "shipping": true
+          },
+          "allows_method_combinations": [["shipping", "pickup"]]
+        }
+      }
+    ]
+  }
 }
 ```
 

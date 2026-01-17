@@ -390,7 +390,7 @@ type & addresses.
             "name": "dev.ucp.shopping.checkout",
             "version": "2026-01-11"
           }
-        ],
+        ]
       },
       "id": "chk_1234567890",
       "status": "incomplete",
@@ -609,7 +609,7 @@ Follow-up calls after initial `fulfillment` data to update selection.
             "name": "dev.ucp.shopping.checkout",
             "version": "2026-01-11"
           }
-        ],
+        ]
       },
       "id": "chk_1234567890",
       "status": "ready_for_complete",
@@ -801,7 +801,7 @@ place to set these expectations via `messages`.
             "name": "dev.ucp.shopping.checkout",
             "version": "2026-01-11"
           }
-        ],
+        ]
       },
       "id": "chk_123456789",
       "status": "completed",
@@ -969,7 +969,7 @@ place to set these expectations via `messages`.
             "name": "dev.ucp.shopping.checkout",
             "version": "2026-01-11"
           }
-        ],
+        ]
       },
       "id": "chk_123456789",
       "status": "completed",
@@ -1137,7 +1137,7 @@ place to set these expectations via `messages`.
             "name": "dev.ucp.shopping.checkout",
             "version": "2026-01-11"
           }
-        ],
+        ]
       },
       "id": "chk_123456789",
       "status": "canceled", // Status is updated to canceled.
