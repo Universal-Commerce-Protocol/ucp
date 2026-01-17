@@ -181,6 +181,9 @@ Extensions can be:
 -   **Official**: `dev.ucp.shopping.fulfillment` extends `dev.ucp.shopping.checkout`
 -   **Vendor**: `com.example.installments` extends `dev.ucp.shopping.checkout`
 
+Common extensions include `dev.ucp.shopping.discount`, `dev.ucp.shopping.fulfillment`,
+`dev.ucp.shopping.loyalty`, and `dev.ucp.shopping.post_order`.
+
 ### Schema Composition
 
 Extensions can add new fields and modify shared structures (e.g., discounts
@@ -976,6 +979,7 @@ UCP defines a set of standard capabilities:
 
 | Capability Name      | ID (URI)                                         | Description                                                                                                  |
 | :------------------- | :----------------------------------------------- | :----------------------------------------------------------------------------------------------------------- |
+| **Cart**             | `{{ ucp_url }}/schemas/shopping/cart.json`             | Provides a first-class basket for multi-item shopping prior to checkout.                                       |
 | **Checkout**         | `{{ ucp_url }}/schemas/shopping/checkout.json`         | Facilitates the creation and management of checkout sessions, including cart management and tax calculation. |
 | **Identity Linking** | - | Enables platforms to obtain authorization via OAuth 2.0 to perform actions on a user's behalf.               |
 | **Order**            | `{{ ucp_url }}/schemas/shopping/order.json`            | Allows businesses to push asynchronous updates about an order's lifecycle (shipping, delivery, returns).      |

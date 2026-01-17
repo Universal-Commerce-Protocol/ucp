@@ -18,6 +18,194 @@
     }
   ],
   "paths": {
+    "/carts": {
+      "post": {
+        "operationId": "create_cart",
+        "summary": "Create Cart",
+        "description": "Create a cart session. Called when a user begins building a basket.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/authorization"
+          },
+          {
+            "$ref": "#/components/parameters/x_api_key"
+          },
+          {
+            "$ref": "#/components/parameters/request_signature"
+          },
+          {
+            "$ref": "#/components/parameters/idempotency_key"
+          },
+          {
+            "$ref": "#/components/parameters/request_id"
+          },
+          {
+            "$ref": "#/components/parameters/user_agent"
+          },
+          {
+            "$ref": "#/components/parameters/content_type"
+          },
+          {
+            "$ref": "#/components/parameters/accept"
+          },
+          {
+            "$ref": "#/components/parameters/accept_language"
+          },
+          {
+            "$ref": "#/components/parameters/accept_encoding"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/cart_create_request"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Cart created",
+            "headers": {
+              "X-Detached-JWT": {
+                "$ref": "#/components/headers/x_detached_jwt"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/cart_response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/carts/{id}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/cart_id_path"
+        }
+      ],
+      "get": {
+        "operationId": "get_cart",
+        "summary": "Get Cart",
+        "description": "Get the latest state of a cart session.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/authorization"
+          },
+          {
+            "$ref": "#/components/parameters/x_api_key"
+          },
+          {
+            "$ref": "#/components/parameters/request_signature"
+          },
+          {
+            "$ref": "#/components/parameters/request_id"
+          },
+          {
+            "$ref": "#/components/parameters/user_agent"
+          },
+          {
+            "$ref": "#/components/parameters/content_type"
+          },
+          {
+            "$ref": "#/components/parameters/accept"
+          },
+          {
+            "$ref": "#/components/parameters/accept_language"
+          },
+          {
+            "$ref": "#/components/parameters/accept_encoding"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cart retrieved",
+            "headers": {
+              "X-Detached-JWT": {
+                "$ref": "#/components/headers/x_detached_jwt"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/cart_response"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "update_cart",
+        "summary": "Update Cart",
+        "description": "If an optional field is provided in the request body, its value is treated as a complete replacement for the corresponding data. If optional field is omitted, then current cart session is unchanged.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/authorization"
+          },
+          {
+            "$ref": "#/components/parameters/x_api_key"
+          },
+          {
+            "$ref": "#/components/parameters/request_signature"
+          },
+          {
+            "$ref": "#/components/parameters/idempotency_key"
+          },
+          {
+            "$ref": "#/components/parameters/request_id"
+          },
+          {
+            "$ref": "#/components/parameters/user_agent"
+          },
+          {
+            "$ref": "#/components/parameters/content_type"
+          },
+          {
+            "$ref": "#/components/parameters/accept"
+          },
+          {
+            "$ref": "#/components/parameters/accept_language"
+          },
+          {
+            "$ref": "#/components/parameters/accept_encoding"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/cart_update_request"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Cart updated",
+            "headers": {
+              "X-Detached-JWT": {
+                "$ref": "#/components/headers/x_detached_jwt"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/cart_response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/checkout-sessions": {
       "post": {
         "operationId": "create_checkout",
@@ -425,6 +613,15 @@
   },
   "components": {
     "parameters": {
+      "cart_id_path": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "The unique identifier of the cart.",
+        "schema": {
+          "type": "string"
+        }
+      },
       "checkout_session_id_path": {
         "name": "id",
         "in": "path",
@@ -545,6 +742,15 @@
       },
       "ucp": {
         "$ref": "https://ucp.dev/schemas/ucp.json"
+      },
+      "cart_response": {
+        "$ref": "https://ucp.dev/schemas/shopping/cart_resp.json"
+      },
+      "cart_create_request": {
+        "$ref": "https://ucp.dev/schemas/shopping/cart.create_req.json"
+      },
+      "cart_update_request": {
+        "$ref": "https://ucp.dev/schemas/shopping/cart.update_req.json"
       },
       "checkout_response": {
         "$ref": "https://ucp.dev/schemas/shopping/checkout_resp.json"

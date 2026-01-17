@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/cart.create_req.json",
+  "name": "dev.ucp.shopping.cart",
+  "version": "2026-01-11",
+  "title": "Cart Create Request",
+  "description": "Cart schema for multi-item baskets prior to checkout.",
+  "type": "object",
+  "required": [
+    "line_items",
+    "currency"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "line_items": {
+      "type": "array",
+      "items": {
+        "$ref": "types/line_item.create_req.json"
+      },
+      "description": "List of line items in the cart."
+    },
+    "buyer": {
+      "$ref": "types/buyer.json",
+      "description": "Representation of the buyer."
+    },
+    "currency": {
+      "type": "string",
+      "description": "ISO 4217 currency code."
+    }
+  }
+}
