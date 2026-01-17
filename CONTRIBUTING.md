@@ -205,6 +205,9 @@ models run `bash sdk/python/generate_models.sh`. Our CI system runs
 `scripts/ci_check_models.sh` to verify that models can be generated
 successfully from the schemas.
 
+If you want a single command that regenerates schemas and SDK artifacts, run
+`bash scripts/regenerate_artifacts.sh`.
+
 It is also important to go through documentation locally whenever spec files
 are updated to ensure there are no broken references or stale/missing contents.
 
