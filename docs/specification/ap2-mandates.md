@@ -38,7 +38,7 @@ checkout session into a cryptographically bound agreement:
 intersection, the session is **Security Locked**. Neither party may revert to
 a standard (unprotected) checkout flow.
 
-![High-level AP2 flow sequence diagram](site:specification/images/ucp-ap2-checkout-flow.png)
+![High-level AP2 flow sequence diagram](images/ucp-ap2-checkout-flow.png)
 
 ### Design
 
