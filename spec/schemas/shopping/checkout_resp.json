@@ -53,7 +53,7 @@
     },
     "currency": {
       "type": "string",
-      "description": "ISO 4217 currency code. Merchant determines based on buyer location: billing address, then context, then GeoIP."
+      "description": "ISO 4217 currency code. Determined by the merchant based on provided address, context, or geo IP."
     },
     "totals": {
       "type": "array",
