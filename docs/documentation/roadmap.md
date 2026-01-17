@@ -48,6 +48,14 @@ shopping experiences. Key upcoming initiatives include:
 *   **Native cross-sell and upsell modules:** Capabilities for businesses to
     provide personalized recommendations and upsells based on user context.
 
+If you want to explore these areas or contribute documentation, start with the
+guide stubs below:
+
+*   [Agent Checkout Quickstart](agent-checkout-quickstart.md)
+*   [Cart and Basket Building](cart-and-basket-building.md)
+*   [Loyalty and Member Benefits](loyalty-and-member-benefits.md)
+*   [Post-Order Management](post-order-management.md)
+
 ### Support for global markets
 
 We are building a scalable ecosystem that is inclusive of all business sizes and
