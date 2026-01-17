@@ -24,7 +24,11 @@ on:
       - "mkdocs.yml"
       - "main.py"
       - "docs/**"
+      - "source/**"
       - "spec/**"
+      - "generate_schemas.py"
+      - "schema_utils.py"
+      - "validate_specs.py"
   pull_request:
     branches:
       - main
@@ -34,7 +38,11 @@ on:
       - "mkdocs.yml"
       - "main.py"
       - "docs/**"
+      - "source/**"
       - "spec/**"
+      - "generate_schemas.py"
+      - "schema_utils.py"
+      - "validate_specs.py"
 
 jobs:
   build_and_deploy:
@@ -74,10 +82,53 @@ jobs:
             ${{ runner.os }}-pip-
 
       - name: Install documentation dependencies
-        run: pip install -r requirements-docs.txt
+        run: python -m pip install -r requirements-docs.txt
 
       - name: Lint YAML files
         run: yamllint -c .github/linters/.yamllint.yml .
+
+      - name: Check if schema files changed
+        id: schema_changed
+        uses: tj-actions/changed-files@v46
+        with:
+          files: |
+            source/**
+            spec/**
+            generate_schemas.py
+            schema_utils.py
+            validate_specs.py
+
+      - name: Generate schemas from source
+        if: steps.schema_changed.outputs.any_changed == 'true'
+        run: python generate_schemas.py
+
+      - name: Verify spec/ directory exists
+        if: steps.schema_changed.outputs.any_changed == 'true'
+        run: |
+          if [ ! -d "spec" ] || [ -z "$(ls -A spec)" ]; then
+            echo "Error: generate_schemas.py succeeded but spec/ is empty or missing"
+            exit 1
+          fi
+
+      - name: Validate generated schemas
+        if: steps.schema_changed.outputs.any_changed == 'true'
+        run: python validate_specs.py
+
+      - name: Check spec sync (safety net)
+        if: steps.schema_changed.outputs.any_changed == 'true'
+        run: |
+          if ! git diff --exit-code spec/; then
+            echo "Error: Generated spec/ files differ from committed files in this PR"
+            echo "Run: python generate_schemas.py and commit the updated spec/ files"
+            git diff --name-only spec/
+            exit 1
+          fi
+          if git ls-files --others --exclude-standard spec/ | grep -q .; then
+            echo "Error: spec/ contains untracked generated files"
+            echo "Run: python generate_schemas.py and commit the updated spec/ files"
+            git ls-files --others --exclude-standard spec/
+            exit 1
+          fi
 
       - name: Install uv
         run: |

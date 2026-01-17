@@ -76,3 +76,4 @@ superfences
 vulnz
 yaml
 yml
+EDITMSG
