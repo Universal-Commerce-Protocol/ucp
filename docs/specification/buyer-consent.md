@@ -32,19 +32,28 @@ with a `consent` field containing boolean consent states.
 This extension can be included in `create_checkout` and `update_checkout`
 operations.
 
+**Dependencies:**
+
+- Checkout Capability
+
 ## Discovery
 
 Businesses advertise consent support in their profile:
 
 ```json
 {
-  "capabilities": [
-    {
-      "name": "dev.ucp.shopping.buyer_consent",
-      "version": "2026-01-11",
-      "extends": "dev.ucp.shopping.checkout"
-    }
-  ]
+  "ucp": {
+    "version": "2026-01-11",
+    "capabilities": [
+      {
+        "name": "dev.ucp.shopping.buyer_consent",
+        "version": "2026-01-11",
+        "extends": "dev.ucp.shopping.checkout",
+        "spec": "https://ucp.dev/specification/buyer-consent",
+        "schema": "https://ucp.dev/schemas/shopping/buyer_consent.json"
+      }
+    ]
+  }
 }
 ```
 
