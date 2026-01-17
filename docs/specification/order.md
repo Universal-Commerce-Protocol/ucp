@@ -274,7 +274,7 @@ The platform provides its webhook URL in the order capability's `config` field
 during capability negotiation. The business discovers this URL from the
 platform's profile and uses it to send order lifecycle events.
 
-{{ extension_schema_fields('order.json#/$defs/platform_config', 'order') }}
+{{ extension_schema_fields('order.json#/$defs/platform_schema', 'order') }}
 
 **Example:**
 
@@ -349,7 +349,7 @@ rotation:
 
 ### Response
 
-{{ extension_schema_fields('capability.json#/$defs/response', 'order') }}
+{{ extension_schema_fields('capability.json#/$defs/response_schema', 'order') }}
 
 ### Total Response
 
@@ -357,4 +357,4 @@ rotation:
 
 ### UCP Response Order
 
-{{ extension_schema_fields('ucp.json#/$defs/response_order', 'order') }}
+{{ extension_schema_fields('ucp.json#/$defs/response_order_schema', 'order') }}

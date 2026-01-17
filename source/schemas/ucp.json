@@ -8,59 +8,182 @@
     "version": {
       "type": "string",
       "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
-      "description": "UCP protocol version in YYYY-MM-DD format."
+      "description": "UCP version in YYYY-MM-DD format."
     },
 
-    "services": {
-      "type": "object",
-      "description": "Service definitions keyed by reverse-domain service name.",
-      "additionalProperties": {"$ref": "../services/service_schema.json"}
+    "reverse_domain_name": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9_]*)+$",
+      "description": "Reverse-domain identifier (e.g., com.google.pay, dev.ucp.shopping.checkout)"
     },
 
-    "discovery_profile": {
-      "title": "UCP Discovery Profile",
-      "description": "Full UCP metadata for /.well-known/ucp discovery.",
+    "entity": {
       "type": "object",
-      "required": ["version", "services", "capabilities"],
+      "description": "Shared foundation for all UCP entities.",
+      "required": ["version"],
       "properties": {
-        "version": {"$ref": "#/$defs/version"},
-        "services": {"$ref": "#/$defs/services"},
-        "capabilities": {
-          "type": "array",
-          "description": "Supported capabilities and extensions.",
-          "items": {"$ref": "capability.json#/$defs/discovery"}
+        "version": {
+          "$ref": "#/$defs/version",
+          "description": "Entity version in YYYY-MM-DD format."
+        },
+        "spec": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL to human-readable specification document."
+        },
+        "schema": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL to JSON Schema defining this entity's structure and payloads."
+        },
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for this entity instance. Used to disambiguate when multiple instances exist."
+        },
+        "config": {
+          "type": "object",
+          "description": "Entity-specific configuration. Structure defined by each entity's schema.",
+          "additionalProperties": true
         }
       }
     },
 
-    "response_checkout": {
-      "title": "UCP Checkout Response",
+    "base": {
+      "description": "Base UCP metadata with shared properties for all schema types.",
+      "type": "object",
+      "required": ["version"],
+      "properties": {
+        "version": { "$ref": "#/$defs/version" },
+        "services": {
+          "type": "object",
+          "description": "Service registry keyed by reverse-domain name.",
+          "propertyNames": { "$ref": "#/$defs/reverse_domain_name" },
+          "additionalProperties": {
+            "type": "array",
+            "items": { "$ref": "service.json#/$defs/base" }
+          }
+        },
+        "capabilities": {
+          "type": "object",
+          "description": "Capability registry keyed by reverse-domain name.",
+          "propertyNames": { "$ref": "#/$defs/reverse_domain_name" },
+          "additionalProperties": {
+            "type": "array",
+            "items": { "$ref": "capability.json#/$defs/base" }
+          }
+        },
+        "payment_handlers": {
+          "type": "object",
+          "description": "Payment handler registry keyed by reverse-domain name.",
+          "propertyNames": { "$ref": "#/$defs/reverse_domain_name" },
+          "additionalProperties": {
+            "type": "array",
+            "items": { "$ref": "payment_handler.json#/$defs/base" }
+          }
+        }
+      }
+    },
+
+    "platform_schema": {
+      "title": "UCP Platform Schema",
+      "description": "Full UCP metadata for platform-level configuration. Hosted at a URI advertised by the platform in request headers.",
+      "allOf": [
+        { "$ref": "#/$defs/base" },
+        {
+          "required": ["services", "payment_handlers"],
+          "properties": {
+            "services": {
+              "additionalProperties": {
+                "items": { "$ref": "service.json#/$defs/platform_schema" }
+              }
+            },
+            "capabilities": {
+              "additionalProperties": {
+                "items": { "$ref": "capability.json#/$defs/platform_schema" }
+              }
+            },
+            "payment_handlers": {
+              "additionalProperties": {
+                "items": {
+                  "$ref": "payment_handler.json#/$defs/platform_schema"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+
+    "business_schema": {
+      "title": "UCP Business Schema",
+      "description": "UCP metadata for business/merchant-level configuration. Subset of platform schema with business-specific settings.",
+      "allOf": [
+        { "$ref": "#/$defs/base" },
+        {
+          "required": ["services", "payment_handlers"],
+          "properties": {
+            "services": {
+              "additionalProperties": {
+                "items": { "$ref": "service.json#/$defs/business_schema" }
+              }
+            },
+            "capabilities": {
+              "additionalProperties": {
+                "items": { "$ref": "capability.json#/$defs/business_schema" }
+              }
+            },
+            "payment_handlers": {
+              "additionalProperties": {
+                "items": {
+                  "$ref": "payment_handler.json#/$defs/business_schema"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+
+    "response_checkout_schema": {
+      "title": "UCP Checkout Response Schema",
       "description": "UCP metadata for checkout responses.",
-      "type": "object",
-      "required": ["version", "capabilities"],
-      "properties": {
-        "version": {"$ref": "#/$defs/version"},
-        "capabilities": {
-          "type": "array",
-          "description": "Active capabilities for this response.",
-          "items": {"$ref": "capability.json#/$defs/response"}
+      "allOf": [
+        { "$ref": "#/$defs/base" },
+        {
+          "required": ["payment_handlers"],
+          "properties": {
+            "capabilities": {
+              "additionalProperties": {
+                "items": { "$ref": "capability.json#/$defs/response_schema" }
+              }
+            },
+            "payment_handlers": {
+              "additionalProperties": {
+                "items": {
+                  "$ref": "payment_handler.json#/$defs/response_schema"
+                }
+              }
+            }
+          }
         }
-      }
+      ]
     },
 
-    "response_order": {
-      "title": "UCP Order Response",
+    "response_order_schema": {
+      "title": "UCP Order Response Schema",
       "description": "UCP metadata for order responses. No payment handlers needed post-purchase.",
-      "type": "object",
-      "required": ["version", "capabilities"],
-      "properties": {
-        "version": {"$ref": "#/$defs/version"},
-        "capabilities": {
-          "type": "array",
-          "description": "Active capabilities for this response.",
-          "items": {"$ref": "capability.json#/$defs/response"}
+      "allOf": [
+        { "$ref": "#/$defs/base" },
+        {
+          "properties": {
+            "capabilities": {
+              "additionalProperties": {
+                "items": { "$ref": "capability.json#/$defs/response_schema" }
+              }
+            }
+          }
         }
-      }
+      ]
     }
   }
 }

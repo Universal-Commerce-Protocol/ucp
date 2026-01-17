@@ -13,13 +13,12 @@
     "status",
     "currency",
     "totals",
-    "links",
-    "payment"
+    "links"
   ],
   "additionalProperties": true,
   "properties": {
     "ucp": {
-      "$ref": "../ucp.json#/$defs/response_checkout"
+      "$ref": "../ucp.json#/$defs/response_checkout_schema"
     },
     "id": {
       "type": "string",
@@ -84,7 +83,7 @@
       "description": "URL for checkout handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements."
     },
     "payment": {
-      "$ref": "payment_resp.json"
+      "$ref": "payment.json"
     },
     "order": {
       "$ref": "types/order_confirmation.json",

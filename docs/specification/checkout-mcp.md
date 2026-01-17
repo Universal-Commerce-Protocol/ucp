@@ -31,30 +31,44 @@ Businesses advertise MCP transport availability through their UCP profile at
   "ucp": {
     "version": "2026-01-11",
     "services": {
-      "dev.ucp.shopping": {
-        "version": "2026-01-11",
-        "spec": "https://ucp.dev/specification/overview",
-        "mcp": {
+      "dev.ucp.shopping": [
+        {
+          "version": "2026-01-11",
+          "spec": "https://ucp.dev/specification/overview",
+          "transport": "mcp",
           "schema": "https://ucp.dev/services/shopping/mcp.openrpc.json",
           "endpoint": "https://business.example.com/ucp/mcp"
         }
-      }
+      ]
     },
-    "capabilities": [
-      {
-        "name": "dev.ucp.shopping.checkout",
-        "version": "2026-01-11",
-        "spec": "https://ucp.dev/specification/checkout",
-        "schema": "https://ucp.dev/schemas/shopping/checkout.json"
-      },
-      {
-        "name": "dev.ucp.shopping.fulfillment",
-        "version": "2026-01-11",
-        "spec": "https://ucp.dev/specification/fulfillment",
-        "schema": "https://ucp.dev/schemas/shopping/fulfillment.json",
-        "extends": "dev.ucp.shopping.checkout"
-      }
-    ]
+    "capabilities": {
+      "dev.ucp.shopping.checkout": [
+        {
+          "version": "2026-01-11",
+          "spec": "https://ucp.dev/specification/checkout",
+          "schema": "https://ucp.dev/schemas/shopping/checkout.json"
+        }
+      ],
+      "dev.ucp.shopping.fulfillment": [
+        {
+          "version": "2026-01-11",
+          "spec": "https://ucp.dev/specification/fulfillment",
+          "schema": "https://ucp.dev/schemas/shopping/fulfillment.json",
+          "extends": "dev.ucp.shopping.checkout"
+        }
+      ]
+    },
+    "payment_handlers": {
+      "com.example.vendor.delegate_payment": [
+        {
+          "id": "handler_1",
+          "version": "2026-01-11",
+          "spec": "https://example.vendor.com/specs/delegate-payment",
+          "schema": "https://example.vendor.com/schemas/delegate-payment-config.json",
+          "config": {}
+        }
+      ]
+    }
   }
 }
 ```
@@ -169,8 +183,7 @@ Maps to the [Create Checkout](checkout.md#create-checkout) operation.
               ]
             }
           ]
-        },
-        "payment": {}
+        }
       },
       "id": 1
     }
@@ -185,16 +198,19 @@ Maps to the [Create Checkout](checkout.md#create-checkout) operation.
       "result": {
         "ucp": {
           "version": "2026-01-11",
-          "capabilities": [
-            {
-              "name": "dev.ucp.shopping.checkout",
-              "version": "2026-01-11"
-            },
-            {
-              "name": "dev.ucp.shopping.fulfillment",
-              "version": "2026-01-11"
-            }
-          ]
+          "capabilities": {
+            "dev.ucp.shopping.checkout": [
+              {"version": "2026-01-11"}
+            ],
+            "dev.ucp.shopping.fulfillment": [
+              {"version": "2026-01-11"}
+            ]
+          },
+          "payment_handlers": {
+            "com.example.vendor.delegate_payment": [
+              {"id": "handler_1", "version": "2026-01-11", "config": {}}
+            ]
+          }
         },
         "id": "checkout_abc123",
         "status": "incomplete",
@@ -282,21 +298,6 @@ Maps to the [Create Checkout](checkout.md#create-checkout) operation.
                   ]
                 }
               ]
-            }
-          ]
-        },
-        "payment": {
-          "handlers": [
-            {
-              "id": "handler_1",
-              "name": "com.example.vendor.delegate_payment",
-              "version": "2026-01-11",
-              "spec": "https://example.vendor.com/specs/delegate-payment",
-              "config_schema": "https://example.vendor.com/schemas/delegate-payment-config.json",
-              "instrument_schemas": [
-                "https://example.vendor.com/schemas/delegate-payment-instrument.json"
-              ],
-              "config": {}
             }
           ]
         },
@@ -389,8 +390,7 @@ Maps to the [Update Checkout](checkout.md#update-checkout) operation.
               ]
             }
           ]
-        },
-        "payment": {}
+        }
       },
       "id": 2
     }
@@ -405,16 +405,19 @@ Maps to the [Update Checkout](checkout.md#update-checkout) operation.
       "result": {
         "ucp": {
           "version": "2026-01-11",
-          "capabilities": [
-            {
-              "name": "dev.ucp.shopping.checkout",
-              "version": "2026-01-11"
-            },
-            {
-              "name": "dev.ucp.shopping.fulfillment",
-              "version": "2026-01-11"
-            }
-          ]
+          "capabilities": {
+            "dev.ucp.shopping.checkout": [
+              {"version": "2026-01-11"}
+            ],
+            "dev.ucp.shopping.fulfillment": [
+              {"version": "2026-01-11"}
+            ]
+          },
+          "payment_handlers": {
+            "com.example.vendor.delegate_payment": [
+              {"id": "handler_1", "version": "2026-01-11", "config": {}}
+            ]
+          }
         },
         "id": "checkout_abc123",
         "status": "incomplete",
@@ -502,21 +505,6 @@ Maps to the [Update Checkout](checkout.md#update-checkout) operation.
                   ]
                 }
               ]
-            }
-          ]
-        },
-        "payment": {
-          "handlers": [
-            {
-              "id": "handler_1",
-              "name": "com.example.vendor.delegate_payment",
-              "version": "2026-01-11",
-              "spec": "https://example.vendor.com/specs/delegate-payment",
-              "config_schema": "https://example.vendor.com/schemas/delegate-payment-config.json",
-              "instrument_schemas": [
-                "https://example.vendor.com/schemas/delegate-payment-instrument.json"
-              ],
-              "config": {}
             }
           ]
         },

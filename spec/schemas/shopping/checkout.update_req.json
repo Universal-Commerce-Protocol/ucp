@@ -33,7 +33,7 @@
       "description": "ISO 4217 currency code."
     },
     "payment": {
-      "$ref": "payment.update_req.json"
+      "$ref": "payment.json"
     }
   }
 }

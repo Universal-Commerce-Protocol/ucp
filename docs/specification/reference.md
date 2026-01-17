@@ -36,23 +36,27 @@ within the UCP.
 The following schemas define the structure of UCP metadata used in discovery
 and responses.
 
-### Discovery Profile
+### Platform Discovery Profile
+The top-level structure of a platform profile document (hosted at a URI advertised by the platform).
 
-The top-level structure of a discovery document (`/.well-known/ucp`).
+{{ extension_schema_fields('ucp.json#/$defs/platform_schema', 'reference') }}
 
-{{ extension_schema_fields('ucp.json#/$defs/discovery_profile', 'reference') }}
+### Business Discovery Profile
+The top-level structure of a business discovery document (`/.well-known/ucp`).
+
+{{ extension_schema_fields('ucp.json#/$defs/business_schema', 'reference') }}
 
 ### Checkout Response Metadata
 
 The `ucp` object included in checkout responses.
 
-{{ extension_schema_fields('ucp.json#/$defs/response_checkout', 'reference') }}
+{{ extension_schema_fields('ucp.json#/$defs/response_checkout_schema', 'reference') }}
 
 ### Order Response Metadata
 
 The `ucp` object included in order responses or events.
 
-{{ extension_schema_fields('ucp.json#/$defs/response_order', 'reference') }}
+{{ extension_schema_fields('ucp.json#/$defs/response_order_schema', 'reference') }}
 
 ### Capability
 
@@ -70,4 +74,4 @@ As seen in discovery profiles.
 
 As seen in response messages.
 
-{{ extension_schema_fields('capability.json#/$defs/response', 'reference') }}
+{{ extension_schema_fields('capability.json#/$defs/response_schema', 'reference') }}

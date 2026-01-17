@@ -29,14 +29,28 @@
     "credential": {
       "$ref": "payment_credential.json"
     },
-    "selected": {
-      "type": "boolean",
-      "description": "Whether this instrument is selected by the user."
-    },
     "display": {
       "type": "object",
       "description": "Display information for this payment instrument."
     }
   },
-  "additionalProperties": true
+  "additionalProperties": true,
+  "$defs": {
+    "selected_payment_instrument": {
+      "title": "Selected Payment Instrument",
+      "description": "A payment instrument with selection state.",
+      "allOf": [
+        { "$ref": "#" },
+        {
+          "type": "object",
+          "properties": {
+            "selected": {
+              "type": "boolean",
+              "description": "Whether this instrument is selected by the user."
+            }
+          }
+        }
+      ]
+    }
+  }
 }

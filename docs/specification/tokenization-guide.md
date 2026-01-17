@@ -24,12 +24,17 @@ This guide is for **implementers building tokenization payment handlers**. It
 defines the shared API, security requirements, and conformance criteria that all
 tokenization handlers follow.
 
+**Note:** While the examples in this guide use card credentials, tokenization
+patterns apply to **any sensitive credential type**—bank accounts, digital
+wallets, loyalty accounts, etc. Compliance requirements (e.g., PCI DSS for
+cards) vary by credential type.
+
 We offer a range of examples to utilize forms of tokenization in UCP:
 
-| Example                                                                  | Use Case                                            |
-| :----------------------------------------------------------------------- | :-------------------------------------------------- |
-| [Business Tokenizer](examples/business-tokenizer-payment-handler.md)     | Business runs their own tokenization service        |
-| [Platform Tokenizer](examples/platform-tokenizer-payment-handler.md)     | Platform tokenizes credentials for businesses/PSPs  |
+| Example | Use Case |
+|:--------|:---------|
+| [Processor Tokenizer](examples/processor-tokenizer-payment-handler.md) | Business or PSP runs tokenization and processing |
+| [Platform Tokenizer](examples/platform-tokenizer-payment-handler.md) | Platform tokenizes credentials for businesses/PSPs |
 | [Encrypted Credential Handler](examples/encrypted-credential-handler.md) | Platform encrypts credentials instead of tokenizing |
 
 ---
@@ -46,7 +51,7 @@ Tokenization handlers transform credentials between source and checkout forms:
 ├─────────────────────────────────────────────────────────────────────────┤
 │                                                                         │
 │   Platform has:            Tokenizer            Business receives:      │
-│   Card Credential    ──▶  /tokenize  ──▶         TokenCredential        │
+│   Source Credential  ──▶  /tokenize  ──▶         TokenCredential        │
 │                                                                         │
 │   ┌─────────────────┐                      ┌─────────────────────────┐  │
 │   │ source_         │                      │ checkout_               │  │

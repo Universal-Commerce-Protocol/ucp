@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/payment_handler.json",
+  "title": "Payment Handler",
+  "description": "Schema for UCP payment handlers. Handlers define how payment instruments are processed.",
+  "$defs": {
+    "base": {
+      "allOf": [
+        {
+          "$ref": "ucp.json#/$defs/entity"
+        },
+        {
+          "type": "object",
+          "required": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "platform_schema": {
+      "title": "Payment Handler (Platform Schema)",
+      "description": "Full handler declaration for platform-level discovery. Includes spec/schema URLs.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
+        },
+        {
+          "required": [
+            "spec",
+            "schema"
+          ]
+        }
+      ]
+    },
+    "business_schema": {
+      "title": "Payment Handler (Business Schema)",
+      "description": "Handler configuration for business/merchant level. Includes merchant-specific config.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
+        }
+      ]
+    },
+    "response_schema": {
+      "title": "Payment Handler (Response Schema)",
+      "description": "Handler reference in responses. Only name/version required to confirm active handlers.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
+        }
+      ]
+    }
+  }
+}

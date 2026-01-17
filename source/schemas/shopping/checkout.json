@@ -13,13 +13,12 @@
     "status",
     "currency",
     "totals",
-    "links",
-    "payment"
+    "links"
   ],
   "additionalProperties": true,
   "properties": {
     "ucp": {
-      "$ref": "../ucp.json#/$defs/response_checkout",
+      "$ref": "../ucp.json#/$defs/response_checkout_schema",
       "ucp_request": "omit"
     },
     "id": {

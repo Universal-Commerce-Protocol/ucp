@@ -768,10 +768,11 @@ checkout UI, such as a new payment method being selected.
             // The entire checkout object is provided, including the updated payment details
             "payment": {
                 "instruments": [
-                    /* ... */
-                ],
-                "handlers": [
-                    /* ... */
+                    {
+                        "id": "payment_instrument_123",
+                        "selected": true
+                        /* ... */
+                    }
                 ]
             }
             // ...
@@ -890,10 +891,11 @@ submission.
             // The entire checkout object is provided, including the current payment details
             "payment": {
                 "instruments": [
-                    /* ... */
-                ],
-                "handlers": [
-                    /* ... */
+                    {
+                        "id": "payment_instrument_123",
+                        "selected": true
+                        /* ... */
+                    }
                 ]
             }
             // ...

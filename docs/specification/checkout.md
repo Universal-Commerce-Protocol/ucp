@@ -26,7 +26,7 @@ finalized manually by the user through a trusted UI unless the AP2 Mandates
 extension is supported.
 
 The business remains the Merchant of Record (MoR), and they don't need to become
-PCI DSS compliant to support this Capability.
+PCI DSS compliant to accept card payments through this Capability.
 
 ### Flow overview
 
@@ -34,11 +34,15 @@ PCI DSS compliant to support this Capability.
 
 ### Payments
 
-On checkout creation, businesses are required to define a payment configuration.
-The Checkout object includes `payment.handlers` which define the processing
-specifications for collecting payment instruments (e.g., Google Pay, direct
-tokenization). When the buyer submits payment, the platform populates the
-`payment.instruments` array with the collected instrument data.
+Payment handlers are discovered from the business's UCP profile at
+`/.well-known/ucp` and checkout.ucp.payment_handlers. The handlers define
+the processing specifications for collecting payment instruments
+(e.g., Google Pay, Shop Pay). When the buyer submits payment, the platform
+populates the `payment.instruments` array with the collected instrument data.
+
+The `payment` object is optional on checkout creation and may be omitted for
+use cases that don't require payment processing (e.g., quote generation, cart
+management).
 
 ### Fulfillment
 
@@ -473,7 +477,7 @@ field or omitting them.
 
 ### Response
 
-{{ extension_schema_fields('capability.json#/$defs/response', 'checkout') }}
+{{ extension_schema_fields('capability.json#/$defs/response_schema', 'checkout') }}
 
 ### Total
 
@@ -483,7 +487,7 @@ field or omitting them.
 
 ### UCP Response Checkout
 
-{{ extension_schema_fields('ucp.json#/$defs/response_checkout', 'checkout') }}
+{{ extension_schema_fields('ucp.json#/$defs/response_checkout_schema', 'checkout') }}
 
 ### Order Confirmation
 

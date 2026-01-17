@@ -26,6 +26,10 @@ This handler implements a **"Tokenize to Process"** flow where the entity
 that generates the token (the Tokenizer) is the same entity that processes
 the final payment (the Processor).
 
+**Note:** While this example uses card credentials, the pattern applies to
+**any credential type**. Compliance requirements vary by credential type
+(e.g., PCI DSS for cards).
+
 This specification unifies two common implementation scenarios:
 
 1. **Business-Hosted:** An enterprise Business hosts their own secure vault.
@@ -48,11 +52,11 @@ happens internally within the Processor's secure environment.
 
 ## Participants
 
-| Participant               | Role                                                                                 | Prerequisites                  |
-| :------------------------ | :----------------------------------------------------------------------------------- | :----------------------------- |
-| **Tokenizer / Processor** | Host `/tokenize` endpoint, store tokens, process payments. (Can be Business or PSP). | **High Compliance** (PCI DSS). |
-| **Platform**              | Collect credentials via secure credential provider, call Tokenizer, submit checkout. | Secure credential provider.    |
-| **Business**              | Configures the handler for the checkout.                                             | None (if PSP-hosted).          |
+| Participant | Role | Prerequisites |
+|:---|:---|:---|
+| **Tokenizer / Processor** | Host `/tokenize` endpoint, store tokens, process payments. (Can be Business or PSP). | Compliance per credential type (e.g., PCI DSS for cards). |
+| **Platform** | Collect credentials via secure credential provider, call Tokenizer, submit checkout. | Secure credential provider. |
+| **Business** | Configures the handler for the checkout. | None (if PSP-hosted). |
 
 ### Pattern Flow
 
@@ -62,7 +66,7 @@ happens internally within the Processor's secure environment.
 │ (Collector)│                         │      (Business or PSP)            │
 └─────┬──────┘                         └─────────────────┬─────────────────┘
       │                                                  │
-      │  1. GET payment.handlers                         │
+      │  1. GET ucp.payment_handlers                     │
       │─────────────────────────────────────────────────>│
       │                                                  │
       │  2. Handler Config (URL + Identity)              │
@@ -87,31 +91,63 @@ happens internally within the Processor's secure environment.
 
 ## Configuration
 
-The Business advertises this handler in the checkout's `payment.handlers` array.
-The configuration determines whether the Platform acts in "PSP Mode"
+The Business advertises this handler in their UCP profile's `payment_handlers`
+registry. The configuration determines whether the Platform acts in "PSP Mode"
 (sending identity) or "Direct Mode" (implicit identity).
 
-### Handler Declaration
+### Business Config (Discovery)
+
+The business advertises their tokenization endpoint and identity during discovery.
+The handler's specification (referenced via the `spec` field) documents the
+`/tokenize` endpoint URL.
+
+| Field | Type | Required | Description |
+|:------|:-----|:---------|:------------|
+| `environment` | string | Yes | API environment (`sandbox` or `production`) |
+| `business_id` | string | Yes | Business identifier with the processor |
+
+#### Example Business Handler Declaration
 
 ```json
 {
-  "payment": {
-    "handlers": [
-      {
-        "id": "processor_tokenizer",
-        "name": "com.example.processor_tokenizer",
-        "spec": "https://example.com/ucp/processor-tokenizer.json",
-        "instrument_schemas": [
-           "https://ucp.dev/schemas/shopping/types/card_payment_instrument.json"
-        ],
-        "config": {
-          "endpoint": "https://api.psp.com/v1/tokenize",
-          "identity": {
-            "access_token": "merchant_xyz789"
+  "ucp": {
+    "version": "2026-01-11",
+    "payment_handlers": {
+      "com.example.processor_tokenizer": [
+        {
+          "id": "processor_tokenizer",
+          "version": "2026-01-11",
+          "spec": "https://example.com/ucp/processor-tokenizer.json",
+          "schema": "https://example.com/ucp/processor-tokenizer/schema.json",
+          "config": {
+            "environment": "production",
+            "business_id": "merchant_xyz789"
           }
         }
-      }
-    ]
+      ]
+    }
+  }
+}
+```
+
+### Response Config (Checkout)
+
+The response config includes runtime information about what's available for this checkout.
+
+| Field | Type | Required | Description |
+|:------|:-----|:---------|:------------|
+| `environment` | string | Yes | API environment used for this checkout |
+| `business_id` | string | Yes | Business identifier |
+| `supported_networks` | array | No | Card networks supported for this transaction |
+
+#### Example Response Config
+
+```json
+{
+  "config": {
+    "environment": "production",
+    "business_id": "merchant_xyz789",
+    "supported_networks": ["visa", "mastercard", "amex"]
   }
 }
 ```
@@ -140,17 +176,22 @@ the specific `endpoint` defined in the handler configuration.
 #### Step 1: Discover Handler
 
 Platform identifies the processor tokenizer handler and retrieves the
-configuration.
+business's configuration.
 
 ```json
 {
-  "id": "processor_tokenizer",
-  "name": "com.example.processor_tokenizer",
-  "spec": "https://example.com/ucp/processor-tokenizer.json",
-  "config": {
-    "endpoint": "https://api.processor.com/v1/tokenize",
-    "identity": {
-      "access_token": "merchant_xyz789"
+  "ucp": {
+    "payment_handlers": {
+      "com.example.processor_tokenizer": [
+        {
+          "id": "processor_tokenizer",
+          "version": "2026-01-11",
+          "config": {
+            "environment": "production",
+            "business_id": "merchant_xyz789"
+          }
+        }
+      ]
     }
   }
 }
@@ -219,12 +260,13 @@ Content-Type: application/json
 
 ### Scenario A: Enterprise Implementation (Self-Hosted)
 
-* **Role:** The Business implements this specification.
-* **Requirements:**
-    1. Deploy the `endpoint` on their own infrastructure.
-    2. Internally map tokens to PANs in their own database.
-* **Security:** **CRITICAL.** The Business **MUST** be PCI DSS compliant
-    as they are receiving raw PANs at their endpoint.
+*   **Role:** The Business implements this specification.
+*   **Requirements:**
+    1.  Deploy the `endpoint` on their own infrastructure.
+    3.  Internally map tokens to PANs in their own database.
+*   **Security:** **CRITICAL.** For card credentials, the Business **MUST** be
+    PCI DSS compliant as they are receiving raw PANs at their endpoint.
+    Other credential types have their own compliance requirements.
 
 ### Scenario B: PSP Implementation (Third-Party)
 
@@ -234,15 +276,17 @@ Content-Type: application/json
     2. Issue `identity.access_token` (Merchant Secure Identifier) to merchants.
     3. Validate that the `binding.identity` matches the merchant requesting
     the final payment charge.
-* **Security:** PSP bears the PCI compliance burden for storage.
+*   **Security:** PSP bears the compliance burden for credential storage
+    (e.g., PCI DSS for cards).
 
 ---
 
 ## Security Considerations
 
-| Requirement            | Description                                                                                                                                            |
-| :--------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **TLS/HTTPS**          | All traffic to `config.endpoint` **MUST** be encrypted.                                                                                                |
-| **Compliance**         | The entity hosting `config.endpoint` **MUST** be compliant with relevant data standards (PCI DSS, GDPR, etc.).                                         |
-| **Scope Isolation**    | The Platform's main application **MUST NOT** see the raw credential; only the Platform's Secure credential provider and the Tokenizer Host may see it. |
-| **Binding Validation** | The Tokenizer/Processor **MUST** verify that the `checkout_id` submitted during final payment matches the `checkout_id` provided during tokenization.  |
+| Requirement | Description |
+|:---|:---|
+| **TLS/HTTPS** | All traffic to `config.endpoint` **MUST** be encrypted. |
+| **Compliance** | The entity hosting `config.endpoint` **MUST** be compliant with relevant data standards for the credential type (e.g., PCI DSS for cards, GDPR for PII, etc.). |
+| **Scope Isolation** | The Platform's main application **MUST NOT** see the raw credential; only the Platform's Secure credential provider and the Tokenizer Host may see it. |
+| **Binding Validation** | The Tokenizer/Processor **MUST** verify that the `checkout_id` submitted during final payment matches the `checkout_id` provided during tokenization. |
+

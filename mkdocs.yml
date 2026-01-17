@@ -47,7 +47,7 @@ nav:
       - Template: specification/payment-handler-template.md
       - Tokenization Guide: specification/tokenization-guide.md
       - Examples:
-        - Business Tokenizer: specification/examples/business-tokenizer-payment-handler.md
+        - Processor Tokenizer: specification/examples/processor-tokenizer-payment-handler.md
         - Platform Tokenizer: specification/examples/platform-tokenizer-payment-handler.md
         - Encrypted Credential: specification/examples/encrypted-credential-handler.md
     - Schema Authoring: documentation/schema-authoring.md
@@ -207,7 +207,7 @@ plugins:
           - specification/payment-handler-template.md
           - specification/tokenization-guide.md
         Payment Handler Examples:
-          - specification/examples/business-tokenizer-payment-handler.md
+          - specification/examples/processor-tokenizer-payment-handler.md
           - specification/examples/platform-tokenizer-payment-handler.md
           - specification/examples/encrypted-credential-handler.md
         Schema Authoring:

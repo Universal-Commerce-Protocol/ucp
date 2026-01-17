@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/service.json",
+  "title": "UCP Service",
+  "description": "Service binding for a specific transport. Each transport binding is a separate entry in the service array.",
+  "$defs": {
+    "base": {
+      "allOf": [
+        {
+          "$ref": "ucp.json#/$defs/entity"
+        },
+        {
+          "type": "object",
+          "required": [
+            "transport"
+          ],
+          "properties": {
+            "transport": {
+              "type": "string",
+              "enum": [
+                "rest",
+                "mcp",
+                "a2a",
+                "embedded"
+              ],
+              "description": "Transport protocol for this service binding."
+            },
+            "endpoint": {
+              "type": "string",
+              "format": "uri",
+              "description": "Endpoint URL for this transport binding."
+            }
+          }
+        }
+      ]
+    },
+    "platform_schema": {
+      "title": "Service (Platform Schema)",
+      "description": "Full service declaration for platform-level discovery. Different transports require different fields.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
+        },
+        {
+          "required": [
+            "spec"
+          ]
+        },
+        {
+          "anyOf": [
+            {
+              "properties": {
+                "transport": {
+                  "const": "rest"
+                }
+              }
+            },
+            {
+              "properties": {
+                "transport": {
+                  "const": "mcp"
+                }
+              }
+            },
+            {
+              "properties": {
+                "transport": {
+                  "const": "a2a"
+                }
+              }
+            },
+            {
+              "properties": {
+                "transport": {
+                  "const": "embedded"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "business_schema": {
+      "title": "Service (Business Schema)",
+      "description": "Service binding for business/merchant configuration. May override platform endpoints.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
+        },
+        {
+          "anyOf": [
+            {
+              "properties": {
+                "transport": {
+                  "const": "rest"
+                }
+              }
+            },
+            {
+              "properties": {
+                "transport": {
+                  "const": "mcp"
+                }
+              }
+            },
+            {
+              "properties": {
+                "transport": {
+                  "const": "a2a"
+                }
+              }
+            },
+            {
+              "properties": {
+                "transport": {
+                  "const": "embedded"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

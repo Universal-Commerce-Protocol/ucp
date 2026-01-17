@@ -358,7 +358,7 @@ about verification and processing of the mandates to complete the checkout.
         "data": {
           "a2a.ucp.checkout.payment_data": {
             "id": "instr_1",
-            "handler_id": "gpay",
+            "handler_id": "gpay_1234",
             "type": "card",
             "description": "Visa •••• 1234",
             "billing_address": {

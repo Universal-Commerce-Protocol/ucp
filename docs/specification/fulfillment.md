@@ -273,7 +273,7 @@ Businesses fetch platform profiles to adapt responses accordingly.
 
 ### Platform Profile
 
-Platforms declare their rendering capabilities using `platform_config`:
+Platforms declare their rendering capabilities using `platform_schema`:
 
 {{ schema_fields('types/platform_fulfillment_config', 'fulfillment') }}
 
@@ -299,16 +299,19 @@ Businesses declare what fulfillment configurations they support using
 
 ```json
 {
-  "capabilities": [{
-    "name": "dev.ucp.shopping.fulfillment",
-    "version": "2026-01-11",
-    "config": {
-      "allows_multi_destination": {
-        "shipping": true
-      },
-      "allows_method_combinations": [["shipping", "pickup"]]
-    }
-  }]
+  "capabilities": {
+    "dev.ucp.shopping.fulfillment": [
+      {
+        "version": "2026-01-11",
+        "config": {
+          "allows_multi_destination": {
+            "shipping": true
+          },
+          "allows_method_combinations": [["shipping", "pickup"]]
+        }
+      }
+    ]
+  }
 }
 ```
 

@@ -246,70 +246,79 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
   "ucp": {
     "version": "2026-01-11",
     "services": {
-      "dev.ucp.shopping": {
-        "version": "2026-01-11",
-        "spec": "https://ucp.dev/specification/overview",
-        "rest": {
-          "schema": "https://ucp.dev/services/shopping/rest.openapi.json",
-          "endpoint": "https://business.example.com/ucp/v1"
+      "dev.ucp.shopping": [
+        {
+          "version": "2026-01-11",
+          "spec": "https://ucp.dev/specification/overview",
+          "transport": "rest",
+          "endpoint": "https://business.example.com/ucp/v1",
+          "schema": "https://ucp.dev/services/shopping/rest.openapi.json"
         },
-        "mcp": {
-          "schema": "https://ucp.dev/services/shopping/mcp.openrpc.json",
-          "endpoint": "https://business.example.com/ucp/mcp"
+        {
+          "version": "2026-01-11",
+          "spec": "https://ucp.dev/specification/overview",
+          "transport": "mcp",
+          "endpoint": "https://business.example.com/ucp/mcp",
+          "schema": "https://ucp.dev/services/shopping/mcp.openrpc.json"
         },
-        "a2a": {
+        {
+          "version": "2026-01-11",
+          "spec": "https://ucp.dev/specification/overview",
+          "transport": "a2a",
           "endpoint": "https://business.example.com/.well-known/agent-card.json"
         },
-        "embedded": {
+        {
+          "version": "2026-01-11",
+          "spec": "https://ucp.dev/specification/overview",
+          "transport": "embedded",
           "schema": "https://ucp.dev/services/shopping/embedded.openrpc.json"
         }
-      }
+      ]
     },
-    "capabilities": [
-      {
-        "name": "dev.ucp.shopping.checkout",
-        "version": "2026-01-11",
-        "spec": "https://ucp.dev/specification/checkout",
-        "schema": "https://ucp.dev/schemas/shopping/checkout.json"
-      },
-      {
-        "name": "dev.ucp.shopping.fulfillment",
-        "version": "2026-01-11",
-        "spec": "https://ucp.dev/specification/fulfillment",
-        "schema": "https://ucp.dev/schemas/shopping/fulfillment.json",
-        "extends": "dev.ucp.shopping.checkout"
-      },
-      {
-        "name": "dev.ucp.shopping.discount",
-        "version": "2026-01-11",
-        "spec": "https://ucp.dev/specification/discount",
-        "schema": "https://ucp.dev/schemas/shopping/discount.json",
-        "extends": "dev.ucp.shopping.checkout"
-      }
-    ]
-  },
-  "payment": {
-    "handlers": [
-      {
-        "id": "business_tokenizer",
-        "name": "com.example.business_tokenizer",
-        "version": "2026-01-11",
-        "spec": "https://example.com/specs/payments/business_tokenizer",
-        "config_schema": "https://example.com/specs/payments/merchant_tokenizer.json",
-        "instrument_schemas": [
-          "https://ucp.dev/schemas/shopping/types/card_payment_instrument.json"
-        ],
-        "config": {
-          "type": "CARD",
-          "tokenization_specification": {
-            "type": "PUSH",
-            "parameters": {
-              "token_retrieval_url": "https://api.psp.example.com/v1/tokens"
+    "capabilities": {
+      "dev.ucp.shopping.checkout": [
+        {
+          "version": "2026-01-11",
+          "spec": "https://ucp.dev/specification/checkout",
+          "schema": "https://ucp.dev/schemas/shopping/checkout.json"
+        }
+      ],
+      "dev.ucp.shopping.fulfillment": [
+        {
+          "version": "2026-01-11",
+          "spec": "https://ucp.dev/specification/fulfillment",
+          "schema": "https://ucp.dev/schemas/shopping/fulfillment.json",
+          "extends": "dev.ucp.shopping.checkout"
+        }
+      ],
+      "dev.ucp.shopping.discount": [
+        {
+          "version": "2026-01-11",
+          "spec": "https://ucp.dev/specification/discount",
+          "schema": "https://ucp.dev/schemas/shopping/discount.json",
+          "extends": "dev.ucp.shopping.checkout"
+        }
+      ]
+    },
+    "payment_handlers": {
+      "com.example.processor_tokenizer": [
+        {
+          "id": "processor_tokenizer",
+          "version": "2026-01-11",
+          "spec": "https://example.com/specs/payments/processor_tokenizer",
+          "schema": "https://example.com/specs/payments/merchant_tokenizer.json",
+          "config": {
+            "type": "CARD",
+            "tokenization_specification": {
+              "type": "PUSH",
+              "parameters": {
+                "token_retrieval_url": "https://api.psp.example.com/v1/tokens"
+              }
             }
           }
         }
-      }
-    ]
+      ]
+    }
   },
   "signing_keys": [
     {
@@ -325,11 +334,10 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
 }
 ```
 
-The `ucp` object contains protocol metadata: version, services, and
-capabilities. Payment configuration is a sibling—see
-[Payment Architecture](#payment-architecture). The `signing_keys` array
-contains public keys (JWK format) used to verify signatures on webhooks and
-other authenticated messages from the business.
+The `ucp` object contains protocol metadata: version, services, capabilities,
+and payment handlers. The `signing_keys` array contains public keys (JWK format)
+used to verify signatures on webhooks and other authenticated messages from the
+business.
 
 #### Platform Profile
 
@@ -342,54 +350,69 @@ example:
 {
   "ucp": {
     "version": "2026-01-11",
-    "capabilities": [
-      {
-        "name": "dev.ucp.shopping.checkout",
-        "version": "2026-01-11",
-        "spec": "https://ucp.dev/specification/checkout",
-        "schema": "https://ucp.dev/schemas/shopping/checkout.json"
-      },
-      {
-        "name": "dev.ucp.shopping.fulfillment",
-        "version": "2026-01-11",
-        "spec": "https://ucp.dev/specification/fulfillment",
-        "schema": "https://ucp.dev/schemas/shopping/fulfillment.json",
-        "extends": "dev.ucp.shopping.checkout"
-      },
-      {
-        "name": "dev.ucp.shopping.order",
-        "version": "2026-01-11",
-        "spec": "https://ucp.dev/specification/order",
-        "schema": "https://ucp.dev/schemas/shopping/order.json",
-        "config": {
-          "webhook_url": "https://platform.example.com/webhooks/ucp/orders"
+    "services": {
+      "dev.ucp.shopping": [
+        {
+          "version": "2026-01-11",
+          "spec": "https://ucp.dev/specification/overview",
+          "transport": "rest",
+          "schema": "https://ucp.dev/services/shopping/rest.openapi.json"
         }
-      }
-    ]
-  },
-  "payment": {
-    "handlers": [
-      {
-        "id": "gpay",
-        "name": "com.google.pay",
-        "version": "2024-12-03",
-        "spec": "https://pay.google.com/gp/p/ucp/2026-01-11/",
-        "config_schema": "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/config.json",
-        "instrument_schemas": [
-          "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/card_payment_instrument.json"
-        ]
-      },
-      {
-        "id": "business_tokenizer",
-        "name": "dev.ucp.business_tokenizer",
-        "version": "2026-01-11",
-        "spec": "https://example.com/specs/payments/business_tokenizer-payment",
-        "config_schema": "https://ucp.dev/schemas/payments/delegate-payment.json",
-        "instrument_schemas": [
-          "https://ucp.dev/schemas/shopping/types/card_payment_instrument.json"
-        ]
-      }
-    ]
+      ]
+    },
+    "capabilities": {
+      "dev.ucp.shopping.checkout": [
+        {
+          "version": "2026-01-11",
+          "spec": "https://ucp.dev/specification/checkout",
+          "schema": "https://ucp.dev/schemas/shopping/checkout.json"
+        }
+      ],
+      "dev.ucp.shopping.fulfillment": [
+        {
+          "version": "2026-01-11",
+          "spec": "https://ucp.dev/specification/fulfillment",
+          "schema": "https://ucp.dev/schemas/shopping/fulfillment.json",
+          "extends": "dev.ucp.shopping.checkout"
+        }
+      ],
+      "dev.ucp.shopping.order": [
+        {
+          "version": "2026-01-11",
+          "spec": "https://ucp.dev/specification/order",
+          "schema": "https://ucp.dev/schemas/shopping/order.json",
+          "config": {
+            "webhook_url": "https://platform.example.com/webhooks/ucp/orders"
+          }
+        }
+      ]
+    },
+    "payment_handlers": {
+      "com.google.pay": [
+        {
+          "id": "gpay_1234",
+          "version": "2024-12-03",
+          "spec": "https://developers.google.com/merchant/ucp/guides/gpay-payment-handler",
+          "schema": "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/gpay_config.json"
+        }
+      ],
+      "dev.shopify.shop_pay": [
+        {
+          "id": "shop_pay_1234",
+          "version": "2026-01-11",
+          "spec": "https://shopify.dev/ucp/shop-pay-handler",
+          "schema": "https://shopify.dev/ucp/schemas/shop-pay-config.json"
+        }
+      ],
+      "dev.ucp.processor_tokenizer": [
+        {
+          "id": "processor_tokenizer",
+          "version": "2026-01-11",
+          "spec": "https://example.com/specs/payments/processor_tokenizer-payment",
+          "schema": "https://ucp.dev/schemas/payments/delegate-payment.json"
+        }
+      ]
+    }
   },
   "signing_keys": [
     {
@@ -504,16 +527,25 @@ If negotiation fails, businesses **MUST** return an error response:
 
 #### Capability Declaration in Responses
 
-The `capabilities` array in responses indicates active capabilities:
+The `capabilities` registry in responses indicates active capabilities:
 
 ```json
 {
   "ucp": {
     "version": "2026-01-11",
-    "capabilities": [
-      {"name": "dev.ucp.shopping.checkout", "version": "2026-01-11"},
-      {"name": "dev.ucp.shopping.fulfillment", "version": "2026-01-11"}
-    ]
+    "capabilities": {
+      "dev.ucp.shopping.checkout": [
+        {"version": "2026-01-11"}
+      ],
+      "dev.ucp.shopping.fulfillment": [
+        {"version": "2026-01-11"}
+      ]
+    },
+    "payment_handlers": {
+      "com.example.processor_tokenizer": [
+        {"id": "processor_tokenizer", "version": "2026-01-11"}
+      ]
+    }
   },
   "id": "checkout_123",
   "line_items": [...]
@@ -574,14 +606,14 @@ splits responsibilities as follows:
 
 ### Payment in the Checkout Lifecycle
 
-The payment process follows a standard 3-step lifecycle within UCP:
-**Negotiation**, **Acquisition**, and **Completion**.
+When payment is required, the payment process follows a standard 3-step lifecycle
+within UCP: **Negotiation**, **Acquisition**, and **Completion**.
 
 ![High-level payment flow sequence diagram](site:specification/images/ucp-payment-flow.png)
 
-1. **Negotiation (Business → Platform):** The business analyzes the cart and advertises available `handlers`. This tells the platform *how* to pay (e.g., "Use this specific payment credential provider endpoint with this public key").
-2. **Acquisition (Platform ↔ Payment Credential Provider):** The platform executes the handler's logic. This happens client-side or agent-side, directly with the payment credential provider (e.g., exchanging credentials for a network token). The business is not involved, ensuring raw data never touches the business's frontend API.
-3. **Completion (Platform → Business):** The platform submits the opaque credential (token) to the business. The business uses it to capture funds via their backend integration with the payment credential provider.
+1.  **Negotiation (Business → Platform):** The business advertises available payment handlers in their UCP profile. This tells the platform *how* to pay (e.g., "Use this specific payment credential provider endpoint with this public key").
+2.  **Acquisition (Platform ↔ Payment Credential Provider):** The platform executes the handler's logic. This happens client-side or agent-side, directly with the payment credential provider (e.g., exchanging credentials for a network token). The business is not involved, ensuring raw data never touches the business's frontend API.
+3.  **Completion (Platform → Business):** The platform submits the opaque credential (token) to the business. The business uses it to capture funds via their backend integration with the payment credential provider.
 
 ### Payment Handlers
 
@@ -638,57 +670,64 @@ an encrypted payment token.
 
 ```json
 {
-  "payment": {
-    "handlers": [
-      {
-        "id": "8c9202bd-63cc-4241-8d24-d57ce69ea31c",
-        "name": "com.google.pay",
-        "version": "2026-01-11",
-        "spec": "https://pay.google.com/gp/p/ucp/2026-01-11/",
-        "config_schema": "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/config.json",
-        "instrument_schemas": [
-          "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/card_payment_instrument.json"
-        ],
-        "config": {
-          "api_version": 2,
-          "api_version_minor": 0,
-          "environment": "TEST",
-          "merchant_info": {
-            "merchant_name": "Example Merchant",
-            "merchant_id": "01234567890123456789",
-            "merchant_origin": "checkout.merchant.com"
-          },
-          "allowed_payment_methods": [
-            {
-              "type": "CARD",
-              "parameters": {
-                "allowed_auth_methods": ["PAN_ONLY"],
-                "allowed_card_networks": ["VISA", "MASTERCARD"]
-              },
-              "tokenization_specification": {
-                "type": "PAYMENT_GATEWAY",
+  "ucp": {
+    "version": "2026-01-11",
+    "payment_handlers": {
+      "com.google.pay": [
+        {
+          "id": "8c9202bd-63cc-4241-8d24-d57ce69ea31c",
+          "version": "2026-01-11",
+          "config": {
+            "api_version": 2,
+            "api_version_minor": 0,
+            "environment": "TEST",
+            "merchant_info": {
+              "merchant_name": "Example Merchant",
+              "merchant_id": "01234567890123456789",
+              "merchant_origin": "checkout.merchant.com"
+            },
+            "allowed_payment_methods": [
+              {
+                "type": "CARD",
                 "parameters": {
-                  "gateway": "example",
-                  "gatewayMerchantId": "exampleGatewayMerchantId"
+                  "allowed_auth_methods": ["PAN_ONLY"],
+                  "allowed_card_networks": ["VISA", "MASTERCARD"]
+                },
+                "tokenization_specification": {
+                  "type": "PAYMENT_GATEWAY",
+                  "parameters": {
+                    "gateway": "example",
+                    "gatewayMerchantId": "exampleGatewayMerchantId"
+                  }
                 }
               }
-            }
-          ]
+            ]
+          }
         }
-      }
-    ]
+      ],
+      "dev.shopify.shop_pay": [
+        {
+          "id": "shop_pay_1234",
+          "version": "2026-01-11",
+          "config": {
+            "shop_id": "shopify-559128571",
+            "environment": "production"
+          }
+        }
+      ]
+    }
   }
 }
 ```
 
 ##### 2. Token Execution (Platform Side)
 
-The platform recognizes `com.google.pay`. It passes the `config` into the
-Google Pay API. Google Pay returns the encrypted token data.
+The platform recognizes `com.google.pay` or `dev.shopify.shop_pay`. It passes the `config` into the
+respective handler API. The handler returns the encrypted token data.
 
 ##### 3. Complete Checkout (Request to Business)
 
-The Platform wraps the Google Pay response into a payment instrument.
+The Platform wraps the payment handler response into a payment instrument.
 
 ```json
 POST /checkout-sessions/{id}/complete
@@ -739,16 +778,21 @@ request a challenge.
 
 ```json
 {
-  "payment": {
-    "handlers": [{
-      "id": "merchant_tokenizer",
-      "name": "com.example.tokenizer",
-      // ... more handler required field
-      "config": {
-        "token_url": "https://api.psp.com/tokens",
-        "public_key": "pk_123"
-      }
-    }]
+  "ucp": {
+    "payment_handlers": {
+      "com.example.tokenizer": [
+        {
+          "id": "merchant_tokenizer",
+          "version": "2026-01-11",
+          "spec": "https://example.com/specs/tokenizer",
+          "schema": "https://example.com/schemas/tokenizer.json",
+          "config": {
+            "token_url": "https://api.psp.com/tokens",
+            "public_key": "pk_123"
+          }
+        }
+      ]
+    }
   }
 }
 ```
@@ -811,12 +855,17 @@ session token, the agent generates cryptographic mandates.
 
 ```json
 {
-  "payment": {
-    "handlers": [{
-      "id": "ap2_234352",
-      "name": "dev.ucp.ap2_mandate_compatible_handlers",
-      // ... other required handler fields
-    }]
+  "ucp": {
+    "payment_handlers": {
+      "dev.ucp.ap2_mandate_compatible_handlers": [
+        {
+          "id": "ap2_234352",
+          "version": "2026-01-11",
+          "spec": "https://ucp.dev/specs/ap2-handler",
+          "schema": "https://ucp.dev/schemas/ap2-handler.json"
+        }
+      ]
+    }
   }
 }
 ```
@@ -1068,9 +1117,9 @@ Both businesses and platforms declare a single version in their profiles:
       "ucp": {
         "version": "2026-01-11",
         "services": { ... },
-        "capabilities": [ ... ]
-      },
-      "payment": { ... }
+        "capabilities": { ... },
+        "payment_handlers": { ... }
+      }
     }
     ```
 
@@ -1080,9 +1129,10 @@ Both businesses and platforms declare a single version in their profiles:
     {
       "ucp": {
         "version": "2026-01-11",
-        "capabilities": [ ... ]
-      },
-      "payment": { ... }
+        "services": { ... },
+        "capabilities": { ... },
+        "payment_handlers": { ... }
+      }
     }
     ```
 
@@ -1107,7 +1157,8 @@ Response with version confirmation:
 {
   "ucp": {
     "version": "2026-01-11",
-    "capabilities": [ ... ]
+    "capabilities": { ... },
+    "payment_handlers": { ... }
   },
   "id": "checkout_123",
   "status": "incomplete"

@@ -332,9 +332,12 @@ request:
     "instruments": [
       {
         "id": "instr_1",
-        "handler_id": "gpay",
+        "handler_id": "gpay_1234",
         "type": "card",
-        "rich_text_description": "Visa •••• 1234",
+        "selected": true,
+        "display": {
+          "description": "Visa •••• 1234",
+        },
         "billing_address": {
           "street_address": "123 Main St",
           "address_locality": "Anytown",
