@@ -52,11 +52,11 @@ happens internally within the Processor's secure environment.
 
 ## Participants
 
-| Participant | Role | Prerequisites |
-|:---|:---|:---|
-| **Tokenizer / Processor** | Host `/tokenize` endpoint, store tokens, process payments. (Can be Business or PSP). | Compliance per credential type (e.g., PCI DSS for cards). |
-| **Platform** | Collect credentials via secure credential provider, call Tokenizer, submit checkout. | Secure credential provider. |
-| **Business** | Configures the handler for the checkout. | None (if PSP-hosted). |
+| Participant               | Role                                                                                  | Prerequisites                                             |
+| :------------------------ | :------------------------------------------------------------------------------------ | :-------------------------------------------------------- |
+| **Tokenizer / Processor** | Host `/tokenize` endpoint, store tokens, process payments. (Can be Business or PSP).  | Compliance per credential type (e.g., PCI DSS for cards). |
+| **Platform**              | Collect credentials via secure credential provider, call Tokenizer, submit checkout.  | Secure credential provider.                               |
+| **Business**              | Configures the handler for the checkout.                                              | None (if PSP-hosted).                                     |
 
 ### Pattern Flow
 
@@ -101,10 +101,10 @@ The business advertises their tokenization endpoint and identity during discover
 The handler's specification (referenced via the `spec` field) documents the
 `/tokenize` endpoint URL.
 
-| Field | Type | Required | Description |
-|:------|:-----|:---------|:------------|
-| `environment` | string | Yes | API environment (`sandbox` or `production`) |
-| `business_id` | string | Yes | Business identifier with the processor |
+| Field         | Type   | Required | Description                                 |
+| :------------ | :----- | :------- | :------------------------------------------ |
+| `environment` | string | Yes      | API environment (`sandbox` or `production`) |
+| `business_id` | string | Yes      | Business identifier with the processor      |
 
 #### Example Business Handler Declaration
 
@@ -134,11 +134,11 @@ The handler's specification (referenced via the `spec` field) documents the
 
 The response config includes runtime information about what's available for this checkout.
 
-| Field | Type | Required | Description |
-|:------|:-----|:---------|:------------|
-| `environment` | string | Yes | API environment used for this checkout |
-| `business_id` | string | Yes | Business identifier |
-| `supported_networks` | array | No | Card networks supported for this transaction |
+| Field                | Type   | Required | Description                                  |
+| :------------------- | :----- | :------- | :------------------------------------------- |
+| `environment`        | string | Yes      | API environment used for this checkout       |
+| `business_id`        | string | Yes      | Business identifier                          |
+| `supported_networks` | array  | No       | Card networks supported for this transaction |
 
 #### Example Response Config
 
@@ -260,11 +260,11 @@ Content-Type: application/json
 
 ### Scenario A: Enterprise Implementation (Self-Hosted)
 
-*   **Role:** The Business implements this specification.
-*   **Requirements:**
-    1.  Deploy the `endpoint` on their own infrastructure.
-    3.  Internally map tokens to PANs in their own database.
-*   **Security:** **CRITICAL.** For card credentials, the Business **MUST** be
+* **Role:** The Business implements this specification.
+* **Requirements:**
+    1. Deploy the `endpoint` on their own infrastructure.
+    2. Internally map tokens to PANs in their own database.
+* **Security:** **CRITICAL.** For card credentials, the Business **MUST** be
     PCI DSS compliant as they are receiving raw PANs at their endpoint.
     Other credential types have their own compliance requirements.
 
@@ -276,7 +276,7 @@ Content-Type: application/json
     2. Issue `identity.access_token` (Merchant Secure Identifier) to merchants.
     3. Validate that the `binding.identity` matches the merchant requesting
     the final payment charge.
-*   **Security:** PSP bears the compliance burden for credential storage
+* **Security:** PSP bears the compliance burden for credential storage
     (e.g., PCI DSS for cards).
 
 ---
@@ -284,9 +284,8 @@ Content-Type: application/json
 ## Security Considerations
 
 | Requirement | Description |
-|:---|:---|
+| :---------- | :---------- |
 | **TLS/HTTPS** | All traffic to `config.endpoint` **MUST** be encrypted. |
 | **Compliance** | The entity hosting `config.endpoint` **MUST** be compliant with relevant data standards for the credential type (e.g., PCI DSS for cards, GDPR for PII, etc.). |
 | **Scope Isolation** | The Platform's main application **MUST NOT** see the raw credential; only the Platform's Secure credential provider and the Tokenizer Host may see it. |
 | **Binding Validation** | The Tokenizer/Processor **MUST** verify that the `checkout_id` submitted during final payment matches the `checkout_id` provided during tokenization. |
-

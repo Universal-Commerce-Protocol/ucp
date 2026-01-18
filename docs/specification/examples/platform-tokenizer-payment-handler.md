@@ -185,10 +185,10 @@ credential type (e.g., PCI DSS for cards).
 
 #### Business Config (Discovery)
 
-| Field | Type | Required | Description |
-|:------|:-----|:---------|:------------|
-| `environment` | string | Yes | API environment (`sandbox` or `production`) |
-| `business_id` | string | Yes | Business identifier assigned by platform |
+| Field         | Type   | Required | Description                                 |
+| :------------ | :----- | :------- | :------------------------------------------ |
+| `environment` | string | Yes      | API environment (`sandbox` or `production`) |
+| `business_id` | string | Yes      | Business identifier assigned by platform    |
 
 #### Example Business Handler Declaration
 
@@ -218,11 +218,11 @@ credential type (e.g., PCI DSS for cards).
 
 The response config includes runtime token lifecycle information.
 
-| Field | Type | Required | Description |
-|:------|:-----|:---------|:------------|
-| `environment` | string | Yes | API environment |
-| `business_id` | string | Yes | Business identifier |
-| `token_ttl_seconds` | integer | No | Token time-to-live in seconds |
+| Field               | Type    | Required | Description                   |
+| :------------------ | :------ | :------- | :---------------------------- |
+| `environment`       | string  | Yes      | API environment               |
+| `business_id`       | string  | Yes      | Business identifier           |
+| `token_ttl_seconds` | integer | No       | Token time-to-live in seconds |
 
 #### Example Response Config
 
@@ -297,11 +297,11 @@ registry using `platform_config`.
 
 #### Platform Config (Discovery)
 
-| Field | Type | Required | Description |
-|:------|:-----|:---------|:------------|
-| `environment` | string | Yes | API environment (`sandbox` or `production`) |
-| `platform_id` | string | Yes | Platform identifier |
-| `default_token_ttl_seconds` | integer | No | Default token TTL offered to businesses |
+| Field                       | Type    | Required | Description                                 |
+| :-------------------------- | :------ | :------- | :------------------------------------------ |
+| `environment`               | string  | Yes      | API environment (`sandbox` or `production`) |
+| `platform_id`               | string  | Yes      | Platform identifier                         |
+| `default_token_ttl_seconds` | integer | No       | Default token TTL offered to businesses     |
 
 #### Example Platform Handler Declaration
 
@@ -444,7 +444,7 @@ The platform's payment credential provider verifies that:
 ## Security Considerations
 
 | Requirement | Description |
-|:------------|:------------|
+| :---------- | :---------- |
 | **Compliance (credential provider)** | Platform's credential provider **MUST** be compliant with relevant standards for the credential type (e.g., PCI DSS for cards) when handling and storing sensitive instrument details. |
 | **Compliance (Receivers)** | Businesses/PSPs calling `/detokenize` **MUST** be compliant with relevant standards for the credential type when receiving sensitive data payloads. |
 | **Secure transmission** | Data transmission via `/detokenize` **MUST** use HTTPS/TLS with strong cipher suites. |

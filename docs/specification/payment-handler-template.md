@@ -114,7 +114,7 @@ The handler schema defines three config variants for different contexts. See
 for the full pattern.
 
 | Config Variant | Context | Purpose |
-|:---------------|:--------|:--------|
+| :------------- | :------ | :------ |
 | `business_config` | Business discovery | {describe business-specific fields} |
 | `platform_config` | Platform discovery | {describe platform-specific fields} |
 | `response_config` | Checkout responses | {describe runtime fields} |
@@ -127,8 +127,8 @@ for the full pattern.
 
 #### Response Config Fields
 
-| Field | Type | Required | Description |
-|:------|:-----|:---------|:------------|
+| Field   | Type   | Required | Description                                                       |
+| :------ | :----- | :------- | :---------------------------------------------------------------- |
 | {field} | {type} | {Yes/No} | {description — include runtime fields like available instruments} |
 
 #### Example Handler Declaration
@@ -193,8 +193,8 @@ Platforms advertise support for this handler in their UCP profile's
 
 #### Platform Config Fields
 
-| Field | Type | Required | Description |
-|:------|:-----|:---------|:------------|
+| Field   | Type   | Required | Description   |
+| :------ | :----- | :------- | :------------ |
 | {field} | {type} | {Yes/No} | {description} |
 
 #### Example Platform Handler Declaration
@@ -338,5 +338,5 @@ Before participating in this handler's flow, {participants} **MUST** complete:
 
 ## References
 
-- **Handler Spec:** `{spec_url}`
-- **Handler Schema:** `{schema_url}` (defines config, instrument, and credential shapes)
+* **Handler Spec:** `{spec_url}`
+* **Handler Schema:** `{schema_url}` (defines config, instrument, and credential shapes)

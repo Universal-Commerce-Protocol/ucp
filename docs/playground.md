@@ -872,7 +872,7 @@ class UcpApp {
   runDiscovery() {
     const fullProfile = this.backend.getDiscoveryProfile();
     const agentCapNames = UcpData.agents[this.state.agent].caps;
-    
+
     const filteredCaps = {};
     agentCapNames.forEach(name => {
       if (fullProfile.ucp.capabilities[name]) {

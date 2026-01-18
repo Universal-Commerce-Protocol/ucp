@@ -24,7 +24,7 @@ the registry pattern, schema variants, and versioning.
 UCP schemas use standard JSON Schema fields plus UCP-specific metadata:
 
 | Field | Standard | Purpose | Required For |
-|-------|----------|---------|--------------|
+| ----- | -------- | ------- | ------------ |
 | `$schema` | JSON Schema | Declares JSON Schema draft version (**SHOULD** use `draft/2020-12`) | All schemas |
 | `$id` | JSON Schema | Schema's canonical URI for `$ref` resolution | All schemas |
 | `title` | JSON Schema | Human-readable display name | All schemas |
@@ -55,10 +55,10 @@ cross-referencing other documents. This matters because:
 
 ### Why Both `$id` and `name`?
 
-| Field | Role | Format |
-|-------|------|--------|
-| `$id` | JSON Schema primitive for `$ref` resolution and tooling | URI (required by spec) |
-| `name` | Registry key and stable identifier | Reverse-domain |
+| Field  | Role                                                    | Format                 |
+| ------ | ------------------------------------------------------- | ---------------------- |
+| `$id`  | JSON Schema primitive for `$ref` resolution and tooling | URI (required by spec) |
+| `name` | Registry key and stable identifier                      | Reverse-domain         |
 
 `$id` must be a valid URI per JSON Schema spec. `name` is the **key used in
 registries** (`capabilities`, `services`, `payment_handlers`) and the wire protocol
@@ -178,7 +178,7 @@ by `name` rather than arrays of objects with `name` fields.
 The same registry structure appears in three contexts with different field requirements:
 
 | Context | Location | Required Fields |
-|---------|----------|-----------------|
+| ------- | -------- | --------------- |
 | Platform Profile | Advertised URI | `version`, `spec`, `schema` |
 | Business Profile | `/.well-known/ucp` | `version`; may add `config` |
 | API Responses | Checkout/order payloads | `version` (+ `id` for handlers) |
@@ -188,7 +188,7 @@ The same registry structure appears in three contexts with different field requi
 All capabilities, services, and handlers extend a common `entity` base schema:
 
 | Field | Type | Description |
-|-------|------|-------------|
+| ----- | ---- | ----------- |
 | `version` | string | Entity version (`YYYY-MM-DD`) — always required |
 | `spec` | URI | Human-readable specification |
 | `schema` | URI | JSON Schema URL |

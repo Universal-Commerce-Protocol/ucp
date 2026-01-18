@@ -32,7 +32,7 @@ cards) vary by credential type.
 We offer a range of examples to utilize forms of tokenization in UCP:
 
 | Example | Use Case |
-|:--------|:---------|
+| :------ | :------- |
 | [Processor Tokenizer](examples/processor-tokenizer-payment-handler.md) | Business or PSP runs tokenization and processing |
 | [Platform Tokenizer](examples/platform-tokenizer-payment-handler.md) | Platform tokenizes credentials for businesses/PSPs |
 | [Encrypted Credential Handler](examples/encrypted-credential-handler.md) | Platform encrypts credentials instead of tokenizing |

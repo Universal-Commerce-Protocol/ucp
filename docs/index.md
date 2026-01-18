@@ -401,8 +401,8 @@ image: assets/banner.png
   <div class="two-column-promo">
 
     <div class="two-column-promo-item">
-      <div class="two-column-promo-item__icon-wrapper">
-        <img src="assets/native_checkout.svg" alt="Native Checkout feature icon" width="96" class="two-column-promo-item__icon">
+      <div class="two-column-promo-item-icon-wrapper">
+        <img src="assets/native_checkout.svg" alt="Native Checkout feature icon" width="96" class="two-column-promo-item-icon">
       </div>
       <h3>Power native checkout</h3>
       <p>
@@ -412,8 +412,8 @@ image: assets/banner.png
     </div>
 
     <div class="two-column-promo-item">
-      <div class="two-column-promo-item__icon-wrapper">
-        <img src="assets/embedded_checkout.svg" alt="Embedded Option feature icon" width="96" class="two-column-promo-item__icon">
+      <div class="two-column-promo-item-icon-wrapper">
+        <img src="assets/embedded_checkout.svg" alt="Embedded Option feature icon" width="96" class="two-column-promo-item-icon">
       </div>
       <h3>Embed business checkout</h3>
       <p>
@@ -428,48 +428,48 @@ image: assets/banner.png
 
     <h2>Designed for the entire commerce ecosystem</h2>
 
-    <div class="lifecycle-container__row">
-      <div class="lifecycle-container__item">
-        <div class="lifecycle-container__item-img-wrapper">
-          <img src="assets/Content=Developers.svg" alt="Content illustration for Developers" class="lifecycle-container__item-img">
+    <div class="lifecycle-container-row">
+      <div class="lifecycle-container-item">
+        <div class="lifecycle-container-item-img-wrapper">
+          <img src="assets/Content=Developers.svg" alt="Content illustration for Developers" class="lifecycle-container-item-img">
         </div>
         <h3>For Developers</h3>
         <p>
           Build the future of commerce on an open foundation. Join our community in evolving an open-source standard designed for the next generation of digital commerce.
         </p>
-        <a href="specification/overview/" class="lifecycle-container__item-link">View the technical spec</a>
+        <a href="specification/overview/" class="lifecycle-container-item-link">View the technical spec</a>
       </div>
-      <div class="lifecycle-container__item">
-        <div class="lifecycle-container__item-img-wrapper">
-          <img src="assets/Content=Retailers.svg" alt="Content illustration for Businesses" class="lifecycle-container__item-img">
+      <div class="lifecycle-container-item">
+        <div class="lifecycle-container-item-img-wrapper">
+          <img src="assets/Content=Retailers.svg" alt="Content illustration for Businesses" class="lifecycle-container-item-img">
         </div>
         <h3>For Businesses</h3>
         <p>
           UCP empowers retailers to meet customers wherever they are—AI assistants, shopping agents, embedded experiences—without rebuilding your checkout for each. You remain the Merchant of Record and your business logic stays intact.
         </p>
-        <a href="https://developers.google.com/merchant/ucp/" target="_blank" class="lifecycle-container__item-link">Integrate with UCP</a>
+        <a href="https://developers.google.com/merchant/ucp/" target="_blank" class="lifecycle-container-item-link">Integrate with UCP</a>
       </div>
     </div>
-    <div class="lifecycle-container__row">
-      <div class="lifecycle-container__item">
-        <div class="lifecycle-container__item-img-wrapper">
-          <img src="assets/Content=AI_Platforms.svg" alt="Content illustration for AI Platforms" class="lifecycle-container__item-img">
+    <div class="lifecycle-container-row">
+      <div class="lifecycle-container-item">
+        <div class="lifecycle-container-item-img-wrapper">
+          <img src="assets/Content=AI_Platforms.svg" alt="Content illustration for AI Platforms" class="lifecycle-container-item-img">
         </div>
         <h3>For AI Platforms</h3>
         <p>
           Simplify business onboarding with standardized APIs and provide your audience with an integrated shopping experience. Compatible with MCP, A2A, and existing agent frameworks.
         </p>
-        <a href="documentation/core-concepts/" class="lifecycle-container__item-link">Learn more about UCP core concepts</a>
+        <a href="documentation/core-concepts/" class="lifecycle-container-item-link">Learn more about UCP core concepts</a>
       </div>
-      <div class="lifecycle-container__item">
-        <div class="lifecycle-container__item-img-wrapper">
-          <img src="assets/Content=Payment_Providers.svg" alt="Content illustration for Payment Providers" class="lifecycle-container__item-img">
+      <div class="lifecycle-container-item">
+        <div class="lifecycle-container-item-img-wrapper">
+          <img src="assets/Content=Payment_Providers.svg" alt="Content illustration for Payment Providers" class="lifecycle-container-item-img">
         </div>
         <h3>For Payment Providers</h3>
         <p>
           Universal payments that are provable—every authorization backed by cryptographic proof of user consent. Open, modular payment handler design enables open interoperability and choice of payment methods.
         </p>
-        <a href="documentation/ucp-and-ap2/" class="lifecycle-container__item-link">Learn more about UCP and AP2</a>
+        <a href="documentation/ucp-and-ap2/" class="lifecycle-container-item-link">Learn more about UCP and AP2</a>
       </div>
 
     </div>
@@ -669,7 +669,7 @@ image: assets/banner.png
 
   <div class="get-started-container">
 
-    <div class="get-started-container__intro">
+    <div class="get-started-container-intro">
       <h2>Get started today</h2>
 
       <p>
@@ -680,30 +680,30 @@ image: assets/banner.png
       </p>
     </div>
 
-    <div class="get-started-container__steps">
-      <div class="get-started-container__step">
-        <div class="get-started-container__step-icon-wrapper">
-          <img src="assets/Icon=Download.svg" alt="Download icon for code samples" class="get-started-container__step-icon">
+    <div class="get-started-container-steps">
+      <div class="get-started-container-step">
+        <div class="get-started-container-step-icon-wrapper">
+          <img src="assets/Icon=Download.svg" alt="Download icon for code samples" class="get-started-container-step-icon">
         </div>
         <h3><a href="https://github.com/Universal-Commerce-Protocol/samples" target="_blank">Download</a></h3>
         <p>Download and run our code samples</p>
       </div>
-      <div class="get-started-container__step">
-        <div class="get-started-container__step-icon-wrapper">
-          <img src="assets/Icon=Experiment.svg" alt="Experiment" class="get-started-container__step-icon">
+      <div class="get-started-container-step">
+        <div class="get-started-container-step-icon-wrapper">
+          <img src="assets/Icon=Experiment.svg" alt="Experiment" class="get-started-container-step-icon">
         </div>
         <h3><a href="https://ucp.dev/playground/" target="_blank">Experiment</a></h3>
         <p>Experiment with the protocol and its different agent roles</p>
       </div>
-      <div class="get-started-container__step">
-        <div class="get-started-container__step-icon-wrapper">
-          <img src="assets/Icon=Contribute.svg" alt="Contribute" class="get-started-container__step-icon">
+      <div class="get-started-container-step">
+        <div class="get-started-container-step-icon-wrapper">
+          <img src="assets/Icon=Contribute.svg" alt="Contribute" class="get-started-container-step-icon">
         </div>
         <h3><a href="https://github.com/Universal-Commerce-Protocol/ucp/blob/main/CONTRIBUTING.md" target="_blank">Contribute</a></h3>
         <p>Contribute your feedback and code to the public repository</p>
       </div>
     </div>
-    <div class="get-started-container__repo-link">
+    <div class="get-started-container-repo-link">
       <a href="https://github.com/Universal-Commerce-Protocol/ucp" target="_blank" class="promo-button">
         <svg height="24" width="24" viewBox="0 0 16 16" version="1.1" fill="currentColor">
           <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>

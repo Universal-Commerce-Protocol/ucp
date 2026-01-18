@@ -199,7 +199,7 @@ The `PaymentHandler` schema defines three variants for different contexts. While
 and typically includes different configuration:
 
 | Variant | Context | Purpose |
-|:--------|:--------|:--------|
+| :------ | :------ | :------ |
 | **business_schema** | Business discovery (`/.well-known/ucp`) | Declares the business identity and how they're configured for this handler. Contains merchant-specific settings. |
 | **platform_schema** | Platform profile (advertised URI) | Declares the platform identity and how it supports this handler. Includes `spec` and `schema` URLs for implementers. |
 | **response_schema** | Checkout/Order API responses | **Runtime configuration** with merged context: merchant identity, available payment methods, tokenization specs, and other state needed to process the transaction. Often the richest of the three. |
@@ -351,7 +351,7 @@ Authors typically define each shape in its own file and reference them:
 Each variant has its own config schema tailored to its context:
 
 | Variant | Config File | Purpose |
-|:--------|:------------|:--------|
+| :------ | :---------- | :------ |
 | **business_schema** | `types/business_config.json` | Business identity and merchant-specific settings |
 | **platform_schema** | `types/platform_config.json` | Platform identity and platform-level settings |
 | **response_schema** | `types/response_config.json` | Full runtime state: identities, available methods, tokenization specs |
@@ -439,10 +439,10 @@ Each variant has its own config schema tailored to its context:
 
 **Base Instrument Schemas:**
 
-| Schema                                                                                        | Description                                         |
-| :-------------------------------------------------------------------------------------------- | :-------------------------------------------------- |
-| [`payment_instrument.json`](https://ucp.dev/schemas/shopping/types/payment_instrument.json)   | Base: id, handler_id, type, billing_address, credential, display |
-| [`card_payment_instrument.json`](https://ucp.dev/schemas/shopping/types/card_payment_instrument.json) | Extends base with display: brand, last_digits, expiry, card art |
+| Schema                                                                                                | Description                                                      |
+| :---------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------- |
+| [`payment_instrument.json`](https://ucp.dev/schemas/shopping/types/payment_instrument.json)           | Base: id, handler_id, type, billing_address, credential, display |
+| [`card_payment_instrument.json`](https://ucp.dev/schemas/shopping/types/card_payment_instrument.json) | Extends base with display: brand, last_digits, expiry, card art  |
 
 UCP provides base schemas for universal payment instruments like `card`. Spec
 authors **MAY** extend any of the base instruments to add handler-specific

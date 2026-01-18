@@ -52,10 +52,10 @@ Compliance requirements vary by credential type.
 
 ## Participants
 
-| Participant | Role | Prerequisites |
-|:------------|:-----|:--------------|
-| **Business** | Registers public key, receives encrypted credentials, decrypts locally | Yes — registers with platform |
-| **Platform** | Operates compliant credential vault, encrypts for business using their public key | Yes — implements encryption |
+| Participant  | Role                                                                              | Prerequisites                 |
+| :----------- | :-------------------------------------------------------------------------------- | :---------------------------- |
+| **Business** | Registers public key, receives encrypted credentials, decrypts locally            | Yes — registers with platform |
+| **Platform** | Operates compliant credential vault, encrypts for business using their public key | Yes — implements encryption   |
 
 ### Pattern Flow
 
@@ -105,9 +105,9 @@ checkout, they decrypt these payloads locally to obtain raw credentials for
 payment processing. **For card credentials**, businesses MUST be **PCI DSS
 compliant** because they will handle raw PANs. This includes:
 
-- Secure key management for decryption keys
-- Secure handling of raw credentials after decryption
-- For cards: Compliance with all PCI DSS requirements for handling Primary Account Numbers (PANs)
+* Secure key management for decryption keys
+* Secure handling of raw credentials after decryption
+* For cards: Compliance with all PCI DSS requirements for handling Primary Account Numbers (PANs)
 
 **Prerequisites Output:**
 
@@ -134,11 +134,11 @@ have their own compliance requirements.
 
 #### Business Config (Discovery)
 
-| Field | Type | Required | Description |
-|:------|:-----|:---------|:------------|
-| `environment` | string | Yes | API environment (`sandbox` or `production`) |
-| `business_id` | string | Yes | Business identifier assigned by platform |
-| `public_key_id` | string | Yes | Identifier for the business's registered public key |
+| Field           | Type   | Required | Description                                         |
+| :-------------- | :----- | :------- | :-------------------------------------------------- |
+| `environment`   | string | Yes      | API environment (`sandbox` or `production`)         |
+| `business_id`   | string | Yes      | Business identifier assigned by platform            |
+| `public_key_id` | string | Yes      | Identifier for the business's registered public key |
 
 #### Example Business Handler Declaration
 
@@ -169,12 +169,12 @@ have their own compliance requirements.
 
 The response config includes information about the encryption used.
 
-| Field | Type | Required | Description |
-|:------|:-----|:---------|:------------|
-| `environment` | string | Yes | API environment |
-| `business_id` | string | Yes | Business identifier |
-| `encryption_algorithm` | string | Yes | Algorithm used (e.g., `RSA-OAEP-256`) |
-| `key_id` | string | Yes | Key identifier used for encryption |
+| Field                  | Type   | Required | Description                           |
+| :--------------------- | :----- | :------- | :------------------------------------ |
+| `environment`          | string | Yes      | API environment                       |
+| `business_id`          | string | Yes      | Business identifier                   |
+| `encryption_algorithm` | string | Yes      | Algorithm used (e.g., `RSA-OAEP-256`) |
+| `key_id`               | string | Yes      | Key identifier used for encryption    |
 
 #### Example Response Config
 
@@ -226,11 +226,11 @@ registry using `platform_config`.
 
 #### Platform Config (Discovery)
 
-| Field | Type | Required | Description |
-|:------|:-----|:---------|:------------|
-| `environment` | string | Yes | API environment (`sandbox` or `production`) |
-| `platform_id` | string | Yes | Platform identifier |
-| `supported_algorithms` | array | Yes | Encryption algorithms supported (e.g., `["RSA-OAEP-256"]`) |
+| Field                  | Type   | Required | Description                                                |
+| :--------------------- | :----- | :------- | :--------------------------------------------------------- |
+| `environment`          | string | Yes      | API environment (`sandbox` or `production`)                |
+| `platform_id`          | string | Yes      | Platform identifier                                        |
+| `supported_algorithms` | array  | Yes      | Encryption algorithms supported (e.g., `["RSA-OAEP-256"]`) |
 
 #### Example Platform Handler Declaration
 
@@ -314,7 +314,7 @@ Content-Type: application/json
 ## Security Considerations
 
 | Requirement | Description |
-|:------------|:------------|
+| :---------- | :---------- |
 | **Compliance (Platform)** | Platform vaulting services MUST be compliant with relevant standards for the credential type (e.g., PCI DSS for cards handling raw PANs) |
 | **Compliance (Business)** | Businesses MUST be compliant with relevant standards for decryption and handling of raw credentials locally (e.g., PCI DSS for cards) |
 | **No platform app credential access** | Platform applications MUST NOT handle raw credentials—only the compliant vaulting service does |

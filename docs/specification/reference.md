@@ -37,11 +37,13 @@ The following schemas define the structure of UCP metadata used in discovery
 and responses.
 
 ### Platform Discovery Profile
+
 The top-level structure of a platform profile document (hosted at a URI advertised by the platform).
 
 {{ extension_schema_fields('ucp.json#/$defs/platform_schema', 'reference') }}
 
 ### Business Discovery Profile
+
 The top-level structure of a business discovery document (`/.well-known/ucp`).
 
 {{ extension_schema_fields('ucp.json#/$defs/business_schema', 'reference') }}
