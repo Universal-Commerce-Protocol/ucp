@@ -5,6 +5,9 @@
   "version": "2026-01-11",
   "title": "Discount Extension",
   "description": "Extends Checkout with discount code support, enabling agents to apply promotional, loyalty, referral, and other discount codes.",
+  "ucp_request": {
+    "complete": "omit"
+  },
   "$defs": {
     "allocation": {
       "type": "object",

@@ -66,6 +66,49 @@ def get_visibility(prop: Any, operation: str | None) -> tuple[str, bool]:
   else:  # Response
     return ("omit" if prop.get("ucp_response") == "omit" else "include"), False
 
+def has_node_schema(schema: Any) -> bool:
+  """
+  Helper: Checks if a specific schema node adds actual validation constraints.
+  It considers a node 'Meaningless' if it is:
+  1. An empty object {}, or {"properties": {}}
+  2. A pure $ref (Alias) - because we are checking if the *file* provides value.
+  3. An allOf where all children are meaningless.
+  """
+  if not isinstance(schema, dict):
+    return True
+  constraint_keys = [
+    "required", "enum", "const", "patternProperties", "minProperties",
+    "items", "minItems", "uniqueItems", "minimum", "pattern",
+    "oneOf", "anyOf", "not"
+  ]
+  if "properties" in schema:
+    if schema["properties"]: 
+      return True
+  if any(k in schema for k in constraint_keys):
+    return True
+  if "allOf" in schema:
+    for item in schema["allOf"]:
+      if has_node_schema(item):
+        return True
+    return False
+  if "$ref" in schema:
+    return False
+  return False
+
+def has_schema(schema: Any) -> bool:
+  """
+  Determines if a generated file should be written to disk.
+  Returns True only if the schema (or its definitions) defines NEW constraints.
+  """
+  if has_node_schema(schema):
+    return True
+  # If the file is a container (no top-level constraints), it is only meaningful 
+  # if at least one definition inside adds ACTUAL constraints (not just aliases).
+  if isinstance(schema, dict) and "$defs" in schema:
+    for def_schema in schema["$defs"].values():
+      if has_node_schema(def_schema):
+        return True
+  return False
 
 def has_ucp_annotations(data: Any) -> bool:
   """Check if schema contains any ucp_* annotations."""
@@ -348,6 +391,16 @@ def process_openapi_schema_schema(
     else:
       # Generate per-operation request schemas
       for op in REQUEST_OPERATIONS:
+        root_visibility, _ = get_visibility(data, op)
+        if root_visibility == "omit":
+            continue
+        suffix = f" {op.capitalize()} Request"
+        transformed = transform_schema(
+          copy.deepcopy(data), op, source_path, annotated_schemas, suffix
+        )
+        if not has_schema(transformed):
+          continue
+
         out_name = f"{stem}.{op}_req.json"
         out_path = Path(dest_dir) / dir_path / out_name
         suffix = f" {op.capitalize()} Request"

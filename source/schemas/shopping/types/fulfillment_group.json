@@ -10,7 +10,11 @@
     "id": {
       "type": "string",
       "description": "Group identifier for referencing merchant-generated groups in updates.",
-      "ucp_request": {"create": "omit", "update": "required"}
+      "ucp_request": {
+        "create": "omit", 
+        "update": "required",
+        "complete": "omit"
+      }
     },
     "line_item_ids": {
       "type": "array",
@@ -26,7 +30,10 @@
     },
     "selected_option_id": {
       "type": ["string", "null"],
-      "description": "ID of the selected fulfillment option for this group."
+      "description": "ID of the selected fulfillment option for this group.",
+      "ucp_request": {
+        "complete": "omit"
+      }
     }
   }
 }

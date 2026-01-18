@@ -10,33 +10,36 @@
     "id": {
       "type": "string",
       "description": "Unique fulfillment method identifier.",
-      "ucp_request": {"create": "omit", "update": "required"}
+      "ucp_request": {"create": "omit", "update": "required", "complete": "omit"}
     },
     "type": {
       "type": "string",
       "enum": ["shipping", "pickup"],
       "description": "Fulfillment method type.",
-      "ucp_request": {"create": "required", "update": "omit"}
+      "ucp_request": {"create": "required", "update": "omit", "complete": "omit"}
     },
     "line_item_ids": {
       "type": "array",
       "description": "Line item IDs fulfilled via this method.",
       "items": { "type": "string" },
-      "ucp_request": {"create": "optional", "update": "required"}
+      "ucp_request": {"create": "optional", "update": "required", "complete": "omit"}
     },
     "destinations": {
       "type": "array",
       "description": "Available destinations. For shipping: addresses. For pickup: retail locations.",
-      "items": { "$ref": "fulfillment_destination.json" }
+      "items": { "$ref": "fulfillment_destination.json" },
+      "ucp_request": {"complete": "omit"}
     },
     "selected_destination_id": {
       "type": ["string", "null"],
-      "description": "ID of the selected destination."
+      "description": "ID of the selected destination.",
+      "ucp_request": {"complete": "omit"}
     },
     "groups": {
       "type": "array",
       "description": "Fulfillment groups for selecting options. Agent sets selected_option_id on groups to choose shipping method.",
-      "items": { "$ref": "fulfillment_group.json" }
+      "items": { "$ref": "fulfillment_group.json" },
+      "ucp_request": {"complete": "omit"}
     }
   }
 }

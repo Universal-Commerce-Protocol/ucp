@@ -15,16 +15,23 @@
       "type": "string",
       "ucp_request": {
         "create": "omit",
-        "update": "optional"
+        "update": "optional",
+        "complete": "omit"
       }
     },
     "item": {
-      "$ref": "item.json"
+      "$ref": "item.json",
+      "ucp_request": {
+        "complete": "omit"
+      }
     },
     "quantity": {
       "type": "integer",
       "description": "Quantity of the item being purchased.",
-      "minimum": 1
+      "minimum": 1,
+      "ucp_request": {
+        "complete": "omit"
+      }
     },
     "totals": {
       "type": "array",
@@ -39,7 +46,8 @@
       "description": "Parent line item identifier for any nested structures.",
       "ucp_request": {
         "create": "omit",
-        "update": "optional"
+        "update": "optional",
+        "complete": "omit"
       }
     }
   }

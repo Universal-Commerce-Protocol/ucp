@@ -5,6 +5,9 @@
   "version": "2026-01-11",
   "title": "Fulfillment Extension",
   "description": "Extends Checkout with fulfillment support using methods, destinations, and groups.",
+  "ucp_request": {
+    "complete": "omit"
+  },
   "$defs": {
     "fulfillment_option": {
       "$ref": "types/fulfillment_option.json"

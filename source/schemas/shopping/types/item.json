@@ -11,7 +11,10 @@
   "properties": {
     "id": {
       "type": "string",
-      "description": "Should be recognized by both the Platform, and the Business. For Google it should match the id provided in the \"id\" field in the product feed."
+      "description": "Should be recognized by both the Platform, and the Business. For Google it should match the id provided in the \"id\" field in the product feed.",
+      "ucp_request": {
+        "complete": "omit"
+      }
     },
     "title": {
       "type": "string",

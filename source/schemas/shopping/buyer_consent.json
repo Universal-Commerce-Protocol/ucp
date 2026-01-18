@@ -5,6 +5,9 @@
   "version": "2026-01-11",
   "title": "Buyer Consent Extension",
   "description": "Extends Checkout with buyer consent tracking for privacy compliance via the buyer object.",
+  "ucp_request": {
+    "complete": "omit"
+  },
   "$defs": {
     "consent": {
       "type": "object",
