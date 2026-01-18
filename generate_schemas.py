@@ -397,7 +397,6 @@ def process_openapi_schema(
 
   ref_map = {}
   schemas = spec["components"].get("schemas", {})
-  source_dir_abs = Path(source_path).resolve().parent
 
   for name, schema in list(schemas.items()):
     ref = schema.get("$ref", "")
@@ -423,8 +422,9 @@ def process_openapi_schema(
         # Remove extension from URL while preserving path
         base_ref = ref.rsplit(".", 1)[0] if "." in ref.split("/")[-1] else ref
       else:
-        rel_path = Path(found_path).relative_to(source_dir_abs)
-        base_ref = rel_path.with_suffix("").as_posix()
+        # The ref from the source openapi.json already has the correct
+        # relative path. We just need to strip the extension.
+        base_ref = ref.rsplit(".json", 1)[0]
 
       # 3. Create Split Components
       # Response (always exists)
