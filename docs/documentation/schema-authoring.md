@@ -30,7 +30,7 @@ UCP schemas use standard JSON Schema fields plus UCP-specific metadata:
 | `title` | JSON Schema | Human-readable display name | All schemas |
 | `description` | JSON Schema | Schema purpose and usage | All schemas |
 | `name` | UCP | Reverse-domain identifier; doubles as registry key | Capabilities, services, handlers |
-| `version` | UCP | Entity version (`YYYY-MM-DD` format) | Capabilities, services, handlers |
+| `version` | UCP | Entity version (`YYYY-MM-DD` format) | Capabilities, services, payment handlers |
 | `id` | UCP | Instance identifier for multiple configurations | Payment handlers only |
 
 ### Why Self-Describing?
@@ -89,7 +89,7 @@ UCP schemas fall into six categories based on their role in the protocol.
 
 Define negotiated capabilities that appear in `ucp.capabilities{}` registries.
 
-- **File-level fields**: `$schema`, `$id`, `title`, `description`, `name`, `version`
+- **Top-level fields**: `$schema`, `$id`, `title`, `description`, `name`, `version`
 - **Variants**: `platform_schema`, `business_schema`, `response_schema`
 
 Examples: `checkout.json`, `fulfillment.json`, `discount.json`, `order.json`
@@ -99,7 +99,7 @@ Examples: `checkout.json`, `fulfillment.json`, `discount.json`, `order.json`
 Define transport bindings that appear in `ucp.services{}` registries. Each transport
 (REST, MCP, A2A, Embedded) is a separate entry.
 
-- **File-level fields**: `$schema`, `$id`, `title`, `description`, `name`, `version`
+- **Top-level fields**: `$schema`, `$id`, `title`, `description`, `name`, `version`
 - **Variants**: `platform_schema`, `business_schema`
 - **Transport requirements**:
     - REST/MCP: `endpoint`, `schema` (OpenAPI/OpenRPC URL)
@@ -110,7 +110,7 @@ Define transport bindings that appear in `ucp.services{}` registries. Each trans
 
 Define payment handler configurations in `ucp.payment_handlers{}` registries.
 
-- **File-level fields**: `$schema`, `$id`, `title`, `description`, `name`, `version`
+- **Top-level fields**: `$schema`, `$id`, `title`, `description`, `name`, `version`
 - **Variants**: `platform_schema`, `business_schema`, `response_schema`
 - **Instance `id`**: Required to distinguish multiple configurations of the same handler
 
@@ -125,7 +125,7 @@ specification template.
 Data structures embedded within capabilities but not independently negotiated.
 Do **not** appear in registries.
 
-- **File-level fields**: `$schema`, `$id`, `title`, `description`
+- **Top-level fields**: `$schema`, `$id`, `title`, `description`
 - **Omit**: `name`, `version` (not independently versioned)
 
 Examples:
@@ -136,7 +136,7 @@ Examples:
 
 Reusable definitions referenced by other schemas. Do **not** appear in registries.
 
-- **File-level fields**: `$schema`, `$id`, `title`, `description`
+- **Top-level fields**: `$schema`, `$id`, `title`, `description`
 - **Omit**: `name`, `version`
 
 Examples: `types/buyer.json`, `types/line_item.json`, `types/postal_address.json`
@@ -145,7 +145,7 @@ Examples: `types/buyer.json`, `types/line_item.json`, `types/postal_address.json
 
 Define protocol structure rather than entity payloads.
 
-- **File-level fields**: `$schema`, `$id`, `title`, `description`
+- **Top-level fields**: `$schema`, `$id`, `title`, `description`
 - **Omit**: `name`, `version`
 
 Examples: `ucp.json` (entity base), `capability.json`, `service.json`, `payment_handler.json`
@@ -318,6 +318,6 @@ A capability schema defines both payload structure and declaration variants:
 
 Key points:
 
-- **File-level `name` and `version`** make the schema self-describing
+- **Top-level `name` and `version`** make the schema self-describing
 - **`$defs` variants** enable validation in different contexts
 - **Payload properties** define the actual checkout response structure

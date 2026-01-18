@@ -425,7 +425,7 @@ const UcpData = {
     "com.shopify.shop_pay": [
       {
         id: "shop_pay",
-        version: "2025-12-08",
+        version: "2026-01-11",
         spec: "https://shopify.dev/docs/agents/checkout/shop-pay-handler",
         config_schema: "https://shopify.dev/ucp/shop-pay-handler/2026-01-11/config.json",
         instrument_schemas: ["https://shopify.dev/ucp/shop-pay-handler/2026-01-11/instrument.json"],
