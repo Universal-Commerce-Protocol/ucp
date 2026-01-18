@@ -585,7 +585,7 @@ class UcpBackend {
   }
 
   genId(prefix) {
-    const r = crypto.randomUUID ? crypto.randomUUID().split['-'](0) : Math.random().toString(36).substr(2, 9);
+    const r = crypto.randomUUID ? crypto.randomUUID().substring(0, 8) : Math.random().toString(36).substr(2, 9);
     return `${prefix}_${r}`;
   }
 
