@@ -61,6 +61,21 @@
           "items": {"$ref": "capability.json#/$defs/response"}
         }
       }
+    },
+
+    "response_cart": {
+      "title": "UCP Cart Response",
+      "description": "UCP metadata for cart responses.",
+      "type": "object",
+      "required": ["version", "capabilities"],
+      "properties": {
+        "version": {"$ref": "#/$defs/version"},
+        "capabilities": {
+          "type": "array",
+          "description": "Active capabilities for this response.",
+          "items": {"$ref": "capability.json#/$defs/response"}
+        }
+      }
     }
   }
 }

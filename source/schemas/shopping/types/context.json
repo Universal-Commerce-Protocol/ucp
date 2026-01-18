@@ -10,6 +10,7 @@
       "pattern": "^[A-Z]{2}$",
       "description": "ISO 3166-1 alpha-2 country code (e.g., 'US', 'CA'). Informs product availability, pricing, and currency. Detected from request if omitted."
     },
+
     "address_region": {
       "type": "string",
       "description": "State, province, emirate, or district (e.g., 'CA', 'ON', 'Dubai'). Format varies by country."
