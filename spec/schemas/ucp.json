@@ -41,9 +41,9 @@
         }
       }
     },
-    "response_checkout": {
-      "title": "UCP Checkout Response",
-      "description": "UCP metadata for checkout responses.",
+    "response": {
+      "title": "UCP Response Metadata",
+      "description": "Generic UCP envelope for all API responses.",
       "type": "object",
       "required": [
         "version",
@@ -62,26 +62,15 @@
         }
       }
     },
+    "response_checkout": {
+      "title": "UCP Checkout Response",
+      "description": "UCP metadata for checkout responses.",
+      "$ref": "#/$defs/response"
+    },
     "response_order": {
       "title": "UCP Order Response",
-      "description": "UCP metadata for order responses. No payment handlers needed post-purchase.",
-      "type": "object",
-      "required": [
-        "version",
-        "capabilities"
-      ],
-      "properties": {
-        "version": {
-          "$ref": "#/$defs/version"
-        },
-        "capabilities": {
-          "type": "array",
-          "description": "Active capabilities for this response.",
-          "items": {
-            "$ref": "capability.json#/$defs/response"
-          }
-        }
-      }
+      "description": "UCP metadata for order responses.",
+      "$ref": "#/$defs/response"
     }
   }
 }

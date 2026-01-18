@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/search_filters.json",
+  "title": "Search Filters",
+  "description": "Filter criteria to narrow search results. All specified filters combine with AND logic.",
+  "type": "object",
+  "properties": {
+    "category": {
+      "type": "string",
+      "description": "Filter by product category. Categories are merchant-defined strings representing product taxonomy. Valid values can be discovered from the category field in search results, merchant documentation, or standard taxonomies that businesses may align with."
+    },
+    "price": {
+      "$ref": "price_filter.json"
+    }
+  },
+  "additionalProperties": true
+}
