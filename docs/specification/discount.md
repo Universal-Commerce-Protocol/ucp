@@ -90,7 +90,7 @@ The `method` field indicates how the discount was calculated:
 When multiple discounts are applied, `priority` indicates the calculation order.
 Lower numbers are applied first:
 
-```
+```text
 Cart: $100
 Discount A (priority: 1): 20% off → $100 × 0.8 = $80
 Discount B (priority: 2): $10 off → $80 - $10 = $70
@@ -181,10 +181,10 @@ segment, or promotional rules:
 Applied discounts are reflected in the core checkout fields using two distinct
 total types:
 
-| Total Type       | When to Use                                              |
-| ---------------- | -------------------------------------------------------- |
-| `items_discount` | Discounts allocated to line items (`$.line_items[*]`)    |
-| `discount`       | Order-level discounts (shipping, fees, flat order amount)|
+| Total Type       | When to Use                                               |
+| ---------------- | --------------------------------------------------------- |
+| `items_discount` | Discounts allocated to line items (`$.line_items[*]`)     |
+| `discount`       | Order-level discounts (shipping, fees, flat order amount) |
 
 **Determining the type:** If a discount has `allocations` pointing to line
 items, it contributes to `items_discount`. Discounts without allocations, or

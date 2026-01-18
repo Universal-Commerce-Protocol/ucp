@@ -60,19 +60,19 @@ picker) to the host for native experiences.
 
 ### Commerce Roles
 
--   **Business:** The seller providing goods/services and the checkout
+- **Business:** The seller providing goods/services and the checkout
     experience.
--   **Buyer:** The end user making a purchase.
+- **Buyer:** The end user making a purchase.
 
 ### Technical Components
 
--   **Host:** The application embedding the checkout (e.g., AI Agent app,
+- **Host:** The application embedding the checkout (e.g., AI Agent app,
     Super
     App, Browser). Responsible for the **Payment Handler** and user
     authentication.
--   **Embedded Checkout:** The business's checkout interface rendered in an
+- **Embedded Checkout:** The business's checkout interface rendered in an
     iframe or webview. Responsible for the checkout flow and order creation.
--   **Payment Handler:** The secure component that performs user authentication
+- **Payment Handler:** The secure component that performs user authentication
     (biometric/PIN) and credential issuance.
 
 ## Requirements
@@ -108,9 +108,9 @@ the `embedded` transport in their `/.well-known/ucp` profile, all checkout
 
 When `embedded` is present in the service definition:
 
--   All `continue_url` values returned by that business support ECP
--   ECP version matches the service's UCP version
--   Delegations are negotiated at runtime via the `ec.ready` handshake
+- All `continue_url` values returned by that business support ECP
+- ECP version matches the service's UCP version
+- Delegations are negotiated at runtime via the `ec.ready` handshake
 
 When `embedded` is absent from the service definition, the business only
 supports redirect-based checkout continuation via `continue_url`.
@@ -123,8 +123,8 @@ URL in an embedded context.
 
 Before loading the embedded context, the host **SHOULD**:
 
-1.  Prepare handlers for any delegations the host wants to support
-2.  Optionally prepare authentication credentials if required by the business
+1. Prepare handlers for any delegations the host wants to support
+2. Optionally prepare authentication credentials if required by the business
 
 To initiate the session, the host **MUST** augment the `continue_url` with ECP
 query parameters using the `ec_` prefix.
@@ -134,20 +134,20 @@ maximum compatibility across different embedding environments. Parameters use
 the `ec_` prefix to avoid namespace pollution and clearly distinguish ECP
 parameters from business-specific query parameters:
 
--   `ec_version` (string, **REQUIRED**): The UCP version for this session
+- `ec_version` (string, **REQUIRED**): The UCP version for this session
     (format: `YYYY-MM-DD`). Must match the version from service discovery.
--   `ec_auth` (string, **OPTIONAL**): Authentication token in business-defined
+- `ec_auth` (string, **OPTIONAL**): Authentication token in business-defined
     format
--   `ec_delegate` (string, **OPTIONAL**): Comma-delimited list of delegations
+- `ec_delegate` (string, **OPTIONAL**): Comma-delimited list of delegations
     the host wants to handle
 
 #### Authentication
 
 **Token Format:**
 
--   The `auth` parameter format is entirely business-defined
--   Common formats include JWT, OAuth tokens, API keys, or session identifiers
--   Businesses **MUST** document their expected token format and validation process
+- The `auth` parameter format is entirely business-defined
+- Common formats include JWT, OAuth tokens, API keys, or session identifiers
+- Businesses **MUST** document their expected token format and validation process
 
 **Example (Informative - JWT-based):**
 
@@ -170,7 +170,7 @@ requirements.
 
 **Example initialization with authentication:**
 
-```
+```text
 https://example.com/checkout/abc123?ec_version=2026-01-11&ec_auth=eyJ...
 ```
 
@@ -194,7 +194,7 @@ message following a consistent pattern: `ec.{delegation}_request`
 Extensions define their own delegation identifiers; see each extension's
 specification for available options.
 
-```
+```text
 ?ec_version=2026-01-11&ec_delegate=payment.instruments_change,payment.credential,fulfillment.address_change
 ```
 
@@ -208,9 +208,9 @@ approved hosts based on business policy.
 
 The Embedded Checkout determines which delegations to honor based on:
 
--   Authentication status (via `ec_auth` parameter)
--   host authorization level
--   Business policy
+- Authentication status (via `ec_auth` parameter)
+- host authorization level
+- Business policy
 
 The Embedded Checkout **MUST** indicate accepted delegations in the `ec.ready`
 request via the `delegate` field (see [`ec.ready`](#ecready)). If a
@@ -223,25 +223,25 @@ capability using its own UI.
 
 **Embedded Checkout responsibilities:**
 
-1.  **MUST** fire the appropriate `{action}_request` message when that action is
+1. **MUST** fire the appropriate `{action}_request` message when that action is
     triggered
-2.  **MUST** wait for the host's response before proceeding
-3.  **MUST NOT** show its own UI for that delegated action
+2. **MUST** wait for the host's response before proceeding
+3. **MUST NOT** show its own UI for that delegated action
 
 **Host responsibilities:**
 
-1.  **MUST** respond to every `{action}_request` message it receives
-2.  **MUST** respond with an appropriate error if the user cancels
-3.  **SHOULD** show loading/processing states while handling delegation
+1. **MUST** respond to every `{action}_request` message it receives
+2. **MUST** respond with an appropriate error if the user cancels
+3. **SHOULD** show loading/processing states while handling delegation
 
 #### 3.3.3 Delegation Flow
 
-1.  **Request**: Embedded Checkout sends an `ec.{capability}.{action}_request`
+1. **Request**: Embedded Checkout sends an `ec.{capability}.{action}_request`
     message with current state (includes `id`)
-2.  **Native UI**: Host presents native UI for the delegated action
-3.  **Response**: host sends back a JSON-RPC response with matching `id` and
+2. **Native UI**: Host presents native UI for the delegated action
+3. **Response**: host sends back a JSON-RPC response with matching `id` and
     `result` or `error`
-4.  **Update**: Embedded Checkout updates its state and may send subsequent
+4. **Update**: Embedded Checkout updates its state and may send subsequent
     change notifications
 
 See [Payment Extension](#payment-extension) and
@@ -257,20 +257,20 @@ browser.
 
 **Navigation Requirements:**
 
--   The embedded checkout **SHOULD** block or intercept navigation attempts to
+- The embedded checkout **SHOULD** block or intercept navigation attempts to
     URLs outside the checkout flow
--   The embedded checkout **SHOULD** remove or disable UI elements that would
+- The embedded checkout **SHOULD** remove or disable UI elements that would
     navigate away from checkout (e.g., external links, navigation bars)
--   The embedder **MAY** implement additional navigation restrictions at the
+- The embedder **MAY** implement additional navigation restrictions at the
     container level
 
 **Permitted Exceptions:** The following navigation scenarios **MAY** be allowed
 when required for checkout completion:
 
--   Payment provider redirects: off-site payment flows
--   3D Secure verification: card authentication frames and redirects
--   Bank authorization: open banking or similar authorization flows
--   Identity verification: KYC/AML compliance checks when required
+- Payment provider redirects: off-site payment flows
+- 3D Secure verification: card authentication frames and redirects
+- Bank authorization: open banking or similar authorization flows
+- Identity verification: KYC/AML compliance checks when required
 
 These exceptions **SHOULD** return the user to the checkout flow upon
 completion.
@@ -282,27 +282,27 @@ completion.
 All ECP messages **MUST** use JSON-RPC 2.0 format
 ([RFC 7159](https://datatracker.ietf.org/doc/html/rfc7159)). Each message **MUST** contain:
 
--   `jsonrpc`: **MUST** be `"2.0"`
--   `method`: The message name (e.g., `"ec.start"`)
--   `params`: Message-specific payload (may be empty object)
--   `id`: (Optional) Present only for requests that expect responses
+- `jsonrpc`: **MUST** be `"2.0"`
+- `method`: The message name (e.g., `"ec.start"`)
+- `params`: Message-specific payload (may be empty object)
+- `id`: (Optional) Present only for requests that expect responses
 
 ### Message Types
 
 **Requests** (with `id` field):
 
--   Require a response from the receiver
--   **MUST** include a unique `id` field
--   Receiver **MUST** respond with matching `id`
--   Response **MUST** be either a `result` or `error` object
--   Used for operations requiring acknowledgment or data
+- Require a response from the receiver
+- **MUST** include a unique `id` field
+- Receiver **MUST** respond with matching `id`
+- Response **MUST** be either a `result` or `error` object
+- Used for operations requiring acknowledgment or data
 
 **Notifications** (without `id` field):
 
--   Informational only, no response expected
--   **MUST NOT** include an `id` field
--   Receiver **MUST NOT** send a response
--   Used for state updates and informational events
+- Informational only, no response expected
+- **MUST NOT** include an `id` field
+- Receiver **MUST NOT** send a response
+- Used for state updates and informational events
 
 ### Response Handling
 
@@ -343,8 +343,8 @@ Embedded Checkout that allows `postMessage` communication between the web and
 native environments. The host **MUST** create at least one of the following
 globals:
 
--   `window.EmbeddedCheckoutProtocolConsumer` (preferred)
--   `window.webkit.messageHandlers.EmbeddedCheckoutProtocolConsumer`
+- `window.EmbeddedCheckoutProtocolConsumer` (preferred)
+- `window.webkit.messageHandlers.EmbeddedCheckoutProtocolConsumer`
 
 This object **MUST** implement the following interface:
 
@@ -372,10 +372,10 @@ for `postMessage()` calls — before the `ec.ready` message is sent.
 Core messages are defined by the ECP specification and **MUST** be supported by
 all implementations. All messages are sent from Embedded Checkout to host.
 
-| Category         | Purpose                                                 | Pattern      | Core Messages                             |
-| ---------------- | ------------------------------------------------------- | ------------ | ----------------------------------------- |
-| **Handshake**    | Establish connection between host and Embedded Checkout | Request      | `ec.ready`                                |
-| **Lifecycle**    | Inform of checkout state transitions                    | Notification | `ec.start`, `ec.complete`                 |
+| Category         | Purpose                                                 | Pattern      | Core Messages                                                                        |
+| :--------------- | :------------------------------------------------------ | :----------- | :----------------------------------------------------------------------------------- |
+| **Handshake**    | Establish connection between host and Embedded Checkout | Request      | `ec.ready`                                                                           |
+| **Lifecycle**    | Inform of checkout state transitions                    | Notification | `ec.start`, `ec.complete`                                                            |
 | **State Change** | Inform of checkout field changes                        | Notification | `ec.line_items.change`, `ec.buyer.change`, `ec.payment.change`, `ec.messages.change` |
 
 #### Extension Messages
@@ -383,17 +383,17 @@ all implementations. All messages are sent from Embedded Checkout to host.
 Extensions **MAY** extend the Embedded protocol by defining additional messages.
 Extension messages **MUST** follow the naming convention:
 
--   **Notifications**: `ec.{capability}.change` — state change notifications (no
+- **Notifications**: `ec.{capability}.change` — state change notifications (no
     `id`)
--   **Delegation requests**: `ec.{capability}.{action}_request` — requires
+- **Delegation requests**: `ec.{capability}.{action}_request` — requires
     response (has `id`)
 
 Where:
 
--   `{capability}` matches the capability identifier from discovery
--   `{action}` describes the specific action being delegated (e.g.,
+- `{capability}` matches the capability identifier from discovery
+- `{action}` describes the specific action being delegated (e.g.,
     `instruments_change`, `address_change`)
--   `_request` suffix signals this is a delegation point requiring a response
+- `_request` suffix signals this is a delegation point requiring a response
 
 ### Handshake Messages
 
@@ -406,10 +406,10 @@ delegations were accepted, and allows the host to provide additional,
 display-only state for the checkout that was not communicated over UCP checkout
 actions.
 
--   **Direction:** Embedded Checkout → host
--   **Type:** Request
--   **Payload:**
-    -   `delegate` (array of strings, **REQUIRED**): List of delegation
+- **Direction:** Embedded Checkout → host
+- **Type:** Request
+- **Payload:**
+    - `delegate` (array of strings, **REQUIRED**): List of delegation
         identifiers accepted by the Embedded Checkout. This is a subset of the
         delegations requested via the `ec_delegate` URL parameter. Omitted or
         empty array means no delegations were accepted.
@@ -443,17 +443,17 @@ actions.
 The `ec.ready` message is a request, which means that the host **MUST** respond
 to complete the handshake.
 
--   **Direction:** host → Embedded Checkout
--   **Type:** Response
--   **Result Payload:**
-    -   `upgrade` (object, **OPTIONAL**): An object describing how the Embedded
+- **Direction:** host → Embedded Checkout
+- **Type:** Response
+- **Result Payload:**
+    - `upgrade` (object, **OPTIONAL**): An object describing how the Embedded
         Checkout should update the communication channel it uses to communicate
         with the host.
-    -   `checkout` (object, **OPTIONAL**): Additional, display-only state for
+    - `checkout` (object, **OPTIONAL**): Additional, display-only state for
         the checkout that was not communicated over UCP checkout actions. This
         is used to populate the checkout UI, and may only be used to populate
         the following fields, under specific conditions:
-        -   `payment.instruments`: can be overwritten when the host and Embedded
+        - `payment.instruments`: can be overwritten when the host and Embedded
             Checkout both accept the `payment.instruments_change` delegation.
 
 **Example Message:**
@@ -533,10 +533,10 @@ information:**
 
 Signals that checkout is visible and ready for interaction.
 
--   **Direction:** Embedded Checkout → host
--   **Type:** Notification
--   **Payload:**
-    -   `checkout`: The latest state of the checkout, using the same structure
+- **Direction:** Embedded Checkout → host
+- **Type:** Notification
+- **Payload:**
+    - `checkout`: The latest state of the checkout, using the same structure
         as the `checkout` object in UCP responses.
 
 **Example Message:**
@@ -571,10 +571,10 @@ Signals that checkout is visible and ready for interaction.
 
 Indicates successful checkout completion.
 
--   **Direction:** Embedded Checkout → host
--   **Type:** Notification
--   **Payload:**
-    -   `checkout`: The latest state of the checkout, using the same structure
+- **Direction:** Embedded Checkout → host
+- **Type:** Notification
+- **Payload:**
+    - `checkout`: The latest state of the checkout, using the same structure
         as the `checkout` object in UCP responses.
 
 **Example Message:**
@@ -607,10 +607,10 @@ already applied the changes and rendered the updated UI.
 Line items have been modified (quantity changed, items added/removed) in the
 checkout UI.
 
--   **Direction:** Embedded Checkout → host
--   **Type:** Notification
--   **Payload:**
-    -   `checkout`: The latest state of the checkout
+- **Direction:** Embedded Checkout → host
+- **Type:** Notification
+- **Payload:**
+    - `checkout`: The latest state of the checkout
 
 **Example Message:**
 
@@ -638,10 +638,10 @@ checkout UI.
 
 Buyer information has been updated in the checkout UI.
 
--   **Direction:** Embedded Checkout → host
--   **Type:** Notification
--   **Payload:**
-    -   `checkout`: The latest state of the checkout
+- **Direction:** Embedded Checkout → host
+- **Type:** Notification
+- **Payload:**
+    - `checkout`: The latest state of the checkout
 
 **Example Message:**
 
@@ -667,10 +667,10 @@ Buyer information has been updated in the checkout UI.
 Checkout messages have been updated. Messages include errors, warnings, and
 informational notices about the checkout state.
 
--   **Direction:** Embedded Checkout → host
--   **Type:** Notification
--   **Payload:**
-    -   `checkout`: The latest state of the checkout
+- **Direction:** Embedded Checkout → host
+- **Type:** Notification
+- **Payload:**
+    - `checkout`: The latest state of the checkout
 
 **Example Message:**
 
@@ -729,16 +729,16 @@ non-delegated flow.
 informing the Embedded Checkout to delegate payment UI and token acquisition to
 the host. When delegated:
 
--   **Embedded Checkout responsibilities**:
-    -   Display current payment method with a change intent (e.g., "Change
+- **Embedded Checkout responsibilities**:
+    - Display current payment method with a change intent (e.g., "Change
         Payment Method" button)
-    -   Wait for a response to the `ec.payment.credential_request` message
+    - Wait for a response to the `ec.payment.credential_request` message
         before submitting the payment
--   **Host responsibilities**:
-    -   Respond to the `ec.payment.instruments_change_request` by rendering
+- **Host responsibilities**:
+    - Respond to the `ec.payment.instruments_change_request` by rendering
         native UI for the buyer to select alternative payment methods, then
         respond with the selected method
-    -   Respond to the `ec.payment.credential_request` by obtaining a payment
+    - Respond to the `ec.payment.credential_request` by obtaining a payment
         token for the selected payment method, and sending that token to the
         Embedded Checkout
 
@@ -749,10 +749,10 @@ the host. When delegated:
 Informs the host that something has changed in the payment section of the
 checkout UI, such as a new payment method being selected.
 
--   **Direction:** Embedded Checkout → host
--   **Type:** Notification
--   **Payload:**
-    -   `checkout`: The latest state of the checkout
+- **Direction:** Embedded Checkout → host
+- **Type:** Notification
+- **Payload:**
+    - `checkout`: The latest state of the checkout
 
 **Example Message:**
 
@@ -783,10 +783,10 @@ checkout UI, such as a new payment method being selected.
 
 Requests the host to present payment instrument selection UI.
 
--   **Direction:** Embedded Checkout → host
--   **Type:** Request
--   **Payload:**
-    -   `checkout`: The latest state of the checkout
+- **Direction:** Embedded Checkout → host
+- **Type:** Request
+- **Payload:**
+    - `checkout`: The latest state of the checkout
 
 **Example Message:**
 
@@ -816,10 +816,10 @@ treat this update as a PUT-style change by entirely replacing the existing state
 for the provided fields, rather than attempting to merge the new data with
 existing state.
 
--   **Direction:** host → Embedded Checkout
--   **Type:** Response
--   **Payload:**
-    -   `checkout`: The update to apply to the checkout object
+- **Direction:** host → Embedded Checkout
+- **Type:** Response
+- **Payload:**
+    - `checkout`: The update to apply to the checkout object
 
 **Example Success Response:**
 
@@ -870,10 +870,10 @@ existing state.
 Requests a credential for the selected payment instrument during checkout
 submission.
 
--   **Direction:** Embedded Checkout → Host
--   **Type:** Request
--   **Payload:**
-    -   `checkout`: The latest state of the checkout
+- **Direction:** Embedded Checkout → Host
+- **Type:** Request
+- **Payload:**
+    - `checkout`: The latest state of the checkout
 
 **Example Message:**
 
@@ -909,10 +909,10 @@ Embedded Checkout **MUST** treat this update as a PUT-style change by entirely
 replacing the existing state for `payment.instruments`, rather than attempting
 to merge the new data with existing state.
 
--   **Direction:** host → Embedded Checkout
--   **Type:** Response
--   **Payload:**
-    -   `checkout`: The update to apply to the checkout object
+- **Direction:** host → Embedded Checkout
+- **Type:** Response
+- **Payload:**
+    - `checkout`: The update to apply to the checkout object
 
 **Example Success Response:**
 
@@ -963,11 +963,11 @@ to merge the new data with existing state.
 
 **Host responsibilities during payment token delegation:**
 
-1.  **Confirmation:** Host displays the Trusted Payment UI (Payment Sheet /
+1. **Confirmation:** Host displays the Trusted Payment UI (Payment Sheet /
     Biometric Prompt). The host **MUST NOT** silently release a token based
     solely on the message.
-2.  **Auth:** host performs User Authorization via the Payment Handler.
-3.  **AP2 Integration (Optional):** If `ucp.ap2_mandate` is active (see
+2. **Auth:** host performs User Authorization via the Payment Handler.
+3. **AP2 Integration (Optional):** If `ucp.ap2_mandate` is active (see
     **[AP2 extension](https://ap2-extension.org/)**), the host generates the
     `payment_mandate` here using trusted user interface.
 
@@ -993,17 +993,17 @@ Embedded Checkout to delegate address selection UI to the host. When delegated:
 
 **Embedded Checkout responsibilities**:
 
--   Display current shipping address with a change intent (e.g., "Change
+- Display current shipping address with a change intent (e.g., "Change
     Address" button)
--   Send `ec.fulfillment.address_change_request` when the buyer triggers address
+- Send `ec.fulfillment.address_change_request` when the buyer triggers address
     change
--   Update shipping options based on the address returned by the host
+- Update shipping options based on the address returned by the host
 
 **Host responsibilities**:
 
--   Respond to the `ec.fulfillment.address_change_request` by rendering native
+- Respond to the `ec.fulfillment.address_change_request` by rendering native
     UI for the buyer to select or enter a shipping address
--   Respond with the selected address in UCP PostalAddress format
+- Respond with the selected address in UCP PostalAddress format
 
 ### Fulfillment Message API Reference
 
@@ -1012,10 +1012,10 @@ Embedded Checkout to delegate address selection UI to the host. When delegated:
 Informs the host that the fulfillment details have been changed in the checkout
 UI.
 
--   **Direction:** Embedded Checkout → Host
--   **Type:** Notification
--   **Payload:**
-    -   `checkout`: The latest state of the checkout
+- **Direction:** Embedded Checkout → Host
+- **Type:** Notification
+- **Payload:**
+    - `checkout`: The latest state of the checkout
 
 **Example Message:**
 
@@ -1041,10 +1041,10 @@ UI.
 Requests the host to present address selection UI for a shipping fulfillment
 method.
 
--   **Direction:** Embedded Checkout → Host
--   **Type:** Request
--   **Payload:**
-    -   `checkout`: The latest state of the checkout
+- **Direction:** Embedded Checkout → Host
+- **Type:** Request
+- **Payload:**
+    - `checkout`: The latest state of the checkout
 
 **Example Message:**
 
@@ -1088,10 +1088,10 @@ existing state. The Embedded Checkout **MUST** treat this update as a PUT-style
 change by entirely replacing the existing state for `fulfillment.methods`,
 rather than attempting to merge the new data with existing state.
 
--   **Direction:** host → Embedded Checkout
--   **Type:** Response
--   **Payload:**
-    -   `checkout`: The update to apply to the checkout object
+- **Direction:** host → Embedded Checkout
+- **Type:** Response
+- **Payload:**
+    - `checkout`: The update to apply to the checkout object
 
 **Example Success Response:**
 
@@ -1153,12 +1153,12 @@ error codes mapped to
 **[W3C DOMException](https://webidl.spec.whatwg.org/#idl-DOMException)** names
 where possible.
 
-| Code                  | Description                                                                                                        |
-| :-------------------- | :----------------------------------------------------------------------------------------------------------------- |
-| `abort_error`         | The user cancelled the interaction (e.g., closed the sheet).                                                       |
-| `security_error`      | The host origin validation failed.                                                                                 |
-| `not_supported_error` | The requested payment method is not supported by the host.                                                         |
-| `invalid_state_error` | Handshake was attempted out of order.                                                                              |
+| Code                  | Description                                                                                                                                    |
+| :-------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------- |
+| `abort_error`         | The user cancelled the interaction (e.g., closed the sheet).                                                                                   |
+| `security_error`      | The host origin validation failed.                                                                                                             |
+| `not_supported_error` | The requested payment method is not supported by the host.                                                                                     |
+| `invalid_state_error` | Handshake was attempted out of order.                                                                                                          |
 | `not_allowed_error`   | The request was missing valid User Activation (see [Prevention of Unsolicited Payment Requests](#prevention-of-unsolicited-payment-requests)). |
 
 ### Security for Web-Based Hosts
@@ -1169,23 +1169,23 @@ To ensure security, both parties **MUST** implement appropriate
 **[Content Security Policy (CSP)](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP)**
 directives:
 
--   **Business:** **MUST** set `frame-ancestors <host_origin>;` to ensure it's
+- **Business:** **MUST** set `frame-ancestors <host_origin>;` to ensure it's
     only embedded by trusted hosts.
 
--   **Host:**
-    -   **Direct Embedding:** If the host directly embeds the business's page,
+- **Host:**
+    - **Direct Embedding:** If the host directly embeds the business's page,
         specifying a `frame-src` directive listing every potential business
         origin can be impractical, especially if there are many businesses. In
         this scenario, while a strict `frame-src` is ideal, other security
         measures like those in [Iframe Sandbox Attributes](#iframe-sandbox-attributes)
         and [Credentialless Iframes](#credentialless-iframes) are critical.
-    -   **Intermediate Iframe:** The host **MAY** use an intermediate iframe
+    - **Intermediate Iframe:** The host **MAY** use an intermediate iframe
         (e.g., on a host-controlled subdomain) to embed the business's page.
         This offers better control:
-        -   The host's main page only needs to allow the origin of the
+        - The host's main page only needs to allow the origin of the
             intermediate iframe in its `frame-src` (e.g.,
             `frame-src <intermediate_iframe_origin>;`).
-        -   The intermediate iframe **MUST** implement a strict `frame-src`
+        - The intermediate iframe **MUST** implement a strict `frame-src`
             policy, dynamically set to allow _only_ the specific
             `<merchant_origin>` for the current embedded session (e.g.,
             `frame-src <merchant_origin>;`). This can be set via HTTP headers

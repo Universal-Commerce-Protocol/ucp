@@ -27,7 +27,8 @@
       "description": "Unique identifier of the checkout session.",
       "ucp_request": {
         "create": "omit",
-        "update": "required"
+        "update": "required",
+        "complete": "omit"
       }
     },
     "line_items": {
@@ -35,11 +36,30 @@
       "items": {
         "$ref": "types/line_item.json"
       },
-      "description": "List of line items being checked out."
+      "description": "List of line items being checked out.",
+      "ucp_request": {
+        "create": "required",
+        "update": "required",
+        "complete": "omit"
+      }
     },
     "buyer": {
       "$ref": "types/buyer.json",
-      "description": "Representation of the buyer."
+      "description": "Representation of the buyer.",
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional",
+        "complete": "omit"
+      }
+    },
+    "context": {
+      "$ref": "types/context.json",
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional",
+        "complete": "omit"
+      },
+      "ucp_response": "omit"
     },
     "context": {
       "$ref": "types/context.json",
@@ -64,7 +84,7 @@
     },
     "currency": {
       "type": "string",
-      "description": "ISO 4217 currency code. Determined by the merchant based on provided address, context, or geo IP.",
+      "description": "ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.",
       "ucp_request": {
         "create": "omit",
         "update": "omit",
@@ -108,7 +128,12 @@
       "ucp_request": "omit"
     },
     "payment": {
-      "$ref": "payment.json"
+      "$ref": "payment.json",
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional",
+        "complete": "required"
+      }
     },
     "order": {
       "$ref": "types/order_confirmation.json",

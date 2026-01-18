@@ -165,12 +165,12 @@ human-readable fields that platforms render directly.
 
 ### Human-Readable Fields
 
-| Location                | Field         | Required | Purpose                                                    |
-| ----------------------- | ------------- | -------- | ---------------------------------------------------------- |
-| `groups[].options[]`    | `title`       | Yes      | Primary label that distinguishes from siblings             |
-| `groups[].options[]`    | `description` | No       | Supplementary context for the title                        |
-| `groups[].options[]`    | `total`       | Yes      | Price in minor units (may be null if not yet available)    |
-| `available_methods[]`   | `description` | No       | Standalone explanation of alternative availability         |
+| Location              | Field         | Required | Purpose                                                 |
+| --------------------- | ------------- | -------- | ------------------------------------------------------- |
+| `groups[].options[]`  | `title`       | Yes      | Primary label that distinguishes from siblings          |
+| `groups[].options[]`  | `description` | No       | Supplementary context for the title                     |
+| `groups[].options[]`  | `total`       | Yes      | Price in minor units (may be null if not yet available) |
+| `available_methods[]` | `description` | No       | Standalone explanation of alternative availability      |
 
 ### Business Responsibilities
 

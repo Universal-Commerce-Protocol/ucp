@@ -26,10 +26,10 @@ tokenization handlers follow.
 
 We offer a range of examples to utilize forms of tokenization in UCP:
 
-| Example | Use Case |
-|:--------|:---------|
-| [Business Tokenizer](examples/business-tokenizer-payment-handler.md) | Business runs their own tokenization service |
-| [Platform Tokenizer](examples/platform-tokenizer-payment-handler.md) | Platform tokenizes credentials for businesses/PSPs |
+| Example                                                                  | Use Case                                            |
+| :----------------------------------------------------------------------- | :-------------------------------------------------- |
+| [Business Tokenizer](examples/business-tokenizer-payment-handler.md)     | Business runs their own tokenization service        |
+| [Platform Tokenizer](examples/platform-tokenizer-payment-handler.md)     | Platform tokenizes credentials for businesses/PSPs  |
 | [Encrypted Credential Handler](examples/encrypted-credential-handler.md) | Platform encrypts credentials instead of tokenizing |
 
 ---
@@ -40,7 +40,7 @@ We offer a range of examples to utilize forms of tokenization in UCP:
 
 Tokenization handlers transform credentials between source and checkout forms:
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                     Tokenization Payment Flow                           │
 ├─────────────────────────────────────────────────────────────────────────┤
@@ -68,7 +68,7 @@ produce checkout credentials (e.g., tokens).
 Tokens move through distinct phases. Your handler specification must document
 which lifecycle policy you use:
 
-```
+```text
 ┌──────────────┐    ┌──────────────┐    ┌──────────────┐    ┌──────────────┐
 │  Generation  │───▶│   Storage    │───▶│ Detokenize   │───▶│ Invalidation │
 │              │    │              │    │              │    │              │
@@ -78,21 +78,21 @@ which lifecycle policy you use:
 └──────────────┘    └──────────────┘    └──────────────┘    └──────────────┘
 ```
 
-| Policy | Description | Use Case |
-|:-------|:------------|:---------|
-| **Single-use** | Invalidated after first detokenization | Most secure; recommended default |
-| **TTL-based** | Expires after fixed duration (e.g., 15 min) | Allows retries on transient failures |
-| **Session-scoped** | Valid for checkout session duration | Complex flows with multiple processing attempts |
+| Policy             | Description                                 | Use Case                                        |
+| :----------------- | :------------------------------------------ | :---------------------------------------------- |
+| **Single-use**     | Invalidated after first detokenization      | Most secure; recommended default                |
+| **TTL-based**      | Expires after fixed duration (e.g., 15 min) | Allows retries on transient failures            |
+| **Session-scoped** | Valid for checkout session duration         | Complex flows with multiple processing attempts |
 
 ### Binding
 
 All tokenization requests require a `binding` object that ties the token to a
 specific context:
 
-| Field | Required | Description |
-|:------|:---------|:------------|
-| `checkout_id` | Yes | The checkout session this token is valid for |
-| `identity` | Conditional | The participant identity to bind to; required when caller acts on behalf of another participant |
+| Field         | Required    | Description                                                                                     |
+| :------------ | :---------- | :---------------------------------------------------------------------------------------------- |
+| `checkout_id` | Yes         | The checkout session this token is valid for                                                    |
+| `identity`    | Conditional | The participant identity to bind to; required when caller acts on behalf of another participant |
 
 The tokenizer **MUST** verify binding matches on `/detokenize`. See [Binding Schema](https://ucp.dev/schemas/shopping/types/binding.json).
 
@@ -184,16 +184,16 @@ See the full [OpenAPI specification](https://ucp.dev/handlers/tokenization/opena
 
 ## Security Requirements
 
-| Requirement | Description |
-|:------------|:------------|
-| **Binding required** | Credentials **MUST** be bound to `checkout_id` and participant `identity` to prevent reuse |
-| **Binding verified** | Tokenizer **MUST** verify binding matches before returning credentials |
-| **Cryptographically random** | Use secure random generators; tokens must be unguessable |
-| **Sufficient length** | Minimum 128 bits of entropy |
-| **Non-reversible** | Cannot derive the credential from the token |
-| **Scoped** | Token should only work with your tokenizer |
-| **Time-limited** | Enforce TTL appropriate to use case (typically 5-30 minutes) |
-| **Single-use preferred** | Invalidate after first detokenization when possible |
+| Requirement                  | Description                                                                                |
+| :--------------------------- | :----------------------------------------------------------------------------------------- |
+| **Binding required**         | Credentials **MUST** be bound to `checkout_id` and participant `identity` to prevent reuse |
+| **Binding verified**         | Tokenizer **MUST** verify binding matches before returning credentials                     |
+| **Cryptographically random** | Use secure random generators; tokens must be unguessable                                   |
+| **Sufficient length**        | Minimum 128 bits of entropy                                                                |
+| **Non-reversible**           | Cannot derive the credential from the token                                                |
+| **Scoped**                   | Token should only work with your tokenizer                                                 |
+| **Time-limited**             | Enforce TTL appropriate to use case (typically 5-30 minutes)                               |
+| **Single-use preferred**     | Invalidate after first detokenization when possible                                        |
 
 ---
 
@@ -201,15 +201,15 @@ See the full [OpenAPI specification](https://ucp.dev/handlers/tokenization/opena
 
 When publishing your handler, your specification document **MUST** include:
 
-| Requirement | Example |
-|:------------|:--------|
-| **Unique handler name** | `com.example.tokenization_payment` (reverse-DNS format) |
-| **Endpoint URLs** | Production and sandbox base URLs |
-| **Authentication requirements** | OAuth 2.0, API keys, etc. |
-| **Onboarding process** | How participants register and receive identities |
-| **Accepted credentials** | Which credential types are accepted for tokenization |
-| **Token lifecycle policy** | Single-use, TTL, or session-scoped |
-| **Security acknowledgements** | Participants receiving raw credentials must accept responsibility |
+| Requirement                     | Example                                                           |
+| :------------------------------ | :---------------------------------------------------------------- |
+| **Unique handler name**         | `com.example.tokenization_payment` (reverse-DNS format)           |
+| **Endpoint URLs**               | Production and sandbox base URLs                                  |
+| **Authentication requirements** | OAuth 2.0, API keys, etc.                                         |
+| **Onboarding process**          | How participants register and receive identities                  |
+| **Accepted credentials**        | Which credential types are accepted for tokenization              |
+| **Token lifecycle policy**      | Single-use, TTL, or session-scoped                                |
+| **Security acknowledgements**   | Participants receiving raw credentials must accept responsibility |
 
 ### Example Specification Outline
 
@@ -218,16 +218,16 @@ When publishing your handler, your specification document **MUST** include:
 **Version:** `2026-01-11`
 **OpenAPI:** [Tokenization API](https://ucp.dev/handlers/tokenization/openapi.json)
 
-| Environment | Base URL |
-|:------------|:---------|
-| Production | `https://api.acme.com/ucp` |
-| Sandbox | `https://sandbox.api.acme.com/ucp` |
+| Environment | Base URL                           |
+| :---------- | :--------------------------------- |
+| Production  | `https://api.acme.com/ucp`         |
+| Sandbox     | `https://sandbox.api.acme.com/ucp` |
 
 **Supported Instruments:**
 
-| Instrument | Source Credentials | Checkout Credentials |
-|:-----------|:-------------------|:---------------------|
-| `card` | `card` (fpan, network_token) | `token` |
+| Instrument | Source Credentials           | Checkout Credentials |
+| :--------- | :--------------------------- | :------------------- |
+| `card`     | `card` (fpan, network_token) | `token`              |
 
 **Token Lifecycle:** Single-use (invalidated after detokenization)
 
@@ -257,13 +257,13 @@ A tokenizer handler conforms to this pattern if it:
 
 ## References
 
-| Resource | URL |
-|:---------|:----|
-| Tokenization OpenAPI | `https://ucp.dev/handlers/tokenization/openapi.json` |
-| Identity Schema | `https://ucp.dev/schemas/shopping/types/payment_identity.json` |
-| Binding Schema | `https://ucp.dev/schemas/shopping/types/binding.json` |
-| Token Credential Schema | `https://ucp.dev/schemas/shopping/types/token_credential.json` |
-| Card Instrument Schema | `https://ucp.dev/schemas/shopping/types/card_payment_instrument.json` |
+| Resource                | URL                                                                   |
+| :---------------------- | :-------------------------------------------------------------------- |
+| Tokenization OpenAPI    | `https://ucp.dev/handlers/tokenization/openapi.json`                  |
+| Identity Schema         | `https://ucp.dev/schemas/shopping/types/payment_identity.json`        |
+| Binding Schema          | `https://ucp.dev/schemas/shopping/types/binding.json`                 |
+| Token Credential Schema | `https://ucp.dev/schemas/shopping/types/token_credential.json`        |
+| Card Instrument Schema  | `https://ucp.dev/schemas/shopping/types/card_payment_instrument.json` |
 
 ---
 

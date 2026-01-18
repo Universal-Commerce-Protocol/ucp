@@ -10,51 +10,27 @@
 /**
  * JWS Detached Content signature (RFC 7515 Appendix F) over the checkout response body (excluding ap2 field). Format: `<base64url-header>..<base64url-signature>`. The header MUST contain 'alg' (ES256/ES384/ES512) and 'kid' claims. The signature covers both the header and JCS-canonicalized checkout payload.
  *
- * This interface was referenced by `AP2MandateExtension`'s JSON-Schema
+ * This interface was referenced by `AP2MandateExtensionCompleteRequest`'s JSON-Schema
  * via the `definition` "merchant_authorization".
  */
-export type MerchantAuthorization = string;
+export type MerchantAuthorizationCompleteRequest = string;
 /**
  * SD-JWT+kb credential in `ap2.checkout_mandate`. Proving user authorization for the checkout. Contains the full checkout including `ap2.merchant_authorization`.
  *
- * This interface was referenced by `AP2MandateExtension`'s JSON-Schema
+ * This interface was referenced by `AP2MandateExtensionCompleteRequest`'s JSON-Schema
  * via the `definition` "checkout_mandate".
  */
-export type CheckoutMandate = string;
+export type CheckoutMandateCompleteRequest = string;
 /**
- * Error codes specific to AP2 mandate verification.
+ * Checkout extended with AP2 mandate support.
  *
- * This interface was referenced by `AP2MandateExtension`'s JSON-Schema
- * via the `definition` "error_code".
+ * This interface was referenced by `AP2MandateExtensionCompleteRequest`'s JSON-Schema
+ * via the `definition` "checkout".
  */
-export type AP2ErrorCode =
-  | 'mandate_required'
-  | 'agent_missing_key'
-  | 'mandate_invalid_signature'
-  | 'mandate_expired'
-  | 'mandate_scope_mismatch'
-  | 'merchant_authorization_invalid'
-  | 'merchant_authorization_missing';
-/**
- * Checkout extended with AP2 embedded signature support.
- *
- * This interface was referenced by `AP2MandateExtension`'s JSON-Schema
- * via the `definition` "checkout_response_with_ap2".
- */
-export type CheckoutWithAP2Mandate = CheckoutResponse & {
-  ap2?: AP2CheckoutResponseObject;
+export type CheckoutWithAP2MandateCompleteRequest = CheckoutCompleteRequest & {
+  ap2?: Ap2WithMerchantAuthorization & Ap2WithCheckoutMandate;
   [k: string]: unknown;
 };
-/**
- * Capability reference in responses. Only name/version required to confirm active capabilities.
- */
-export type CapabilityResponse = Base & {
-  [k: string]: unknown;
-};
-/**
- * Container for error, warning, or info messages.
- */
-export type Message = MessageError | MessageWarning | MessageInfo;
 /**
  * Matches a specific instrument type based on validation logic.
  */
@@ -98,19 +74,160 @@ export type CardPaymentInstrument = PaymentInstrumentBase & {
  */
 export type PaymentCredential = TokenCredentialResponse | CardCredential;
 /**
- * Order details available at the time of checkout completion.
+ * Error codes specific to AP2 mandate verification.
+ *
+ * This interface was referenced by `AP2MandateExtensionCompleteRequest`'s JSON-Schema
+ * via the `definition` "error_code".
  */
-export type OrderConfirmation = {
-  /**
-   * Unique order identifier.
-   */
-  id: string;
-  /**
-   * Permalink to access the order on merchant site.
-   */
-  permalink_url: string;
+export type AP2ErrorCodeCompleteRequest =
+  | 'mandate_required'
+  | 'agent_missing_key'
+  | 'mandate_invalid_signature'
+  | 'mandate_expired'
+  | 'mandate_scope_mismatch'
+  | 'merchant_authorization_invalid'
+  | 'merchant_authorization_missing';
+/**
+ * JWS Detached Content signature (RFC 7515 Appendix F) over the checkout response body (excluding ap2 field). Format: `<base64url-header>..<base64url-signature>`. The header MUST contain 'alg' (ES256/ES384/ES512) and 'kid' claims. The signature covers both the header and JCS-canonicalized checkout payload.
+ *
+ * This interface was referenced by `AP2MandateExtensionCreateRequest`'s JSON-Schema
+ * via the `definition` "merchant_authorization".
+ */
+export type MerchantAuthorizationCreateRequest = string;
+/**
+ * SD-JWT+kb credential in `ap2.checkout_mandate`. Proving user authorization for the checkout. Contains the full checkout including `ap2.merchant_authorization`.
+ *
+ * This interface was referenced by `AP2MandateExtensionCreateRequest`'s JSON-Schema
+ * via the `definition` "checkout_mandate".
+ */
+export type CheckoutMandateCreateRequest = string;
+/**
+ * Checkout extended with AP2 mandate support.
+ *
+ * This interface was referenced by `AP2MandateExtensionCreateRequest`'s JSON-Schema
+ * via the `definition` "checkout".
+ */
+export type CheckoutWithAP2MandateCreateRequest = CheckoutCreateRequest & {
   [k: string]: unknown;
-} & string;
+};
+/**
+ * Error codes specific to AP2 mandate verification.
+ *
+ * This interface was referenced by `AP2MandateExtensionCreateRequest`'s JSON-Schema
+ * via the `definition` "error_code".
+ */
+export type AP2ErrorCodeCreateRequest =
+  | 'mandate_required'
+  | 'agent_missing_key'
+  | 'mandate_invalid_signature'
+  | 'mandate_expired'
+  | 'mandate_scope_mismatch'
+  | 'merchant_authorization_invalid'
+  | 'merchant_authorization_missing';
+/**
+ * JWS Detached Content signature (RFC 7515 Appendix F) over the checkout response body (excluding ap2 field). Format: `<base64url-header>..<base64url-signature>`. The header MUST contain 'alg' (ES256/ES384/ES512) and 'kid' claims. The signature covers both the header and JCS-canonicalized checkout payload.
+ *
+ * This interface was referenced by `AP2MandateExtensionUpdateRequest`'s JSON-Schema
+ * via the `definition` "merchant_authorization".
+ */
+export type MerchantAuthorizationUpdateRequest = string;
+/**
+ * SD-JWT+kb credential in `ap2.checkout_mandate`. Proving user authorization for the checkout. Contains the full checkout including `ap2.merchant_authorization`.
+ *
+ * This interface was referenced by `AP2MandateExtensionUpdateRequest`'s JSON-Schema
+ * via the `definition` "checkout_mandate".
+ */
+export type CheckoutMandateUpdateRequest = string;
+/**
+ * Checkout extended with AP2 mandate support.
+ *
+ * This interface was referenced by `AP2MandateExtensionUpdateRequest`'s JSON-Schema
+ * via the `definition` "checkout".
+ */
+export type CheckoutWithAP2MandateUpdateRequest = CheckoutUpdateRequest & {
+  [k: string]: unknown;
+};
+/**
+ * Error codes specific to AP2 mandate verification.
+ *
+ * This interface was referenced by `AP2MandateExtensionUpdateRequest`'s JSON-Schema
+ * via the `definition` "error_code".
+ */
+export type AP2ErrorCodeUpdateRequest =
+  | 'mandate_required'
+  | 'agent_missing_key'
+  | 'mandate_invalid_signature'
+  | 'mandate_expired'
+  | 'mandate_scope_mismatch'
+  | 'merchant_authorization_invalid'
+  | 'merchant_authorization_missing';
+/**
+ * JWS Detached Content signature (RFC 7515 Appendix F) over the checkout response body (excluding ap2 field). Format: `<base64url-header>..<base64url-signature>`. The header MUST contain 'alg' (ES256/ES384/ES512) and 'kid' claims. The signature covers both the header and JCS-canonicalized checkout payload.
+ *
+ * This interface was referenced by `AP2MandateExtensionResponse`'s JSON-Schema
+ * via the `definition` "merchant_authorization".
+ */
+export type MerchantAuthorizationResponse = string;
+/**
+ * SD-JWT+kb credential in `ap2.checkout_mandate`. Proving user authorization for the checkout. Contains the full checkout including `ap2.merchant_authorization`.
+ *
+ * This interface was referenced by `AP2MandateExtensionResponse`'s JSON-Schema
+ * via the `definition` "checkout_mandate".
+ */
+export type CheckoutMandateResponse = string;
+/**
+ * Checkout extended with AP2 mandate support.
+ *
+ * This interface was referenced by `AP2MandateExtensionResponse`'s JSON-Schema
+ * via the `definition` "checkout".
+ */
+export type CheckoutWithAP2MandateResponse = CheckoutResponse & {
+  ap2?: Ap2WithMerchantAuthorization1 & Ap2WithCheckoutMandate1;
+  [k: string]: unknown;
+};
+/**
+ * Capability reference in responses. Only name/version required to confirm active capabilities.
+ */
+export type CapabilityResponse = Base & {
+  [k: string]: unknown;
+};
+/**
+ * Container for error, warning, or info messages.
+ */
+export type Message = MessageError | MessageWarning | MessageInfo;
+/**
+ * Error codes specific to AP2 mandate verification.
+ *
+ * This interface was referenced by `AP2MandateExtensionResponse`'s JSON-Schema
+ * via the `definition` "error_code".
+ */
+export type AP2ErrorCodeResponse =
+  | 'mandate_required'
+  | 'agent_missing_key'
+  | 'mandate_invalid_signature'
+  | 'mandate_expired'
+  | 'mandate_scope_mismatch'
+  | 'merchant_authorization_invalid'
+  | 'merchant_authorization_missing';
+/**
+ * Buyer object extended with consent tracking.
+ *
+ * This interface was referenced by `BuyerConsentExtensionCompleteRequest`'s JSON-Schema
+ * via the `definition` "buyer".
+ */
+export type BuyerWithConsentCompleteRequest = Buyer & {
+  consent?: Consent;
+  [k: string]: unknown;
+};
+/**
+ * Checkout extended with consent tracking via buyer object.
+ *
+ * This interface was referenced by `BuyerConsentExtensionCompleteRequest`'s JSON-Schema
+ * via the `definition` "checkout".
+ */
+export type CheckoutWithBuyerConsentCompleteRequest = CheckoutCompleteRequest & {
+  [k: string]: unknown;
+};
 /**
  * Buyer object extended with consent tracking.
  *
@@ -118,7 +235,7 @@ export type OrderConfirmation = {
  * via the `definition` "buyer".
  */
 export type BuyerWithConsentCreateRequest = Buyer & {
-  consent?: Consent;
+  consent?: Consent1;
   [k: string]: unknown;
 };
 /**
@@ -138,7 +255,7 @@ export type CheckoutWithBuyerConsentCreateRequest = CheckoutCreateRequest & {
  * via the `definition` "buyer".
  */
 export type BuyerWithConsentUpdateRequest = Buyer & {
-  consent?: Consent1;
+  consent?: Consent2;
   [k: string]: unknown;
 };
 /**
@@ -158,7 +275,7 @@ export type CheckoutWithBuyerConsentUpdateRequest = CheckoutUpdateRequest & {
  * via the `definition` "buyer".
  */
 export type BuyerWithConsentResponse = Buyer & {
-  consent?: Consent2;
+  consent?: Consent3;
   [k: string]: unknown;
 };
 /**
@@ -169,6 +286,15 @@ export type BuyerWithConsentResponse = Buyer & {
  */
 export type CheckoutWithBuyerConsentResponse = CheckoutResponse & {
   buyer?: BuyerWithConsentResponse;
+  [k: string]: unknown;
+};
+/**
+ * Checkout extended with discount capability.
+ *
+ * This interface was referenced by `DiscountExtensionCompleteRequest`'s JSON-Schema
+ * via the `definition` "checkout".
+ */
+export type CheckoutWithDiscountCompleteRequest = CheckoutCompleteRequest & {
   [k: string]: unknown;
 };
 /**
@@ -209,6 +335,19 @@ export type FulfillmentDestinationRequest = ShippingDestinationRequest | RetailL
  * Shipping destination.
  */
 export type ShippingDestinationRequest = PostalAddress & {
+  /**
+   * ID specific to this shipping destination.
+   */
+  id?: string;
+  [k: string]: unknown;
+};
+/**
+ * Checkout extended with hierarchical fulfillment.
+ *
+ * This interface was referenced by `FulfillmentExtensionCompleteRequest`'s JSON-Schema
+ * via the `definition` "checkout".
+ */
+export type CheckoutWithFulfillmentCompleteRequest = CheckoutCompleteRequest & {
   [k: string]: unknown;
 };
 /**
@@ -259,27 +398,320 @@ export type CheckoutWithFulfillmentResponse = CheckoutResponse & {
 /**
  * Extends Checkout with cryptographic mandate support for non-repudiable authorization per the AP2 protocol. Uses embedded signature model with ap2 namespace.
  */
-export declare interface AP2MandateExtension {
+export declare interface AP2MandateExtensionCompleteRequest {
   [k: string]: unknown;
 }
 /**
- * The ap2 object included in checkout responses when AP2 is negotiated.
+ * AP2 extension data including merchant authorization.
  *
- * This interface was referenced by `AP2MandateExtension`'s JSON-Schema
- * via the `definition` "ap2_checkout_response".
+ * This interface was referenced by `AP2MandateExtensionCompleteRequest`'s JSON-Schema
+ * via the `definition` "ap2_with_merchant_authorization".
  */
-export declare interface AP2CheckoutResponseObject {
-  merchant_authorization: MerchantAuthorization;
+export declare interface Ap2WithMerchantAuthorization {
   [k: string]: unknown;
 }
 /**
- * The ap2 object included in complete_checkout requests when AP2 is negotiated.
+ * AP2 extension data including checkout mandate.
  *
- * This interface was referenced by `AP2MandateExtension`'s JSON-Schema
- * via the `definition` "ap2_complete_request".
+ * This interface was referenced by `AP2MandateExtensionCompleteRequest`'s JSON-Schema
+ * via the `definition` "ap2_with_checkout_mandate".
  */
-export declare interface AP2CompleteRequestObject {
-  checkout_mandate: CheckoutMandate;
+export declare interface Ap2WithCheckoutMandate {
+  checkout_mandate?: CheckoutMandateCompleteRequest;
+  [k: string]: unknown;
+}
+/**
+ * Base checkout schema. Extensions compose onto this using allOf.
+ */
+export declare interface CheckoutCompleteRequest {
+  payment: PaymentCompleteRequest;
+  [k: string]: unknown;
+}
+/**
+ * Payment configuration containing handlers.
+ */
+export declare interface PaymentCompleteRequest {
+  /**
+   * The id of the currently selected payment instrument from the instruments array. Set by the agent when submitting payment, and echoed back by the merchant in finalized state.
+   */
+  selected_instrument_id?: string;
+  /**
+   * The payment instruments available for this payment. Each instrument is associated with a specific handler via the handler_id field. Handlers can extend the base payment_instrument schema to add handler-specific fields.
+   */
+  instruments?: PaymentInstrument[];
+  [k: string]: unknown;
+}
+/**
+ * The base definition for any payment instrument. It links the instrument to a specific Merchant configuration (handler_id) and defines common fields like billing address.
+ */
+export declare interface PaymentInstrumentBase {
+  /**
+   * A unique identifier for this instrument instance, assigned by the Agent. Used to reference this specific instrument in the 'payment.selected_instrument_id' field.
+   */
+  id: string;
+  /**
+   * The unique identifier for the handler instance that produced this instrument. This corresponds to the 'id' field in the Payment Handler definition.
+   */
+  handler_id: string;
+  /**
+   * The broad category of the instrument (e.g., 'card', 'tokenized_card'). Specific schemas will constrain this to a constant value.
+   */
+  type: string;
+  billing_address?: PostalAddress;
+  credential?: PaymentCredential;
+  [k: string]: unknown;
+}
+export declare interface PostalAddress {
+  /**
+   * An address extension such as an apartment number, C/O or alternative name.
+   */
+  extended_address?: string;
+  /**
+   * The street address.
+   */
+  street_address?: string;
+  /**
+   * The locality in which the street address is, and which is in the region. For example, Mountain View.
+   */
+  address_locality?: string;
+  /**
+   * The region in which the locality is, and which is in the country. Required for applicable countries (i.e. state in US, province in CA). For example, California or another appropriate first-level Administrative division.
+   */
+  address_region?: string;
+  /**
+   * The country. Recommended to be in 2-letter ISO 3166-1 alpha-2 format, for example "US". For backward compatibility, a 3-letter ISO 3166-1 alpha-3 country code such as "SGP" or a full country name such as "Singapore" can also be used.
+   */
+  address_country?: string;
+  /**
+   * The postal code. For example, 94043.
+   */
+  postal_code?: string;
+  /**
+   * Optional. First name of the contact associated with the address.
+   */
+  first_name?: string;
+  /**
+   * Optional. Last name of the contact associated with the address.
+   */
+  last_name?: string;
+  /**
+   * Optional. Phone number of the contact associated with the address.
+   */
+  phone_number?: string;
+  [k: string]: unknown;
+}
+/**
+ * Base token credential schema. Concrete payment handlers may extend this schema with additional fields and define their own constraints.
+ */
+export declare interface TokenCredentialResponse {
+  /**
+   * The specific type of token produced by the handler (e.g., 'stripe_token').
+   */
+  type: string;
+  [k: string]: unknown;
+}
+/**
+ * A card credential containing sensitive payment card details including raw Primary Account Numbers (PANs). This credential type MUST NOT be used for checkout, only with payment handlers that tokenize or encrypt credentials. CRITICAL: Both parties handling CardCredential (sender and receiver) MUST be PCI DSS compliant. Transmission MUST use HTTPS/TLS with strong cipher suites.
+ */
+export declare interface CardCredential {
+  /**
+   * The credential type identifier for card credentials.
+   */
+  type: 'card';
+  /**
+   * The type of card number. Network tokens are preferred with fallback to FPAN. See PCI Scope for more details.
+   */
+  card_number_type: 'fpan' | 'network_token' | 'dpan';
+  /**
+   * Card number.
+   */
+  number?: string;
+  /**
+   * The month of the card's expiration date (1-12).
+   */
+  expiry_month?: number;
+  /**
+   * The year of the card's expiration date.
+   */
+  expiry_year?: number;
+  /**
+   * Cardholder name.
+   */
+  name?: string;
+  /**
+   * Card CVC number.
+   */
+  cvc?: string;
+  /**
+   * Cryptogram provided with network tokens.
+   */
+  cryptogram?: string;
+  /**
+   * Electronic Commerce Indicator / Security Level Indicator provided with network tokens.
+   */
+  eci_value?: string;
+  [k: string]: unknown;
+}
+/**
+ * Extends Checkout with cryptographic mandate support for non-repudiable authorization per the AP2 protocol. Uses embedded signature model with ap2 namespace.
+ */
+export declare interface AP2MandateExtensionCreateRequest {
+  [k: string]: unknown;
+}
+/**
+ * Base checkout schema. Extensions compose onto this using allOf.
+ */
+export declare interface CheckoutCreateRequest {
+  /**
+   * List of line items being checked out.
+   */
+  line_items: LineItemCreateRequest[];
+  buyer?: Buyer;
+  /**
+   * ISO 4217 currency code.
+   */
+  currency: string;
+  payment?: PaymentCreateRequest;
+  [k: string]: unknown;
+}
+/**
+ * Line item object. Expected to use the currency of the parent object.
+ */
+export declare interface LineItemCreateRequest {
+  item: ItemCreateRequest;
+  /**
+   * Quantity of the item being purchased.
+   */
+  quantity: number;
+  [k: string]: unknown;
+}
+export declare interface ItemCreateRequest {
+  /**
+   * Should be recognized by both the Platform, and the Business. For Google it should match the id provided in the "id" field in the product feed.
+   */
+  id: string;
+  [k: string]: unknown;
+}
+export declare interface Buyer {
+  /**
+   * First name of the buyer.
+   */
+  first_name?: string;
+  /**
+   * Last name of the buyer.
+   */
+  last_name?: string;
+  /**
+   * Email of the buyer.
+   */
+  email?: string;
+  /**
+   * E.164 standard.
+   */
+  phone_number?: string;
+  [k: string]: unknown;
+}
+/**
+ * Payment configuration containing handlers.
+ */
+export declare interface PaymentCreateRequest {
+  /**
+   * The id of the currently selected payment instrument from the instruments array. Set by the agent when submitting payment, and echoed back by the merchant in finalized state.
+   */
+  selected_instrument_id?: string;
+  /**
+   * The payment instruments available for this payment. Each instrument is associated with a specific handler via the handler_id field. Handlers can extend the base payment_instrument schema to add handler-specific fields.
+   */
+  instruments?: PaymentInstrument[];
+  [k: string]: unknown;
+}
+/**
+ * Extends Checkout with cryptographic mandate support for non-repudiable authorization per the AP2 protocol. Uses embedded signature model with ap2 namespace.
+ */
+export declare interface AP2MandateExtensionUpdateRequest {
+  [k: string]: unknown;
+}
+/**
+ * Base checkout schema. Extensions compose onto this using allOf.
+ */
+export declare interface CheckoutUpdateRequest {
+  /**
+   * Unique identifier of the checkout session.
+   */
+  id: string;
+  /**
+   * List of line items being checked out.
+   */
+  line_items: LineItemUpdateRequest[];
+  buyer?: Buyer;
+  /**
+   * ISO 4217 currency code.
+   */
+  currency: string;
+  payment?: PaymentUpdateRequest;
+  [k: string]: unknown;
+}
+/**
+ * Line item object. Expected to use the currency of the parent object.
+ */
+export declare interface LineItemUpdateRequest {
+  id?: string;
+  item: ItemUpdateRequest;
+  /**
+   * Quantity of the item being purchased.
+   */
+  quantity: number;
+  /**
+   * Parent line item identifier for any nested structures.
+   */
+  parent_id?: string;
+  [k: string]: unknown;
+}
+export declare interface ItemUpdateRequest {
+  /**
+   * Should be recognized by both the Platform, and the Business. For Google it should match the id provided in the "id" field in the product feed.
+   */
+  id: string;
+  [k: string]: unknown;
+}
+/**
+ * Payment configuration containing handlers.
+ */
+export declare interface PaymentUpdateRequest {
+  /**
+   * The id of the currently selected payment instrument from the instruments array. Set by the agent when submitting payment, and echoed back by the merchant in finalized state.
+   */
+  selected_instrument_id?: string;
+  /**
+   * The payment instruments available for this payment. Each instrument is associated with a specific handler via the handler_id field. Handlers can extend the base payment_instrument schema to add handler-specific fields.
+   */
+  instruments?: PaymentInstrument[];
+  [k: string]: unknown;
+}
+/**
+ * Extends Checkout with cryptographic mandate support for non-repudiable authorization per the AP2 protocol. Uses embedded signature model with ap2 namespace.
+ */
+export declare interface AP2MandateExtensionResponse {
+  [k: string]: unknown;
+}
+/**
+ * AP2 extension data including merchant authorization.
+ *
+ * This interface was referenced by `AP2MandateExtensionResponse`'s JSON-Schema
+ * via the `definition` "ap2_with_merchant_authorization".
+ */
+export declare interface Ap2WithMerchantAuthorization1 {
+  merchant_authorization?: MerchantAuthorizationResponse;
+  [k: string]: unknown;
+}
+/**
+ * AP2 extension data including checkout mandate.
+ *
+ * This interface was referenced by `AP2MandateExtensionResponse`'s JSON-Schema
+ * via the `definition` "ap2_with_checkout_mandate".
+ */
+export declare interface Ap2WithCheckoutMandate1 {
+  checkout_mandate?: CheckoutMandateResponse;
   [k: string]: unknown;
 }
 /**
@@ -431,29 +863,6 @@ export declare interface TotalResponse {
   amount: number;
   [k: string]: unknown;
 }
-export declare interface Buyer {
-  /**
-   * First name of the buyer.
-   */
-  first_name?: string;
-  /**
-   * Last name of the buyer.
-   */
-  last_name?: string;
-  /**
-   * Optional, buyer's full name (if first_name or last_name fields are present they take precedence).
-   */
-  full_name?: string;
-  /**
-   * Email of the buyer.
-   */
-  email?: string;
-  /**
-   * E.164 standard.
-   */
-  phone_number?: string;
-  [k: string]: unknown;
-}
 export declare interface MessageError {
   /**
    * Message type discriminator.
@@ -591,140 +1000,29 @@ export declare interface PaymentHandlerResponse {
   [k: string]: unknown;
 }
 /**
- * The base definition for any payment instrument. It links the instrument to a specific Merchant configuration (handler_id) and defines common fields like billing address.
+ * Order details available at the time of checkout completion.
  */
-export declare interface PaymentInstrumentBase {
+export declare interface OrderConfirmation {
   /**
-   * A unique identifier for this instrument instance, assigned by the Agent. Used to reference this specific instrument in the 'payment.selected_instrument_id' field.
+   * Unique order identifier.
    */
   id: string;
   /**
-   * The unique identifier for the handler instance that produced this instrument. This corresponds to the 'id' field in the Payment Handler definition.
+   * Permalink to access the order on merchant site.
    */
-  handler_id: string;
-  /**
-   * The broad category of the instrument (e.g., 'card', 'tokenized_card'). Specific schemas will constrain this to a constant value.
-   */
-  type: string;
-  billing_address?: PostalAddress;
-  credential?: PaymentCredential;
-  [k: string]: unknown;
-}
-export declare interface PostalAddress {
-  /**
-   * An address extension such as an apartment number, C/O or alternative name.
-   */
-  extended_address?: string;
-  /**
-   * The street address.
-   */
-  street_address?: string;
-  /**
-   * The locality in which the street address is, and which is in the region. For example, Mountain View.
-   */
-  address_locality?: string;
-  /**
-   * The region in which the locality is, and which is in the country. Required for applicable countries (i.e. state in US, province in CA). For example, California or another appropriate first-level Administrative division.
-   */
-  address_region?: string;
-  /**
-   * The country. Recommended to be in 2-letter ISO 3166-1 alpha-2 format, for example "US". For backward compatibility, a 3-letter ISO 3166-1 alpha-3 country code such as "SGP" or a full country name such as "Singapore" can also be used.
-   */
-  address_country?: string;
-  /**
-   * The postal code. For example, 94043.
-   */
-  postal_code?: string;
-  /**
-   * Optional. First name of the contact associated with the address.
-   */
-  first_name?: string;
-  /**
-   * Optional. Last name of the contact associated with the address.
-   */
-  last_name?: string;
-  /**
-   * Optional. Full name of the contact associated with the address (if first_name or last_name fields are present they take precedence).
-   */
-  full_name?: string;
-  /**
-   * Optional. Phone number of the contact associated with the address.
-   */
-  phone_number?: string;
-  [k: string]: unknown;
-}
-/**
- * Base token credential schema. Concrete payment handlers may extend this schema with additional fields and define their own constraints.
- */
-export declare interface TokenCredentialResponse {
-  /**
-   * The specific type of token produced by the handler (e.g., 'stripe_token').
-   */
-  type: string;
-  [k: string]: unknown;
-}
-/**
- * A card credential containing sensitive payment card details including raw Primary Account Numbers (PANs). This credential type MUST NOT be used for checkout, only with payment handlers that tokenize or encrypt credentials. CRITICAL: Both parties handling CardCredential (sender and receiver) MUST be PCI DSS compliant. Transmission MUST use HTTPS/TLS with strong cipher suites.
- */
-export declare interface CardCredential {
-  /**
-   * The credential type identifier for card credentials.
-   */
-  type: 'card';
-  /**
-   * The type of card number. Network tokens are preferred with fallback to FPAN. See PCI Scope for more details.
-   */
-  card_number_type: 'fpan' | 'network_token' | 'dpan';
-  /**
-   * Card number.
-   */
-  number?: string;
-  /**
-   * The month of the card's expiration date (1-12).
-   */
-  expiry_month?: number;
-  /**
-   * The year of the card's expiration date.
-   */
-  expiry_year?: number;
-  /**
-   * Cardholder name.
-   */
-  name?: string;
-  /**
-   * Card CVC number.
-   */
-  cvc?: string;
-  /**
-   * Cryptogram provided with network tokens.
-   */
-  cryptogram?: string;
-  /**
-   * Electronic Commerce Indicator / Security Level Indicator provided with network tokens.
-   */
-  eci_value?: string;
-  [k: string]: unknown;
-}
-/**
- * Extension fields for complete_checkout when AP2 is negotiated.
- *
- * This interface was referenced by `AP2MandateExtension`'s JSON-Schema
- * via the `definition` "complete_request_with_ap2".
- */
-export declare interface CompleteCheckoutRequestWithAP2 {
-  ap2?: AP2CompleteRequestObject;
+  permalink_url: string;
   [k: string]: unknown;
 }
 /**
  * Extends Checkout with buyer consent tracking for privacy compliance via the buyer object.
  */
-export declare interface BuyerConsentExtensionCreateRequest {
+export declare interface BuyerConsentExtensionCompleteRequest {
   [k: string]: unknown;
 }
 /**
  * User consent states for data processing
  *
- * This interface was referenced by `BuyerConsentExtensionCreateRequest`'s JSON-Schema
+ * This interface was referenced by `BuyerConsentExtensionCompleteRequest`'s JSON-Schema
  * via the `definition` "consent".
  */
 export declare interface Consent {
@@ -747,63 +1045,15 @@ export declare interface Consent {
   [k: string]: unknown;
 }
 /**
- * Base checkout schema. Extensions compose onto this using allOf.
- */
-export declare interface CheckoutCreateRequest {
-  /**
-   * List of line items being checked out.
-   */
-  line_items: LineItemCreateRequest[];
-  buyer?: Buyer;
-  /**
-   * ISO 4217 currency code.
-   */
-  currency: string;
-  payment: PaymentCreateRequest;
-  [k: string]: unknown;
-}
-/**
- * Line item object. Expected to use the currency of the parent object.
- */
-export declare interface LineItemCreateRequest {
-  item: ItemCreateRequest;
-  /**
-   * Quantity of the item being purchased.
-   */
-  quantity: number;
-  [k: string]: unknown;
-}
-export declare interface ItemCreateRequest {
-  /**
-   * Should be recognized by both the Platform, and the Business. For Google it should match the id provided in the "id" field in the product feed.
-   */
-  id: string;
-  [k: string]: unknown;
-}
-/**
- * Payment configuration containing handlers.
- */
-export declare interface PaymentCreateRequest {
-  /**
-   * The id of the currently selected payment instrument from the instruments array. Set by the agent when submitting payment, and echoed back by the merchant in finalized state.
-   */
-  selected_instrument_id?: string;
-  /**
-   * The payment instruments available for this payment. Each instrument is associated with a specific handler via the handler_id field. Handlers can extend the base payment_instrument schema to add handler-specific fields.
-   */
-  instruments?: PaymentInstrument[];
-  [k: string]: unknown;
-}
-/**
  * Extends Checkout with buyer consent tracking for privacy compliance via the buyer object.
  */
-export declare interface BuyerConsentExtensionUpdateRequest {
+export declare interface BuyerConsentExtensionCreateRequest {
   [k: string]: unknown;
 }
 /**
  * User consent states for data processing
  *
- * This interface was referenced by `BuyerConsentExtensionUpdateRequest`'s JSON-Schema
+ * This interface was referenced by `BuyerConsentExtensionCreateRequest`'s JSON-Schema
  * via the `definition` "consent".
  */
 export declare interface Consent1 {
@@ -826,72 +1076,15 @@ export declare interface Consent1 {
   [k: string]: unknown;
 }
 /**
- * Base checkout schema. Extensions compose onto this using allOf.
- */
-export declare interface CheckoutUpdateRequest {
-  /**
-   * Unique identifier of the checkout session.
-   */
-  id: string;
-  /**
-   * List of line items being checked out.
-   */
-  line_items: LineItemUpdateRequest[];
-  buyer?: Buyer;
-  /**
-   * ISO 4217 currency code.
-   */
-  currency: string;
-  payment: PaymentUpdateRequest;
-  [k: string]: unknown;
-}
-/**
- * Line item object. Expected to use the currency of the parent object.
- */
-export declare interface LineItemUpdateRequest {
-  id?: string;
-  item: ItemUpdateRequest;
-  /**
-   * Quantity of the item being purchased.
-   */
-  quantity: number;
-  /**
-   * Parent line item identifier for any nested structures.
-   */
-  parent_id?: string;
-  [k: string]: unknown;
-}
-export declare interface ItemUpdateRequest {
-  /**
-   * Should be recognized by both the Platform, and the Business. For Google it should match the id provided in the "id" field in the product feed.
-   */
-  id: string;
-  [k: string]: unknown;
-}
-/**
- * Payment configuration containing handlers.
- */
-export declare interface PaymentUpdateRequest {
-  /**
-   * The id of the currently selected payment instrument from the instruments array. Set by the agent when submitting payment, and echoed back by the merchant in finalized state.
-   */
-  selected_instrument_id?: string;
-  /**
-   * The payment instruments available for this payment. Each instrument is associated with a specific handler via the handler_id field. Handlers can extend the base payment_instrument schema to add handler-specific fields.
-   */
-  instruments?: PaymentInstrument[];
-  [k: string]: unknown;
-}
-/**
  * Extends Checkout with buyer consent tracking for privacy compliance via the buyer object.
  */
-export declare interface BuyerConsentExtensionResponse {
+export declare interface BuyerConsentExtensionUpdateRequest {
   [k: string]: unknown;
 }
 /**
  * User consent states for data processing
  *
- * This interface was referenced by `BuyerConsentExtensionResponse`'s JSON-Schema
+ * This interface was referenced by `BuyerConsentExtensionUpdateRequest`'s JSON-Schema
  * via the `definition` "consent".
  */
 export declare interface Consent2 {
@@ -914,15 +1107,46 @@ export declare interface Consent2 {
   [k: string]: unknown;
 }
 /**
+ * Extends Checkout with buyer consent tracking for privacy compliance via the buyer object.
+ */
+export declare interface BuyerConsentExtensionResponse {
+  [k: string]: unknown;
+}
+/**
+ * User consent states for data processing
+ *
+ * This interface was referenced by `BuyerConsentExtensionResponse`'s JSON-Schema
+ * via the `definition` "consent".
+ */
+export declare interface Consent3 {
+  /**
+   * Consent for analytics and performance tracking.
+   */
+  analytics?: boolean;
+  /**
+   * Consent for storing user preferences.
+   */
+  preferences?: boolean;
+  /**
+   * Consent for marketing communications.
+   */
+  marketing?: boolean;
+  /**
+   * Consent for selling data to third parties (CCPA).
+   */
+  sale_of_data?: boolean;
+  [k: string]: unknown;
+}
+/**
  * Extends Checkout with discount code support, enabling agents to apply promotional, loyalty, referral, and other discount codes.
  */
-export declare interface DiscountExtensionCreateRequest {
+export declare interface DiscountExtensionCompleteRequest {
   [k: string]: unknown;
 }
 /**
  * Breakdown of how a discount amount was allocated to a specific target.
  *
- * This interface was referenced by `DiscountExtensionCreateRequest`'s JSON-Schema
+ * This interface was referenced by `DiscountExtensionCompleteRequest`'s JSON-Schema
  * via the `definition` "allocation".
  */
 export declare interface Allocation {
@@ -939,7 +1163,7 @@ export declare interface Allocation {
 /**
  * A discount that was successfully applied.
  *
- * This interface was referenced by `DiscountExtensionCreateRequest`'s JSON-Schema
+ * This interface was referenced by `DiscountExtensionCompleteRequest`'s JSON-Schema
  * via the `definition` "applied_discount".
  */
 export declare interface AppliedDiscount {
@@ -974,32 +1198,15 @@ export declare interface AppliedDiscount {
   [k: string]: unknown;
 }
 /**
- * Discount codes input and applied discounts output.
- *
- * This interface was referenced by `DiscountExtensionCreateRequest`'s JSON-Schema
- * via the `definition` "discounts_object".
- */
-export declare interface DiscountsObject {
-  /**
-   * Discount codes to apply. Case-insensitive. Replaces previously submitted codes. Send empty array to clear.
-   */
-  codes?: string[];
-  /**
-   * Discounts successfully applied (code-based and automatic).
-   */
-  applied?: AppliedDiscount[];
-  [k: string]: unknown;
-}
-/**
  * Extends Checkout with discount code support, enabling agents to apply promotional, loyalty, referral, and other discount codes.
  */
-export declare interface DiscountExtensionUpdateRequest {
+export declare interface DiscountExtensionCreateRequest {
   [k: string]: unknown;
 }
 /**
  * Breakdown of how a discount amount was allocated to a specific target.
  *
- * This interface was referenced by `DiscountExtensionUpdateRequest`'s JSON-Schema
+ * This interface was referenced by `DiscountExtensionCreateRequest`'s JSON-Schema
  * via the `definition` "allocation".
  */
 export declare interface Allocation1 {
@@ -1016,7 +1223,7 @@ export declare interface Allocation1 {
 /**
  * A discount that was successfully applied.
  *
- * This interface was referenced by `DiscountExtensionUpdateRequest`'s JSON-Schema
+ * This interface was referenced by `DiscountExtensionCreateRequest`'s JSON-Schema
  * via the `definition` "applied_discount".
  */
 export declare interface AppliedDiscount1 {
@@ -1053,10 +1260,10 @@ export declare interface AppliedDiscount1 {
 /**
  * Discount codes input and applied discounts output.
  *
- * This interface was referenced by `DiscountExtensionUpdateRequest`'s JSON-Schema
+ * This interface was referenced by `DiscountExtensionCreateRequest`'s JSON-Schema
  * via the `definition` "discounts_object".
  */
-export declare interface DiscountsObject1 {
+export declare interface DiscountsObject {
   /**
    * Discount codes to apply. Case-insensitive. Replaces previously submitted codes. Send empty array to clear.
    */
@@ -1070,13 +1277,13 @@ export declare interface DiscountsObject1 {
 /**
  * Extends Checkout with discount code support, enabling agents to apply promotional, loyalty, referral, and other discount codes.
  */
-export declare interface DiscountExtensionResponse {
+export declare interface DiscountExtensionUpdateRequest {
   [k: string]: unknown;
 }
 /**
  * Breakdown of how a discount amount was allocated to a specific target.
  *
- * This interface was referenced by `DiscountExtensionResponse`'s JSON-Schema
+ * This interface was referenced by `DiscountExtensionUpdateRequest`'s JSON-Schema
  * via the `definition` "allocation".
  */
 export declare interface Allocation2 {
@@ -1093,7 +1300,7 @@ export declare interface Allocation2 {
 /**
  * A discount that was successfully applied.
  *
- * This interface was referenced by `DiscountExtensionResponse`'s JSON-Schema
+ * This interface was referenced by `DiscountExtensionUpdateRequest`'s JSON-Schema
  * via the `definition` "applied_discount".
  */
 export declare interface AppliedDiscount2 {
@@ -1130,10 +1337,10 @@ export declare interface AppliedDiscount2 {
 /**
  * Discount codes input and applied discounts output.
  *
- * This interface was referenced by `DiscountExtensionResponse`'s JSON-Schema
+ * This interface was referenced by `DiscountExtensionUpdateRequest`'s JSON-Schema
  * via the `definition` "discounts_object".
  */
-export declare interface DiscountsObject2 {
+export declare interface DiscountsObject1 {
   /**
    * Discount codes to apply. Case-insensitive. Replaces previously submitted codes. Send empty array to clear.
    */
@@ -1145,13 +1352,93 @@ export declare interface DiscountsObject2 {
   [k: string]: unknown;
 }
 /**
+ * Extends Checkout with discount code support, enabling agents to apply promotional, loyalty, referral, and other discount codes.
+ */
+export declare interface DiscountExtensionResponse {
+  [k: string]: unknown;
+}
+/**
+ * Breakdown of how a discount amount was allocated to a specific target.
+ *
+ * This interface was referenced by `DiscountExtensionResponse`'s JSON-Schema
+ * via the `definition` "allocation".
+ */
+export declare interface Allocation3 {
+  /**
+   * JSONPath to the allocation target (e.g., '$.line_items[0]', '$.totals.shipping').
+   */
+  path: string;
+  /**
+   * Amount allocated to this target in minor (cents) currency units.
+   */
+  amount: number;
+  [k: string]: unknown;
+}
+/**
+ * A discount that was successfully applied.
+ *
+ * This interface was referenced by `DiscountExtensionResponse`'s JSON-Schema
+ * via the `definition` "applied_discount".
+ */
+export declare interface AppliedDiscount3 {
+  /**
+   * The discount code. Omitted for automatic discounts.
+   */
+  code?: string;
+  /**
+   * Human-readable discount name (e.g., 'Summer Sale 20% Off').
+   */
+  title: string;
+  /**
+   * Total discount amount in minor (cents) currency units.
+   */
+  amount: number;
+  /**
+   * True if applied automatically by merchant rules (no code required).
+   */
+  automatic?: boolean;
+  /**
+   * Allocation method. 'each' = applied independently per item. 'across' = split proportionally by value.
+   */
+  method?: 'each' | 'across';
+  /**
+   * Stacking order for discount calculation. Lower numbers applied first (1 = first).
+   */
+  priority?: number;
+  /**
+   * Breakdown of where this discount was allocated. Sum of allocation amounts equals total amount.
+   */
+  allocations?: Allocation3[];
+  [k: string]: unknown;
+}
+/**
+ * Discount codes input and applied discounts output.
+ *
+ * This interface was referenced by `DiscountExtensionResponse`'s JSON-Schema
+ * via the `definition` "discounts_object".
+ */
+export declare interface DiscountsObject2 {
+  /**
+   * Discount codes to apply. Case-insensitive. Replaces previously submitted codes. Send empty array to clear.
+   */
+  codes?: string[];
+  /**
+   * Discounts successfully applied (code-based and automatic).
+   */
+  applied?: AppliedDiscount3[];
+  [k: string]: unknown;
+}
+/**
  * Extends Checkout with fulfillment support using methods, destinations, and groups.
  */
-export declare interface FulfillmentExtensionCreateRequest {
+export declare interface FulfillmentExtensionCompleteRequest {
   [k: string]: unknown;
 }
 /**
  * A fulfillment option within a group (e.g., Standard Shipping $5, Express $15).
+ *
+ * This interface was referenced by `FulfillmentExtensionCompleteRequest`'s JSON-Schema
+ * via the `definition` "fulfillment_option".
  *
  * This interface was referenced by `FulfillmentExtensionCreateRequest`'s JSON-Schema
  * via the `definition` "fulfillment_option".
@@ -1165,14 +1452,96 @@ export declare interface FulfillmentOptionRequest {
 /**
  * A merchant-generated package/group of line items with fulfillment options.
  *
- * This interface was referenced by `FulfillmentExtensionCreateRequest`'s JSON-Schema
+ * This interface was referenced by `FulfillmentExtensionCompleteRequest`'s JSON-Schema
  * via the `definition` "fulfillment_group".
  */
-export declare interface FulfillmentGroupCreateRequest {
+export declare interface FulfillmentGroupCompleteRequest {
+  /**
+   * Group identifier for referencing merchant-generated groups in updates.
+   */
+  id: string;
   /**
    * ID of the selected fulfillment option for this group.
    */
   selected_option_id?: string | null;
+  [k: string]: unknown;
+}
+/**
+ * A fulfillment method (shipping or pickup) with destinations and groups.
+ *
+ * This interface was referenced by `FulfillmentExtensionCompleteRequest`'s JSON-Schema
+ * via the `definition` "fulfillment_method".
+ */
+export declare interface FulfillmentMethodCompleteRequest {
+  /**
+   * Unique fulfillment method identifier.
+   */
+  id: string;
+  /**
+   * Fulfillment method type.
+   */
+  type: 'shipping' | 'pickup';
+  /**
+   * Line item IDs fulfilled via this method.
+   */
+  line_item_ids: string[];
+  /**
+   * Available destinations. For shipping: addresses. For pickup: retail locations.
+   */
+  destinations?: FulfillmentDestinationRequest[];
+  /**
+   * ID of the selected destination.
+   */
+  selected_destination_id?: string | null;
+  /**
+   * Fulfillment groups for selecting options. Agent sets selected_option_id on groups to choose shipping method.
+   */
+  groups?: FulfillmentGroupCompleteRequest[];
+  [k: string]: unknown;
+}
+/**
+ * A pickup location (retail store, locker, etc.).
+ */
+export declare interface RetailLocationRequest {
+  /**
+   * Location name (e.g., store name).
+   */
+  name: string;
+  address?: PostalAddress;
+  [k: string]: unknown;
+}
+/**
+ * Inventory availability hint for a fulfillment method type.
+ *
+ * This interface was referenced by `FulfillmentExtensionCompleteRequest`'s JSON-Schema
+ * via the `definition` "fulfillment_available_method".
+ *
+ * This interface was referenced by `FulfillmentExtensionCreateRequest`'s JSON-Schema
+ * via the `definition` "fulfillment_available_method".
+ *
+ * This interface was referenced by `FulfillmentExtensionUpdateRequest`'s JSON-Schema
+ * via the `definition` "fulfillment_available_method".
+ */
+export declare interface FulfillmentAvailableMethodRequest {
+  [k: string]: unknown;
+}
+/**
+ * Container for fulfillment methods and availability.
+ *
+ * This interface was referenced by `FulfillmentExtensionCompleteRequest`'s JSON-Schema
+ * via the `definition` "fulfillment".
+ *
+ * This interface was referenced by `FulfillmentExtensionCreateRequest`'s JSON-Schema
+ * via the `definition` "fulfillment".
+ *
+ * This interface was referenced by `FulfillmentExtensionUpdateRequest`'s JSON-Schema
+ * via the `definition` "fulfillment".
+ */
+export declare interface FulfillmentRequest {
+  /**
+   * Fulfillment methods for cart items.
+   */
+  methods?: FulfillmentMethodCreateRequest[];
   [k: string]: unknown;
 }
 /**
@@ -1205,42 +1574,22 @@ export declare interface FulfillmentMethodCreateRequest {
   [k: string]: unknown;
 }
 /**
- * A pickup location (retail store, locker, etc.).
+ * A merchant-generated package/group of line items with fulfillment options.
+ *
+ * This interface was referenced by `FulfillmentExtensionCreateRequest`'s JSON-Schema
+ * via the `definition` "fulfillment_group".
  */
-export declare interface RetailLocationRequest {
+export declare interface FulfillmentGroupCreateRequest {
   /**
-   * Location name (e.g., store name).
+   * ID of the selected fulfillment option for this group.
    */
-  name: string;
-  address?: PostalAddress;
+  selected_option_id?: string | null;
   [k: string]: unknown;
 }
 /**
- * Inventory availability hint for a fulfillment method type.
- *
- * This interface was referenced by `FulfillmentExtensionCreateRequest`'s JSON-Schema
- * via the `definition` "fulfillment_available_method".
- *
- * This interface was referenced by `FulfillmentExtensionUpdateRequest`'s JSON-Schema
- * via the `definition` "fulfillment_available_method".
+ * Extends Checkout with fulfillment support using methods, destinations, and groups.
  */
-export declare interface FulfillmentAvailableMethodRequest {
-  [k: string]: unknown;
-}
-/**
- * Container for fulfillment methods and availability.
- *
- * This interface was referenced by `FulfillmentExtensionCreateRequest`'s JSON-Schema
- * via the `definition` "fulfillment".
- *
- * This interface was referenced by `FulfillmentExtensionUpdateRequest`'s JSON-Schema
- * via the `definition` "fulfillment".
- */
-export declare interface FulfillmentRequest {
-  /**
-   * Fulfillment methods for cart items.
-   */
-  methods?: FulfillmentMethodCreateRequest[];
+export declare interface FulfillmentExtensionCreateRequest {
   [k: string]: unknown;
 }
 /**
@@ -1333,17 +1682,9 @@ export declare interface FulfillmentOptionResponse {
    */
   latest_fulfillment_time?: string;
   /**
-   * Fulfillment cost before tax in minor currency units.
+   * Fulfillment option totals breakdown.
    */
-  subtotal?: number;
-  /**
-   * Tax amount in minor currency units.
-   */
-  tax?: number;
-  /**
-   * Total cost (subtotal + tax) in minor currency units.
-   */
-  total: number;
+  totals: TotalResponse[];
   [k: string]: unknown;
 }
 /**
@@ -1694,12 +2035,5 @@ export declare interface PlatformOrderConfig {
    * URL where merchant sends order lifecycle events (webhooks).
    */
   webhook_url: string;
-  [k: string]: unknown;
-}
-/**
- * The data that will used to submit payment to the merchant.
- */
-export declare interface PaymentData {
-  payment_data: PaymentInstrument;
   [k: string]: unknown;
 }

@@ -8,8 +8,7 @@
   "type": "object",
   "required": [
     "id",
-    "line_items",
-    "payment"
+    "line_items"
   ],
   "additionalProperties": true,
   "properties": {

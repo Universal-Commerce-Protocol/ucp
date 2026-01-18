@@ -31,18 +31,18 @@ Orders have three main components:
 
 **Line Items** — what was purchased at checkout:
 
-- Includes current quantity counts (total, fulfilled)
+* Includes current quantity counts (total, fulfilled)
 
 **Fulfillment** — how items get delivered:
 
-- **Expectations** — buyer-facing *promises* about when/how items will arrive
-- **Events** (append-only log) — what actually happened (e.g. 👕 was shipped)
+* **Expectations** — buyer-facing *promises* about when/how items will arrive
+* **Events** (append-only log) — what actually happened (e.g. 👕 was shipped)
 
 **Adjustments** (append-only log) — post-order events independent of fulfillment:
 
-- Typically money movements (refunds, returns, credits, disputes, cancellations)
-- Can be any post-order change
-- Can happen before, during, or after fulfillment
+* Typically money movements (refunds, returns, credits, disputes, cancellations)
+* Can be any post-order change
+* Can happen before, during, or after fulfillment
 
 ## Data Model
 
@@ -50,8 +50,8 @@ Orders have three main components:
 
 Line items reflect what was purchased at checkout and their current state:
 
-- Item details (product, price, quantity ordered)
-- Quantity counts and status are derived
+* Item details (product, price, quantity ordered)
+* Quantity counts and status are derived
 
 ### Fulfillment
 
@@ -61,24 +61,24 @@ Fulfillment tracks how items are delivered to the buyer.
 
 **Expectations** are buyer-facing groupings of items (e.g., "package 📦"). They represent:
 
-- What items are grouped together
-- Where they're going (`destination`)
-- How they're being delivered (`method_type`)
-- When they'll arrive (`description`, `fulfillable_on`)
+* What items are grouped together
+* Where they're going (`destination`)
+* How they're being delivered (`method_type`)
+* When they'll arrive (`description`, `fulfillable_on`)
 
 Expectations can be split, merged, or adjusted post-order. For example:
 
-- Group everything by delivery date: "what is coming when"
-- Use a single expectation with a wide date range for flexibility
-- The goal is **setting buyer expectations** - for the best buyer experience
+* Group everything by delivery date: "what is coming when"
+* Use a single expectation with a wide date range for flexibility
+* The goal is **setting buyer expectations** - for the best buyer experience
 
 #### Fulfillment Events
 
 **Fulfillment Events** are an append-only log tracking physical shipments:
 
-- Reference line items by ID and quantity
-- Include tracking information
-- Type is an open string field - businesses can use any values that make sense
+* Reference line items by ID and quantity
+* Include tracking information
+* Type is an open string field - businesses can use any values that make sense
   (common examples: `processing`, `shipped`, `in_transit`, `delivered`,
   `failed_attempt`, `canceled`, `undeliverable`, `returned_to_sender`)
 
@@ -87,13 +87,13 @@ Expectations can be split, merged, or adjusted post-order. For example:
 **Adjustments** are an append-only log of events that exist independently of
 fulfillment:
 
-- Type is an open string field - businesses can use any values that make sense
+* Type is an open string field - businesses can use any values that make sense
   (typically money movements like `refund`, `return`, `credit`,
   `price_adjustment`, `dispute`, `cancellation`)
-- Can be any post-order change
-- Optionally link to line items (or order-level for things like shipping refunds)
-- Include amount when relevant
-- Can happen at any time regardless of fulfillment status
+* Can be any post-order change
+* Optionally link to line items (or order-level for things like shipping refunds)
+* Include amount when relevant
+* Can happen at any time regardless of fulfillment status
 
 ## Schema
 
@@ -119,7 +119,7 @@ Status and quantity counts should reflect the event logs.
 
 **Status Derivation:**
 
-```
+```text
 if (fulfilled == total) → "fulfilled"
 else if (fulfilled > 0) → "partial"
 else → "processing"
@@ -257,8 +257,8 @@ Examples: `refund`, `return`, `credit`, `price_adjustment`, `dispute`,
 
 Businesses send order status changes as events after order placement.
 
-| Event Mechanism | Method | Endpoint | Description |
-| :---- | :---- | :---- | :---- |
+| Event Mechanism                             | Method | Endpoint              | Description                                            |
+| :------------------------------------------ | :----- | :-------------------- | :----------------------------------------------------- |
 | [Order Event Webhook](#order-event-webhook) | `POST` | Platform-provided URL | Business sends order lifecycle events to the platform. |
 
 ### Order Event Webhook
@@ -277,6 +277,7 @@ platform's profile and uses it to send order lifecycle events.
 {{ extension_schema_fields('order.json#/$defs/platform_config', 'order') }}
 
 **Example:**
+
 ```json
 {
   "name": "dev.ucp.shopping.order",
@@ -292,49 +293,49 @@ platform's profile and uses it to send order lifecycle events.
 Webhook payloads **MUST** be signed by the business and verified by the platform
 to ensure authenticity and integrity.
 
-**Signing (Business)**
+#### Signing (Business)
 
-1.  Select a key from the `signing_keys` array in UCP profile.
-2.  Create a detached JWT (RFC 7797) over the request body using the selected key.
-3.  Include the JWT in the `Request-Signature` header.
-4.  Include the key ID in the JWT header's `kid` claim to allow the receiver to
+1. Select a key from the `signing_keys` array in UCP profile.
+2. Create a detached JWT (RFC 7797) over the request body using the selected key.
+3. Include the JWT in the `Request-Signature` header.
+4. Include the key ID in the JWT header's `kid` claim to allow the receiver to
     identify which key to use for verification.
 
-**Verification (Platform)**
+#### Verification (Platform)
 
-1.  Extract the `Request-Signature` header from the incoming webhook request.
-2.  Parse the JWT header to retrieve the `kid` (key ID).
-3.  Fetch the business's UCP profile from `/.well-known/ucp` (cache as appropriate).
-4.  Locate the key in `signing_keys` with the matching `kid`.
-5.  Verify the JWT signature against the request body using the public key.
-6.  If verification fails, reject the webhook with an appropriate error response.
+1. Extract the `Request-Signature` header from the incoming webhook request.
+2. Parse the JWT header to retrieve the `kid` (key ID).
+3. Fetch the business's UCP profile from `/.well-known/ucp` (cache as appropriate).
+4. Locate the key in `signing_keys` with the matching `kid`.
+5. Verify the JWT signature against the request body using the public key.
+6. If verification fails, reject the webhook with an appropriate error response.
 
-**Key Rotation**
+#### Key Rotation
 
 The `signing_keys` array supports multiple keys to enable zero-downtime
 rotation:
 
-*   **Adding a new key:** Add the new key to `signing_keys`, then start signing
+* **Adding a new key:** Add the new key to `signing_keys`, then start signing
     with it. Verifiers will find it by `kid`.
-*   **Removing an old key:** After sufficient time for all in-flight webhooks to
+* **Removing an old key:** After sufficient time for all in-flight webhooks to
     be delivered, remove the old key from `signing_keys`.
 
 ## Guidelines
 
 **Platform:**
 
-- **MUST** respond quickly with a 2xx HTTP status code to acknowledge receipt
-- Process events asynchronously after responding
+* **MUST** respond quickly with a 2xx HTTP status code to acknowledge receipt
+* Process events asynchronously after responding
 
 **Business:**
 
-- **MUST** sign all webhook payloads using a key from their `signing_keys`
+* **MUST** sign all webhook payloads using a key from their `signing_keys`
   array (published in `/.well-known/ucp`). The signature **MUST** be included
   in the `Request-Signature` header as a detached JWT (RFC 7797).
-- **MUST** send "Order created" event with fully populated order entity
-- **MUST** send full order entity on updates (not incremental deltas)
-- **MUST** retry failed webhook deliveries
-- **MUST** include business identifier in webhook path or headers
+* **MUST** send "Order created" event with fully populated order entity
+* **MUST** send full order entity on updates (not incremental deltas)
+* **MUST** retry failed webhook deliveries
+* **MUST** include business identifier in webhook path or headers
 
 ## Entities
 
