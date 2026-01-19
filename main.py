@@ -450,7 +450,18 @@ def define_env(env):
         elif version_data and ref == "#/$defs/version":
           desc += version_data.get("description", "")
 
-        desc += details.get("description", "")
+        # Get embedder's description, or inherit from ref'd type if omitted
+        embedder_desc = details.get("description")
+        if embedder_desc is not None:
+          desc += embedder_desc
+        elif ref and not ref.startswith("#"):
+          # No embedder description - inherit from ref'd type
+          ref_clean = ref.split("#")[0]
+          ref_entity = ref_clean.replace(".json", "")
+          ref_schema = _load_json_file(ref_entity)
+          if ref_schema:
+            desc += ref_schema.get("description", "")
+
         enum_values = details.get("enum")
 
         # --- Handle Enum ---
