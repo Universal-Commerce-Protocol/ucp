@@ -538,34 +538,25 @@
     },
     "schemas": {
       "order": {
-        "$ref": "https://ucp.dev/schemas/shopping/order.json"
+        "$ref": "../../schemas/shopping/order.json"
+      },
+      "payment": {
+        "$ref": "../../schemas/shopping/payment.json"
       },
       "ucp": {
-        "$ref": "https://ucp.dev/schemas/ucp.json"
+        "$ref": "../../schemas/ucp.json"
       },
       "checkout_response": {
-        "$ref": "https://ucp.dev/schemas/shopping/checkout_resp.json"
+        "$ref": "../../schemas/shopping/checkout_resp.json"
       },
       "checkout_create_request": {
-        "$ref": "https://ucp.dev/schemas/shopping/checkout.create_req.json"
+        "$ref": "../../schemas/shopping/checkout.create_req.json"
       },
       "checkout_update_request": {
-        "$ref": "https://ucp.dev/schemas/shopping/checkout.update_req.json"
+        "$ref": "../../schemas/shopping/checkout.update_req.json"
       },
       "checkout_complete_request": {
-        "$ref": "https://ucp.dev/schemas/shopping/checkout.complete_req.json"
-      },
-      "payment_response": {
-        "$ref": "https://ucp.dev/schemas/shopping/payment_resp.json"
-      },
-      "payment_create_request": {
-        "$ref": "https://ucp.dev/schemas/shopping/payment.create_req.json"
-      },
-      "payment_update_request": {
-        "$ref": "https://ucp.dev/schemas/shopping/payment.update_req.json"
-      },
-      "payment_complete_request": {
-        "$ref": "https://ucp.dev/schemas/shopping/payment.complete_req.json"
+        "$ref": "../../schemas/shopping/checkout.complete_req.json"
       }
     }
   }

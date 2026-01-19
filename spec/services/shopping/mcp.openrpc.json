@@ -27,14 +27,14 @@
           "name": "checkout",
           "required": true,
           "schema": {
-            "$ref": "https://ucp.dev/schemas/shopping/checkout.create_req.json"
+            "$ref": "../../schemas/shopping/checkout.create_req.json"
           }
         }
       ],
       "result": {
         "name": "checkout",
         "schema": {
-          "$ref": "https://ucp.dev/schemas/shopping/checkout_resp.json"
+          "$ref": "../../schemas/shopping/checkout_resp.json"
         }
       }
     },
@@ -53,7 +53,7 @@
       "result": {
         "name": "checkout",
         "schema": {
-          "$ref": "https://ucp.dev/schemas/shopping/checkout_resp.json"
+          "$ref": "../../schemas/shopping/checkout_resp.json"
         }
       }
     },
@@ -72,14 +72,14 @@
           "name": "checkout",
           "required": true,
           "schema": {
-            "$ref": "https://ucp.dev/schemas/shopping/checkout.update_req.json"
+            "$ref": "../../schemas/shopping/checkout.update_req.json"
           }
         }
       ],
       "result": {
         "name": "checkout",
         "schema": {
-          "$ref": "https://ucp.dev/schemas/shopping/checkout_resp.json"
+          "$ref": "../../schemas/shopping/checkout_resp.json"
         }
       }
     },
@@ -98,7 +98,7 @@
           "name": "checkout",
           "required": true,
           "schema": {
-            "$ref": "https://ucp.dev/schemas/shopping/checkout.complete_req.json"
+            "$ref": "../../schemas/shopping/checkout.complete_req.json"
           }
         },
         {
@@ -113,7 +113,7 @@
       "result": {
         "name": "checkout",
         "schema": {
-          "$ref": "https://ucp.dev/schemas/shopping/checkout_resp.json"
+          "$ref": "../../schemas/shopping/checkout_resp.json"
         }
       }
     },
@@ -140,7 +140,7 @@
       "result": {
         "name": "checkout",
         "schema": {
-          "$ref": "https://ucp.dev/schemas/shopping/checkout_resp.json"
+          "$ref": "../../schemas/shopping/checkout_resp.json"
         }
       }
     }

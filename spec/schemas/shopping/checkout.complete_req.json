@@ -12,7 +12,7 @@
   "additionalProperties": true,
   "properties": {
     "payment": {
-      "$ref": "payment.complete_req.json"
+      "$ref": "payment.json"
     }
   }
 }

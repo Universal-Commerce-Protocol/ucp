@@ -23,6 +23,7 @@ on:
       - "requirements-docs.txt"
       - "mkdocs.yml"
       - "main.py"
+      - "hooks.py"
       - "docs/**"
       - "spec/**"
   pull_request:
@@ -33,6 +34,7 @@ on:
       - "requirements-docs.txt"
       - "mkdocs.yml"
       - "main.py"
+      - "hooks.py"
       - "docs/**"
       - "spec/**"
 

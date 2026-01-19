@@ -26,12 +26,12 @@
         {
           "name": "checkout",
           "required": true,
-          "schema": {"$ref": "https://ucp.dev/schemas/shopping/checkout.json"}
+          "schema": {"$ref": "../../schemas/shopping/checkout.json"}
         }
       ],
       "result": {
         "name": "checkout",
-        "schema": {"$ref": "https://ucp.dev/schemas/shopping/checkout.json"}
+        "schema": {"$ref": "../../schemas/shopping/checkout.json"}
       }
     },
     {
@@ -46,7 +46,7 @@
       ],
       "result": {
         "name": "checkout",
-        "schema": {"$ref": "https://ucp.dev/schemas/shopping/checkout.json"}
+        "schema": {"$ref": "../../schemas/shopping/checkout.json"}
       }
     },
     {
@@ -61,12 +61,12 @@
         {
           "name": "checkout",
           "required": true,
-          "schema": {"$ref": "https://ucp.dev/schemas/shopping/checkout.json"}
+          "schema": {"$ref": "../../schemas/shopping/checkout.json"}
         }
       ],
       "result": {
         "name": "checkout",
-        "schema": {"$ref": "https://ucp.dev/schemas/shopping/checkout.json"}
+        "schema": {"$ref": "../../schemas/shopping/checkout.json"}
       }
     },
     {
@@ -81,7 +81,7 @@
         {
           "name": "checkout",
           "required": true,
-          "schema": {"$ref": "https://ucp.dev/schemas/shopping/checkout.json"}
+          "schema": {"$ref": "../../schemas/shopping/checkout.json"}
         },
         {
           "name": "idempotency_key",
@@ -91,7 +91,7 @@
       ],
       "result": {
         "name": "checkout",
-        "schema": {"$ref": "https://ucp.dev/schemas/shopping/checkout.json"}
+        "schema": {"$ref": "../../schemas/shopping/checkout.json"}
       }
     },
     {
@@ -111,7 +111,7 @@
       ],
       "result": {
         "name": "checkout",
-        "schema": {"$ref": "https://ucp.dev/schemas/shopping/checkout.json"}
+        "schema": {"$ref": "../../schemas/shopping/checkout.json"}
       }
     }
   ]
