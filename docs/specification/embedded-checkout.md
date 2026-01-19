@@ -89,20 +89,25 @@ the `embedded` transport in their `/.well-known/ucp` profile, all checkout
 ```json
 {
     "services": {
-        "dev.ucp.shopping": {
-            "version": "2026-01-11",
-            "rest": {
+        "dev.ucp.shopping": [
+            {
+                "version": "2026-01-11",
+                "transport": "rest",
                 "schema": "https://ucp.dev/services/shopping/rest.openapi.json",
                 "endpoint": "https://merchant.example.com/ucp/v1"
             },
-            "mcp": {
+            {
+                "version": "2026-01-11",
+                "transport": "mcp",
                 "schema": "https://ucp.dev/services/shopping/mcp.openrpc.json",
                 "endpoint": "https://merchant.example.com/ucp/mcp"
             },
-            "embedded": {
+            {
+                "version": "2026-01-11",
+                "transport": "embedded",
                 "schema": "https://ucp.dev/services/shopping/embedded.openrpc.json"
             }
-        }
+        ]
     }
 }
 ```
