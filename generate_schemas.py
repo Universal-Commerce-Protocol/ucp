@@ -397,20 +397,19 @@ def process_openapi_schema(
 
   ref_map = {}
   schemas = spec["components"].get("schemas", {})
+  source_dir_abs = Path(source_path).resolve().parent
 
   for name, schema in list(schemas.items()):
     ref = schema.get("$ref", "")
 
     # 1. Find the local file that matches this Ref
     found_path = None
-    for path in annotated_schemas:
-      # Normalize path separators for comparison
-      # e.g., matches "schemas/shopping/checkout.json" inside the URL or path
-      resolved_source = Path(SOURCE_DIR).resolve()
-      path_suffix = Path(path).relative_to(resolved_source).as_posix()
-      if ref.endswith(path_suffix):
-        found_path = path
-        break
+    if not (ref.startswith("http:") or ref.startswith("#")):
+      # Resolve the ref path relative to the openapi.json file's location
+      # and check if its absolute path is in the annotated list.
+      resolved_ref_path = (source_dir_abs / ref).resolve()
+      if str(resolved_ref_path) in annotated_schemas:
+        found_path = str(resolved_ref_path)
 
     if found_path:
       is_shared = annotated_schemas[found_path]

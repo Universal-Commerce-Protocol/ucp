@@ -540,6 +540,9 @@
       "order": {
         "$ref": "../../schemas/shopping/order.json"
       },
+      "payment": {
+        "$ref": "../../schemas/shopping/payment.json"
+      },
       "ucp": {
         "$ref": "../../schemas/ucp.json"
       },
@@ -554,18 +557,6 @@
       },
       "checkout_complete_request": {
         "$ref": "../../schemas/shopping/checkout.complete_req.json"
-      },
-      "payment_response": {
-        "$ref": "../../schemas/shopping/payment_resp.json"
-      },
-      "payment_create_request": {
-        "$ref": "../../schemas/shopping/payment.create_req.json"
-      },
-      "payment_update_request": {
-        "$ref": "../../schemas/shopping/payment.update_req.json"
-      },
-      "payment_complete_request": {
-        "$ref": "../../schemas/shopping/payment.complete_req.json"
       }
     }
   }
