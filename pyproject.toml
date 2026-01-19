@@ -1,3 +1,19 @@
+[project]
+name = "ucp"
+version = "0.1.0"
+description = "Universal Commerce Protocol"
+requires-python = ">=3.13"
+dependencies = [
+    "datamodel-code-generator[ruff]"
+]
+
+[tool.setuptools]
+packages = []
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
 [tool.ruff]
 line-length = 80
 indent-width = 2
