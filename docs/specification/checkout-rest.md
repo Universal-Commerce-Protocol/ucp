@@ -21,11 +21,62 @@ This document specifies the REST binding for the
 
 ## Protocol Fundamentals
 
+### Discovery
+
+Businesses advertise REST transport availability through their UCP profile at
+`/.well-known/ucp`.
+
+```json
+{
+  "ucp": {
+    "version": "2026-01-11",
+    "services": {
+      "dev.ucp.shopping": [
+        {
+          "version": "2026-01-11",
+          "spec": "https://ucp.dev/specification/overview",
+          "transport": "rest",
+          "schema": "https://ucp.dev/services/shopping/rest.openapi.json",
+          "endpoint": "https://business.example.com/ucp/v1"
+        }
+      ]
+    },
+    "capabilities": {
+      "dev.ucp.shopping.checkout": [
+        {
+          "version": "2026-01-11",
+          "spec": "https://ucp.dev/specification/checkout",
+          "schema": "https://ucp.dev/schemas/shopping/checkout.json"
+        }
+      ],
+      "dev.ucp.shopping.fulfillment": [
+        {
+          "version": "2026-01-11",
+          "spec": "https://ucp.dev/specification/fulfillment",
+          "schema": "https://ucp.dev/schemas/shopping/fulfillment.json",
+          "extends": "dev.ucp.shopping.checkout"
+        }
+      ]
+    },
+    "payment_handlers": {
+      "com.example.vendor.delegate_payment": [
+        {
+          "id": "handler_1",
+          "version": "2026-01-11",
+          "spec": "https://example.vendor.com/specs/delegate-payment",
+          "schema": "https://example.vendor.com/schemas/delegate-payment-config.json",
+          "config": {}
+        }
+      ]
+    }
+  }
+}
+```
+
 ### Base URL
 All UCP REST endpoints are relative to the business's base URL, which is
-discovered through the UCP profile at `/.well-known/ucp`. The endpoint for the
-checkout capability is defined in the `rest.endpoint` field of the
-business profile.
+provided in the `services["dev.ucp.shopping"][transport="rest"].endpoint`
+field of the business’s profile response.
 
 ### Content Types
 
