@@ -43,7 +43,7 @@
         }
       }
     },
-    "checkout": {
+    "dev.ucp.shopping.checkout": {
       "title": "Checkout with AP2 Mandate",
       "description": "Checkout extended with AP2 mandate support.",
       "allOf": [
