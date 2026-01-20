@@ -19,5 +19,6 @@ mkdocs-site-urls==0.3.1
 mkdocs-llmstxt==0.5.0
 mkdocs-material[imaging]>=9.0.0
 datamodel-code-generator[http]>=0.50.0
+PyYAML>=6.0
 uv==0.2.23
 yamllint==1.35.1
