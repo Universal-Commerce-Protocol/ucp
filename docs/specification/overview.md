@@ -171,9 +171,9 @@ Extensions use the `extends` field to declare their parent(s):
 {
   "dev.ucp.shopping.fulfillment": [
     {
-      "version": "2026-01-11",
-      "spec": "https://ucp.dev/specification/fulfillment",
-      "schema": "https://ucp.dev/schemas/shopping/fulfillment.json",
+      "version": "2026-01-23",
+      "spec": "https://ucp.dev/2026-01-23/specification/fulfillment",
+      "schema": "https://ucp.dev/2026-01-23/schemas/shopping/fulfillment.json",
       "extends": "dev.ucp.shopping.checkout"
     }
   ]
@@ -188,9 +188,9 @@ Extensions **MAY** extend multiple parent capabilities by using an array:
 {
   "dev.ucp.shopping.discount": [
     {
-      "version": "2026-01-11",
-      "spec": "https://ucp.dev/specification/discount",
-      "schema": "https://ucp.dev/schemas/shopping/discount.json",
+      "version": "2026-01-23",
+      "spec": "https://ucp.dev/2026-01-23/specification/discount",
+      "schema": "https://ucp.dev/2026-01-23/schemas/shopping/discount.json",
       "extends": ["dev.ucp.shopping.checkout", "dev.ucp.shopping.cart"]
     }
   ]
@@ -261,7 +261,7 @@ This convention ensures:
 
 - **Self-documenting**: The schema declares exactly which parents it extends
 - **Deterministic resolution**: The `extends` value maps directly to the `$defs` key
-- **Validatable**: Build-time validation can verify each `extends` entry has a
+- **Verifiable**: Build-time checks can confirm each `extends` entry has a
     matching `$defs` key
 
 #### Schema Resolution Convention
@@ -636,11 +636,11 @@ root capability.
 
 **Selection Examples:**
 
-| Response Type | Includes | Does NOT Include |
-|---------------|----------|------------------|
-| Checkout | checkout, discount, fulfillment | cart, order |
-| Cart | cart, discount | checkout, fulfillment, order |
-| Order | order | checkout, cart, discount |
+| Response Type | Includes                        | Does NOT Include             |
+| ------------- | ------------------------------- | ---------------------------- |
+| Checkout      | checkout, discount, fulfillment | cart, order                  |
+| Cart          | cart, discount                  | checkout, fulfillment, order |
+| Order         | order                           | checkout, cart, discount     |
 
 ## Payment Architecture
 
