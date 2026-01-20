@@ -73,10 +73,10 @@ Businesses advertise MCP transport availability through their UCP profile at
 }
 ```
 
-### Platform Profile
+### Request Metadata
 
-MCP clients **MUST** include a valid `ucp_agent` parameter in every request to
-enable [capability negotiation](overview.md#negotiation-protocol):
+MCP clients **MUST** include a `meta` object in every request containing
+protocol metadata:
 
 ```json
 {
@@ -86,14 +86,22 @@ enable [capability negotiation](overview.md#negotiation-protocol):
   "params": {
     "name": "create_checkout",
     "arguments": {
-      "ucp_agent": {
-        "profile": "https://platform.example/profiles/shopping-agent.json"
+      "meta": {
+        "ucp-agent": {
+          "profile": "https://platform.example/profiles/shopping-agent.json"
+        }
       },
       "checkout": { ... }
     }
   }
 }
 ```
+
+The `meta["ucp-agent"]` field is **required** on all requests to enable
+[capability negotiation](overview.md#negotiation-protocol). The
+`complete_checkout` and `cancel_checkout` operations also require
+`meta["idempotency-key"]` for retry safety. Platforms **MAY** include
+additional metadata fields.
 
 ## Tools
 
@@ -145,10 +153,11 @@ Maps to the [Create Checkout](checkout.md#create-checkout) operation.
       "jsonrpc": "2.0",
       "method": "create_checkout",
       "params": {
-        "ucp_agent": {
-          "profile": "https://platform.example/profiles/v2026-01/shopping-agent.json"
+        "meta": {
+          "ucp-agent": {
+            "profile": "https://platform.example/profiles/v2026-01/shopping-agent.json"
+          }
         },
-        "idempotency_key": "550e8400-e29b-41d4-a716-446655440000",
         "checkout": {
           "buyer": {
             "email": "jane.doe@example.com",
@@ -354,8 +363,10 @@ Maps to the [Update Checkout](checkout.md#update-checkout) operation.
       "jsonrpc": "2.0",
       "method": "update_checkout",
       "params": {
-        "ucp_agent": {
-          "profile": "https://platform.example/profiles/v2026-01/shopping-agent.json"
+        "meta": {
+          "ucp-agent": {
+            "profile": "https://platform.example/profiles/v2026-01/shopping-agent.json"
+          }
         },
         "id": "checkout_abc123",
         "checkout": {
@@ -527,11 +538,12 @@ Maps to the [Complete Checkout](checkout.md#complete-checkout) operation.
 
 #### Input Schema
 
+* `meta` (Object): **Required**. Request metadata containing:
+    * `ucp-agent` (Object): **Required**. Platform agent identification.
+    * `idempotency-key` (String, UUID): **Required**. Unique key for retry safety.
 * `id` (String): **Required**. The ID of the checkout session.
 * `checkout` ([Checkout](checkout.md#complete-checkout)): **Required**.
     Contains payment credentials and other finalization data to execute the transaction.
-* `idempotency_key` (String, UUID): **Required**. Unique key for retry
-    safety.
 
 #### Output Schema
 
@@ -544,8 +556,10 @@ Maps to the [Cancel Checkout](checkout.md#cancel-checkout) operation.
 
 #### Input Schema
 
-* `id` (String): The ID of the checkout session.
-* `idempotency_key` (String, UUID): **Required**. Unique key for retry safety.
+* `meta` (Object): **Required**. Request metadata containing:
+    * `ucp-agent` (Object): **Required**. Platform agent identification.
+    * `idempotency-key` (String, UUID): **Required**. Unique key for retry safety.
+* `id` (String): **Required**. The ID of the checkout session.
 
 #### Output Schema
 
@@ -607,9 +621,9 @@ transformation:
 
 **Param conventions:**
 
-* Domain payload is passed in a named object (e.g., `checkout`)
-* Request metadata (identifiers, keys, agent profile) are sibling params
-* Param names use snake_case (e.g., `idempotency_key`, `ucp_agent`)
+* `meta` contains request metadata
+* `id` identifies the target resource (path parameter equivalent)
+* `checkout` contains the domain payload (body equivalent)
 
 **Example:** Given the `complete_checkout` operation defined in OpenRPC:
 
@@ -617,8 +631,10 @@ transformation:
 {
   "method": "complete_checkout",
   "params": {
-    "ucp_agent": { "profile": "https://..." },
-    "idempotency_key": "550e8400-e29b-41d4-a716-446655440000",
+    "meta": {
+      "ucp-agent": { "profile": "https://..." },
+      "idempotency-key": "550e8400-e29b-41d4-a716-446655440000"
+    },
     "id": "checkout_abc123",
     "checkout": { "payment": {...} }
   }
@@ -635,8 +651,10 @@ Implementers **MUST** expose this as an MCP `tools/call` endpoint:
   "params": {
     "name": "complete_checkout",
     "arguments": {
-      "ucp_agent": { "profile": "https://..." },
-      "idempotency_key": "550e8400-e29b-41d4-a716-446655440000",
+      "meta": {
+        "ucp-agent": { "profile": "https://..." },
+        "idempotency-key": "550e8400-e29b-41d4-a716-446655440000"
+      },
       "id": "checkout_abc123",
       "checkout": { "payment": {...} }
     }

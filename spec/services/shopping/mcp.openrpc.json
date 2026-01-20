@@ -20,17 +20,32 @@
   ],
   "components": {
     "schemas": {
-      "ucp_agent": {
+      "meta": {
         "type": "object",
-        "description": "Platform agent identification. Maps to HTTP UCP-Agent header.",
+        "description": "Request metadata.",
         "required": [
-          "profile"
+          "ucp-agent"
         ],
+        "additionalProperties": true,
         "properties": {
-          "profile": {
+          "ucp-agent": {
+            "type": "object",
+            "description": "Platform agent identification. Maps to HTTP UCP-Agent header.",
+            "required": [
+              "profile"
+            ],
+            "properties": {
+              "profile": {
+                "type": "string",
+                "format": "uri",
+                "description": "URL to the platform's UCP profile document."
+              }
+            }
+          },
+          "idempotency-key": {
             "type": "string",
-            "format": "uri",
-            "description": "URL to the platform's UCP profile document."
+            "format": "uuid",
+            "description": "Unique key for retry safety. Maps to HTTP Idempotency-Key header."
           }
         }
       }
@@ -42,10 +57,10 @@
       "summary": "Create a checkout",
       "params": [
         {
-          "name": "ucp_agent",
+          "name": "meta",
           "required": true,
           "schema": {
-            "$ref": "#/components/schemas/ucp_agent"
+            "$ref": "#/components/schemas/meta"
           }
         },
         {
@@ -68,10 +83,10 @@
       "summary": "Get checkout",
       "params": [
         {
-          "name": "ucp_agent",
+          "name": "meta",
           "required": true,
           "schema": {
-            "$ref": "#/components/schemas/ucp_agent"
+            "$ref": "#/components/schemas/meta"
           }
         },
         {
@@ -94,10 +109,10 @@
       "summary": "Update checkout",
       "params": [
         {
-          "name": "ucp_agent",
+          "name": "meta",
           "required": true,
           "schema": {
-            "$ref": "#/components/schemas/ucp_agent"
+            "$ref": "#/components/schemas/meta"
           }
         },
         {
@@ -127,10 +142,20 @@
       "summary": "Complete checkout and place order",
       "params": [
         {
-          "name": "ucp_agent",
+          "name": "meta",
           "required": true,
           "schema": {
-            "$ref": "#/components/schemas/ucp_agent"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/meta"
+              },
+              {
+                "required": [
+                  "ucp-agent",
+                  "idempotency-key"
+                ]
+              }
+            ]
           }
         },
         {
@@ -146,15 +171,6 @@
           "schema": {
             "$ref": "../../schemas/shopping/checkout.complete_req.json"
           }
-        },
-        {
-          "name": "idempotency_key",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "description": "Unique key for retry safety. Maps to HTTP Idempotency-Key header."
         }
       ],
       "result": {
@@ -169,10 +185,20 @@
       "summary": "Cancel checkout",
       "params": [
         {
-          "name": "ucp_agent",
+          "name": "meta",
           "required": true,
           "schema": {
-            "$ref": "#/components/schemas/ucp_agent"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/meta"
+              },
+              {
+                "required": [
+                  "ucp-agent",
+                  "idempotency-key"
+                ]
+              }
+            ]
           }
         },
         {
@@ -181,15 +207,6 @@
           "schema": {
             "type": "string"
           }
-        },
-        {
-          "name": "idempotency_key",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "description": "Unique key for retry safety. Maps to HTTP Idempotency-Key header."
         }
       ],
       "result": {

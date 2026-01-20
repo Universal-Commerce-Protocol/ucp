@@ -450,17 +450,18 @@ Content-Type: application/json
 {"line_items": [...]}
 ```
 
-**MCP Transport:** Platforms **MUST** use the `ucp_agent` param. The param name
-is the header name transformed to snake_case (`UCP-Agent` → `ucp_agent`), and
-the value is the parsed Dictionary Structured Field:
+**MCP Transport:** Platforms **MUST** include a `meta` object containing request
+metadata:
 
 ```json
 {
   "jsonrpc": "2.0",
   "method": "create_checkout",
   "params": {
-    "ucp_agent": {
-      "profile": "https://agent.example/profiles/shopping-agent.json"
+    "meta": {
+      "ucp-agent": {
+        "profile": "https://agent.example/profiles/shopping-agent.json"
+      }
     },
     "checkout": {
       "line_items": [...]

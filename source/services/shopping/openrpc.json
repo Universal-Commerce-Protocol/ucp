@@ -20,15 +20,28 @@
   ],
   "components": {
     "schemas": {
-      "ucp_agent": {
+      "meta": {
         "type": "object",
-        "description": "Platform agent identification. Maps to HTTP UCP-Agent header.",
-        "required": ["profile"],
+        "description": "Request metadata.",
+        "required": ["ucp-agent"],
+        "additionalProperties": true,
         "properties": {
-          "profile": {
+          "ucp-agent": {
+            "type": "object",
+            "description": "Platform agent identification. Maps to HTTP UCP-Agent header.",
+            "required": ["profile"],
+            "properties": {
+              "profile": {
+                "type": "string",
+                "format": "uri",
+                "description": "URL to the platform's UCP profile document."
+              }
+            }
+          },
+          "idempotency-key": {
             "type": "string",
-            "format": "uri",
-            "description": "URL to the platform's UCP profile document."
+            "format": "uuid",
+            "description": "Unique key for retry safety. Maps to HTTP Idempotency-Key header."
           }
         }
       }
@@ -40,9 +53,9 @@
       "summary": "Create a checkout",
       "params": [
         {
-          "name": "ucp_agent",
+          "name": "meta",
           "required": true,
-          "schema": {"$ref": "#/components/schemas/ucp_agent"}
+          "schema": {"$ref": "#/components/schemas/meta"}
         },
         {
           "name": "checkout",
@@ -60,9 +73,9 @@
       "summary": "Get checkout",
       "params": [
         {
-          "name": "ucp_agent",
+          "name": "meta",
           "required": true,
-          "schema": {"$ref": "#/components/schemas/ucp_agent"}
+          "schema": {"$ref": "#/components/schemas/meta"}
         },
         {
           "name": "id",
@@ -80,9 +93,9 @@
       "summary": "Update checkout",
       "params": [
         {
-          "name": "ucp_agent",
+          "name": "meta",
           "required": true,
-          "schema": {"$ref": "#/components/schemas/ucp_agent"}
+          "schema": {"$ref": "#/components/schemas/meta"}
         },
         {
           "name": "id",
@@ -105,9 +118,14 @@
       "summary": "Complete checkout and place order",
       "params": [
         {
-          "name": "ucp_agent",
+          "name": "meta",
           "required": true,
-          "schema": {"$ref": "#/components/schemas/ucp_agent"}
+          "schema": {
+            "allOf": [
+              {"$ref": "#/components/schemas/meta"},
+              {"required": ["ucp-agent", "idempotency-key"]}
+            ]
+          }
         },
         {
           "name": "id",
@@ -118,12 +136,6 @@
           "name": "checkout",
           "required": true,
           "schema": {"$ref": "../../schemas/shopping/checkout.json"}
-        },
-        {
-          "name": "idempotency_key",
-          "required": true,
-          "schema": {"type": "string", "format": "uuid"},
-          "description": "Unique key for retry safety. Maps to HTTP Idempotency-Key header."
         }
       ],
       "result": {
@@ -136,20 +148,19 @@
       "summary": "Cancel checkout",
       "params": [
         {
-          "name": "ucp_agent",
+          "name": "meta",
           "required": true,
-          "schema": {"$ref": "#/components/schemas/ucp_agent"}
+          "schema": {
+            "allOf": [
+              {"$ref": "#/components/schemas/meta"},
+              {"required": ["ucp-agent", "idempotency-key"]}
+            ]
+          }
         },
         {
           "name": "id",
           "required": true,
           "schema": {"type": "string"}
-        },
-        {
-          "name": "idempotency_key",
-          "required": true,
-          "schema": {"type": "string", "format": "uuid"},
-          "description": "Unique key for retry safety. Maps to HTTP Idempotency-Key header."
         }
       ],
       "result": {
