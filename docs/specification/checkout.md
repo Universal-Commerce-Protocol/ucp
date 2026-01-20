@@ -30,7 +30,7 @@ PCI DSS compliant to support this Capability.
 
 **Flow overview**
 
-![High-level checkout flow sequence diagram](site:specification/images/ucp-checkout-flow.png)
+![High-level checkout flow sequence diagram](images/ucp-checkout-flow.png)
 
 **Payments**
 
