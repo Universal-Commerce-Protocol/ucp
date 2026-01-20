@@ -73,30 +73,27 @@ Businesses advertise MCP transport availability through their UCP profile at
 }
 ```
 
-### Platform Profile Advertisement
+### Platform Profile
 
-MCP clients **MUST** include the UCP platform profile URI with every request.
-The platform profile is included in the `_meta.ucp` structure within the request
-parameters:
+MCP clients **MUST** include a valid `ucp_agent` parameter in every request to
+enable [capability negotiation](overview.md#negotiation-protocol):
 
 ```json
 {
   "jsonrpc": "2.0",
   "id": 1,
-  "method": "create_checkout",
+  "method": "tools/call",
   "params": {
-    "_meta": {
-      "ucp": {
-        "profile": "https://platform.example/profiles/v2026-01/shopping-agent.json"
-      }
-    },
-    "idempotency_key": "..."
+    "name": "create_checkout",
+    "arguments": {
+      "ucp_agent": {
+        "profile": "https://platform.example/profiles/shopping-agent.json"
+      },
+      "checkout": { ... }
+    }
   }
 }
 ```
-
-The `_meta.ucp.profile` field **MUST** be present in every MCP tool invocation
-to enable version compatibility checking and capability negotiation.
 
 ## Tools
 
@@ -148,41 +145,41 @@ Maps to the [Create Checkout](checkout.md#create-checkout) operation.
       "jsonrpc": "2.0",
       "method": "create_checkout",
       "params": {
-        "_meta": {
-          "ucp": {
-            "profile": "https://platform.example/profiles/v2026-01/shopping-agent.json"
-          }
+        "ucp_agent": {
+          "profile": "https://platform.example/profiles/v2026-01/shopping-agent.json"
         },
         "idempotency_key": "550e8400-e29b-41d4-a716-446655440000",
-        "buyer": {
-          "email": "jane.doe@example.com",
-          "first_name": "Jane",
-          "last_name": "Doe"
-        },
-        "line_items": [
-          {
-            "item": {
-              "id": "item_123"
-            },
-            "quantity": 1
-          }
-        ],
-        "currency": "USD",
-        "fulfillment": {
-          "methods": [
+        "checkout": {
+          "buyer": {
+            "email": "jane.doe@example.com",
+            "first_name": "Jane",
+            "last_name": "Doe"
+          },
+          "line_items": [
             {
-              "type": "shipping",
-              "destinations": [
-                {
-                  "street_address": "123 Main St",
-                  "address_locality": "Springfield",
-                  "address_region": "IL",
-                  "postal_code": "62701",
-                  "address_country": "US"
-                }
-              ]
+              "item": {
+                "id": "item_123"
+              },
+              "quantity": 1
             }
-          ]
+          ],
+          "currency": "USD",
+          "fulfillment": {
+            "methods": [
+              {
+                "type": "shipping",
+                "destinations": [
+                  {
+                    "street_address": "123 Main St",
+                    "address_locality": "Springfield",
+                    "address_region": "IL",
+                    "postal_code": "62701",
+                    "address_country": "US"
+                  }
+                ]
+              }
+            ]
+          }
         }
       },
       "id": 1
@@ -357,39 +354,39 @@ Maps to the [Update Checkout](checkout.md#update-checkout) operation.
       "jsonrpc": "2.0",
       "method": "update_checkout",
       "params": {
-        "_meta": {
-          "ucp": {
-            "profile": "https://platform.example/profiles/v2026-01/shopping-agent.json"
-          }
+        "ucp_agent": {
+          "profile": "https://platform.example/profiles/v2026-01/shopping-agent.json"
         },
         "id": "checkout_abc123",
-        "buyer": {
-          "email": "jane.doe@example.com",
-          "first_name": "Jane",
-          "last_name": "Doe"
-        },
-        "line_items": [
-          {
-            "item": {
-              "id": "item_123"
-            },
-            "quantity": 1
-          }
-        ],
-        "currency": "USD",
-        "fulfillment": {
-          "methods": [
+        "checkout": {
+          "buyer": {
+            "email": "jane.doe@example.com",
+            "first_name": "Jane",
+            "last_name": "Doe"
+          },
+          "line_items": [
             {
-              "id": "shipping_1",
-              "line_item_ids": ["item_123"],
-              "groups": [
-                {
-                  "id": "package_1",
-                  "selected_option_id": "express"
-                }
-              ]
+              "item": {
+                "id": "item_123"
+              },
+              "quantity": 1
             }
-          ]
+          ],
+          "currency": "USD",
+          "fulfillment": {
+            "methods": [
+              {
+                "id": "shipping_1",
+                "line_item_ids": ["item_123"],
+                "groups": [
+                  {
+                    "id": "package_1",
+                    "selected_option_id": "express"
+                  }
+                ]
+              }
+            ]
+          }
         }
       },
       "id": 2
@@ -594,3 +591,55 @@ A conforming MCP transport implementation **MUST**:
     object.
 4. Validate tool inputs against UCP schemas.
 5. Support HTTP transport with streaming.
+
+## Implementation
+
+UCP operations are defined using [OpenRPC](https://open-rpc.org/) (JSON-RPC
+schema format). The [MCP specification](https://modelcontextprotocol.io/)
+requires all tool invocations to use a `tools/call` method with the operation
+name and arguments wrapped in `params`. Implementers **MUST** apply this
+transformation:
+
+| OpenRPC | MCP |
+|:--------|:----|
+| `method` | `params.name` |
+| `params` | `params.arguments` |
+
+**Param conventions:**
+
+- Domain payload is passed in a named object (e.g., `checkout`)
+- Request metadata (identifiers, keys, agent profile) are sibling params
+- Param names use snake_case (e.g., `idempotency_key`, `ucp_agent`)
+
+**Example:** Given the `complete_checkout` operation defined in OpenRPC:
+
+```json
+{
+  "method": "complete_checkout",
+  "params": {
+    "ucp_agent": { "profile": "https://..." },
+    "idempotency_key": "550e8400-e29b-41d4-a716-446655440000",
+    "id": "checkout_abc123",
+    "checkout": { "payment": {...} }
+  }
+}
+```
+
+Implementers **MUST** expose this as an MCP `tools/call` endpoint:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "tools/call",
+  "params": {
+    "name": "complete_checkout",
+    "arguments": {
+      "ucp_agent": { "profile": "https://..." },
+      "idempotency_key": "550e8400-e29b-41d4-a716-446655440000",
+      "id": "checkout_abc123",
+      "checkout": { "payment": {...} }
+    }
+  }
+}
+```

@@ -450,20 +450,21 @@ Content-Type: application/json
 {"line_items": [...]}
 ```
 
-**MCP Transport:** Platforms **MUST** use native dictionary structure in
-`_meta.ucp`:
+**MCP Transport:** Platforms **MUST** use the `ucp_agent` param. The param name
+is the header name transformed to snake_case (`UCP-Agent` → `ucp_agent`), and
+the value is the parsed Dictionary Structured Field:
 
 ```json
 {
   "jsonrpc": "2.0",
   "method": "create_checkout",
   "params": {
-    "_meta": {
-      "ucp": {
-        "profile": "https://agent.example/profiles/shopping-agent.json"
-      }
+    "ucp_agent": {
+      "profile": "https://agent.example/profiles/shopping-agent.json"
     },
-    "line_items": [...]
+    "checkout": {
+      "line_items": [...]
+    }
   },
   "id": 1
 }

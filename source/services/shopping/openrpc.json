@@ -18,11 +18,32 @@
       }
     }
   ],
+  "components": {
+    "schemas": {
+      "ucp_agent": {
+        "type": "object",
+        "description": "Platform agent identification. Maps to HTTP UCP-Agent header.",
+        "required": ["profile"],
+        "properties": {
+          "profile": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL to the platform's UCP profile document."
+          }
+        }
+      }
+    }
+  },
   "methods": [
     {
       "name": "create_checkout",
       "summary": "Create a checkout",
       "params": [
+        {
+          "name": "ucp_agent",
+          "required": true,
+          "schema": {"$ref": "#/components/schemas/ucp_agent"}
+        },
         {
           "name": "checkout",
           "required": true,
@@ -39,6 +60,11 @@
       "summary": "Get checkout",
       "params": [
         {
+          "name": "ucp_agent",
+          "required": true,
+          "schema": {"$ref": "#/components/schemas/ucp_agent"}
+        },
+        {
           "name": "id",
           "required": true,
           "schema": {"type": "string"}
@@ -53,6 +79,11 @@
       "name": "update_checkout",
       "summary": "Update checkout",
       "params": [
+        {
+          "name": "ucp_agent",
+          "required": true,
+          "schema": {"$ref": "#/components/schemas/ucp_agent"}
+        },
         {
           "name": "id",
           "required": true,
@@ -74,6 +105,11 @@
       "summary": "Complete checkout and place order",
       "params": [
         {
+          "name": "ucp_agent",
+          "required": true,
+          "schema": {"$ref": "#/components/schemas/ucp_agent"}
+        },
+        {
           "name": "id",
           "required": true,
           "schema": {"type": "string"}
@@ -86,7 +122,8 @@
         {
           "name": "idempotency_key",
           "required": true,
-          "schema": {"type": "string", "format": "uuid"}
+          "schema": {"type": "string", "format": "uuid"},
+          "description": "Unique key for retry safety. Maps to HTTP Idempotency-Key header."
         }
       ],
       "result": {
@@ -99,6 +136,11 @@
       "summary": "Cancel checkout",
       "params": [
         {
+          "name": "ucp_agent",
+          "required": true,
+          "schema": {"$ref": "#/components/schemas/ucp_agent"}
+        },
+        {
           "name": "id",
           "required": true,
           "schema": {"type": "string"}
@@ -106,7 +148,8 @@
         {
           "name": "idempotency_key",
           "required": true,
-          "schema": {"type": "string", "format": "uuid"}
+          "schema": {"type": "string", "format": "uuid"},
+          "description": "Unique key for retry safety. Maps to HTTP Idempotency-Key header."
         }
       ],
       "result": {
