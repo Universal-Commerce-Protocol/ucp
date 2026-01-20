@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/action.json",
+  "title": "Action",
+  "type": "object",
+  "required": [
+    "type"
+  ],
+  "properties": {
+    "type": {
+      "type": "string",
+      "description": "Type of action. Well-known values: `submit` (primary action to complete checkout and place order). Consumers SHOULD handle unknown values gracefully by ignoring actions they don't support."
+    },
+    "disabled": {
+      "type": "boolean",
+      "description": "Whether the action is currently disabled. Defaults to false. When true, the action cannot be performed (e.g., submit button should be disabled because required fields are missing or invalid).",
+      "default": false
+    }
+  }
+}
