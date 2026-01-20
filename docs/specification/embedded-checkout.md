@@ -80,52 +80,107 @@ picker) to the host for native experiences.
 
 ### Discovery
 
-ECP availability is signaled via service discovery. When a business advertises
-the `embedded` transport in their `/.well-known/ucp` profile, all checkout
-`continue_url` values support the Embedded Checkout Protocol.
+ECP availability is signaled at two levels: service-level discovery declares
+capability, checkout responses confirm availability and allowed per-session configuration.
+
+#### Service-Level Discovery
+
+When a business advertises the `embedded` transport in their `/.well-known/ucp`
+profile, they declare support for the Embedded Checkout Protocol.
 
 **Service Discovery Example:**
 
 ```json
 {
     "services": {
-        "dev.ucp.shopping": {
-            "version": "2026-01-11",
-            "rest": {
-                "schema": "https://ucp.dev/services/shopping/rest.openapi.json",
-                "endpoint": "https://merchant.example.com/ucp/v1"
+        "dev.ucp.shopping": [
+            {
+                "version": "2026-01-11",
+                "transport": "rest",
+                "endpoint": "https://merchant.example.com/ucp/v1",
+                "schema": "https://ucp.dev/services/shopping/rest.openapi.json"
             },
-            "mcp": {
-                "schema": "https://ucp.dev/services/shopping/mcp.openrpc.json",
-                "endpoint": "https://merchant.example.com/ucp/mcp"
+            {
+                "version": "2026-01-11",
+                "transport": "mcp",
+                "endpoint": "https://merchant.example.com/ucp/mcp",
+                "schema": "https://ucp.dev/services/shopping/mcp.openrpc.json"
             },
-            "embedded": {
+            {
+                "version": "2026-01-11",
+                "transport": "embedded",
                 "schema": "https://ucp.dev/services/shopping/embedded.openrpc.json"
             }
-        }
+        ]
     }
 }
 ```
 
-When `embedded` is present in the service definition:
-
-- All `continue_url` values returned by that business support ECP
-- ECP version matches the service's UCP version
-- Delegations are negotiated at runtime via the `ec.ready` handshake
-
 When `embedded` is absent from the service definition, the business only
 supports redirect-based checkout continuation via `continue_url`.
 
+#### Per-Checkout Configuration
+
+Service-level discovery declares that a business supports ECP, but does not
+guarantee that every checkout session will enable it. Businesses **MUST** include
+an embedded service binding with `config.delegate` in checkout responses to
+indicate ECP availability and allowed delegations for a specific session.
+
+**Checkout Response Example:**
+
+```json
+{
+    "id": "checkout_abc123",
+    "status": "open",
+    "continue_url": "https://merchant.example.com/checkout/abc123",
+    "ucp": {
+        "version": "2026-01-11",
+        "services": {
+            "dev.ucp.shopping": [
+                {
+                    "version": "2026-01-11",
+                    "transport": "embedded",
+                    "config": {
+                        "delegate": ["payment.credential", "fulfillment.address_change"]
+                    }
+                }
+            ]
+        },
+        "capabilities": {...},
+        "payment_handlers": {...}
+    }
+}
+```
+
+The `config.delegate` array confirms the delegations the business accepted for
+this checkout session—the intersection of what the host requested via
+`ec_delegate` and what the business allows. This may vary based on:
+
+- **Cart contents**: Some products may require business-handled payment flows
+- **Agent authorization**: Authenticated agents may receive more delegations
+- **Business policy**: Risk rules, regional restrictions, etc.
+
+When an embedded service binding with `config.delegate` is present:
+
+- ECP is available for this checkout via `continue_url`
+- `config.delegate` confirms which delegations the business accepted
+- This mirrors the `delegate` field in the `ec.ready` handshake
+
+When the embedded service binding is absent from a checkout response (even if
+service-level discovery advertises embedded support), the checkout only supports
+redirect-based continuation via `continue_url`.
+
 ### Loading an Embedded Checkout URL
 
-When a host receives a checkout response with a `continue_url` from a business
-that advertises ECP support, it **MAY** initiate an ECP session by loading the
-URL in an embedded context.
+When a host receives a checkout response with an embedded service binding, it
+**MAY** initiate an ECP session by loading the `continue_url` in an embedded
+context.
 
 Before loading the embedded context, the host **SHOULD**:
 
-1. Prepare handlers for any delegations the host wants to support
-2. Optionally prepare authentication credentials if required by the business
+1. Check `config.delegate` for available delegations
+2. Prepare handlers for delegations the host wants to support
+3. Optionally prepare authentication credentials if required by the business
 
 To initiate the session, the host **MUST** augment the `continue_url` with ECP
 query parameters using the `ec_` prefix.
@@ -136,11 +191,12 @@ the `ec_` prefix to avoid namespace pollution and clearly distinguish ECP
 parameters from business-specific query parameters:
 
 - `ec_version` (string, **REQUIRED**): The UCP version for this session
-    (format: `YYYY-MM-DD`). Must match the version from service discovery.
+    (format: `YYYY-MM-DD`). Must match the version from the checkout response.
 - `ec_auth` (string, **OPTIONAL**): Authentication token in business-defined
     format
 - `ec_delegate` (string, **OPTIONAL**): Comma-delimited list of delegations
-    the host wants to handle
+    the host wants to handle. **SHOULD** be a subset of `config.delegate`
+    from the embedded service binding.
 
 #### Authentication
 

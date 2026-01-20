@@ -185,6 +185,13 @@
             "payment_handlers"
           ],
           "properties": {
+            "services": {
+              "additionalProperties": {
+                "items": {
+                  "$ref": "service.json#/$defs/response_schema"
+                }
+              }
+            },
             "capabilities": {
               "additionalProperties": {
                 "items": {

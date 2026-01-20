@@ -114,6 +114,53 @@
               "properties": {
                 "transport": {
                   "const": "embedded"
+                },
+                "config": {
+                  "$ref": "transports/embedded_config.json"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "response_schema": {
+      "title": "Service (Response Schema)",
+      "description": "Service binding in API responses. Includes per-resource transport configuration via typed config.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
+        },
+        {
+          "anyOf": [
+            {
+              "properties": {
+                "transport": {
+                  "const": "rest"
+                }
+              }
+            },
+            {
+              "properties": {
+                "transport": {
+                  "const": "mcp"
+                }
+              }
+            },
+            {
+              "properties": {
+                "transport": {
+                  "const": "a2a"
+                }
+              }
+            },
+            {
+              "properties": {
+                "transport": {
+                  "const": "embedded"
+                },
+                "config": {
+                  "$ref": "transports/embedded_config.json"
                 }
               }
             }
