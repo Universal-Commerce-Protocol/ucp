@@ -513,16 +513,16 @@
     },
     "schemas": {
       "checkout": {
-        "$ref": "https://ucp.dev/schemas/shopping/checkout.json"
+        "$ref": "../../schemas/shopping/checkout.json"
       },
       "order": {
-        "$ref": "https://ucp.dev/schemas/shopping/order.json"
+        "$ref": "../../schemas/shopping/order.json"
       },
       "payment": {
-        "$ref": "https://ucp.dev/schemas/shopping/payment.json"
+        "$ref": "../../schemas/shopping/payment.json"
       },
       "ucp": {
-        "$ref": "https://ucp.dev/schemas/ucp.json"
+        "$ref": "../../schemas/ucp.json"
       }
     }
   }

@@ -77,6 +77,9 @@ def resolve_internal_ref(ref: str, root_data: Any) -> Any | None:
     The data at the reference, or None if not found.
 
   """
+  if ref == "#":
+    return root_data
+
   if not ref.startswith("#/"):
     return None
   path = ref.lstrip("#/").split("/")
@@ -170,7 +173,7 @@ def resolve_schema(
       visited.add(ref_id)
       resolved = None
 
-      if ref.startswith("#/"):
+      if ref.startswith("#/") or ref == "#":
         # Internal reference
         resolved = resolve_internal_ref(ref, root_data)
       elif file_loader and not ref.startswith("http"):
