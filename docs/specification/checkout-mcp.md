@@ -600,16 +600,16 @@ requires all tool invocations to use a `tools/call` method with the operation
 name and arguments wrapped in `params`. Implementers **MUST** apply this
 transformation:
 
-| OpenRPC | MCP |
-|:--------|:----|
-| `method` | `params.name` |
+| OpenRPC  | MCP                |
+|:---------|:-------------------|
+| `method` | `params.name`      |
 | `params` | `params.arguments` |
 
 **Param conventions:**
 
-- Domain payload is passed in a named object (e.g., `checkout`)
-- Request metadata (identifiers, keys, agent profile) are sibling params
-- Param names use snake_case (e.g., `idempotency_key`, `ucp_agent`)
+* Domain payload is passed in a named object (e.g., `checkout`)
+* Request metadata (identifiers, keys, agent profile) are sibling params
+* Param names use snake_case (e.g., `idempotency_key`, `ucp_agent`)
 
 **Example:** Given the `complete_checkout` operation defined in OpenRPC:
 
