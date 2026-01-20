@@ -49,6 +49,54 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
 | [Complete Checkout](checkout.md#complete-checkout) | `POST` | `/checkout-sessions/{id}/complete` | Place the order. |
 | [Cancel Checkout](checkout.md#cancel-checkout) | `POST` | `/checkout-sessions/{id}/cancel` | Cancel a checkout session. |
 
+## Agent Checkout Reference Flow
+
+This sequence shows a canonical REST flow for an agent completing checkout.
+
+```mermaid
+sequenceDiagram
+  participant Platform
+  participant Business
+  Platform->>Business: POST /checkout-sessions (create checkout)
+  Business-->>Platform: 201 checkout (status=incomplete)
+  Platform->>Business: PUT /checkout-sessions/{id} (add buyer/fulfillment)
+  Business-->>Platform: 200 checkout (status=ready_for_complete)
+  Platform->>Business: POST /checkout-sessions/{id}/complete
+  Business-->>Platform: 200 checkout (status=completed, order)
+```
+
+### Minimal Payloads
+
+**Create checkout (request)**
+
+```json
+{
+  "line_items": [
+    {
+      "item": { "id": "item_123", "title": "Red T-Shirt", "price": 2500 },
+      "quantity": 1
+    }
+  ]
+}
+```
+
+**Complete checkout (request)**
+
+```json
+{
+  "id": "chk_1234567890",
+  "payment": {
+    "handlers": [
+      {
+        "id": "business_tokenizer",
+        "type": "token",
+        "credential": { "token": "tok_visa_123" }
+      }
+    ]
+  }
+}
+```
+
 ## Examples
 
 ### Create Checkout
