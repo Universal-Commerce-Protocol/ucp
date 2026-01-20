@@ -11,7 +11,14 @@
     ".cspell.json",
     "**/*.svg",
     ".gitignore",
-    "package.json"
+    "package.json",
+    ".pre-commit-config.yaml",
+    "**/*.css"
+  ],
+  "ignoreRegExpList": [
+    "src\\s*=\\s*(\"[^\"]*\"|'[^']*')",
+    "(\"token\"|token)\\s*:\\s*(\"[^\"]*\"|'[^']*')",
+    "(\"auth_jwt\"|auth_jwt)\\s*:\\s*(\"[^\"]*\"|'[^']*')"
   ],
   "dictionaryDefinitions": [
     {

@@ -70,7 +70,9 @@ extra:
   ucp_url: https://ucp.dev
   analytics:
     provider: google
+    # cSpell:disable
     property: G-ZEGTBCTMJ9
+    # cSpell:enable
   consent:
     title: Cookie consent
     description: >-

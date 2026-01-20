@@ -28,7 +28,7 @@ from pathlib import Path
 # Modify sys.path to include the current directory so schema_utils can be found.
 sys.path.append(str(Path(__file__).resolve().parent))
 
-import schema_utils  # pylint: disable=g-import-not-at-top
+import schema_utils  # noqa: E402
 
 
 def define_env(env):
@@ -39,6 +39,7 @@ def define_env(env):
   `method_fields` for use in Markdown pages.
 
   Args:
+  ----
     env: The MkDocs environment object.
 
   """
@@ -66,10 +67,12 @@ def define_env(env):
     """Load the specific schema variant (create/update/resp) if available.
 
     Args:
+    ----
       entity_name: The base name (e.g., 'checkout').
       context: Dict containing 'io_type' (request/response) and 'operation_id'.
 
     Returns:
+    -------
       The loaded schema data as a dictionary, or None if not found.
 
     """
@@ -109,10 +112,12 @@ def define_env(env):
     the same specification file.
 
     Args:
+    ----
       ref_string: e.g., "types/line_item.create_req.json"
       spec_file_name: e.g., "checkout"
 
     Returns:
+    -------
       Markdown link: [Line Item.Create_Req](#line-item-create_request)
 
     """
@@ -186,6 +191,7 @@ def define_env(env):
     """Inline fields from a given list of properties.
 
     Args:
+    ----
       properties_ref: The reference JSON file.
       required_list: The list of required properties from the parent schema.
       spec_file_name: The name of the spec file indicating where the dictionary
@@ -195,6 +201,7 @@ def define_env(env):
         'createCheckout'}).
 
     Returns:
+    -------
       A string containing a Markdown table representing the schema properties,
       or a message indicating why a table could not be rendered.
 
@@ -235,6 +242,7 @@ def define_env(env):
     """Inline fields from a given list of properties.
 
     Args:
+    ----
       properties_list: A list containing properties JSON.
       required_list: The list of required properties from the parent schema.
       spec_file_name: The name of the spec file indicating where the dictionary
@@ -244,6 +252,7 @@ def define_env(env):
         'createCheckout'}).
 
     Returns:
+    -------
       A string containing a Markdown table representing the schema properties,
       or a message indicating why a table could not be rendered.
 
@@ -292,6 +301,7 @@ def define_env(env):
     Schema dictionary must contain 'properties'. 'required' list is optional.
 
     Args:
+    ----
       schema_data: A dictionary representing the JSON schema.
       spec_file_name: The name of the spec file indicating where the dictionary
         should be rendered.
@@ -303,6 +313,7 @@ def define_env(env):
         'createCheckout'}).
 
     Returns:
+    -------
       A string containing a Markdown table representing the schema properties,
       or a message indicating why a table could not be rendered.
 
@@ -535,6 +546,7 @@ def define_env(env):
     Usage: {{ schema_fields('buyer') }}  (assumes .json extension)
 
     Args:
+    ----
       entity_name: The name of the schema entity (e.g., 'buyer').
       spec_file_name: The name of the spec file indicating where the dictionary
         should be rendered (e.g., "checkout", "fulfillment").
@@ -569,6 +581,7 @@ def define_env(env):
     Usage: {{ extension_schema_fields('fulfillment_option') }}
 
     Args:
+    ----
       entity_name: The name of the schema entity embedded in the extension
         (e.g., 'fulfillment.json#/$defs/fulfillment_option').
       spec_file_name: The name of the spec file indicating where the dictionary
@@ -590,6 +603,7 @@ def define_env(env):
     and generate documentation for each schema found.
 
     Args:
+    ----
       sub_dir: The subdirectory to scan, relative to spec/schemas/shopping/.
       spec_file_name: The name of the spec file for link generation.
       include_extensions: If true, includes schemas with 'Extension' in title.
@@ -705,6 +719,7 @@ def define_env(env):
     Usage: {{ extension_fields('discount', 'checkout') }}
 
     Args:
+    ----
       entity_name: The name of the extension schema (e.g., 'discount').
       spec_file_name: The name of the spec file indicating where the dictionary
         should be rendered (e.g., "checkout", "fulfillment").
@@ -739,6 +754,7 @@ def define_env(env):
     """Extract Request/Response schemas for a specific OpenAPI operationId.
 
     Args:
+    ----
       operation_id: The `operationId` of the OpenAPI operation to document.
       file_name: The name of the OpenAPI file to read.
       spec_file_name: The name of the spec file indicating where the dictionary
@@ -927,6 +943,7 @@ def define_env(env):
     """Extract HTTP headers for a specific OpenAPI operationId.
 
     Args:
+    ----
       operation_id: The `operationId` of the OpenAPI operation.
       file_name: The name of the OpenAPI file to read.
 

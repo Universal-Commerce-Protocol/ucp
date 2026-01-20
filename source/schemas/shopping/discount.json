@@ -90,7 +90,7 @@
         {
           "type": "object",
           "properties": {
-            "discounts": { 
+            "discounts": {
               "$ref": "#/$defs/discounts_object",
               "ucp_request": {
                 "create": "optional",

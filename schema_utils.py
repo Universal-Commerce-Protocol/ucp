@@ -34,11 +34,13 @@ def resolve_ref_path(ref: str, current_file: str | Path) -> Path | None:
   """Resolve a $ref to an absolute file path.
 
   Args:
+  ----
       ref: The $ref value (e.g., "types/line_item.json" or
         "foo.json#/$defs/Bar")
       current_file: Absolute path of the file containing the $ref
 
   Returns:
+  -------
       Absolute path to referenced file, or None if ref is internal (#) or
       external (http)
 
@@ -70,10 +72,12 @@ def resolve_internal_ref(ref: str, root_data: Any) -> Any | None:
   """Resolve a local reference (e.g., '#/definitions/item') against root_data.
 
   Args:
+  ----
     ref: The internal reference string (starting with '#').
     root_data: The full JSON/YAML object of the file.
 
   Returns:
+  -------
     The data at the reference, or None if not found.
 
   """
@@ -109,10 +113,12 @@ def merge_schemas(
   vs object merge (properties) vs replacement (other fields).
 
   Args:
+  ----
     base: The base schema to merge into.
     overlay: The schema to merge on top.
 
   Returns:
+  -------
     A new merged schema dictionary.
 
   """
@@ -147,12 +153,14 @@ def resolve_schema(
   which is useful for documentation rendering.
 
   Args:
+  ----
     schema: The schema to resolve.
     root_data: The root document (for resolving internal #/ refs).
     file_loader: Optional callable(filename) -> dict for loading external files.
     visited: Set of visited refs to prevent infinite recursion.
 
   Returns:
+  -------
     A flattened schema with refs resolved and allOf merged.
 
   """
