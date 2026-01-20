@@ -89,7 +89,8 @@ protocol metadata:
       "meta": {
         "ucp-agent": {
           "profile": "https://platform.example/profiles/shopping-agent.json"
-        }
+        },
+        "idempotency-key": "550e8400-e29b-41d4-a716-446655440000"
       },
       "checkout": { ... }
     }
