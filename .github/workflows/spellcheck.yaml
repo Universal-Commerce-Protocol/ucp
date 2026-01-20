@@ -29,4 +29,3 @@ jobs:
         with:
           incremental_files_only: true
           config: .cspell.json
-          

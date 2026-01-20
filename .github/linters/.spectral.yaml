@@ -1,0 +1,3 @@
+extends: spectral:oas
+rules:
+  oas3-valid-media-example: off
