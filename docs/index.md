@@ -321,7 +321,7 @@ image: assets/banner.png
             <img src="assets/order.png" alt="Example user interface showing order confirmation details" class="phone-mockup" onerror="this.src='https://placehold.co/260x500/EEE/31343C?text=Order+UI'">
           </div>
           <div class="code-block-placeholder">
-  
+
   ```json {.yaml .no-copy}
   {
     "ucp": { ... },
@@ -384,14 +384,14 @@ image: assets/banner.png
 
   <script>
   function openTab(evt, tabName) {
-    var i, tabContent, tabBtns;
+    var i, tabContent, tabButtons;
     tabContent = document.getElementsByClassName("tab-pane");
     for (i = 0; i < tabContent.length; i++) {
       tabContent[i].classList.remove("active");
     }
-    tabBtns = document.getElementsByClassName("tab-btn");
-    for (i = 0; i < tabBtns.length; i++) {
-      tabBtns[i].classList.remove("active");
+    tabButtons = document.getElementsByClassName("tab-btn");
+    for (i = 0; i < tabButtons.length; i++) {
+      tabButtons[i].classList.remove("active");
     }
     document.getElementById(tabName).classList.add("active");
     evt.currentTarget.classList.add("active");

@@ -156,12 +156,14 @@ def rewrite_ref(
     - operation=None (response) -> type_resp.json
 
   Args:
+  ----
     ref: The $ref value.
     current_file: Absolute path of file containing the ref.
     annotated_schemas: Dict of paths to annotated schemas -> is_shared_request.
     operation: Request operation ('create' or 'update') or None for response.
 
   Returns:
+  -------
     The rewritten $ref, or original if no rewrite is needed.
 
   """
@@ -207,6 +209,7 @@ def transform_schema(
   collisions.
 
   Args:
+  ----
     data: Schema data to transform.
     operation: Request operation ('create' or 'update') or None for response.
     current_file: Absolute path of file containing the schema data.
@@ -214,6 +217,7 @@ def transform_schema(
     title_suffix: Suffix to append to titles (e.g., " Create Request").
 
   Returns:
+  -------
     Transformed schema data.
 
   """
@@ -594,10 +598,12 @@ def rewrite_refs_for_ecp(data: Any, annotated_schemas: set[str]) -> Any:
   which need _resp suffix for annotated schemas.
 
   Args:
+  ----
     data: Schema data to rewrite refs for.
     annotated_schemas: Set of annotated schema paths.
 
   Returns:
+  -------
     Schema data with rewritten refs.
 
   """
@@ -671,9 +677,11 @@ def generate_ecp_spec(annotated_schemas: set[str]) -> int:
   """Generate Embedded Protocol OpenRPC spec.
 
   Args:
+  ----
     annotated_schemas: Set of annotated schema paths.
 
   Returns:
+  -------
     number of files generated.
 
   """

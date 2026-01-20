@@ -41,6 +41,7 @@ the business.
 checkout UI in an iframe/webview. Events flow bidirectionally, with optional
 delegation allowing the host to handle specific interactions natively.
 
+<!-- cSpell:ignore paymentmethodchange -->
 | Concept                   | W3C Payment Request              | Embedded Checkout                                                   |
 | :------------------------ | :------------------------------- | :------------------------------------------------------------------ |
 | **Initialization**        | `new PaymentRequest()`           | Load embedded context with `continue_url`                           |
