@@ -20,7 +20,7 @@
 |--------|-------------|
 | Author | @0xtotaylor |
 | Created | 2026-01-11 |
-| Last Updated | 2026-01-12 |
+| Last Updated | 2026-01-21 |
 
 ## Summary
 
@@ -294,14 +294,15 @@ Mitigation: Extension is fully optional; cancel succeeds regardless of support.
 
 **Exit Criteria**: TC vote for GA status, no outstanding blocking issues
 
+## Implementation Plan
+
+Per governance, this proposal does not include implementation changes. If advanced to Implementable, a follow-up PR will add schemas, transport bindings, and documentation.
+
 ## Files Changed
 
 | File | Description |
 |------|-------------|
 | `rfcs/intent-trace.md` | This enhancement proposal |
-| `source/schemas/shopping/intent_trace.json` | Extension schema |
-| `docs/specification/intent-trace.md` | Specification documentation |
-| `mkdocs.yml` | Navigation updates |
 
 ## References
 
@@ -314,3 +315,4 @@ Mitigation: Extension is fully optional; cancel succeeds regardless of support.
 |------|--------|
 | 2026-01-11 | Initial proposal |
 | 2026-01-12 | Added Enhancement Proposal format per governance requirements |
+| 2026-01-21 | Proposal-only update pending TC approval |
