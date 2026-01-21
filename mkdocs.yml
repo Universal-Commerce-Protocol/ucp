@@ -40,7 +40,6 @@ nav:
       - Buyer Consent Extension: specification/buyer-consent.md
       - Discounts Extension: specification/discount.md
       - Fulfillment Extension: specification/fulfillment.md
-      - Affiliate Attribution Extension: specification/affiliate-attribution.md
     - Order Capability: specification/order.md
     - Identity Linking Capability: specification/identity-linking.md
     - Payment Handlers:
@@ -199,7 +198,6 @@ plugins:
           - specification/discount.md
           - specification/embedded-checkout.md
           - specification/fulfillment.md
-          - specification/affiliate-attribution.md
         Order Capability:
           - specification/order.md
         Identity Linking Capability:

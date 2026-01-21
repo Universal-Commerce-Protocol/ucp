@@ -20,7 +20,7 @@
 |--------|-------------|
 | Author | @0xtotaylor |
 | Created | 2026-01-11 |
-| Last Updated | 2026-01-12 |
+| Last Updated | 2026-01-21 |
 
 ## Summary
 
@@ -290,14 +290,15 @@ support.
 
 **Exit Criteria**: TC vote for GA status, no outstanding blocking issues
 
+## Implementation Plan
+
+Per governance, this proposal does not include implementation changes. If advanced to Implementable, a follow-up PR will add schemas, transport bindings, and documentation.
+
 ## Files Changed
 
 | File | Description |
 |------|-------------|
 | `rfcs/affiliate-attribution.md` | This enhancement proposal |
-| `source/schemas/shopping/affiliate_attribution.json` | Extension schema |
-| `docs/specification/affiliate-attribution.md` | Specification documentation |
-| `mkdocs.yml` | Navigation updates |
 
 ## References
 
@@ -311,3 +312,4 @@ support.
 |------|--------|
 | 2026-01-11 | Initial proposal |
 | 2026-01-12 | Simplified to complete-only per reviewer feedback |
+| 2026-01-21 | Proposal-only update pending TC approval |
