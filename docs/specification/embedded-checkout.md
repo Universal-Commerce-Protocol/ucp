@@ -255,6 +255,27 @@ specification for available options.
 ?ec_version=2026-01-11&ec_delegate=payment.instruments_change,payment.credential,fulfillment.address_change
 ```
 
+#### Delegation Negotiation
+
+Delegation follows a narrowing chain from business policy to final acceptance:
+
+```text
+config.delegate ⊇ ec_delegate ⊇ ec.ready delegate
+```
+
+1. **Business allows** (`config.delegate` in checkout response): The set of
+    delegations the business permits for this checkout session
+2. **Host requests** (`ec_delegate` URL parameter): The subset the host wants
+    to handle natively
+3. **ECP accepts** (`delegate` in `ec.ready`): The final subset the Embedded
+    Checkout will actually delegate
+
+Each stage is a subset of the previous:
+
+- The host **SHOULD** only request delegations present in `config.delegate`
+- The business **SHOULD NOT** accept delegations not present in
+    `config.delegate` and **MUST** confirm accepted delegations in `ec.ready`
+
 ### Delegation Contract
 
 Delegation creates a binding contract between the host and Embedded Checkout.
@@ -467,9 +488,10 @@ actions.
 - **Type:** Request
 - **Payload:**
     - `delegate` (array of strings, **REQUIRED**): List of delegation
-        identifiers accepted by the Embedded Checkout. This is a subset of the
-        delegations requested via the `ec_delegate` URL parameter. Omitted or
-        empty array means no delegations were accepted.
+        identifiers accepted by the Embedded Checkout. **MUST** be a subset of
+        both `ec_delegate` (what host requested) and `config.delegate` from the
+        checkout response (what business allows). An empty array means no
+        delegations were accepted.
 
 **Example Message (no delegations accepted):**
 
