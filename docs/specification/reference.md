@@ -39,6 +39,16 @@ The top-level structure of a discovery document (`/.well-known/ucp`).
 
 {{ extension_schema_fields('ucp.json#/$defs/discovery_profile', 'reference') }}
 
+### Services
+Services define the API surface for a vertical (shopping, common, etc.) with
+transport bindings. Each service is keyed by its reverse-domain name
+(e.g., `dev.ucp.shopping`) in the discovery profile's `services` object.
+
+{{ extension_schema_fields('ucp.json#/$defs/services', 'reference') }}
+
+#### Service Schema
+{{ schema_fields('service_schema', 'reference') }}
+
 ### Checkout Response Metadata
 The `ucp` object included in checkout responses.
 

@@ -49,6 +49,7 @@ def define_env(env):
     "spec/schemas/",
     "spec/schemas/shopping/",
     "spec/schemas/shopping/types/",
+    "spec/services/",
   ]
 
   def _load_json_file(entity_name):
