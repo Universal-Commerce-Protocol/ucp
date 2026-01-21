@@ -97,14 +97,14 @@ profile, they declare support for the Embedded Checkout Protocol.
             {
                 "version": "2026-01-11",
                 "transport": "rest",
-                "endpoint": "https://merchant.example.com/ucp/v1",
-                "schema": "https://ucp.dev/services/shopping/rest.openapi.json"
+                "schema": "https://ucp.dev/services/shopping/rest.openapi.json",
+                "endpoint": "https://merchant.example.com/ucp/v1"
             },
             {
                 "version": "2026-01-11",
                 "transport": "mcp",
-                "endpoint": "https://merchant.example.com/ucp/mcp",
-                "schema": "https://ucp.dev/services/shopping/mcp.openrpc.json"
+                "schema": "https://ucp.dev/services/shopping/mcp.openrpc.json",
+                "endpoint": "https://merchant.example.com/ucp/mcp"
             },
             {
                 "version": "2026-01-11",

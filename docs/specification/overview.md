@@ -133,7 +133,9 @@ appended to this endpoint to form the complete URL.
 **Example:**
 
 ```json
-"rest": {
+{
+  "version": "2026-01-11",
+  "transport": "rest",
   "schema": "https://ucp.dev/services/shopping/rest.openapi.json",
   "endpoint": "https://business.example.com/api/v2"
 }
@@ -169,11 +171,14 @@ Extensions use the `extends` field to declare their parent:
 
 ```json
 {
-  "name": "dev.ucp.shopping.fulfillment",
-  "version": "2026-01-11",
-  "spec": "https://ucp.dev/specification/fulfillment",
-  "schema": "https://ucp.dev/schemas/shopping/fulfillment.json",
-  "extends": "dev.ucp.shopping.checkout"
+  "dev.ucp.shopping.fulfillment": [
+    {
+      "version": "2026-01-11",
+      "spec": "https://ucp.dev/specification/fulfillment",
+      "schema": "https://ucp.dev/schemas/shopping/fulfillment.json",
+      "extends": "dev.ucp.shopping.checkout"
+    }
+  ]
 }
 ```
 

@@ -43,15 +43,16 @@ Businesses advertise discount support in their profile:
 {
   "ucp": {
     "version": "2026-01-11",
-    "capabilities": [
-      {
-        "name": "dev.ucp.shopping.discount",
-        "version": "2026-01-11",
-        "extends": "dev.ucp.shopping.checkout",
-        "spec": "https://ucp.dev/specification/discount",
-        "schema": "https://ucp.dev/schemas/shopping/discount.json"
-      }
-    ]
+    "capabilities": {
+      "dev.ucp.shopping.discount": [
+        {
+          "version": "2026-01-11",
+          "extends": "dev.ucp.shopping.checkout",
+          "spec": "https://ucp.dev/specification/discount",
+          "schema": "https://ucp.dev/schemas/shopping/discount.json"
+        }
+      ]
+    }
   }
 }
 ```

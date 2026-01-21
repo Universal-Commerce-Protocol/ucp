@@ -284,10 +284,10 @@ within each method.
 
 ```json
 // Default: single group per method
-{ "name": "dev.ucp.shopping.fulfillment", "version": "2026-01-11" }
+{ "dev.ucp.shopping.fulfillment": [{"version": "2026-01-11"}] }
 
 // Opt-in: business MAY return multiple groups per method
-{ "name": "dev.ucp.shopping.fulfillment", "version": "2026-01-11", "config": { "supports_multi_group": true } }
+{ "dev.ucp.shopping.fulfillment": [{"version": "2026-01-11", "config": { "supports_multi_group": true }}] }
 ```
 
 ### Business Profile

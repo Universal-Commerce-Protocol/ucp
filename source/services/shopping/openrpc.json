@@ -3,7 +3,7 @@
   "info": {
     "title": "UCP Shopping Service",
     "version": "2026-01-11",
-    "description": "Canonical MCP/JSON-RPC interface for UCP Shopping service. Schema references are logical pointers - actual payload shape is determined by negotiated capabilities.\n\n**Endpoint Resolution:** This spec defines methods only. The endpoint URL MUST be obtained from the merchant's discovery profile at `/.well-known/ucp` under `services[\"dev.ucp.shopping\"].mcp.endpoint`. The server entry below is a placeholder for tooling compatibility."
+    "description": "Canonical MCP/JSON-RPC interface for UCP Shopping service. Schema references are logical pointers - actual payload shape is determined by negotiated capabilities.\n\n**Endpoint Resolution:** This spec defines methods only. The endpoint URL MUST be obtained from the merchant's discovery profile at `/.well-known/ucp` under `services[\"dev.ucp.shopping\"][transport=mcp].endpoint`. The server entry below is a placeholder for tooling compatibility."
   },
   "servers": [
     {
@@ -13,7 +13,7 @@
       "variables": {
         "endpoint": {
           "default": "https://merchant.example.com/ucp/mcp",
-          "description": "Obtain from /.well-known/ucp → services[\"dev.ucp.shopping\"].mcp.endpoint"
+          "description": "Obtain from /.well-known/ucp → services[\"dev.ucp.shopping\"][transport=mcp].endpoint"
         }
       }
     }

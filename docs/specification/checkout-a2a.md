@@ -30,13 +30,14 @@ platforms to interact with the business services over A2A Protocol.
   "ucp": {
     "version": "2026-01-11",
     "services": {
-      "dev.ucp.shopping": {
-        "version": "2026-01-11",
-        "spec": "https://ucp.dev/specification/overview",
-        "a2a": {
+      "dev.ucp.shopping": [
+        {
+          "version": "2026-01-11",
+          "spec": "https://ucp.dev/specification/overview",
+          "transport": "a2a",
           "endpoint": "https://example-business.com/.well-known/agent-card.json"
         }
-      }
+      ]
     }
   }
 }
@@ -84,17 +85,17 @@ An example:
       "uri": "https://ucp.dev/specification/reference?v=2026-01-11",
       "description": "Business agent supporting UCP",
       "params": {
-        "capabilities": [
-          {
-            "name": "dev.ucp.shopping.checkout",
-            "version": "2026-01-11"
-          },
-          {
-            "name": "dev.ucp.shopping.fulfillment",
-            "version": "2026-01-11",
-            "extends": "dev.ucp.shopping.checkout"
-          }
-        ]
+        "capabilities": {
+          "dev.ucp.shopping.checkout": [
+            {"version": "2026-01-11"}
+          ],
+          "dev.ucp.shopping.fulfillment": [
+            {
+              "version": "2026-01-11",
+              "extends": "dev.ucp.shopping.checkout"
+            }
+          ]
+        }
       }
     }
   ]
