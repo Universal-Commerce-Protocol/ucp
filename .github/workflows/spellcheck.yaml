@@ -15,6 +15,7 @@
 name: "Check Spelling"
 on:
   pull_request:
+    branches: [main]
 
 jobs:
   spellcheck:
@@ -27,3 +28,5 @@ jobs:
       - uses: streetsidesoftware/cspell-action@v7
         with:
           incremental_files_only: true
+          config: .cspell.json
+          

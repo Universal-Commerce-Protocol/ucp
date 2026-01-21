@@ -2,5 +2,8 @@
   "dependencies": {
     "json-schema-to-typescript": "^15.0.4",
     "quicktype": "^23.2.6"
+  },
+    "overrides": {
+      "diff": "8.0.3"
   }
 }

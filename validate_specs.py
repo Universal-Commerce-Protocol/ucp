@@ -20,7 +20,8 @@ Usage: python validate_specs.py
 import json
 import os
 import sys
-from typing import Any, List, Optional, Tuple
+from pathlib import Path
+from typing import Any
 
 import schema_utils
 import yaml
@@ -32,6 +33,8 @@ EXIT_ON_ERROR = True  # Set to False if you want to see all errors at once
 
 # ANSI Colors for nicer output
 class Colors:
+  """ANSI color codes for nicer output."""
+
   GREEN = "\033[92m"
   RED = "\033[91m"
   YELLOW = "\033[93m"
@@ -39,18 +42,20 @@ class Colors:
 
 
 def check_ref(
-    ref: str, current_file: str, root_data: Optional[Any] = None
-) -> Optional[str]:
-  """Checks if a reference exists."""
+  ref: str, current_file: str, root_data: Any | None = None
+) -> str | None:
+  """Check if a reference exists."""
   if ref.startswith("#"):
     if ref != "#" and not ref.startswith("#/"):
       return (
-          f"Invalid internal reference format in {current_file}: {ref} (Must"
-          " start with '#/')"
+        f"Invalid internal reference format in {current_file}: {ref} (Must"
+        " start with '#/')"
       )
-    if root_data is not None:
-      if schema_utils.resolve_internal_ref(ref, root_data) is None:
-        return f"Broken internal reference in {current_file}: {ref}"
+    if (
+      root_data is not None
+      and schema_utils.resolve_internal_ref(ref, root_data) is None
+    ):
+      return f"Broken internal reference in {current_file}: {ref}"
     return None  # Skip if no root_data context (shouldn't happen in new flow)
 
   if ref.startswith("http"):
@@ -61,24 +66,24 @@ def check_ref(
   file_part = parts[0]
   anchor_part = parts[1] if len(parts) > 1 else None
 
-  current_dir = os.path.dirname(current_file)
-  referenced_path = os.path.join(current_dir, file_part)
+  current_dir = Path(current_file).parent
+  referenced_path = current_dir / file_part
 
-  if not os.path.exists(referenced_path):
+  if not referenced_path.exists():
     return f"Missing reference in {current_file}: {ref}"
 
   # If there is an anchor, we need to load the referenced file and check it
   if anchor_part:
     if not anchor_part.startswith("/"):
       return (
-          f"Invalid anchor format in {current_file}: {ref} (Anchor must start"
-          " with '/')"
+        f"Invalid anchor format in {current_file}: {ref} (Anchor must start"
+        " with '/')"
       )
     try:
-      with open(referenced_path, "r", encoding="utf-8") as f:
-        if referenced_path.endswith(".json"):
+      with referenced_path.open(encoding="utf-8") as f:
+        if referenced_path.suffix == ".json":
           referenced_data = json.load(f)
-        elif referenced_path.endswith((".yaml", ".yml")):
+        elif referenced_path.suffix in (".yaml", ".yml"):
           referenced_data = yaml.safe_load(f)
         else:
           # Unknown file type, can't validate anchor
@@ -87,8 +92,8 @@ def check_ref(
       # Validate the anchor using resolve_internal_ref logic
       # We verify if '#/anchor' resolves in referenced_data
       if (
-          schema_utils.resolve_internal_ref("#" + anchor_part, referenced_data)
-          is None
+        schema_utils.resolve_internal_ref("#" + anchor_part, referenced_data)
+        is None
       ):
         return f"Broken anchor in external reference in {current_file}: {ref}"
 
@@ -98,17 +103,17 @@ def check_ref(
       # Ideally we should report a warning or error here, but for now
       # we'll assume it's fine or caught by other validation.
       return (
-          f"Could not parse referenced file for reference validation:"
-          f" {referenced_path}"
+        f"Could not parse referenced file for reference validation:"
+        f" {referenced_path}"
       )
 
   return None
 
 
 def check_refs(
-    data: Any, current_file: str, root_data: Optional[Any] = None
-) -> List[str]:
-  """Recursively checks for broken references in a JSON/YAML object."""
+  data: Any, current_file: str, root_data: Any | None = None
+) -> list[str]:
+  """Recursively check for broken references in a JSON/YAML object."""
   errors = []
   # If root_data isn't passed initially, assume 'data' is the root
   if root_data is None:
@@ -128,13 +133,12 @@ def check_refs(
   return errors
 
 
-def validate_file(filepath: str) -> Tuple[bool, Optional[str]]:
-  """Returns (True, None) if valid, or (False, error_message) if invalid."""
-
+def validate_file(filepath: str) -> tuple[bool, str | None]:
+  """Return (True, None) if valid, or (False, error_message) if invalid."""
   # 1. Validate JSON
   if filepath.endswith(".json"):
     try:
-      with open(filepath, "r", encoding="utf-8") as f:
+      with Path(filepath).open(encoding="utf-8") as f:
         data = json.load(f)
 
       # Validate references
@@ -149,7 +153,7 @@ def validate_file(filepath: str) -> Tuple[bool, Optional[str]]:
   # 2. Validate YAML
   elif filepath.endswith((".yaml", ".yml")):
     try:
-      with open(filepath, "r", encoding="utf-8") as f:
+      with Path(filepath).open(encoding="utf-8") as f:
         data = yaml.safe_load(f)
 
       # Validate references
@@ -167,10 +171,10 @@ def validate_file(filepath: str) -> Tuple[bool, Optional[str]]:
 
 
 def main() -> None:
-  if not os.path.exists(SPEC_DIR):
+  """Validate specs in the spec directory."""
+  if not Path(SPEC_DIR).exists():
     print(
-        f"{Colors.YELLOW}Warning: Directory '{SPEC_DIR}' not"
-        f" found.{Colors.RESET}"
+      f"{Colors.YELLOW}Warning: Directory '{SPEC_DIR}' not found.{Colors.RESET}"
     )
     sys.exit(0)
 
@@ -181,16 +185,16 @@ def main() -> None:
 
   for root, _, files in os.walk(SPEC_DIR):
     for filename in files:
-      full_path = os.path.join(root, filename)
+      full_path = Path(root) / filename
 
       # Skip hidden files or unrelated types
       if filename.startswith(".") or not filename.endswith(
-          (".json", ".yaml", ".yml")
+        (".json", ".yaml", ".yml")
       ):
         continue
 
       file_count += 1
-      is_valid, error_msg = validate_file(full_path)
+      is_valid, error_msg = validate_file(str(full_path))
 
       if not is_valid:
         error_count += 1
@@ -207,8 +211,8 @@ def main() -> None:
   print("\n")
   if error_count == 0:
     print(
-        f"{Colors.GREEN}✅ Success! Scanned {file_count} files. No errors"
-        f" found.{Colors.RESET}"
+      f"{Colors.GREEN}✅ Success! Scanned {file_count} files. No errors"
+      f" found.{Colors.RESET}"
     )
     sys.exit(0)
   else:

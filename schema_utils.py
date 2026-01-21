@@ -15,8 +15,9 @@
 """Shared utilities for schema processing and validation."""
 
 import json
-import os
-from typing import Any, Optional
+from collections.abc import Callable
+from pathlib import Path
+from typing import Any
 
 
 class Colors:
@@ -29,8 +30,8 @@ class Colors:
   RESET = "\033[0m"
 
 
-def resolve_ref_path(ref: str, current_file: str) -> Optional[str]:
-  """Resolves a $ref to an absolute file path.
+def resolve_ref_path(ref: str, current_file: str | Path) -> Path | None:
+  """Resolve a $ref to an absolute file path.
 
   Args:
       ref: The $ref value (e.g., "types/line_item.json" or
@@ -40,6 +41,7 @@ def resolve_ref_path(ref: str, current_file: str) -> Optional[str]:
   Returns:
       Absolute path to referenced file, or None if ref is internal (#) or
       external (http)
+
   """
   if ref.startswith("#"):
     return None  # Internal reference within same file
@@ -51,21 +53,21 @@ def resolve_ref_path(ref: str, current_file: str) -> Optional[str]:
   if not file_part:
     return None  # Just an anchor like "#/$defs/Bar"
 
-  current_dir = os.path.dirname(current_file)
-  return os.path.normpath(os.path.join(current_dir, file_part))
+  current_dir = Path(current_file).parent
+  return (current_dir / file_part).resolve()
 
 
-def load_json(path: str) -> Optional[dict[str, Any]]:
-  """Loads JSON file, returns None on error."""
+def load_json(path: str | Path) -> dict[str, Any] | None:
+  """Load JSON file, returns None on error."""
   try:
-    with open(path, "r", encoding="utf-8") as f:
+    with Path(path).open(encoding="utf-8") as f:
       return json.load(f)
   except (json.JSONDecodeError, OSError):
     return None
 
 
-def resolve_internal_ref(ref: str, root_data: Any) -> Optional[Any]:
-  """Resolves a local reference (e.g., '#/definitions/item') against root_data.
+def resolve_internal_ref(ref: str, root_data: Any) -> Any | None:
+  """Resolve a local reference (e.g., '#/definitions/item') against root_data.
 
   Args:
     ref: The internal reference string (starting with '#').
@@ -73,6 +75,7 @@ def resolve_internal_ref(ref: str, root_data: Any) -> Optional[Any]:
 
   Returns:
     The data at the reference, or None if not found.
+
   """
   if not ref.startswith("#/"):
     return None
@@ -95,9 +98,9 @@ def resolve_internal_ref(ref: str, root_data: Any) -> Optional[Any]:
 
 
 def merge_schemas(
-    base: dict[str, Any], overlay: dict[str, Any]
+  base: dict[str, Any], overlay: dict[str, Any]
 ) -> dict[str, Any]:
-  """Merges two JSON schemas, with overlay taking precedence.
+  """Merge two JSON schemas, with overlay taking precedence.
 
   Handles special JSON Schema keywords that require array union (required)
   vs object merge (properties) vs replacement (other fields).
@@ -108,6 +111,7 @@ def merge_schemas(
 
   Returns:
     A new merged schema dictionary.
+
   """
   result = base.copy()
 
@@ -129,12 +133,12 @@ def merge_schemas(
 
 
 def resolve_schema(
-    schema: dict[str, Any],
-    root_data: dict[str, Any],
-    file_loader: Optional[callable] = None,
-    visited: Optional[set[str]] = None,
+  schema: dict[str, Any],
+  root_data: dict[str, Any],
+  file_loader: Callable | None = None,
+  visited: set[str] | None = None,
 ) -> dict[str, Any]:
-  """Recursively resolves $ref and allOf in a JSON schema.
+  """Recursively resolve $ref and allOf in a JSON schema.
 
   This flattens composed schemas into a single schema with merged properties,
   which is useful for documentation rendering.
@@ -147,6 +151,7 @@ def resolve_schema(
 
   Returns:
     A flattened schema with refs resolved and allOf merged.
+
   """
   if not isinstance(schema, dict):
     return schema

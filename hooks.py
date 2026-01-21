@@ -25,55 +25,86 @@ accessible.
 
 import json
 import logging
-import os
 import shutil
+from urllib.parse import urljoin
 
-log = logging.getLogger('mkdocs')
+from pathlib import Path
+
+log = logging.getLogger("mkdocs")
+
+
+def _process_refs(data, base_url):
+  """Recursively processes $ref fields in a JSON object."""
+  if isinstance(data, dict):
+    for key, value in data.items():
+      if key == "$ref" and isinstance(value, str):
+        data[key] = urljoin(
+          base_url,
+          value.replace("_resp.json", ".json").replace("_schema.json", ".json"),
+        )
+      else:
+        _process_refs(value, base_url)
+  elif isinstance(data, list):
+    for item in data:
+      _process_refs(item, base_url)
 
 
 def on_post_build(config):
-  """Moves files from the spec/ directory to the site directory based on their $id.
+  """Copy and process spec files into the site directory.
 
-  Args:
-      config: The mkdocs config object.
+  For JSON files, it resolves $ref paths to absolute URLs and standardizes
+  response file names. Non-JSON files are copied as-is.
   """
-
-  # Base path for the source directories
-  base_src_path = os.path.join(os.getcwd(), 'spec')
-
-  # Check if the parent 'spec' folder exists first
-  if not os.path.exists(base_src_path):
-    log.warning('Spec source directory not found: %s', base_src_path)
+  base_src_path = Path.cwd() / "spec"
+  if not base_src_path.exists():
+    log.warning("Spec source directory not found: %s", base_src_path)
     return
 
-  # Iterate over everything inside 'spec'
-  for root, _, files in os.walk(base_src_path):
-    for filename in files:
-      src_file = os.path.join(root, filename)
+  for src_file in base_src_path.rglob("*"):
+    if not src_file.is_file():
+      continue
+    rel_path = src_file.relative_to(base_src_path).as_posix()
 
-      # Default to relative path (copy as-is)
-      rel_path = os.path.relpath(src_file, base_src_path)
+    if not src_file.name.endswith(".json"):
+      dest_file = Path(config["site_dir"]) / rel_path
+      dest_dir = dest_file.parent
+      dest_dir.mkdir(exist_ok=True, parents=True)
+      shutil.copy2(src_file, dest_file)
+      log.info("Copied %s to %s", src_file, dest_file)
+      continue
 
-      try:
-        with open(src_file, 'r') as f:
-          data = json.load(f)
-          file_id = data.get('$id')
+    # Process JSON files
+    try:
+      with src_file.open("r", encoding="utf-8") as f:
+        data = json.load(f)
 
-          # If the file has a valid $id, use it to generate a destination path.
-          prefix = 'https://ucp.dev'
-          if file_id and file_id.startswith(prefix):
-            rel_path = file_id[len(prefix) :].lstrip('/')
-
-      except (json.JSONDecodeError, UnicodeDecodeError, OSError) as e:
-        log.error(
-            'Failed to parse or read JSON file %s (copying as-is): %s',
-            src_file,
-            e,
+      # Determine the final relative path for the destination
+      file_id = data.get("$id")
+      prefix = "https://ucp.dev"
+      if file_id and file_id.startswith(prefix):
+        file_rel_path = file_id[len(prefix) :].lstrip("/")
+      else:
+        file_rel_path = rel_path.replace("_resp.json", ".json").replace(
+          "_schema.json", ".json"
         )
 
-      dest_file = os.path.join(config['site_dir'], rel_path)
-      dest_dir = os.path.dirname(dest_file)
+      # Process refs using the final path
+      _process_refs(data, f"https://ucp.dev/{file_rel_path}")
 
-      os.makedirs(dest_dir, exist_ok=True)
+      dest_file = Path(config["site_dir"]) / file_rel_path
+      dest_dir = dest_file.parent
+
+      dest_dir.mkdir(exist_ok=True, parents=True)
+      with dest_file.open("w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+      log.info("Processed and copied %s to %s", src_file, dest_file)
+
+    except (json.JSONDecodeError, UnicodeDecodeError, OSError) as e:
+      log.error(
+        "Failed to process JSON file %s, copying as-is: %s", src_file, e
+      )
+      # Fallback to copying if processing fails
+      dest_file = Path(config["site_dir"]) / rel_path
+      dest_dir = dest_file.parent
+      dest_dir.mkdir(exist_ok=True, parents=True)
       shutil.copy2(src_file, dest_file)
-      log.info('Copied %s to %s', src_file, dest_file)

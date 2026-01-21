@@ -54,6 +54,81 @@ to use GitHub Discussions.
 
 ## Contribution Process
 
+### Significant Changes
+
+Any significant change to the protocol requires a formal
+[Enhancement Proposal](../../issues/new?template=enhancement-proposal.md)
+and will require Technical Committee approval. Because a change to the protocol
+requires the entire adopting ecosystem to implement the change, we consider
+significant changes to include:
+
+* Core Schema Modifications: Any change to JSON schemas, including
+  adding/updating fields or field descriptions
+* Protocol Changes: Alterations to communication flows or expected behaviors of
+  operations
+* New API Endpoints: Introduction of entirely new capabilities or services.
+* Backwards Incompatibility: Any "breaking" change that requires a major version
+  increment.
+
+An [Enhancement Proposal](../../issues/new?template=enhancement-proposal.md)
+is a living artifact that tracks a proposal through its lifecycle:
+
+* Provisional: The initial stage where the idea is proposed and debated within
+  the community. In order to move to the next stage, the enhancement proposal
+  will need to be approved by a simple majority of the TC.
+* Implementable: The stage after the design has been finalized and has received
+  formal approval from at least one maintainer and one member of the TC.
+* Implemented: The final stage, reached when the code for the feature is
+  complete, tested, documented, and merged.
+
+Every [Enhancement Proposal](../../issues/new?template=enhancement-proposal.md)
+must follow a standard template requiring sections for a Summary, Motivation,
+Detailed Design, Risks, a Test Plan, and Graduation Criteria (defining the path
+from Alpha to Beta to General Availability). This creates a permanent, public
+design record for the project's evolution.
+
+### Voting and decision making
+
+The path below should be followed for resolving issues that are technical in
+nature.
+
+* L1: routine changes (bug fixes, documentation, minor improvements) require
+  approval from at least 2 Maintainers.
+* L2: Any technical issues that span across topics and/or cannot be resolved
+  amongst maintainers and DWGs will be escalated to the TC. Significant changes
+  affecting core protocol architecture must follow the Enhancement Proposal
+  process, requiring TC approval before implementation.
+* L3: Any changes made to the Governance process (e.g updating the
+  [GOVERNANCE.md](GOVERNANCE.md) file) or any changes that impact the core
+  protocol’s scope or adoption, must be approved by Governance Council (GC).
+
+The TC reserves the right to stop any discussions deemed non-critical to the
+protocol.
+
+### Versioning
+
+The base protocol uses date based versioning. Major version increments (breaking
+changes) require a majority Governing Council approval due to the high cost to
+the ecosystem. A quorum requires all Governing Council members (or appropriate
+representatives) to be present for decision-making. New features should
+typically be attempted through the extensions framework first. If an extension
+achieves significant usage, it can be considered for adoption into the next
+minor version of the core.
+
+### Adding new extensions and capabilities to the core protocol
+
+UCP is designed to be very extensible while keeping the core protocol light. A
+core principle of UCP is to ensure that the set of extensions and capabilities
+defined in UCP have broad ecosystem support. Vendors should first create
+capabilities & extensions in vendor-specific namespace pattern
+(e.g. com.{vendor}.*) for new use cases. Requests to add new capabilities and
+extensions should only be submitted when there is proven widespread adoption of
+vendor-specific capabilities and extensions. See
+[Spec URL Binding](https://ucp.dev/specification/overview/#spec-url-binding)
+and [Governance Model](https://ucp.dev/specification/overview/#governance-model)
+for more details on using namespace pattern for creating vendor-specific
+capabilities and extensions.
+
 ### Code Reviews
 
 All submissions, including submissions by project members, require review. We
@@ -69,21 +144,21 @@ add `!` before the colon: `type!: description`.
 
 **Common Types:**
 
-- `feat`: A new feature
-- `fix`: A bug fix
-- `docs`: Documentation only changes
-- `style`: Changes that do not affect the meaning of the code
-- `refactor`: A code change that neither fixes a bug nor adds a feature
-- `perf`: A code change that improves performance
-- `test`: Adding missing tests or correcting existing tests
-- `chore`: Changes to the build process or auxiliary tools and libraries
+* `feat`: A new feature
+* `fix`: A bug fix
+* `docs`: Documentation only changes
+* `style`: Changes that do not affect the meaning of the code
+* `refactor`: A code change that neither fixes a bug nor adds a feature
+* `perf`: A code change that improves performance
+* `test`: Adding missing tests or correcting existing tests
+* `chore`: Changes to the build process or auxiliary tools and libraries
 
 **Examples:**
 
-- `feat: add new payment gateway`
-- `fix: resolve crash on checkout`
-- `docs: update setup guide`
-- `feat!: remove deprecated buyer field from checkout`
+* `feat: add new payment gateway`
+* `fix: resolve crash on checkout`
+* `docs: update setup guide`
+* `feat!: remove deprecated buyer field from checkout`
 
 ### Linting and Automated Checks
 
@@ -103,14 +178,14 @@ This will set up pre-commit hooks to run automatically when you `git commit`.
 
 ### Submitting a Pull Request
 
-1.  Fork the repository and create your branch from `main`.
-2.  Make your changes, ensuring you follow the setup instructions below.
-3.  If you've installed `pre-commit`, it will run checks as you commit.
-4.  Ensure your pull request title follows the Conventional Commits format.
-5.  Fill out the pull request template in GitHub, providing details about
+1. Fork the repository and create your branch from `main`.
+2. Make your changes, ensuring you follow the setup instructions below.
+3. If you've installed `pre-commit`, it will run checks as you commit.
+4. Ensure your pull request title follows the Conventional Commits format.
+5. Fill out the pull request template in GitHub, providing details about
     your change.
-6.  Push your branch to GitHub and open a pull request.
-7.  Address any automated check failures or reviewer feedback.
+6. Push your branch to GitHub and open a pull request.
+7. Address any automated check failures or reviewer feedback.
 
 ## Local Development Setup
 
@@ -135,10 +210,10 @@ are updated to ensure there are no broken references or stale/missing contents.
 
 ### Documentation Development
 
-1.  Ensure dependencies are installed: `pip install -r requirements-docs.txt`
-2.  Run the development server: `mkdocs serve --watch spec`
-3.  Open **http://127.0.0.1:8000** in your browser
-4.  Before submitting a pull request with documentation changes, run
+1. Ensure dependencies are installed: `pip install -r requirements-docs.txt`
+2. Run the development server: `mkdocs serve --watch spec`
+3. Open **<http://127.0.0.1:8000>** in your browser
+4. Before submitting a pull request with documentation changes, run
     `mkdocs build --strict` to ensure there are no warnings or errors. Our CI
     build uses this command and will fail if warnings are present (e.g.,
     broken links).
