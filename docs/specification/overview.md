@@ -450,20 +450,23 @@ Content-Type: application/json
 {"line_items": [...]}
 ```
 
-**MCP Transport:** Platforms **MUST** use native dictionary structure in
-`_meta.ucp`:
+**MCP Transport:** Platforms **MUST** include a `meta` object containing request
+metadata:
 
 ```json
 {
   "jsonrpc": "2.0",
   "method": "create_checkout",
   "params": {
-    "_meta": {
-      "ucp": {
+    "meta": {
+      "ucp-agent": {
         "profile": "https://agent.example/profiles/shopping-agent.json"
-      }
+      },
+      "idempotency-key": "550e8400-e29b-41d4-a716-446655440000"
     },
-    "line_items": [...]
+    "checkout": {
+      "line_items": [...]
+    }
   },
   "id": 1
 }
