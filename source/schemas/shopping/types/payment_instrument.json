@@ -31,7 +31,7 @@
     },
     "display": {
       "type": "object",
-      "description": "Display information for this payment instrument."
+      "description": "Display information for this payment instrument. Each payment instrument schema defines its specific display properties, as outlined by the payment handler."
     }
   },
   "additionalProperties": true,

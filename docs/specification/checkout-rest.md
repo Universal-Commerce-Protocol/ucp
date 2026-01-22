@@ -157,7 +157,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
             "handler_id": "shop_pay_1234",
             "type": "shop_pay",
             "selected": true,
-            "display_data": {
+            "display": {
               "email": "buyer@example.com"
             }
           }
@@ -287,7 +287,7 @@ so clients must include all previously set fields they wish to retain.
             "handler_id": "shop_pay_1234",
             "type": "shop_pay",
             "selected": true,
-            "display_data": {
+            "display": {
               "email": "buyer@example.com"
             }
           }
@@ -489,7 +489,7 @@ type & addresses.
             "handler_id": "gpay_1234",
             "type": "card",
             "selected": true,
-            "display_data": {
+            "display": {
               "brand": "mastercard",
               "last_digits": "5678",
               "rich_text_description": "Google Pay •••• 5678"
@@ -685,7 +685,7 @@ Follow-up calls after initial `fulfillment` data to update selection.
             "handler_id": "shop_pay_1234",
             "type": "shop_pay",
             "selected": true,
-            "display_data": {
+            "display": {
               "email": "buyer@example.com"
             }
           }
@@ -879,7 +879,7 @@ place to set these expectations via `messages`.
             "handler_id": "gpay_1234",
             "type": "card",
             "selected": true,
-            "display_data": {
+            "display": {
               "brand": "mastercard",
               "last_digits": "5678",
               "rich_text_description": "Google Pay •••• 5678"
@@ -1033,7 +1033,7 @@ place to set these expectations via `messages`.
             "handler_id": "shop_pay_1234",
             "type": "shop_pay",
             "selected": true,
-            "display_data": {
+            "display": {
               "email": "buyer@example.com"
             }
           }
@@ -1188,7 +1188,7 @@ place to set these expectations via `messages`.
             "handler_id": "gpay_1234",
             "type": "card",
             "selected": true,
-            "display_data": {
+            "display": {
               "brand": "mastercard",
               "last_digits": "5678",
               "rich_text_description": "Google Pay •••• 5678"

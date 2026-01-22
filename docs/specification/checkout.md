@@ -444,41 +444,15 @@ field or omitting them.
 
 ### Payment
 
-#### Payment Create Request
-
-{{ schema_fields('payment.create_req', 'checkout') }}
-
-#### Payment Update Request
-
-{{ schema_fields('payment.update_req', 'checkout') }}
-
-#### Payment Response
-
-{{ schema_fields('payment_resp', 'checkout') }}
-
-### Payment Handler Response
-
-{{ schema_fields('types/payment_handler_resp', 'checkout') }}
+{{ schema_fields('payment', 'checkout') }}
 
 ### Payment Instrument
 
 {{ schema_fields('payment_instrument', 'checkout') }}
 
-### Card Payment Instrument
-
-{{ schema_fields('card_payment_instrument', 'checkout') }}
-
 ### Payment Credential
 
 {{ schema_fields('payment_credential', 'checkout') }}
-
-### Token Credential Response
-
-{{ schema_fields('token_credential.create_req', 'checkout') }}
-
-### Card Credential
-
-{{ schema_fields('card_credential', 'checkout') }}
 
 ### Postal Address
 
