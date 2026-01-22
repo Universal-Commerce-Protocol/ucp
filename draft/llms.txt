@@ -1,0 +1,69 @@
+# Universal Commerce Protocol (UCP)
+
+> The Universal Commerce Protocol (UCP) is a solution for enabling gen AI agents to make payments on behalf of users, safely, securely, and in a decentralized and privacy protecting manner. This protocol is a part of the broader ecosystem, which includes agentic protocols like A2A and MCP, and encompasses the global nature of payments.
+
+
+## Introduction
+
+- [Home](https://ucp.dev/draft/index.md)
+- [Core Concepts](https://ucp.dev/draft/documentation/core-concepts/index.md)
+
+## UCP and AP2
+
+- [UCP and AP2](https://ucp.dev/draft/documentation/ucp-and-ap2/index.md)
+
+## Playground
+
+- [Playground](https://ucp.dev/draft/playground/index.md)
+
+## Roadmap
+
+- [Roadmap](https://ucp.dev/draft/documentation/roadmap/index.md)
+
+## Specification Overview
+
+- [Overview](https://ucp.dev/draft/specification/overview/index.md)
+
+## Checkout Capability
+
+- [Overview](https://ucp.dev/draft/specification/checkout/index.md)
+- [HTTP/REST Binding](https://ucp.dev/draft/specification/checkout-rest/index.md)
+- [MCP Binding](https://ucp.dev/draft/specification/checkout-mcp/index.md)
+- [A2A Binding](https://ucp.dev/draft/specification/checkout-a2a/index.md)
+
+## Checkout Extensions
+
+- [AP2 Mandates Extension](https://ucp.dev/draft/specification/ap2-mandates/index.md)
+- [Buyer Consent Extension](https://ucp.dev/draft/specification/buyer-consent/index.md)
+- [Discounts Extension](https://ucp.dev/draft/specification/discount/index.md)
+- [EP Binding](https://ucp.dev/draft/specification/embedded-checkout/index.md)
+- [Fulfillment Extension](https://ucp.dev/draft/specification/fulfillment/index.md)
+
+## Order Capability
+
+- [Order Capability](https://ucp.dev/draft/specification/order/index.md)
+
+## Identity Linking Capability
+
+- [Identity Linking Capability](https://ucp.dev/draft/specification/identity-linking/index.md)
+
+## Payment Handlers
+
+- [Guide](https://ucp.dev/draft/specification/payment-handler-guide/index.md)
+- [Template](https://ucp.dev/draft/specification/payment-handler-template/index.md)
+- [Tokenization Guide](https://ucp.dev/draft/specification/tokenization-guide/index.md)
+
+## Payment Handler Examples
+
+- [Business Tokenizer](https://ucp.dev/draft/specification/examples/business-tokenizer-payment-handler/index.md)
+- [Platform Tokenizer](https://ucp.dev/draft/specification/examples/platform-tokenizer-payment-handler/index.md)
+- [Encrypted Credential](https://ucp.dev/draft/specification/examples/encrypted-credential-handler/index.md)
+
+## Schema Authoring
+
+- [Schema Authoring](https://ucp.dev/draft/documentation/schema-authoring/index.md)
+
+## Reference
+
+- [Reference](https://ucp.dev/draft/specification/reference/index.md)
+

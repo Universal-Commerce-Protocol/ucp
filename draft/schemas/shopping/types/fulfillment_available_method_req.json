@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/fulfillment_available_method_req.json",
+  "title": "Fulfillment Available Method Request",
+  "description": "Inventory availability hint for a fulfillment method type.",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {}
+}

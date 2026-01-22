@@ -1,0 +1,7 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/payment_handler.update_req.json",
+  "title": "Payment Handler Update Request",
+  "type": "object",
+  "properties": {}
+}

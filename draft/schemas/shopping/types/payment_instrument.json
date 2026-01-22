@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/payment_instrument.json",
+  "title": "Payment Instrument",
+  "description": "Matches a specific instrument type based on validation logic.",
+  "oneOf": [
+    {
+      "$ref": "https://ucp.dev/schemas/shopping/types/card_payment_instrument.json"
+    }
+  ]
+}

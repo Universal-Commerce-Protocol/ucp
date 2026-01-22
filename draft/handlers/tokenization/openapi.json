@@ -1,0 +1,223 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Tokenization API",
+    "version": "2026-01-11",
+    "description": "Shared API for tokenization payment handlers. Tokenizer services implement these endpoints to enable secure credential exchange. See the Tokenization Guide for implementation details."
+  },
+  "paths": {
+    "/tokenize": {
+      "post": {
+        "operationId": "tokenize",
+        "summary": "Tokenize Credential",
+        "description": "Convert a credential into a token bound to a specific checkout session. Handlers define accepted credential schemas and their own authentication requirements.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "credential",
+                  "binding"
+                ],
+                "properties": {
+                  "credential": {
+                    "$ref": "https://ucp.dev/schemas/shopping/types/payment_credential.json",
+                    "description": "Credential to tokenize. Handlers define accepted credential types in their specification."
+                  },
+                  "binding": {
+                    "$ref": "https://ucp.dev/schemas/shopping/types/binding.json",
+                    "description": "Binding context that ties this token to a specific checkout and participant identity."
+                  }
+                }
+              },
+              "examples": {
+                "card_credential_agent": {
+                  "summary": "Agent tokenizing on behalf of merchant",
+                  "value": {
+                    "credential": {
+                      "type": "card",
+                      "card_number_type": "fpan",
+                      "number": "4111111111111111",
+                      "expiry_month": 12,
+                      "expiry_year": 2026,
+                      "cvc": "123",
+                      "name": "Jane Doe"
+                    },
+                    "binding": {
+                      "checkout_id": "abc123",
+                      "identity": {
+                        "access_token": "merchant_abc123"
+                      }
+                    }
+                  }
+                },
+                "card_credential_merchant": {
+                  "summary": "Merchant tokenizing for themselves",
+                  "value": {
+                    "credential": {
+                      "type": "card",
+                      "card_number_type": "fpan",
+                      "number": "4111111111111111",
+                      "expiry_month": 12,
+                      "expiry_year": 2026,
+                      "cvc": "123",
+                      "name": "Jane Doe"
+                    },
+                    "binding": {
+                      "checkout_id": "xyz789"
+                    }
+                  }
+                },
+                "card_credential_network_token": {
+                  "summary": "Card credential (network token)",
+                  "value": {
+                    "credential": {
+                      "type": "card",
+                      "card_number_type": "network_token",
+                      "number": "4111111111111111",
+                      "expiry_month": 12,
+                      "expiry_year": 2026,
+                      "cryptogram": "gXc5UCLnM6ckD7pjM1TdPA==",
+                      "eci_value": "07",
+                      "name": "Jane Doe"
+                    },
+                    "binding": {
+                      "checkout_id": "abc123",
+                      "identity": {
+                        "access_token": "merchant_abc123"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Token created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "token"
+                  ],
+                  "properties": {
+                    "token": {
+                      "type": "string",
+                      "description": "The token value."
+                    }
+                  }
+                },
+                "examples": {
+                  "token_response": {
+                    "summary": "Token response",
+                    "value": {
+                      "token": "tok_abc123xyz789"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/detokenize": {
+      "post": {
+        "operationId": "detokenize",
+        "summary": "Detokenize",
+        "description": "Retrieve the original credential. The binding must match what was provided during tokenization. Handlers define their own authentication and response schemas.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "token",
+                  "binding"
+                ],
+                "properties": {
+                  "token": {
+                    "type": "string",
+                    "description": "The token value."
+                  },
+                  "binding": {
+                    "$ref": "https://ucp.dev/schemas/shopping/types/binding.json",
+                    "description": "Binding context that must match the original tokenization request."
+                  }
+                }
+              },
+              "examples": {
+                "detokenize_by_merchant": {
+                  "summary": "Merchant detokenizing their own token",
+                  "value": {
+                    "token": "tok_abc123xyz789",
+                    "binding": {
+                      "checkout_id": "xyz789"
+                    }
+                  }
+                },
+                "detokenize_by_psp": {
+                  "summary": "PSP detokenizing on behalf of merchant",
+                  "value": {
+                    "token": "tok_abc123xyz789",
+                    "binding": {
+                      "checkout_id": "abc123",
+                      "identity": {
+                        "access_token": "merchant_abc123"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Credential retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "https://ucp.dev/schemas/shopping/types/payment_credential.json"
+                },
+                "examples": {
+                  "card_credential_fpan": {
+                    "summary": "Card credential (FPAN)",
+                    "value": {
+                      "type": "card",
+                      "card_number_type": "fpan",
+                      "number": "4111111111111111",
+                      "expiry_month": 12,
+                      "expiry_year": 2026,
+                      "cvc": "123",
+                      "name": "Jane Doe"
+                    }
+                  },
+                  "card_credential_network_token": {
+                    "summary": "Card credential (network token)",
+                    "value": {
+                      "type": "card",
+                      "card_number_type": "network_token",
+                      "number": "4111111111111111",
+                      "expiry_month": 12,
+                      "expiry_year": 2026,
+                      "cryptogram": "gXc5UCLnM6ckD7pjM1TdPA==",
+                      "eci_value": "07",
+                      "name": "Jane Doe"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

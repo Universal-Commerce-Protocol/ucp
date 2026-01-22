@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/discount.create_req.json",
+  "name": "dev.ucp.shopping.discount",
+  "version": "2026-01-11",
+  "title": "Discount Extension Create Request",
+  "description": "Extends Checkout with discount code support, enabling agents to apply promotional, loyalty, referral, and other discount codes.",
+  "$defs": {
+    "allocation": {
+      "type": "object",
+      "description": "Breakdown of how a discount amount was allocated to a specific target.",
+      "required": [
+        "path",
+        "amount"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "JSONPath to the allocation target (e.g., '$.line_items[0]', '$.totals.shipping')."
+        },
+        "amount": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Amount allocated to this target in minor (cents) currency units."
+        }
+      }
+    },
+    "applied_discount": {
+      "type": "object",
+      "description": "A discount that was successfully applied.",
+      "required": [
+        "title",
+        "amount"
+      ],
+      "properties": {
+        "code": {
+          "type": "string",
+          "description": "The discount code. Omitted for automatic discounts."
+        },
+        "title": {
+          "type": "string",
+          "description": "Human-readable discount name (e.g., 'Summer Sale 20% Off')."
+        },
+        "amount": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total discount amount in minor (cents) currency units."
+        },
+        "automatic": {
+          "type": "boolean",
+          "default": false,
+          "description": "True if applied automatically by merchant rules (no code required)."
+        },
+        "method": {
+          "type": "string",
+          "enum": [
+            "each",
+            "across"
+          ],
+          "description": "Allocation method. 'each' = applied independently per item. 'across' = split proportionally by value."
+        },
+        "priority": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Stacking order for discount calculation. Lower numbers applied first (1 = first)."
+        },
+        "allocations": {
+          "type": "array",
+          "items": {
+            "$ref": "https://ucp.dev/schemas/shopping/discount.create_req.json#/$defs/allocation"
+          },
+          "description": "Breakdown of where this discount was allocated. Sum of allocation amounts equals total amount."
+        }
+      }
+    },
+    "discounts_object": {
+      "type": "object",
+      "description": "Discount codes input and applied discounts output.",
+      "properties": {
+        "codes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Discount codes to apply. Case-insensitive. Replaces previously submitted codes. Send empty array to clear."
+        },
+        "applied": {
+          "type": "array",
+          "readOnly": true,
+          "items": {
+            "$ref": "https://ucp.dev/schemas/shopping/discount.create_req.json#/$defs/applied_discount"
+          },
+          "description": "Discounts successfully applied (code-based and automatic)."
+        }
+      }
+    },
+    "checkout": {
+      "title": "Checkout with Discount Create Request",
+      "description": "Checkout extended with discount capability.",
+      "allOf": [
+        {
+          "$ref": "https://ucp.dev/schemas/shopping/checkout.create_req.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "discounts": {
+              "$ref": "https://ucp.dev/schemas/shopping/discount.create_req.json#/$defs/discounts_object"
+            }
+          }
+        }
+      ]
+    }
+  }
+}
