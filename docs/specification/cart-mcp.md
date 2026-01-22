@@ -199,7 +199,7 @@ Maps to the [Create Cart](cart.md#create-cart) operation.
             "amount": 5000
           }
         ],
-        "checkout_url": "https://business.example.com/checkout?cart=cart_abc123",
+        "continue_url": "https://business.example.com/checkout?cart=cart_abc123",
         "expires_at": "2026-01-16T12:00:00Z"
       }
     }
@@ -284,7 +284,7 @@ Maps to the [Get Cart](cart.md#get-cart) operation.
             "amount": 5000
           }
         ],
-        "checkout_url": "https://business.example.com/checkout?cart=cart_abc123",
+        "continue_url": "https://business.example.com/checkout?cart=cart_abc123",
         "expires_at": "2026-01-16T12:00:00Z"
       }
     }
@@ -418,7 +418,7 @@ Maps to the [Update Cart](cart.md#update-cart) operation.
             "amount": 15000
           }
         ],
-        "checkout_url": "https://business.example.com/checkout?cart=cart_abc123",
+        "continue_url": "https://business.example.com/checkout?cart=cart_abc123",
         "expires_at": "2026-01-16T12:00:00Z"
       }
     }
@@ -505,7 +505,7 @@ Maps to the [Cancel Cart](cart.md#cancel-cart) operation.
             "amount": 5000
           }
         ],
-        "checkout_url": "https://business.example.com/checkout?cart=cart_abc123"
+        "continue_url": "https://business.example.com/checkout?cart=cart_abc123"
       }
     }
     ```

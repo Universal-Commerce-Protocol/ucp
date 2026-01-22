@@ -39,7 +39,7 @@ Carts support:
 
 - **Incremental building**: Add/remove items across sessions
 - **Localized estimates**: Context-aware pricing without full checkout overhead
-- **Sharing**: `checkout_url` enables cart sharing and recovery
+- **Sharing**: `continue_url` enables cart sharing and recovery
 
 ## Cart vs Checkout
 
@@ -49,7 +49,6 @@ Carts support:
 | **Payment** | None | Required (handlers, instruments) |
 | **Status** | Binary (exists/not found) | Lifecycle (`incomplete` → `completed`) |
 | **Complete Operation** | No | Yes |
-| **Handoff URL** | `checkout_url` | `continue_url` |
 | **Totals** | Estimates (may be partial) | Final pricing |
 
 ## Cart-to-Checkout Conversion
@@ -65,9 +64,15 @@ by providing `cart_id` in the Create Checkout request. The cart contents
 }
 ```
 
-Cart contents take precedence over checkout payload for overlapping fields.
+Business MUST use cart contents and MUST ignore overlapping fields in checkout payload.
 The `cart_id` parameter is only available when the cart capability is advertised
 in the business profile.
+
+**Idempotent conversion:**
+
+If an incomplete checkout already exists for the given `cart_id`, the business
+MUST return the existing checkout session rather than creating a new one. This
+ensures a single active checkout per cart and prevents conflicting sessions.
 
 **Cart lifecycle after conversion:**
 
@@ -90,20 +95,21 @@ SHOULD be linked for the duration of the checkout.
 
 *   **MAY** use carts for pre-purchase exploration and session persistence.
 *   **SHOULD** convert cart to checkout when user expresses purchase intent.
-*   **MAY** display `checkout_url` for handoff to business UI.
+*   **MAY** display `continue_url` for handoff to business UI.
 *   **SHOULD** handle 404 gracefully when cart expires or is canceled.
 
 **Business**
 
-*   **MUST** provide `checkout_url` in all cart responses.
+*   **SHOULD** provide `continue_url` for cart handoff and session recovery.
+*   TODO: discuss `continue_url` destination - cart vs checkout.
 *   **SHOULD** provide estimated totals when calculable.
-*   **MAY** omit shipping totals until checkout when address is unknown.
+*   **MAY** omit fulfillment totals until checkout when address is unknown.
 *   **SHOULD** return informational messages for validation warnings.
 *   **MAY** set cart expiry via `expires_at`.
 *   **SHOULD** follow [cart lifecycle requirements](#cart-to-checkout-conversion)
     when checkout is initialized via `cart_id`.
 
-## Capability Schema Definition
+## Cart Schema Definition
 
 {{ schema_fields('cart_resp', 'cart') }}
 

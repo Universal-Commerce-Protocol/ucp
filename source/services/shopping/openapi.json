@@ -461,7 +461,7 @@
       "post": {
         "operationId": "cancel_cart",
         "summary": "Cancel Cart",
-        "description": "Cancel a cart session.",
+        "description": "Cancel a cart session. Returns the cart state at time of cancellation.",
         "parameters": [
           { "$ref": "#/components/parameters/authorization" },
           { "$ref": "#/components/parameters/x_api_key" },

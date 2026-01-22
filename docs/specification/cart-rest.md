@@ -20,6 +20,43 @@ This document specifies the REST binding for the [Cart Capability](cart.md).
 
 ## Protocol Fundamentals
 
+### Discovery
+
+Businesses advertise REST transport availability through their UCP profile at
+`/.well-known/ucp`.
+
+```json
+{
+  "ucp": {
+    "version": "2026-01-15",
+    "services": {
+      "dev.ucp.shopping": {
+        "version": "2026-01-15",
+        "spec": "https://ucp.dev/specification/overview",
+        "rest": {
+          "schema": "https://ucp.dev/services/shopping/rest.openapi.json",
+          "endpoint": "https://business.example.com/ucp/v1"
+        }
+      }
+    },
+    "capabilities": [
+      {
+        "name": "dev.ucp.shopping.checkout",
+        "version": "2026-01-11",
+        "spec": "https://ucp.dev/specification/checkout",
+        "schema": "https://ucp.dev/schemas/shopping/checkout.json"
+      },
+      {
+        "name": "dev.ucp.shopping.cart",
+        "version": "2026-01-15",
+        "spec": "https://ucp.dev/specification/cart",
+        "schema": "https://ucp.dev/schemas/shopping/cart.json"
+      }
+    ]
+  }
+}
+```
+
 ### Base URL
 
 All UCP REST endpoints are relative to the business's base URL, which is
@@ -70,11 +107,8 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
       "line_items": [
         {
           "item": {
-            "id": "item_123",
-            "title": "Red T-Shirt",
-            "price": 2500
+            "id": "item_123"
           },
-          "id": "li_1",
           "quantity": 2
         }
       ],
@@ -134,7 +168,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
           "display_text": "Estimated total (taxes calculated at checkout)"
         }
       ],
-      "checkout_url": "https://business.example.com/checkout?cart=cart_abc123",
+      "continue_url": "https://business.example.com/checkout?cart=cart_abc123",
       "expires_at": "2026-01-16T12:00:00Z"
     }
     ```
@@ -205,7 +239,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
           "amount": 5000
         }
       ],
-      "checkout_url": "https://business.example.com/checkout?cart=cart_abc123",
+      "continue_url": "https://business.example.com/checkout?cart=cart_abc123",
       "expires_at": "2026-01-16T12:00:00Z"
     }
     ```
@@ -242,18 +276,14 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
       "line_items": [
         {
           "item": {
-            "id": "item_123",
-            "title": "Red T-Shirt",
-            "price": 2500
+            "id": "item_123"
           },
           "id": "li_1",
           "quantity": 3
         },
         {
           "item": {
-            "id": "item_456",
-            "title": "Blue Jeans",
-            "price": 7500
+            "id": "item_456"
           },
           "id": "li_2",
           "quantity": 1
@@ -327,7 +357,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
           "amount": 15000
         }
       ],
-      "checkout_url": "https://business.example.com/checkout?cart=cart_abc123",
+      "continue_url": "https://business.example.com/checkout?cart=cart_abc123",
       "expires_at": "2026-01-16T12:00:00Z"
     }
     ```
@@ -401,7 +431,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
           "amount": 5000
         }
       ],
-      "checkout_url": "https://business.example.com/checkout?cart=cart_abc123"
+      "continue_url": "https://business.example.com/checkout?cart=cart_abc123"
     }
     ```
 
@@ -466,7 +496,7 @@ Content-Type: application/json
       "content": "Quantity must be at least 1"
     }
   ],
-  "checkout_url": "https://business.example.com/checkout?cart=cart_abc123"
+  "continue_url": "https://business.example.com/checkout?cart=cart_abc123"
 }
 ```
 
