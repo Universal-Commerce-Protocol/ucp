@@ -14,6 +14,8 @@
    limitations under the License.
 -->
 
+<!-- markdownlint-disable-file MD041 -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -419,99 +421,113 @@ const UcpData = {
     "sku_mug": { title: "UCP Demo Mug", price: 1999, image_url: "https://example.com/images/mug.jpg" }
   },
 
-  handlers: [
-    {
-      id: "shop_pay",
-      name: "com.shopify.shop_pay",
-      version: "2025-12-08",
-      spec: "https://shopify.dev/ucp/shop_pay",
-      config_schema: "https://shopify.dev/ucp/handlers/shop_pay/config.json",
-      instrument_schemas: ["https://shopify.dev/ucp/handlers/shop_pay/instrument.json"],
-      config: { shop_id: "shopify-559128571" }
-    },
-    {
-      id: "gpay",
-      name: "com.google.pay",
-      version: "2026-01-11",
-      spec: "https://pay.google.com/gp/p/ucp/2026-01-11/",
-      config_schema: "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/config.json",
-      instrument_schemas: [
-        "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/card_payment_instrument.json"
-      ],
-      config: {
-        api_version: 2,
-        api_version_minor: 0,
-        environment: "TEST",
-        merchant_info: {
-          merchant_name: "Example Merchant",
-          merchant_id: "01234567890123456789",
-          merchant_origin: "checkout.merchant.com",
-          auth_jwt: "edxsdfoaisjdfapsodjf...."
-        },
-        allowed_payment_methods: [
-          {
-            type: "CARD",
-            parameters: {
-              allowed_auth_methods: ["PAN_ONLY", "CRYPTOGRAM_3DS"],
-              allowed_card_networks: ["VISA", "MASTERCARD"]
-            },
-            tokenization_specification: {
-              type: "PAYMENT_GATEWAY",
+  payment_handlers: {
+    "com.shopify.shop_pay": [
+      {
+        id: "shop_pay",
+        version: "2026-01-11",
+        spec: "https://shopify.dev/docs/agents/checkout/shop-pay-handler",
+        config_schema: "https://shopify.dev/ucp/shop-pay-handler/2026-01-11/config.json",
+        instrument_schemas: ["https://shopify.dev/ucp/shop-pay-handler/2026-01-11/instrument.json"],
+        config: { shop_id: "shopify-559128571" }
+      }
+    ],
+    "com.google.pay": [
+      {
+        id: "gpay",
+        version: "2026-01-11",
+        spec: "https://pay.google.com/gp/p/ucp/2026-01-11/",
+        config_schema: "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/config.json",
+        instrument_schemas: [
+          "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/card_payment_instrument.json"
+        ],
+        config: {
+          api_version: 2,
+          api_version_minor: 0,
+          environment: "TEST",
+          merchant_info: {
+            merchant_name: "Example Merchant",
+            merchant_id: "01234567890123456789",
+            merchant_origin: "checkout.merchant.com",
+            auth_jwt: "edxsdfoaisjdfapsodjf...."
+          },
+          allowed_payment_methods: [
+            {
+              type: "CARD",
               parameters: {
-                gateway: "example",
-                gatewayMerchantId: "exampleGatewayMerchantId"
+                allowed_auth_methods: ["PAN_ONLY", "CRYPTOGRAM_3DS"],
+                allowed_card_networks: ["VISA", "MASTERCARD"]
+              },
+              tokenization_specification: {
+                type: "PAYMENT_GATEWAY",
+                parameters: {
+                  gateway: "example",
+                  gatewayMerchantId: "exampleGatewayMerchantId"
+                }
               }
             }
-          }
-        ]
+          ]
+        }
       }
-    }
-  ],
+    ]
+  },
 
   capabilities: {
-    core: [
+    "dev.ucp.shopping.checkout": [
       {
-        name: "dev.ucp.shopping.checkout",
         version: "2026-01-11",
         spec: "https://ucp.dev/specs/checkout",
         schema: "https://ucp.dev/schemas/shopping/checkout.json"
-      },
+      }
+    ],
+    "dev.ucp.shopping.order": [
       {
-        name: "dev.ucp.shopping.order",
         version: "2026-01-11",
         spec: "https://ucp.dev/specs/order",
         schema: "https://ucp.dev/schemas/shopping/order.json"
       }
     ],
-    extensions: [
+    "dev.ucp.shopping.fulfillment": [
       {
-        name: "dev.ucp.shopping.fulfillment",
         extends: "dev.ucp.shopping.checkout",
         version: "2026-01-11",
         spec: "https://ucp.dev/specs/fulfillment",
-        schema: "https://ucp.dev/schemas/shopping/fulfillment.json"
-      },
+        schema: "https://ucp.dev/schemas/shopping/fulfillment.json",
+        config: {
+          allows_multi_destination: {
+            shipping: false,
+            pickup: false
+          },
+          allows_method_combinations: [
+            ["shipping"],
+            ["pickup"]
+          ]
+        }
+      }
+    ],
+    "dev.ucp.shopping.discount": [
       {
-        name: "dev.ucp.shopping.discount",
         extends: "dev.ucp.shopping.checkout",
         version: "2026-01-11",
         spec: "https://ucp.dev/specs/discount",
         schema: "https://ucp.dev/schemas/shopping/discount.json"
-      },
+      }
+    ],
+    "dev.ucp.shopping.buyer_consent": [
       {
-        name: "dev.ucp.shopping.buyer_consent",
         extends: "dev.ucp.shopping.checkout",
         version: "2026-01-11",
         spec: "https://ucp.dev/specs/buyer_consent",
         schema: "https://ucp.dev/schemas/shopping/buyer_consent.json"
-      },
+      }
+    ],
+    "dev.ucp.shopping.ap2_mandates": [
       {
-        name: "dev.ucp.shopping.ap2_mandates",
         extends: "dev.ucp.shopping.checkout",
         version: "2026-01-11",
         spec: "https://ucp.dev/specs/ap2_mandates",
         schema: "https://ucp.dev/schemas/shopping/ap2_mandates.json"
-      },
+      }
     ]
   },
 
@@ -530,16 +546,18 @@ const UcpData = {
 
   mock_instruments: {
     shop_pay: {
-      "handler_id": "shop_pay",
+      "handler_id": "shop_pay_1234",
       "type": "shop_pay",
       "email": "buyer@example.com",
       "id": "instr_sp_1338ef2c-3913-4267-83a2-a84d07d9a6a6"
     },
     gpay: {
-      "handler_id": "gpay",
+      "handler_id": "gpay_1234",
       "type": "card",
-      "brand": "visa",
-      "last_digits": "4242",
+      "display": {
+        "brand": "visa",
+        "last_digits": "4242"
+      },
       "billing_address": {
         "street_address": "123 Main Street",
         "extended_address": "Suite 400",
@@ -567,7 +585,7 @@ class UcpBackend {
   }
 
   genId(prefix) {
-    const r = crypto.randomUUID ? crypto.randomUUID().split('-')[0] : Math.random().toString(36).substr(2, 9);
+    const r = crypto.randomUUID ? crypto.randomUUID().substring(0, 8) : Math.random().toString(36).substr(2, 9);
     return `${prefix}_${r}`;
   }
 
@@ -575,10 +593,8 @@ class UcpBackend {
     return {
       ucp: {
         version: UcpData.version,
-        capabilities: [...UcpData.capabilities.core, ...UcpData.capabilities.extensions]
-      },
-      payment: {
-        handlers: UcpData.handlers
+        capabilities: UcpData.capabilities,
+        payment_handlers: UcpData.payment_handlers
       }
     };
   }
@@ -599,7 +615,7 @@ class UcpBackend {
     const subtotal = lineItems.reduce((acc, li) => acc + li.totals.find(t=>t.type==='total').amount, 0);
 
     const messages = [];
-    const isFullAgent = activeCaps.some(c => c.name.includes("fulfillment"));
+    const isFullAgent = Object.keys(activeCaps).some(name => name.includes("fulfillment"));
 
     if (!requestPayload.buyer?.email) {
       messages.push({
@@ -625,14 +641,13 @@ class UcpBackend {
     }
 
     this.session = {
-      ucp: { version: UcpData.version, capabilities: activeCaps },
+      ucp: { version: UcpData.version, capabilities: activeCaps, payment_handlers: UcpData.payment_handlers },
       id: this.genId('chk'),
       status: messages.length > 0 ? "incomplete" : "ready_for_complete",
       line_items: lineItems,
       currency: "USD",
       totals: [{ type: "subtotal", amount: subtotal }, { type: "total", amount: subtotal }],
-      messages: messages,
-      payment: { handlers: UcpData.handlers }
+      messages: messages
     };
 
     return this.session;
@@ -669,7 +684,7 @@ class UcpBackend {
       });
     }
 
-    const isFullAgent = this.session.ucp.capabilities.some(c => c.name.includes("fulfillment"));
+    const isFullAgent = Object.keys(this.session.ucp.capabilities).some(name => name.includes("fulfillment"));
     if(isFullAgent) {
         const hasDest = this.session.fulfillment?.methods?.[0]?.destinations?.length > 0;
         if(!hasDest && this.session.fulfillment) {
@@ -729,8 +744,7 @@ class UcpBackend {
       line_items: orderLineItems,
       fulfillment: fulfillmentObj,
       adjustments: [],
-      totals: this.session.totals,
-      payment: { selected_instrument_id: paymentInstrument.id }
+      totals: this.session.totals
     };
 
     this.session.status = "completed";
@@ -845,21 +859,30 @@ class UcpApp {
 
     document.getElementById('agent-desc').textContent = profile.description;
 
-    const capabilities = profile.caps.map(name =>
-      [...UcpData.capabilities.core, ...UcpData.capabilities.extensions].find(c => c.name === name)
-    ).filter(Boolean);
+    const capabilities = {};
+    profile.caps.forEach(name => {
+      if (UcpData.capabilities[name]) {
+        capabilities[name] = UcpData.capabilities[name];
+      }
+    });
 
-    this.setJson('json-profiles', { ucp: { version: UcpData.version, capabilities } });
+    this.setJson('json-profiles', { ucp: { version: UcpData.version, capabilities, payment_handlers: UcpData.payment_handlers } });
   }
 
   runDiscovery() {
     const fullProfile = this.backend.getDiscoveryProfile();
     const agentCapNames = UcpData.agents[this.state.agent].caps;
-    const filteredCaps = fullProfile.ucp.capabilities.filter(c => agentCapNames.includes(c.name));
+
+    const filteredCaps = {};
+    agentCapNames.forEach(name => {
+      if (fullProfile.ucp.capabilities[name]) {
+        filteredCaps[name] = fullProfile.ucp.capabilities[name];
+      }
+    });
 
     const displayProfile = {
       ...fullProfile,
-      ucp: { ...fullProfile.ucp, capabilities: filteredCaps }
+      ucp: { ...fullProfile.ucp, capabilities: filteredCaps, payment_handlers: fullProfile.ucp.payment_handlers }
     };
 
     this.setJson('json-disc-res', displayProfile);
@@ -870,7 +893,12 @@ class UcpApp {
     this.setJson('json-neg-biz', bizProfile.ucp.capabilities);
 
     const agentCapsNames = UcpData.agents[this.state.agent].caps;
-    const active = bizProfile.ucp.capabilities.filter(c => agentCapsNames.includes(c.name));
+    const active = {};
+    agentCapsNames.forEach(name => {
+      if (bizProfile.ucp.capabilities[name]) {
+        active[name] = bizProfile.ucp.capabilities[name];
+      }
+    });
     this.state.activeCaps = active;
 
     this.setJson('json-neg-active', active);
@@ -896,7 +924,7 @@ class UcpApp {
       payment: { instruments: [UcpData.mock_instruments.shop_pay] }
     };
 
-    if (this.state.activeCaps.some(c => c.name.includes('fulfillment'))) {
+    if (Object.keys(this.state.activeCaps).some(name => name.includes('fulfillment'))) {
         payload.fulfillment = { methods: [] };
     }
 
@@ -989,6 +1017,8 @@ class UcpApp {
     } else if (handlerId === 'shop_pay') {
       instrument.credential = { type: "ShopPayToken", token: "shoppay_tok_" + tokenStr };
     }
+
+    instrument.selected = true;
 
     this.state.lastRequests.instrument = instrument;
     this.setJson('json-mint-res', instrument);

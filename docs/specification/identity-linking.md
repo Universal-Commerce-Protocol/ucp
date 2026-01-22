@@ -37,68 +37,68 @@ for securely linking a user's platform account with their business account.
 
 (In addition to the overarching guidelines)
 
-**For platforms**
+### For platforms
 
-*   **MUST** authenticate using their `client_id` and `client_secret`
+* **MUST** authenticate using their `client_id` and `client_secret`
     ([RFC 6749 2.3.1](https://datatracker.ietf.org/doc/html/rfc6749#section-2.3.1){target="_blank"})
     through HTTP Basic Authentication
     ([RFC 7617](https://datatracker.ietf.org/doc/html/rfc7617){target="_blank"})
     when exchanging codes for tokens.
-    *   **MAY** support Client Metadata
-    *   **MAY** support Dynamic Client Registration mechanisms to supersede
+    * **MAY** support Client Metadata
+    * **MAY** support Dynamic Client Registration mechanisms to supersede
         static credential exchange.
-*   The platform must include the token in the HTTP Authorization header using
+* The platform must include the token in the HTTP Authorization header using
     the Bearer schema (`Authorization: Bearer <access_token>`)
-*   **MUST** implement the OAuth 2.0 Authorization Code flow
+* **MUST** implement the OAuth 2.0 Authorization Code flow
     ([RFC 6749 4.1](https://datatracker.ietf.org/doc/html/rfc6749#section-4.1){target="_blank"})
     as the primary linking mechanism.
-*   **SHOULD** include a unique, unguessable state parameter in the
+* **SHOULD** include a unique, unguessable state parameter in the
     authorization request to prevent Cross-Site Request Forgery (CSRF)
     ([RFC 6749 10.12](https://datatracker.ietf.org/doc/html/rfc6749#section-10.12){target="_blank"})
     (part of
     [OAuth 2.1 draft](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-14#name-preventing-csrf-attacks){target="_blank"})
     .
-*   Revocation and security events
-    *   **SHOULD** call the business's revocation endpoint
+* Revocation and security events
+    * **SHOULD** call the business's revocation endpoint
         ([RFC 7009](https://datatracker.ietf.org/doc/html/rfc7009){target="_blank"}) when a user
         initiates an unlink action on the platform side.
-    *   **SHOULD** support
+    * **SHOULD** support
         [OpenID RISC Profile 1.0](https://openid.net/specs/openid-risc-1_0-final.html)
         to handle asynchronous account updates, unlinking events, and
         cross-account protection.
 
-**For businesses**
+### For businesses
 
-*   **MUST** implement OAuth 2.0
+* **MUST** implement OAuth 2.0
     ([RFC 6749](https://datatracker.ietf.org/doc/html/rfc6749))
-*   **MUST** adhere to [RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414) to
+* **MUST** adhere to [RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414) to
     declare the location of their OAuth 2.0 endpoints
     (`/.well-known/oauth-authorization-server`)
-    *   **SHOULD** implement
+    * **SHOULD** implement
         [RFC 9728](https://datatracker.ietf.org/doc/html/rfc9728/) (HTTP
         Resource Metadata) to allow platforms to discover the Authorization
         Server associated with specific resources.
-    *   **SHOULD** fill in `scopes_supported` as part of
+    * **SHOULD** fill in `scopes_supported` as part of
         [RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414).
-*   **MUST** enforce Client Authentication at the Token Endpoint.
-*   **MUST** provide an account creation flow if the user does not already have
+* **MUST** enforce Client Authentication at the Token Endpoint.
+* **MUST** provide an account creation flow if the user does not already have
     an account.
-*   **MUST** support standard UCP scopes, as defined in the Scopes section,
+* **MUST** support standard UCP scopes, as defined in the Scopes section,
     granting the tokens permission to all associated Operations for a given
     resource.
-*   Additional permissions **MAY** be granted beyond those explicitly requested,
+* Additional permissions **MAY** be granted beyond those explicitly requested,
     provided that the requested scopes are, at minimum, included.
-*   The platform and business **MAY** define additional custom scopes beyond the
+* The platform and business **MAY** define additional custom scopes beyond the
     minimum scope requirements.
-*   Revocation and security events
-    *   **MUST** implement standard Token Revocation as defined in
+* Revocation and security events
+    * **MUST** implement standard Token Revocation as defined in
         [RFC 7009](https://datatracker.ietf.org/doc/html/rfc7009).
-    *   **MUST** revoke the specified token and **SHOULD** recursively revoke
+    * **MUST** revoke the specified token and **SHOULD** recursively revoke
         all associated tokens (e.g., revoking a `refresh_token` **MUST** also
         immediately revoke all active `access_token`s issued from it).
-    *   **MUST** support revocation requests authenticated with the same client
+    * **MUST** support revocation requests authenticated with the same client
         credentials used for the token endpoint.
-    *   **SHOULD** support
+    * **SHOULD** support
         [OpenID RISC Profile 1.0](https://openid.net/specs/openid-risc-1_0-final.html)
         to enable Cross-Account Protection and securely signal revocation or
         account state changes initiated by the business side.

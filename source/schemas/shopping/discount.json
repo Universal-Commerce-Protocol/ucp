@@ -92,7 +92,11 @@
           "properties": {
             "discounts": {
               "$ref": "#/$defs/discounts_object",
-              "ucp_request": "optional"
+              "ucp_request": {
+                "create": "optional",
+                "update": "optional",
+                "complete": "omit"
+              }
             }
           }
         }

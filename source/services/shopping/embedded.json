@@ -182,7 +182,7 @@
                     "instruments": {
                       "type": "array",
                       "items": {
-                        "$ref": "../../schemas/shopping/types/payment_instrument.json"
+                        "$ref": "../../schemas/shopping/types/payment_instrument.json#/$defs/selected_payment_instrument"
                       },
                       "description": "Available payment instruments after selection."
                     }
@@ -226,7 +226,7 @@
                     "instruments": {
                       "type": "array",
                       "items": {
-                        "$ref": "../../schemas/shopping/types/payment_instrument.json"
+                        "$ref": "../../schemas/shopping/types/payment_instrument.json#/$defs/selected_payment_instrument"
                       },
                       "description": "Payment instruments with credential populated on selected instrument."
                     }

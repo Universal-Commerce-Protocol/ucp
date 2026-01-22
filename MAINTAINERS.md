@@ -21,6 +21,9 @@
 The Tech Council is responsible for the technical direction and overall
 design of the protocol.
 
+<!-- cSpell:ignore Amit Handa Anurag Sinha Chris Sauve Daniel Wyckoff Drew -->
+<!-- cSpell:ignore Olson Ilya Grigorik Imran Hoosain Lee Richmond Maxime -->
+<!-- cSpell:ignore Najim Naga Malepati Venu Vemula -->
 | Name | Company |
 | :--- | :--- |
 | Amit Handa | Google |

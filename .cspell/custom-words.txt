@@ -54,7 +54,9 @@ fulfillable
 gpay
 ingestions
 inlinehilite
+lifecycles
 linenums
+llms
 llmstxt
 mastercard
 mkdocs
@@ -73,6 +75,8 @@ schemas
 sdjwt
 shopify
 superfences
+upsell
+upsells
 vulnz
 yaml
 yml
