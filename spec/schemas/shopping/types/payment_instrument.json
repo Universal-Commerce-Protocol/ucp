@@ -30,8 +30,7 @@
       "$ref": "payment_credential.json"
     },
     "display": {
-      "type": "object",
-      "description": "Display information for this payment instrument."
+      "$ref": "display.json"
     }
   },
   "additionalProperties": true,

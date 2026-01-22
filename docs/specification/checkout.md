@@ -373,6 +373,10 @@ require explicit validation and error feedback.
 
 {{ schema_fields('context', 'checkout') }}
 
+### Display
+
+{{ schema_fields('types/display', 'checkout') }}
+
 ### Fulfillment Option
 
 {{ extension_schema_fields('fulfillment_resp.json#/$defs/fulfillment_option', 'checkout') }}
