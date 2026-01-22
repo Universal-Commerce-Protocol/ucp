@@ -372,11 +372,12 @@ for `postMessage()` calls — before the `ec.ready` message is sent.
 Core messages are defined by the ECP specification and **MUST** be supported by
 all implementations. All messages are sent from Embedded Checkout to host.
 
-| Category         | Purpose                                                 | Pattern      | Core Messages                             |
-| ---------------- | ------------------------------------------------------- | ------------ | ----------------------------------------- |
-| **Handshake**    | Establish connection between host and Embedded Checkout | Request      | `ec.ready`                                |
-| **Lifecycle**    | Inform of checkout state transitions                    | Notification | `ec.start`, `ec.complete`                 |
-| **State Change** | Inform of checkout field changes                        | Notification | `ec.line_items.change`, `ec.buyer.change`, `ec.payment.change`, `ec.messages.change` |
+| Category         | Purpose                                                 | Pattern      | Core Messages                                                                                              |
+| :--------------- | :------------------------------------------------------ | :----------- | :--------------------------------------------------------------------------------------------------------- |
+| **Handshake**    | Establish connection between host and Embedded Checkout | Request      | `ec.ready`                                                                                                 |
+| **Lifecycle**    | Inform of checkout state transitions                    | Notification | `ec.start`, `ec.complete`                                                                                  |
+| **State Change** | Inform of checkout field changes                        | Notification | `ec.line_items.change`, `ec.buyer.change`, `ec.payment.change`, `ec.messages.change`, `ec.actions.change` |
+| **Host Control** | Allow host to trigger checkout actions                  | Request      | `ec.complete_request`                                                                                      |
 
 #### Extension Messages
 
@@ -703,8 +704,172 @@ informational notices about the checkout state.
 
 #### `ec.payment.change`
 
-Payment state has been updated. See [`ec.payment.change`](#ecpaymentchange) for
-full documentation.
+Payment state has been updated. See [`ec.payment.change`](#ecpaymentchange-1) for
+full documentation in the Payment Extension section.
+
+#### `ec.actions.change`
+
+Checkout actions have been updated. This notification is sent when the state of
+available actions changes, such as when the primary submit action becomes
+enabled or disabled.
+
+- **Direction:** Embedded Checkout → host
+- **Type:** Notification
+- **Payload:**
+    - `checkout`: The latest state of the checkout
+
+**Example Message:**
+
+```json
+{
+    "jsonrpc": "2.0",
+    "method": "ec.actions.change",
+    "params": {
+        "checkout": {
+            "id": "checkout_123",
+            "actions": [
+                {
+                    "type": "submit",
+                    "disabled": false
+                }
+            ]
+            // ...
+        }
+    }
+}
+```
+
+### Host Control Messages
+
+Host control messages allow the host to trigger actions within the Embedded
+Checkout, rather than just observing state changes. These messages are sent
+from host to Embedded Checkout.
+
+#### `ec.complete_request`
+
+Requests the Embedded Checkout to complete the checkout and place the order.
+This is the primary host-initiated action that triggers order placement. The
+host **MAY** provide payment credentials or other completion data as part of
+the request.
+
+- **Direction:** host → Embedded Checkout
+- **Type:** Request
+- **Payload:**
+    - `checkout` (object, **OPTIONAL**): Partial checkout update with payment
+        credential or other completion data. Supports the same payment fields
+        as `ec.payment.credential_request`.
+
+**Example Request (with payment credential):**
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": "complete_request_1",
+    "method": "ec.complete_request",
+    "params": {
+        "checkout": {
+            "payment": {
+                "instruments": [
+                    {
+                        "id": "payment_instrument_123",
+                        "handler_id": "merchant_psp_handler_123",
+                        "type": "card",
+                        "selected": true,
+                        "credential": {
+                            "type": "token",
+                            "token": "tok_123"
+                        }
+                    }
+                ]
+            }
+        }
+    }
+}
+```
+
+**Example Request (no additional data):**
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": "complete_request_2",
+    "method": "ec.complete_request",
+    "params": {}
+}
+```
+
+The Embedded Checkout **MUST** respond with either a success or error result.
+
+- **Direction:** Embedded Checkout → host
+- **Type:** Response
+- **Result Payload:**
+    - `checkout`: Updated checkout state after completion attempt. May include
+        order details if successful, or updated messages/actions if additional
+        steps are required.
+
+**Example Success Response (order placed):**
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": "complete_request_1",
+    "result": {
+        "checkout": {
+            "id": "checkout_123",
+            "status": "complete",
+            "order": {
+                "id": "ord_99887766",
+                "permalink_url": "https://merchant.com/orders/ord_99887766"
+            }
+            // ... other checkout fields
+        }
+    }
+}
+```
+
+**Example Response (additional steps required):**
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": "complete_request_1",
+    "result": {
+        "checkout": {
+            "id": "checkout_123",
+            "status": "ready_for_complete",
+            "messages": [
+                {
+                    "type": "error",
+                    "code": "payment_declined",
+                    "path": "$.payment",
+                    "content": "Payment was declined. Please try another payment method.",
+                    "severity": "recoverable"
+                }
+            ],
+            "actions": [
+                {
+                    "type": "submit",
+                    "disabled": false
+                }
+            ]
+            // ... other checkout fields
+        }
+    }
+}
+```
+
+**Example Error Response:**
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": "complete_request_1",
+    "error": {
+        "code": "invalid_state_error",
+        "message": "Checkout cannot be completed in its current state."
+    }
+}
+```
 
 ## Payment Extension
 
@@ -1246,6 +1411,39 @@ The object returned upon successful completion of a checkout, containing
 confirmation details.
 
 {{ schema_fields('order', 'order') }}
+
+### Actions
+
+Represents available actions within the checkout interface, including their
+current enabled/disabled state. Actions communicate interactive elements that
+the buyer or host can trigger.
+
+**Fields:**
+
+- `type` (string, **REQUIRED**): The type of action. Standard types include:
+    - `submit`: Primary action to complete the checkout and place the order
+- `disabled` (boolean, **OPTIONAL**): Whether the action is currently disabled.
+    Defaults to `false`. When `true`, the action cannot be performed (e.g., the
+    submit button should be disabled because required fields are missing or
+    invalid).
+
+**Example:**
+
+```json
+{
+    "actions": [
+        {
+            "type": "submit",
+            "disabled": false
+        }
+    ]
+}
+```
+
+When the `submit` action is `disabled: true`, it typically indicates that the
+checkout is not ready for completion due to missing or invalid information. The
+`checkout.messages` field should contain specific error messages explaining
+what needs to be corrected.
 
 ### Payment
 

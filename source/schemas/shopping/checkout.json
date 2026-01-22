@@ -82,6 +82,14 @@
       "description": "Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.",
       "ucp_request": "omit"
     },
+    "actions": {
+      "type": "array",
+      "items": {
+        "$ref": "types/action.json"
+      },
+      "description": "Available actions within the checkout interface, including their enabled/disabled state. Communicates interactive elements that the buyer or host can trigger.",
+      "ucp_request": "omit"
+    },
     "expires_at": {
       "type": "string",
       "format": "date-time",

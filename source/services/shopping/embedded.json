@@ -148,6 +148,22 @@
     },
 
     {
+      "name": "ec.actions.change",
+      "summary": "Checkout actions changed",
+      "description": "Merchant notifies host that checkout.actions has changed (action enabled/disabled, new actions available).",
+      "params": [
+        {
+          "name": "checkout",
+          "required": true,
+          "schema": {
+            "$ref": "../../schemas/shopping/checkout.json",
+            "description": "Current checkout state with updated actions."
+          }
+        }
+      ]
+    },
+
+    {
       "name": "ec.payment.instruments_change_request",
       "summary": "Request payment instrument change",
       "description": "Merchant requests host to present payment instrument selection UI for the buyer to change their payment method.",
@@ -233,6 +249,50 @@
                   }
                 }
               }
+            }
+          }
+        }
+      }
+    },
+
+    {
+      "name": "ec.complete_request",
+      "summary": "Request checkout completion",
+      "description": "Host requests merchant to complete the checkout. This is the primary host-initiated action that triggers order placement. Host may provide payment credential as part of the request.",
+      "params": [
+        {
+          "name": "checkout",
+          "required": false,
+          "schema": {
+            "type": "object",
+            "description": "Partial checkout update with payment credential or other completion data.",
+            "properties": {
+              "payment": {
+                "type": "object",
+                "properties": {
+                  "instruments": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "../../schemas/shopping/types/payment_instrument.json#/$defs/selected_payment_instrument"
+                    },
+                    "description": "Payment instruments with credential populated on selected instrument."
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "result": {
+        "name": "completeResult",
+        "schema": {
+          "type": "object",
+          "description": "Result of checkout completion attempt.",
+          "required": ["checkout"],
+          "properties": {
+            "checkout": {
+              "$ref": "../../schemas/shopping/checkout.json",
+              "description": "Updated checkout state after completion attempt. May include order details if successful, or updated messages/actions if additional steps required."
             }
           }
         }
