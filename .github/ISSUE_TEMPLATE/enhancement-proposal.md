@@ -72,7 +72,7 @@ proposal. For every risk identified, list a mitigation strategy.
 
 <!--
 Describe how this feature will be tested. A test plan is required for a proposal
-to be moved to the "Implementable" stage.
+to be moved to the "Provisional" stage.
 
 * **Unit Tests:** Which core logic requires unit coverage?
 * **Integration Tests:** How will interactions between different components be
@@ -84,21 +84,19 @@ to be moved to the "Implementable" stage.
 ## Graduation Criteria
 
 <!--
-Define the specific, objective criteria required to move this feature through
-the stability levels.
+Define the specific, objective criteria required to move this capability through
+the maturity levels. See CONTRIBUTING.md for full definitions of each level.
 
-**Alpha -> Beta:**
-* [ ] Feature is implemented behind a feature flag (if applicable).
+**Working Draft → Candidate:**
+* [ ] Schema merged and documented (with Working Draft disclaimer).
 * [ ] Unit and integration tests are passing.
 * [ ] Initial documentation is written.
-* [ ] Deployed and tested in a non-production environment.
+* [ ] TC majority vote to advance.
 
-**Beta -> General Availability (GA):**
-* [ ] At least two independent implementations exist (e.g., from two different
-      merchants or platforms).
-* [ ] User/developer adoption feedback has been collected and addressed.
-* [ ] No critical bugs have been reported for a set period (e.g., 4 weeks).
+**Candidate → Stable:**
+* [ ] Adoption feedback has been collected and addressed.
 * [ ] Full documentation and migration guides are published.
+* [ ] TC majority vote to advance.
 -->
 
 ### Implementation History
@@ -107,7 +105,8 @@ the stability levels.
 This section will be updated by the maintainers as the proposal moves through
 its lifecycle.
 
-* [YYYY-MM-DD]: Proposal submitted as "Provisional".
-* [YYYY-MM-DD]: TC approved proposal to move to "Implementable".
-* [YYYY-MM-DD]: Code merged, proposal moved to "Implemented".
+* [YYYY-MM-DD]: Proposal submitted.
+* [YYYY-MM-DD]: TC approved "Provisional"; capability enters "Working Draft".
+* [YYYY-MM-DD]: TC approved advancement to "Candidate".
+* [YYYY-MM-DD]: TC approved "Implemented"; capability enters "Stable".
 -->
