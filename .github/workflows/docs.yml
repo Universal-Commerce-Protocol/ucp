@@ -15,16 +15,12 @@
 name: Docs Build and Deploy
 
 on:
+  workflow_dispatch:
+
   push:
     branches:
       - main
-    paths:
-      - ".github/workflows/docs.yml"
-      - "requirements-docs.txt"
-      - "mkdocs.yml"
-      - "main.py"
-      - "docs/**"
-      - "spec/**"
+      - 'release/**'
   pull_request:
     branches:
       - main
@@ -112,10 +108,29 @@ jobs:
         run: |
           mike deploy --push draft
 
-      - name: Deploy versioned docs for tagged releases
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Deploy release version
+        if: startsWith(github.ref, 'refs/heads/release/')
         run: |
-          TAG_NAME=${GITHUB_REF#refs/tags/}
-          mike delete latest --push
-          mike deploy --push --update-aliases $TAG_NAME latest
+          # Extract the date (e.g., release/2026-01-11 -> 2026-01-11)
+          VERSION_NAME=${GITHUB_REF#refs/heads/release/}
+
+          # Deploy this version, tag it as 'latest', and set it as the default site root
+          mike deploy --push --update-aliases $VERSION_NAME latest
           mike set-default --push latest
+
+      - name: Create GitHub Release and Tag
+        if: startsWith(github.ref, 'refs/heads/release/')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION_DATE=${GITHUB_REF#refs/heads/release/}
+          TAG_NAME="v$VERSION_DATE"
+
+          # Create Release (This implicitly creates the git tag)
+          # The '|| true' ensures the workflow doesn't fail if you
+          # push updates to this branch later (re-running the build).
+          gh release create "$TAG_NAME" \
+            --title "Release $TAG_NAME" \
+            --generate-notes \
+            --target "$GITHUB_REF_NAME" \
+            || echo "Release $TAG_NAME already exists, skipping creation."

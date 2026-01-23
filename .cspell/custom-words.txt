@@ -55,6 +55,7 @@ gpay
 ingestions
 inlinehilite
 linenums
+llms
 llmstxt
 mastercard
 mkdocs
