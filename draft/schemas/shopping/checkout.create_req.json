@@ -7,9 +7,7 @@
   "description": "Base checkout schema. Extensions compose onto this using allOf.",
   "type": "object",
   "required": [
-    "line_items",
-    "currency",
-    "payment"
+    "line_items"
   ],
   "additionalProperties": true,
   "properties": {
@@ -24,12 +22,11 @@
       "$ref": "https://ucp.dev/schemas/shopping/types/buyer.json",
       "description": "Representation of the buyer."
     },
-    "currency": {
-      "type": "string",
-      "description": "ISO 4217 currency code."
+    "context": {
+      "$ref": "https://ucp.dev/schemas/shopping/types/context.json"
     },
     "payment": {
-      "$ref": "https://ucp.dev/schemas/shopping/payment.create_req.json"
+      "$ref": "https://ucp.dev/schemas/shopping/payment.json"
     }
   }
 }

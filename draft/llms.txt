@@ -55,7 +55,7 @@
 
 ## Payment Handler Examples
 
-- [Business Tokenizer](https://ucp.dev/draft/specification/examples/business-tokenizer-payment-handler/index.md)
+- [Processor Tokenizer](https://ucp.dev/draft/specification/examples/processor-tokenizer-payment-handler/index.md)
 - [Platform Tokenizer](https://ucp.dev/draft/specification/examples/platform-tokenizer-payment-handler/index.md)
 - [Encrypted Credential](https://ucp.dev/draft/specification/examples/encrypted-credential-handler/index.md)
 

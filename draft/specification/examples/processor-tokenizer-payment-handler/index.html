@@ -11,7 +11,7 @@
       
       
       
-        <link rel="canonical" href="https://ucp.dev/draft/specification/examples/business-tokenizer-payment-handler/">
+        <link rel="canonical" href="https://ucp.dev/draft/specification/examples/processor-tokenizer-payment-handler/">
       
       
         <link rel="prev" href="../../tokenization-guide/">
@@ -25,7 +25,7 @@
     
     
       
-        <title>Business Tokenizer - Universal Commerce Protocol (UCP)</title>
+        <title>Processor Tokenizer - Universal Commerce Protocol (UCP)</title>
       
     
     
@@ -137,12 +137,12 @@
       
         <meta  property="og:type"  content="website" >
       
-        <meta  property="og:title"  content="Business Tokenizer - Universal Commerce Protocol (UCP)" >
+        <meta  property="og:title"  content="Processor Tokenizer - Universal Commerce Protocol (UCP)" >
       
         <meta  property="og:description"  content="The Universal Commerce Protocol (UCP) is a solution for enabling gen AI agents to make payments on behalf of users, safely, securely, and in a decentralized and privacy protecting manner. This protocol is a part of the broader ecosystem, which includes agentic protocols like A2A and MCP, and encompasses the global nature of payments.
 " >
       
-        <meta  property="og:image"  content="https://ucp.dev/draft/assets/images/social/specification/examples/business-tokenizer-payment-handler.png" >
+        <meta  property="og:image"  content="https://ucp.dev/draft/assets/images/social/specification/examples/processor-tokenizer-payment-handler.png" >
       
         <meta  property="og:image:type"  content="image/png" >
       
@@ -150,16 +150,16 @@
       
         <meta  property="og:image:height"  content="630" >
       
-        <meta  property="og:url"  content="https://ucp.dev/draft/specification/examples/business-tokenizer-payment-handler/" >
+        <meta  property="og:url"  content="https://ucp.dev/draft/specification/examples/processor-tokenizer-payment-handler/" >
       
         <meta  name="twitter:card"  content="summary_large_image" >
       
-        <meta  name="twitter:title"  content="Business Tokenizer - Universal Commerce Protocol (UCP)" >
+        <meta  name="twitter:title"  content="Processor Tokenizer - Universal Commerce Protocol (UCP)" >
       
         <meta  name="twitter:description"  content="The Universal Commerce Protocol (UCP) is a solution for enabling gen AI agents to make payments on behalf of users, safely, securely, and in a decentralized and privacy protecting manner. This protocol is a part of the broader ecosystem, which includes agentic protocols like A2A and MCP, and encompasses the global nature of payments.
 " >
       
-        <meta  name="twitter:image"  content="https://ucp.dev/draft/assets/images/social/specification/examples/business-tokenizer-payment-handler.png" >
+        <meta  name="twitter:image"  content="https://ucp.dev/draft/assets/images/social/specification/examples/processor-tokenizer-payment-handler.png" >
       
     
     
@@ -221,7 +221,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Business Tokenizer
+              Processor Tokenizer
             
           </span>
         </div>
@@ -1005,7 +1005,7 @@
   
   
   <span class="md-ellipsis">
-    Business Tokenizer
+    Processor Tokenizer
     
   </span>
   
@@ -1018,7 +1018,7 @@
   
   
   <span class="md-ellipsis">
-    Business Tokenizer
+    Processor Tokenizer
     
   </span>
   
@@ -1099,11 +1099,50 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#handler-declaration" class="md-nav__link">
+  <a href="#business-config-discovery" class="md-nav__link">
     <span class="md-ellipsis">
-      Handler Declaration
+      Business Config (Discovery)
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Business Config (Discovery)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-business-handler-declaration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example Business Handler Declaration
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#response-config-checkout" class="md-nav__link">
+    <span class="md-ellipsis">
+      Response Config (Checkout)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Response Config (Checkout)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-response-config" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example Response Config
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -1505,11 +1544,50 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#handler-declaration" class="md-nav__link">
+  <a href="#business-config-discovery" class="md-nav__link">
     <span class="md-ellipsis">
-      Handler Declaration
+      Business Config (Discovery)
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Business Config (Discovery)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-business-handler-declaration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example Business Handler Declaration
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#response-config-checkout" class="md-nav__link">
+    <span class="md-ellipsis">
+      Response Config (Checkout)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Response Config (Checkout)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-response-config" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example Response Config
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -1680,11 +1758,16 @@
 <p>This handler implements a <strong>"Tokenize to Process"</strong> flow where the entity
 that generates the token (the Tokenizer) is the same entity that processes
 the final payment (the Processor).</p>
-<p>This specification unifies two common implementation scenarios:
-1.  <strong>Business-Hosted:</strong> An enterprise Business hosts their own secure vault.
-    The Business tokenizes and processes.
-2.  <strong>PSP-Hosted:</strong> The Business uses a third-party PSP. The PSP tokenizes
-    and processes.</p>
+<p><strong>Note:</strong> While this example uses card credentials, the pattern applies to
+<strong>any credential type</strong>. Compliance requirements vary by credential type
+(e.g., PCI DSS for cards).</p>
+<p>This specification unifies two common implementation scenarios:</p>
+<ol>
+<li><strong>Business-Hosted:</strong> An enterprise Business hosts their own secure vault.
+    The Business tokenizes and processes.</li>
+<li><strong>PSP-Hosted:</strong> The Business uses a third-party PSP. The PSP tokenizes
+    and processes.</li>
+</ol>
 <p>In both cases, <strong>no API detokenization step is required</strong>. The token resolution
 happens internally within the Processor's secure environment.</p>
 <h3 id="comparison-of-scenarios">Comparison of Scenarios<a class="headerlink" href="#comparison-of-scenarios" title="Permanent link">&para;</a></h3>
@@ -1728,7 +1811,7 @@ happens internally within the Processor's secure environment.</p>
 <tr>
 <td style="text-align: left;"><strong>Tokenizer / Processor</strong></td>
 <td style="text-align: left;">Host <code>/tokenize</code> endpoint, store tokens, process payments. (Can be Business or PSP).</td>
-<td style="text-align: left;"><strong>High Compliance</strong> (PCI DSS).</td>
+<td style="text-align: left;">Compliance per credential type (e.g., PCI DSS for cards).</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Platform</strong></td>
@@ -1748,7 +1831,7 @@ happens internally within the Processor's secure environment.</p>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>│ (Collector)│                         │      (Business or PSP)            │
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>└─────┬──────┘                         └─────────────────┬─────────────────┘
 </span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>      │                                                  │
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>      │  1. GET payment.handlers                         │
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>      │  1. GET ucp.payment_handlers                     │
 </span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>      │─────────────────────────────────────────────────&gt;│
 </span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>      │                                                  │
 </span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>      │  2. Handler Config (URL + Identity)              │
@@ -1770,30 +1853,98 @@ happens internally within the Processor's secure environment.</p>
 </span></code></pre></div>
 <hr />
 <h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h2>
-<p>The Business advertises this handler in the checkout's <code>payment.handlers</code> array.
-The configuration determines whether the Platform acts in "PSP Mode"
+<p>The Business advertises this handler in their UCP profile's <code>payment_handlers</code>
+registry. The configuration determines whether the Platform acts in "PSP Mode"
 (sending identity) or "Direct Mode" (implicit identity).</p>
-<h3 id="handler-declaration">Handler Declaration<a class="headerlink" href="#handler-declaration" title="Permanent link">&para;</a></h3>
+<h3 id="business-config-discovery">Business Config (Discovery)<a class="headerlink" href="#business-config-discovery" title="Permanent link">&para;</a></h3>
+<p>The business advertises their tokenization endpoint and identity during discovery.
+The handler's specification (referenced via the <code>spec</code> field) documents the
+<code>/tokenize</code> endpoint URL.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Field</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>environment</code></td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">API environment (<code>sandbox</code> or <code>production</code>)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>business_id</code></td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">Business identifier with the processor</td>
+</tr>
+</tbody>
+</table>
+<h4 id="example-business-handler-declaration">Example Business Handler Declaration<a class="headerlink" href="#example-business-handler-declaration" title="Permanent link">&para;</a></h4>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="p">{</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="nt">&quot;payment&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="nt">&quot;handlers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">      </span><span class="p">{</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;processor_tokenizer&quot;</span><span class="p">,</span>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;com.example.processor_tokenizer&quot;</span><span class="p">,</span>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">        </span><span class="nt">&quot;spec&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://example.com/ucp/processor-tokenizer.json&quot;</span><span class="p">,</span>
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">        </span><span class="nt">&quot;instrument_schemas&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">           </span><span class="s2">&quot;https://ucp.dev/schemas/shopping/types/card_payment_instrument.json&quot;</span>
-</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">        </span><span class="p">],</span>
-</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">        </span><span class="nt">&quot;config&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">          </span><span class="nt">&quot;endpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://api.psp.com/v1/tokenize&quot;</span><span class="p">,</span>
-</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w">          </span><span class="nt">&quot;identity&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="w">            </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;merchant_xyz789&quot;</span>
-</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="w">          </span><span class="p">}</span>
-</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="w">        </span><span class="p">}</span>
-</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="w">      </span><span class="p">}</span>
-</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="w">    </span><span class="p">]</span>
-</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="w">  </span><span class="p">}</span>
-</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a><span class="p">}</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="nt">&quot;ucp&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-01-11&quot;</span><span class="p">,</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">    </span><span class="nt">&quot;payment_handlers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">      </span><span class="nt">&quot;com.example.processor_tokenizer&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">        </span><span class="p">{</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">          </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;processor_tokenizer&quot;</span><span class="p">,</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">          </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-01-11&quot;</span><span class="p">,</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">          </span><span class="nt">&quot;spec&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://example.com/ucp/processor-tokenizer.json&quot;</span><span class="p">,</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">          </span><span class="nt">&quot;schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://example.com/ucp/processor-tokenizer/schema.json&quot;</span><span class="p">,</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">          </span><span class="nt">&quot;config&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">            </span><span class="nt">&quot;environment&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;production&quot;</span><span class="p">,</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w">            </span><span class="nt">&quot;business_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;merchant_xyz789&quot;</span>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="w">          </span><span class="p">}</span>
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="w">        </span><span class="p">}</span>
+</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="w">      </span><span class="p">]</span>
+</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="p">}</span>
+</span></code></pre></div>
+<h3 id="response-config-checkout">Response Config (Checkout)<a class="headerlink" href="#response-config-checkout" title="Permanent link">&para;</a></h3>
+<p>The response config includes runtime information about what's available for this checkout.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Field</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>environment</code></td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">API environment used for this checkout</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>business_id</code></td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">Business identifier</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>supported_networks</code></td>
+<td style="text-align: left;">array</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Card networks supported for this transaction</td>
+</tr>
+</tbody>
+</table>
+<h4 id="example-response-config">Example Response Config<a class="headerlink" href="#example-response-config" title="Permanent link">&para;</a></h4>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="p">{</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="nt">&quot;config&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="nt">&quot;environment&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;production&quot;</span><span class="p">,</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="nt">&quot;business_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;merchant_xyz789&quot;</span><span class="p">,</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">    </span><span class="nt">&quot;supported_networks&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;visa&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;mastercard&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;amex&quot;</span><span class="p">]</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="p">}</span>
 </span></code></pre></div>
 <h2 id="platform-integration">Platform Integration<a class="headerlink" href="#platform-integration" title="Permanent link">&para;</a></h2>
 <h3 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h3>
@@ -1827,18 +1978,23 @@ the specific <code>endpoint</code> defined in the handler configuration.</li>
 <h3 id="payment-protocol">Payment Protocol<a class="headerlink" href="#payment-protocol" title="Permanent link">&para;</a></h3>
 <h4 id="step-1-discover-handler">Step 1: Discover Handler<a class="headerlink" href="#step-1-discover-handler" title="Permanent link">&para;</a></h4>
 <p>Platform identifies the processor tokenizer handler and retrieves the
-configuration.</p>
-<div class="language-json highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="p">{</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;processor_tokenizer&quot;</span><span class="p">,</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;com.example.processor_tokenizer&quot;</span><span class="p">,</span>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">  </span><span class="nt">&quot;spec&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://example.com/ucp/processor-tokenizer.json&quot;</span><span class="p">,</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">  </span><span class="nt">&quot;config&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">    </span><span class="nt">&quot;endpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://api.processor.com/v1/tokenize&quot;</span><span class="p">,</span>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">    </span><span class="nt">&quot;identity&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">      </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;merchant_xyz789&quot;</span>
-</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">    </span><span class="p">}</span>
-</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">  </span><span class="p">}</span>
-</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="p">}</span>
+business's configuration.</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="p">{</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="nt">&quot;ucp&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">    </span><span class="nt">&quot;payment_handlers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">      </span><span class="nt">&quot;com.example.processor_tokenizer&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">        </span><span class="p">{</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">          </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;processor_tokenizer&quot;</span><span class="p">,</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">          </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-01-11&quot;</span><span class="p">,</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">          </span><span class="nt">&quot;config&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">            </span><span class="nt">&quot;environment&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;production&quot;</span><span class="p">,</span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">            </span><span class="nt">&quot;business_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;merchant_xyz789&quot;</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="w">          </span><span class="p">}</span>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="w">        </span><span class="p">}</span>
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="w">      </span><span class="p">]</span>
+</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a><span class="p">}</span>
 </span></code></pre></div>
 <h4 id="step-2-collect-sensitive-data">Step 2: Collect Sensitive Data<a class="headerlink" href="#step-2-collect-sensitive-data" title="Permanent link">&para;</a></h4>
 <p>Platform's <strong>compliant secure payment credential providers</strong> collects the
@@ -1849,33 +2005,41 @@ that ensures the sensitive instrument details never touch the platform).</p>
 <p><strong>Note:</strong> If the handler configuration includes an <code>identity</code> object, the
 credential provider <strong>MUST</strong> inject it into the <code>binding</code> object.</p>
 <p>Response:</p>
-<div class="language-json highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="p">{</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="nt">&quot;token&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;tok_a1b2c3d4e5f6&quot;</span>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="p">}</span>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p">{</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="nt">&quot;token&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;tok_a1b2c3d4e5f6&quot;</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="p">}</span>
 </span></code></pre></div>
 <h3 id="step-4-complete-checkout">Step 4: Complete Checkout<a class="headerlink" href="#step-4-complete-checkout" title="Permanent link">&para;</a></h3>
 <p>The Platform submits the token.</p>
-<div class="language-json highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="err">POST</span><span class="w"> </span><span class="err">/checkou</span><span class="kc">t</span><span class="mi">-</span><span class="err">sessio</span><span class="kc">ns</span><span class="err">/</span><span class="p">{</span><span class="err">checkou</span><span class="kc">t</span><span class="err">_id</span><span class="p">}</span><span class="err">/comple</span><span class="kc">te</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="err">UCP</span><span class="mi">-</span><span class="err">Age</span><span class="kc">nt</span><span class="p">:</span><span class="w"> </span><span class="err">pro</span><span class="kc">f</span><span class="err">ile=</span><span class="s2">&quot;https://platform.example/profile&quot;</span>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="err">Co</span><span class="kc">ntent</span><span class="mi">-</span><span class="err">Type</span><span class="p">:</span><span class="w"> </span><span class="err">applica</span><span class="kc">t</span><span class="err">io</span><span class="kc">n</span><span class="err">/jso</span><span class="kc">n</span>
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>
-</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="p">{</span>
-</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">  </span><span class="nt">&quot;payment_data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">    </span><span class="nt">&quot;handler_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;processor_tokenizer&quot;</span><span class="p">,</span>
-</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;card&quot;</span><span class="p">,</span>
-</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="w">    </span><span class="nt">&quot;brand&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;visa&quot;</span><span class="p">,</span>
-</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="w">    </span><span class="nt">&quot;last_digits&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1111&quot;</span><span class="p">,</span>
-</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="w">    </span><span class="nt">&quot;expiry_month&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">12</span><span class="p">,</span>
-</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="w">    </span><span class="nt">&quot;expiry_year&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2026</span><span class="p">,</span>
-</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="w">    </span><span class="nt">&quot;credential&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a><span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;token&quot;</span><span class="p">,</span>
-</span><span id="__span-4-15"><a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a><span class="w">      </span><span class="nt">&quot;token&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;tok_a1b2c3d4e5f6&quot;</span>
-</span><span id="__span-4-16"><a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a><span class="w">    </span><span class="p">}</span>
-</span><span id="__span-4-17"><a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a><span class="w">  </span><span class="p">},</span>
-</span><span id="__span-4-18"><a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a><span class="w">  </span><span class="nt">&quot;risk_signal&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-4-19"><a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a><span class="w">    </span><span class="c1">// ... the key value pair for potential risk signal data</span>
-</span><span id="__span-4-20"><a id="__codelineno-4-20" name="__codelineno-4-20" href="#__codelineno-4-20"></a><span class="w">  </span><span class="p">}</span>
-</span><span id="__span-4-21"><a id="__codelineno-4-21" name="__codelineno-4-21" href="#__codelineno-4-21"></a><span class="p">}</span>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="err">POST</span><span class="w"> </span><span class="err">/checkou</span><span class="kc">t</span><span class="mi">-</span><span class="err">sessio</span><span class="kc">ns</span><span class="err">/</span><span class="p">{</span><span class="err">checkou</span><span class="kc">t</span><span class="err">_id</span><span class="p">}</span><span class="err">/comple</span><span class="kc">te</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="err">UCP</span><span class="mi">-</span><span class="err">Age</span><span class="kc">nt</span><span class="p">:</span><span class="w"> </span><span class="err">pro</span><span class="kc">f</span><span class="err">ile=</span><span class="s2">&quot;https://platform.example/profile&quot;</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="err">Co</span><span class="kc">ntent</span><span class="mi">-</span><span class="err">Type</span><span class="p">:</span><span class="w"> </span><span class="err">applica</span><span class="kc">t</span><span class="err">io</span><span class="kc">n</span><span class="err">/jso</span><span class="kc">n</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="p">{</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">  </span><span class="nt">&quot;payment&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">    </span><span class="nt">&quot;instruments&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">      </span><span class="p">{</span>
+</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;instr_1&quot;</span><span class="p">,</span>
+</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="w">        </span><span class="nt">&quot;handler_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;processor_tokenizer&quot;</span><span class="p">,</span>
+</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;card&quot;</span><span class="p">,</span>
+</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="w">        </span><span class="nt">&quot;selected&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+</span><span id="__span-5-13"><a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="w">        </span><span class="nt">&quot;display&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-5-14"><a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a><span class="w">          </span><span class="nt">&quot;brand&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;visa&quot;</span><span class="p">,</span>
+</span><span id="__span-5-15"><a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a><span class="w">          </span><span class="nt">&quot;last_digits&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1111&quot;</span><span class="p">,</span>
+</span><span id="__span-5-16"><a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a><span class="w">          </span><span class="nt">&quot;expiry_month&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">12</span><span class="p">,</span>
+</span><span id="__span-5-17"><a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a><span class="w">          </span><span class="nt">&quot;expiry_year&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2026</span>
+</span><span id="__span-5-18"><a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a><span class="w">        </span><span class="p">},</span>
+</span><span id="__span-5-19"><a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a><span class="w">        </span><span class="nt">&quot;credential&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-5-20"><a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a><span class="w">          </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;token&quot;</span><span class="p">,</span>
+</span><span id="__span-5-21"><a id="__codelineno-5-21" name="__codelineno-5-21" href="#__codelineno-5-21"></a><span class="w">          </span><span class="nt">&quot;token&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;tok_a1b2c3d4e5f6&quot;</span>
+</span><span id="__span-5-22"><a id="__codelineno-5-22" name="__codelineno-5-22" href="#__codelineno-5-22"></a><span class="w">        </span><span class="p">}</span>
+</span><span id="__span-5-23"><a id="__codelineno-5-23" name="__codelineno-5-23" href="#__codelineno-5-23"></a><span class="w">      </span><span class="p">}</span>
+</span><span id="__span-5-24"><a id="__codelineno-5-24" name="__codelineno-5-24" href="#__codelineno-5-24"></a><span class="w">    </span><span class="p">]</span>
+</span><span id="__span-5-25"><a id="__codelineno-5-25" name="__codelineno-5-25" href="#__codelineno-5-25"></a><span class="w">  </span><span class="p">},</span>
+</span><span id="__span-5-26"><a id="__codelineno-5-26" name="__codelineno-5-26" href="#__codelineno-5-26"></a><span class="w">  </span><span class="nt">&quot;risk_signal&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-5-27"><a id="__codelineno-5-27" name="__codelineno-5-27" href="#__codelineno-5-27"></a><span class="w">    </span><span class="c1">// ... the key value pair for potential risk signal data</span>
+</span><span id="__span-5-28"><a id="__codelineno-5-28" name="__codelineno-5-28" href="#__codelineno-5-28"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-5-29"><a id="__codelineno-5-29" name="__codelineno-5-29" href="#__codelineno-5-29"></a><span class="p">}</span>
 </span></code></pre></div>
 <hr />
 <h2 id="implementation-guide">Implementation Guide<a class="headerlink" href="#implementation-guide" title="Permanent link">&para;</a></h2>
@@ -1887,8 +2051,9 @@ credential provider <strong>MUST</strong> inject it into the <code>binding</code
 <li>Internally map tokens to PANs in their own database.</li>
 </ol>
 </li>
-<li><strong>Security:</strong> <strong>CRITICAL.</strong> The Business <strong>MUST</strong> be PCI DSS compliant
-    as they are receiving raw PANs at their endpoint.</li>
+<li><strong>Security:</strong> <strong>CRITICAL.</strong> For card credentials, the Business <strong>MUST</strong> be
+    PCI DSS compliant as they are receiving raw PANs at their endpoint.
+    Other credential types have their own compliance requirements.</li>
 </ul>
 <h3 id="scenario-b-psp-implementation-third-party">Scenario B: PSP Implementation (Third-Party)<a class="headerlink" href="#scenario-b-psp-implementation-third-party" title="Permanent link">&para;</a></h3>
 <ul>
@@ -1900,7 +2065,8 @@ credential provider <strong>MUST</strong> inject it into the <code>binding</code
 the final payment charge.</li>
 </ol>
 </li>
-<li><strong>Security:</strong> PSP bears the PCI compliance burden for storage.</li>
+<li><strong>Security:</strong> PSP bears the compliance burden for credential storage
+    (e.g., PCI DSS for cards).</li>
 </ul>
 <hr />
 <h2 id="security-considerations">Security Considerations<a class="headerlink" href="#security-considerations" title="Permanent link">&para;</a></h2>
@@ -1918,7 +2084,7 @@ the final payment charge.</li>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Compliance</strong></td>
-<td style="text-align: left;">The entity hosting <code>config.endpoint</code> <strong>MUST</strong> be compliant with relevant data standards (PCI DSS, GDPR, etc.).</td>
+<td style="text-align: left;">The entity hosting <code>config.endpoint</code> <strong>MUST</strong> be compliant with relevant data standards for the credential type (e.g., PCI DSS for cards, GDPR for PII, etc.).</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Scope Isolation</strong></td>

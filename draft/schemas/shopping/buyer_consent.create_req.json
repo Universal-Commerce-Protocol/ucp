@@ -39,7 +39,7 @@
           "type": "object",
           "properties": {
             "consent": {
-              "$ref": "https://ucp.dev/schemas/shopping/buyer_consent.create_req.json#/$defs/consent",
+              "$ref": "#/$defs/consent",
               "description": "Consent tracking fields."
             }
           }
@@ -57,7 +57,7 @@
           "type": "object",
           "properties": {
             "buyer": {
-              "$ref": "https://ucp.dev/schemas/shopping/buyer_consent.create_req.json#/$defs/buyer",
+              "$ref": "#/$defs/buyer",
               "description": "Buyer with consent tracking."
             }
           }

@@ -75,7 +75,6 @@ This object MUST be one of the following types: [Shipping Destination Response](
 | postal_code      | string | No       | The postal code. For example, 94043.                                                                                                                                                                                                      |
 | first_name       | string | No       | Optional. First name of the contact associated with the address.                                                                                                                                                                          |
 | last_name        | string | No       | Optional. Last name of the contact associated with the address.                                                                                                                                                                           |
-| full_name        | string | No       | Optional. Full name of the contact associated with the address (if first_name or last_name fields are present they take precedence).                                                                                                      |
 | phone_number     | string | No       | Optional. Phone number of the contact associated with the address.                                                                                                                                                                        |
 | id               | string | **Yes**  | ID specific to this shipping destination.                                                                                                                                                                                                 |
 
@@ -137,7 +136,6 @@ This object MUST be one of the following types: [Shipping Destination Response](
 | postal_code      | string | No       | The postal code. For example, 94043.                                                                                                                                                                                                      |
 | first_name       | string | No       | Optional. First name of the contact associated with the address.                                                                                                                                                                          |
 | last_name        | string | No       | Optional. Last name of the contact associated with the address.                                                                                                                                                                           |
-| full_name        | string | No       | Optional. Full name of the contact associated with the address (if first_name or last_name fields are present they take precedence).                                                                                                      |
 | phone_number     | string | No       | Optional. Phone number of the contact associated with the address.                                                                                                                                                                        |
 
 ### Example
@@ -300,7 +298,7 @@ Businesses and platforms declare fulfillment constraints in their profiles. Busi
 
 ### Platform Profile
 
-Platforms declare their rendering capabilities using `platform_config`:
+Platforms declare their rendering capabilities using `platform_schema`:
 
 | Name                 | Type    | Required | Description                         |
 | -------------------- | ------- | -------- | ----------------------------------- |
@@ -310,10 +308,10 @@ Platforms that omit config or set `supports_multi_group: false` receive single-g
 
 ```json
 // Default: single group per method
-{ "name": "dev.ucp.shopping.fulfillment", "version": "2026-01-11" }
+{ "dev.ucp.shopping.fulfillment": [{"version": "2026-01-11"}] }
 
 // Opt-in: business MAY return multiple groups per method
-{ "name": "dev.ucp.shopping.fulfillment", "version": "2026-01-11", "config": { "supports_multi_group": true } }
+{ "dev.ucp.shopping.fulfillment": [{"version": "2026-01-11", "config": { "supports_multi_group": true }}] }
 ```
 
 ### Business Profile
@@ -327,16 +325,19 @@ Businesses declare what fulfillment configurations they support using `merchant_
 
 ```json
 {
-  "capabilities": [{
-    "name": "dev.ucp.shopping.fulfillment",
-    "version": "2026-01-11",
-    "config": {
-      "allows_multi_destination": {
-        "shipping": true
-      },
-      "allows_method_combinations": [["shipping", "pickup"]]
-    }
-  }]
+  "capabilities": {
+    "dev.ucp.shopping.fulfillment": [
+      {
+        "version": "2026-01-11",
+        "config": {
+          "allows_multi_destination": {
+            "shipping": true
+          },
+          "allows_method_combinations": [["shipping", "pickup"]]
+        }
+      }
+    ]
+  }
 }
 ```
 

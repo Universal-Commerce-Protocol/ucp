@@ -991,12 +991,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../business-tokenizer-payment-handler/" class="md-nav__link">
+      <a href="../processor-tokenizer-payment-handler/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Business Tokenizer
+    Processor Tokenizer
     
   </span>
   
@@ -1160,6 +1160,21 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Prerequisites">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#critical-compliance-required-for-card-credentials" class="md-nav__link">
+    <span class="md-ellipsis">
+      CRITICAL: Compliance Required for Card Credentials
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
           <li class="md-nav__item">
@@ -1173,9 +1188,36 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#example-handler-declaration" class="md-nav__link">
+  <a href="#business-config-discovery" class="md-nav__link">
     <span class="md-ellipsis">
-      Example Handler Declaration
+      Business Config (Discovery)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-business-handler-declaration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example Business Handler Declaration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#response-config-checkout" class="md-nav__link">
+    <span class="md-ellipsis">
+      Response Config (Checkout)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-response-config" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example Response Config
     </span>
   </a>
   
@@ -1216,6 +1258,39 @@
       Prerequisites
     </span>
   </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#handler-configuration-platform" class="md-nav__link">
+    <span class="md-ellipsis">
+      Handler Configuration (Platform)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Handler Configuration (Platform)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#platform-config-discovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      Platform Config (Discovery)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-platform-handler-declaration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example Platform Handler Declaration
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -1505,6 +1580,21 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Prerequisites">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#critical-compliance-required-for-card-credentials" class="md-nav__link">
+    <span class="md-ellipsis">
+      CRITICAL: Compliance Required for Card Credentials
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
           <li class="md-nav__item">
@@ -1518,9 +1608,36 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#example-handler-declaration" class="md-nav__link">
+  <a href="#business-config-discovery" class="md-nav__link">
     <span class="md-ellipsis">
-      Example Handler Declaration
+      Business Config (Discovery)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-business-handler-declaration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example Business Handler Declaration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#response-config-checkout" class="md-nav__link">
+    <span class="md-ellipsis">
+      Response Config (Checkout)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-response-config" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example Response Config
     </span>
   </a>
   
@@ -1561,6 +1678,39 @@
       Prerequisites
     </span>
   </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#handler-configuration-platform" class="md-nav__link">
+    <span class="md-ellipsis">
+      Handler Configuration (Platform)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Handler Configuration (Platform)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#platform-config-discovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      Platform Config (Discovery)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-platform-handler-declaration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example Platform Handler Declaration
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -1649,11 +1799,14 @@
 <h2 id="introduction">Introduction<a class="headerlink" href="#introduction" title="Permanent link">&para;</a></h2>
 <p>This example demonstrates a payment handler where the <strong>platform encrypts
 credentials directly for the business</strong>. Unlike tokenization patterns, there is
-no <code>/tokenize</code> or <code>/detokenize</code>
-endpoint—the platform's <strong>PCI DSS compliant credential vault</strong> encrypts credentials
-using the business's public key, and the business decrypts them locally.</p>
+no <code>/tokenize</code> or <code>/detokenize</code> endpoint—the platform's compliant credential
+vault encrypts credentials using the business's public key, and the business
+decrypts them locally.</p>
 <p>This pattern is ideal when businesses want to avoid round-trip latency to a
 tokenizer at payment time.</p>
+<p><strong>Note:</strong> While this example uses card credentials (requiring PCI DSS
+compliance), the encryption pattern applies to <strong>any credential type</strong>.
+Compliance requirements vary by credential type.</p>
 <h3 id="key-benefits">Key Benefits<a class="headerlink" href="#key-benefits" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>No runtime round-trips:</strong> Business decrypts locally, no <code>/detokenize</code> call needed</li>
@@ -1697,7 +1850,7 @@ tokenizer at payment time.</p>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Platform</strong></td>
-<td style="text-align: left;">Operates PCI-compliant credential vault, encrypts for business using their public key</td>
+<td style="text-align: left;">Operates compliant credential vault, encrypts for business using their public key</td>
 <td style="text-align: left;">Yes — implements encryption</td>
 </tr>
 </tbody>
@@ -1714,7 +1867,7 @@ tokenizer at payment time.</p>
 </span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>         │  2. Confirmation                             │
 </span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>         │─────────────────────────────────────────────&gt;│
 </span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>         │                                              │
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>         │  3. GET payment.handlers                     │
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>         │  3. GET ucp.payment_handlers                 │
 </span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>         │─────────────────────────────────────────────&gt;│
 </span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>         │                                              │
 </span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>         │  4. Handler with business identity           │
@@ -1734,16 +1887,17 @@ tokenizer at payment time.</p>
 <hr />
 <h2 id="business-integration">Business Integration<a class="headerlink" href="#business-integration" title="Permanent link">&para;</a></h2>
 <h3 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h3>
-<p><strong>CRITICAL: PCI DSS Compliance Required</strong></p>
+<h4 id="critical-compliance-required-for-card-credentials">CRITICAL: Compliance Required for Card Credentials<a class="headerlink" href="#critical-compliance-required-for-card-credentials" title="Permanent link">&para;</a></h4>
 <p>Before accepting this handler, businesses must register their public encryption
 key with the platform.</p>
 <p>While businesses receive only encrypted <code>EncryptedCredential</code> payloads during
-checkout, they MUST be <strong>PCI DSS compliant</strong> because they decrypt these payloads
-locally to obtain raw <code>CardCredential</code> for payment processing. This includes:</p>
+checkout, they decrypt these payloads locally to obtain raw credentials for
+payment processing. <strong>For card credentials</strong>, businesses MUST be <strong>PCI DSS
+compliant</strong> because they will handle raw PANs. This includes:</p>
 <ul>
 <li>Secure key management for decryption keys</li>
 <li>Secure handling of raw credentials after decryption</li>
-<li>Compliance with all PCI DSS requirements for handling Primary Account Numbers (PANs)</li>
+<li>For cards: Compliance with all PCI DSS requirements for handling Primary Account Numbers (PANs)</li>
 </ul>
 <p><strong>Prerequisites Output:</strong></p>
 <table>
@@ -1765,36 +1919,116 @@ locally to obtain raw <code>CardCredential</code> for payment processing. This i
 </tbody>
 </table>
 <h3 id="handler-configuration">Handler Configuration<a class="headerlink" href="#handler-configuration" title="Permanent link">&para;</a></h3>
-<p>Businesses advertise the platform's handler. The <code>identity</code> field contains the
-<strong>business's identity</strong>, which the platform uses to look up the correct public
-key for encryption.</p>
-<p>The only supported identity schema is <a href="https://ucp.dev/schemas/shopping/types/payment_identity.json">PaymentIdentity</a>.</p>
+<p>Businesses advertise the platform's handler. The <code>business_id</code> field identifies
+the business, which the platform uses to look up the correct public key for
+encryption.</p>
 <p>The only supported instrument schema is <a href="https://ucp.dev/schemas/shopping/types/card_payment_instrument.json">CardPaymentInstrument</a>, the only supported checkout credential schema is <code>EncryptedCredential</code>, and the only supported source credential schema is <a href="https://ucp.dev/schemas/shopping/types/card_credential.json">CardCredential</a>.</p>
-<p><strong>Note:</strong> <code>CardCredential</code> contains raw PANs. The platform's
-<strong>PCI DSS compliant</strong> vaulting service handles these credentials and encrypts
-them before transmission. Businesses receive only encrypted payloads but
-MUST be PCI DSS compliant once they decrypt the credentials locally.</p>
-<h4 id="example-handler-declaration">Example Handler Declaration<a class="headerlink" href="#example-handler-declaration" title="Permanent link">&para;</a></h4>
+<p><strong>Note:</strong> The <code>EncryptedCredential</code> shape would be formally defined in the handler's schema (referenced via the <code>schema</code> field in the handler declaration).</p>
+<p><strong>Note:</strong> <code>CardCredential</code> contains raw PANs. For card credentials, the
+platform's vaulting service must be <strong>PCI DSS compliant</strong> when handling these
+credentials. Businesses receive only encrypted payloads but must be PCI DSS
+compliant once they decrypt card credentials locally. Other credential types
+have their own compliance requirements.</p>
+<h4 id="business-config-discovery">Business Config (Discovery)<a class="headerlink" href="#business-config-discovery" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Field</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>environment</code></td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">API environment (<code>sandbox</code> or <code>production</code>)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>business_id</code></td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">Business identifier assigned by platform</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>public_key_id</code></td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">Identifier for the business's registered public key</td>
+</tr>
+</tbody>
+</table>
+<h4 id="example-business-handler-declaration">Example Business Handler Declaration<a class="headerlink" href="#example-business-handler-declaration" title="Permanent link">&para;</a></h4>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="p">{</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="nt">&quot;payment&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="nt">&quot;handlers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">      </span><span class="p">{</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;platform_encrypted&quot;</span><span class="p">,</span>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;com.example.platform_encrypted&quot;</span><span class="p">,</span>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">        </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-01-11&quot;</span><span class="p">,</span>
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">        </span><span class="nt">&quot;spec&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://platform.example.com/ucp/encrypted-handler.json&quot;</span><span class="p">,</span>
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">        </span><span class="nt">&quot;config_schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://platform.example.com/ucp/encrypted-handler/config.json&quot;</span><span class="p">,</span>
-</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">        </span><span class="nt">&quot;instrument_schemas&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">          </span><span class="s2">&quot;https://ucp.dev/schemas/shopping/types/card_payment_instrument.json&quot;</span>
-</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">        </span><span class="p">],</span>
-</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w">        </span><span class="nt">&quot;config&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="w">          </span><span class="nt">&quot;merchant_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;merchant_abc123&quot;</span><span class="p">,</span>
-</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="w">          </span><span class="nt">&quot;environment&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;production&quot;</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="nt">&quot;ucp&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-01-11&quot;</span><span class="p">,</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">    </span><span class="nt">&quot;payment_handlers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">      </span><span class="nt">&quot;com.example.platform_encrypted&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">        </span><span class="p">{</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">          </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;platform_encrypted&quot;</span><span class="p">,</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">          </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-01-11&quot;</span><span class="p">,</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">          </span><span class="nt">&quot;spec&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://platform.example.com/ucp/encrypted-handler.json&quot;</span><span class="p">,</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">          </span><span class="nt">&quot;schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://platform.example.com/ucp/encrypted-handler/schema.json&quot;</span><span class="p">,</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">          </span><span class="nt">&quot;config&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">            </span><span class="nt">&quot;environment&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;production&quot;</span><span class="p">,</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w">            </span><span class="nt">&quot;business_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;merchant_abc123&quot;</span><span class="p">,</span>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="w">            </span><span class="nt">&quot;public_key_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;key_2026_01&quot;</span>
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="w">          </span><span class="p">}</span>
 </span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="w">        </span><span class="p">}</span>
-</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="w">      </span><span class="p">}</span>
-</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="w">    </span><span class="p">]</span>
+</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="w">      </span><span class="p">]</span>
+</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="w">    </span><span class="p">}</span>
 </span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="w">  </span><span class="p">}</span>
 </span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a><span class="p">}</span>
+</span></code></pre></div>
+<h4 id="response-config-checkout">Response Config (Checkout)<a class="headerlink" href="#response-config-checkout" title="Permanent link">&para;</a></h4>
+<p>The response config includes information about the encryption used.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Field</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>environment</code></td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">API environment</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>business_id</code></td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">Business identifier</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>encryption_algorithm</code></td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">Algorithm used (e.g., <code>RSA-OAEP-256</code>)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>key_id</code></td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">Key identifier used for encryption</td>
+</tr>
+</tbody>
+</table>
+<h4 id="example-response-config">Example Response Config<a class="headerlink" href="#example-response-config" title="Permanent link">&para;</a></h4>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="p">{</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="nt">&quot;config&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="nt">&quot;environment&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;production&quot;</span><span class="p">,</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="nt">&quot;business_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;merchant_abc123&quot;</span><span class="p">,</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">    </span><span class="nt">&quot;encryption_algorithm&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RSA-OAEP-256&quot;</span><span class="p">,</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">    </span><span class="nt">&quot;key_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;key_2026_01&quot;</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="p">}</span>
 </span></code></pre></div>
 <h3 id="processing-payments">Processing Payments<a class="headerlink" href="#processing-payments" title="Permanent link">&para;</a></h3>
 <p>Upon receiving a checkout with an encrypted credential:</p>
@@ -1808,11 +2042,10 @@ MUST be PCI DSS compliant once they decrypt the credentials locally.</p>
 <hr />
 <h2 id="platform-integration">Platform Integration<a class="headerlink" href="#platform-integration" title="Permanent link">&para;</a></h2>
 <h3 id="prerequisites_1">Prerequisites<a class="headerlink" href="#prerequisites_1" title="Permanent link">&para;</a></h3>
-<p>This handler is implemented by platforms that operate <strong>PCI DSS compliant</strong>
-credential vaults and can encrypt credentials for businesses. To implement,
-platforms must:</p>
+<p>This handler is implemented by platforms that operate compliant credential
+vaults and can encrypt credentials for businesses. To implement, platforms must:</p>
 <ol>
-<li>Maintain PCI DSS compliance for credential storage and handling</li>
+<li>Maintain compliance for credential storage and handling (e.g., PCI DSS for cards)</li>
 <li>Store business public keys during onboarding</li>
 <li>Encrypt credentials using the correct business's key based on handler identity</li>
 </ol>
@@ -1835,12 +2068,68 @@ platforms must:</p>
 </tr>
 </tbody>
 </table>
+<h3 id="handler-configuration-platform">Handler Configuration (Platform)<a class="headerlink" href="#handler-configuration-platform" title="Permanent link">&para;</a></h3>
+<p>Platforms advertise this handler in their UCP profile's <code>payment_handlers</code>
+registry using <code>platform_config</code>.</p>
+<h4 id="platform-config-discovery">Platform Config (Discovery)<a class="headerlink" href="#platform-config-discovery" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Field</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>environment</code></td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">API environment (<code>sandbox</code> or <code>production</code>)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>platform_id</code></td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">Platform identifier</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>supported_algorithms</code></td>
+<td style="text-align: left;">array</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">Encryption algorithms supported (e.g., <code>["RSA-OAEP-256"]</code>)</td>
+</tr>
+</tbody>
+</table>
+<h4 id="example-platform-handler-declaration">Example Platform Handler Declaration<a class="headerlink" href="#example-platform-handler-declaration" title="Permanent link">&para;</a></h4>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="p">{</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="nt">&quot;ucp&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">    </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-01-11&quot;</span><span class="p">,</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">    </span><span class="nt">&quot;payment_handlers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">      </span><span class="nt">&quot;com.example.platform_encrypted&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">        </span><span class="p">{</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">          </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;platform_encrypted&quot;</span><span class="p">,</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">          </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-01-11&quot;</span><span class="p">,</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">          </span><span class="nt">&quot;spec&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://platform.example.com/ucp/encrypted-handler.json&quot;</span><span class="p">,</span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">          </span><span class="nt">&quot;schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://platform.example.com/ucp/encrypted-handler/schema.json&quot;</span><span class="p">,</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="w">          </span><span class="nt">&quot;config&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="w">            </span><span class="nt">&quot;environment&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;production&quot;</span><span class="p">,</span>
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="w">            </span><span class="nt">&quot;platform_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;platform_abc123&quot;</span><span class="p">,</span>
+</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="w">            </span><span class="nt">&quot;supported_algorithms&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;RSA-OAEP-256&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;RSA-OAEP-384&quot;</span><span class="p">]</span>
+</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="w">          </span><span class="p">}</span>
+</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a><span class="w">        </span><span class="p">}</span>
+</span><span id="__span-3-17"><a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a><span class="w">      </span><span class="p">]</span>
+</span><span id="__span-3-18"><a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-3-19"><a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-3-20"><a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a><span class="p">}</span>
+</span></code></pre></div>
 <h3 id="credential-encryption">Credential Encryption<a class="headerlink" href="#credential-encryption" title="Permanent link">&para;</a></h3>
 <p>The platform application orchestrates the payment flow but
 <strong>never has access to raw credentials</strong>. Instead:</p>
 <ol>
-<li>The platform's <strong>PCI-compliant card vaulting service</strong> receives the raw
-   credential from the user</li>
+<li>The platform's <strong>compliant vaulting service</strong> receives the raw credential
+   from the user</li>
 <li>The vaulting service encrypts the credential along with binding context using
    the business's public key</li>
 <li>The vaulting service returns the encrypted payload to the platform application</li>
@@ -1851,28 +2140,35 @@ access to raw PANs.</p>
 <h3 id="submitting-checkout">Submitting Checkout<a class="headerlink" href="#submitting-checkout" title="Permanent link">&para;</a></h3>
 <p>Platform application submits the checkout with the encrypted credential
 (received from its vaulting service):</p>
-<div class="language-json highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="err">POST</span><span class="w"> </span><span class="err">/checkou</span><span class="kc">t</span><span class="mi">-</span><span class="err">sessio</span><span class="kc">ns</span><span class="err">/</span><span class="p">{</span><span class="err">checkou</span><span class="kc">t</span><span class="err">_id</span><span class="p">}</span><span class="err">/comple</span><span class="kc">te</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="err">UCP</span><span class="mi">-</span><span class="err">Age</span><span class="kc">nt</span><span class="p">:</span><span class="w"> </span><span class="err">pro</span><span class="kc">f</span><span class="err">ile=</span><span class="s2">&quot;https://platform.example/profile&quot;</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="err">Co</span><span class="kc">ntent</span><span class="mi">-</span><span class="err">Type</span><span class="p">:</span><span class="w"> </span><span class="err">applica</span><span class="kc">t</span><span class="err">io</span><span class="kc">n</span><span class="err">/jso</span><span class="kc">n</span>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="p">{</span>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">  </span><span class="nt">&quot;payment_data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;instr_1&quot;</span><span class="p">,</span>
-</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">    </span><span class="nt">&quot;handler_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;platform_encrypted&quot;</span><span class="p">,</span>
-</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;card&quot;</span><span class="p">,</span>
-</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">    </span><span class="nt">&quot;brand&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;visa&quot;</span><span class="p">,</span>
-</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">    </span><span class="nt">&quot;last_digits&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1111&quot;</span><span class="p">,</span>
-</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">    </span><span class="nt">&quot;expiry_month&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">12</span><span class="p">,</span>
-</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">    </span><span class="nt">&quot;expiry_year&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2026</span><span class="p">,</span>
-</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="w">    </span><span class="nt">&quot;credential&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;encrypted&quot;</span><span class="p">,</span>
-</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="w">      </span><span class="nt">&quot;encrypted_data&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;base64-encoded-encrypted-payload...&quot;</span>
-</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="w">    </span><span class="p">}</span>
-</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a><span class="w">  </span><span class="p">},</span>
-</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a><span class="w">  </span><span class="nt">&quot;risk_signal&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-2-20"><a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a><span class="w">    </span><span class="c1">// ... the key value pair for potential risk signal data</span>
-</span><span id="__span-2-21"><a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a><span class="w">  </span><span class="p">}</span>
-</span><span id="__span-2-22"><a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a><span class="p">}</span>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="err">POST</span><span class="w"> </span><span class="err">/checkou</span><span class="kc">t</span><span class="mi">-</span><span class="err">sessio</span><span class="kc">ns</span><span class="err">/</span><span class="p">{</span><span class="err">checkou</span><span class="kc">t</span><span class="err">_id</span><span class="p">}</span><span class="err">/comple</span><span class="kc">te</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="err">UCP</span><span class="mi">-</span><span class="err">Age</span><span class="kc">nt</span><span class="p">:</span><span class="w"> </span><span class="err">pro</span><span class="kc">f</span><span class="err">ile=</span><span class="s2">&quot;https://platform.example/profile&quot;</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="err">Co</span><span class="kc">ntent</span><span class="mi">-</span><span class="err">Type</span><span class="p">:</span><span class="w"> </span><span class="err">applica</span><span class="kc">t</span><span class="err">io</span><span class="kc">n</span><span class="err">/jso</span><span class="kc">n</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="p">{</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">  </span><span class="nt">&quot;payment&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">    </span><span class="nt">&quot;instruments&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">      </span><span class="p">{</span>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;instr_1&quot;</span><span class="p">,</span>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="w">        </span><span class="nt">&quot;handler_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;platform_encrypted&quot;</span><span class="p">,</span>
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;card&quot;</span><span class="p">,</span>
+</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="w">        </span><span class="nt">&quot;selected&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="w">        </span><span class="nt">&quot;display&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a><span class="w">          </span><span class="nt">&quot;brand&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;visa&quot;</span><span class="p">,</span>
+</span><span id="__span-4-15"><a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a><span class="w">          </span><span class="nt">&quot;last_digits&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1111&quot;</span><span class="p">,</span>
+</span><span id="__span-4-16"><a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a><span class="w">          </span><span class="nt">&quot;expiry_month&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">12</span><span class="p">,</span>
+</span><span id="__span-4-17"><a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a><span class="w">          </span><span class="nt">&quot;expiry_year&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2026</span>
+</span><span id="__span-4-18"><a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a><span class="w">        </span><span class="p">},</span>
+</span><span id="__span-4-19"><a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a><span class="w">        </span><span class="nt">&quot;credential&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-4-20"><a id="__codelineno-4-20" name="__codelineno-4-20" href="#__codelineno-4-20"></a><span class="w">          </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;encrypted&quot;</span><span class="p">,</span>
+</span><span id="__span-4-21"><a id="__codelineno-4-21" name="__codelineno-4-21" href="#__codelineno-4-21"></a><span class="w">          </span><span class="nt">&quot;encrypted_data&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;base64-encoded-encrypted-payload...&quot;</span>
+</span><span id="__span-4-22"><a id="__codelineno-4-22" name="__codelineno-4-22" href="#__codelineno-4-22"></a><span class="w">        </span><span class="p">}</span>
+</span><span id="__span-4-23"><a id="__codelineno-4-23" name="__codelineno-4-23" href="#__codelineno-4-23"></a><span class="w">      </span><span class="p">}</span>
+</span><span id="__span-4-24"><a id="__codelineno-4-24" name="__codelineno-4-24" href="#__codelineno-4-24"></a><span class="w">    </span><span class="p">]</span>
+</span><span id="__span-4-25"><a id="__codelineno-4-25" name="__codelineno-4-25" href="#__codelineno-4-25"></a><span class="w">  </span><span class="p">},</span>
+</span><span id="__span-4-26"><a id="__codelineno-4-26" name="__codelineno-4-26" href="#__codelineno-4-26"></a><span class="w">  </span><span class="nt">&quot;risk_signals&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-4-27"><a id="__codelineno-4-27" name="__codelineno-4-27" href="#__codelineno-4-27"></a><span class="w">    </span><span class="c1">// ... the key value pair for potential risk signal data</span>
+</span><span id="__span-4-28"><a id="__codelineno-4-28" name="__codelineno-4-28" href="#__codelineno-4-28"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-4-29"><a id="__codelineno-4-29" name="__codelineno-4-29" href="#__codelineno-4-29"></a><span class="p">}</span>
 </span></code></pre></div>
 <hr />
 <h2 id="security-considerations">Security Considerations<a class="headerlink" href="#security-considerations" title="Permanent link">&para;</a></h2>
@@ -1885,16 +2181,16 @@ access to raw PANs.</p>
 </thead>
 <tbody>
 <tr>
-<td style="text-align: left;"><strong>PCI DSS compliance (Platform)</strong></td>
-<td style="text-align: left;">Platform vaulting services MUST be PCI DSS compliant when handling and encrypting raw PANs (Primary Account Numbers)</td>
+<td style="text-align: left;"><strong>Compliance (Platform)</strong></td>
+<td style="text-align: left;">Platform vaulting services MUST be compliant with relevant standards for the credential type (e.g., PCI DSS for cards handling raw PANs)</td>
 </tr>
 <tr>
-<td style="text-align: left;"><strong>PCI DSS compliance (Business)</strong></td>
-<td style="text-align: left;">Businesses MUST be PCI DSS compliant for decryption and handling of raw credentials locally</td>
+<td style="text-align: left;"><strong>Compliance (Business)</strong></td>
+<td style="text-align: left;">Businesses MUST be compliant with relevant standards for decryption and handling of raw credentials locally (e.g., PCI DSS for cards)</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>No platform app credential access</strong></td>
-<td style="text-align: left;">Platform applications MUST NOT handle raw credentials—only the PCI-compliant vaulting service does</td>
+<td style="text-align: left;">Platform applications MUST NOT handle raw credentials—only the compliant vaulting service does</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Asymmetric encryption</strong></td>

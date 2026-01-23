@@ -13,13 +13,12 @@
     "status",
     "currency",
     "totals",
-    "links",
-    "payment"
+    "links"
   ],
   "additionalProperties": true,
   "properties": {
     "ucp": {
-      "$ref": "https://ucp.dev/schemas/ucp.json#/$defs/response_checkout"
+      "$ref": "https://ucp.dev/schemas/ucp.json#/$defs/response_checkout_schema"
     },
     "id": {
       "type": "string",
@@ -50,7 +49,7 @@
     },
     "currency": {
       "type": "string",
-      "description": "ISO 4217 currency code."
+      "description": "ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency."
     },
     "totals": {
       "type": "array",

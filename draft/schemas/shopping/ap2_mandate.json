@@ -3,51 +3,67 @@
   "$id": "https://ucp.dev/schemas/shopping/ap2_mandate.json",
   "name": "dev.ucp.shopping.ap2_mandate",
   "version": "2026-01-11",
-  "title": "AP2 Mandate Extension",
+  "title": "AP2 Mandate Extension Response",
   "description": "Extends Checkout with cryptographic mandate support for non-repudiable authorization per the AP2 protocol. Uses embedded signature model with ap2 namespace.",
   "$defs": {
     "merchant_authorization": {
-      "title": "Merchant Authorization",
+      "title": "Merchant Authorization Response",
       "description": "JWS Detached Content signature (RFC 7515 Appendix F) over the checkout response body (excluding ap2 field). Format: `<base64url-header>..<base64url-signature>`. The header MUST contain 'alg' (ES256/ES384/ES512) and 'kid' claims. The signature covers both the header and JCS-canonicalized checkout payload.",
       "type": "string",
       "pattern": "^[A-Za-z0-9_-]+\\.\\.[A-Za-z0-9_-]+$"
     },
     "checkout_mandate": {
-      "title": "Checkout Mandate",
+      "title": "Checkout Mandate Response",
       "description": "SD-JWT+kb credential in `ap2.checkout_mandate`. Proving user authorization for the checkout. Contains the full checkout including `ap2.merchant_authorization`.",
       "type": "string",
       "pattern": "^[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]*\\.[A-Za-z0-9_-]+(~[A-Za-z0-9_-]+)*$"
     },
-    "ap2_checkout_response": {
-      "title": "AP2 Checkout Response Object",
-      "description": "The ap2 object included in checkout responses when AP2 is negotiated.",
+    "ap2_with_merchant_authorization": {
       "type": "object",
-      "required": [
-        "merchant_authorization"
-      ],
+      "description": "AP2 extension data including merchant authorization.",
       "properties": {
         "merchant_authorization": {
-          "$ref": "https://ucp.dev/schemas/shopping/ap2_mandate.json#/$defs/merchant_authorization",
+          "$ref": "#/$defs/merchant_authorization",
           "description": "Merchant's signature proving checkout terms are authentic."
         }
       }
     },
-    "ap2_complete_request": {
-      "title": "AP2 Complete Request Object",
-      "description": "The ap2 object included in complete_checkout requests when AP2 is negotiated.",
+    "ap2_with_checkout_mandate": {
       "type": "object",
-      "required": [
-        "checkout_mandate"
-      ],
+      "description": "AP2 extension data including checkout mandate.",
       "properties": {
         "checkout_mandate": {
-          "$ref": "https://ucp.dev/schemas/shopping/ap2_mandate.json#/$defs/checkout_mandate",
+          "$ref": "#/$defs/checkout_mandate",
           "description": "SD-JWT+kb proving user authorized this checkout."
         }
       }
     },
+    "checkout": {
+      "title": "Checkout with AP2 Mandate Response",
+      "description": "Checkout extended with AP2 mandate support.",
+      "allOf": [
+        {
+          "$ref": "https://ucp.dev/schemas/shopping/checkout.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "ap2": {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/ap2_with_merchant_authorization"
+                },
+                {
+                  "$ref": "#/$defs/ap2_with_checkout_mandate"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
     "error_code": {
-      "title": "AP2 Error Code",
+      "title": "AP2 Error Code Response",
       "description": "Error codes specific to AP2 mandate verification.",
       "type": "string",
       "enum": [
@@ -59,35 +75,6 @@
         "merchant_authorization_invalid",
         "merchant_authorization_missing"
       ]
-    },
-    "checkout_response_with_ap2": {
-      "title": "Checkout with AP2 Mandate",
-      "description": "Checkout extended with AP2 embedded signature support.",
-      "allOf": [
-        {
-          "$ref": "https://ucp.dev/schemas/shopping/checkout.json"
-        },
-        {
-          "type": "object",
-          "properties": {
-            "ap2": {
-              "$ref": "https://ucp.dev/schemas/shopping/ap2_mandate.json#/$defs/ap2_checkout_response",
-              "description": "AP2 extension data including merchant authorization."
-            }
-          }
-        }
-      ]
-    },
-    "complete_request_with_ap2": {
-      "title": "Complete Checkout Request with AP2",
-      "description": "Extension fields for complete_checkout when AP2 is negotiated.",
-      "type": "object",
-      "properties": {
-        "ap2": {
-          "$ref": "https://ucp.dev/schemas/shopping/ap2_mandate.json#/$defs/ap2_complete_request",
-          "description": "AP2 extension data including checkout mandate."
-        }
-      }
     }
   }
 }

@@ -32,12 +32,48 @@
           "type": "object",
           "properties": {
             "fulfillment": {
-              "$ref": "https://ucp.dev/schemas/shopping/fulfillment.update_req.json#/$defs/fulfillment",
+              "$ref": "#/$defs/fulfillment",
               "description": "Fulfillment details."
             }
           }
         }
       ]
+    },
+    "dev.ucp.shopping.fulfillment": {
+      "platform_schema": {
+        "title": "Fulfillment Capability (Platform) Update Request",
+        "description": "Platform-level fulfillment capability configuration",
+        "allOf": [
+          {
+            "$ref": "https://ucp.dev/schemas/capability.json#/$defs/platform_schema"
+          },
+          {
+            "properties": {
+              "config": {
+                "$ref": "https://ucp.dev/schemas/shopping/types/platform_fulfillment_config.json",
+                "description": "Platform fulfillment configuration"
+              }
+            }
+          }
+        ]
+      },
+      "business_schema": {
+        "title": "Fulfillment Capability (Business) Update Request",
+        "description": "Business-level fulfillment capability configuration",
+        "allOf": [
+          {
+            "$ref": "https://ucp.dev/schemas/capability.json#/$defs/business_schema"
+          },
+          {
+            "properties": {
+              "config": {
+                "$ref": "https://ucp.dev/schemas/shopping/types/business_fulfillment_config.json",
+                "description": "Business fulfillment configuration"
+              }
+            }
+          }
+        ]
+      }
     }
   },
   "embedded": {

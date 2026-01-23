@@ -6,11 +6,13 @@
 
 This guide is for **implementers building tokenization payment handlers**. It defines the shared API, security requirements, and conformance criteria that all tokenization handlers follow.
 
+**Note:** While the examples in this guide use card credentials, tokenization patterns apply to **any sensitive credential type**—bank accounts, digital wallets, loyalty accounts, etc. Compliance requirements (e.g., PCI DSS for cards) vary by credential type.
+
 We offer a range of examples to utilize forms of tokenization in UCP:
 
 | Example                                                                                                            | Use Case                                            |
 | ------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------- |
-| [Business Tokenizer](https://ucp.dev/draft/specification/examples/business-tokenizer-payment-handler/index.md)     | Business runs their own tokenization service        |
+| [Processor Tokenizer](https://ucp.dev/draft/specification/examples/processor-tokenizer-payment-handler/index.md)   | Business or PSP runs tokenization and processing    |
 | [Platform Tokenizer](https://ucp.dev/draft/specification/examples/platform-tokenizer-payment-handler/index.md)     | Platform tokenizes credentials for businesses/PSPs  |
 | [Encrypted Credential Handler](https://ucp.dev/draft/specification/examples/encrypted-credential-handler/index.md) | Platform encrypts credentials instead of tokenizing |
 
@@ -28,7 +30,7 @@ Tokenization handlers transform credentials between source and checkout forms:
 ├─────────────────────────────────────────────────────────────────────────┤
 │                                                                         │
 │   Platform has:            Tokenizer            Business receives:      │
-│   Card Credential    ──▶  /tokenize  ──▶         TokenCredential        │
+│   Source Credential  ──▶  /tokenize  ──▶         TokenCredential        │
 │                                                                         │
 │   ┌─────────────────┐                      ┌─────────────────────────┐  │
 │   │ source_         │                      │ checkout_               │  │
@@ -191,16 +193,16 @@ When publishing your handler, your specification document **MUST** include:
 **Version:** `2026-01-11`
 **OpenAPI:** [Tokenization API](https://ucp.dev/handlers/tokenization/openapi.json)
 
-| Environment | Base URL |
-|:------------|:---------|
-| Production | `https://api.acme.com/ucp` |
-| Sandbox | `https://sandbox.api.acme.com/ucp` |
+| Environment | Base URL                           |
+| :---------- | :--------------------------------- |
+| Production  | `https://api.acme.com/ucp`         |
+| Sandbox     | `https://sandbox.api.acme.com/ucp` |
 
 **Supported Instruments:**
 
-| Instrument | Source Credentials | Checkout Credentials |
-|:-----------|:-------------------|:---------------------|
-| `card` | `card` (fpan, network_token) | `token` |
+| Instrument | Source Credentials           | Checkout Credentials |
+| :--------- | :--------------------------- | :------------------- |
+| `card`     | `card` (fpan, network_token) | `token`              |
 
 **Token Lifecycle:** Single-use (invalidated after detokenization)
 

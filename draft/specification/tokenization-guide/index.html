@@ -17,7 +17,7 @@
         <link rel="prev" href="../payment-handler-template/">
       
       
-        <link rel="next" href="../examples/business-tokenizer-payment-handler/">
+        <link rel="next" href="../examples/processor-tokenizer-payment-handler/">
       
       
       <link rel="icon" href="../../assets/favicon.png">
@@ -1175,12 +1175,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../examples/business-tokenizer-payment-handler/" class="md-nav__link">
+      <a href="../examples/processor-tokenizer-payment-handler/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Business Tokenizer
+    Processor Tokenizer
     
   </span>
   
@@ -1584,6 +1584,10 @@
 <p>This guide is for <strong>implementers building tokenization payment handlers</strong>. It
 defines the shared API, security requirements, and conformance criteria that all
 tokenization handlers follow.</p>
+<p><strong>Note:</strong> While the examples in this guide use card credentials, tokenization
+patterns apply to <strong>any sensitive credential type</strong>—bank accounts, digital
+wallets, loyalty accounts, etc. Compliance requirements (e.g., PCI DSS for
+cards) vary by credential type.</p>
 <p>We offer a range of examples to utilize forms of tokenization in UCP:</p>
 <table>
 <thead>
@@ -1594,8 +1598,8 @@ tokenization handlers follow.</p>
 </thead>
 <tbody>
 <tr>
-<td style="text-align: left;"><a href="../examples/business-tokenizer-payment-handler/">Business Tokenizer</a></td>
-<td style="text-align: left;">Business runs their own tokenization service</td>
+<td style="text-align: left;"><a href="../examples/processor-tokenizer-payment-handler/">Processor Tokenizer</a></td>
+<td style="text-align: left;">Business or PSP runs tokenization and processing</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../examples/platform-tokenizer-payment-handler/">Platform Tokenizer</a></td>
@@ -1616,7 +1620,7 @@ tokenization handlers follow.</p>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>├─────────────────────────────────────────────────────────────────────────┤
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>│                                                                         │
 </span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>│   Platform has:            Tokenizer            Business receives:      │
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>│   Card Credential    ──▶  /tokenize  ──▶         TokenCredential        │
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>│   Source Credential  ──▶  /tokenize  ──▶         TokenCredential        │
 </span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>│                                                                         │
 </span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>│   ┌─────────────────┐                      ┌─────────────────────────┐  │
 </span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>│   │ source_         │                      │ checkout_               │  │
@@ -1846,16 +1850,16 @@ PSP detokenizing for business).</p>
 </span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="gs">**Version:**</span> <span class="sb">`2026-01-11`</span>
 </span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="gs">**OpenAPI:**</span> [<span class="nt">Tokenization API</span>](<span class="na">https://ucp.dev/handlers/tokenization/openapi.json</span>)
 </span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>
-</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>| Environment | Base URL |
-</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>|:------------|:---------|
-</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>| Production | <span class="sb">`https://api.acme.com/ucp`</span> |
-</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>| Sandbox | <span class="sb">`https://sandbox.api.acme.com/ucp`</span> |
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>| Environment | Base URL                           |
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>| :---------- | :--------------------------------- |
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>| Production  | <span class="sb">`https://api.acme.com/ucp`</span>         |
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>| Sandbox     | <span class="sb">`https://sandbox.api.acme.com/ucp`</span> |
 </span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>
 </span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="gs">**Supported Instruments:**</span>
 </span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>
-</span><span id="__span-6-12"><a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>| Instrument | Source Credentials | Checkout Credentials |
-</span><span id="__span-6-13"><a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a>|:-----------|:-------------------|:---------------------|
-</span><span id="__span-6-14"><a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a>| <span class="sb">`card`</span> | <span class="sb">`card`</span> (fpan, network_token) | <span class="sb">`token`</span> |
+</span><span id="__span-6-12"><a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>| Instrument | Source Credentials           | Checkout Credentials |
+</span><span id="__span-6-13"><a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a>| :--------- | :--------------------------- | :------------------- |
+</span><span id="__span-6-14"><a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a>| <span class="sb">`card`</span>     | <span class="sb">`card`</span> (fpan, network_token) | <span class="sb">`token`</span>              |
 </span><span id="__span-6-15"><a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a>
 </span><span id="__span-6-16"><a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a><span class="gs">**Token Lifecycle:**</span> Single-use (invalidated after detokenization)
 </span><span id="__span-6-17"><a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a>
@@ -1975,13 +1979,13 @@ PSP detokenizing for business).</p>
         
         
           
-          <a href="../examples/business-tokenizer-payment-handler/" class="md-footer__link md-footer__link--next" aria-label="Next: Business Tokenizer">
+          <a href="../examples/processor-tokenizer-payment-handler/" class="md-footer__link md-footer__link--next" aria-label="Next: Processor Tokenizer">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Business Tokenizer
+                Processor Tokenizer
               </div>
             </div>
             <div class="md-footer__button md-icon">

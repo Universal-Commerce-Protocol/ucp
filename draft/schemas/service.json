@@ -2,90 +2,171 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/service.json",
   "title": "UCP Service",
-  "description": "Schema for UCP service definitions. A service defines the API surface for a vertical (shopping, common, etc.) with transport bindings.",
-  "type": "object",
-  "additionalProperties": true,
-  "required": [
-    "version",
-    "spec"
-  ],
-  "properties": {
-    "version": {
-      "$ref": "https://ucp.dev/schemas/ucp.json#/$defs/version",
-      "description": "Service version in YYYY-MM-DD format."
-    },
-    "spec": {
-      "type": "string",
-      "format": "uri",
-      "description": "URL to service documentation. Origin MUST match namespace authority."
-    },
-    "rest": {
-      "type": "object",
-      "description": "REST transport binding",
-      "required": [
-        "schema",
-        "endpoint"
-      ],
-      "properties": {
-        "schema": {
-          "type": "string",
-          "format": "uri",
-          "description": "URL to OpenAPI 3.x specification (JSON format)"
+  "description": "Service binding for a specific transport. Each transport binding is a separate entry in the service array.",
+  "$defs": {
+    "base": {
+      "allOf": [
+        {
+          "$ref": "https://ucp.dev/schemas/ucp.json#/$defs/entity"
         },
-        "endpoint": {
-          "type": "string",
-          "format": "uri",
-          "description": "Merchant's REST API endpoint"
+        {
+          "type": "object",
+          "required": [
+            "transport"
+          ],
+          "properties": {
+            "transport": {
+              "type": "string",
+              "enum": [
+                "rest",
+                "mcp",
+                "a2a",
+                "embedded"
+              ],
+              "description": "Transport protocol for this service binding."
+            },
+            "endpoint": {
+              "type": "string",
+              "format": "uri",
+              "description": "Endpoint URL for this transport binding."
+            }
+          }
         }
-      }
+      ]
     },
-    "mcp": {
-      "type": "object",
-      "description": "MCP transport binding",
-      "required": [
-        "schema",
-        "endpoint"
-      ],
-      "properties": {
-        "schema": {
-          "type": "string",
-          "format": "uri",
-          "description": "URL to OpenRPC specification (JSON format)"
+    "platform_schema": {
+      "title": "Service (Platform Schema)",
+      "description": "Full service declaration for platform-level discovery. Different transports require different fields.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
         },
-        "endpoint": {
-          "type": "string",
-          "format": "uri",
-          "description": "Merchant's MCP endpoint"
+        {
+          "required": [
+            "spec"
+          ]
+        },
+        {
+          "anyOf": [
+            {
+              "properties": {
+                "transport": {
+                  "const": "rest"
+                }
+              }
+            },
+            {
+              "properties": {
+                "transport": {
+                  "const": "mcp"
+                }
+              }
+            },
+            {
+              "properties": {
+                "transport": {
+                  "const": "a2a"
+                }
+              }
+            },
+            {
+              "properties": {
+                "transport": {
+                  "const": "embedded"
+                }
+              }
+            }
+          ]
         }
-      }
+      ]
     },
-    "a2a": {
-      "type": "object",
-      "description": "A2A transport binding",
-      "required": [
-        "endpoint"
-      ],
-      "properties": {
-        "endpoint": {
-          "type": "string",
-          "format": "uri",
-          "description": "Merchant's Agent Card endpoint"
+    "business_schema": {
+      "title": "Service (Business Schema)",
+      "description": "Service binding for business/merchant configuration. May override platform endpoints.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
+        },
+        {
+          "anyOf": [
+            {
+              "properties": {
+                "transport": {
+                  "const": "rest"
+                }
+              }
+            },
+            {
+              "properties": {
+                "transport": {
+                  "const": "mcp"
+                }
+              }
+            },
+            {
+              "properties": {
+                "transport": {
+                  "const": "a2a"
+                }
+              }
+            },
+            {
+              "properties": {
+                "transport": {
+                  "const": "embedded"
+                },
+                "config": {
+                  "$ref": "https://ucp.dev/schemas/transports/embedded_config.json"
+                }
+              }
+            }
+          ]
         }
-      }
+      ]
     },
-    "embedded": {
-      "type": "object",
-      "description": "Embedded transport binding (JSON-RPC 2.0 over postMessage). Unlike REST/MCP, the endpoint is per-capability (i.e. per-checkout via continue_url), not per-service.",
-      "required": [
-        "schema"
-      ],
-      "properties": {
-        "schema": {
-          "type": "string",
-          "format": "uri",
-          "description": "URL to OpenRPC specification (JSON format) defining the embedded protocol"
+    "response_schema": {
+      "title": "Service (Response Schema)",
+      "description": "Service binding in API responses. Includes per-resource transport configuration via typed config.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
+        },
+        {
+          "anyOf": [
+            {
+              "properties": {
+                "transport": {
+                  "const": "rest"
+                }
+              }
+            },
+            {
+              "properties": {
+                "transport": {
+                  "const": "mcp"
+                }
+              }
+            },
+            {
+              "properties": {
+                "transport": {
+                  "const": "a2a"
+                }
+              }
+            },
+            {
+              "properties": {
+                "transport": {
+                  "const": "embedded"
+                },
+                "config": {
+                  "$ref": "https://ucp.dev/schemas/transports/embedded_config.json"
+                }
+              }
+            }
+          ]
         }
-      }
+      ]
     }
   }
 }

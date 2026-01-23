@@ -1021,6 +1021,39 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Webhook Signature Verification">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#signing-business" class="md-nav__link">
+    <span class="md-ellipsis">
+      Signing (Business)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verification-platform" class="md-nav__link">
+    <span class="md-ellipsis">
+      Verification (Platform)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-rotation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key Rotation
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
       </ul>
@@ -1299,12 +1332,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../examples/business-tokenizer-payment-handler/" class="md-nav__link">
+      <a href="../examples/processor-tokenizer-payment-handler/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Business Tokenizer
+    Processor Tokenizer
     
   </span>
   
@@ -1717,6 +1750,39 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Webhook Signature Verification">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#signing-business" class="md-nav__link">
+    <span class="md-ellipsis">
+      Signing (Business)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verification-platform" class="md-nav__link">
+    <span class="md-ellipsis">
+      Verification (Platform)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-rotation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key Rotation
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
       </ul>
@@ -1912,9 +1978,9 @@ fulfillment:</p>
 <tbody>
 <tr>
 <td style="text-align: left;">ucp</td>
-<td style="text-align: left;"><a href="/draft/specification/order/#ucp-response-order">UCP Response Order</a></td>
+<td style="text-align: left;"><a href="/draft/specification/order/#ucp-response-order-schema">UCP Response Order Schema</a></td>
 <td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;"></td>
+<td style="text-align: left;">Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.</td>
 </tr>
 <tr>
 <td style="text-align: left;">id</td>
@@ -2204,9 +2270,9 @@ sense to them.</p>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="p">{</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="nt">&quot;ucp&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-01-11&quot;</span><span class="p">,</span>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="nt">&quot;capabilities&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">      </span><span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dev.ucp.shopping.order&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-01-11&quot;</span><span class="p">}</span>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">    </span><span class="p">]</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="nt">&quot;capabilities&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">      </span><span class="nt">&quot;dev.ucp.shopping.order&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-01-11&quot;</span><span class="p">}]</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">    </span><span class="p">}</span>
 </span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">  </span><span class="p">},</span>
 </span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;order_abc123&quot;</span><span class="p">,</span>
 </span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">  </span><span class="nt">&quot;checkout_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;checkout_xyz789&quot;</span><span class="p">,</span>
@@ -2331,9 +2397,9 @@ during partner onboarding. The URL format is platform-specific.</p>
 <tbody>
 <tr>
 <td style="text-align: left;">ucp</td>
-<td style="text-align: left;"><a href="/draft/specification/order/#ucp-response-order">UCP Response Order</a></td>
+<td style="text-align: left;"><a href="/draft/specification/order/#ucp-response-order-schema">UCP Response Order Schema</a></td>
 <td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;"></td>
+<td style="text-align: left;">Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.</td>
 </tr>
 <tr>
 <td style="text-align: left;">id</td>
@@ -2432,19 +2498,22 @@ platform's profile and uses it to send order lifecycle events.</p>
 </tr>
 </tbody>
 </table>
-<p><strong>Example:</strong>
+<p><strong>Example:</strong></p>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="p">{</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dev.ucp.shopping.order&quot;</span><span class="p">,</span>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-01-11&quot;</span><span class="p">,</span>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">  </span><span class="nt">&quot;config&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">    </span><span class="nt">&quot;webhook_url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://platform.example.com/webhooks/ucp/orders&quot;</span>
-</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">  </span><span class="p">}</span>
-</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="p">}</span>
-</span></code></pre></div></p>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="nt">&quot;dev.ucp.shopping.order&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">    </span><span class="p">{</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">      </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-01-11&quot;</span><span class="p">,</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">      </span><span class="nt">&quot;config&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">        </span><span class="nt">&quot;webhook_url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://platform.example.com/webhooks/ucp/orders&quot;</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">      </span><span class="p">}</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">  </span><span class="p">]</span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="p">}</span>
+</span></code></pre></div>
 <h3 id="webhook-signature-verification">Webhook Signature Verification<a class="headerlink" href="#webhook-signature-verification" title="Permanent link">&para;</a></h3>
 <p>Webhook payloads <strong>MUST</strong> be signed by the business and verified by the platform
 to ensure authenticity and integrity.</p>
-<p><strong>Signing (Business)</strong></p>
+<h4 id="signing-business">Signing (Business)<a class="headerlink" href="#signing-business" title="Permanent link">&para;</a></h4>
 <ol>
 <li>Select a key from the <code>signing_keys</code> array in UCP profile.</li>
 <li>Create a detached JWT (RFC 7797) over the request body using the selected key.</li>
@@ -2452,7 +2521,7 @@ to ensure authenticity and integrity.</p>
 <li>Include the key ID in the JWT header's <code>kid</code> claim to allow the receiver to
     identify which key to use for verification.</li>
 </ol>
-<p><strong>Verification (Platform)</strong></p>
+<h4 id="verification-platform">Verification (Platform)<a class="headerlink" href="#verification-platform" title="Permanent link">&para;</a></h4>
 <ol>
 <li>Extract the <code>Request-Signature</code> header from the incoming webhook request.</li>
 <li>Parse the JWT header to retrieve the <code>kid</code> (key ID).</li>
@@ -2461,7 +2530,7 @@ to ensure authenticity and integrity.</p>
 <li>Verify the JWT signature against the request body using the public key.</li>
 <li>If verification fails, reject the webhook with an appropriate error response.</li>
 </ol>
-<p><strong>Key Rotation</strong></p>
+<h4 id="key-rotation">Key Rotation<a class="headerlink" href="#key-rotation" title="Permanent link">&para;</a></h4>
 <p>The <code>signing_keys</code> array supports multiple keys to enable zero-downtime
 rotation:</p>
 <ul>
@@ -2584,12 +2653,6 @@ rotation:</p>
 <td style="text-align: left;">Optional. Last name of the contact associated with the address.</td>
 </tr>
 <tr>
-<td style="text-align: left;">full_name</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Optional. Full name of the contact associated with the address (if first_name or last_name fields are present they take precedence).</td>
-</tr>
-<tr>
 <td style="text-align: left;">phone_number</td>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;">No</td>
@@ -2609,16 +2672,10 @@ rotation:</p>
 </thead>
 <tbody>
 <tr>
-<td style="text-align: left;">name</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Stable capability identifier in reverse-domain notation (e.g., dev.ucp.shopping.checkout). Used in capability negotiation.</td>
-</tr>
-<tr>
 <td style="text-align: left;">version</td>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Capability version in YYYY-MM-DD format.</td>
+<td style="text-align: left;">UCP version in YYYY-MM-DD format.Entity version in YYYY-MM-DD format.</td>
 </tr>
 <tr>
 <td style="text-align: left;">spec</td>
@@ -2630,19 +2687,25 @@ rotation:</p>
 <td style="text-align: left;">schema</td>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;">No</td>
-<td style="text-align: left;">URL to JSON Schema for this capability's payload.</td>
+<td style="text-align: left;">URL to JSON Schema defining this entity's structure and payloads.</td>
+</tr>
+<tr>
+<td style="text-align: left;">id</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Unique identifier for this entity instance. Used to disambiguate when multiple instances exist.</td>
+</tr>
+<tr>
+<td style="text-align: left;">config</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Entity-specific configuration. Structure defined by each entity's schema.</td>
 </tr>
 <tr>
 <td style="text-align: left;">extends</td>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Parent capability this extends. Present for extensions, absent for root capabilities.</td>
-</tr>
-<tr>
-<td style="text-align: left;">config</td>
-<td style="text-align: left;">object</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Capability-specific configuration (structure defined by each capability).</td>
 </tr>
 </tbody>
 </table>
@@ -2692,13 +2755,25 @@ rotation:</p>
 <td style="text-align: left;">version</td>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">UCP protocol version in YYYY-MM-DD format.</td>
+<td style="text-align: left;">UCP version in YYYY-MM-DD format.</td>
+</tr>
+<tr>
+<td style="text-align: left;">services</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Service registry keyed by reverse-domain name.</td>
 </tr>
 <tr>
 <td style="text-align: left;">capabilities</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/order/#response">Response</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Active capabilities for this response.</td>
+<td style="text-align: left;">any</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">payment_handlers</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Payment handler registry keyed by reverse-domain name.</td>
 </tr>
 </tbody>
 </table>

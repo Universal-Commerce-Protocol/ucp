@@ -34,26 +34,28 @@ Businesses declare support by adding `dev.ucp.shopping.ap2_mandate` to their `ca
 
 ```json
 {
-  "capabilities": [
-    {
-      "name": "dev.ucp.shopping.checkout",
-      "version": "2026-01-11",
-      "spec": "https://ucp.dev/specification/checkout",
-      "schema": "https://ucp.dev/schemas/shopping/checkout.json"
-    },
-    {
-      "name": "dev.ucp.shopping.ap2_mandate",
-      "version": "2026-01-11",
-      "spec": "https://ucp.dev/specification/ap2-mandates",
-      "schema": "https://ucp.dev/schemas/shopping/ap2_mandate.json",
-      "extends": "dev.ucp.shopping.checkout",
-      "config": {
-        "vp_formats_supported": {
-          "dc+sd-jwt": { }
+  "capabilities": {
+    "dev.ucp.shopping.checkout": [
+      {
+        "version": "2026-01-11",
+        "spec": "https://ucp.dev/specification/checkout",
+        "schema": "https://ucp.dev/schemas/shopping/checkout.json"
+      }
+    ],
+    "dev.ucp.shopping.ap2_mandate": [
+      {
+        "version": "2026-01-11",
+        "spec": "https://ucp.dev/specification/ap2-mandates",
+        "schema": "https://ucp.dev/schemas/shopping/ap2_mandate.json",
+        "extends": "dev.ucp.shopping.checkout",
+        "config": {
+          "vp_formats_supported": {
+            "dc+sd-jwt": { }
+          }
         }
       }
-    }
-  ]
+    ]
+  }
 }
 ```
 
@@ -148,10 +150,10 @@ sign_checkout(checkout, private_key, kid, alg="ES256"):
 
 Mandates are **SD-JWT** credentials with Key Binding (`+kb`). The platform **MUST** produce two distinct mandate artifacts:
 
-| Mandate              | UCP Placement          | Purpose                                              |
-| -------------------- | ---------------------- | ---------------------------------------------------- |
-| **checkout_mandate** | `ap2.checkout_mandate` | Proof bound to checkout terms, protects business     |
-| **payment_mandate**  | `payment_data.token`   | Proof bound to payment authorization, protects funds |
+| Mandate              | UCP Placement                             | Purpose                                              |
+| -------------------- | ----------------------------------------- | ---------------------------------------------------- |
+| **checkout_mandate** | `ap2.checkout_mandate`                    | Proof bound to checkout terms, protects business     |
+| **payment_mandate**  | `payment.instruments[*].credential.token` | Proof bound to payment authorization, protects funds |
 
 The checkout mandate **MUST** contain the full checkout response including the `ap2.merchant_authorization` field. This creates a nested cryptographic binding where the platform's signature covers the business's signature.
 
@@ -173,22 +175,7 @@ Once the `dev.ucp.shopping.ap2_mandate` capability is negotiated, the session is
 
 The platform initiates the session. The business returns the `Checkout` object with `ap2.merchant_authorization` embedded in the response body.
 
-| Name         | Type                                                                              | Required | Description                                                                                                                                                                                                                                                     |
-| ------------ | --------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ucp          | [UCP Response Checkout](/draft/specification/checkout/#ucp-response-checkout)     | **Yes**  |                                                                                                                                                                                                                                                                 |
-| id           | string                                                                            | **Yes**  | Unique identifier of the checkout session.                                                                                                                                                                                                                      |
-| line_items   | Array\[[Line Item Response](/draft/specification/checkout/#line-item-response)\]  | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                           |
-| buyer        | [Buyer](/draft/specification/checkout/#buyer)                                     | No       | Representation of the buyer.                                                                                                                                                                                                                                    |
-| status       | string                                                                            | **Yes**  | Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details. **Enum:** `incomplete`, `requires_escalation`, `ready_for_complete`, `complete_in_progress`, `completed`, `canceled` |
-| currency     | string                                                                            | **Yes**  | ISO 4217 currency code.                                                                                                                                                                                                                                         |
-| totals       | Array\[[Total Response](/draft/specification/checkout/#total-response)\]          | **Yes**  | Different cart totals.                                                                                                                                                                                                                                          |
-| messages     | Array\[[Message](/draft/specification/checkout/#message)\]                        | No       | List of messages with error and info about the checkout session state.                                                                                                                                                                                          |
-| links        | Array\[[Link](/draft/specification/checkout/#link)\]                              | **Yes**  | Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.                                                                                                                                                                    |
-| expires_at   | string                                                                            | No       | RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.                                                                                                                                                                                    |
-| continue_url | string                                                                            | No       | URL for checkout handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements.                                                                                                 |
-| payment      | [Payment Response](/draft/specification/checkout/#payment-response)               | **Yes**  |                                                                                                                                                                                                                                                                 |
-| order        | [Order Confirmation](/draft/specification/checkout/#order-confirmation)           | No       | Details about an order created for this checkout session.                                                                                                                                                                                                       |
-| ap2          | [Ap2 Checkout Response](/draft/specification/ap2-mandates/#ap2-checkout-response) | No       | AP2 extension data including merchant authorization.                                                                                                                                                                                                            |
+**Error:** Schema file 'ap2_mandate.json' not found in any schema directory.
 
 **Example Response:**
 
@@ -265,37 +252,42 @@ The business trusts the Credential Issuer (Bank) and verifies the user's Key Bin
 
 Once the mandates are generated, the platform submits them in the completion request:
 
-| Name | Type                                                                            | Required | Description                                    |
-| ---- | ------------------------------------------------------------------------------- | -------- | ---------------------------------------------- |
-| ap2  | [Ap2 Complete Request](/draft/specification/ap2-mandates/#ap2-complete-request) | No       | AP2 extension data including checkout mandate. |
+**Error:** Schema file 'ap2_mandate.json' not found in any schema directory.
 
 ```json
 {
-  "payment_data": {
-      "id": "instr_1",
-      "handler_id": "gpay",
-      "type": "card",
-      "description": "Visa •••• 1234",
-      "billing_address": {
-        "street_address": "123 Main St",
-        "address_locality": "Anytown",
-        "address_region": "CA",
-        "address_country": "US",
-        "postal_code": "12345"
-      },
-      "credential": {
-        "type": "PAYMENT_GATEWAY",
-        "token": "examplePaymentMethodToken"
+  "payment": {
+    "instruments": [
+      {
+        "id": "instr_1",
+        "handler_id": "gpay_1234",
+        "type": "card",
+        "selected": true,
+        "display": {
+          "description": "Visa •••• 1234",
+        },
+        "billing_address": {
+          "street_address": "123 Main St",
+          "address_locality": "Anytown",
+          "address_region": "CA",
+          "address_country": "US",
+          "postal_code": "12345"
+        },
+        "credential": {
+          "type": "PAYMENT_GATEWAY",
+          "token": "examplePaymentMethodToken"
+        }
       }
+    ]
   },
   "ap2": {
-     "checkout_mandate": "eyJhbGciOiJFUzI1NiIsInR5cCI6InZjK3NkLWp3dCJ9..." // The User-Signed SD-JWT+kb / platform provider signed SD-JWT / delegated SD-JWT-KB
+    "checkout_mandate": "eyJhbGciOiJFUzI1NiIsInR5cCI6InZjK3NkLWp3dCJ9..." // The User-Signed SD-JWT+kb / platform provider signed SD-JWT / delegated SD-JWT-KB
   }
 }
 ```
 
 - `ap2.checkout_mandate`: The SD-JWT+kb checkout mandate containing the full checkout (with `ap2.merchant_authorization`)
-- `payment_data.token`: Contains the payment mandate (composite token)
+- `payment.instruments[*].credential.token`: Contains the payment mandate (composite token)
 
 ## Verification & Processing
 
@@ -336,37 +328,27 @@ The business passes the `token` (composite object) to their Payment Handler / PS
 
 ### Business Authorization
 
-JWS Detached Content signature (RFC 7515 Appendix F) over the checkout response body (excluding ap2 field). Format: `<base64url-header>..<base64url-signature>`. The header MUST contain 'alg' (ES256/ES384/ES512) and 'kid' claims. The signature covers both the header and JCS-canonicalized checkout payload.
-
-**Pattern:** `^[A-Za-z0-9_-]+\.\.[A-Za-z0-9_-]+$`
+**Error:** Schema file 'ap2_mandate.json' not found in any schema directory.
 
 ### AP2 Checkout Response
 
-The `ap2` object included in CREATE / UPDATE checkout responses.
+The `ap2` object included in checkout responses.
 
-| Name                   | Type                                                                                | Required | Description                                                |
-| ---------------------- | ----------------------------------------------------------------------------------- | -------- | ---------------------------------------------------------- |
-| merchant_authorization | [Merchant Authorization](/draft/specification/ap2-mandates/#merchant-authorization) | **Yes**  | Merchant's signature proving checkout terms are authentic. |
+**Error:** Schema file 'ap2_mandate.json' not found in any schema directory.
+
+### Checkout Mandate
+
+**Error:** Schema file 'ap2_mandate.json' not found in any schema directory.
 
 ### AP2 Complete Request
 
 The `ap2` object included in COMPLETE checkout requests.
 
-| Name             | Type                                                                    | Required | Description                                      |
-| ---------------- | ----------------------------------------------------------------------- | -------- | ------------------------------------------------ |
-| checkout_mandate | [Checkout Mandate](/draft/specification/ap2-mandates/#checkout-mandate) | **Yes**  | SD-JWT+kb proving user authorized this checkout. |
-
-### Checkout Mandate
-
-SD-JWT+kb credential in `ap2.checkout_mandate`. Proving user authorization for the checkout. Contains the full checkout including `ap2.merchant_authorization`.
-
-**Pattern:** `^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]*\.[A-Za-z0-9_-]+(~[A-Za-z0-9_-]+)*$`
+**Error:** Schema file 'ap2_mandate.json' not found in any schema directory.
 
 ### Error Codes
 
-Error codes specific to AP2 mandate verification.
-
-**Enum:** `mandate_required`, `agent_missing_key`, `mandate_invalid_signature`, `mandate_expired`, `mandate_scope_mismatch`, `merchant_authorization_invalid`, `merchant_authorization_missing`
+**Error:** Schema file 'ap2_mandate.json' not found in any schema directory.
 
 | Error Code                       | Description                                                       |
 | -------------------------------- | ----------------------------------------------------------------- |

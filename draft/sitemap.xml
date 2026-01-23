@@ -93,15 +93,15 @@
          <lastmod>2026-01-23</lastmod>
     </url>
     <url>
-         <loc>https://ucp.dev/draft/specification/examples/business-tokenizer-payment-handler/</loc>
-         <lastmod>2026-01-23</lastmod>
-    </url>
-    <url>
          <loc>https://ucp.dev/draft/specification/examples/encrypted-credential-handler/</loc>
          <lastmod>2026-01-23</lastmod>
     </url>
     <url>
          <loc>https://ucp.dev/draft/specification/examples/platform-tokenizer-payment-handler/</loc>
+         <lastmod>2026-01-23</lastmod>
+    </url>
+    <url>
+         <loc>https://ucp.dev/draft/specification/examples/processor-tokenizer-payment-handler/</loc>
          <lastmod>2026-01-23</lastmod>
     </url>
 </urlset>

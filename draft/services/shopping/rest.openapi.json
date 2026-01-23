@@ -3,7 +3,7 @@
   "info": {
     "title": "UCP Shopping Service",
     "version": "2026-01-11",
-    "description": "Canonical REST interface for UCP Shopping service. Schema references are logical pointers - actual payload shape is determined by negotiated capabilities.\n\n**Endpoint Resolution:** This spec defines operations only. The base URL MUST be obtained from the merchant's discovery profile at `/.well-known/ucp` under `services[\"dev.ucp.shopping\"].rest.endpoint`. The `{endpoint}` server variable below is a placeholder for tooling compatibility."
+    "description": "Canonical REST interface for UCP Shopping service. Schema references are logical pointers - actual payload shape is determined by negotiated capabilities.\n\n**Endpoint Resolution:** This spec defines operations only. The base URL MUST be obtained from the merchant's discovery profile at `/.well-known/ucp` under `services[\"dev.ucp.shopping\"][transport=rest].endpoint`. The `{endpoint}` server variable below is a placeholder for tooling compatibility."
   },
   "servers": [
     {
@@ -12,7 +12,7 @@
       "variables": {
         "endpoint": {
           "default": "https://merchant.example.com/ucp",
-          "description": "Obtain from /.well-known/ucp → services[\"dev.ucp.shopping\"].rest.endpoint"
+          "description": "Obtain from /.well-known/ucp → services[\"dev.ucp.shopping\"][transport=rest].endpoint"
         }
       }
     }
@@ -25,34 +25,34 @@
         "description": "Create a checkout session. Called as soon as a user adds an item to a cart.",
         "parameters": [
           {
-            "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/authorization"
+            "$ref": "#/components/parameters/authorization"
           },
           {
-            "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/x_api_key"
+            "$ref": "#/components/parameters/x_api_key"
           },
           {
-            "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/request_signature"
+            "$ref": "#/components/parameters/request_signature"
           },
           {
-            "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/idempotency_key"
+            "$ref": "#/components/parameters/idempotency_key"
           },
           {
-            "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/request_id"
+            "$ref": "#/components/parameters/request_id"
           },
           {
-            "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/user_agent"
+            "$ref": "#/components/parameters/user_agent"
           },
           {
-            "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/content_type"
+            "$ref": "#/components/parameters/content_type"
           },
           {
-            "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/accept"
+            "$ref": "#/components/parameters/accept"
           },
           {
-            "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/accept_language"
+            "$ref": "#/components/parameters/accept_language"
           },
           {
-            "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/accept_encoding"
+            "$ref": "#/components/parameters/accept_encoding"
           }
         ],
         "requestBody": {
@@ -60,7 +60,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/schemas/checkout_create_request"
+                "$ref": "#/components/schemas/checkout_create_request"
               }
             }
           }
@@ -70,13 +70,13 @@
             "description": "Checkout session created",
             "headers": {
               "X-Detached-JWT": {
-                "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/headers/x_detached_jwt"
+                "$ref": "#/components/headers/x_detached_jwt"
               }
             },
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/schemas/checkout_response"
+                  "$ref": "#/components/schemas/checkout_response"
                 }
               }
             }
@@ -87,7 +87,7 @@
     "/checkout-sessions/{id}": {
       "parameters": [
         {
-          "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/checkout_session_id_path"
+          "$ref": "#/components/parameters/checkout_session_id_path"
         }
       ],
       "get": {
@@ -96,31 +96,31 @@
         "description": "Get the latest state of a checkout session.",
         "parameters": [
           {
-            "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/authorization"
+            "$ref": "#/components/parameters/authorization"
           },
           {
-            "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/x_api_key"
+            "$ref": "#/components/parameters/x_api_key"
           },
           {
-            "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/request_signature"
+            "$ref": "#/components/parameters/request_signature"
           },
           {
-            "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/request_id"
+            "$ref": "#/components/parameters/request_id"
           },
           {
-            "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/user_agent"
+            "$ref": "#/components/parameters/user_agent"
           },
           {
-            "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/content_type"
+            "$ref": "#/components/parameters/content_type"
           },
           {
-            "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/accept"
+            "$ref": "#/components/parameters/accept"
           },
           {
-            "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/accept_language"
+            "$ref": "#/components/parameters/accept_language"
           },
           {
-            "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/accept_encoding"
+            "$ref": "#/components/parameters/accept_encoding"
           }
         ],
         "responses": {
@@ -128,13 +128,13 @@
             "description": "Checkout session retrieved",
             "headers": {
               "X-Detached-JWT": {
-                "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/headers/x_detached_jwt"
+                "$ref": "#/components/headers/x_detached_jwt"
               }
             },
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/schemas/checkout_response"
+                  "$ref": "#/components/schemas/checkout_response"
                 }
               }
             }
@@ -147,34 +147,34 @@
         "description": "If an optional field is provided in the request body, its value is treated as a complete replacement for the corresponding data. If optional field is omitted, then current checkout session is unchanged.",
         "parameters": [
           {
-            "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/authorization"
+            "$ref": "#/components/parameters/authorization"
           },
           {
-            "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/x_api_key"
+            "$ref": "#/components/parameters/x_api_key"
           },
           {
-            "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/request_signature"
+            "$ref": "#/components/parameters/request_signature"
           },
           {
-            "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/idempotency_key"
+            "$ref": "#/components/parameters/idempotency_key"
           },
           {
-            "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/request_id"
+            "$ref": "#/components/parameters/request_id"
           },
           {
-            "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/user_agent"
+            "$ref": "#/components/parameters/user_agent"
           },
           {
-            "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/content_type"
+            "$ref": "#/components/parameters/content_type"
           },
           {
-            "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/accept"
+            "$ref": "#/components/parameters/accept"
           },
           {
-            "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/accept_language"
+            "$ref": "#/components/parameters/accept_language"
           },
           {
-            "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/accept_encoding"
+            "$ref": "#/components/parameters/accept_encoding"
           }
         ],
         "requestBody": {
@@ -182,7 +182,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/schemas/checkout_update_request"
+                "$ref": "#/components/schemas/checkout_update_request"
               }
             }
           }
@@ -192,13 +192,13 @@
             "description": "Checkout session updated",
             "headers": {
               "X-Detached-JWT": {
-                "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/headers/x_detached_jwt"
+                "$ref": "#/components/headers/x_detached_jwt"
               }
             },
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/schemas/checkout_response"
+                  "$ref": "#/components/schemas/checkout_response"
                 }
               }
             }
@@ -209,7 +209,7 @@
     "/checkout-sessions/{id}/complete": {
       "parameters": [
         {
-          "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/checkout_session_id_path"
+          "$ref": "#/components/parameters/checkout_session_id_path"
         }
       ],
       "post": {
@@ -218,34 +218,34 @@
         "description": "Place the order",
         "parameters": [
           {
-            "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/authorization"
+            "$ref": "#/components/parameters/authorization"
           },
           {
-            "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/x_api_key"
+            "$ref": "#/components/parameters/x_api_key"
           },
           {
-            "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/request_signature"
+            "$ref": "#/components/parameters/request_signature"
           },
           {
-            "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/idempotency_key"
+            "$ref": "#/components/parameters/idempotency_key"
           },
           {
-            "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/request_id"
+            "$ref": "#/components/parameters/request_id"
           },
           {
-            "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/user_agent"
+            "$ref": "#/components/parameters/user_agent"
           },
           {
-            "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/content_type"
+            "$ref": "#/components/parameters/content_type"
           },
           {
-            "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/accept"
+            "$ref": "#/components/parameters/accept"
           },
           {
-            "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/accept_language"
+            "$ref": "#/components/parameters/accept_language"
           },
           {
-            "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/accept_encoding"
+            "$ref": "#/components/parameters/accept_encoding"
           }
         ],
         "requestBody": {
@@ -255,7 +255,7 @@
               "schema": {
                 "allOf": [
                   {
-                    "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/schemas/payment_data"
+                    "$ref": "#/components/schemas/checkout_complete_request"
                   },
                   {
                     "title": "Risk Signals",
@@ -278,13 +278,13 @@
             "description": "Checkout session completed",
             "headers": {
               "X-Detached-JWT": {
-                "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/headers/x_detached_jwt"
+                "$ref": "#/components/headers/x_detached_jwt"
               }
             },
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/schemas/checkout_response"
+                  "$ref": "#/components/schemas/checkout_response"
                 }
               }
             }
@@ -295,7 +295,7 @@
     "/checkout-sessions/{id}/cancel": {
       "parameters": [
         {
-          "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/checkout_session_id_path"
+          "$ref": "#/components/parameters/checkout_session_id_path"
         }
       ],
       "post": {
@@ -304,34 +304,34 @@
         "description": "Cancel a checkout session",
         "parameters": [
           {
-            "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/authorization"
+            "$ref": "#/components/parameters/authorization"
           },
           {
-            "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/x_api_key"
+            "$ref": "#/components/parameters/x_api_key"
           },
           {
-            "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/request_signature"
+            "$ref": "#/components/parameters/request_signature"
           },
           {
-            "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/idempotency_key"
+            "$ref": "#/components/parameters/idempotency_key"
           },
           {
-            "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/request_id"
+            "$ref": "#/components/parameters/request_id"
           },
           {
-            "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/user_agent"
+            "$ref": "#/components/parameters/user_agent"
           },
           {
-            "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/content_type"
+            "$ref": "#/components/parameters/content_type"
           },
           {
-            "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/accept"
+            "$ref": "#/components/parameters/accept"
           },
           {
-            "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/accept_language"
+            "$ref": "#/components/parameters/accept_language"
           },
           {
-            "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/accept_encoding"
+            "$ref": "#/components/parameters/accept_encoding"
           }
         ],
         "responses": {
@@ -339,13 +339,13 @@
             "description": "Checkout session canceled",
             "headers": {
               "X-Detached-JWT": {
-                "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/headers/x_detached_jwt"
+                "$ref": "#/components/headers/x_detached_jwt"
               }
             },
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/schemas/checkout_response"
+                  "$ref": "#/components/schemas/checkout_response"
                 }
               }
             }
@@ -362,10 +362,10 @@
         "description": "Merchant sends order lifecycle events to the platform's registered webhook URL. The platform provides the webhook URL during partner onboarding.",
         "parameters": [
           {
-            "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/request_signature"
+            "$ref": "#/components/parameters/request_signature"
           },
           {
-            "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/parameters/x_api_key"
+            "$ref": "#/components/parameters/x_api_key"
           }
         ],
         "requestBody": {
@@ -375,7 +375,7 @@
               "schema": {
                 "allOf": [
                   {
-                    "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/schemas/order"
+                    "$ref": "#/components/schemas/order"
                   },
                   {
                     "type": "object",
@@ -412,7 +412,7 @@
                   ],
                   "properties": {
                     "ucp": {
-                      "$ref": "https://ucp.dev/services/shopping/rest.openapi.json#/components/schemas/ucp"
+                      "$ref": "#/components/schemas/ucp"
                     }
                   }
                 }
@@ -540,8 +540,8 @@
       "order": {
         "$ref": "https://ucp.dev/schemas/shopping/order.json"
       },
-      "payment_data": {
-        "$ref": "https://ucp.dev/schemas/shopping/payment_data.json"
+      "payment": {
+        "$ref": "https://ucp.dev/schemas/shopping/payment.json"
       },
       "ucp": {
         "$ref": "https://ucp.dev/schemas/ucp.json"
@@ -555,14 +555,8 @@
       "checkout_update_request": {
         "$ref": "https://ucp.dev/schemas/shopping/checkout.update_req.json"
       },
-      "payment_response": {
-        "$ref": "https://ucp.dev/schemas/shopping/payment.json"
-      },
-      "payment_create_request": {
-        "$ref": "https://ucp.dev/schemas/shopping/payment.create_req.json"
-      },
-      "payment_update_request": {
-        "$ref": "https://ucp.dev/schemas/shopping/payment.update_req.json"
+      "checkout_complete_request": {
+        "$ref": "https://ucp.dev/schemas/shopping/checkout.complete_req.json"
       }
     }
   }

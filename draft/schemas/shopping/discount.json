@@ -67,7 +67,7 @@
         "allocations": {
           "type": "array",
           "items": {
-            "$ref": "https://ucp.dev/schemas/shopping/discount.json#/$defs/allocation"
+            "$ref": "#/$defs/allocation"
           },
           "description": "Breakdown of where this discount was allocated. Sum of allocation amounts equals total amount."
         }
@@ -88,7 +88,7 @@
           "type": "array",
           "readOnly": true,
           "items": {
-            "$ref": "https://ucp.dev/schemas/shopping/discount.json#/$defs/applied_discount"
+            "$ref": "#/$defs/applied_discount"
           },
           "description": "Discounts successfully applied (code-based and automatic)."
         }
@@ -105,7 +105,7 @@
           "type": "object",
           "properties": {
             "discounts": {
-              "$ref": "https://ucp.dev/schemas/shopping/discount.json#/$defs/discounts_object"
+              "$ref": "#/$defs/discounts_object"
             }
           }
         }

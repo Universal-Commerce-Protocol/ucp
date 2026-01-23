@@ -76,16 +76,16 @@ Expectations can be split, merged, or adjusted post-order. For example:
 
 ### Order
 
-| Name          | Type                                                                    | Required | Description                                                                                                                                  |
-| ------------- | ----------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| ucp           | [UCP Response Order](/draft/specification/order/#ucp-response-order)    | **Yes**  |                                                                                                                                              |
-| id            | string                                                                  | **Yes**  | Unique order identifier.                                                                                                                     |
-| checkout_id   | string                                                                  | **Yes**  | Associated checkout ID for reconciliation.                                                                                                   |
-| permalink_url | string                                                                  | **Yes**  | Permalink to access the order on merchant site.                                                                                              |
-| line_items    | Array\[[Order Line Item](/draft/specification/order/#order-line-item)\] | **Yes**  | Immutable line items — source of truth for what was ordered.                                                                                 |
-| fulfillment   | object                                                                  | **Yes**  | Fulfillment data: buyer expectations and what actually happened.                                                                             |
-| adjustments   | Array\[[Adjustment](/draft/specification/order/#adjustment)\]           | No       | Append-only event log of money movements (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment. |
-| totals        | Array\[[Total Response](/draft/specification/order/#total-response)\]   | **Yes**  | Different totals for the order.                                                                                                              |
+| Name          | Type                                                                               | Required | Description                                                                                                                                  |
+| ------------- | ---------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| ucp           | [UCP Response Order Schema](/draft/specification/order/#ucp-response-order-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                      |
+| id            | string                                                                             | **Yes**  | Unique order identifier.                                                                                                                     |
+| checkout_id   | string                                                                             | **Yes**  | Associated checkout ID for reconciliation.                                                                                                   |
+| permalink_url | string                                                                             | **Yes**  | Permalink to access the order on merchant site.                                                                                              |
+| line_items    | Array\[[Order Line Item](/draft/specification/order/#order-line-item)\]            | **Yes**  | Immutable line items — source of truth for what was ordered.                                                                                 |
+| fulfillment   | object                                                                             | **Yes**  | Fulfillment data: buyer expectations and what actually happened.                                                                             |
+| adjustments   | Array\[[Adjustment](/draft/specification/order/#adjustment)\]                      | No       | Append-only event log of money movements (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment. |
+| totals        | Array\[[Total Response](/draft/specification/order/#total-response)\]              | **Yes**  | Different totals for the order.                                                                                                              |
 
 ### Order Line Item
 
@@ -169,9 +169,9 @@ Examples: `refund`, `return`, `credit`, `price_adjustment`, `dispute`, `cancella
 {
   "ucp": {
     "version": "2026-01-11",
-    "capabilities": [
-      {"name": "dev.ucp.shopping.order", "version": "2026-01-11"}
-    ]
+    "capabilities": {
+      "dev.ucp.shopping.order": [{"version": "2026-01-11"}]
+    }
   },
   "id": "order_abc123",
   "checkout_id": "checkout_xyz789",
@@ -275,18 +275,18 @@ Businesses POST order events to a webhook URL provided by the platform during pa
 
 **Inputs**
 
-| Name          | Type                                                                    | Required | Description                                                                                                                                  |
-| ------------- | ----------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| ucp           | [UCP Response Order](/draft/specification/order/#ucp-response-order)    | **Yes**  |                                                                                                                                              |
-| id            | string                                                                  | **Yes**  | Unique order identifier.                                                                                                                     |
-| checkout_id   | string                                                                  | **Yes**  | Associated checkout ID for reconciliation.                                                                                                   |
-| permalink_url | string                                                                  | **Yes**  | Permalink to access the order on merchant site.                                                                                              |
-| line_items    | Array\[[Order Line Item](/draft/specification/order/#order-line-item)\] | **Yes**  | Immutable line items — source of truth for what was ordered.                                                                                 |
-| fulfillment   | object                                                                  | **Yes**  | Fulfillment data: buyer expectations and what actually happened.                                                                             |
-| adjustments   | Array\[[Adjustment](/draft/specification/order/#adjustment)\]           | No       | Append-only event log of money movements (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment. |
-| totals        | Array\[[Total Response](/draft/specification/order/#total-response)\]   | **Yes**  | Different totals for the order.                                                                                                              |
-| event_id      | string                                                                  | **Yes**  | Unique event identifier.                                                                                                                     |
-| created_time  | string                                                                  | **Yes**  | Event creation timestamp in RFC 3339 format.                                                                                                 |
+| Name          | Type                                                                               | Required | Description                                                                                                                                  |
+| ------------- | ---------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| ucp           | [UCP Response Order Schema](/draft/specification/order/#ucp-response-order-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                      |
+| id            | string                                                                             | **Yes**  | Unique order identifier.                                                                                                                     |
+| checkout_id   | string                                                                             | **Yes**  | Associated checkout ID for reconciliation.                                                                                                   |
+| permalink_url | string                                                                             | **Yes**  | Permalink to access the order on merchant site.                                                                                              |
+| line_items    | Array\[[Order Line Item](/draft/specification/order/#order-line-item)\]            | **Yes**  | Immutable line items — source of truth for what was ordered.                                                                                 |
+| fulfillment   | object                                                                             | **Yes**  | Fulfillment data: buyer expectations and what actually happened.                                                                             |
+| adjustments   | Array\[[Adjustment](/draft/specification/order/#adjustment)\]                      | No       | Append-only event log of money movements (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment. |
+| totals        | Array\[[Total Response](/draft/specification/order/#total-response)\]              | **Yes**  | Different totals for the order.                                                                                                              |
+| event_id      | string                                                                             | **Yes**  | Unique event identifier.                                                                                                                     |
+| created_time  | string                                                                             | **Yes**  | Event creation timestamp in RFC 3339 format.                                                                                                 |
 
 **Output**
 
@@ -306,11 +306,14 @@ The platform provides its webhook URL in the order capability's `config` field d
 
 ```json
 {
-  "name": "dev.ucp.shopping.order",
-  "version": "2026-01-11",
-  "config": {
-    "webhook_url": "https://platform.example.com/webhooks/ucp/orders"
-  }
+  "dev.ucp.shopping.order": [
+    {
+      "version": "2026-01-11",
+      "config": {
+        "webhook_url": "https://platform.example.com/webhooks/ucp/orders"
+      }
+    }
+  ]
 }
 ```
 
@@ -318,14 +321,14 @@ The platform provides its webhook URL in the order capability's `config` field d
 
 Webhook payloads **MUST** be signed by the business and verified by the platform to ensure authenticity and integrity.
 
-**Signing (Business)**
+#### Signing (Business)
 
 1. Select a key from the `signing_keys` array in UCP profile.
 1. Create a detached JWT (RFC 7797) over the request body using the selected key.
 1. Include the JWT in the `Request-Signature` header.
 1. Include the key ID in the JWT header's `kid` claim to allow the receiver to identify which key to use for verification.
 
-**Verification (Platform)**
+#### Verification (Platform)
 
 1. Extract the `Request-Signature` header from the incoming webhook request.
 1. Parse the JWT header to retrieve the `kid` (key ID).
@@ -334,7 +337,7 @@ Webhook payloads **MUST** be signed by the business and verified by the platform
 1. Verify the JWT signature against the request body using the public key.
 1. If verification fails, reject the webhook with an appropriate error response.
 
-**Key Rotation**
+#### Key Rotation
 
 The `signing_keys` array supports multiple keys to enable zero-downtime rotation:
 
@@ -379,19 +382,18 @@ The `signing_keys` array supports multiple keys to enable zero-downtime rotation
 | postal_code      | string | No       | The postal code. For example, 94043.                                                                                                                                                                                                      |
 | first_name       | string | No       | Optional. First name of the contact associated with the address.                                                                                                                                                                          |
 | last_name        | string | No       | Optional. Last name of the contact associated with the address.                                                                                                                                                                           |
-| full_name        | string | No       | Optional. Full name of the contact associated with the address (if first_name or last_name fields are present they take precedence).                                                                                                      |
 | phone_number     | string | No       | Optional. Phone number of the contact associated with the address.                                                                                                                                                                        |
 
 ### Response
 
-| Name    | Type   | Required | Description                                                                                                                |
-| ------- | ------ | -------- | -------------------------------------------------------------------------------------------------------------------------- |
-| name    | string | **Yes**  | Stable capability identifier in reverse-domain notation (e.g., dev.ucp.shopping.checkout). Used in capability negotiation. |
-| version | string | **Yes**  | Capability version in YYYY-MM-DD format.                                                                                   |
-| spec    | string | No       | URL to human-readable specification document.                                                                              |
-| schema  | string | No       | URL to JSON Schema for this capability's payload.                                                                          |
-| extends | string | No       | Parent capability this extends. Present for extensions, absent for root capabilities.                                      |
-| config  | object | No       | Capability-specific configuration (structure defined by each capability).                                                  |
+| Name    | Type   | Required | Description                                                                                     |
+| ------- | ------ | -------- | ----------------------------------------------------------------------------------------------- |
+| version | string | **Yes**  | UCP version in YYYY-MM-DD format.Entity version in YYYY-MM-DD format.                           |
+| spec    | string | No       | URL to human-readable specification document.                                                   |
+| schema  | string | No       | URL to JSON Schema defining this entity's structure and payloads.                               |
+| id      | string | No       | Unique identifier for this entity instance. Used to disambiguate when multiple instances exist. |
+| config  | object | No       | Entity-specific configuration. Structure defined by each entity's schema.                       |
+| extends | string | No       | Parent capability this extends. Present for extensions, absent for root capabilities.           |
 
 ### Total Response
 
@@ -403,7 +405,9 @@ The `signing_keys` array supports multiple keys to enable zero-downtime rotation
 
 ### UCP Response Order
 
-| Name         | Type                                                      | Required | Description                                |
-| ------------ | --------------------------------------------------------- | -------- | ------------------------------------------ |
-| version      | string                                                    | **Yes**  | UCP protocol version in YYYY-MM-DD format. |
-| capabilities | Array\[[Response](/draft/specification/order/#response)\] | **Yes**  | Active capabilities for this response.     |
+| Name             | Type   | Required | Description                                            |
+| ---------------- | ------ | -------- | ------------------------------------------------------ |
+| version          | string | **Yes**  | UCP version in YYYY-MM-DD format.                      |
+| services         | object | No       | Service registry keyed by reverse-domain name.         |
+| capabilities     | any    | No       |                                                        |
+| payment_handlers | object | No       | Payment handler registry keyed by reverse-domain name. |
