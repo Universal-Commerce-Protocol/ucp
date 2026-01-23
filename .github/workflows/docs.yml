@@ -123,13 +123,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          VERSION_NAME=${GITHUB_REF#refs/heads/release/}
+          VERSION_DATE=${GITHUB_REF#refs/heads/release/}
+          TAG_NAME="v$VERSION_DATE"
 
           # Create Release (This implicitly creates the git tag)
           # The '|| true' ensures the workflow doesn't fail if you
           # push updates to this branch later (re-running the build).
-          gh release create "$VERSION_NAME" \
-            --title "Release $VERSION_NAME" \
+          gh release create "$TAG_NAME" \
+            --title "Release $TAG_NAME" \
             --generate-notes \
             --target "$GITHUB_REF_NAME" \
-            || echo "Release $VERSION_NAME already exists, skipping creation."
+            || echo "Release $TAG_NAME already exists, skipping creation."
