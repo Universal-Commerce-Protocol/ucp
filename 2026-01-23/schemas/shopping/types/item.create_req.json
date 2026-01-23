@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/item.create_req.json",
+  "title": "Item Create Request",
+  "type": "object",
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Should be recognized by both the Platform, and the Business. For Google it should match the id provided in the \"id\" field in the product feed."
+    }
+  }
+}

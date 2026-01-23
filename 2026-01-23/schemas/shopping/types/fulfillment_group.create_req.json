@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/fulfillment_group.create_req.json",
+  "title": "Fulfillment Group Create Request",
+  "description": "A merchant-generated package/group of line items with fulfillment options.",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "selected_option_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "ID of the selected fulfillment option for this group."
+    }
+  }
+}

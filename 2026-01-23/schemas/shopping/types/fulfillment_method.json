@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/fulfillment_method.json",
+  "title": "Fulfillment Method Response",
+  "description": "A fulfillment method (shipping or pickup) with destinations and groups.",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "line_item_ids"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique fulfillment method identifier."
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "shipping",
+        "pickup"
+      ],
+      "description": "Fulfillment method type."
+    },
+    "line_item_ids": {
+      "type": "array",
+      "description": "Line item IDs fulfilled via this method.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "destinations": {
+      "type": "array",
+      "description": "Available destinations. For shipping: addresses. For pickup: retail locations.",
+      "items": {
+        "$ref": "https://ucp.dev/schemas/shopping/types/fulfillment_destination.json"
+      }
+    },
+    "selected_destination_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "ID of the selected destination."
+    },
+    "groups": {
+      "type": "array",
+      "description": "Fulfillment groups for selecting options. Agent sets selected_option_id on groups to choose shipping method.",
+      "items": {
+        "$ref": "https://ucp.dev/schemas/shopping/types/fulfillment_group.json"
+      }
+    }
+  }
+}

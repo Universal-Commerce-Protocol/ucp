@@ -1,0 +1,824 @@
+/**
+ * Copyright 2026 UCP Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/* Ensure headings in documentation are black */
+.md-typeset h1,
+.md-typeset h2,
+.md-typeset h3,
+.md-typeset h4,
+.md-typeset h5,
+.md-typeset h6 {
+  color: #000;
+}
+
+/* --- External link icon --- */
+a[target="_blank"]::after {
+  content: "";
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  margin-left: 0.2em;
+  vertical-align: middle;
+
+  /* This makes the icon take the color of the text (currentColor) */
+  background-color: currentcolor;
+
+  /* The icon shape */
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M14 3v2h3.59l-9.83 9.83 1.41 1.41 9.83-9.83V10h2V3m-2 16H5V5h7V3H5c-1.11 0-2 .89-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2v7z'/%3E%3C/svg%3E")
+    no-repeat center;
+}
+
+/* --- HEADER & BASE --- */
+[class~="md-header"] {
+  background-color: #fff;
+  border-bottom: 0.05rem solid rgb(0 0 0 / 10%);
+  color: #202124;
+}
+
+[class~="md-header__title"] [class~="md-header__topic"] {
+  color: #202124;
+  font-weight: 450;
+}
+
+[class~="md-header__button"] {
+  color: #5f6368;
+}
+
+form[class~="md-search__form"] {
+  background-color: rgb(0 0 0 / 5%);
+  border-radius: 4px;
+}
+
+/* -- LANDING PAGE BODY -- */
+.landing-page p {
+  font-size: 0.8rem;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.landing-page h2 {
+  font-size: 2rem;
+  font-weight: 450;
+  color: #202124;
+  margin: 0 auto 36px 0;
+}
+
+.landing-page h3 {
+  font-size: 1rem;
+  margin: 0 0 16px;
+  font-weight: 450;
+}
+
+/* --- HERO SECTION --- */
+.hero-wrapper {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.hero-content {
+  flex: 1;
+  max-width: 26.8rem;
+}
+
+.hero-content h1 {
+  font-size: 3rem;
+  line-height: 1.12;
+  font-weight: 450;
+  color: #202124;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.02em;
+}
+
+p.hero-subheading {
+  font-size: 1.5rem;
+  line-height: 1.28;
+  color: #3c4043;
+  margin: 0 0 1rem;
+}
+
+p.hero-description {
+  line-height: 1.4;
+  margin: 0;
+}
+
+.hero-image {
+  flex: 0 0 250px;
+  display: flex;
+  justify-content: center;
+  margin-top: 15px;
+  max-width: 250px;
+}
+
+.hero-logo-crisp {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+/* --- PROMO CARDS  --- */
+.promo-card-wrapper {
+  display: flex;
+  gap: 24px;
+  max-width: 1200px;
+  margin: 60px auto;
+  flex-wrap: wrap;
+}
+
+.promo-card {
+  flex: 1;
+  min-width: 300px;
+  background-color: #f8f9fa;
+  border-radius: 24px;
+  padding: 16px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.promo-card h3 {
+  color: #202124;
+  margin-top: 0;
+  margin-bottom: 12px;
+}
+
+.promo-card p {
+  margin-bottom: 16px;
+  flex-grow: 1;
+}
+
+.promo-button,
+.learn-more-btn {
+  display: inline-block;
+  padding: 0.5rem 1.2rem;
+  border: 1px solid #000;
+  border-radius: 50px; /* Pill shape */
+  text-decoration: none;
+  color: #000;
+  font-weight: 500;
+  font-size: 0.8rem;
+  transition: background-color 0.2s ease-in-out;
+  background-color: transparent;
+}
+
+/* Ensure link buttons don't inherit blue color */
+:is(a.promo-button, a.learn-more-btn):is(:link, :visited) {
+  color: #000;
+}
+
+.promo-button:hover,
+.learn-more-btn:hover {
+  background-color: #e9ecef;
+  color: #000;
+}
+
+/* --- PARTNERS INTRO SECTION --- */
+.partners-intro-wrapper {
+  text-align: center;
+  max-width: 1200px;
+  margin: 60px auto 0;
+  padding-bottom: 60px;
+}
+
+.partners-intro-wrapper p {
+  max-width: 800px;
+  margin: 0 auto 50px;
+  text-align: center;
+}
+
+.partners-logo-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 120px;
+  flex-wrap: wrap;
+  padding: 16px 0;
+}
+
+.partners-logo-img {
+  max-height: 80px;
+  max-width: 240px;
+  height: auto;
+  width: auto;
+  opacity: 0.9;
+}
+
+.partners-logo-fallback {
+  display: none;
+  font-weight: 700;
+  color: #202124;
+  font-size: 1.4rem;
+}
+
+/* --- PARTNER CAROUSEL SECTION --- */
+.partner-carousel {
+  text-align: center;
+  max-width: 100%;
+  margin: 80px auto;
+  overflow: hidden; /* Hides logos as they move off screen */
+  position: relative;
+  background: white;
+}
+
+.partner-carousel h2 {
+  margin-bottom: 60px;
+  position: relative;
+  z-index: 3;
+}
+
+/* Gradient fade on the sides */
+.partner-carousel::before,
+.partner-carousel::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 150px;
+  height: 100%;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.partner-carousel::before {
+  left: 0;
+  background: linear-gradient(to right, white, transparent);
+}
+
+.partner-carousel::after {
+  right: 0;
+  background: linear-gradient(to left, white, transparent);
+}
+
+.partner-track {
+  display: flex;
+  gap: 40px;
+  width: max-content;
+
+  /* 40s is the speed. Lower number = faster */
+  animation: partner-scroll 40s linear infinite;
+}
+
+.partner-track:hover {
+  animation-play-state: paused;
+}
+
+.partner-logo {
+  display: flex;
+  align-items: center;
+  opacity: 0.9;
+  transition: opacity 0.3s;
+  padding: 0 40px;
+  min-height: 65px;
+}
+
+.partner-logo:hover {
+  opacity: 1;
+}
+
+.partner-logo img {
+  max-height: 65px;
+  max-width: 180px;
+  height: auto;
+  width: auto;
+}
+
+.partner-logo span {
+  display: none;
+  font-weight: 700;
+  color: #202124;
+  font-size: 1.4rem;
+  white-space: nowrap;
+}
+
+/* The Animation Loop */
+@keyframes partner-scroll {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/* Mobile Tweak */
+@media (width <= 768px) {
+  .partner-logo img {
+    height: 45px; /* Smaller logos on phone */
+  }
+
+  .partner-track {
+    gap: 40px; /* Tighter spacing on phone */
+  }
+
+  .partners-logo-row {
+    gap: 30px; /* Less space between logos on phone */
+  }
+
+  .flexibility-section {
+    margin: 0 0 60px; /* Less space below logo section on phone */
+  }
+}
+
+/* --- ACTION CAROUSEL SECTION --- */
+.action-carousel-section {
+  text-align: center;
+  max-width: 100%;
+  margin: 60px 0;
+}
+
+.action-carousel-section p {
+  max-width: 800px;
+  margin: 0 auto 36px;
+  text-align: center;
+}
+
+/* Navigation Tabs */
+.carousel-tabs {
+  display: inline-flex;
+  background-color: #f8f9fa;
+  border-radius: 50px;
+  padding: 4px;
+  margin-bottom: 60px;
+}
+
+.tab-btn {
+  background: transparent;
+  border: none;
+  padding: 14px 24px;
+  border-radius: 50px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #5f6368;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.tab-btn:hover {
+  color: #202124;
+}
+
+.tab-btn.active {
+  background-color: #202124;
+  color: #fff;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 30%);
+}
+
+/* Content Area */
+.carousel-content {
+  min-height: 500px;
+  position: relative;
+}
+
+.tab-pane {
+  display: none;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 40px;
+  text-align: left;
+  animation: fade-in 0.4s ease;
+  width: 100%;
+}
+
+.tab-pane.active {
+  display: flex;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Left Column: Text */
+.pane-text {
+  flex: 1;
+  min-width: 250px;
+  max-width: 350px;
+}
+
+.icon-placeholder {
+  margin-bottom: 20px;
+}
+
+.icon-placeholder img {
+  height: 64px;
+  width: auto;
+}
+
+.pane-eyebrow {
+  text-transform: uppercase;
+  color: #5f6368;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  margin-bottom: 16px;
+}
+
+.pane-text h3 {
+  margin: 0 0 16px;
+  color: #202124;
+  line-height: 1.2;
+}
+
+.pane-text p {
+  margin-bottom: 24px;
+  text-align: left;
+}
+
+.pane-visuals {
+  flex: 2;
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  justify-content: center;
+  align-items: stretch;
+  min-width: 400px;
+}
+
+/* Image Wrapper */
+.image-container {
+  height: 580px;
+  width: 260px;
+  flex-shrink: 0;
+}
+
+.phone-mockup {
+  width: 100%;
+  height: 520px;
+  object-fit: contain;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgb(0 0 0 / 10%);
+  background-color: #fff;
+  display: block;
+}
+
+.code-block-placeholder {
+  display: flex;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  overflow: auto;
+  border: 1px solid #dadce0;
+  min-width: 300px;
+  background-color: #f8f9fa;
+
+  /* Desktop Height */
+  height: 580px;
+}
+
+.code-block-placeholder *,
+.code-block-placeholder pre,
+.code-block-placeholder code {
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.code-block-placeholder pre {
+  margin: 0;
+  height: 100%;
+  width: 100%;
+}
+
+.code-block-placeholder .md-typeset pre > code {
+  display: block;
+  height: 100%;
+  padding: 12px;
+}
+
+.code-block-placeholder .md-clipboard {
+  display: none;
+}
+
+/* --- INTERMEDIATE RESPONSIVENESS (< 1200px) --- */
+@media (width <= 1200px) {
+  .tab-pane {
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+  }
+
+  .pane-text {
+    text-align: center;
+    max-width: 800px;
+  }
+
+  .pane-visuals {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* --- MOBILE RESPONSIVENESS (< 960px) --- */
+@media (width <= 960px) {
+  /* Hero */
+  .hero-wrapper {
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+    gap: 2rem;
+    padding: 40px 20px;
+  }
+
+  .hero-content {
+    flex: auto;
+    width: 100%;
+  }
+
+  .hero-content h1 {
+    font-size: 2.5rem;
+  }
+
+  .hero-image {
+    flex: 0 0 auto;
+    width: 60%;
+    margin-bottom: 40px;
+  }
+
+  .hero-logo-crisp {
+    max-width: 240px;
+  }
+
+  .partner-grid {
+    gap: 1.5rem;
+  }
+
+  .tab-pane {
+    flex-direction: column; /* Stack vertically on mobile */
+    align-items: center;
+    gap: 40px;
+  }
+
+  .pane-text {
+    text-align: center;
+    max-width: 100%;
+  }
+
+  .pane-visuals {
+    flex-direction: column; /* Stack image and code */
+    width: 100%;
+    min-width: 0; /* Reset desktop constraint */
+    align-items: center;
+  }
+
+  /* Make sure code block is visible on mobile */
+  .code-block-placeholder {
+    display: flex;
+    max-width: 100%;
+  }
+}
+
+/* --- FLEXIBILITY SECTION --- */
+.flexibility-section {
+  text-align: center;
+  margin: 80px 0 60px;
+}
+
+.flexibility-section p {
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+/* General link style for containers - placed here for specificity ordering */
+.get-started-container a {
+  text-decoration: underline;
+}
+
+.flexibility-section p a {
+  text-decoration: underline;
+}
+
+/* --- FEATURES LIST --- */
+.features-list {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 0 0 80px;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  padding: 30px;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 16px;
+}
+
+.feature-item-icon {
+  flex-shrink: 0;
+}
+
+.feature-item h3 {
+  margin: 0 0 8px;
+}
+
+/* --- TWO COLUMN PROMO --- */
+.two-column-promo {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding-top: 60px;
+  margin-bottom: 60px;
+}
+
+.two-column-promo-item {
+  flex: 1;
+  min-width: 300px;
+  background: #f8f9fa;
+  border-radius: 16px;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.two-column-promo-item-icon {
+  display: block;
+}
+
+.two-column-promo-item p {
+  flex-grow: 1;
+}
+
+/* --- LIFECYCLE CONTAINER --- */
+.lifecycle-container {
+  padding: 80px 0;
+  text-align: center;
+}
+
+.lifecycle-container h2 {
+  margin-bottom: 60px;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.lifecycle-container-row {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
+.lifecycle-container-item {
+  flex: 1;
+  min-width: 300px;
+  border: 1px solid #dadce0;
+  border-radius: 32px;
+  padding: 0 30px 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.lifecycle-container-item-img-wrapper {
+  height: 120px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lifecycle-container-item-img {
+  max-height: 100%;
+  width: auto;
+}
+
+.lifecycle-container-item h3 {
+  margin: 0 0 16px;
+  color: #202124;
+}
+
+.lifecycle-container-item p {
+  margin-bottom: 30px;
+  flex-grow: 1;
+  text-align: center;
+}
+
+.lifecycle-container-item-link {
+  color: #1a73e8;
+  text-decoration: underline;
+}
+
+/* --- GET STARTED CONTAINER --- */
+.get-started-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 60px 0;
+  text-align: center;
+}
+
+.get-started-container-intro {
+  margin-bottom: 60px;
+}
+
+.get-started-container p {
+  margin-bottom: 16px;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+
+.get-started-container-steps {
+  display: flex;
+  justify-content: center;
+  gap: 60px;
+  flex-wrap: wrap;
+  text-align: center;
+}
+
+.get-started-container-step {
+  flex: 1;
+  min-width: 250px;
+  max-width: 350px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 0;
+}
+
+.get-started-container-step-icon-wrapper {
+  height: 60px;
+  margin-bottom: 20px;
+}
+
+.get-started-container-step-icon {
+  height: 48px;
+  width: auto;
+  opacity: 0.8;
+}
+
+.get-started-container-step p {
+  text-align: center;
+}
+
+.get-started-container-repo-link {
+  text-align: center;
+  margin-top: 60px;
+}
+
+.get-started-container-repo-link .promo-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* --- FOOTER SECTION --- */
+.footer-wrapper {
+  background: #f8f9fa;
+  padding: 60px 20px;
+  text-align: center;
+  border-top: 1px solid #e0e0e0;
+}
+
+.footer-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  opacity: 0.9;
+}
+
+.footer-logo {
+  height: 28px;
+  width: auto;
+}
+
+.footer-text {
+  font-size: 1.2rem;
+  color: #5f6368;
+  font-weight: 400;
+  letter-spacing: -0.5px;
+  font-family: "Google Sans", sans-serif;
+}

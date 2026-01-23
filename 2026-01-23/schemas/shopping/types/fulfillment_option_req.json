@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/fulfillment_option_req.json",
+  "title": "Fulfillment Option Request",
+  "description": "A fulfillment option within a group (e.g., Standard Shipping $5, Express $15).",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {}
+}

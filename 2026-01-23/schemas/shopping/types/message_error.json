@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/message_error.json",
+  "title": "Message Error",
+  "type": "object",
+  "required": [
+    "type",
+    "code",
+    "content",
+    "severity"
+  ],
+  "properties": {
+    "type": {
+      "type": "string",
+      "const": "error",
+      "description": "Message type discriminator."
+    },
+    "code": {
+      "type": "string",
+      "description": "Error code. Possible values include: missing, invalid, out_of_stock, payment_declined, requires_sign_in, requires_3ds, requires_identity_linking. Freeform codes also allowed."
+    },
+    "path": {
+      "type": "string",
+      "description": "RFC 9535 JSONPath to the component the message refers to (e.g., $.items[1])."
+    },
+    "content_type": {
+      "type": "string",
+      "enum": [
+        "plain",
+        "markdown"
+      ],
+      "default": "plain",
+      "description": "Content format, default = plain."
+    },
+    "content": {
+      "type": "string",
+      "description": "Human-readable message."
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "recoverable",
+        "requires_buyer_input",
+        "requires_buyer_review"
+      ],
+      "description": "Declares who resolves this error. 'recoverable': agent can fix via API. 'requires_buyer_input': merchant requires information their API doesn't support collecting programmatically (checkout incomplete). 'requires_buyer_review': buyer must authorize before order placement due to policy, regulatory, or entitlement rules (checkout complete). Errors with 'requires_*' severity contribute to 'status: requires_escalation'."
+    }
+  }
+}

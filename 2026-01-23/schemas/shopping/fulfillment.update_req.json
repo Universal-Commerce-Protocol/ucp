@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/fulfillment.update_req.json",
+  "name": "dev.ucp.shopping.fulfillment",
+  "version": "2026-01-11",
+  "title": "Fulfillment Extension Update Request",
+  "description": "Extends Checkout with fulfillment support using methods, destinations, and groups.",
+  "$defs": {
+    "fulfillment_option": {
+      "$ref": "https://ucp.dev/schemas/shopping/types/fulfillment_option_req.json"
+    },
+    "fulfillment_group": {
+      "$ref": "https://ucp.dev/schemas/shopping/types/fulfillment_group.update_req.json"
+    },
+    "fulfillment_method": {
+      "$ref": "https://ucp.dev/schemas/shopping/types/fulfillment_method.update_req.json"
+    },
+    "fulfillment_available_method": {
+      "$ref": "https://ucp.dev/schemas/shopping/types/fulfillment_available_method_req.json"
+    },
+    "fulfillment": {
+      "$ref": "https://ucp.dev/schemas/shopping/types/fulfillment_req.json"
+    },
+    "checkout": {
+      "title": "Checkout with Fulfillment Update Request",
+      "description": "Checkout extended with hierarchical fulfillment.",
+      "allOf": [
+        {
+          "$ref": "https://ucp.dev/schemas/shopping/checkout.update_req.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "fulfillment": {
+              "$ref": "#/$defs/fulfillment",
+              "description": "Fulfillment details."
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.fulfillment": {
+      "platform_schema": {
+        "title": "Fulfillment Capability (Platform) Update Request",
+        "description": "Platform-level fulfillment capability configuration",
+        "allOf": [
+          {
+            "$ref": "https://ucp.dev/schemas/capability.json#/$defs/platform_schema"
+          },
+          {
+            "properties": {
+              "config": {
+                "$ref": "https://ucp.dev/schemas/shopping/types/platform_fulfillment_config.json",
+                "description": "Platform fulfillment configuration"
+              }
+            }
+          }
+        ]
+      },
+      "business_schema": {
+        "title": "Fulfillment Capability (Business) Update Request",
+        "description": "Business-level fulfillment capability configuration",
+        "allOf": [
+          {
+            "$ref": "https://ucp.dev/schemas/capability.json#/$defs/business_schema"
+          },
+          {
+            "properties": {
+              "config": {
+                "$ref": "https://ucp.dev/schemas/shopping/types/business_fulfillment_config.json",
+                "description": "Business fulfillment configuration"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "embedded": {
+    "delegations": [
+      "fulfillment.address_change"
+    ],
+    "methods": [
+      {
+        "name": "ec.fulfillment.change",
+        "summary": "Fulfillment details changed",
+        "description": "Merchant notifies host that checkout.fulfillment has changed (shipping method selected, destination updated).",
+        "params": [
+          {
+            "name": "checkout",
+            "required": true,
+            "schema": {
+              "$ref": "https://ucp.dev/schemas/shopping/checkout.update_req.json",
+              "description": "Current checkout state with updated fulfillment."
+            }
+          }
+        ]
+      },
+      {
+        "name": "ec.fulfillment.address_change_request",
+        "summary": "Request address selection",
+        "description": "Merchant requests host to present address selection UI for a shipping fulfillment method.",
+        "params": [
+          {
+            "name": "checkout",
+            "required": true,
+            "schema": {
+              "$ref": "https://ucp.dev/schemas/shopping/checkout.update_req.json",
+              "description": "Current checkout state with fulfillment context."
+            }
+          }
+        ],
+        "result": {
+          "name": "addressChangeResult",
+          "schema": {
+            "type": "object",
+            "description": "Checkout state with updated fulfillment address.",
+            "required": [
+              "checkout"
+            ],
+            "properties": {
+              "checkout": {
+                "type": "object",
+                "description": "Partial checkout update with fulfillment address selection.",
+                "properties": {
+                  "fulfillment": {
+                    "$ref": "https://ucp.dev/schemas/shopping/types/fulfillment_req.json",
+                    "description": "Fulfillment with updated destinations and selected_destination_id."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/line_item.complete_req.json",
+  "title": "Line Item Complete Request",
+  "type": "object",
+  "description": "Line item object. Expected to use the currency of the parent object.",
+  "required": [
+    "id",
+    "item",
+    "quantity"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "item": {
+      "$ref": "https://ucp.dev/schemas/shopping/types/item.complete_req.json"
+    },
+    "quantity": {
+      "type": "integer",
+      "description": "Quantity of the item being purchased.",
+      "minimum": 1
+    },
+    "parent_id": {
+      "type": "string",
+      "description": "Parent line item identifier for any nested structures."
+    }
+  }
+}

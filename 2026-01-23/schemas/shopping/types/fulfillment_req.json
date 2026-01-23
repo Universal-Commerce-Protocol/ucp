@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/fulfillment_req.json",
+  "title": "Fulfillment Request",
+  "description": "Container for fulfillment methods and availability.",
+  "type": "object",
+  "properties": {
+    "methods": {
+      "type": "array",
+      "description": "Fulfillment methods for cart items.",
+      "items": {
+        "$ref": "https://ucp.dev/schemas/shopping/types/fulfillment_method.create_req.json"
+      }
+    }
+  }
+}
