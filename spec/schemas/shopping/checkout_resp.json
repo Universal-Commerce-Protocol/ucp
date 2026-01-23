@@ -36,9 +36,6 @@
       "$ref": "types/buyer.json",
       "description": "Representation of the buyer."
     },
-    "context": {
-      "$ref": "types/context.json"
-    },
     "status": {
       "type": "string",
       "enum": [

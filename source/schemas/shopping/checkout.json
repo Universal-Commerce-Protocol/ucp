@@ -61,14 +61,6 @@
       },
       "ucp_response": "omit"
     },
-    "context": {
-      "$ref": "types/context.json",
-      "ucp_request": {
-        "create": "optional",
-        "update": "optional",
-        "complete": "omit"
-      }
-    },
     "status": {
       "type": "string",
       "enum": [

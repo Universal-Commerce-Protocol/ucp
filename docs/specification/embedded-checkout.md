@@ -234,7 +234,7 @@ capability using its own UI.
 2. **MUST** respond with an appropriate error if the user cancels
 3. **SHOULD** show loading/processing states while handling delegation
 
-#### 3.3.3 Delegation Flow
+#### Delegation Flow
 
 1. **Request**: Embedded Checkout sends an `ec.{capability}.{action}_request`
     message with current state (includes `id`)
@@ -338,7 +338,7 @@ that channel. Otherwise, the host and business **MUST** continue using
 
 #### Communication Channel for Native Hosts
 
-When the host is a native application, they MUST inject globals into the
+When the host is a native application, they **MUST** inject globals into the
 Embedded Checkout that allows `postMessage` communication between the web and
 native environments. The host **MUST** create at least one of the following
 globals:
@@ -598,7 +598,7 @@ Indicates successful checkout completion.
 
 ### State Change Messages
 
-State change messages inform the embedder of changes that have already occurred
+State change messages inform the host of changes that have already occurred
 in the checkout interface. These are informational only. The checkout has
 already applied the changes and rendered the updated UI.
 

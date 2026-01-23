@@ -44,6 +44,7 @@ nav:
       - Overview: specification/cart.md
       - HTTP/REST Binding: specification/cart-rest.md
       - MCP Binding: specification/cart-mcp.md
+      - EP Binding: specification/embedded-cart.md
     - Order Capability: specification/order.md
     - Identity Linking Capability: specification/identity-linking.md
     - Payment Handlers:
@@ -206,6 +207,7 @@ plugins:
           - specification/cart.md
           - specification/cart-rest.md
           - specification/cart-mcp.md
+          - specification/embedded-cart.md
         Order Capability:
           - specification/order.md
         Identity Linking Capability:

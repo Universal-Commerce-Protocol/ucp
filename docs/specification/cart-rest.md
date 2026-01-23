@@ -493,7 +493,8 @@ Content-Type: application/json
       "type": "error",
       "code": "invalid_quantity",
       "path": "$.line_items[0].quantity",
-      "content": "Quantity must be at least 1"
+      "content": "Quantity must be at least 1",
+      "severity": "recoverable"
     }
   ],
   "continue_url": "https://business.example.com/checkout?cart=cart_abc123"

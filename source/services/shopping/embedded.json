@@ -317,22 +317,6 @@
     },
 
     {
-      "name": "ect.complete",
-      "summary": "Cart building completed successfully",
-      "description": "Business notifies host that basket building has completed and buyer is ready for subsequent actions.",
-      "params": [
-        {
-          "name": "cart",
-          "required": true,
-          "schema": {
-            "$ref": "../../schemas/shopping/cart.json",
-            "description": "Final cart state."
-          }
-        }
-      ]
-    },
-
-    {
       "name": "ect.transition.checkout",
       "summary": "Cart successfully transitioned into a checkout session.",
       "description": "Business notifies host that basket building has completed and buyer is seamlessly transitioning to the Embedded Checkout Protocol.",
@@ -381,17 +365,12 @@
               "type": "object",
               "description": "Partial cart update with line items.",
               "properties": {
-                "payment": {
-                  "type": "object",
-                  "properties": {
-                    "line_items": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "types/line_item.json"
-                      },
-                      "description": "Cart line items after passing host validations."
-                    }
-                  }
+                "line_items": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "types/line_item.json"
+                  },
+                  "description": "Cart line items after passing host validations."
                 }
               }
             }
