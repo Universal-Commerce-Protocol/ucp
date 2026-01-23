@@ -553,7 +553,7 @@
       "post": {
         "operationId": "cancel_cart",
         "summary": "Cancel Cart",
-        "description": "Cancel a cart session.",
+        "description": "Cancel a cart session. Returns the cart state at time of cancellation.",
         "parameters": [
           {
             "$ref": "#/components/parameters/authorization"
@@ -815,6 +815,18 @@
       },
       "checkout_complete_request": {
         "$ref": "https://ucp.dev/schemas/shopping/checkout.complete_req.json"
+      },
+      "cart_response": {
+        "$ref": "https://ucp.dev/schemas/shopping/cart_resp.json"
+      },
+      "cart_create_request": {
+        "$ref": "https://ucp.dev/schemas/shopping/cart.create_req.json"
+      },
+      "cart_update_request": {
+        "$ref": "https://ucp.dev/schemas/shopping/cart.update_req.json"
+      },
+      "cart_complete_request": {
+        "$ref": "https://ucp.dev/schemas/shopping/cart.complete_req.json"
       },
       "payment_response": {
         "$ref": "https://ucp.dev/schemas/shopping/payment_resp.json"

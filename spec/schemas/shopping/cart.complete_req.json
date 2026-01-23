@@ -1,17 +1,17 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/schemas/shopping/cart.create_req.json",
+  "$id": "https://ucp.dev/schemas/shopping/cart.complete_req.json",
   "name": "dev.ucp.shopping.cart",
   "version": "2026-01-15",
-  "title": "Cart Create Request",
+  "title": "Cart Complete Request",
   "description": "Shopping cart with estimated pricing before checkout. Lightweight pre-purchase exploration with no payment info or complex status states. Cart exists (200) or doesn't (404).",
   "$defs": {
     "checkout": {
-      "title": "Checkout with Cart Create Request",
+      "title": "Checkout with Cart Complete Request",
       "description": "Checkout extended with cart capability. Adds cart_id to create_checkout for cart-to-checkout conversion.",
       "allOf": [
         {
-          "$ref": "checkout.create_req.json"
+          "$ref": "checkout.complete_req.json"
         },
         {
           "type": "object",
@@ -27,14 +27,19 @@
   },
   "type": "object",
   "required": [
+    "id",
     "line_items"
   ],
   "additionalProperties": true,
   "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique cart identifier."
+    },
     "line_items": {
       "type": "array",
       "items": {
-        "$ref": "types/line_item.create_req.json"
+        "$ref": "types/line_item.complete_req.json"
       },
       "description": "Cart line items. Same structure as checkout. Full replacement on update."
     },

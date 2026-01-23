@@ -18,7 +18,7 @@
           "properties": {
             "cart_id": {
               "type": "string",
-              "description": "Cart ID to convert. Cart contents (line_items, context, buyer) initialize checkout and take precedence over checkout payload for overlapping fields."
+              "description": "Cart ID to convert to checkout. Business MUST use cart contents (line_items, context, buyer) and MUST ignore overlapping fields in checkout payload."
             }
           }
         }
@@ -31,8 +31,7 @@
     "id",
     "line_items",
     "currency",
-    "totals",
-    "checkout_url"
+    "totals"
   ],
   "additionalProperties": true,
   "properties": {
@@ -83,10 +82,10 @@
       },
       "description": "Optional merchant links (policies, FAQs)."
     },
-    "checkout_url": {
+    "continue_url": {
       "type": "string",
       "format": "uri",
-      "description": "URL to convert cart to checkout. Always provided by merchant. Enables sharing, recovery, and cart-to-checkout conversion."
+      "description": "URL for cart handoff and session recovery. Enables sharing and human-in-the-loop flows."
     },
     "expires_at": {
       "type": "string",
