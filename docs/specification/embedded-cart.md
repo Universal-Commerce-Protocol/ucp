@@ -204,7 +204,7 @@ all implementations.
 | Category          | Communication Direction | Purpose                                                               | Pattern      | Core Messages                                |
 | :---------------- | :---------------------- | :---------------------------------------------------------------------| :----------- | :------------------------------------------- |
 | **Handshake**     | Embedded Cart -> Host   | Establish connection between host and Embedded Cart.                  | Request      | `ect.ready`                                  |
-| **Authentication**| Host -> Embedded        | Inform any additional auth data required by Embedded Cart from host.  | Notification | `ect.auth`                                   |
+| **Authentication**| Host -> Embedded Cart   | Inform any additional auth data required by Embedded Cart from host.  | Notification | `ect.auth`                                   |
 | **Lifecycle**     | Embedded Cart -> Host   | Inform of cart state transitions.                                     | Notification | `ect.start`, `ect.transition.checkout`|
 | **State Change**  | Embedded Cart -> Host   | Inform of cart field changes.                                         | Notification | `ect.line_items.change`, `ect.buyer.change`, `ect.context.change`, `ect.messages.change` |
 | **State Change**  | Embedded Cart -> Host   | Inform of cart field changes but also require host input.             | Request      | `ect.line_items.change_request`              |
