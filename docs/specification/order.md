@@ -95,6 +95,11 @@ fulfillment:
 - Include amount when relevant
 - Can happen at any time regardless of fulfillment status
 
+### Post-Order Management Extension
+
+For structured return, exchange, and refund events, see the
+[Post-Order Management Extension](post-order.md).
+
 ## Schema
 
 ### Order
