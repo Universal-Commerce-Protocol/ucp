@@ -248,6 +248,235 @@
       }
     },
     {
+      "name": "ect.ready",
+      "summary": "Handshake from business to host",
+      "description": "Initiates the Embedded Cart Protocol. Business declares whether or not additional auth exchange is needed, host responds with optional channel upgrade and initial cart state if not additional auth exchange is needed.",
+      "params": [
+        {
+          "name": "require_auth",
+          "required": true,
+          "schema": {
+            "type": "boolean",
+            "description": "Whether or not business requires additional auth exchange from host. Needed when identity linking is a pre-requisite."
+          },
+          "description": "Whether or not business requires additional auth exchange from host. Needed when identity linking is a pre-requisite."
+        }
+      ],
+      "result": {
+        "name": "readyResult",
+        "schema": {
+          "type": "object",
+          "description": "Handshake response from host.",
+          "properties": {
+            "upgrade": {
+              "type": "object",
+              "description": "Channel upgrade instructions. If present, switch to provided MessagePort.",
+              "properties": {
+                "port": {
+                  "type": "object",
+                  "description": "MessagePort for upgraded channel. Runtime type is MessagePort."
+                }
+              }
+            },
+            "cart": {
+              "$ref": "../../schemas/shopping/cart_resp.json",
+              "description": "Optional cart state with host-provided data (line_items)."
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "ect.auth",
+      "summary": "Handshake from host to business",
+      "description": "Augments Embedded Cart Protocol by doing an additional auth exchanges per business requirement.",
+      "params": [
+        {
+          "name": "authorization",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "cart",
+          "required": false,
+          "schema": {
+            "$ref": "../../schemas/shopping/cart_resp.json",
+            "description": "Optional cart state with host-provided data (line_items)."
+          },
+          "description": "Optional cart state with host-provided data (line_items)."
+        }
+      ]
+    },
+    {
+      "name": "ect.start",
+      "summary": "Cart visible to buyer",
+      "description": "Business notifies host that checkout UI is visible and ready for interaction.",
+      "params": [
+        {
+          "name": "cart",
+          "required": true,
+          "schema": {
+            "$ref": "../../schemas/shopping/cart_resp.json",
+            "description": "Current cart state."
+          },
+          "description": "Current cart state."
+        }
+      ]
+    },
+    {
+      "name": "ect.complete",
+      "summary": "Cart building completed successfully",
+      "description": "Business notifies host that basket building has completed and buyer is ready for subsequent actions.",
+      "params": [
+        {
+          "name": "cart",
+          "required": true,
+          "schema": {
+            "$ref": "../../schemas/shopping/cart_resp.json",
+            "description": "Final cart state."
+          },
+          "description": "Final cart state."
+        }
+      ]
+    },
+    {
+      "name": "ect.transition.checkout",
+      "summary": "Cart successfully transitioned into a checkout session.",
+      "description": "Business notifies host that basket building has completed and buyer is seamlessly transitioning to the Embedded Checkout Protocol.",
+      "params": [
+        {
+          "name": "cart",
+          "required": true,
+          "schema": {
+            "$ref": "../../schemas/shopping/cart_resp.json",
+            "description": "Final cart state before transitioning to checkout."
+          },
+          "description": "Final cart state before transitioning to checkout."
+        },
+        {
+          "name": "checkout",
+          "required": true,
+          "schema": {
+            "$ref": "../../schemas/shopping/checkout_resp.json",
+            "description": "Initial checkout session that is visible to buyer and ready for interaction."
+          },
+          "description": "Initial checkout session that is visible to buyer and ready for interaction."
+        }
+      ]
+    },
+    {
+      "name": "ect.line_items.change_request",
+      "summary": "Request line item change validation",
+      "description": "Business notifies host that cart.line_items has changed (item added, removed, quantity updated) and requests host to validate change request.",
+      "params": [
+        {
+          "name": "cart",
+          "required": true,
+          "schema": {
+            "$ref": "../../schemas/shopping/cart_resp.json",
+            "description": "Current cart state with updated line items."
+          },
+          "description": "Current cart state with updated line items."
+        }
+      ],
+      "result": {
+        "name": "changeResult",
+        "schema": {
+          "type": "object",
+          "description": "Cart state after line item update validation.",
+          "required": [
+            "cart"
+          ],
+          "properties": {
+            "cart": {
+              "type": "object",
+              "description": "Partial cart update with line items.",
+              "properties": {
+                "payment": {
+                  "type": "object",
+                  "properties": {
+                    "line_items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "types/line_item.json"
+                      },
+                      "description": "Cart line items after passing host validations."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "ect.line_items.change",
+      "summary": "Line items changed",
+      "description": "Business notifies host that cart.line_items has changed (item added, removed, quantity updated).",
+      "params": [
+        {
+          "name": "cart",
+          "required": true,
+          "schema": {
+            "$ref": "../../schemas/shopping/cart_resp.json",
+            "description": "Current cart state with updated line items."
+          },
+          "description": "Current cart state with updated line items."
+        }
+      ]
+    },
+    {
+      "name": "ect.buyer.change",
+      "summary": "Buyer information changed",
+      "description": "Business notifies host that cart.buyer has changed (email, phone, address updated).",
+      "params": [
+        {
+          "name": "cart",
+          "required": true,
+          "schema": {
+            "$ref": "../../schemas/shopping/cart_resp.json",
+            "description": "Current cart state with updated buyer."
+          },
+          "description": "Current cart state with updated buyer."
+        }
+      ]
+    },
+    {
+      "name": "ect.context.change",
+      "summary": "Buyer context changed",
+      "description": "Business notifies host that cart.context (localization signals) has changed.",
+      "params": [
+        {
+          "name": "cart",
+          "required": true,
+          "schema": {
+            "$ref": "../../schemas/shopping/cart_resp.json",
+            "description": "Current cart state with updated context."
+          },
+          "description": "Current cart state with updated context."
+        }
+      ]
+    },
+    {
+      "name": "ect.messages.change",
+      "summary": "Cart messages changed",
+      "description": "Business notifies host that cart.messages has changed. Includes errors, warnings, and info. Host should update UI accordingly.",
+      "params": [
+        {
+          "name": "cart",
+          "required": true,
+          "schema": {
+            "$ref": "../../schemas/shopping/cart_resp.json",
+            "description": "Current cart state with updated messages."
+          },
+          "description": "Current cart state with updated messages."
+        }
+      ]
+    },
+    {
       "name": "ec.fulfillment.change",
       "summary": "Fulfillment details changed",
       "description": "Merchant notifies host that checkout.fulfillment has changed (shipping method selected, destination updated).",
