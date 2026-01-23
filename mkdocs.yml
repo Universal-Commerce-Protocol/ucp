@@ -52,6 +52,7 @@ nav:
         - Encrypted Credential: specification/examples/encrypted-credential-handler.md
     - Schema Authoring: documentation/schema-authoring.md
     - Reference: specification/reference.md
+    - Versioning: specification/versioning.md
   - UCP and AP2: documentation/ucp-and-ap2.md
   - Roadmap: documentation/roadmap.md
 
@@ -70,7 +71,9 @@ extra:
   ucp_url: https://ucp.dev
   analytics:
     provider: google
+    # cSpell:disable
     property: G-ZEGTBCTMJ9
+    # cSpell:enable
   consent:
     title: Cookie consent
     description: >-

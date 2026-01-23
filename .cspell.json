@@ -11,7 +11,8 @@
     ".cspell.json",
     "**/*.svg",
     ".gitignore",
-    "package.json"
+    "package.json",
+    ".pre-commit-config.yaml"
   ],
   "dictionaryDefinitions": [
     {
