@@ -17,7 +17,7 @@ branches for all supported releases of the spec.
       1. The fix is made on the release branch and merged to `main`.
       2. The fix is made on `main` and cherry-picked to the release branch.
 * Once finalized, we will merge the release branch into `main` and tag it (e.g.
-  `git tag -a YYYY-MM-DD`).  We will use a GitHub Action to detect the new Tag
+  `git tag -a vYYYY-MM-DD`).  We will use a GitHub Action to detect the new Tag
   and automatically generate a release notes draft and upload artifacts.
 * Unlike temporary feature branches, release/YYYY-MM-DD branches are long-lived
   and correspond to specific versions of the spec for historical reference and
