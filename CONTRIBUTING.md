@@ -73,19 +73,39 @@ significant changes to include:
 An [Enhancement Proposal](../../issues/new?template=enhancement-proposal.md)
 is a living artifact that tracks a proposal through its lifecycle:
 
-* Provisional: The initial stage where the idea is proposed and debated within
-  the community. In order to move to the next stage, the enhancement proposal
-  will need to be approved by a simple majority of the TC.
-* Implementable: The stage after the design has been finalized and has received
-  formal approval from at least one maintainer and one member of the TC.
-* Implemented: The final stage, reached when the code for the feature is
-  complete, tested, documented, and merged.
+* **Proposal:** Anyone can submit; idea is proposed and debated.
+* **Provisional:** TC majority vote to accept; enters working draft iteration.
+* **Implemented:** TC majority vote to finalize; code complete and merged.
 
 Every [Enhancement Proposal](../../issues/new?template=enhancement-proposal.md)
 must follow a standard template requiring sections for a Summary, Motivation,
-Detailed Design, Risks, a Test Plan, and Graduation Criteria (defining the path
-from Alpha to Beta to General Availability). This creates a permanent, public
-design record for the project's evolution.
+Detailed Design, Risks, a Test Plan, and Graduation Criteria. This creates a
+permanent, public design record for the project's evolution.
+
+### Capability Maturity Levels
+
+After an Enhancement Proposal reaches "Provisional" status, the capability
+enters the maturity lifecycle with the following stability guarantees:
+
+#### Working Draft
+
+* **Version:** `Working Draft`
+* **Stability:** Breaking changes expected
+* **Status:** Prototyping, gathering feedback, iterating on design
+* **Exit criteria:** TC majority vote to advance
+
+#### Candidate
+
+* **Version:** `Candidate`
+* **Stability:** API surface stable; implementation details may evolve
+* **Status:** Early adopter implementations, production pilots
+* **Exit criteria:** TC majority vote to advance
+
+#### Stable
+
+* **Version:** `YYYY-MM-DD` (date-based version assigned)
+* **Stability:** Full backward compatibility within major version
+* **Status:** Production deployments
 
 ### Voting and decision making
 
@@ -117,7 +137,7 @@ minor version of the core.
 
 ### Adding new extensions and capabilities to the core protocol
 
-UCP is designed to be very extensible while keeping the core protocol light. A
+UCP is designed to be extensible while keeping the core protocol light. A
 core principle of UCP is to ensure that the set of extensions and capabilities
 defined in UCP have broad ecosystem support. Vendors should first create
 capabilities & extensions in vendor-specific namespace pattern

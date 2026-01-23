@@ -4,6 +4,7 @@
     "quicktype": "^23.2.6"
   },
     "overrides": {
-      "diff": "8.0.3"
+      "diff": "8.0.3",
+      "lodash": "4.17.23"
   }
 }
