@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/option_value.json",
+  "title": "Option Value",
+  "description": "A selectable value for a product option.",
+  "type": "object",
+  "required": [
+    "label"
+  ],
+  "properties": {
+    "label": {
+      "type": "string",
+      "description": "Display text for this option value (e.g., 'Small', 'Blue')."
+    }
+  }
+}

@@ -109,7 +109,7 @@ def define_env(env):
     the same specification file.
 
     Args:
-      ref_string: e.g., "types/line_item.create_req.json"
+      ref_string: e.g., "types/line_item.create_req.json" or "types/pagination.json#/$defs/response"
       spec_file_name: e.g., "checkout"
 
     Returns:
@@ -125,7 +125,14 @@ def define_env(env):
     ):
       spec_file_name = "checkout"
 
-    filename = Path(ref_string).name
+    # Extract fragment identifier if present (e.g., #/$defs/response)
+    # This handles cases like "types/pagination.json#/$defs/response"
+    fragment = None
+    ref_path = ref_string
+    if '#/$defs/' in ref_string:
+      ref_path, fragment = ref_string.split('#/$defs/', 1)
+
+    filename = os.path.basename(ref_path)
 
     # Check if this reference comes from the core UCP schema
     is_ucp = "ucp.json" in ref_string
@@ -137,13 +144,20 @@ def define_env(env):
 
     # 2. Generate Link Text (Visual)
     # e.g. "checkout_response" -> "Checkout Response"
-    link_text = (
-      raw_name.replace("_", " ").replace(".", " ").replace("-", " ").title()
-    )
-    if link_text.endswith("Resp"):
-      link_text = link_text.replace("Resp", "Response")
-    elif link_text.endswith("Req"):
-      link_text = link_text.replace("Req", "Request")
+    # e.g. "pagination" + fragment "response" -> "Pagination Response"
+    if fragment:
+      base_text = raw_name.replace('_', ' ').replace('.', ' ').replace('-', ' ').title()
+      fragment_text = fragment.replace('_', ' ').replace('.', ' ').replace('-', ' ').title()
+      link_text = f'{base_text} {fragment_text}'
+    else:
+      link_text = (
+          raw_name.replace('_', ' ').replace('.', ' ').replace('-', ' ').title()
+      )
+
+    if link_text.endswith('Resp'):
+      link_text = link_text.replace('Resp', 'Response')
+    elif link_text.endswith('Req'):
+      link_text = link_text.replace('Req', 'Request')
 
     # FIX: Explicitly add UCP prefix for core UCP definitions if missing
     if is_ucp and "Ucp" not in link_text and "UCP" not in link_text:
@@ -159,7 +173,14 @@ def define_env(env):
 
     anchor_name = base_entity.replace("_", "-")
 
-    if len(parts) > 1:
+    # Handle fragment in anchor (e.g., pagination#/$defs/response -> pagination-response)
+    if fragment:
+      fragment_anchor = fragment.replace('_', '-')
+      if anchor_name:  # External ref: base-fragment
+        anchor_name = f'{anchor_name}-{fragment_anchor}'
+      else:  # Internal ref like #/$defs/context: just use fragment
+        anchor_name = fragment_anchor
+    elif len(parts) > 1:
       variant = parts[1]
       variant_expanded = (
         variant.replace("create_req", "create-request")

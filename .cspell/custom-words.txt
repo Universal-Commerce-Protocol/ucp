@@ -58,6 +58,7 @@ linenums
 llms
 llmstxt
 mastercard
+midsole
 mkdocs
 mtok
 openapi
