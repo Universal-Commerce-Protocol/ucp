@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/buyer.json",
+  "title": "Buyer",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "first_name": {
+      "type": "string",
+      "description": "First name of the buyer."
+    },
+    "last_name": {
+      "type": "string",
+      "description": "Last name of the buyer."
+    },
+    "full_name": {
+      "type": "string",
+      "description": "Optional, buyer's full name (if first_name or last_name fields are present they take precedence)."
+    },
+    "email": {
+      "type": "string",
+      "description": "Email of the buyer."
+    },
+    "phone_number": {
+      "type": "string",
+      "description": "E.164 standard."
+    }
+  }
+}

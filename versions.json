@@ -3,5 +3,12 @@
     "version": "draft",
     "title": "draft",
     "aliases": []
+  },
+  {
+    "version": "2026-01-11",
+    "title": "2026-01-11",
+    "aliases": [
+      "latest"
+    ]
   }
 ]

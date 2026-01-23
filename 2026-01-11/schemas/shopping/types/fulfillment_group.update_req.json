@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/fulfillment_group.update_req.json",
+  "title": "Fulfillment Group Update Request",
+  "description": "A merchant-generated package/group of line items with fulfillment options.",
+  "type": "object",
+  "required": [
+    "id"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Group identifier for referencing merchant-generated groups in updates."
+    },
+    "selected_option_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "ID of the selected fulfillment option for this group."
+    }
+  }
+}

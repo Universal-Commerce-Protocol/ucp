@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/adjustment.json",
+  "title": "Adjustment",
+  "description": "Append-only event that exists independently of fulfillment. Typically represents money movements but can be any post-order change. Polymorphic type that can optionally reference line items.",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "occurred_at",
+    "status"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Adjustment event identifier."
+    },
+    "type": {
+      "type": "string",
+      "description": "Type of adjustment (open string). Typically money-related like: refund, return, credit, price_adjustment, dispute, cancellation. Can be any value that makes sense for the merchant's business."
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC 3339 timestamp when this adjustment occurred."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "completed",
+        "failed"
+      ],
+      "description": "Adjustment status."
+    },
+    "line_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "quantity"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Line item ID reference."
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Quantity affected by this adjustment."
+          }
+        }
+      },
+      "description": "Which line items and quantities are affected (optional)."
+    },
+    "amount": {
+      "type": "integer",
+      "description": "Amount in minor units (cents) for refunds, credits, price adjustments (optional)."
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable reason or description (e.g., 'Defective item', 'Customer requested')."
+    }
+  }
+}

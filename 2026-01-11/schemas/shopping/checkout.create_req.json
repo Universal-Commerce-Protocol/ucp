@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/checkout.create_req.json",
+  "name": "dev.ucp.shopping.checkout",
+  "version": "2026-01-11",
+  "title": "Checkout Create Request",
+  "description": "Base checkout schema. Extensions compose onto this using allOf.",
+  "type": "object",
+  "required": [
+    "line_items",
+    "currency",
+    "payment"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "line_items": {
+      "type": "array",
+      "items": {
+        "$ref": "https://ucp.dev/schemas/shopping/types/line_item.create_req.json"
+      },
+      "description": "List of line items being checked out."
+    },
+    "buyer": {
+      "$ref": "https://ucp.dev/schemas/shopping/types/buyer.json",
+      "description": "Representation of the buyer."
+    },
+    "currency": {
+      "type": "string",
+      "description": "ISO 4217 currency code."
+    },
+    "payment": {
+      "$ref": "https://ucp.dev/schemas/shopping/payment.create_req.json"
+    }
+  }
+}
