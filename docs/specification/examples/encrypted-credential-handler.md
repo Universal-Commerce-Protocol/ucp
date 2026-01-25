@@ -71,7 +71,7 @@ Compliance requirements vary by credential type.
          |  2. Confirmation                             |
          |--------------------------------------------->|
          |                                              |
-         |  3. GET payment.handlers                     |
+         |  3. GET ucp.payment_handlers                 |
          |--------------------------------------------->|
          |                                              |
          |  4. Handler with business identity           |

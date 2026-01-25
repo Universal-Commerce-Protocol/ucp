@@ -66,7 +66,7 @@ happens internally within the Processor's secure environment.
 | (Collector)|                         |      (Business or PSP)            |
 +-----+------+                         +-----------------+-----------------+
       |                                                  |
-      |  1. GET payment.handlers                         |
+      |  1. GET ucp.payment_handlers                     |
       |------------------------------------------------->|
       |                                                  |
       |  2. Handler Config (URL + Identity)              |

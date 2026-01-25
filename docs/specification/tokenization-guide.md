@@ -51,7 +51,7 @@ Tokenization handlers transform credentials between source and checkout forms:
 +-------------------------------------------------------------------------+
 |                                                                         |
 |   Platform has:            Tokenizer            Business receives:      |
-|   Card Credential    -->  /tokenize  -->         TokenCredential        |
+|   Source Credential    -->  /tokenize  -->         TokenCredential      |
 |                                                                         |
 |   +-----------------+                      +-------------------------+  |
 |   | source_         |                      | checkout_               |  |
