@@ -165,12 +165,12 @@ human-readable fields that platforms render directly.
 
 ### Human-Readable Fields
 
-| Location                | Field         | Required | Purpose                                                    |
-| ----------------------- | ------------- | -------- | ---------------------------------------------------------- |
-| `groups[].options[]`    | `title`       | Yes      | Primary label that distinguishes from siblings             |
-| `groups[].options[]`    | `description` | No       | Supplementary context for the title                        |
-| `groups[].options[]`    | `total`       | Yes      | Price in minor units (may be null if not yet available)    |
-| `available_methods[]`   | `description` | No       | Standalone explanation of alternative availability         |
+| Location              | Field         | Required | Purpose                                                 |
+| --------------------- | ------------- | -------- | ------------------------------------------------------- |
+| `groups[].options[]`  | `title`       | Yes      | Primary label that distinguishes from siblings          |
+| `groups[].options[]`  | `description` | No       | Supplementary context for the title                     |
+| `groups[].options[]`  | `total`       | Yes      | Price in minor units (may be null if not yet available) |
+| `available_methods[]` | `description` | No       | Standalone explanation of alternative availability      |
 
 ### Business Responsibilities
 
@@ -273,7 +273,7 @@ Businesses fetch platform profiles to adapt responses accordingly.
 
 ### Platform Profile
 
-Platforms declare their rendering capabilities using `platform_config`:
+Platforms declare their rendering capabilities using `platform_schema`:
 
 {{ schema_fields('types/platform_fulfillment_config', 'fulfillment') }}
 
@@ -284,10 +284,10 @@ within each method.
 
 ```json
 // Default: single group per method
-{ "name": "dev.ucp.shopping.fulfillment", "version": "2026-01-11" }
+{ "dev.ucp.shopping.fulfillment": [{"version": "2026-01-11"}] }
 
 // Opt-in: business MAY return multiple groups per method
-{ "name": "dev.ucp.shopping.fulfillment", "version": "2026-01-11", "config": { "supports_multi_group": true } }
+{ "dev.ucp.shopping.fulfillment": [{"version": "2026-01-11", "config": { "supports_multi_group": true }}] }
 ```
 
 ### Business Profile
@@ -299,16 +299,19 @@ Businesses declare what fulfillment configurations they support using
 
 ```json
 {
-  "capabilities": [{
-    "name": "dev.ucp.shopping.fulfillment",
-    "version": "2026-01-11",
-    "config": {
-      "allows_multi_destination": {
-        "shipping": true
-      },
-      "allows_method_combinations": [["shipping", "pickup"]]
-    }
-  }]
+  "capabilities": {
+    "dev.ucp.shopping.fulfillment": [
+      {
+        "version": "2026-01-11",
+        "config": {
+          "allows_multi_destination": {
+            "shipping": true
+          },
+          "allows_method_combinations": [["shipping", "pickup"]]
+        }
+      }
+    ]
+  }
 }
 ```
 

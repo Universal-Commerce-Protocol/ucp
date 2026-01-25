@@ -6,8 +6,8 @@
   "title": "Order",
   "description": "Order schema with immutable line items, buyer-facing fulfillment expectations, and append-only event logs.",
   "$defs": {
-    "platform_config": {
-      "title": "Platform Order Config",
+    "platform_schema": {
+      "title": "Platform Order Schema",
       "description": "Platform's order capability configuration.",
       "type": "object",
       "required": [
@@ -34,7 +34,7 @@
   ],
   "properties": {
     "ucp": {
-      "$ref": "../ucp.json#/$defs/response_order"
+      "$ref": "../ucp.json#/$defs/response_order_schema"
     },
     "id": {
       "type": "string",

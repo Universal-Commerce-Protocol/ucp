@@ -3,7 +3,7 @@
   "info": {
     "title": "UCP Shopping Service",
     "version": "2026-01-11",
-    "description": "Canonical REST interface for UCP Shopping service. Schema references are logical pointers - actual payload shape is determined by negotiated capabilities.\n\n**Endpoint Resolution:** This spec defines operations only. The base URL MUST be obtained from the merchant's discovery profile at `/.well-known/ucp` under `services[\"dev.ucp.shopping\"].rest.endpoint`. The `{endpoint}` server variable below is a placeholder for tooling compatibility."
+    "description": "Canonical REST interface for UCP Shopping service. Schema references are logical pointers - actual payload shape is determined by negotiated capabilities.\n\n**Endpoint Resolution:** This spec defines operations only. The base URL MUST be obtained from the merchant's discovery profile at `/.well-known/ucp` under `services[\"dev.ucp.shopping\"][transport=rest].endpoint`. The `{endpoint}` server variable below is a placeholder for tooling compatibility."
   },
   "servers": [
     {
@@ -12,7 +12,7 @@
       "variables": {
         "endpoint": {
           "default": "https://merchant.example.com/ucp",
-          "description": "Obtain from /.well-known/ucp → services[\"dev.ucp.shopping\"].rest.endpoint"
+          "description": "Obtain from /.well-known/ucp → services[\"dev.ucp.shopping\"][transport=rest].endpoint"
         }
       }
     }
@@ -255,7 +255,7 @@
               "schema": {
                 "allOf": [
                   {
-                    "$ref": "#/components/schemas/payment_data"
+                    "$ref": "#/components/schemas/checkout_complete_request"
                   },
                   {
                     "title": "Risk Signals",
@@ -538,31 +538,25 @@
     },
     "schemas": {
       "order": {
-        "$ref": "https://ucp.dev/schemas/shopping/order.json"
+        "$ref": "../../schemas/shopping/order.json"
       },
-      "payment_data": {
-        "$ref": "https://ucp.dev/schemas/shopping/payment_data.json"
+      "payment": {
+        "$ref": "../../schemas/shopping/payment.json"
       },
       "ucp": {
-        "$ref": "https://ucp.dev/schemas/ucp.json"
+        "$ref": "../../schemas/ucp.json"
       },
       "checkout_response": {
-        "$ref": "https://ucp.dev/schemas/shopping/checkout_resp.json"
+        "$ref": "../../schemas/shopping/checkout_resp.json"
       },
       "checkout_create_request": {
-        "$ref": "https://ucp.dev/schemas/shopping/checkout.create_req.json"
+        "$ref": "../../schemas/shopping/checkout.create_req.json"
       },
       "checkout_update_request": {
-        "$ref": "https://ucp.dev/schemas/shopping/checkout.update_req.json"
+        "$ref": "../../schemas/shopping/checkout.update_req.json"
       },
-      "payment_response": {
-        "$ref": "https://ucp.dev/schemas/shopping/payment_resp.json"
-      },
-      "payment_create_request": {
-        "$ref": "https://ucp.dev/schemas/shopping/payment.create_req.json"
-      },
-      "payment_update_request": {
-        "$ref": "https://ucp.dev/schemas/shopping/payment.update_req.json"
+      "checkout_complete_request": {
+        "$ref": "../../schemas/shopping/checkout.complete_req.json"
       }
     }
   }

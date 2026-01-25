@@ -3,7 +3,7 @@
   "info": {
     "title": "UCP Shopping Service",
     "version": "2026-01-11",
-    "description": "Canonical MCP/JSON-RPC interface for UCP Shopping service. Schema references are logical pointers - actual payload shape is determined by negotiated capabilities.\n\n**Endpoint Resolution:** This spec defines methods only. The endpoint URL MUST be obtained from the merchant's discovery profile at `/.well-known/ucp` under `services[\"dev.ucp.shopping\"].mcp.endpoint`. The server entry below is a placeholder for tooling compatibility."
+    "description": "Canonical MCP/JSON-RPC interface for UCP Shopping service. Schema references are logical pointers - actual payload shape is determined by negotiated capabilities.\n\n**Endpoint Resolution:** This spec defines methods only. The endpoint URL MUST be obtained from the merchant's discovery profile at `/.well-known/ucp` under `services[\"dev.ucp.shopping\"][transport=mcp].endpoint`. The server entry below is a placeholder for tooling compatibility."
   },
   "servers": [
     {
@@ -13,25 +13,69 @@
       "variables": {
         "endpoint": {
           "default": "https://merchant.example.com/ucp/mcp",
-          "description": "Obtain from /.well-known/ucp → services[\"dev.ucp.shopping\"].mcp.endpoint"
+          "description": "Obtain from /.well-known/ucp → services[\"dev.ucp.shopping\"][transport=mcp].endpoint"
         }
       }
     }
   ],
+  "components": {
+    "schemas": {
+      "meta": {
+        "type": "object",
+        "description": "Request metadata.",
+        "required": [
+          "ucp-agent"
+        ],
+        "additionalProperties": true,
+        "properties": {
+          "ucp-agent": {
+            "type": "object",
+            "description": "Platform agent identification. Maps to HTTP UCP-Agent header.",
+            "required": [
+              "profile"
+            ],
+            "properties": {
+              "profile": {
+                "type": "string",
+                "format": "uri",
+                "description": "URL to the platform's UCP profile document."
+              }
+            }
+          },
+          "idempotency-key": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique key for retry safety. Maps to HTTP Idempotency-Key header."
+          }
+        }
+      }
+    }
+  },
   "methods": [
     {
       "name": "create_checkout",
       "summary": "Create a checkout",
       "params": [
         {
+          "name": "meta",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/meta"
+          }
+        },
+        {
           "name": "checkout",
           "required": true,
-          "schema": {"$ref": "https://ucp.dev/schemas/shopping/checkout.json"}
+          "schema": {
+            "$ref": "../../schemas/shopping/checkout.create_req.json"
+          }
         }
       ],
       "result": {
         "name": "checkout",
-        "schema": {"$ref": "https://ucp.dev/schemas/shopping/checkout.json"}
+        "schema": {
+          "$ref": "../../schemas/shopping/checkout_resp.json"
+        }
       }
     },
     {
@@ -39,14 +83,25 @@
       "summary": "Get checkout",
       "params": [
         {
+          "name": "meta",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/meta"
+          }
+        },
+        {
           "name": "id",
           "required": true,
-          "schema": {"type": "string"}
+          "schema": {
+            "type": "string"
+          }
         }
       ],
       "result": {
         "name": "checkout",
-        "schema": {"$ref": "https://ucp.dev/schemas/shopping/checkout.json"}
+        "schema": {
+          "$ref": "../../schemas/shopping/checkout_resp.json"
+        }
       }
     },
     {
@@ -54,19 +109,32 @@
       "summary": "Update checkout",
       "params": [
         {
+          "name": "meta",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/meta"
+          }
+        },
+        {
           "name": "id",
           "required": true,
-          "schema": {"type": "string"}
+          "schema": {
+            "type": "string"
+          }
         },
         {
           "name": "checkout",
           "required": true,
-          "schema": {"$ref": "https://ucp.dev/schemas/shopping/checkout.json"}
+          "schema": {
+            "$ref": "../../schemas/shopping/checkout.update_req.json"
+          }
         }
       ],
       "result": {
         "name": "checkout",
-        "schema": {"$ref": "https://ucp.dev/schemas/shopping/checkout.json"}
+        "schema": {
+          "$ref": "../../schemas/shopping/checkout_resp.json"
+        }
       }
     },
     {
@@ -74,24 +142,50 @@
       "summary": "Complete checkout and place order",
       "params": [
         {
-          "name": "id",
+          "name": "meta",
           "required": true,
-          "schema": {"type": "string"}
+          "schema": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/meta"
+              },
+              {
+                "required": [
+                  "ucp-agent",
+                  "idempotency-key"
+                ]
+              }
+            ]
+          }
         },
         {
-          "name": "payment",
-          "required": false,
-          "schema": {"$ref": "https://ucp.dev/schemas/shopping/payment.json"}
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "checkout",
+          "required": true,
+          "schema": {
+            "$ref": "../../schemas/shopping/checkout.complete_req.json"
+          }
         },
         {
           "name": "idempotency_key",
           "required": true,
-          "schema": {"type": "string", "format": "uuid"}
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
         }
       ],
       "result": {
         "name": "checkout",
-        "schema": {"$ref": "https://ucp.dev/schemas/shopping/checkout.json"}
+        "schema": {
+          "$ref": "../../schemas/shopping/checkout_resp.json"
+        }
       }
     },
     {
@@ -99,19 +193,35 @@
       "summary": "Cancel checkout",
       "params": [
         {
-          "name": "id",
+          "name": "meta",
           "required": true,
-          "schema": {"type": "string"}
+          "schema": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/meta"
+              },
+              {
+                "required": [
+                  "ucp-agent",
+                  "idempotency-key"
+                ]
+              }
+            ]
+          }
         },
         {
-          "name": "idempotency_key",
+          "name": "id",
           "required": true,
-          "schema": {"type": "string", "format": "uuid"}
+          "schema": {
+            "type": "string"
+          }
         }
       ],
       "result": {
         "name": "checkout",
-        "schema": {"$ref": "https://ucp.dev/schemas/shopping/checkout.json"}
+        "schema": {
+          "$ref": "../../schemas/shopping/checkout_resp.json"
+        }
       }
     }
   ]

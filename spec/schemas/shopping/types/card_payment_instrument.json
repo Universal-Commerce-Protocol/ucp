@@ -5,14 +5,12 @@
   "description": "A basic card payment instrument with visible card details. Can be inherited by a handler's instrument schema to define handler-specific display details or more complex credential structures.",
   "allOf": [
     {
-      "$ref": "payment_instrument_base.json"
+      "$ref": "payment_instrument.json"
     },
     {
       "type": "object",
       "required": [
-        "type",
-        "brand",
-        "last_digits"
+        "type"
       ],
       "properties": {
         "type": {
@@ -20,30 +18,36 @@
           "const": "card",
           "description": "Indicates this is a card payment instrument."
         },
-        "brand": {
-          "type": "string",
-          "description": "The card brand/network (e.g., visa, mastercard, amex)."
-        },
-        "last_digits": {
-          "type": "string",
-          "description": "Last 4 digits of the card number."
-        },
-        "expiry_month": {
-          "type": "integer",
-          "description": "The month of the card's expiration date (1-12)."
-        },
-        "expiry_year": {
-          "type": "integer",
-          "description": "The year of the card's expiration date."
-        },
-        "rich_text_description": {
-          "type": "string",
-          "description": "An optional rich text description of the card to display to the user (e.g., 'Visa ending in 1234, expires 12/2025')."
-        },
-        "rich_card_art": {
-          "type": "string",
-          "format": "uri",
-          "description": "An optional URI to a rich image representing the card (e.g., card art provided by the issuer)."
+        "display": {
+          "type": "object",
+          "description": "Display information for this card payment instrument.",
+          "properties": {
+            "brand": {
+              "type": "string",
+              "description": "The card brand/network (e.g., visa, mastercard, amex)."
+            },
+            "last_digits": {
+              "type": "string",
+              "description": "Last 4 digits of the card number."
+            },
+            "expiry_month": {
+              "type": "integer",
+              "description": "The month of the card's expiration date (1-12)."
+            },
+            "expiry_year": {
+              "type": "integer",
+              "description": "The year of the card's expiration date."
+            },
+            "description": {
+              "type": "string",
+              "description": "An optional rich text description of the card to display to the user (e.g., 'Visa ending in 1234, expires 12/2025')."
+            },
+            "card_art": {
+              "type": "string",
+              "format": "uri",
+              "description": "An optional URI to a rich image representing the card (e.g., card art provided by the issuer)."
+            }
+          }
         }
       }
     }
