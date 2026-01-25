@@ -61,12 +61,14 @@ jobs:
       - name: Configure Git Credentials
         run: |
           git config --global user.name github-actions[bot]
-          git config --global user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git config --global user.email \
+            41898282+github-actions[bot]@users.noreply.github.com
 
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libcairo2-dev libfreetype6-dev libffi-dev libjpeg-dev libpng-dev libz-dev
+          sudo apt-get install -y libcairo2-dev libfreetype6-dev \
+            libffi-dev libjpeg-dev libpng-dev libz-dev
 
       - name: Setup Python
         uses: actions/setup-python@v6
@@ -106,7 +108,8 @@ jobs:
         if: steps.schema_changed.outputs.any_changed == 'true'
         run: |
           if [ ! -d "spec" ] || [ -z "$(ls -A spec)" ]; then
-            echo "Error: generate_schemas.py succeeded but spec/ is empty or missing"
+            echo "Error: generate_schemas.py succeeded but spec/ is" \
+              "empty or missing"
             exit 1
           fi
 
@@ -118,14 +121,17 @@ jobs:
         if: steps.schema_changed.outputs.any_changed == 'true'
         run: |
           if ! git diff --exit-code spec/; then
-            echo "Error: Generated spec/ files differ from committed files in this PR"
-            echo "Run: python generate_schemas.py and commit the updated spec/ files"
+            echo "Error: Generated spec/ files differ from committed" \
+              "files in this PR"
+            echo "Run: python generate_schemas.py and commit the" \
+              "updated spec/ files"
             git diff --name-only spec/
             exit 1
           fi
           if git ls-files --others --exclude-standard spec/ | grep -q .; then
             echo "Error: spec/ contains untracked generated files"
-            echo "Run: python generate_schemas.py and commit the updated spec/ files"
+            echo "Run: python generate_schemas.py and commit the" \
+              "updated spec/ files"
             git ls-files --others --exclude-standard spec/
             exit 1
           fi
