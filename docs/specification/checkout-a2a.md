@@ -24,18 +24,20 @@ This document specifies the Agent2Agent Protocol (A2A) binding for
 Businesses that support A2A transport must specify the agent card endpoint as
 part of `services` in UCP Profile at `/.well-known/ucp`. This allows capable
 platforms to interact with the business services over A2A Protocol.
+
 ```json
 {
   "ucp": {
     "version": "2026-01-11",
     "services": {
-      "dev.ucp.shopping": {
-        "version": "2026-01-11",
-        "spec": "https://ucp.dev/specification/overview",
-        "a2a": {
+      "dev.ucp.shopping": [
+        {
+          "version": "2026-01-11",
+          "spec": "https://ucp.dev/specification/overview",
+          "transport": "a2a",
           "endpoint": "https://example-business.com/.well-known/agent-card.json"
         }
-      }
+      ]
     }
   }
 }
@@ -46,7 +48,7 @@ platforms to interact with the business services over A2A Protocol.
 Shopping platforms interacting with the business agent must
 send their profile URI as `UCP-Agent` request headers with every request.
 
-```
+```text
 UCP-Agent: profile="https://agent.example/profiles/v2025-11/shopping-agent.json"
 Content-Type: application/json
 ```
@@ -56,10 +58,10 @@ Content-Type: application/json
 The following table defines the required headers for enabling an A2A Agent
 to communicate UCP data types with platforms.
 
-| Header Name | Description |
-| :--- | :--- |
-| `UCP-Agent` | Shopping platform application profile URI. |
-| `X-A2A-Extensions` | UCP Extension URI (specified below). |
+| Header Name        | Description                                |
+| :----------------- | :----------------------------------------- |
+| `UCP-Agent`        | Shopping platform application profile URI. |
+| `X-A2A-Extensions` | UCP Extension URI (specified below).       |
 
 ## A2A Interactions
 
@@ -83,17 +85,17 @@ An example:
       "uri": "https://ucp.dev/specification/reference?v=2026-01-11",
       "description": "Business agent supporting UCP",
       "params": {
-        "capabilities": [
-          {
-            "name": "dev.ucp.shopping.checkout",
-            "version": "2026-01-11"
-          },
-          {
-            "name": "dev.ucp.shopping.fulfillment",
-            "version": "2026-01-11",
-            "extends": "dev.ucp.shopping.checkout"
-          }
-        ]
+        "capabilities": {
+          "dev.ucp.shopping.checkout": [
+            {"version": "2026-01-11"}
+          ],
+          "dev.ucp.shopping.fulfillment": [
+            {
+              "version": "2026-01-11",
+              "extends": "dev.ucp.shopping.checkout"
+            }
+          ]
+        }
       }
     }
   ]
@@ -220,12 +222,12 @@ Checkout functionality:
 
 ### Checkout Completion
 
-When a user is ready to make a payment, `payment_data` must be submitted
-to the business agent to complete the checkout process. `payment_data` is a
+When a user is ready to make a payment, `payment` must be submitted
+to the business agent to complete the checkout process. `payment` is a
 structured data type specified as part of UCP. When processing a payment to
-complete the checkout, `payment_data` must be submitted to the business
+complete the checkout, `payment` must be submitted to the business
 agent
-as a `DataPart` with attribute name `a2a.ucp.checkout.payment_data`. Any
+as a `DataPart` with attribute name `a2a.ucp.checkout.payment`. Any
 associated risk signals should be sent with attribute
 name `a2a.ucp.checkout.risk_signals`.
 
@@ -246,8 +248,8 @@ checkout object containing an `order` attribute with `id` and `permalink_url`.
       {
         "kind": "data",
         "data": {
-          "a2a.ucp.checkout.payment_data": {
-            ...paymentDataObject
+          "a2a.ucp.checkout.payment": {
+            ...paymentObject
           },
           "a2a.ucp.checkout.risk_signals":{...content}
         }
@@ -331,13 +333,14 @@ checkout payload against the business's public keys.
 
 When the user confirms the payment on a platform, the user signed
 checkout and payment mandate objects must be sent as `DataPart`s
-to the business agent for completing checkout. The `payment_data` which
+to the business agent for completing checkout. The `payment` which
 includes the payment mandate must be submitted as part of a `DataPart`
-with attribute name `a2a.ucp.checkout.payment_data`. Signed checkout mandate
+with attribute name `a2a.ucp.checkout.payment`. Signed checkout mandate
 must be specified in the `DataPart` as `ap2.checkout_mandate`. The `token`
-attribute of `payment_data` contains the payment mandate. Refer to
-[AP2 Mandates Extension](ap2-mandates.md) documentation for more details
-about verification and processing of the mandates to complete the checkout.
+attribute of `payment.instruments[*].credential` contains the payment mandate.
+Refer to [AP2 Mandates Extension](ap2-mandates.md) documentation for more
+details about verification and processing of the mandates to complete the
+checkout.
 
 **Request format:**
 
@@ -355,22 +358,29 @@ about verification and processing of the mandates to complete the checkout.
       {
         "kind": "data",
         "data": {
-          "a2a.ucp.checkout.payment_data": {
-            "id": "instr_1",
-            "handler_id": "gpay",
-            "type": "card",
-            "description": "Visa •••• 1234",
-            "billing_address": {
-              "street_address": "123 Main St",
-              "address_locality": "Anytown",
-              "address_region": "CA",
-              "address_country": "US",
-              "postal_code": "12345"
-            },
-            "credential": {
-              "type": "PAYMENT_GATEWAY",
-              "token": "examplePaymentMethodToken"
-            }
+          "a2a.ucp.checkout.payment": {
+            "instruments": [
+              {
+                "id": "instr_1",
+                "handler_id": "gpay_1234",
+                "type": "card",
+                "selected": true,
+                "display": {
+                  "description": "Visa •••• 1234",
+                },
+                "billing_address": {
+                  "street_address": "123 Main St",
+                  "address_locality": "Anytown",
+                  "address_region": "CA",
+                  "address_country": "US",
+                  "postal_code": "12345"
+                },
+                "credential": {
+                  "type": "PAYMENT_GATEWAY",
+                  "token": "examplePaymentMethodToken"
+                }
+              }
+            ]
           },
           "ap2": {
             "checkout_mandate": "eyJhbGciOiJFUz..."

@@ -29,6 +29,7 @@ on:
       - "requirements-docs.txt"
       - "mkdocs.yml"
       - "main.py"
+      - "hooks.py"
       - "docs/**"
       - "spec/**"
 

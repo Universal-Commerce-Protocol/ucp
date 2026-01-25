@@ -26,27 +26,55 @@ accessible.
 import json
 import logging
 import shutil
-from urllib.parse import urljoin
-
 from pathlib import Path
 
 log = logging.getLogger("mkdocs")
 
 
-def _process_refs(data, base_url):
+def _process_refs(data, current_file_dir):
   """Recursively processes $ref fields in a JSON object."""
   if isinstance(data, dict):
     for key, value in data.items():
-      if key == "$ref" and isinstance(value, str):
-        data[key] = urljoin(
-          base_url,
-          value.replace("_resp.json", ".json").replace("_schema.json", ".json"),
-        )
+      if (
+        key == "$ref"
+        and isinstance(value, str)
+        and not value.startswith(("#", "http"))
+      ):
+        ref_parts = value.split("#", 1)
+        relative_path = ref_parts[0]
+        fragment = f"#{ref_parts[1]}" if len(ref_parts) > 1 else ""
+
+        if not relative_path:
+          continue
+
+        ref_file_path = (current_file_dir / relative_path).resolve()
+
+        try:
+          with ref_file_path.open("r", encoding="utf-8") as f:
+            ref_data = json.load(f)
+
+          if "$id" in ref_data:
+            data[key] = ref_data["$id"] + fragment
+          else:
+            log.warning(
+              f"No '$id' found in {ref_file_path}. "
+              f"Keeping original '$ref': {value}"
+            )
+        except FileNotFoundError:
+          log.error(
+            f"Referenced file not found: {ref_file_path}. "
+            f"Keeping original '$ref': {value}"
+          )
+        except (json.JSONDecodeError, UnicodeDecodeError, OSError) as e:
+          log.error(
+            f"Failed to read referenced file {ref_file_path}: {e}. "
+            f"Keeping original '$ref': {value}"
+          )
       else:
-        _process_refs(value, base_url)
+        _process_refs(value, current_file_dir)
   elif isinstance(data, list):
     for item in data:
-      _process_refs(item, base_url)
+      _process_refs(item, current_file_dir)
 
 
 def on_post_build(config):
@@ -89,7 +117,7 @@ def on_post_build(config):
         )
 
       # Process refs using the final path
-      _process_refs(data, f"https://ucp.dev/{file_rel_path}")
+      _process_refs(data, src_file.parent)
 
       dest_file = Path(config["site_dir"]) / file_rel_path
       dest_dir = dest_file.parent

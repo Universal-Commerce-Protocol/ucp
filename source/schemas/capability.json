@@ -6,55 +6,37 @@
 
   "$defs": {
     "base": {
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string",
-          "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9_]*)+$",
-          "description": "Stable capability identifier in reverse-domain notation (e.g., dev.ucp.shopping.checkout). Used in capability negotiation."
-        },
-        "version": {
-          "$ref": "ucp.json#/$defs/version",
-          "description": "Capability version in YYYY-MM-DD format."
-        },
-        "spec": {
-          "type": "string",
-          "format": "uri",
-          "description": "URL to human-readable specification document."
-        },
-        "schema": {
-          "type": "string",
-          "format": "uri",
-          "description": "URL to JSON Schema for this capability's payload."
-        },
-        "extends": {
-          "type": "string",
-          "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9_]*)+$",
-          "description": "Parent capability this extends. Present for extensions, absent for root capabilities."
-        },
-        "config": {
+      "allOf": [
+        { "$ref": "ucp.json#/$defs/entity" },
+        {
           "type": "object",
-          "description": "Capability-specific configuration (structure defined by each capability)."
+          "properties": {
+            "extends": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9_]*)+$",
+              "description": "Parent capability this extends. Present for extensions, absent for root capabilities."
+            }
+          }
         }
-      }
-    },
-
-    "discovery": {
-      "title": "Capability (Discovery)",
-      "description": "Full capability declaration for discovery profiles. Includes spec/schema URLs for agent fetching.",
-      "allOf": [
-        {"$ref": "#/$defs/base"},
-        {"required": ["name", "version", "spec", "schema"]}
       ]
     },
 
-    "response": {
-      "title": "Capability (Response)",
+    "platform_schema": {
+      "title": "Capability (Platform Schema)",
+      "description": "Full capability declaration for platform-level discovery. Includes spec/schema URLs for agent fetching.",
+      "allOf": [{ "$ref": "#/$defs/base" }, { "required": ["spec", "schema"] }]
+    },
+
+    "business_schema": {
+      "title": "Capability (Business Schema)",
+      "description": "Capability configuration for business/merchant level. May include business-specific config overrides.",
+      "allOf": [{ "$ref": "#/$defs/base" }]
+    },
+
+    "response_schema": {
+      "title": "Capability (Response Schema)",
       "description": "Capability reference in responses. Only name/version required to confirm active capabilities.",
-      "allOf": [
-        {"$ref": "#/$defs/base"},
-        {"required": ["name", "version"]}
-      ]
+      "allOf": [{ "$ref": "#/$defs/base" }]
     }
   }
 }

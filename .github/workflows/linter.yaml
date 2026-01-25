@@ -16,7 +16,9 @@ name: Lint Code Base
 
 on:
   pull_request:
-    branches: [main]
+    branches:
+      - main
+      - 'release/**'
 
 permissions:
   contents: read      # Required to checkout the code
@@ -37,7 +39,7 @@ jobs:
       - name: Lint Code Base
         uses: super-linter/super-linter/slim@v8
         env:
-          DEFAULT_BRANCH: origin/main
+          DEFAULT_BRANCH: ${{ github.base_ref }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           MARKDOWN_CONFIG_FILE: ".markdownlint.json"
           PYTHON_RUFF_CONFIG_FILE: ../../pyproject.toml
@@ -54,6 +56,7 @@ jobs:
           VALIDATE_PYTHON_MYPY: false
           VALIDATE_PYTHON_PYLINT: false
           VALIDATE_CHECKOV: false
+          VALIDATE_GITLEAKS: false
           VALIDATE_NATURAL_LANGUAGE: false
           VALIDATE_MARKDOWN_PRETTIER: false
           VALIDATE_JAVASCRIPT_PRETTIER: false

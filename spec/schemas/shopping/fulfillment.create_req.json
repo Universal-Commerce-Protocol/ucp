@@ -38,6 +38,42 @@
           }
         }
       ]
+    },
+    "dev.ucp.shopping.fulfillment": {
+      "platform_schema": {
+        "title": "Fulfillment Capability (Platform) Create Request",
+        "description": "Platform-level fulfillment capability configuration",
+        "allOf": [
+          {
+            "$ref": "../capability.json#/$defs/platform_schema"
+          },
+          {
+            "properties": {
+              "config": {
+                "$ref": "types/platform_fulfillment_config.json",
+                "description": "Platform fulfillment configuration"
+              }
+            }
+          }
+        ]
+      },
+      "business_schema": {
+        "title": "Fulfillment Capability (Business) Create Request",
+        "description": "Business-level fulfillment capability configuration",
+        "allOf": [
+          {
+            "$ref": "../capability.json#/$defs/business_schema"
+          },
+          {
+            "properties": {
+              "config": {
+                "$ref": "types/business_fulfillment_config.json",
+                "description": "Business fulfillment configuration"
+              }
+            }
+          }
+        ]
+      }
     }
   },
   "embedded": {
