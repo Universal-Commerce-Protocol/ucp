@@ -1,3 +1,4 @@
+#!/bin/bash
 #   Copyright 2026 UCP Authors
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,7 +13,6 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-#!/bin/bash
 # Checks if UCP Pydantic models in src/ucp_sdk/models are in sync with JSON schemas.
 # To be used in CI. If models are out of sync, exits with error.
 
