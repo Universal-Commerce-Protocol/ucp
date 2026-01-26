@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/cart.json",
+  "name": "dev.ucp.shopping.cart",
+  "version": "2026-01-15",
+  "title": "Cart Response",
+  "description": "Shopping cart with estimated pricing before checkout. Lightweight pre-purchase exploration with no payment info or complex status states. Cart exists (200) or doesn't (404).",
+  "$defs": {
+    "checkout": {
+      "title": "Checkout with Cart Response",
+      "description": "Checkout extended with cart capability. Adds cart_id to create_checkout for cart-to-checkout conversion.",
+      "allOf": [
+        {
+          "$ref": "checkout_resp.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "cart_id": {
+              "type": "string",
+              "description": "Cart ID to convert. Cart contents (line_items, context, buyer) initialize checkout and take precedence over checkout payload for overlapping fields."
+            }
+          }
+        }
+      ]
+    }
+  },
+  "type": "object",
+  "required": [
+    "ucp",
+    "id",
+    "line_items",
+    "currency",
+    "totals",
+    "checkout_url"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "ucp": {
+      "$ref": "../ucp.json#/$defs/response_cart_schema"
+    },
+    "id": {
+      "type": "string",
+      "description": "Unique cart identifier."
+    },
+    "line_items": {
+      "type": "array",
+      "items": {
+        "$ref": "types/line_item_resp.json"
+      },
+      "description": "Cart line items. Same structure as checkout. Full replacement on update."
+    },
+    "context": {
+      "$ref": "types/context.json",
+      "description": "Buyer signals for localization (country, region, postal_code). Merchant uses for pricing, availability, currency. Falls back to geo-IP if omitted."
+    },
+    "buyer": {
+      "$ref": "types/buyer.json",
+      "description": "Optional buyer information for personalized estimates."
+    },
+    "currency": {
+      "type": "string",
+      "description": "ISO 4217 currency code. Determined by merchant based on context or geo-IP."
+    },
+    "totals": {
+      "type": "array",
+      "items": {
+        "$ref": "types/total_resp.json"
+      },
+      "description": "Estimated cost breakdown. May be partial if shipping/tax not yet calculable."
+    },
+    "messages": {
+      "type": "array",
+      "items": {
+        "$ref": "types/message.json"
+      },
+      "description": "Validation messages, warnings, or informational notices."
+    },
+    "links": {
+      "type": "array",
+      "items": {
+        "$ref": "types/link.json"
+      },
+      "description": "Optional merchant links (policies, FAQs)."
+    },
+    "checkout_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL to convert cart to checkout. Always provided by merchant. Enables sharing, recovery, and cart-to-checkout conversion."
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Cart expiry timestamp (RFC 3339). Optional."
+    }
+  }
+}

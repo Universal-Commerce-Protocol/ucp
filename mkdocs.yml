@@ -40,6 +40,10 @@ nav:
       - Buyer Consent Extension: specification/buyer-consent.md
       - Discounts Extension: specification/discount.md
       - Fulfillment Extension: specification/fulfillment.md
+    - Cart Capability:
+      - Overview: specification/cart.md
+      - HTTP/REST Binding: specification/cart-rest.md
+      - MCP Binding: specification/cart-mcp.md
     - Order Capability: specification/order.md
     - Identity Linking Capability: specification/identity-linking.md
     - Payment Handlers:
@@ -203,6 +207,10 @@ plugins:
           - specification/discount.md
           - specification/embedded-checkout.md
           - specification/fulfillment.md
+        Cart Capability:
+          - specification/cart.md
+          - specification/cart-rest.md
+          - specification/cart-mcp.md
         Order Capability:
           - specification/order.md
         Identity Linking Capability:
