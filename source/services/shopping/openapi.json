@@ -675,7 +675,7 @@
         "$ref": "../../schemas/shopping/checkout.json"
       },
       "cart": {
-        "$ref": "https://ucp.dev/schemas/shopping/cart.json"
+        "$ref": "../../schemas/shopping/cart.json"
       },
       "order": {
         "$ref": "../../schemas/shopping/order.json"

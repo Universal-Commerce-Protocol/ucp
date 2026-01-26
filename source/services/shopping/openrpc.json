@@ -182,12 +182,12 @@
         {
           "name": "cart",
           "required": true,
-          "schema": {"$ref": "https://ucp.dev/schemas/shopping/cart.json"}
+          "schema": {"$ref": "../../schemas/shopping/cart.json"}
         }
       ],
       "result": {
         "name": "cart",
-        "schema": {"$ref": "https://ucp.dev/schemas/shopping/cart.json"}
+        "schema": {"$ref": "../../schemas/shopping/cart.json"}
       }
     },
     {
@@ -202,7 +202,7 @@
       ],
       "result": {
         "name": "cart",
-        "schema": {"$ref": "https://ucp.dev/schemas/shopping/cart.json"}
+        "schema": {"$ref": "../../schemas/shopping/cart.json"}
       }
     },
     {
@@ -217,12 +217,12 @@
         {
           "name": "cart",
           "required": true,
-          "schema": {"$ref": "https://ucp.dev/schemas/shopping/cart.json"}
+          "schema": {"$ref": "../../schemas/shopping/cart.json"}
         }
       ],
       "result": {
         "name": "cart",
-        "schema": {"$ref": "https://ucp.dev/schemas/shopping/cart.json"}
+        "schema": {"$ref": "../../schemas/shopping/cart.json"}
       }
     },
     {
@@ -242,7 +242,7 @@
       ],
       "result": {
         "name": "cart",
-        "schema": {"$ref": "https://ucp.dev/schemas/shopping/cart.json"}
+        "schema": {"$ref": "../../schemas/shopping/cart.json"}
       }
     }
   ]
