@@ -11,13 +11,13 @@
       
       
       
-        <link rel="canonical" href="https://ucp.dev/draft/specification/payment-handler-template/">
+        <link rel="canonical" href="https://ucp.dev/draft/specification/cart/">
       
       
-        <link rel="prev" href="../payment-handler-guide/">
+        <link rel="prev" href="../fulfillment/">
       
       
-        <link rel="next" href="../tokenization-guide/">
+        <link rel="next" href="../cart-rest/">
       
       
       <link rel="icon" href="../../assets/favicon.png">
@@ -25,7 +25,7 @@
     
     
       
-        <title>Template - Universal Commerce Protocol (UCP)</title>
+        <title>Overview - Universal Commerce Protocol (UCP)</title>
       
     
     
@@ -137,12 +137,12 @@
       
         <meta  property="og:type"  content="website" >
       
-        <meta  property="og:title"  content="Template - Universal Commerce Protocol (UCP)" >
+        <meta  property="og:title"  content="Overview - Universal Commerce Protocol (UCP)" >
       
         <meta  property="og:description"  content="The Universal Commerce Protocol (UCP) is a solution for enabling gen AI agents to make payments on behalf of users, safely, securely, and in a decentralized and privacy protecting manner. This protocol is a part of the broader ecosystem, which includes agentic protocols like A2A and MCP, and encompasses the global nature of payments.
 " >
       
-        <meta  property="og:image"  content="https://ucp.dev/draft/assets/images/social/specification/payment-handler-template.png" >
+        <meta  property="og:image"  content="https://ucp.dev/draft/assets/images/social/specification/cart.png" >
       
         <meta  property="og:image:type"  content="image/png" >
       
@@ -150,16 +150,16 @@
       
         <meta  property="og:image:height"  content="630" >
       
-        <meta  property="og:url"  content="https://ucp.dev/draft/specification/payment-handler-template/" >
+        <meta  property="og:url"  content="https://ucp.dev/draft/specification/cart/" >
       
         <meta  name="twitter:card"  content="summary_large_image" >
       
-        <meta  name="twitter:title"  content="Template - Universal Commerce Protocol (UCP)" >
+        <meta  name="twitter:title"  content="Overview - Universal Commerce Protocol (UCP)" >
       
         <meta  name="twitter:description"  content="The Universal Commerce Protocol (UCP) is a solution for enabling gen AI agents to make payments on behalf of users, safely, securely, and in a decentralized and privacy protecting manner. This protocol is a part of the broader ecosystem, which includes agentic protocols like A2A and MCP, and encompasses the global nature of payments.
 " >
       
-        <meta  name="twitter:image"  content="https://ucp.dev/draft/assets/images/social/specification/payment-handler-template.png" >
+        <meta  name="twitter:image"  content="https://ucp.dev/draft/assets/images/social/specification/cart.png" >
       
     
     
@@ -182,7 +182,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#handler-name-payment-handler" class="md-skip">
+        <a href="#cart-capability" class="md-skip">
           Skip to content
         </a>
       
@@ -221,7 +221,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Template
+              Overview
             
           </span>
         </div>
@@ -777,8 +777,10 @@
                 
   
   
+    
   
   
+  
     
     
       
@@ -792,11 +794,11 @@
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3" checked>
         
           
           <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="0">
@@ -812,7 +814,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_4_3">
             <span class="md-nav__icon md-icon"></span>
             Cart Capability
@@ -823,10 +825,32 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../cart/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -837,6 +861,281 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cart-vs-checkout" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cart vs Checkout
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cart-to-checkout-conversion" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cart-to-Checkout Conversion
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#guidelines" class="md-nav__link">
+    <span class="md-ellipsis">
+      Guidelines
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Guidelines">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#platform" class="md-nav__link">
+    <span class="md-ellipsis">
+      Platform
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#business" class="md-nav__link">
+    <span class="md-ellipsis">
+      Business
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cart-schema-definition" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cart Schema Definition
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Operations
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Operations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#create-cart" class="md-nav__link">
+    <span class="md-ellipsis">
+      Create Cart
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get-cart" class="md-nav__link">
+    <span class="md-ellipsis">
+      Get Cart
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#update-cart" class="md-nav__link">
+    <span class="md-ellipsis">
+      Update Cart
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cancel-cart" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cancel Cart
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#entities" class="md-nav__link">
+    <span class="md-ellipsis">
+      Entities
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Entities">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#line-item" class="md-nav__link">
+    <span class="md-ellipsis">
+      Line Item
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Line Item">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#line-item-create-request" class="md-nav__link">
+    <span class="md-ellipsis">
+      Line Item Create Request
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#line-item-update-request" class="md-nav__link">
+    <span class="md-ellipsis">
+      Line Item Update Request
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#line-item-response" class="md-nav__link">
+    <span class="md-ellipsis">
+      Line Item Response
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#buyer" class="md-nav__link">
+    <span class="md-ellipsis">
+      Buyer
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#context" class="md-nav__link">
+    <span class="md-ellipsis">
+      Context
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#total" class="md-nav__link">
+    <span class="md-ellipsis">
+      Total
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#message" class="md-nav__link">
+    <span class="md-ellipsis">
+      Message
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Message">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#message-error" class="md-nav__link">
+    <span class="md-ellipsis">
+      Message Error
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#message-info" class="md-nav__link">
+    <span class="md-ellipsis">
+      Message Info
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#message-warning" class="md-nav__link">
+    <span class="md-ellipsis">
+      Message Warning
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#link" class="md-nav__link">
+    <span class="md-ellipsis">
+      Link
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -946,10 +1245,8 @@
                 
   
   
-    
   
   
-  
     
     
       
@@ -965,11 +1262,11 @@
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_6" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_6" >
         
           
           <label class="md-nav__link" for="__nav_4_6" id="__nav_4_6_label" tabindex="0">
@@ -985,7 +1282,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_6_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_6_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_4_6">
             <span class="md-nav__icon md-icon"></span>
             Payment Handlers
@@ -1019,32 +1316,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    Template
-    
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../payment-handler-template/" class="md-nav__link">
         
   
   
@@ -1055,311 +1330,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#introduction" class="md-nav__link">
-    <span class="md-ellipsis">
-      Introduction
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Introduction">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#key-benefits" class="md-nav__link">
-    <span class="md-ellipsis">
-      Key Benefits
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#integration-guide" class="md-nav__link">
-    <span class="md-ellipsis">
-      Integration Guide
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#participants" class="md-nav__link">
-    <span class="md-ellipsis">
-      Participants
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#business-integration" class="md-nav__link">
-    <span class="md-ellipsis">
-      Business Integration
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Business Integration">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#prerequisites" class="md-nav__link">
-    <span class="md-ellipsis">
-      Prerequisites
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#handler-configuration" class="md-nav__link">
-    <span class="md-ellipsis">
-      Handler Configuration
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Handler Configuration">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#handler-schema" class="md-nav__link">
-    <span class="md-ellipsis">
-      Handler Schema
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#business-config-fields" class="md-nav__link">
-    <span class="md-ellipsis">
-      Business Config Fields
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#response-config-fields" class="md-nav__link">
-    <span class="md-ellipsis">
-      Response Config Fields
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#example-handler-declaration" class="md-nav__link">
-    <span class="md-ellipsis">
-      Example Handler Declaration
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#processing-payments" class="md-nav__link">
-    <span class="md-ellipsis">
-      Processing Payments
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#platform-integration" class="md-nav__link">
-    <span class="md-ellipsis">
-      Platform Integration
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Platform Integration">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#prerequisites_1" class="md-nav__link">
-    <span class="md-ellipsis">
-      Prerequisites
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#handler-configuration_1" class="md-nav__link">
-    <span class="md-ellipsis">
-      Handler Configuration
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Handler Configuration">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#platform-config-fields" class="md-nav__link">
-    <span class="md-ellipsis">
-      Platform Config Fields
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#example-platform-handler-declaration" class="md-nav__link">
-    <span class="md-ellipsis">
-      Example Platform Handler Declaration
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#payment-protocol" class="md-nav__link">
-    <span class="md-ellipsis">
-      Payment Protocol
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Payment Protocol">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#step-1-discover-handler" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 1: Discover Handler
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#step-2" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 2:
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#step-3" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 3:
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#step-n-complete-checkout" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step N: Complete Checkout
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#participant-integration" class="md-nav__link">
-    <span class="md-ellipsis">
-      {Participant} Integration
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="{Participant} Integration">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#prerequisites_2" class="md-nav__link">
-    <span class="md-ellipsis">
-      Prerequisites
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#action-or-configuration" class="md-nav__link">
-    <span class="md-ellipsis">
-      {Action or Configuration}
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#security-considerations" class="md-nav__link">
-    <span class="md-ellipsis">
-      Security Considerations
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#references" class="md-nav__link">
-    <span class="md-ellipsis">
-      References
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1666,28 +1636,55 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#introduction" class="md-nav__link">
+  <a href="#overview" class="md-nav__link">
     <span class="md-ellipsis">
-      Introduction
+      Overview
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Introduction">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cart-vs-checkout" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cart vs Checkout
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cart-to-checkout-conversion" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cart-to-Checkout Conversion
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#guidelines" class="md-nav__link">
+    <span class="md-ellipsis">
+      Guidelines
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Guidelines">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#key-benefits" class="md-nav__link">
+  <a href="#platform" class="md-nav__link">
     <span class="md-ellipsis">
-      Key Benefits
+      Platform
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#integration-guide" class="md-nav__link">
+  <a href="#business" class="md-nav__link">
     <span class="md-ellipsis">
-      Integration Guide
+      Business
     </span>
   </a>
   
@@ -1699,88 +1696,55 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#participants" class="md-nav__link">
+  <a href="#cart-schema-definition" class="md-nav__link">
     <span class="md-ellipsis">
-      Participants
+      Cart Schema Definition
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#business-integration" class="md-nav__link">
+  <a href="#operations" class="md-nav__link">
     <span class="md-ellipsis">
-      Business Integration
+      Operations
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Business Integration">
+    <nav class="md-nav" aria-label="Operations">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#prerequisites" class="md-nav__link">
+  <a href="#create-cart" class="md-nav__link">
     <span class="md-ellipsis">
-      Prerequisites
+      Create Cart
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#handler-configuration" class="md-nav__link">
+  <a href="#get-cart" class="md-nav__link">
     <span class="md-ellipsis">
-      Handler Configuration
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Handler Configuration">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#handler-schema" class="md-nav__link">
-    <span class="md-ellipsis">
-      Handler Schema
+      Get Cart
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#business-config-fields" class="md-nav__link">
+  <a href="#update-cart" class="md-nav__link">
     <span class="md-ellipsis">
-      Business Config Fields
+      Update Cart
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#response-config-fields" class="md-nav__link">
+  <a href="#cancel-cart" class="md-nav__link">
     <span class="md-ellipsis">
-      Response Config Fields
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#example-handler-declaration" class="md-nav__link">
-    <span class="md-ellipsis">
-      Example Handler Declaration
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#processing-payments" class="md-nav__link">
-    <span class="md-ellipsis">
-      Processing Payments
+      Cancel Cart
     </span>
   </a>
   
@@ -1792,47 +1756,47 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#platform-integration" class="md-nav__link">
+  <a href="#entities" class="md-nav__link">
     <span class="md-ellipsis">
-      Platform Integration
+      Entities
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Platform Integration">
+    <nav class="md-nav" aria-label="Entities">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#prerequisites_1" class="md-nav__link">
+  <a href="#line-item" class="md-nav__link">
     <span class="md-ellipsis">
-      Prerequisites
+      Line Item
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Line Item">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#line-item-create-request" class="md-nav__link">
+    <span class="md-ellipsis">
+      Line Item Create Request
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#handler-configuration_1" class="md-nav__link">
+  <a href="#line-item-update-request" class="md-nav__link">
     <span class="md-ellipsis">
-      Handler Configuration
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Handler Configuration">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#platform-config-fields" class="md-nav__link">
-    <span class="md-ellipsis">
-      Platform Config Fields
+      Line Item Update Request
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#example-platform-handler-declaration" class="md-nav__link">
+  <a href="#line-item-response" class="md-nav__link">
     <span class="md-ellipsis">
-      Example Platform Handler Declaration
+      Line Item Response
     </span>
   </a>
   
@@ -1844,46 +1808,64 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#payment-protocol" class="md-nav__link">
+  <a href="#buyer" class="md-nav__link">
     <span class="md-ellipsis">
-      Payment Protocol
+      Buyer
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Payment Protocol">
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#context" class="md-nav__link">
+    <span class="md-ellipsis">
+      Context
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#total" class="md-nav__link">
+    <span class="md-ellipsis">
+      Total
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#message" class="md-nav__link">
+    <span class="md-ellipsis">
+      Message
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Message">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#step-1-discover-handler" class="md-nav__link">
+  <a href="#message-error" class="md-nav__link">
     <span class="md-ellipsis">
-      Step 1: Discover Handler
+      Message Error
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#step-2" class="md-nav__link">
+  <a href="#message-info" class="md-nav__link">
     <span class="md-ellipsis">
-      Step 2:
+      Message Info
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#step-3" class="md-nav__link">
+  <a href="#message-warning" class="md-nav__link">
     <span class="md-ellipsis">
-      Step 3:
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#step-n-complete-checkout" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step N: Complete Checkout
+      Message Warning
     </span>
   </a>
   
@@ -1894,34 +1876,10 @@
   
 </li>
         
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#participant-integration" class="md-nav__link">
-    <span class="md-ellipsis">
-      {Participant} Integration
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="{Participant} Integration">
-      <ul class="md-nav__list">
-        
           <li class="md-nav__item">
-  <a href="#prerequisites_2" class="md-nav__link">
+  <a href="#link" class="md-nav__link">
     <span class="md-ellipsis">
-      Prerequisites
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#action-or-configuration" class="md-nav__link">
-    <span class="md-ellipsis">
-      {Action or Configuration}
+      Link
     </span>
   </a>
   
@@ -1929,24 +1887,6 @@
         
       </ul>
     </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#security-considerations" class="md-nav__link">
-    <span class="md-ellipsis">
-      Security Considerations
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#references" class="md-nav__link">
-    <span class="md-ellipsis">
-      References
-    </span>
-  </a>
   
 </li>
       
@@ -1985,165 +1925,124 @@
    limitations under the License.
 -->
 
-<h1 id="handler-name-payment-handler">{Handler Name} Payment Handler<a class="headerlink" href="#handler-name-payment-handler" title="Permanent link">&para;</a></h1>
+<h1 id="cart-capability">Cart Capability<a class="headerlink" href="#cart-capability" title="Permanent link">&para;</a></h1>
 <ul>
-<li><strong>Handler Name:</strong> <code>{reverse-dns.name}</code></li>
-<li><strong>Version:</strong> <code>{YYYY-MM-DD}</code></li>
+<li><strong>Capability Name:</strong> <code>dev.ucp.shopping.cart</code></li>
+<li><strong>Version:</strong> <code>DRAFT</code></li>
 </ul>
-<h2 id="introduction">Introduction<a class="headerlink" href="#introduction" title="Permanent link">&para;</a></h2>
-<p>{Brief description of what this handler enables and the payment flow it
-supports.}</p>
-<h3 id="key-benefits">Key Benefits<a class="headerlink" href="#key-benefits" title="Permanent link">&para;</a></h3>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>The Cart capability enables basket building without the complexity of checkout.
+While <a href="../checkout/">Checkout</a> manages payment handlers, status lifecycle, and
+order finalization, cart provides a lightweight CRUD interface for item
+collection before purchase intent is established.</p>
+<p><strong>When to use Cart vs Checkout:</strong></p>
 <ul>
-<li>{Benefit 1}</li>
-<li>{Benefit 2}</li>
-<li>{Benefit 3}</li>
+<li><strong>Cart</strong>: User is exploring, comparing, saving items for later. No payment
+  configuration needed. Platform/agent can freely add, remove, update items.</li>
+<li><strong>Checkout</strong>: User has expressed purchase intent. Payment handlers are
+  configured, status lifecycle begins, session moves toward completion.</li>
 </ul>
-<h3 id="integration-guide">Integration Guide<a class="headerlink" href="#integration-guide" title="Permanent link">&para;</a></h3>
+<p>The typical flow: <code>cart session</code> &#8594; <code>checkout session</code> &#8594; <code>order</code></p>
+<p>Carts support:</p>
+<ul>
+<li><strong>Incremental building</strong>: Add/remove items across sessions</li>
+<li><strong>Localized estimates</strong>: Context-aware pricing without full checkout overhead</li>
+<li><strong>Sharing</strong>: <code>continue_url</code> enables cart sharing and recovery</li>
+</ul>
+<h2 id="cart-vs-checkout">Cart vs Checkout<a class="headerlink" href="#cart-vs-checkout" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th style="text-align: left;">Participant</th>
-<th style="text-align: left;">Integration Section</th>
+<th>Aspect</th>
+<th>Cart</th>
+<th>Checkout</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align: left;"><strong>Business</strong></td>
-<td style="text-align: left;"><a href="#business-integration">Business Integration</a></td>
+<td><strong>Purpose</strong></td>
+<td>Pre-purchase exploration</td>
+<td>Purchase finalization</td>
 </tr>
 <tr>
-<td style="text-align: left;"><strong>Platform</strong></td>
-<td style="text-align: left;"><a href="#platform-integration">Platform Integration</a></td>
+<td><strong>Payment</strong></td>
+<td>None</td>
+<td>Required (handlers, instruments)</td>
+</tr>
+<tr>
+<td><strong>Status</strong></td>
+<td>Binary (exists/not found)</td>
+<td>Lifecycle (<code>incomplete</code> → <code>completed</code>)</td>
+</tr>
+<tr>
+<td><strong>Complete Operation</strong></td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><strong>Totals</strong></td>
+<td>Estimates (may be partial)</td>
+<td>Final pricing</td>
 </tr>
 </tbody>
 </table>
-<hr />
-<h2 id="participants">Participants<a class="headerlink" href="#participants" title="Permanent link">&para;</a></h2>
-<p>{Describe all participants in this handler and their roles.}</p>
-<blockquote>
-<p><strong>Note on Terminology:</strong>
-While this specification refers to the participant as the <strong>"business,"</strong>
-technical schema fields may retain the standard industry nomenclature
-<strong><code>merchant_*</code></strong> (e.g., <code>merchant_id</code>). Mappings are documented below.</p>
-</blockquote>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Participant</th>
-<th style="text-align: left;">Role</th>
-<th style="text-align: left;">Prerequisites</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;"><strong>Business</strong></td>
-<td style="text-align: left;">{role description}</td>
-<td style="text-align: left;">{Yes/No — brief description}</td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong>Platform</strong></td>
-<td style="text-align: left;">{role description}</td>
-<td style="text-align: left;">{Yes/No — brief description}</td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong>{Other Participant}</strong></td>
-<td style="text-align: left;">{role description}</td>
-<td style="text-align: left;">{Yes/No — brief description}</td>
-</tr>
-</tbody>
-</table>
-<p>{Optional: ASCII diagram showing participant relationships}</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>┌─────────┐     ┌───────────────┐     ┌────────────┐
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>│Platform │     │   {Provider}  │     │  Business  │
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>└────┬────┘     └───────┬───────┘     └──────┬─────┘
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>     │                  │                    │
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>     │  {step 1}        │                    │
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>     │─────────────────&gt;│                    │
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>     │                  │                    │
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>     │  {step 2}        │                    │
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>     │&lt;─────────────────│                    │
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>     │                  │                    │
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>     │  {step 3}                             │
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>     │──────────────────────────────────────&gt;│
+<h2 id="cart-to-checkout-conversion">Cart-to-Checkout Conversion<a class="headerlink" href="#cart-to-checkout-conversion" title="Permanent link">&para;</a></h2>
+<p>When the cart capability is negotiated, platforms can convert a cart to checkout
+by providing <code>cart_id</code> in the Create Checkout request. The cart contents
+(<code>line_items</code>, <code>context</code>, <code>buyer</code>) initialize the checkout session.</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="p">{</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="nt">&quot;cart_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cart_abc123&quot;</span><span class="p">,</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span><span class="nt">&quot;line_items&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="p">}</span>
 </span></code></pre></div>
-<hr />
-<!--
-  PARTICIPANT INTEGRATION SECTIONS
-
-  Include one section per participant. Each section follows the same structure:
-  - Prerequisites (onboarding, setup)
-  - Configuration or Protocol (what they need to do)
-  - Examples
-
-  Number sections starting from 3. Add more sections as needed for additional participants.
--->
-
-<h2 id="business-integration">Business Integration<a class="headerlink" href="#business-integration" title="Permanent link">&para;</a></h2>
-<h3 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h3>
-<p>Before advertising this handler, businesses <strong>MUST</strong> complete:</p>
-<ol>
-<li>{Prerequisite 1, e.g., "Register with {provider} to obtain a business identifier"}</li>
-<li>{Prerequisite 2}</li>
-</ol>
-<p><strong>Prerequisites Output:</strong></p>
+<p>Business MUST use cart contents and MUST ignore overlapping fields in checkout payload.
+The <code>cart_id</code> parameter is only available when the cart capability is advertised
+in the business profile.</p>
+<p><strong>Idempotent conversion:</strong></p>
+<p>If an incomplete checkout already exists for the given <code>cart_id</code>, the business
+MUST return the existing checkout session rather than creating a new one. This
+ensures a single active checkout per cart and prevents conflicting sessions.</p>
+<p><strong>Cart lifecycle after conversion:</strong></p>
+<p>When checkout is initialized via <code>cart_id</code>, the cart and checkout sessions
+SHOULD be linked for the duration of the checkout.</p>
+<ul>
+<li>
+<p><strong>During active checkout</strong> — Business SHOULD maintain the cart and reflect
+    relevant checkout modifications (quantity changes, item removals) back to
+    the cart. This supports back-to-storefront flows when buyers transition
+    between checkout and storefront.</p>
+</li>
+<li>
+<p><strong>After checkout completion</strong> — Business MAY clear the cart based on TTL,
+    completion of the checkout, or other business logic. Subsequent operations
+    on a cleared cart ID return 404; the platform can start a new session with
+    <code>create_cart</code>.</p>
+</li>
+</ul>
+<h2 id="guidelines">Guidelines<a class="headerlink" href="#guidelines" title="Permanent link">&para;</a></h2>
+<h3 id="platform">Platform<a class="headerlink" href="#platform" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>MAY</strong> use carts for pre-purchase exploration and session persistence.</li>
+<li><strong>SHOULD</strong> convert cart to checkout when user expresses purchase intent.</li>
+<li><strong>MAY</strong> display <code>continue_url</code> for handoff to business UI.</li>
+<li><strong>SHOULD</strong> handle 404 gracefully when cart expires or is canceled.</li>
+</ul>
+<h3 id="business">Business<a class="headerlink" href="#business" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>SHOULD</strong> provide <code>continue_url</code> for cart handoff and session recovery.</li>
+<li>TODO: discuss <code>continue_url</code> destination - cart vs checkout.</li>
+<li><strong>SHOULD</strong> provide estimated totals when calculable.</li>
+<li><strong>MAY</strong> omit fulfillment totals until checkout when address is unknown.</li>
+<li><strong>SHOULD</strong> return informational messages for validation warnings.</li>
+<li><strong>MAY</strong> set cart expiry via <code>expires_at</code>.</li>
+<li><strong>SHOULD</strong> follow <a href="#cart-to-checkout-conversion">cart lifecycle requirements</a>
+    when checkout is initialized via <code>cart_id</code>.</li>
+</ul>
+<h2 id="cart-schema-definition">Cart Schema Definition<a class="headerlink" href="#cart-schema-definition" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th style="text-align: left;">Field</th>
-<th style="text-align: left;">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;"><code>identity.access_token</code></td>
-<td style="text-align: left;">{what identifier is assigned, e.g., business_id}</td>
-</tr>
-<tr>
-<td style="text-align: left;">{additional config}</td>
-<td style="text-align: left;">{any additional configuration from onboarding}</td>
-</tr>
-</tbody>
-</table>
-<h3 id="handler-configuration">Handler Configuration<a class="headerlink" href="#handler-configuration" title="Permanent link">&para;</a></h3>
-<p>Businesses advertise support for this handler in their UCP profile's
-<code>payment_handlers</code> registry.</p>
-<h4 id="handler-schema">Handler Schema<a class="headerlink" href="#handler-schema" title="Permanent link">&para;</a></h4>
-<p><strong>Schema URL:</strong> <code>{schema_url}</code></p>
-<p>The handler schema defines three config variants for different contexts. See
-<a href="../payment-handler-guide/#defining-the-schema">Payment Handler Guide: Defining the Schema</a>
-for the full pattern.</p>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Config Variant</th>
-<th style="text-align: left;">Context</th>
-<th style="text-align: left;">Purpose</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;"><code>business_config</code></td>
-<td style="text-align: left;">Business discovery</td>
-<td style="text-align: left;">{describe business-specific fields}</td>
-</tr>
-<tr>
-<td style="text-align: left;"><code>platform_config</code></td>
-<td style="text-align: left;">Platform discovery</td>
-<td style="text-align: left;">{describe platform-specific fields}</td>
-</tr>
-<tr>
-<td style="text-align: left;"><code>response_config</code></td>
-<td style="text-align: left;">Checkout responses</td>
-<td style="text-align: left;">{describe runtime fields}</td>
-</tr>
-</tbody>
-</table>
-<h4 id="business-config-fields">Business Config Fields<a class="headerlink" href="#business-config-fields" title="Permanent link">&para;</a></h4>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Field</th>
+<th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
 <th style="text-align: left;">Required</th>
 <th style="text-align: left;">Description</th>
@@ -2151,265 +2050,508 @@ for the full pattern.</p>
 </thead>
 <tbody>
 <tr>
-<td style="text-align: left;">{field}</td>
-<td style="text-align: left;">{type}</td>
-<td style="text-align: left;">{Yes/No}</td>
-<td style="text-align: left;">{description}</td>
+<td style="text-align: left;">ucp</td>
+<td style="text-align: left;"><a href="/draft/specification/cart/#ucp-response-cart-schema">UCP Response Cart Schema</a></td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.</td>
+</tr>
+<tr>
+<td style="text-align: left;">id</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Unique cart identifier.</td>
+</tr>
+<tr>
+<td style="text-align: left;">line_items</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/cart/#line-item-response">Line Item Response</a>]</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Cart line items. Same structure as checkout. Full replacement on update.</td>
+</tr>
+<tr>
+<td style="text-align: left;">context</td>
+<td style="text-align: left;"><a href="/draft/specification/cart/#context">Context</a></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Buyer signals for localization (country, region, postal_code). Merchant uses for pricing, availability, currency. Falls back to geo-IP if omitted.</td>
+</tr>
+<tr>
+<td style="text-align: left;">buyer</td>
+<td style="text-align: left;"><a href="/draft/specification/cart/#buyer">Buyer</a></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional buyer information for personalized estimates.</td>
+</tr>
+<tr>
+<td style="text-align: left;">currency</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">ISO 4217 currency code. Determined by merchant based on context or geo-IP.</td>
+</tr>
+<tr>
+<td style="text-align: left;">totals</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/cart/#total-response">Total Response</a>]</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Estimated cost breakdown. May be partial if shipping/tax not yet calculable.</td>
+</tr>
+<tr>
+<td style="text-align: left;">messages</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/cart/#message">Message</a>]</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Validation messages, warnings, or informational notices.</td>
+</tr>
+<tr>
+<td style="text-align: left;">links</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/cart/#link">Link</a>]</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional merchant links (policies, FAQs).</td>
+</tr>
+<tr>
+<td style="text-align: left;">checkout_url</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">URL to convert cart to checkout. Always provided by merchant. Enables sharing, recovery, and cart-to-checkout conversion.</td>
+</tr>
+<tr>
+<td style="text-align: left;">expires_at</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Cart expiry timestamp (RFC 3339). Optional.</td>
 </tr>
 </tbody>
 </table>
-<h4 id="response-config-fields">Response Config Fields<a class="headerlink" href="#response-config-fields" title="Permanent link">&para;</a></h4>
+<h2 id="operations">Operations<a class="headerlink" href="#operations" title="Permanent link">&para;</a></h2>
+<p>The Cart capability defines the following logical operations.</p>
 <table>
 <thead>
 <tr>
-<th style="text-align: left;">Field</th>
-<th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Operation</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align: left;">{field}</td>
-<td style="text-align: left;">{type}</td>
-<td style="text-align: left;">{Yes/No}</td>
-<td style="text-align: left;">{description — include runtime fields like available instruments}</td>
+<td style="text-align: left;"><strong>Create Cart</strong></td>
+<td style="text-align: left;">Creates a new cart session.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Get Cart</strong></td>
+<td style="text-align: left;">Retrieves the current state of a cart session.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Update Cart</strong></td>
+<td style="text-align: left;">Updates a cart session.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Cancel Cart</strong></td>
+<td style="text-align: left;">Cancels a cart session.</td>
 </tr>
 </tbody>
 </table>
-<h4 id="example-handler-declaration">Example Handler Declaration<a class="headerlink" href="#example-handler-declaration" title="Permanent link">&para;</a></h4>
-<div class="language-json highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="p">{</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="nt">&quot;ucp&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-01-11&quot;</span><span class="p">,</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">    </span><span class="nt">&quot;payment_handlers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">      </span><span class="nt">&quot;{handler_name}&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">        </span><span class="p">{</span>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">          </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{handler_id}&quot;</span><span class="p">,</span>
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">          </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{version}&quot;</span><span class="p">,</span>
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">          </span><span class="nt">&quot;spec&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{spec_url}&quot;</span><span class="p">,</span>
-</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">          </span><span class="nt">&quot;schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{schema_url}&quot;</span><span class="p">,</span>
-</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">          </span><span class="nt">&quot;config&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">            </span><span class="c1">// Handler-specific configuration</span>
-</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w">          </span><span class="p">}</span>
-</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="w">        </span><span class="p">}</span>
-</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="w">      </span><span class="p">]</span>
-</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="w">    </span><span class="p">}</span>
-</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="w">  </span><span class="p">}</span>
-</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="p">}</span>
-</span></code></pre></div>
-<h3 id="processing-payments">Processing Payments<a class="headerlink" href="#processing-payments" title="Permanent link">&para;</a></h3>
-<p>Upon receiving a payment with this handler's instrument, businesses <strong>MUST</strong>:</p>
-<ol>
-<li><strong>Validate Handler:</strong> Confirm <code>instrument.handler_id</code> matches an advertised handler.</li>
-<li><strong>Ensure Idempotency:</strong> If the request is a retry (matches a previous
-  <code>checkout_id</code> or idempotency key), return the previous result immediately
-  without re-processing funds.</li>
-<li><strong>{Step 3}:</strong> {description}</li>
-<li><strong>{Step 4}:</strong> {description}</li>
-<li><strong>Return Response:</strong> Respond with the finalized checkout state.</li>
-</ol>
-<p>{Include example request/response if the business calls an external service}</p>
-<hr />
-<h2 id="platform-integration">Platform Integration<a class="headerlink" href="#platform-integration" title="Permanent link">&para;</a></h2>
-<h3 id="prerequisites_1">Prerequisites<a class="headerlink" href="#prerequisites_1" title="Permanent link">&para;</a></h3>
-<p>Before using this handler, Platforms <strong>MUST</strong> complete:</p>
-<ol>
-<li>{Prerequisite 1, e.g., "Register with {provider} to obtain a Platform identifier"}</li>
-<li>{Prerequisite 2}</li>
-</ol>
-<p><strong>Prerequisites Output:</strong></p>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Field</th>
-<th style="text-align: left;">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;"><code>identity.access_token</code></td>
-<td style="text-align: left;">{what identifier is assigned}</td>
-</tr>
-<tr>
-<td style="text-align: left;">{additional config}</td>
-<td style="text-align: left;">{any additional configuration from onboarding}</td>
-</tr>
-</tbody>
-</table>
-<h3 id="handler-configuration_1">Handler Configuration<a class="headerlink" href="#handler-configuration_1" title="Permanent link">&para;</a></h3>
-<p>Platforms advertise support for this handler in their UCP profile's
-<code>payment_handlers</code> registry using <code>platform_config</code>.</p>
-<h4 id="platform-config-fields">Platform Config Fields<a class="headerlink" href="#platform-config-fields" title="Permanent link">&para;</a></h4>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Field</th>
-<th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
-<th style="text-align: left;">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;">{field}</td>
-<td style="text-align: left;">{type}</td>
-<td style="text-align: left;">{Yes/No}</td>
-<td style="text-align: left;">{description}</td>
-</tr>
-</tbody>
-</table>
-<h4 id="example-platform-handler-declaration">Example Platform Handler Declaration<a class="headerlink" href="#example-platform-handler-declaration" title="Permanent link">&para;</a></h4>
-<div class="language-json highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="p">{</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="nt">&quot;ucp&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-01-11&quot;</span><span class="p">,</span>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="nt">&quot;payment_handlers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">      </span><span class="nt">&quot;{handler_name}&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">        </span><span class="p">{</span>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">          </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{handler_id}&quot;</span><span class="p">,</span>
-</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">          </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{version}&quot;</span><span class="p">,</span>
-</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">          </span><span class="nt">&quot;spec&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{spec_url}&quot;</span><span class="p">,</span>
-</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">          </span><span class="nt">&quot;schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{schema_url}&quot;</span><span class="p">,</span>
-</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">          </span><span class="nt">&quot;config&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">            </span><span class="c1">// Platform-specific configuration</span>
-</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">          </span><span class="p">}</span>
-</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="w">        </span><span class="p">}</span>
-</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="w">      </span><span class="p">]</span>
-</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="w">    </span><span class="p">}</span>
-</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="w">  </span><span class="p">}</span>
-</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a><span class="p">}</span>
-</span></code></pre></div>
-<h3 id="payment-protocol">Payment Protocol<a class="headerlink" href="#payment-protocol" title="Permanent link">&para;</a></h3>
-<p>Platforms <strong>MUST</strong> follow this flow to acquire a payment instrument:</p>
-<h4 id="step-1-discover-handler">Step 1: Discover Handler<a class="headerlink" href="#step-1-discover-handler" title="Permanent link">&para;</a></h4>
-<p>The Platform identifies <code>{handler_name}</code> in the business's UCP profile
-<code>payment_handlers</code> registry (from <code>/.well-known/ucp</code>).</p>
-<div class="language-json highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="p">{</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="nt">&quot;ucp&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">    </span><span class="nt">&quot;payment_handlers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">      </span><span class="nt">&quot;{handler_name}&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">        </span><span class="p">{</span>
-</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">          </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{handler_id}&quot;</span><span class="p">,</span>
-</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">          </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{version}&quot;</span><span class="p">,</span>
-</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">          </span><span class="nt">&quot;config&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">            </span><span class="c1">// Business&#39;s configuration</span>
-</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">          </span><span class="p">}</span>
-</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="w">        </span><span class="p">}</span>
-</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="w">      </span><span class="p">]</span>
-</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="w">    </span><span class="p">}</span>
-</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="w">  </span><span class="p">}</span>
-</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="p">}</span>
-</span></code></pre></div>
-<h4 Action="Action" Name="Name" id="step-2">Step 2:<a class="headerlink" href="#step-2" title="Permanent link">&para;</a></h4>
-<p>{Description of what the Platform does in this step.}</p>
-<p>{Code example if applicable:}</p>
-<div class="language-javascript highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1">// Example SDK usage or API call</span>
-</span></code></pre></div>
-<h4 Action="Action" Name="Name" id="step-3">Step 3:<a class="headerlink" href="#step-3" title="Permanent link">&para;</a></h4>
-<p>{Continue for all steps...}</p>
-<h4 id="step-n-complete-checkout">Step N: Complete Checkout<a class="headerlink" href="#step-n-complete-checkout" title="Permanent link">&para;</a></h4>
-<p>The Platform submits the checkout with the constructed payment instrument.</p>
-<div class="language-json highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="err">POST</span><span class="w"> </span><span class="err">/checkou</span><span class="kc">t</span><span class="mi">-</span><span class="err">sessio</span><span class="kc">ns</span><span class="err">/</span><span class="p">{</span><span class="err">checkou</span><span class="kc">t</span><span class="err">_id</span><span class="p">}</span><span class="err">/comple</span><span class="kc">te</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="err">Co</span><span class="kc">ntent</span><span class="mi">-</span><span class="err">Type</span><span class="p">:</span><span class="w"> </span><span class="err">applica</span><span class="kc">t</span><span class="err">io</span><span class="kc">n</span><span class="err">/jso</span><span class="kc">n</span>
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>
-</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="p">{</span>
-</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">  </span><span class="nt">&quot;payment&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">    </span><span class="nt">&quot;instruments&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">      </span><span class="p">{</span>
-</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{instrument_id}&quot;</span><span class="p">,</span>
-</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="w">        </span><span class="nt">&quot;handler_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{handler_id}&quot;</span><span class="p">,</span>
-</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{instrument_type}&quot;</span><span class="p">,</span>
-</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="w">        </span><span class="nt">&quot;credential&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="w">          </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{credential_type}&quot;</span><span class="p">,</span>
-</span><span id="__span-5-13"><a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="w">          </span><span class="c1">// Credential fields</span>
-</span><span id="__span-5-14"><a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a><span class="w">        </span><span class="p">}</span>
-</span><span id="__span-5-15"><a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a><span class="w">        </span><span class="c1">// Additional instrument fields</span>
-</span><span id="__span-5-16"><a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a><span class="w">      </span><span class="p">}</span>
-</span><span id="__span-5-17"><a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a><span class="w">    </span><span class="p">]</span>
-</span><span id="__span-5-18"><a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a><span class="w">  </span><span class="p">},</span>
-</span><span id="__span-5-19"><a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a><span class="w">  </span><span class="nt">&quot;risk_signals&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-5-20"><a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a><span class="w">    </span><span class="c1">// risk signal objects here</span>
-</span><span id="__span-5-21"><a id="__codelineno-5-21" name="__codelineno-5-21" href="#__codelineno-5-21"></a><span class="w">  </span><span class="p">}</span>
-</span><span id="__span-5-22"><a id="__codelineno-5-22" name="__codelineno-5-22" href="#__codelineno-5-22"></a><span class="p">}</span>
-</span></code></pre></div>
-<hr />
-<!--
-  ADDITIONAL PARTICIPANT SECTIONS
-
-  Add one section per additional participant (PSP, Tokenizer, Wallet Provider, etc.)
-  following the same pattern as Business and Platform integration.
--->
-
-<h2 id="participant-integration">{Participant} Integration<a class="headerlink" href="#participant-integration" title="Permanent link">&para;</a></h2>
-<h3 id="prerequisites_2">Prerequisites<a class="headerlink" href="#prerequisites_2" title="Permanent link">&para;</a></h3>
-<p>Before participating in this handler's flow, {participants} <strong>MUST</strong> complete:</p>
-<ol>
-<li>{Prerequisite 1}</li>
-<li>{Prerequisite 2}</li>
-</ol>
-<p><strong>Prerequisites Output:</strong></p>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Field</th>
-<th style="text-align: left;">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;"><code>identity.access_token</code></td>
-<td style="text-align: left;">{what identifier is assigned}</td>
-</tr>
-<tr>
-<td style="text-align: left;">{additional config}</td>
-<td style="text-align: left;">{any additional configuration from onboarding}</td>
-</tr>
-</tbody>
-</table>
-<h3 id="action-or-configuration">{Action or Configuration}<a class="headerlink" href="#action-or-configuration" title="Permanent link">&para;</a></h3>
-<p>{Describe what this participant needs to do.}</p>
-<p>{Include examples as appropriate.}</p>
-<hr />
-<h2 id="security-considerations">Security Considerations<a class="headerlink" href="#security-considerations" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Requirement</th>
-<th style="text-align: left;">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;"><strong>Binding required</strong></td>
-<td style="text-align: left;">Credentials <strong>MUST</strong> be bound to <code>checkout_id</code> and <code>identity</code> to prevent reuse.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong>Binding placement</strong></td>
-<td style="text-align: left;">Binding data (e.g., <code>checkout_id</code>) <strong>SHOULD</strong> be included within the <code>credential</code> payload to ensure it is covered by the signature, rather than in transport headers.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong>Binding verified</strong></td>
-<td style="text-align: left;">The processing participant <strong>MUST</strong> verify binding matches before processing.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong>Token Expiry</strong></td>
-<td style="text-align: left;">{If using tokens: Tokens <strong>MUST</strong> expire after {duration} or single-use.}</td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong>Data Residency</strong></td>
-<td style="text-align: left;">{Specify if PII <strong>MUST</strong> be processed/stored in specific geographic regions (e.g., EU, US) to comply with local laws.}</td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong>{Additional requirement}</strong></td>
-<td style="text-align: left;">{description}</td>
-</tr>
-</tbody>
-</table>
-<hr />
-<h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
+<h3 id="create-cart">Create Cart<a class="headerlink" href="#create-cart" title="Permanent link">&para;</a></h3>
+<p>Creates a new cart session with line items and optional buyer/context
+information for localized pricing estimates.</p>
 <ul>
-<li><strong>Handler Spec:</strong> <code>{spec_url}</code></li>
-<li><strong>Handler Schema:</strong> <code>{schema_url}</code> (defines config, instrument, and credential shapes)</li>
+<li><a href="../cart-rest/#create-cart">REST Binding</a></li>
+<li><a href="../cart-mcp/#create_cart">MCP Binding</a></li>
 </ul>
+<h3 id="get-cart">Get Cart<a class="headerlink" href="#get-cart" title="Permanent link">&para;</a></h3>
+<p>Retrieves the latest state of a cart session. Returns 404 if the cart
+does not exist, has expired, or was canceled.</p>
+<ul>
+<li><a href="../cart-rest/#get-cart">REST Binding</a></li>
+<li><a href="../cart-mcp/#get_cart">MCP Binding</a></li>
+</ul>
+<h3 id="update-cart">Update Cart<a class="headerlink" href="#update-cart" title="Permanent link">&para;</a></h3>
+<p>Performs a full replacement of the cart session. The platform <strong>MUST</strong> send
+the entire cart resource. The provided resource replaces the existing cart
+state on the business side.</p>
+<ul>
+<li><a href="../cart-rest/#update-cart">REST Binding</a></li>
+<li><a href="../cart-mcp/#update_cart">MCP Binding</a></li>
+</ul>
+<h3 id="cancel-cart">Cancel Cart<a class="headerlink" href="#cancel-cart" title="Permanent link">&para;</a></h3>
+<p>Cancels a cart session. Business MUST return the cart state before deletion.
+Subsequent operations for this cart ID SHOULD return 404.</p>
+<ul>
+<li><a href="../cart-rest/#cancel-cart">REST Binding</a></li>
+<li><a href="../cart-mcp/#cancel_cart">MCP Binding</a></li>
+</ul>
+<h2 id="entities">Entities<a class="headerlink" href="#entities" title="Permanent link">&para;</a></h2>
+<p>Cart reuses the same entity schemas as <a href="../checkout/">Checkout</a>. This ensures
+consistent data structures when converting a cart to a checkout session.</p>
+<h3 id="line-item">Line Item<a class="headerlink" href="#line-item" title="Permanent link">&para;</a></h3>
+<h4 id="line-item-create-request">Line Item Create Request<a class="headerlink" href="#line-item-create-request" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">item</td>
+<td style="text-align: left;"><a href="/draft/specification/checkout/#item-create-request">Item Create Request</a></td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">quantity</td>
+<td style="text-align: left;">integer</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Quantity of the item being purchased.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="line-item-update-request">Line Item Update Request<a class="headerlink" href="#line-item-update-request" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">id</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">item</td>
+<td style="text-align: left;"><a href="/draft/specification/checkout/#item-update-request">Item Update Request</a></td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">quantity</td>
+<td style="text-align: left;">integer</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Quantity of the item being purchased.</td>
+</tr>
+<tr>
+<td style="text-align: left;">parent_id</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Parent line item identifier for any nested structures.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="line-item-response">Line Item Response<a class="headerlink" href="#line-item-response" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">id</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">item</td>
+<td style="text-align: left;"><a href="/draft/specification/checkout/#item-response">Item Response</a></td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">quantity</td>
+<td style="text-align: left;">integer</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Quantity of the item being purchased.</td>
+</tr>
+<tr>
+<td style="text-align: left;">totals</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/checkout/#total-response">Total Response</a>]</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Line item totals breakdown.</td>
+</tr>
+<tr>
+<td style="text-align: left;">parent_id</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Parent line item identifier for any nested structures.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="buyer">Buyer<a class="headerlink" href="#buyer" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">first_name</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">First name of the buyer.</td>
+</tr>
+<tr>
+<td style="text-align: left;">last_name</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Last name of the buyer.</td>
+</tr>
+<tr>
+<td style="text-align: left;">email</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Email of the buyer.</td>
+</tr>
+<tr>
+<td style="text-align: left;">phone_number</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">E.164 standard.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="context">Context<a class="headerlink" href="#context" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">address_country</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">The country. Recommended to be in 2-letter ISO 3166-1 alpha-2 format, for example "US". For backward compatibility, a 3-letter ISO 3166-1 alpha-3 country code such as "SGP" or a full country name such as "Singapore" can also be used. Optional hint for market context (currency, availability, pricing)—higher-resolution data (e.g., shipping address) supersedes this value.</td>
+</tr>
+<tr>
+<td style="text-align: left;">address_region</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">The region in which the locality is, and which is in the country. For example, California or another appropriate first-level Administrative division. Optional hint for progressive localization—higher-resolution data (e.g., shipping address) supersedes this value.</td>
+</tr>
+<tr>
+<td style="text-align: left;">postal_code</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">The postal code. For example, 94043. Optional hint for regional refinement—higher-resolution data (e.g., shipping address) supersedes this value.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="total">Total<a class="headerlink" href="#total" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">type</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Type of total categorization.<br><strong>Enum:</strong> <code>items_discount</code>, <code>subtotal</code>, <code>discount</code>, <code>fulfillment</code>, <code>tax</code>, <code>fee</code>, <code>total</code></td>
+</tr>
+<tr>
+<td style="text-align: left;">display_text</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Text to display against the amount. Should reflect appropriate method (e.g., 'Shipping', 'Delivery').</td>
+</tr>
+<tr>
+<td style="text-align: left;">amount</td>
+<td style="text-align: left;">integer</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">If type == total, sums subtotal - discount + fulfillment + tax + fee. Should be &gt;= 0. Amount in minor (cents) currency units.</td>
+</tr>
+</tbody>
+</table>
+<p>Taxes MAY be included where calculable. Platforms SHOULD assume cart totals
+are estimates; accurate taxes are computed at checkout.</p>
+<h3 id="message">Message<a class="headerlink" href="#message" title="Permanent link">&para;</a></h3>
+<p>This object MUST be one of the following types: <a href="/draft/specification/checkout/#message-error">Message Error</a>, <a href="/draft/specification/checkout/#message-warning">Message Warning</a>, <a href="/draft/specification/checkout/#message-info">Message Info</a>.</p>
+<h4 id="message-error">Message Error<a class="headerlink" href="#message-error" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">type</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Constant = error</strong>. Message type discriminator.</td>
+</tr>
+<tr>
+<td style="text-align: left;">code</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Error code. Possible values include: missing, invalid, out_of_stock, payment_declined, requires_sign_in, requires_3ds, requires_identity_linking. Freeform codes also allowed.</td>
+</tr>
+<tr>
+<td style="text-align: left;">path</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">RFC 9535 JSONPath to the component the message refers to (e.g., $.items[1]).</td>
+</tr>
+<tr>
+<td style="text-align: left;">content_type</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Content format, default = plain.<br><strong>Enum:</strong> <code>plain</code>, <code>markdown</code></td>
+</tr>
+<tr>
+<td style="text-align: left;">content</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Human-readable message.</td>
+</tr>
+<tr>
+<td style="text-align: left;">severity</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Declares who resolves this error. 'recoverable': agent can fix via API. 'requires_buyer_input': merchant requires information their API doesn't support collecting programmatically (checkout incomplete). 'requires_buyer_review': buyer must authorize before order placement due to policy, regulatory, or entitlement rules (checkout complete). Errors with 'requires_<em>' severity contribute to 'status: requires_escalation'.<br></em><em>Enum:</em>* <code>recoverable</code>, <code>requires_buyer_input</code>, <code>requires_buyer_review</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="message-info">Message Info<a class="headerlink" href="#message-info" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">type</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Constant = info</strong>. Message type discriminator.</td>
+</tr>
+<tr>
+<td style="text-align: left;">path</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">RFC 9535 JSONPath to the component the message refers to.</td>
+</tr>
+<tr>
+<td style="text-align: left;">code</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Info code for programmatic handling.</td>
+</tr>
+<tr>
+<td style="text-align: left;">content_type</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Content format, default = plain.<br><strong>Enum:</strong> <code>plain</code>, <code>markdown</code></td>
+</tr>
+<tr>
+<td style="text-align: left;">content</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Human-readable message.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="message-warning">Message Warning<a class="headerlink" href="#message-warning" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">type</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Constant = warning</strong>. Message type discriminator.</td>
+</tr>
+<tr>
+<td style="text-align: left;">path</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">JSONPath (RFC 9535) to related field (e.g., $.line_items[0]).</td>
+</tr>
+<tr>
+<td style="text-align: left;">code</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Warning code. Machine-readable identifier for the warning type (e.g., final_sale, prop65, fulfillment_changed, age_restricted, etc.).</td>
+</tr>
+<tr>
+<td style="text-align: left;">content</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Human-readable warning message that MUST be displayed.</td>
+</tr>
+<tr>
+<td style="text-align: left;">content_type</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Content format, default = plain.<br><strong>Enum:</strong> <code>plain</code>, <code>markdown</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="link">Link<a class="headerlink" href="#link" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">type</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Type of link. Well-known values: <code>privacy_policy</code>, <code>terms_of_service</code>, <code>refund_policy</code>, <code>shipping_policy</code>, <code>faq</code>. Consumers SHOULD handle unknown values gracefully by displaying them using the <code>title</code> field or omitting the link.</td>
+</tr>
+<tr>
+<td style="text-align: left;">url</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">The actual URL pointing to the content to be displayed.</td>
+</tr>
+<tr>
+<td style="text-align: left;">title</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional display text for the link. When provided, use this instead of generating from type.</td>
+</tr>
+</tbody>
+</table>
 
 
 
@@ -2452,7 +2594,7 @@ for the full pattern.</p>
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../payment-handler-guide/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Guide">
+          <a href="../fulfillment/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Fulfillment Extension">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -2462,20 +2604,20 @@ for the full pattern.</p>
                 Previous
               </span>
               <div class="md-ellipsis">
-                Guide
+                Fulfillment Extension
               </div>
             </div>
           </a>
         
         
           
-          <a href="../tokenization-guide/" class="md-footer__link md-footer__link--next" aria-label="Next: Tokenization Guide">
+          <a href="../cart-rest/" class="md-footer__link md-footer__link--next" aria-label="Next: HTTP/REST Binding">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Tokenization Guide
+                HTTP/REST Binding
               </div>
             </div>
             <div class="md-footer__button md-icon">

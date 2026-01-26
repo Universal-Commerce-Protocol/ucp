@@ -39,6 +39,12 @@
 - [EP Binding](https://ucp.dev/draft/specification/embedded-checkout/index.md)
 - [Fulfillment Extension](https://ucp.dev/draft/specification/fulfillment/index.md)
 
+## Cart Capability
+
+- [Overview](https://ucp.dev/draft/specification/cart/index.md)
+- [HTTP/REST Binding](https://ucp.dev/draft/specification/cart-rest/index.md)
+- [MCP Binding](https://ucp.dev/draft/specification/cart-mcp/index.md)
+
 ## Order Capability
 
 - [Order Capability](https://ucp.dev/draft/specification/order/index.md)
