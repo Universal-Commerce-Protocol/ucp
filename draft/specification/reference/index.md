@@ -383,36 +383,36 @@ ______________________________________________________________________
 
 ### Item Complete Request
 
-| Name | Type   | Required | Description                                                                                                                                    |
-| ---- | ------ | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| id   | string | **Yes**  | Should be recognized by both the Platform, and the Business. For Google it should match the id provided in the "id" field in the product feed. |
+| Name | Type   | Required | Description                                                                                                                                                                 |
+| ---- | ------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| id   | string | **Yes**  | The product identifier, often the SKU, required to resolve the product details associated with this line item. Should be recognized by both the Platform, and the Business. |
 
 ______________________________________________________________________
 
 ### Item Create Request
 
-| Name | Type   | Required | Description                                                                                                                                    |
-| ---- | ------ | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| id   | string | **Yes**  | Should be recognized by both the Platform, and the Business. For Google it should match the id provided in the "id" field in the product feed. |
+| Name | Type   | Required | Description                                                                                                                                                                 |
+| ---- | ------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| id   | string | **Yes**  | The product identifier, often the SKU, required to resolve the product details associated with this line item. Should be recognized by both the Platform, and the Business. |
 
 ______________________________________________________________________
 
 ### Item Update Request
 
-| Name | Type   | Required | Description                                                                                                                                    |
-| ---- | ------ | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| id   | string | **Yes**  | Should be recognized by both the Platform, and the Business. For Google it should match the id provided in the "id" field in the product feed. |
+| Name | Type   | Required | Description                                                                                                                                                                 |
+| ---- | ------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| id   | string | **Yes**  | The product identifier, often the SKU, required to resolve the product details associated with this line item. Should be recognized by both the Platform, and the Business. |
 
 ______________________________________________________________________
 
 ### Item Response
 
-| Name      | Type    | Required | Description                                                                                                                                    |
-| --------- | ------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| id        | string  | **Yes**  | Should be recognized by both the Platform, and the Business. For Google it should match the id provided in the "id" field in the product feed. |
-| title     | string  | **Yes**  | Product title.                                                                                                                                 |
-| price     | integer | **Yes**  | Unit price in minor (cents) currency units.                                                                                                    |
-| image_url | string  | No       | Product image URI.                                                                                                                             |
+| Name      | Type    | Required | Description                                                                                                                                                                 |
+| --------- | ------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| id        | string  | **Yes**  | The product identifier, often the SKU, required to resolve the product details associated with this line item. Should be recognized by both the Platform, and the Business. |
+| title     | string  | **Yes**  | Product title.                                                                                                                                                              |
+| price     | integer | **Yes**  | Unit price in minor (cents) currency units.                                                                                                                                 |
+| image_url | string  | No       | Product image URI.                                                                                                                                                          |
 
 ______________________________________________________________________
 
