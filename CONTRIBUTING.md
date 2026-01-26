@@ -252,3 +252,19 @@ $ source .ucp/bin/activate
 (.ucp) $ mkdocs serve --watch spec
 (.ucp) $ deactivate # when done
 ```
+
+**Windows (PowerShell):**
+
+```powershell
+$ python -m venv .ucp
+$ .\.ucp\Scripts\Activate.ps1
+(.ucp) $ pip install -r requirements-docs.txt
+(.ucp) $ mkdocs serve --watch spec
+(.ucp) $ deactivate # when done
+```
+
+**Note:** If you encounter execution policy errors when activating, you may need to run:
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
+
