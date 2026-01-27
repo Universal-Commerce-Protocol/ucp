@@ -23,7 +23,7 @@ rewritten to point to the appropriate per-operation variant.
 Pass 3: Generates Embedded Protocol OpenRPC spec by aggregating methods
 from source/services/shopping/embedded.json and extension schemas.
 
-Usage: python generate_schemas.py
+Usage: uv run generate_schemas.py
 """
 
 import copy

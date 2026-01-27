@@ -43,7 +43,7 @@ echo "Generating Pydantic models from $SCHEMA_DIR to temporary dir $OUTPUT_DIR..
 # Run generation using uv
 uv run \
 	--link-mode=copy \
-	--extra-index-url https://pypi.org/simple python \
+	python \
 	-m datamodel_code_generator \
 	--input "$SCHEMA_DIR" \
 	--input-file-type jsonschema \
