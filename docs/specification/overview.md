@@ -519,19 +519,124 @@ dependencies satisfied.
 
 #### Error Handling
 
-If negotiation fails, businesses **MUST** return an error response:
+UCP negotiation can fail in two ways:
 
-```json
-{
-  "status": "requires_escalation",
-  "messages": [{
-    "type": "error",
-    "code": "version_unsupported",
-    "message": "Version 2026-01-11 is not supported.",
-    "severity": "requires_buyer_input"
-  }]
-}
-```
+1. **Discovery failure**: The business cannot fetch or parse the platform's
+   profile.
+
+2. **Negotiation failure**: The provided profile is valid but capability
+   intersection is empty or versions are incompatible.
+
+These failure types require different handling:
+
+- **Discovery failure** → transport error with optional `continue_url`
+- **Negotiation failure** → UCP response with optional `continue_url`
+
+##### Error Codes
+
+| Code                        | Description                                          | REST | MCP    |
+| --------------------------- | ---------------------------------------------------- | ---- | ------ |
+| `INVALID_PROFILE_URL`       | Profile URL is malformed, missing, or unresolvable   | 400  | error  |
+| `PROFILE_UNREACHABLE`       | Resolved URL but fetch failed (timeout, non-2xx)     | 424  | error  |
+| `PROFILE_MALFORMED`         | Fetched content is not valid JSON or violates schema | 422  | error  |
+| `CAPABILITIES_INCOMPATIBLE` | No compatible capabilities in intersection           | 200  | result |
+| `VERSION_UNSUPPORTED`       | Platform's UCP version is not supported              | 200  | result |
+
+##### The `continue_url` Field
+
+When UCP negotiation fails, `continue_url` provides a fallback web experience.
+Businesses **SHOULD** provide the most contextually relevant URL:
+
+- For checkout operations: link to the cart or checkout page
+- For catalog operations: link to the product or search results
+- As a fallback: link to the storefront homepage
+
+This enables graceful degradation—agents can redirect buyers to complete their
+task through the standard web interface.
+
+##### Transport Bindings
+
+=== "REST"
+
+    **Discovery Failure (424):**
+
+    ```http
+    HTTP/1.1 424 Failed Dependency
+    Content-Type: application/json
+
+    {
+      "code": "PROFILE_UNREACHABLE",
+      "content": "Unable to fetch agent profile: connection timeout",
+      "continue_url": "https://merchant.com/cart"
+    }
+    ```
+
+    **Negotiation Failure (200):**
+
+    ```http
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+
+    {
+      "ucp": {
+        "version": "2026-01-11",
+        "capabilities": {}
+      },
+      "messages": [
+        {
+          "type": "error",
+          "code": "VERSION_UNSUPPORTED",
+          "content": "Platform UCP version 2024-01-01 is not supported",
+          "severity": "requires_buyer_input"
+        }
+      ],
+      "continue_url": "https://merchant.com/cart"
+    }
+    ```
+
+=== "MCP"
+
+    **Discovery Failure (JSON-RPC error):**
+
+    ```json
+    {
+      "jsonrpc": "2.0",
+      "id": 1,
+      "error": {
+        "code": -32001,
+        "message": "UCP discovery failed",
+        "data": {
+          "code": "PROFILE_UNREACHABLE",
+          "content": "Unable to fetch agent profile: connection timeout",
+          "continue_url": "https://merchant.com/cart"
+        }
+      }
+    }
+    ```
+
+    **Negotiation Failure (JSON-RPC result):**
+
+    ```json
+    {
+      "jsonrpc": "2.0",
+      "id": 1,
+      "result": {
+        "ucp": {
+          "version": "2026-01-11",
+          "capabilities": {}
+        },
+        "messages": [
+          {
+            "type": "error",
+            "code": "VERSION_UNSUPPORTED",
+            "content": "Platform UCP version 2024-01-01 is not supported",
+            "severity": "requires_buyer_input"
+          }
+        ],
+        "continue_url": "https://merchant.com/cart"
+      }
+    }
+    ```
 
 #### Capability Declaration in Responses
 
@@ -1182,7 +1287,7 @@ Version unsupported error:
   "messages": [{
     "type": "error",
     "code": "version_unsupported",
-    "message": "Version 2026-01-12 is not supported. This business implements version 2026-01-11.",
+    "content": "Version 2026-01-12 is not supported. This business implements version 2026-01-11.",
     "severity": "requires_buyer_input"
   }]
 }

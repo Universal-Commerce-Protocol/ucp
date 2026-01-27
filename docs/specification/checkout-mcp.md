@@ -568,30 +568,44 @@ Maps to the [Cancel Checkout](checkout.md#cancel-checkout) operation.
 
 ## Error Handling
 
-Error responses follow JSON-RPC 2.0 format while using the UCP error structure
-defined in the [Core Specification](overview.md). The UCP error object is
-embedded in the JSON-RPC error's `data` field:
+See the [Core Specification](overview.md#error-handling) for negotiation error
+handling (discovery failures, negotiation failures).
+
+### Business Outcomes
+
+Business outcomes (including errors like unavailable merchandise) are returned
+as JSON-RPC `result` with the UCP envelope and `messages`:
 
 ```json
 {
   "jsonrpc": "2.0",
   "id": 1,
-  "error": {
-    "code": -32603,
-    "message": "Internal error",
-    "data": {
-      "status": "error",
-      "errors": [
-        {
-          "code": "MERCHANDISE_NOT_AVAILABLE",
-          "message": "One or more cart items are not available",
-          "severity": "requires_buyer_input",
-          "details": {
-            "invalid_items": ["sku_999"]
-          }
-        }
-      ]
-    }
+  "result": {
+    "ucp": {
+      "version": "2026-01-11",
+      "capabilities": {
+        "dev.ucp.shopping.checkout": [{"version": "2026-01-11"}]
+      }
+    },
+    "id": "checkout_abc123",
+    "status": "incomplete",
+    "line_items": [
+      {
+        "id": "item_456",
+        "quantity": 100,
+        "available_quantity": 12
+      }
+    ],
+    "messages": [
+      {
+        "type": "error",
+        "code": "INSUFFICIENT_STOCK",
+        "content": "Requested 100 units but only 12 available",
+        "severity": "requires_buyer_input",
+        "path": "$.line_items[0].quantity"
+      }
+    ],
+    "continue_url": "https://merchant.com/checkout/checkout_abc123"
   }
 }
 ```
@@ -602,10 +616,12 @@ A conforming MCP transport implementation **MUST**:
 
 1. Implement JSON-RPC 2.0 protocol correctly.
 2. Provide all core checkout tools defined in this specification.
-3. Handle errors with UCP-specific error codes embedded in the JSON-RPC error
-    object.
-4. Validate tool inputs against UCP schemas.
-5. Support HTTP transport with streaming.
+3. Return negotiation failures per the
+    [Core Specification](overview.md#error-handling).
+4. Return business outcomes as JSON-RPC `result` with UCP envelope and
+    `messages` array.
+5. Validate tool inputs against UCP schemas.
+6. Support HTTP transport with streaming.
 
 ## Implementation
 
