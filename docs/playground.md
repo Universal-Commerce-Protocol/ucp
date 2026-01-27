@@ -476,14 +476,14 @@ const UcpData = {
     "dev.ucp.shopping.checkout": [
       {
         version: "2026-01-11",
-        spec: "https://ucp.dev/specs/checkout",
+        spec: "https://ucp.dev/specification/checkout",
         schema: "https://ucp.dev/schemas/shopping/checkout.json"
       }
     ],
     "dev.ucp.shopping.order": [
       {
         version: "2026-01-11",
-        spec: "https://ucp.dev/specs/order",
+        spec: "https://ucp.dev/specification/order",
         schema: "https://ucp.dev/schemas/shopping/order.json"
       }
     ],
@@ -491,7 +491,7 @@ const UcpData = {
       {
         extends: "dev.ucp.shopping.checkout",
         version: "2026-01-11",
-        spec: "https://ucp.dev/specs/fulfillment",
+        spec: "https://ucp.dev/specification/fulfillment",
         schema: "https://ucp.dev/schemas/shopping/fulfillment.json",
         config: {
           allows_multi_destination: {
@@ -509,7 +509,7 @@ const UcpData = {
       {
         extends: "dev.ucp.shopping.checkout",
         version: "2026-01-11",
-        spec: "https://ucp.dev/specs/discount",
+        spec: "https://ucp.dev/specification/discount",
         schema: "https://ucp.dev/schemas/shopping/discount.json"
       }
     ],
@@ -517,7 +517,7 @@ const UcpData = {
       {
         extends: "dev.ucp.shopping.checkout",
         version: "2026-01-11",
-        spec: "https://ucp.dev/specs/buyer_consent",
+        spec: "https://ucp.dev/specification/buyer-consent",
         schema: "https://ucp.dev/schemas/shopping/buyer_consent.json"
       }
     ],
@@ -525,8 +525,8 @@ const UcpData = {
       {
         extends: "dev.ucp.shopping.checkout",
         version: "2026-01-11",
-        spec: "https://ucp.dev/specs/ap2_mandates",
-        schema: "https://ucp.dev/schemas/shopping/ap2_mandates.json"
+        spec: "https://ucp.dev/specification/ap2-mandates",
+        schema: "https://ucp.dev/schemas/shopping/ap2_mandate.json"
       }
     ]
   },
