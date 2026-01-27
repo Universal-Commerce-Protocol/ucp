@@ -189,6 +189,23 @@
           }
         }
       ]
+    },
+
+    "response_cart_schema": {
+      "title": "UCP Cart Response Schema",
+      "description": "UCP metadata for cart responses. No payment handlers needed pre-checkout.",
+      "allOf": [
+        { "$ref": "#/$defs/base" },
+        {
+          "properties": {
+            "capabilities": {
+              "additionalProperties": {
+                "items": { "$ref": "capability.json#/$defs/response_schema" }
+              }
+            }
+          }
+        }
+      ]
     }
   }
 }

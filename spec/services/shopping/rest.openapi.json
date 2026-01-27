@@ -22,7 +22,7 @@
       "post": {
         "operationId": "create_checkout",
         "summary": "Create Checkout",
-        "description": "Create a checkout session. Called as soon as a user adds an item to a cart.",
+        "description": "Create a new checkout session.",
         "parameters": [
           {
             "$ref": "#/components/parameters/authorization"
@@ -352,6 +352,258 @@
           }
         }
       }
+    },
+    "/carts": {
+      "post": {
+        "operationId": "create_cart",
+        "summary": "Create Cart",
+        "description": "Create a new cart session.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/authorization"
+          },
+          {
+            "$ref": "#/components/parameters/x_api_key"
+          },
+          {
+            "$ref": "#/components/parameters/request_signature"
+          },
+          {
+            "$ref": "#/components/parameters/idempotency_key"
+          },
+          {
+            "$ref": "#/components/parameters/request_id"
+          },
+          {
+            "$ref": "#/components/parameters/user_agent"
+          },
+          {
+            "$ref": "#/components/parameters/content_type"
+          },
+          {
+            "$ref": "#/components/parameters/accept"
+          },
+          {
+            "$ref": "#/components/parameters/accept_language"
+          },
+          {
+            "$ref": "#/components/parameters/accept_encoding"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/cart_create_request"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Cart created",
+            "headers": {
+              "X-Detached-JWT": {
+                "$ref": "#/components/headers/x_detached_jwt"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/cart_response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/carts/{id}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/cart_id_path"
+        }
+      ],
+      "get": {
+        "operationId": "get_cart",
+        "summary": "Get Cart",
+        "description": "Get the latest state of a cart session.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/authorization"
+          },
+          {
+            "$ref": "#/components/parameters/x_api_key"
+          },
+          {
+            "$ref": "#/components/parameters/request_signature"
+          },
+          {
+            "$ref": "#/components/parameters/request_id"
+          },
+          {
+            "$ref": "#/components/parameters/user_agent"
+          },
+          {
+            "$ref": "#/components/parameters/content_type"
+          },
+          {
+            "$ref": "#/components/parameters/accept"
+          },
+          {
+            "$ref": "#/components/parameters/accept_language"
+          },
+          {
+            "$ref": "#/components/parameters/accept_encoding"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cart retrieved",
+            "headers": {
+              "X-Detached-JWT": {
+                "$ref": "#/components/headers/x_detached_jwt"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/cart_response"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Cart not found (cancelled, expired, or never existed)"
+          }
+        }
+      },
+      "put": {
+        "operationId": "update_cart",
+        "summary": "Update Cart",
+        "description": "Update a cart session.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/authorization"
+          },
+          {
+            "$ref": "#/components/parameters/x_api_key"
+          },
+          {
+            "$ref": "#/components/parameters/request_signature"
+          },
+          {
+            "$ref": "#/components/parameters/idempotency_key"
+          },
+          {
+            "$ref": "#/components/parameters/request_id"
+          },
+          {
+            "$ref": "#/components/parameters/user_agent"
+          },
+          {
+            "$ref": "#/components/parameters/content_type"
+          },
+          {
+            "$ref": "#/components/parameters/accept"
+          },
+          {
+            "$ref": "#/components/parameters/accept_language"
+          },
+          {
+            "$ref": "#/components/parameters/accept_encoding"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/cart_update_request"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Cart updated",
+            "headers": {
+              "X-Detached-JWT": {
+                "$ref": "#/components/headers/x_detached_jwt"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/cart_response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/carts/{id}/cancel": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/cart_id_path"
+        }
+      ],
+      "post": {
+        "operationId": "cancel_cart",
+        "summary": "Cancel Cart",
+        "description": "Cancel a cart session.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/authorization"
+          },
+          {
+            "$ref": "#/components/parameters/x_api_key"
+          },
+          {
+            "$ref": "#/components/parameters/request_signature"
+          },
+          {
+            "$ref": "#/components/parameters/idempotency_key"
+          },
+          {
+            "$ref": "#/components/parameters/request_id"
+          },
+          {
+            "$ref": "#/components/parameters/user_agent"
+          },
+          {
+            "$ref": "#/components/parameters/content_type"
+          },
+          {
+            "$ref": "#/components/parameters/accept"
+          },
+          {
+            "$ref": "#/components/parameters/accept_language"
+          },
+          {
+            "$ref": "#/components/parameters/accept_encoding"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cart cancelled",
+            "headers": {
+              "X-Detached-JWT": {
+                "$ref": "#/components/headers/x_detached_jwt"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/cart_response"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "webhooks": {
@@ -430,6 +682,15 @@
         "in": "path",
         "required": true,
         "description": "The unique identifier of the checkout session.",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "cart_id_path": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "The unique identifier of the cart.",
         "schema": {
           "type": "string"
         }
@@ -557,6 +818,15 @@
       },
       "checkout_complete_request": {
         "$ref": "../../schemas/shopping/checkout.complete_req.json"
+      },
+      "cart_response": {
+        "$ref": "../../schemas/shopping/cart_resp.json"
+      },
+      "cart_create_request": {
+        "$ref": "../../schemas/shopping/cart.create_req.json"
+      },
+      "cart_update_request": {
+        "$ref": "../../schemas/shopping/cart.update_req.json"
       }
     }
   }

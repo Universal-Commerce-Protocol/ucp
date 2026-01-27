@@ -51,6 +51,7 @@
     {
       "name": "create_checkout",
       "summary": "Create a checkout",
+      "description": "Create a new checkout session.",
       "params": [
         {
           "name": "meta",
@@ -171,6 +172,77 @@
       "result": {
         "name": "checkout",
         "schema": {"$ref": "../../schemas/shopping/checkout.json"}
+      }
+    },
+    {
+      "name": "create_cart",
+      "summary": "Create a cart",
+      "description": "Create a new cart session.",
+      "params": [
+        {
+          "name": "cart",
+          "required": true,
+          "schema": {"$ref": "../../schemas/shopping/cart.json"}
+        }
+      ],
+      "result": {
+        "name": "cart",
+        "schema": {"$ref": "../../schemas/shopping/cart.json"}
+      }
+    },
+    {
+      "name": "get_cart",
+      "summary": "Get cart",
+      "params": [
+        {
+          "name": "id",
+          "required": true,
+          "schema": {"type": "string"}
+        }
+      ],
+      "result": {
+        "name": "cart",
+        "schema": {"$ref": "../../schemas/shopping/cart.json"}
+      }
+    },
+    {
+      "name": "update_cart",
+      "summary": "Update cart",
+      "params": [
+        {
+          "name": "id",
+          "required": true,
+          "schema": {"type": "string"}
+        },
+        {
+          "name": "cart",
+          "required": true,
+          "schema": {"$ref": "../../schemas/shopping/cart.json"}
+        }
+      ],
+      "result": {
+        "name": "cart",
+        "schema": {"$ref": "../../schemas/shopping/cart.json"}
+      }
+    },
+    {
+      "name": "cancel_cart",
+      "summary": "Cancel cart",
+      "params": [
+        {
+          "name": "id",
+          "required": true,
+          "schema": {"type": "string"}
+        },
+        {
+          "name": "idempotency_key",
+          "required": true,
+          "schema": {"type": "string", "format": "uuid"}
+        }
+      ],
+      "result": {
+        "name": "cart",
+        "schema": {"$ref": "../../schemas/shopping/cart.json"}
       }
     }
   ]

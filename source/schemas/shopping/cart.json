@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/cart.json",
+  "name": "dev.ucp.shopping.cart",
+  "version": "2026-01-15",
+  "title": "Cart",
+  "description": "Shopping cart with estimated pricing before checkout. Lightweight pre-purchase exploration with no payment info or complex status states. Cart exists (200) or doesn't (404).",
+  "$defs": {
+    "checkout": {
+      "title": "Checkout with Cart",
+      "description": "Checkout extended with cart capability. Adds cart_id to create_checkout for cart-to-checkout conversion.",
+      "allOf": [
+        { "$ref": "checkout.json" },
+        {
+          "type": "object",
+          "properties": {
+            "cart_id": {
+              "type": "string",
+              "description": "Cart ID to convert to checkout. Business MUST use cart contents (line_items, context, buyer) and MUST ignore overlapping fields in checkout payload.",
+              "ucp_request": {
+                "create": "optional",
+                "update": "omit"
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "type": "object",
+  "required": ["ucp", "id", "line_items", "currency", "totals"],
+  "additionalProperties": true,
+  "properties": {
+    "ucp": {
+      "$ref": "../ucp.json#/$defs/response_cart_schema",
+      "ucp_request": "omit"
+    },
+    "id": {
+      "type": "string",
+      "description": "Unique cart identifier.",
+      "ucp_request": {
+        "create": "omit",
+        "update": "required"
+      }
+    },
+    "line_items": {
+      "type": "array",
+      "items": {
+        "$ref": "types/line_item.json"
+      },
+      "description": "Cart line items. Same structure as checkout. Full replacement on update.",
+      "ucp_request": {
+        "create": "required",
+        "update": "required"
+      }
+    },
+    "context": {
+      "$ref": "types/context.json",
+      "description": "Buyer signals for localization (country, region, postal_code). Merchant uses for pricing, availability, currency. Falls back to geo-IP if omitted.",
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional"
+      }
+    },
+    "buyer": {
+      "$ref": "types/buyer.json",
+      "description": "Optional buyer information for personalized estimates.",
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional"
+      }
+    },
+    "currency": {
+      "type": "string",
+      "description": "ISO 4217 currency code. Determined by merchant based on context or geo-IP.",
+      "ucp_request": "omit"
+    },
+    "totals": {
+      "type": "array",
+      "items": {
+        "$ref": "types/total.json"
+      },
+      "description": "Estimated cost breakdown. May be partial if shipping/tax not yet calculable.",
+      "ucp_request": "omit"
+    },
+    "messages": {
+      "type": "array",
+      "items": {
+        "$ref": "types/message.json"
+      },
+      "description": "Validation messages, warnings, or informational notices.",
+      "ucp_request": "omit"
+    },
+    "links": {
+      "type": "array",
+      "items": {
+        "$ref": "types/link.json"
+      },
+      "description": "Optional merchant links (policies, FAQs).",
+      "ucp_request": "omit"
+    },
+    "continue_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL for cart handoff and session recovery. Enables sharing and human-in-the-loop flows.",
+      "ucp_request": "omit"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Cart expiry timestamp (RFC 3339). Optional.",
+      "ucp_request": "omit"
+    }
+  }
+}
