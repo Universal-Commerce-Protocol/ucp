@@ -223,13 +223,13 @@ def define_env(env):
     elif io_type == "response":
       operation = "read"
 
-    # Resolve using ucp-schema
+    # Resolve using ucp-schema (no fallback - fail loudly if unavailable)
     resolved = _resolve_with_ucp_schema(schema_path, direction, operation)
     if resolved:
       return resolved
 
-    # Fallback to loading raw file
-    return _load_json_file(entity_name)
+    # ucp-schema failed - don't silently fall back to raw JSON with annotations
+    return None
 
   # Cache for polymorphic type detection
   _polymorphic_cache: dict[str, bool] = {}
@@ -407,7 +407,11 @@ def define_env(env):
       # If purely external and not found locally
       if properties_ref.startswith("http"):
         return f"_See [{properties_ref}]({properties_ref})_"
-      return ""
+      # ucp-schema failed or schema not found - fail loudly
+      return (
+        f"**Error:** Failed to resolve '{ref_entity_name}'. "
+        f"Ensure ucp-schema is installed: `cargo install ucp-schema`"
+      )
 
   def _render_embedded_table(
     properties_list, required_list, spec_file_name, context=None
@@ -766,10 +770,11 @@ def define_env(env):
         return _render_table_from_schema(
           resolved_schema, spec_file_name, context=context
         )
-      # Fallback to raw JSON if ucp-schema fails
-      data = _load_json(full_path)
-      if data:
-        return _render_table_from_schema(data, spec_file_name, context=context)
+      # ucp-schema failed - fail loudly, don't silently use raw JSON
+      return (
+        f"**Error:** Failed to resolve schema '{full_path}' with ucp-schema. "
+        f"Ensure ucp-schema is installed: `cargo install ucp-schema`"
+      )
 
     return f"**Error:** Schema '{base_name}' not found in any schema directory."
 
