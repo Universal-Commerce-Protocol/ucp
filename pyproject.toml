@@ -1,6 +1,19 @@
+[project]
+name = "ucp"
+version = "2026.01.23"
+description = "Universal Commerce Protocol"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "datamodel-code-generator[http]>=0.50.0",
+]
+
 [tool.ruff]
 line-length = 80
 indent-width = 2
+
+[tool.setuptools]
+packages = []
 
 [tool.ruff.format]
 quote-style = "double"
