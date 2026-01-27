@@ -15,63 +15,36 @@
 
 """MkDocs hooks for UCP documentation.
 
-This module contains functions that are executed during the MkDocs build
-process:
-- Copy source files into site directory with $ref resolution
-- Publish bundled schemas to /schemas/{version}/ for consumers
+Processes source files during build:
+1. Resolve relative $ref to absolute URLs (using $id from referenced files)
+2. Rewrite all ucp.dev/schemas/ URLs to include version for proper resolution
+3. Copy to site directory based on $id path
+
+Mike handles deployment to /{version}/ paths, so output paths exclude version
+but $id/$ref URLs include it for correct resolution after deployment.
 """
 
 import json
 import logging
+import re
 import shutil
+from datetime import date
 from pathlib import Path
 
 log = logging.getLogger("mkdocs")
 
-# Directory containing capability schemas to publish (excludes types/ subdir)
-SCHEMAS_DIR = Path("source/schemas/shopping")
-
-
-def _publish_versioned_schemas(config):
-  """Publish source schemas to /schemas/.
-
-  Copies source schemas with ucp_* annotations intact and injects version.
-  Consumers use ucp-schema to resolve for their specific direction/operation.
-
-  Mike handles the doc version path (e.g., /2026-01-11/schemas/checkout.json).
-  """
-  version = config.get("extra", {}).get("ucp_version")
-  if not version:
-    log.warning("No ucp_version in mkdocs.yml extra config, skipping schemas")
-    return
-
-  output_dir = Path(config["site_dir"]) / "schemas"
-  output_dir.mkdir(parents=True, exist_ok=True)
-
-  # Copy all schemas recursively (includes types/ subdirectory)
-  for schema_file in SCHEMAS_DIR.rglob("*.json"):
-    try:
-      with schema_file.open("r", encoding="utf-8") as f:
-        data = json.load(f)
-
-      # Inject version
-      data.setdefault("ucp", {})["version"] = version
-
-      # Preserve directory structure
-      rel_path = schema_file.relative_to(SCHEMAS_DIR)
-      output_file = output_dir / rel_path
-      output_file.parent.mkdir(parents=True, exist_ok=True)
-
-      with output_file.open("w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2, ensure_ascii=False)
-      log.info("Published schema: %s", output_file)
-
-    except (json.JSONDecodeError, OSError) as e:
-      log.error("Failed to process %s: %s", schema_file, e)
+# URL prefix for UCP schemas that need version injection
+UCP_SCHEMA_PREFIX = "https://ucp.dev/schemas/"
+# Pattern for valid date-based versions
+DATE_VERSION_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 
 def _process_refs(data, current_file_dir):
-  """Recursively processes $ref fields in a JSON object."""
+  """Recursively resolve relative $ref paths to absolute URLs.
+
+  Reads referenced file's $id to construct the absolute URL.
+  Only processes relative refs (not # fragments or http URLs).
+  """
   if isinstance(data, dict):
     for key, value in data.items():
       if (
@@ -116,18 +89,71 @@ def _process_refs(data, current_file_dir):
       _process_refs(item, current_file_dir)
 
 
+def _rewrite_version_urls(data, url_version):
+  """Recursively rewrite ucp.dev/schemas/ URLs to include version.
+
+  Transforms: https://ucp.dev/schemas/X -> https://ucp.dev/{url_version}/schemas/X
+
+  This ensures $id matches the deployed URL and $ref resolves correctly.
+  Applied to both $id and $ref fields.
+  """
+  versioned_prefix = f"https://ucp.dev/{url_version}/schemas/"
+
+  if isinstance(data, dict):
+    for key, value in data.items():
+      if (
+        key in ("$id", "$ref")
+        and isinstance(value, str)
+        and value.startswith(UCP_SCHEMA_PREFIX)
+      ):
+        data[key] = value.replace(UCP_SCHEMA_PREFIX, versioned_prefix, 1)
+      else:
+        _rewrite_version_urls(value, url_version)
+  elif isinstance(data, list):
+    for item in data:
+      _rewrite_version_urls(item, url_version)
+
+
+def _set_schema_version(data, version):
+  """Set version field in capability schemas (top-level 'version' property)."""
+  if "version" in data:
+    data["version"] = version
+
+
 def on_post_build(config):
   """Copy and process source files into the site directory.
 
-  For JSON files, it resolves $ref paths to absolute URLs.
+  For JSON files:
+  1. Resolve relative $ref to absolute URLs
+  2. Set schema version field
+  3. Rewrite URLs to include version (for proper resolution after deployment)
+  4. Output to path derived from original $id (mike adds version prefix)
+
   Non-JSON files are copied as-is.
 
-  Also publishes bundled schemas to /schemas/{version}/ for consumers.
+  Version handling:
+  - YYYY-MM-DD: use for both URL path and version field
+  - Non-date (e.g., 'draft'): URL uses literal, version = today's date
   """
-  # Publish versioned schemas for consumers
-  _publish_versioned_schemas(config)
+  ucp_version = config.get("extra", {}).get("ucp_version")
+  if not ucp_version:
+    log.warning("No ucp_version in mkdocs.yml extra config")
+    schema_version = None
+    url_version = None
+  elif DATE_VERSION_PATTERN.match(ucp_version):
+    # Date version: use for both URL path and schema version field
+    url_version = ucp_version
+    schema_version = ucp_version
+  else:
+    # Non-date (e.g., 'draft'): URL uses literal, version field gets today
+    # This way $id matches deployed URL, version indicates publish date
+    url_version = ucp_version
+    schema_version = date.today().isoformat()
+    log.info(
+      f"Non-date version '{ucp_version}': schema version set to "
+      f"'{schema_version}'"
+    )
 
-  # Copy source files (with ucp_* annotations intact for agents)
   base_src_path = Path.cwd() / "source"
   if not base_src_path.exists():
     log.warning("Source directory not found: %s", base_src_path)
@@ -151,7 +177,8 @@ def on_post_build(config):
       with src_file.open("r", encoding="utf-8") as f:
         data = json.load(f)
 
-      # Determine the final relative path for the destination from $id
+      # Determine output path from ORIGINAL $id (before version rewrite).
+      # Mike deploys site/ to /{version}/, so we exclude version from path.
       file_id = data.get("$id")
       prefix = "https://ucp.dev"
       if file_id and file_id.startswith(prefix):
@@ -159,8 +186,16 @@ def on_post_build(config):
       else:
         file_rel_path = rel_path
 
-      # Process refs using the final path
+      # Step 1: Resolve relative $ref to absolute URLs
       _process_refs(data, src_file.parent)
+
+      # Step 2: Set schema version field (if schema has one)
+      if schema_version:
+        _set_schema_version(data, schema_version)
+
+      # Step 3: Rewrite URLs to include version
+      if url_version:
+        _rewrite_version_urls(data, url_version)
 
       dest_file = Path(config["site_dir"]) / file_rel_path
       dest_dir = dest_file.parent
