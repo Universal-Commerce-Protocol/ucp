@@ -201,13 +201,14 @@ for `postMessage()` calls — before the `ect.ready` message is sent.
 Core messages are defined by the ECaP specification and **MUST** be supported by
 all implementations.
 
-| Category          | Communication Direction | Purpose                                                               | Pattern      | Core Messages                                |
-| :---------------- | :---------------------- | :---------------------------------------------------------------------| :----------- | :------------------------------------------- |
-| **Handshake**     | Embedded Cart -> Host   | Establish connection between host and Embedded Cart.                  | Request      | `ect.ready`                                  |
-| **Authentication**| Host -> Embedded Cart   | Inform any additional auth data required by Embedded Cart from host.  | Notification | `ect.auth`                                   |
-| **Lifecycle**     | Embedded Cart -> Host   | Inform of cart state transitions.                                     | Notification | `ect.start`, `ect.transition.checkout`|
-| **State Change**  | Embedded Cart -> Host   | Inform of cart field changes.                                         | Notification | `ect.line_items.change`, `ect.buyer.change`, `ect.context.change`, `ect.messages.change` |
-| **State Change**  | Embedded Cart -> Host   | Inform of cart field changes but also require host input.             | Request      | `ect.line_items.change_request`              |
+| Category          | Communication Direction | Purpose                                                               | Pattern      | Core Messages                                                                             |
+| :---------------- | :---------------------- | :---------------------------------------------------------------------| :----------- | :---------------------------------------------------------------------------------------- |
+| **Handshake**     | Embedded Cart -> Host   | Establish connection between host and Embedded Cart.                  | Request      | `ect.ready`                                                                               |
+| **Authentication**| Host -> Embedded Cart   | Inform any additional auth data required by Embedded Cart from host.  | Notification | `ect.auth`                                                                                |
+| **Lifecycle**     | Embedded Cart -> Host   | Inform of cart state in Embedded Cart.                                | Notification | `ect.start`                                                                               |
+| **Transition**    | Embedded Cart -> Host   | Establish transition from cart to other capabilities.                 | Request      | `ect.transition.checkout`                                                                 |
+| **State Change**  | Embedded Cart -> Host   | Inform of cart field changes.                                         | Notification | `ect.line_items.change`, `ect.buyer.change`, `ect.context.change`, `ect.messages.change`  |
+| **State Change**  | Embedded Cart -> Host   | Inform of cart field changes but also require host input.             | Request      | `ect.line_items.change_request`                                                           |
 
 ### Handshake Messages
 
@@ -249,9 +250,6 @@ to complete the handshake.
     - `upgrade` (object, **OPTIONAL**): An object describing how the Embedded
         Cart should update the communication channel it uses to communicate
         with the host.
-    - `cart` (object, **OPTIONAL**): Additional, display-only state for
-        the cart that was not communicated over UCP cart actions. This
-        is used to populate the cart UI.
 
 **Example Message:**
 
@@ -289,33 +287,6 @@ over the upgraded communication channel, and wait for a new response. All
 subsequent messages **MUST** be sent only over the upgraded communication
 channel.
 
-The host **MAY** also respond with a `cart` object, if no additional auth
-data is required by the business, which will be used to populate the cart UI.
-
-```json
-{
-    "jsonrpc": "2.0",
-    "id": "ready_1",
-    "result": {
-        "cart": {
-            "line_items": [
-                {
-                "item": {
-                    "id": "item_123"
-                },
-                "quantity": 2
-                }
-            ],
-            "context": {
-                "country": "US",
-                "region": "CA",
-                "postal_code": "94105"
-            }
-        }
-    }
-}
-```
-
 ### Authentication
 
 #### `ect.auth`
@@ -328,9 +299,6 @@ requirements (i.e. when identity linking is a pre-requisite).
 - **Payload:**
     - `authorization` (string, **REQUIRED**): The required authorization data by
     business, can be in the form of an OAuth token, JWT, API keys, etc.
-    - `cart` (object, **OPTIONAL**): Additional, display-only state for
-        the cart that was not communicated over UCP cart actions. This
-        is used to populate the cart UI.
 
 **Example Message (no cart object specified):**
 
@@ -340,37 +308,6 @@ requirements (i.e. when identity linking is a pre-requisite).
     "method": "ect.auth",
     "params": {
         "authorization": "fake_token_from_identity_linking"
-    }
-}
-```
-
-The host **MAY** also specify a `cart` object to Embedded Cart, especially if
-it was not communicated over UCP cart actions or `ect.ready`, which will be
-used to populate the cart UI.
-
-**Example Message (with cart object specified):**
-
-```json
-{
-    "jsonrpc": "2.0",
-    "method": "ect.auth",
-    "params": {
-        "authorization": "fake_token_from_identity_linking",
-        "cart": {
-            "line_items": [
-                {
-                "item": {
-                    "id": "item_123"
-                },
-                "quantity": 2
-                }
-            ],
-            "context": {
-                "country": "US",
-                "region": "CA",
-                "postal_code": "94105"
-            }
-        }
     }
 }
 ```
@@ -406,15 +343,17 @@ Signals that cart is visible and ready for interaction.
 }
 ```
 
+### Transition Messages
+
 #### `ect.transition.checkout`
 
 Indicates completion of cart building process and buyer now seamlessly transitions from
-ECaP to ECP. This marks the completion of Embedded Cart and host **MUST** listen to
-state change `postMessages` adhering to [ECP's specification](site:specification/embedded-checkout)
+ECaP to ECP. This marks the completion of Embedded Cart and host **MUST** listen for
+`ec.ready` handshake adhering to [ECP's specification](site:specification/embedded-checkout)
 over the same communication channel established during `ect.ready`.
 
 - **Direction:** Embedded Cart → host
-- **Type:** Notification
+- **Type:** Request
 - **Payload:**
     - `cart` (object, **REQUIRED**): The latest state of the cart, using the same structure
         as the `cart` object in UCP responses.
@@ -426,6 +365,7 @@ over the same communication channel established during `ect.ready`.
 ```json
 {
     "jsonrpc": "2.0",
+    "id": "transition_1",
     "method": "ect.transition.checkout",
     "params": {
         "cart": {
@@ -444,6 +384,44 @@ over the same communication channel established during `ect.ready`.
     }
 }
 ```
+
+The `ect.transition.checkout` message is a request, which means that the
+host **MUST** respond to acknowledge the transition.
+
+- **Direction:** host → Embedded Cart
+- **Type:** Response
+- **Result Payload:**
+    - `delegation` (array, **OPTIONAL**): An array containing delegation
+    requests from host as part of Embedded Checkout Protocol.
+
+**Example Message:**
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": "transition_1",
+    "result": {}
+}
+```
+
+Hosts **MAY** respond with a `delegate` field to request for operations
+they would like to handle natively. See [ECP's
+documentation](site:specification/embedded-checkout/#delegation) for more details.
+
+**Example Message:**
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": "transition_1",
+    "result": {
+        "delegate": ["payment.credential"]
+    }
+}
+```
+
+When the host responds with a `delegate` array, the Embedded Cart **MUST**
+use it to instantiate the handshake on ECP.x
 
 ### State Change Messages
 

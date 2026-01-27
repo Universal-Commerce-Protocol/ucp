@@ -268,10 +268,6 @@
                   "description": "MessagePort for upgraded channel. Runtime type is MessagePort."
                 }
               }
-            },
-            "cart": {
-              "$ref": "../../schemas/shopping/cart.json",
-              "description": "Optional cart state with host-provided data (line_items)."
             }
           }
         }
@@ -288,13 +284,6 @@
           "required": true,
           "schema": {
             "type": "string"
-          }
-        },
-        {
-          "name": "cart",
-          "schema": {
-            "$ref": "../../schemas/shopping/cart.json",
-            "description": "Optional cart state with host-provided data (line_items)."
           }
         }
       ]
@@ -334,10 +323,28 @@
           "required": true,
           "schema": {
             "$ref": "../../schemas/shopping/checkout.json",
-            "description": "Initial checkout session that is visible to buyer and ready for interaction."
+            "description": "Initial checkout session based on the final cart state."
           }
         }
-      ]
+      ],
+      "result": {
+        "name": "transitionResult",
+        "schema": {
+          "type": "object",
+          "description": "Transition acknowledgement from host with requested delegations to enter ECP.",
+          "properties": {
+            "delegate": {
+              "type": "array",
+              "description": "Delegation types the business accepts. Must be subset of checkout.embedded.delegations.",
+              "items": {
+                "type": "string",
+                "pattern": "^[a-z_]+(?:\\.[a-z_]+)*$"
+              },
+              "uniqueItems": true
+            }
+          }
+        }
+      }
     },
 
     {
@@ -368,7 +375,7 @@
                 "line_items": {
                   "type": "array",
                   "items": {
-                    "$ref": "types/line_item.json"
+                    "$ref": "../../schemas/shopping/types/line_item.json"
                   },
                   "description": "Cart line items after passing host validations."
                 }
