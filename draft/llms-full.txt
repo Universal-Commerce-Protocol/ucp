@@ -485,8 +485,6 @@ UCP is fully compatible with [Agent Payments Protocol (AP2)](https://ap2-protoco
 [Learn more about AP2](https://ap2-protocol.org)
 # Playground
 
-UCP Playground
-
 # UCP Playground
 
 Walk through a complete UCP checkout flow step-by-step. This interactive demo runs entirely in the browser, simulating payloads and validating against real UCP schemas at each stage.
@@ -573,7 +571,39 @@ Minted Instrument
 
 ← Back Next Step →
 
-## 
+## 7. Complete Checkout
+
+Submit the minted instrument to finalize the transaction and create an order.
+
+Request Finalize
+
+Response (Order Created)
+
+**Success!** Order ID: created.
+
+← Back Next Step →
+
+## 8. Webhook Simulation
+
+Simulate a backend event (e.g., shipping center update) triggering a webhook push to the Agent.
+
+### Trigger Event
+
+This action runs on the Business server and pushes data to the Platform's webhook URL.
+
+Simulate "Shipped" Event
+
+Webhook Payload (POST) Push Notification
+
+```
+// Waiting for event trigger...
+```
+
+← Back
+
+About this demo
+
+This playground is a simulation running entirely in your browser. It uses mocked logic to demonstrate the UCP protocol flow and isn't intended as a reference for production code. For real-world implementation examples and best practices, please check out our [samples on GitHub](https://github.com/Universal-Commerce-Protocol/samples).
 # Roadmap
 
 # Roadmap
