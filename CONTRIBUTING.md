@@ -190,7 +190,7 @@ You can run many of these checks locally before committing by installing and
 using `pre-commit`:
 
 ```bash
-pip install pre-commit
+uv tool install pre-commit
 pre-commit install
 ```
 
@@ -212,10 +212,16 @@ This will set up pre-commit hooks to run automatically when you `git commit`.
 ### Schema Development
 
 Schemas live in `source/` and are published with `ucp_*` annotations intact.
-Agents use [ucp-schema](https://github.com/anthropics/ucp-schema) to resolve
-annotations for specific operations at runtime.
+Agents use [ucp-schema](https://github.com/universal-commerce-protocol/ucp-schema)
+to resolve annotations for specific operations at runtime.
 
-1. Ensure `ucp-schema` is installed: `cargo install ucp-schema`
+1. Ensure `ucp-schema` is installed:
+
+   ```bash
+   cargo install ucp-schema                 # from crates.io
+   cargo install --git https://github.com/universal-commerce-protocol/ucp-schema  # from git
+   ```
+
 2. Make updates to JSON files in `source/`
 3. Run `ucp-schema lint source/` to validate syntax and references
 
@@ -225,31 +231,12 @@ For example, to regenerate Python Pydantic models run
 `scripts/ci_check_models.sh` to verify that models can be generated
 successfully from the schemas.
 
-It is also important to preview documentation locally whenever schemas are
-updated to ensure there are no broken references or stale/missing contents.
-
 ### Documentation Development
 
-1. Ensure dependencies are installed: `pip install -r requirements-docs.txt`
-2. Ensure `ucp-schema` is installed: `cargo install ucp-schema`
-3. Run the development server: `mkdocs serve --watch source`
+This project uses [uv](https://docs.astral.sh/uv/) for Python dependency management.
+
+1. Install Python dependencies: `uv sync`
+2. Ensure `ucp-schema` is installed (see above)
+3. Run the development server: `uv run mkdocs serve --watch source`
 4. Open **<http://127.0.0.1:8000>** in your browser
-5. Before submitting a pull request with documentation changes, run
-    `mkdocs build --strict` to ensure there are no warnings or errors. Our CI
-    build uses this command and will fail if warnings are present (e.g.,
-    broken links).
-
-### Using a virtual environment (Recommended)
-
-To avoid polluting your global environment, use a virtual environment. Prefix
-the virtual environment name with a `.` so the versioning control systems don't
-track pip install files:
-
-```bash
-$ sudo apt-get install virtualenv python3-venv
-$ virtualenv .ucp # or python3 -m venv .ucp
-$ source .ucp/bin/activate
-(.ucp) $ pip install -r requirements-docs.txt
-(.ucp) $ mkdocs serve --watch spec
-(.ucp) $ deactivate # when done
-```
+5. Before submitting, run `uv run mkdocs build --strict` to check for warnings/errors

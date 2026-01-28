@@ -40,8 +40,8 @@ Its primary goal is to enable:
 <!-- Responsive image: shows ucp-diagram-mobile.jpg on small screens (<=600px)
      and ucp-diagram.jpg on larger screens. -->
 <picture>
-  <source media="(max-width: 600px)" srcset="../../assets/ucp-diagram-mobile.png">
-  <img alt="UCP Diagram" src="../../assets/ucp-diagram.jpg">
+  <source media="(max-width: 600px)" srcset="../assets/ucp-diagram-mobile.png">
+  <img alt="UCP Diagram" src="../assets/ucp-diagram.jpg">
 </picture>
 
 ## Key Goals of UCP
