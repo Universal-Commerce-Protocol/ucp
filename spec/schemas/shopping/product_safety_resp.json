@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://deeprecall.io/ucp/schemas/shopping/product_safety_resp.json",
+  "name": "io.deeprecall.shopping.product_safety",
+  "version": "2026-01-27",
+  "title": "Product Safety Search Response",
+  "description": "Response schema containing recall evidence. Provides similarity matches only; interpretation and action decisions are left to the caller.",
+  "type": "object",
+  "properties": {
+    "matches": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/recall_match" },
+      "description": "Recalls similar to the queried product, ordered by similarity"
+    },
+    "query_timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when the query was executed (RFC 3339)"
+    }
+  },
+  "required": ["matches", "query_timestamp"],
+  "$defs": {
+    "recall_match": {
+      "type": "object",
+      "description": "A recalled product that matches the query",
+      "properties": {
+        "recall_id": {
+          "type": "string",
+          "description": "Unique identifier for this recall record"
+        },
+        "similarity_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Similarity confidence (0.0 to 1.0)"
+        },
+        "regulator": {
+          "type": "string",
+          "description": "Regulatory agency that issued the recall",
+          "enum": [
+            "us_cpsc",
+            "us_fda",
+            "safety_gate",
+            "uk_opss",
+            "canada_recalls",
+            "oecd",
+            "rappel_conso",
+            "accc_recalls"
+          ]
+        },
+        "regulator_case_id": {
+          "type": "string",
+          "description": "Case ID assigned by the regulatory agency"
+        },
+        "title": {
+          "type": "string",
+          "description": "Title of the recall notice"
+        },
+        "product_name": {
+          "type": "string",
+          "description": "Name of the recalled product"
+        },
+        "hazard": {
+          "type": "string",
+          "description": "Description of the identified hazard"
+        },
+        "remedy": {
+          "type": "string",
+          "description": "Recommended remedy (refund, repair, etc.)"
+        },
+        "recall_date": {
+          "type": "string",
+          "format": "date",
+          "description": "Date the recall was issued"
+        },
+        "evidence_url": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL to the official recall notice"
+        }
+      },
+      "required": [
+        "recall_id",
+        "similarity_score",
+        "regulator",
+        "title",
+        "evidence_url"
+      ]
+    }
+  }
+}

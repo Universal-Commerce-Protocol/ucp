@@ -40,6 +40,7 @@ nav:
       - Buyer Consent Extension: specification/buyer-consent.md
       - Discounts Extension: specification/discount.md
       - Fulfillment Extension: specification/fulfillment.md
+      - Product Safety Extension: specification/product-safety.md
     - Cart Capability:
       - Overview: specification/cart.md
       - HTTP/REST Binding: specification/cart-rest.md
@@ -207,6 +208,7 @@ plugins:
           - specification/discount.md
           - specification/embedded-checkout.md
           - specification/fulfillment.md
+          - specification/product-safety.md
         Cart Capability:
           - specification/cart.md
           - specification/cart-rest.md
