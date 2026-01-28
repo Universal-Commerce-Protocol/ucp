@@ -1209,8 +1209,7 @@ negotiate the transport via `services` on their profiles.
 
 ### REST Transport (Core)
 
-The primary transport for UCP is **HTTP/1.1** (or higher) using RESTful
-patterns.
+UCP supports **HTTP/1.1** (or higher) using RESTful patterns.
 
 - **Content-Type:** Requests and responses **MUST** use `application/json`.
 - **Methods:** Implementations **MUST** use standard HTTP verbs (e.g., `POST`
@@ -1220,9 +1219,59 @@ patterns.
 
 ### Model Context Protocol (MCP)
 
-UCP capabilities map 1:1 to MCP tools. A business **MAY** expose an MCP server
-that wraps their UCP implementation, allowing LLMs to call tools like
-`create_checkout` directly.
+UCP supports **[MCP protocol](https://modelcontextprotocol.io/specification/)**,
+which operates over JSON-RPC.
+
+#### Request Format
+
+MCP requests use the `tools/call` method with the operation name in
+`params.name` and UCP payload in `params.arguments`:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "tools/call",
+  "params": {
+    "name": "create_checkout",
+    "arguments": {
+      "meta": {"ucp-agent": {"profile": "https://..."}},
+      "checkout": {"line_items": [...]}
+    }
+  },
+  "id": 1
+}
+```
+
+#### Response Format
+
+MCP tool responses use a dual-output pattern for backward compatibility. UCP
+MCP servers:
+
+- **MUST** return the UCP response payload in `structuredContent`
+- **SHOULD** declare `outputSchema` in tool definitions, referencing the
+    appropriate UCP JSON Schema for the capability
+- **SHOULD** also return serialized JSON in `content[]` for backward
+    compatibility with clients not supporting `structuredContent`
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "structuredContent": {
+      "checkout": {
+        "ucp": {"version": "2026-01-11", "capabilities": {...}},
+        "id": "checkout_abc123",
+        "status": "incomplete",
+        ...
+      }
+    },
+    "content": [
+      {"type": "text", "text": "{\"checkout\":{\"ucp\":{...},\"id\":\"checkout_abc123\",...}}"}
+    ]
+  }
+}
+```
 
 ### Agent-to-Agent Protocol (A2A)
 
