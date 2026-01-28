@@ -21,14 +21,130 @@ bodies.
 """
 
 import json
-import os
-import sys
+import subprocess
 from pathlib import Path
+from typing import Any
 
-# Modify sys.path to include the current directory so schema_utils can be found.
-sys.path.append(str(Path(__file__).resolve().parent))
+# --- CONFIGURATION ---
+# Base directories for schema resolution
+OPENAPI_DIR = Path("source/services/shopping")
+SHOPPING_SCHEMAS_DIR = Path("source/schemas/shopping")
+UCP_SCHEMA_PATH = Path("source/schemas/ucp.json")
+SCHEMAS_DIRS = [
+  Path("source/handlers/google_pay"),
+  Path("source/schemas"),
+  SHOPPING_SCHEMAS_DIR,
+  SHOPPING_SCHEMAS_DIR / "types",
+]
 
-import schema_utils  # noqa: E402
+# Cache for resolved schemas to avoid repeated subprocess calls
+_resolved_schema_cache: dict[str, dict] = {}
+
+
+# --- HELPER FUNCTIONS ---
+# These are thin wrappers; actual schema resolution is done by ucp-schema CLI.
+
+
+def _load_json(path: str | Path) -> dict[str, Any] | None:
+  """Load JSON file, returns None on error."""
+  try:
+    with Path(path).open(encoding="utf-8") as f:
+      return json.load(f)
+  except (json.JSONDecodeError, OSError):
+    return None
+
+
+def _resolve_json_pointer(pointer: str, data: Any) -> Any | None:
+  """Navigate to a JSON pointer path (e.g., '#/$defs/foo' or '#/components/x').
+
+  Args:
+    pointer: JSON pointer starting with '#' (e.g., '#/$defs/allocation').
+    data: The JSON data to navigate.
+
+  Returns:
+    The value at the pointer path, or None if not found.
+
+  """
+  if pointer == "#":
+    return data
+  if not pointer.startswith("#/"):
+    return None
+
+  path_parts = pointer[2:].split("/")  # Remove '#/' prefix and split
+  current = data
+  for part in path_parts:
+    if isinstance(current, dict) and part in current:
+      current = current[part]
+    elif isinstance(current, list):
+      try:
+        current = current[int(part)]
+      except (ValueError, IndexError):
+        return None
+    else:
+      return None
+  return current
+
+
+def _resolve_schema(
+  schema_path: str | Path,
+  direction: str = "response",
+  operation: str = "read",
+  bundle: bool = False,
+) -> dict[str, Any] | None:
+  """Resolve a schema using ucp-schema CLI.
+
+  Args:
+    schema_path: Path to the schema file.
+    direction: 'request' or 'response'.
+    operation: 'create', 'update', 'complete', or 'read'.
+    bundle: If True, inline all $ref pointers. If False, preserve $refs for
+      hyperlink generation in documentation.
+
+  Returns:
+    Resolved schema as dict, or None if resolution fails.
+
+  """
+  bundle_suffix = ":bundled" if bundle else ""
+  cache_key = f"{schema_path}:{direction}:{operation}{bundle_suffix}"
+  if cache_key in _resolved_schema_cache:
+    return _resolved_schema_cache[cache_key]
+
+  dir_flag = "--request" if direction == "request" else "--response"
+  cmd = [
+    "ucp-schema",
+    "resolve",
+    str(schema_path),
+    dir_flag,
+    "--op",
+    operation,
+  ]
+  if bundle:
+    cmd.append("--bundle")
+
+  try:
+    result = subprocess.run(
+      cmd,
+      capture_output=True,
+      text=True,
+      check=False,
+    )
+    if result.returncode == 0:
+      data = json.loads(result.stdout)
+      _resolved_schema_cache[cache_key] = data
+      return data
+  except (subprocess.SubprocessError, json.JSONDecodeError, FileNotFoundError):
+    pass
+  return None
+
+
+# Backward compatibility alias
+def _resolve_schema_bundled(
+  schema_path: str | Path,
+  direction: str = "response",
+  operation: str = "read",
+) -> dict[str, Any] | None:
+  """Resolve a schema with bundling (backward compat)."""
+  return _resolve_schema(schema_path, direction, operation, bundle=True)
 
 
 def define_env(env):
@@ -43,14 +159,12 @@ def define_env(env):
     env: The MkDocs environment object.
 
   """
-  # --- CONFIGURATION ---
-  openapi_dir = "spec/services/shopping/"
-  schemas_dirs = [
-    "spec/handlers/google_pay/",
-    "spec/schemas/",
-    "spec/schemas/shopping/",
-    "spec/schemas/shopping/types/",
-  ]
+  # Use module-level constants for paths
+  schemas_dirs = SCHEMAS_DIRS
+
+  def _resolve_with_ucp_schema(schema_path, direction, operation):
+    """Resolve a schema using ucp-schema CLI (delegates to module-level fn)."""
+    return _resolve_schema(schema_path, direction, operation, bundle=False)
 
   def _load_json_file(entity_name):
     """Try loading a JSON file from the configured directories."""
@@ -64,7 +178,9 @@ def define_env(env):
     return None
 
   def _load_schema_variant(entity_name, context):
-    """Load the specific schema variant (create/update/resp) if available.
+    """Load and resolve a schema for a specific operation.
+
+    Uses ucp-schema to resolve annotations at runtime based on context.
 
     Args:
     ----
@@ -73,7 +189,7 @@ def define_env(env):
 
     Returns:
     -------
-      The loaded schema data as a dictionary, or None if not found.
+      The resolved schema data as a dictionary, or None if not found.
 
     """
     if not context:
@@ -82,29 +198,77 @@ def define_env(env):
     io_type = context.get("io_type")
     op_id = context.get("operation_id", "").lower()
 
-    variant_name = None
+    # Find the schema file
+    schema_path = None
+    for schemas_dir in schemas_dirs:
+      full_path = Path(schemas_dir) / (entity_name + ".json")
+      if full_path.exists():
+        schema_path = str(full_path)
+        break
 
-    # 1. Determine the target filename based on IO type and Operation ID
-    if io_type == "response":
-      # e.g., checkout -> checkout_resp
-      variant_name = f"{entity_name}_resp"
+    if not schema_path:
+      return _load_json_file(entity_name)
 
-    elif io_type == "request":
-      # Heuristic: Determine if this is a create or update operation
+    # Determine direction and operation for ucp-schema
+    direction = io_type  # "request" or "response"
+    operation = "read"  # default for responses
+
+    if io_type == "request":
       if "create" in op_id:
-        variant_name = f"{entity_name}.create_req"
+        operation = "create"
       elif "update" in op_id or "patch" in op_id:
-        variant_name = f"{entity_name}.update_req"
+        operation = "update"
+      elif "complete" in op_id:
+        operation = "complete"
+    elif io_type == "response":
+      operation = "read"
 
-    # 2. Try to load the variant
-    if variant_name:
-      data = _load_json_file(variant_name)
-      if data:
-        return data
+    # Resolve using ucp-schema (no fallback - fail loudly if unavailable)
+    resolved = _resolve_with_ucp_schema(schema_path, direction, operation)
+    if resolved:
+      return resolved
 
-    return _load_json_file(entity_name)
+    # ucp-schema failed - don't silently fall back to raw JSON with annotations
+    return None
 
-  def create_link(ref_string, spec_file_name):
+  # Cache for polymorphic type detection
+  _polymorphic_cache: dict[str, bool] = {}
+
+  def _is_polymorphic_type(ref_string: str) -> bool:
+    """Check if a schema file is polymorphic (has ucp_request annotations).
+
+    Polymorphic types have different request/response variants and require
+    the -response suffix in anchors to match markdown headings.
+    """
+    if ref_string in _polymorphic_cache:
+      return _polymorphic_cache[ref_string]
+
+    # Only check types/ refs
+    if "types/" not in ref_string:
+      _polymorphic_cache[ref_string] = False
+      return False
+
+    # Find and load the schema file
+    # ref_string is like "types/line_item.json", extract just the filename
+    filename = Path(ref_string).name.replace(".json", "")
+    # _load_json_file searches in SCHEMAS_DIRS which already includes the
+    # types directory, so we just pass the filename
+    schema_data = _load_json_file(filename)
+    if not schema_data:
+      _polymorphic_cache[ref_string] = False
+      return False
+
+    # Check if any property has ucp_request annotation
+    properties = schema_data.get("properties", {})
+    for prop_details in properties.values():
+      if isinstance(prop_details, dict) and "ucp_request" in prop_details:
+        _polymorphic_cache[ref_string] = True
+        return True
+
+    _polymorphic_cache[ref_string] = False
+    return False
+
+  def create_link(ref_string, spec_file_name, context=None):
     """Transform schema paths into Markdown links.
 
     Transforms paths like "types/line_item.create_req.json" into Markdown links.
@@ -115,6 +279,8 @@ def define_env(env):
     ----
       ref_string: e.g., "types/line_item.create_req.json"
       spec_file_name: e.g., "checkout"
+      context: Optional dict with 'io_type' (request/response) for polymorphic
+        type handling.
 
     Returns:
     -------
@@ -177,6 +343,13 @@ def define_env(env):
       anchor_name = raw_name.replace("_", "-").replace("-resp", "-response")
     elif raw_name.endswith("_req"):
       anchor_name = raw_name.replace("_", "-").replace("-req", "-request")
+    elif context and context.get("io_type") == "response":
+      # For polymorphic types in response mode, append -response to match
+      # markdown headings like "Line Item Response" (h4 under "Line Item" h3)
+      if _is_polymorphic_type(ref_string):
+        anchor_name = f"{anchor_name}-response"
+        if not link_text.endswith("Response"):
+          link_text = f"{link_text} Response"
 
     # FIX: Ensure anchor starts with ucp- for UCP definitions
     if is_ucp and not anchor_name.startswith("ucp-"):
@@ -234,7 +407,11 @@ def define_env(env):
       # If purely external and not found locally
       if properties_ref.startswith("http"):
         return f"_See [{properties_ref}]({properties_ref})_"
-      return ""
+      # ucp-schema failed or schema not found - fail loudly
+      return (
+        f"**Error:** Failed to resolve '{ref_entity_name}'. "
+        f"Ensure ucp-schema is installed: `cargo install ucp-schema`"
+      )
 
   def _render_embedded_table(
     properties_list, required_list, spec_file_name, context=None
@@ -331,7 +508,7 @@ def define_env(env):
       links = []
       for item in schema_data["oneOf"]:
         if "$ref" in item:
-          links.append(create_link(item["$ref"], spec_file_name))
+          links.append(create_link(item["$ref"], spec_file_name, context))
         elif item.get("type"):
           links.append(f"`{item.get('type')}`")
       if links:
@@ -421,7 +598,7 @@ def define_env(env):
         version_data = None
         if ref and ref.endswith("#/$defs/version"):
           try:
-            with Path("spec/schemas/ucp.json").open(encoding="utf-8") as f:
+            with UCP_SCHEMA_PATH.open(encoding="utf-8") as f:
               data = json.load(f)
               version_data = data.get("$defs", {}).get("version", {})
           except json.JSONDecodeError as e:
@@ -433,7 +610,9 @@ def define_env(env):
           f_type = "OneOf["
           for idx, one_of_type in enumerate(details.get("oneOf", [])):
             if "$ref" in one_of_type:
-              f_type += create_link(one_of_type["$ref"], spec_file_name)
+              f_type += create_link(
+                one_of_type["$ref"], spec_file_name, context
+              )
               if idx < len(details.get("oneOf", [])) - 1:
                 f_type += ", "
           f_type += "]"
@@ -442,10 +621,10 @@ def define_env(env):
             f_type = version_data.get("type", "any")
           else:
             # Direct Reference
-            f_type = create_link(ref, spec_file_name)
+            f_type = create_link(ref, spec_file_name, context)
         elif f_type == "array" and items_ref:
           # Array of References
-          link = create_link(items_ref, spec_file_name)
+          link = create_link(items_ref, spec_file_name, context)
           f_type = f"Array[{link}]"
         elif f_type == "array":
           # Array of Primitives
@@ -491,19 +670,6 @@ def define_env(env):
 
     return "\n".join(md)
 
-  def _resolve_ref(ref, root_data):
-    """Resolve a local reference (e.g., '#/components/parameters/id')."""
-    return schema_utils.resolve_internal_ref(ref, root_data)
-
-  def _create_file_loader(schema_path):
-    """Create a file loader closure for a given base path."""
-
-    def _loader(filename):
-      dir_path = Path(schema_path).parent
-      return schema_utils.load_json(dir_path / filename)
-
-    return _loader
-
   def _read_schema_from_defs(
     entity_name, spec_file_name, need_header=True, parent_required_list=None
   ):
@@ -523,17 +689,16 @@ def define_env(env):
 
     for schemas_dir in schemas_dirs:
       full_path = Path(schemas_dir) / core_entity_name
-      data = schema_utils.load_json(full_path)
-      if data:
-        file_loader = _create_file_loader(full_path)
-        embedded_schema_data = schema_utils.resolve_internal_ref(def_path, data)
+      if not full_path.exists():
+        continue
+      # Use ucp-schema to resolve the full file with bundling
+      bundled = _resolve_schema_bundled(full_path)
+      if bundled:
+        # Extract the $def from the bundled result
+        embedded_schema_data = _resolve_json_pointer(def_path, bundled)
         if embedded_schema_data is not None:
-          # Resolve allOf/refs before rendering to flatten composed schemas
-          resolved_schema = schema_utils.resolve_schema(
-            embedded_schema_data, data, file_loader
-          )
           return _render_table_from_schema(
-            resolved_schema,
+            embedded_schema_data,
             spec_file_name,
             need_header,
             parent_required_list,
@@ -542,7 +707,7 @@ def define_env(env):
           return (
             f"**Error:** Definition '{def_path}' not found in '{full_path}'"
           )
-      # Try next directory if load_json returned None
+      # Try next directory if resolution failed
 
     return (
       f"**Error:** Schema file '{core_entity_name}' not found in any schema"
@@ -554,36 +719,64 @@ def define_env(env):
   def schema_fields(entity_name, spec_file_name):
     """Parse a standalone JSON Schema file and render a table.
 
-    Usage: {{ schema_fields('buyer') }}  (assumes .json extension)
+    Usage: {{ schema_fields('buyer', 'checkout') }}
+
+    Suffixes control schema resolution direction:
+    - 'cart_resp' -> resolves cart.json as response schema
+    - 'cart_create_req' -> resolves cart.json as request schema (op=create)
+    - 'buyer' -> resolves buyer.json as response schema (default)
 
     Args:
     ----
-      entity_name: The name of the schema entity (e.g., 'buyer').
-      spec_file_name: The name of the spec file indicating where the dictionary
-        should be rendered (e.g., "checkout", "fulfillment").
+      entity_name: Schema name with optional suffix (e.g., 'cart_resp').
+      spec_file_name: Spec file for link generation (e.g., 'checkout').
 
     """
-    data = None
-    loaded_path = None
-    for schemas_dir in schemas_dirs:
-      full_path = Path(schemas_dir) / (entity_name + ".json")
-      try:
-        with full_path.open() as f:
-          data = json.load(f)
-          loaded_path = full_path
-          break
-      except FileNotFoundError:
-        continue
-      except json.JSONDecodeError as e:
-        return f"**Error parsing schema '{full_path}':** {e}"
+    # Parse suffix to determine resolution direction/operation
+    direction = "response"
+    operation = "read"
+    base_name = entity_name
 
-    if data and loaded_path:
-      file_loader = _create_file_loader(loaded_path)
-      resolved_schema = schema_utils.resolve_schema(data, data, file_loader)
-      return _render_table_from_schema(resolved_schema, spec_file_name)
-    return (
-      f"**Error:** Schema '{entity_name}' not found in any schema directory."
-    )
+    if entity_name.endswith("_resp"):
+      base_name = entity_name[:-5]  # Strip _resp
+      direction = "response"
+    elif entity_name.endswith("_req"):
+      # Pattern: entity_op_req (e.g., cart_create_req)
+      parts = entity_name[:-4].rsplit("_", 1)  # Strip _req, split on last _
+      if len(parts) == 2 and parts[1] in (
+        "create",
+        "update",
+        "complete",
+        "read",
+      ):
+        base_name, operation = parts
+        direction = "request"
+      else:
+        base_name = entity_name[:-4]
+        direction = "request"
+
+    # Build context for downstream link generation
+    context = {"io_type": direction, "operation_id": operation}
+
+    for schemas_dir in schemas_dirs:
+      full_path = Path(schemas_dir) / (base_name + ".json")
+      if not full_path.exists():
+        continue
+      # Resolve WITHOUT bundling to preserve $refs for hyperlinks
+      resolved_schema = _resolve_schema(
+        full_path, direction, operation, bundle=False
+      )
+      if resolved_schema:
+        return _render_table_from_schema(
+          resolved_schema, spec_file_name, context=context
+        )
+      # ucp-schema failed - fail loudly, don't silently use raw JSON
+      return (
+        f"**Error:** Failed to resolve schema '{full_path}' with ucp-schema. "
+        f"Ensure ucp-schema is installed: `cargo install ucp-schema`"
+      )
+
+    return f"**Error:** Schema '{base_name}' not found in any schema directory."
 
   @env.macro
   def extension_schema_fields(entity_name, spec_file_name):
@@ -610,19 +803,19 @@ def define_env(env):
   ):
     """Scan a dir for JSON schemas and generate documentation.
 
-    Scan a subdirectory within spec/schemas/shopping/ for .json files
+    Scan a subdirectory within source/schemas/shopping/ for .json files
     and generate documentation for each schema found.
 
     Args:
     ----
-      sub_dir: The subdirectory to scan, relative to spec/schemas/shopping/.
+      sub_dir: The subdirectory to scan, relative to source/schemas/shopping/.
       spec_file_name: The name of the spec file for link generation.
       include_extensions: If true, includes schemas with 'Extension' in title.
       include_capability: If true, includes schemas without 'Extension' in
         title.
 
     """
-    schema_base_path = Path("spec/schemas/shopping")
+    schema_base_path = SHOPPING_SCHEMAS_DIR
     scan_path = (
       schema_base_path / sub_dir if sub_dir != "." else schema_base_path
     )
@@ -646,7 +839,7 @@ def define_env(env):
       if sub_dir == ".":
         entity_name = entity_name_base
       else:
-        entity_name = sub_dir.replace(os.sep, "/") + "/" + entity_name_base
+        entity_name = str(Path(sub_dir).as_posix()) + "/" + entity_name_base
 
       schema_data = _load_json_file(entity_name)
       if schema_data:
@@ -737,7 +930,7 @@ def define_env(env):
 
     """
     # Construct full path based on new structure
-    full_path = Path("spec/schemas/shopping") / (entity_name + ".json")
+    full_path = SHOPPING_SCHEMAS_DIR / (entity_name + ".json")
     try:
       with full_path.open(encoding="utf-8") as f:
         data = json.load(f)
@@ -774,7 +967,7 @@ def define_env(env):
         both (if None).
 
     """
-    full_path = Path(openapi_dir) / file_name
+    full_path = OPENAPI_DIR / file_name
 
     try:
       with full_path.open(encoding="utf-8") as f:
@@ -841,7 +1034,7 @@ def define_env(env):
           return schema
         # 1. Resolve Top-Level Ref (e.g. "create_checkout")
         if "$ref" in schema and schema["$ref"].startswith("#/"):
-          resolved = _resolve_ref(schema["$ref"], root)
+          resolved = _resolve_json_pointer(schema["$ref"], root)
           if resolved:
             schema = resolved
 
@@ -850,7 +1043,7 @@ def define_env(env):
           new_all_of = []
           for item in schema["allOf"]:
             if "$ref" in item and item["$ref"].startswith("#/"):
-              resolved = _resolve_ref(item["$ref"], root)
+              resolved = _resolve_json_pointer(item["$ref"], root)
               new_all_of.append(resolved if resolved else item)
             else:
               new_all_of.append(item)
@@ -873,7 +1066,7 @@ def define_env(env):
           # Resolve param refs explicitly if needed (rare for params but good
           # safety)
           if "$ref" in param and param["$ref"].startswith("#/"):
-            resolved = _resolve_ref(param["$ref"], data)
+            resolved = _resolve_json_pointer(param["$ref"], data)
             if resolved:
               param = resolved
 
@@ -959,7 +1152,7 @@ def define_env(env):
       file_name: The name of the OpenAPI file to read.
 
     """
-    full_path = Path(openapi_dir) / file_name
+    full_path = OPENAPI_DIR / file_name
 
     try:
       with full_path.open(encoding="utf-8") as f:
@@ -993,7 +1186,7 @@ def define_env(env):
       for param in all_parameters:
         # Resolve reference if needed
         if "$ref" in param:
-          resolved = _resolve_ref(param["$ref"], data)
+          resolved = _resolve_json_pointer(param["$ref"], data)
           if resolved:
             param = resolved
           else:
@@ -1009,7 +1202,7 @@ def define_env(env):
       res_headers = []
       for name, header in res_headers_defs.items():
         if "$ref" in header:
-          resolved = _resolve_ref(header["$ref"], data)
+          resolved = _resolve_json_pointer(header["$ref"], data)
           if resolved:
             h = resolved.copy()
             h["name"] = name

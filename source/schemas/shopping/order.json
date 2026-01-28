@@ -2,16 +2,16 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/shopping/order.json",
   "name": "dev.ucp.shopping.order",
-  "version": "2026-01-11",
   "title": "Order",
   "description": "Order schema with immutable line items, buyer-facing fulfillment expectations, and append-only event logs.",
-
   "$defs": {
     "platform_schema": {
       "title": "Platform Order Schema",
       "description": "Platform's order capability configuration.",
       "type": "object",
-      "required": ["webhook_url"],
+      "required": [
+        "webhook_url"
+      ],
       "properties": {
         "webhook_url": {
           "type": "string",
@@ -21,7 +21,6 @@
       }
     }
   },
-
   "type": "object",
   "required": [
     "ucp",

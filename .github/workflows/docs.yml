@@ -31,7 +31,7 @@ on:
       - "main.py"
       - "hooks.py"
       - "docs/**"
-      - "spec/**"
+      - "source/**"
 
 jobs:
   build_and_deploy:
@@ -66,19 +66,20 @@ jobs:
       - name: Lint YAML files
         run: uv run yamllint -c .github/linters/.yamllint.yml .
 
-      - name: Check for changed files in spec
-        id: spec_files_changed
+      - name: Check for changed files in source
+        id: source_files_changed
         uses: tj-actions/changed-files@v46
         with:
-          files: spec/**
+          files: source/**
 
-      - name: Check Python SDK Models Consistency
-        if: steps.spec_files_changed.outputs.any_changed == 'true'
-        run: |
-          chmod +x scripts/ci_check_models.sh
-          scripts/ci_check_models.sh
+      - name: Install ucp-schema for runtime resolution
+        run: cargo install ucp-schema
 
-      - name: Create specs folders for JSON publishing
+      - name: Lint source schemas
+        if: steps.source_files_changed.outputs.any_changed == 'true'
+        run: ucp-schema lint source/
+
+      - name: Create folders for JSON publishing
         run: |
           mkdir -p site/schemas
           mkdir -p site/services

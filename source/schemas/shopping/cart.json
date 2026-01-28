@@ -2,7 +2,6 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/shopping/cart.json",
   "name": "dev.ucp.shopping.cart",
-  "version": "2026-01-15",
   "title": "Cart",
   "description": "Shopping cart with estimated pricing before checkout. Lightweight pre-purchase exploration with no payment info or complex status states. Cart exists (200) or doesn't (404).",
   "$defs": {
@@ -10,7 +9,9 @@
       "title": "Checkout with Cart",
       "description": "Checkout extended with cart capability. Adds cart_id to create_checkout for cart-to-checkout conversion.",
       "allOf": [
-        { "$ref": "checkout.json" },
+        {
+          "$ref": "checkout.json"
+        },
         {
           "type": "object",
           "properties": {
@@ -28,7 +29,13 @@
     }
   },
   "type": "object",
-  "required": ["ucp", "id", "line_items", "currency", "totals"],
+  "required": [
+    "ucp",
+    "id",
+    "line_items",
+    "currency",
+    "totals"
+  ],
   "additionalProperties": true,
   "properties": {
     "ucp": {

@@ -16,8 +16,6 @@
 
 # AP2 Mandates Extension
 
-**Version:** `2026-01-11`
-
 ## Overview
 
 The AP2 Mandates extension enables the secure exchange of user intents and
@@ -443,4 +441,3 @@ The `ap2` object included in COMPLETE checkout requests.
 | `mandate_expired`                | The mandate `exp` timestamp has passed.                           |
 | `mandate_scope_mismatch`         | The mandate is bound to a different checkout.                     |
 | `merchant_authorization_invalid` | The business authorization signature could not be verified.       |
-| `merchant_authorization_missing` | AP2 negotiated but response lacks `ap2.merchant_authorization`.   |

@@ -466,24 +466,24 @@ const UcpData = {
   capabilities: {
     "dev.ucp.shopping.checkout": [
       {
-        version: "2026-01-11",
-        spec: "https://ucp.dev/specification/checkout",
-        schema: "https://ucp.dev/schemas/shopping/checkout.json"
+        version: "2026-01-23",
+        spec: "https://ucp.dev/2026-01-23/specification/checkout",
+        schema: "https://ucp.dev/2026-01-23/schemas/shopping/checkout.json"
       }
     ],
     "dev.ucp.shopping.order": [
       {
-        version: "2026-01-11",
-        spec: "https://ucp.dev/specification/order",
-        schema: "https://ucp.dev/schemas/shopping/order.json"
+        version: "2026-01-23",
+        spec: "https://ucp.dev/2026-01-23/specification/order",
+        schema: "https://ucp.dev/2026-01-23/schemas/shopping/order.json"
       }
     ],
     "dev.ucp.shopping.fulfillment": [
       {
         extends: "dev.ucp.shopping.checkout",
-        version: "2026-01-11",
-        spec: "https://ucp.dev/specification/fulfillment",
-        schema: "https://ucp.dev/schemas/shopping/fulfillment.json",
+        version: "2026-01-23",
+        spec: "https://ucp.dev/2026-01-23/specification/fulfillment",
+        schema: "https://ucp.dev/2026-01-23/schemas/shopping/fulfillment.json",
         config: {
           allows_multi_destination: {
             shipping: false,
@@ -499,25 +499,25 @@ const UcpData = {
     "dev.ucp.shopping.discount": [
       {
         extends: "dev.ucp.shopping.checkout",
-        version: "2026-01-11",
-        spec: "https://ucp.dev/specification/discount",
-        schema: "https://ucp.dev/schemas/shopping/discount.json"
+        version: "2026-01-23",
+        spec: "https://ucp.dev/2026-01-23/specification/discount",
+        schema: "https://ucp.dev/2026-01-23/schemas/shopping/discount.json"
       }
     ],
     "dev.ucp.shopping.buyer_consent": [
       {
         extends: "dev.ucp.shopping.checkout",
-        version: "2026-01-11",
-        spec: "https://ucp.dev/specification/buyer-consent",
-        schema: "https://ucp.dev/schemas/shopping/buyer_consent.json"
+        version: "2026-01-23",
+        spec: "https://ucp.dev/2026-01-23/specification/buyer-consent",
+        schema: "https://ucp.dev/2026-01-23/schemas/shopping/buyer_consent.json"
       }
     ],
     "dev.ucp.shopping.ap2_mandates": [
       {
         extends: "dev.ucp.shopping.checkout",
-        version: "2026-01-11",
-        spec: "https://ucp.dev/specification/ap2-mandates",
-        schema: "https://ucp.dev/schemas/shopping/ap2_mandate.json"
+        version: "2026-01-23",
+        spec: "https://ucp.dev/2026-01-23/specification/ap2-mandates",
+        schema: "https://ucp.dev/2026-01-23/schemas/shopping/ap2_mandate.json"
       }
     ]
   },

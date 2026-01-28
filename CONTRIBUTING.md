@@ -209,47 +209,34 @@ This will set up pre-commit hooks to run automatically when you `git commit`.
 
 ## Local Development Setup
 
-### Spec Development
+### Schema Development
 
-1. Make relevant updates to JSON files in `source/`
-2. Run `uv run generate_schemas.py` to generate updated files in `spec/`
-3. Check outputs from step above to ensure deltas are expected. You may need to
-   extend `generate_schemas.py` if you are introducing a new generation concept
+Schemas live in `source/` and are published with `ucp_*` annotations intact.
+Agents use [ucp-schema](https://github.com/universal-commerce-protocol/ucp-schema)
+to resolve annotations for specific operations at runtime.
 
-To validate JSON and YAML files format and references in `spec/`, run
-`uv run validate_specs.py`.
+1. Ensure `ucp-schema` is installed:
 
-If you change any JSON schemas in `spec/`, you must regenerate any SDK client
-libraries that depend on them. For example, to regenerate Python Pydantic
-models run `bash sdk/python/generate_models.sh`. Our CI system runs
+   ```bash
+   cargo install ucp-schema                 # from crates.io
+   cargo install --git https://github.com/universal-commerce-protocol/ucp-schema  # from git
+   ```
+
+2. Make updates to JSON files in `source/`
+3. Run `ucp-schema lint source/` to validate syntax and references
+
+If you change any JSON schemas, you may need to regenerate SDK client libraries.
+For example, to regenerate Python Pydantic models run
+`bash sdk/python/generate_models.sh`. Our CI system runs
 `scripts/ci_check_models.sh` to verify that models can be generated
 successfully from the schemas.
 
-It is also important to go through documentation locally whenever spec files
-are updated to ensure there are no broken references or stale/missing contents.
-
 ### Documentation Development
 
-1. Ensure dependencies are installed: `uv sync`
-2. Run the development server: `uv run mkdocs serve --watch spec`
-3. Open **<http://127.0.0.1:8000>** in your browser
-4. Before submitting a pull request with documentation changes, run
-    `uv run mkdocs build --strict` to ensure there are no warnings or errors. Our CI
-    build uses this command and will fail if warnings are present (e.g.,
-    broken links).
+This project uses [uv](https://docs.astral.sh/uv/) for Python dependency management.
 
-### Using uv (Recommended)
-
-This project uses `uv` to manage dependencies and virtual environments. To set up
-your development environment:
-
-```bash
-# Install dependencies and set up the virtual environment
-$ uv sync
-
-# Run development commands using 'uv run'
-$ uv run mkdocs serve --watch spec
-```
-
-`uv` will automatically manage a virtual environment in the `.venv` directory.
-You don't need to manually activate it if you use `uv run`.
+1. Install Python dependencies: `uv sync`
+2. Ensure `ucp-schema` is installed (see above)
+3. Run the development server: `uv run mkdocs serve --watch source`
+4. Open **<http://127.0.0.1:8000>** in your browser
+5. Before submitting, run `uv run mkdocs build --strict` to check for warnings/errors

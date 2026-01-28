@@ -12,9 +12,21 @@
           "type": "object",
           "properties": {
             "extends": {
-              "type": "string",
-              "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9_]*)+$",
-              "description": "Parent capability this extends. Present for extensions, absent for root capabilities."
+              "oneOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9_]*)+$"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9_]*)+$"
+                  },
+                  "minItems": 1
+                }
+              ],
+              "description": "Parent capability(s) this extends. Present for extensions, absent for root capabilities. Use array for multi-parent extensions."
             }
           }
         }

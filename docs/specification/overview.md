@@ -16,8 +16,6 @@
 
 # Universal Commerce Protocol (UCP) Official Specification
 
-**Version:** `2026-01-11`
-
 ## Overarching guidelines
 
 The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**,
@@ -167,20 +165,43 @@ functionality is supported and where to find documentation and schemas.
 #### Extensions
 
 An **extension** is an optional module that augments another capability.
-Extensions use the `extends` field to declare their parent:
+Extensions use the `extends` field to declare their parent(s):
 
 ```json
 {
   "dev.ucp.shopping.fulfillment": [
     {
-      "version": "2026-01-11",
-      "spec": "https://ucp.dev/specification/fulfillment",
-      "schema": "https://ucp.dev/schemas/shopping/fulfillment.json",
+      "version": "2026-01-23",
+      "spec": "https://ucp.dev/2026-01-23/specification/fulfillment",
+      "schema": "https://ucp.dev/2026-01-23/schemas/shopping/fulfillment.json",
       "extends": "dev.ucp.shopping.checkout"
     }
   ]
 }
 ```
+
+##### Multi-Parent Extensions
+
+Extensions **MAY** extend multiple parent capabilities by using an array:
+
+```json
+{
+  "dev.ucp.shopping.discount": [
+    {
+      "version": "2026-01-23",
+      "spec": "https://ucp.dev/2026-01-23/specification/discount",
+      "schema": "https://ucp.dev/2026-01-23/schemas/shopping/discount.json",
+      "extends": ["dev.ucp.shopping.checkout", "dev.ucp.shopping.cart"]
+    }
+  ]
+}
+```
+
+When an extension declares multiple parents:
+
+- The extension **MAY** define different fields for each capability it extends
+    (e.g., `loyalty_earned` for checkout, `loyalty_preview` for cart)
+- See [Intersection Algorithm](#intersection-algorithm) for negotiation rules
 
 Extensions can be:
 
@@ -204,13 +225,16 @@ modify `totals`, fulfillment adds fulfillment to `totals.type`).
 
 #### Extension Schema Pattern
 
-Extension schemas define composed types using `allOf`. An example is as follows:
+Extension schemas define composed types using `allOf`. The `$defs` key **MUST**
+use the full parent capability name (reverse-domain format) to enable
+deterministic schema resolution:
 
 ```json
 {
   "$defs": {
     "discounts_object": { ... },
-    "checkout": {
+    "dev.ucp.shopping.checkout": {
+      "title": "Checkout with Discount",
       "allOf": [
         {"$ref": "checkout.json"},
         {
@@ -227,7 +251,32 @@ Extension schemas define composed types using `allOf`. An example is as follows:
 }
 ```
 
-Composed type names **MUST** use the pattern: `{capability-name}.{TypeName}`
+**Requirements:**
+
+- Extension schemas **MUST** have a `$defs` entry for each parent declared in
+    `extends`
+- The `$defs` key **MUST** match the parent's full capability name exactly
+
+This convention ensures:
+
+- **Self-documenting**: The schema declares exactly which parents it extends
+- **Deterministic resolution**: The `extends` value maps directly to the `$defs` key
+- **Verifiable**: Build-time checks can confirm each `extends` entry has a
+    matching `$defs` key
+
+#### Schema Resolution Convention
+
+To validate payloads, implementations resolve extension schemas as follows:
+
+1. Determine the root capability from the operation (e.g., checkout operations
+    use `dev.ucp.shopping.checkout`)
+2. For each active extension, resolve and apply its `$defs[{root_capability}]`
+
+**Example:** A checkout response includes the discount extension.
+
+- Root capability: `dev.ucp.shopping.checkout`
+- Extension schema: `discount.json`
+- Resolve: `discount.json#/$defs/dev.ucp.shopping.checkout`
 
 #### Resolution Flow
 
@@ -509,7 +558,10 @@ for a session:
     result if a platform capability with the same `name` exists.
 
 2. **Prune orphaned extensions**: Remove any capability where `extends` is
-    set but the parent capability is not in the intersection.
+    set but **none** of its parent capabilities are in the intersection.
+    - For single-parent extensions (`extends: "string"`): parent must be present
+    - For multi-parent extensions (`extends: ["a", "b"]`): at least one parent
+        must be present
 
 3. **Repeat pruning**: Continue step 2 until no more capabilities are removed
     (handles transitive extension chains).
@@ -665,6 +717,35 @@ The `capabilities` registry in responses indicates active capabilities:
   ... other fields
 }
 ```
+
+#### Response Capability Selection
+
+Businesses **MUST** include in `ucp.capabilities` only the capabilities that are:
+
+1. In the negotiated intersection for this session, AND
+2. Relevant to this response's operation type
+
+**Root Capability Relevance:**
+
+A root capability is relevant if it matches the operation type:
+
+- `create_checkout` / `update_checkout` / `complete_checkout` →
+    `dev.ucp.shopping.checkout`
+- `create_cart` / `update_cart` → `dev.ucp.shopping.cart`
+- Order webhooks → `dev.ucp.shopping.order`
+
+**Extension Relevance:**
+
+An extension is relevant if **any** of its `extends` values matches a relevant
+root capability.
+
+**Selection Examples:**
+
+| Response Type | Includes                        | Does NOT Include             |
+| ------------- | ------------------------------- | ---------------------------- |
+| Checkout      | checkout, discount, fulfillment | cart, order                  |
+| Cart          | cart, discount                  | checkout, fulfillment, order |
+| Order         | order                           | checkout, cart, discount     |
 
 ## Payment Architecture
 
@@ -1356,4 +1437,3 @@ Vendors control their own release schedules and versioning strategy.
 | **Payment Service Provider**      | PSP     | The financial infrastructure provider that processes payments, authorizations, and settlements on behalf of the business.                                 |
 | **Platform**                      | -       | The consumer-facing surface (AI agent, app, website) acting on behalf of the user to discover businesses and facilitate commerce.                         |
 | **Verifiable Digital Credential** | VDC     | An Issuer-signed credential (set of claims) whose authenticity can be verified cryptographically. Used in UCP for secure payment authorizations.          |
-| **Verifiable Presentation**       | VP      | A presentation of one or more VDCs that includes a cryptographic proof of binding, used to prove authorization to a business or PSP.                      |
