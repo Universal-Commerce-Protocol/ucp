@@ -2,7 +2,6 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/shopping/fulfillment.json",
   "name": "dev.ucp.shopping.fulfillment",
-  "version": "2026-01-11",
   "title": "Fulfillment Extension",
   "description": "Extends Checkout with fulfillment support using methods, destinations, and groups.",
   "$defs": {
@@ -25,7 +24,9 @@
       "title": "Checkout with Fulfillment",
       "description": "Checkout extended with hierarchical fulfillment.",
       "allOf": [
-        { "$ref": "checkout.json" },
+        {
+          "$ref": "checkout.json"
+        },
         {
           "type": "object",
           "properties": {
@@ -47,7 +48,9 @@
         "title": "Fulfillment Capability (Platform)",
         "description": "Platform-level fulfillment capability configuration",
         "allOf": [
-          { "$ref": "../capability.json#/$defs/platform_schema" },
+          {
+            "$ref": "../capability.json#/$defs/platform_schema"
+          },
           {
             "properties": {
               "config": {
@@ -62,7 +65,9 @@
         "title": "Fulfillment Capability (Business)",
         "description": "Business-level fulfillment capability configuration",
         "allOf": [
-          { "$ref": "../capability.json#/$defs/business_schema" },
+          {
+            "$ref": "../capability.json#/$defs/business_schema"
+          },
           {
             "properties": {
               "config": {
@@ -75,9 +80,10 @@
       }
     }
   },
-
   "embedded": {
-    "delegations": ["fulfillment.address_change"],
+    "delegations": [
+      "fulfillment.address_change"
+    ],
     "methods": [
       {
         "name": "ec.fulfillment.change",
@@ -113,7 +119,9 @@
           "schema": {
             "type": "object",
             "description": "Checkout state with updated fulfillment address.",
-            "required": ["checkout"],
+            "required": [
+              "checkout"
+            ],
             "properties": {
               "checkout": {
                 "type": "object",

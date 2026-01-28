@@ -2,7 +2,6 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/shopping/buyer_consent.json",
   "name": "dev.ucp.shopping.buyer_consent",
-  "version": "2026-01-11",
   "title": "Buyer Consent Extension",
   "description": "Extends Checkout with buyer consent tracking for privacy compliance via the buyer object.",
   "$defs": {
@@ -28,12 +27,13 @@
         }
       }
     },
-
     "buyer": {
       "title": "Buyer with Consent",
       "description": "Buyer object extended with consent tracking.",
       "allOf": [
-        {"$ref": "types/buyer.json"},
+        {
+          "$ref": "types/buyer.json"
+        },
         {
           "type": "object",
           "properties": {
@@ -45,12 +45,13 @@
         }
       ]
     },
-
     "checkout": {
       "title": "Checkout with Buyer Consent",
       "description": "Checkout extended with consent tracking via buyer object.",
       "allOf": [
-        {"$ref": "checkout.json"},
+        {
+          "$ref": "checkout.json"
+        },
         {
           "type": "object",
           "properties": {

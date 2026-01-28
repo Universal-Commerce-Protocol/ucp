@@ -115,8 +115,12 @@ def _rewrite_version_urls(data, url_version):
 
 
 def _set_schema_version(data, version):
-  """Set version field in capability schemas (top-level 'version' property)."""
-  if "version" in data:
+  """Set version field for named entities (capabilities, services, handlers).
+
+  Named entities (schemas with top-level 'name' field) require version per
+  ucp.json#/$defs/entity. Build injects version so source files don't need it.
+  """
+  if "name" in data:
     data["version"] = version
 
 
@@ -187,7 +191,7 @@ def on_post_build(config):
       # Step 1: Resolve relative $ref to absolute URLs
       _process_refs(data, src_file.parent)
 
-      # Step 2: Set schema version field (if schema has one)
+      # Step 2: Inject version field for named entities
       if schema_version:
         _set_schema_version(data, schema_version)
 

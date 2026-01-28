@@ -2,10 +2,8 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/shopping/ap2_mandate.json",
   "name": "dev.ucp.shopping.ap2_mandate",
-  "version": "2026-01-11",
   "title": "AP2 Mandate Extension",
   "description": "Extends Checkout with cryptographic mandate support for non-repudiable authorization per the AP2 protocol. Uses embedded signature model with ap2 namespace.",
-
   "$defs": {
     "merchant_authorization": {
       "title": "Merchant Authorization",
@@ -13,14 +11,12 @@
       "type": "string",
       "pattern": "^[A-Za-z0-9_-]+\\.\\.[A-Za-z0-9_-]+$"
     },
-
     "checkout_mandate": {
       "title": "Checkout Mandate",
       "description": "SD-JWT+kb credential in `ap2.checkout_mandate`. Proving user authorization for the checkout. Contains the full checkout including `ap2.merchant_authorization`.",
       "type": "string",
       "pattern": "^[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]*\\.[A-Za-z0-9_-]+(~[A-Za-z0-9_-]+)*$"
     },
-
     "ap2_with_merchant_authorization": {
       "type": "object",
       "description": "AP2 extension data including merchant authorization.",
@@ -32,7 +28,6 @@
         }
       }
     },
-
     "ap2_with_checkout_mandate": {
       "type": "object",
       "description": "AP2 extension data including checkout mandate.",
@@ -48,19 +43,24 @@
         }
       }
     },
-
     "checkout": {
       "title": "Checkout with AP2 Mandate",
       "description": "Checkout extended with AP2 mandate support.",
       "allOf": [
-        { "$ref": "checkout.json" },
+        {
+          "$ref": "checkout.json"
+        },
         {
           "type": "object",
           "properties": {
             "ap2": {
               "allOf": [
-                { "$ref": "#/$defs/ap2_with_merchant_authorization" },
-                { "$ref": "#/$defs/ap2_with_checkout_mandate" }
+                {
+                  "$ref": "#/$defs/ap2_with_merchant_authorization"
+                },
+                {
+                  "$ref": "#/$defs/ap2_with_checkout_mandate"
+                }
               ],
               "ucp_request": {
                 "create": "omit",
@@ -72,7 +72,6 @@
         }
       ]
     },
-
     "error_code": {
       "title": "AP2 Error Code",
       "description": "Error codes specific to AP2 mandate verification.",
