@@ -233,12 +233,16 @@
         {
           "name": "cart",
           "required": true,
-          "schema": {"$ref": "https://ucp.dev/schemas/shopping/cart.json"}
+          "schema": {
+            "$ref": "../../schemas/shopping/cart.create_req.json"
+          }
         }
       ],
       "result": {
         "name": "cart",
-        "schema": {"$ref": "https://ucp.dev/schemas/shopping/cart.json"}
+        "schema": {
+          "$ref": "../../schemas/shopping/cart_resp.json"
+        }
       }
     },
     {
@@ -248,12 +252,16 @@
         {
           "name": "id",
           "required": true,
-          "schema": {"type": "string"}
+          "schema": {
+            "type": "string"
+          }
         }
       ],
       "result": {
         "name": "cart",
-        "schema": {"$ref": "https://ucp.dev/schemas/shopping/cart.json"}
+        "schema": {
+          "$ref": "../../schemas/shopping/cart_resp.json"
+        }
       }
     },
     {
@@ -263,17 +271,23 @@
         {
           "name": "id",
           "required": true,
-          "schema": {"type": "string"}
+          "schema": {
+            "type": "string"
+          }
         },
         {
           "name": "cart",
           "required": true,
-          "schema": {"$ref": "https://ucp.dev/schemas/shopping/cart.json"}
+          "schema": {
+            "$ref": "../../schemas/shopping/cart.update_req.json"
+          }
         }
       ],
       "result": {
         "name": "cart",
-        "schema": {"$ref": "https://ucp.dev/schemas/shopping/cart.json"}
+        "schema": {
+          "$ref": "../../schemas/shopping/cart_resp.json"
+        }
       }
     },
     {
@@ -283,17 +297,24 @@
         {
           "name": "id",
           "required": true,
-          "schema": {"type": "string"}
+          "schema": {
+            "type": "string"
+          }
         },
         {
           "name": "idempotency_key",
           "required": true,
-          "schema": {"type": "string", "format": "uuid"}
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
         }
       ],
       "result": {
         "name": "cart",
-        "schema": {"$ref": "https://ucp.dev/schemas/shopping/cart.json"}
+        "schema": {
+          "$ref": "../../schemas/shopping/cart_resp.json"
+        }
       }
     }
   ]

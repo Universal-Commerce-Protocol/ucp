@@ -18,7 +18,7 @@
           "properties": {
             "cart_id": {
               "type": "string",
-              "description": "Cart ID to convert. Cart contents (line_items, context, buyer) initialize checkout and take precedence over checkout payload for overlapping fields."
+              "description": "Cart ID to convert to checkout. Business MUST use cart contents (line_items, context, buyer) and MUST ignore overlapping fields in checkout payload."
             }
           }
         }

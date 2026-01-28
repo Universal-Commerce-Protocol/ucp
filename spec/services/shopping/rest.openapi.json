@@ -19,40 +19,42 @@
   ],
   "paths": {
     "/checkout-sessions": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/authorization"
+        },
+        {
+          "$ref": "#/components/parameters/x_api_key"
+        },
+        {
+          "$ref": "#/components/parameters/request_signature"
+        },
+        {
+          "$ref": "#/components/parameters/request_id"
+        },
+        {
+          "$ref": "#/components/parameters/user_agent"
+        },
+        {
+          "$ref": "#/components/parameters/content_type"
+        },
+        {
+          "$ref": "#/components/parameters/accept"
+        },
+        {
+          "$ref": "#/components/parameters/accept_language"
+        },
+        {
+          "$ref": "#/components/parameters/accept_encoding"
+        }
+      ],
       "post": {
         "operationId": "create_checkout",
         "summary": "Create Checkout",
         "description": "Create a new checkout session.",
         "parameters": [
           {
-            "$ref": "#/components/parameters/authorization"
-          },
-          {
-            "$ref": "#/components/parameters/x_api_key"
-          },
-          {
-            "$ref": "#/components/parameters/request_signature"
-          },
-          {
             "$ref": "#/components/parameters/idempotency_key"
-          },
-          {
-            "$ref": "#/components/parameters/request_id"
-          },
-          {
-            "$ref": "#/components/parameters/user_agent"
-          },
-          {
-            "$ref": "#/components/parameters/content_type"
-          },
-          {
-            "$ref": "#/components/parameters/accept"
-          },
-          {
-            "$ref": "#/components/parameters/accept_language"
-          },
-          {
-            "$ref": "#/components/parameters/accept_encoding"
           }
         ],
         "requestBody": {
@@ -80,6 +82,15 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/bad_request"
+          },
+          "401": {
+            "$ref": "#/components/responses/unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/internal_server_error"
           }
         }
       }
@@ -88,41 +99,39 @@
       "parameters": [
         {
           "$ref": "#/components/parameters/checkout_session_id_path"
+        },
+        {
+          "$ref": "#/components/parameters/authorization"
+        },
+        {
+          "$ref": "#/components/parameters/x_api_key"
+        },
+        {
+          "$ref": "#/components/parameters/request_signature"
+        },
+        {
+          "$ref": "#/components/parameters/request_id"
+        },
+        {
+          "$ref": "#/components/parameters/user_agent"
+        },
+        {
+          "$ref": "#/components/parameters/content_type"
+        },
+        {
+          "$ref": "#/components/parameters/accept"
+        },
+        {
+          "$ref": "#/components/parameters/accept_language"
+        },
+        {
+          "$ref": "#/components/parameters/accept_encoding"
         }
       ],
       "get": {
         "operationId": "get_checkout",
         "summary": "Get Checkout",
         "description": "Get the latest state of a checkout session.",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/authorization"
-          },
-          {
-            "$ref": "#/components/parameters/x_api_key"
-          },
-          {
-            "$ref": "#/components/parameters/request_signature"
-          },
-          {
-            "$ref": "#/components/parameters/request_id"
-          },
-          {
-            "$ref": "#/components/parameters/user_agent"
-          },
-          {
-            "$ref": "#/components/parameters/content_type"
-          },
-          {
-            "$ref": "#/components/parameters/accept"
-          },
-          {
-            "$ref": "#/components/parameters/accept_language"
-          },
-          {
-            "$ref": "#/components/parameters/accept_encoding"
-          }
-        ],
         "responses": {
           "200": {
             "description": "Checkout session retrieved",
@@ -138,6 +147,18 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/bad_request"
+          },
+          "401": {
+            "$ref": "#/components/responses/unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/not_found"
+          },
+          "500": {
+            "$ref": "#/components/responses/internal_server_error"
           }
         }
       },
@@ -147,34 +168,7 @@
         "description": "If an optional field is provided in the request body, its value is treated as a complete replacement for the corresponding data. If optional field is omitted, then current checkout session is unchanged.",
         "parameters": [
           {
-            "$ref": "#/components/parameters/authorization"
-          },
-          {
-            "$ref": "#/components/parameters/x_api_key"
-          },
-          {
-            "$ref": "#/components/parameters/request_signature"
-          },
-          {
             "$ref": "#/components/parameters/idempotency_key"
-          },
-          {
-            "$ref": "#/components/parameters/request_id"
-          },
-          {
-            "$ref": "#/components/parameters/user_agent"
-          },
-          {
-            "$ref": "#/components/parameters/content_type"
-          },
-          {
-            "$ref": "#/components/parameters/accept"
-          },
-          {
-            "$ref": "#/components/parameters/accept_language"
-          },
-          {
-            "$ref": "#/components/parameters/accept_encoding"
           }
         ],
         "requestBody": {
@@ -202,6 +196,18 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/bad_request"
+          },
+          "401": {
+            "$ref": "#/components/responses/unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/not_found"
+          },
+          "500": {
+            "$ref": "#/components/responses/internal_server_error"
           }
         }
       }
@@ -210,6 +216,33 @@
       "parameters": [
         {
           "$ref": "#/components/parameters/checkout_session_id_path"
+        },
+        {
+          "$ref": "#/components/parameters/authorization"
+        },
+        {
+          "$ref": "#/components/parameters/x_api_key"
+        },
+        {
+          "$ref": "#/components/parameters/request_signature"
+        },
+        {
+          "$ref": "#/components/parameters/request_id"
+        },
+        {
+          "$ref": "#/components/parameters/user_agent"
+        },
+        {
+          "$ref": "#/components/parameters/content_type"
+        },
+        {
+          "$ref": "#/components/parameters/accept"
+        },
+        {
+          "$ref": "#/components/parameters/accept_language"
+        },
+        {
+          "$ref": "#/components/parameters/accept_encoding"
         }
       ],
       "post": {
@@ -218,34 +251,7 @@
         "description": "Place the order",
         "parameters": [
           {
-            "$ref": "#/components/parameters/authorization"
-          },
-          {
-            "$ref": "#/components/parameters/x_api_key"
-          },
-          {
-            "$ref": "#/components/parameters/request_signature"
-          },
-          {
             "$ref": "#/components/parameters/idempotency_key"
-          },
-          {
-            "$ref": "#/components/parameters/request_id"
-          },
-          {
-            "$ref": "#/components/parameters/user_agent"
-          },
-          {
-            "$ref": "#/components/parameters/content_type"
-          },
-          {
-            "$ref": "#/components/parameters/accept"
-          },
-          {
-            "$ref": "#/components/parameters/accept_language"
-          },
-          {
-            "$ref": "#/components/parameters/accept_encoding"
           }
         ],
         "requestBody": {
@@ -288,6 +294,18 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/bad_request"
+          },
+          "401": {
+            "$ref": "#/components/responses/unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/not_found"
+          },
+          "500": {
+            "$ref": "#/components/responses/internal_server_error"
           }
         }
       }
@@ -296,6 +314,33 @@
       "parameters": [
         {
           "$ref": "#/components/parameters/checkout_session_id_path"
+        },
+        {
+          "$ref": "#/components/parameters/authorization"
+        },
+        {
+          "$ref": "#/components/parameters/x_api_key"
+        },
+        {
+          "$ref": "#/components/parameters/request_signature"
+        },
+        {
+          "$ref": "#/components/parameters/request_id"
+        },
+        {
+          "$ref": "#/components/parameters/user_agent"
+        },
+        {
+          "$ref": "#/components/parameters/content_type"
+        },
+        {
+          "$ref": "#/components/parameters/accept"
+        },
+        {
+          "$ref": "#/components/parameters/accept_language"
+        },
+        {
+          "$ref": "#/components/parameters/accept_encoding"
         }
       ],
       "post": {
@@ -304,34 +349,7 @@
         "description": "Cancel a checkout session",
         "parameters": [
           {
-            "$ref": "#/components/parameters/authorization"
-          },
-          {
-            "$ref": "#/components/parameters/x_api_key"
-          },
-          {
-            "$ref": "#/components/parameters/request_signature"
-          },
-          {
             "$ref": "#/components/parameters/idempotency_key"
-          },
-          {
-            "$ref": "#/components/parameters/request_id"
-          },
-          {
-            "$ref": "#/components/parameters/user_agent"
-          },
-          {
-            "$ref": "#/components/parameters/content_type"
-          },
-          {
-            "$ref": "#/components/parameters/accept"
-          },
-          {
-            "$ref": "#/components/parameters/accept_language"
-          },
-          {
-            "$ref": "#/components/parameters/accept_encoding"
           }
         ],
         "responses": {
@@ -349,45 +367,59 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/bad_request"
+          },
+          "401": {
+            "$ref": "#/components/responses/unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/not_found"
+          },
+          "500": {
+            "$ref": "#/components/responses/internal_server_error"
           }
         }
       }
     },
     "/carts": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/authorization"
+        },
+        {
+          "$ref": "#/components/parameters/x_api_key"
+        },
+        {
+          "$ref": "#/components/parameters/request_signature"
+        },
+        {
+          "$ref": "#/components/parameters/request_id"
+        },
+        {
+          "$ref": "#/components/parameters/user_agent"
+        },
+        {
+          "$ref": "#/components/parameters/content_type"
+        },
+        {
+          "$ref": "#/components/parameters/accept"
+        },
+        {
+          "$ref": "#/components/parameters/accept_language"
+        },
+        {
+          "$ref": "#/components/parameters/accept_encoding"
+        }
+      ],
       "post": {
         "operationId": "create_cart",
         "summary": "Create Cart",
         "description": "Create a new cart session.",
         "parameters": [
           {
-            "$ref": "#/components/parameters/authorization"
-          },
-          {
-            "$ref": "#/components/parameters/x_api_key"
-          },
-          {
-            "$ref": "#/components/parameters/request_signature"
-          },
-          {
             "$ref": "#/components/parameters/idempotency_key"
-          },
-          {
-            "$ref": "#/components/parameters/request_id"
-          },
-          {
-            "$ref": "#/components/parameters/user_agent"
-          },
-          {
-            "$ref": "#/components/parameters/content_type"
-          },
-          {
-            "$ref": "#/components/parameters/accept"
-          },
-          {
-            "$ref": "#/components/parameters/accept_language"
-          },
-          {
-            "$ref": "#/components/parameters/accept_encoding"
           }
         ],
         "requestBody": {
@@ -415,6 +447,15 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/bad_request"
+          },
+          "401": {
+            "$ref": "#/components/responses/unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/internal_server_error"
           }
         }
       }
@@ -423,41 +464,39 @@
       "parameters": [
         {
           "$ref": "#/components/parameters/cart_id_path"
+        },
+        {
+          "$ref": "#/components/parameters/authorization"
+        },
+        {
+          "$ref": "#/components/parameters/x_api_key"
+        },
+        {
+          "$ref": "#/components/parameters/request_signature"
+        },
+        {
+          "$ref": "#/components/parameters/request_id"
+        },
+        {
+          "$ref": "#/components/parameters/user_agent"
+        },
+        {
+          "$ref": "#/components/parameters/content_type"
+        },
+        {
+          "$ref": "#/components/parameters/accept"
+        },
+        {
+          "$ref": "#/components/parameters/accept_language"
+        },
+        {
+          "$ref": "#/components/parameters/accept_encoding"
         }
       ],
       "get": {
         "operationId": "get_cart",
         "summary": "Get Cart",
         "description": "Get the latest state of a cart session.",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/authorization"
-          },
-          {
-            "$ref": "#/components/parameters/x_api_key"
-          },
-          {
-            "$ref": "#/components/parameters/request_signature"
-          },
-          {
-            "$ref": "#/components/parameters/request_id"
-          },
-          {
-            "$ref": "#/components/parameters/user_agent"
-          },
-          {
-            "$ref": "#/components/parameters/content_type"
-          },
-          {
-            "$ref": "#/components/parameters/accept"
-          },
-          {
-            "$ref": "#/components/parameters/accept_language"
-          },
-          {
-            "$ref": "#/components/parameters/accept_encoding"
-          }
-        ],
         "responses": {
           "200": {
             "description": "Cart retrieved",
@@ -474,8 +513,17 @@
               }
             }
           },
+          "400": {
+            "$ref": "#/components/responses/bad_request"
+          },
+          "401": {
+            "$ref": "#/components/responses/unauthorized"
+          },
           "404": {
-            "description": "Cart not found (cancelled, expired, or never existed)"
+            "$ref": "#/components/responses/not_found"
+          },
+          "500": {
+            "$ref": "#/components/responses/internal_server_error"
           }
         }
       },
@@ -485,34 +533,7 @@
         "description": "Update a cart session.",
         "parameters": [
           {
-            "$ref": "#/components/parameters/authorization"
-          },
-          {
-            "$ref": "#/components/parameters/x_api_key"
-          },
-          {
-            "$ref": "#/components/parameters/request_signature"
-          },
-          {
             "$ref": "#/components/parameters/idempotency_key"
-          },
-          {
-            "$ref": "#/components/parameters/request_id"
-          },
-          {
-            "$ref": "#/components/parameters/user_agent"
-          },
-          {
-            "$ref": "#/components/parameters/content_type"
-          },
-          {
-            "$ref": "#/components/parameters/accept"
-          },
-          {
-            "$ref": "#/components/parameters/accept_language"
-          },
-          {
-            "$ref": "#/components/parameters/accept_encoding"
           }
         ],
         "requestBody": {
@@ -540,6 +561,18 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/bad_request"
+          },
+          "401": {
+            "$ref": "#/components/responses/unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/not_found"
+          },
+          "500": {
+            "$ref": "#/components/responses/internal_server_error"
           }
         }
       }
@@ -548,42 +581,42 @@
       "parameters": [
         {
           "$ref": "#/components/parameters/cart_id_path"
+        },
+        {
+          "$ref": "#/components/parameters/authorization"
+        },
+        {
+          "$ref": "#/components/parameters/x_api_key"
+        },
+        {
+          "$ref": "#/components/parameters/request_signature"
+        },
+        {
+          "$ref": "#/components/parameters/request_id"
+        },
+        {
+          "$ref": "#/components/parameters/user_agent"
+        },
+        {
+          "$ref": "#/components/parameters/content_type"
+        },
+        {
+          "$ref": "#/components/parameters/accept"
+        },
+        {
+          "$ref": "#/components/parameters/accept_language"
+        },
+        {
+          "$ref": "#/components/parameters/accept_encoding"
         }
       ],
       "post": {
         "operationId": "cancel_cart",
         "summary": "Cancel Cart",
-        "description": "Cancel a cart session.",
+        "description": "Cancel a cart session. Returns the cart state at time of cancellation.",
         "parameters": [
           {
-            "$ref": "#/components/parameters/authorization"
-          },
-          {
-            "$ref": "#/components/parameters/x_api_key"
-          },
-          {
-            "$ref": "#/components/parameters/request_signature"
-          },
-          {
             "$ref": "#/components/parameters/idempotency_key"
-          },
-          {
-            "$ref": "#/components/parameters/request_id"
-          },
-          {
-            "$ref": "#/components/parameters/user_agent"
-          },
-          {
-            "$ref": "#/components/parameters/content_type"
-          },
-          {
-            "$ref": "#/components/parameters/accept"
-          },
-          {
-            "$ref": "#/components/parameters/accept_language"
-          },
-          {
-            "$ref": "#/components/parameters/accept_encoding"
           }
         ],
         "responses": {
@@ -601,6 +634,18 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/bad_request"
+          },
+          "401": {
+            "$ref": "#/components/responses/unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/not_found"
+          },
+          "500": {
+            "$ref": "#/components/responses/internal_server_error"
           }
         }
       }
@@ -797,6 +842,48 @@
         "description": "Optional detached JWT signature for the response body. Verifies the response came from the server."
       }
     },
+    "responses": {
+      "bad_request": {
+        "description": "Bad Request - The request was malformed or contained invalid data.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/error_response"
+            }
+          }
+        }
+      },
+      "unauthorized": {
+        "description": "Unauthorized - Authentication credentials were missing or invalid.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/error_response"
+            }
+          }
+        }
+      },
+      "not_found": {
+        "description": "Not Found - The requested resource does not exist or has expired.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/error_response"
+            }
+          }
+        }
+      },
+      "internal_server_error": {
+        "description": "Internal Server Error - An unexpected error occurred on the server.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/error_response"
+            }
+          }
+        }
+      }
+    },
     "schemas": {
       "order": {
         "$ref": "../../schemas/shopping/order.json"
@@ -806,6 +893,22 @@
       },
       "ucp": {
         "$ref": "../../schemas/ucp.json"
+      },
+      "error_response": {
+        "type": "object",
+        "description": "Standard error response wrapper containing one or more error messages.",
+        "required": [
+          "messages"
+        ],
+        "properties": {
+          "messages": {
+            "type": "array",
+            "description": "List of error messages describing what went wrong.",
+            "items": {
+              "$ref": "../../schemas/shopping/types/message_error.json"
+            }
+          }
+        }
       },
       "checkout_response": {
         "$ref": "../../schemas/shopping/checkout_resp.json"
@@ -827,6 +930,9 @@
       },
       "cart_update_request": {
         "$ref": "../../schemas/shopping/cart.update_req.json"
+      },
+      "cart_complete_request": {
+        "$ref": "../../schemas/shopping/cart.complete_req.json"
       }
     }
   }
