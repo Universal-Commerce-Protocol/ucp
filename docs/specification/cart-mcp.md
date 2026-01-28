@@ -296,9 +296,24 @@ Maps to the [Get Cart](cart.md#get-cart) operation.
     {
       "jsonrpc": "2.0",
       "id": 1,
-      "error": {
-        "code": -32602,
-        "message": "Invalid params: cart not found"
+      "result": {
+        "ucp": {
+          "version": "2026-01-15",
+          "capabilities": [
+            {
+              "name": "dev.ucp.shopping.cart",
+              "version": "2026-01-15"
+            }
+          ]
+        },
+        "messages": [
+          {
+            "type": "error",
+            "code": "NOT_FOUND",
+            "content": "Cart not found or has expired"
+          }
+        ],
+        "continue_url": "https://merchant.com/"
       }
     }
     ```
@@ -512,45 +527,33 @@ Maps to the [Cancel Cart](cart.md#cancel-cart) operation.
 
 ## Error Handling
 
-Error responses follow JSON-RPC 2.0 format.
+See the [Core Specification](overview.md#error-handling) for negotiation error
+handling (discovery failures, negotiation failures).
 
-### Not Found (-32602)
+### Business Outcomes
 
-Returned when cart does not exist, has expired, or was canceled:
-
-```json
-{
-  "jsonrpc": "2.0",
-  "id": 1,
-  "error": {
-    "code": -32602,
-    "message": "Invalid params: cart not found"
-  }
-}
-```
-
-### Validation Errors
-
-Validation errors are returned in the cart's `messages` array. The operation
-succeeds and returns the cart state with messages indicating issues:
+Business outcomes (including not found and validation errors) are returned as
+JSON-RPC `result` with the UCP envelope and `messages`:
 
 ```json
 {
   "jsonrpc": "2.0",
   "id": 1,
   "result": {
-    "ucp": { ... },
-    "id": "cart_abc123",
-    "line_items": [ ... ],
+    "ucp": {
+      "version": "2026-01-11",
+      "capabilities": {
+        "dev.ucp.shopping.cart": [{"version": "2026-01-11"}]
+      }
+    },
     "messages": [
       {
         "type": "error",
-        "code": "invalid_quantity",
-        "path": "$.line_items[0].quantity",
-        "content": "Quantity must be at least 1"
+        "code": "NOT_FOUND",
+        "content": "Cart not found or has expired"
       }
     ],
-    ...
+    "continue_url": "https://merchant.com/"
   }
 }
 ```
@@ -561,6 +564,9 @@ A conforming MCP transport implementation **MUST**:
 
 1. Implement JSON-RPC 2.0 protocol correctly.
 2. Provide all core cart tools defined in this specification.
-3. Handle errors with appropriate JSON-RPC error codes.
-4. Validate tool inputs against UCP schemas.
-5. Support HTTP transport with streaming.
+3. Return negotiation failures per the
+    [Core Specification](overview.md#error-handling).
+4. Return business outcomes as JSON-RPC `result` with UCP envelope and
+    `messages` array.
+5. Validate tool inputs against UCP schemas.
+6. Support HTTP transport with streaming.
