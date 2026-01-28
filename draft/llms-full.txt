@@ -764,20 +764,42 @@ A **capability** is a feature within a service. It declares what functionality i
 
 #### Extensions
 
-An **extension** is an optional module that augments another capability. Extensions use the `extends` field to declare their parent:
+An **extension** is an optional module that augments another capability. Extensions use the `extends` field to declare their parent(s):
 
 ```json
 {
   "dev.ucp.shopping.fulfillment": [
     {
-      "version": "2026-01-11",
-      "spec": "https://ucp.dev/specification/fulfillment",
-      "schema": "https://ucp.dev/schemas/shopping/fulfillment.json",
+      "version": "2026-01-23",
+      "spec": "https://ucp.dev/2026-01-23/specification/fulfillment",
+      "schema": "https://ucp.dev/2026-01-23/schemas/shopping/fulfillment.json",
       "extends": "dev.ucp.shopping.checkout"
     }
   ]
 }
 ```
+
+##### Multi-Parent Extensions
+
+Extensions **MAY** extend multiple parent capabilities by using an array:
+
+```json
+{
+  "dev.ucp.shopping.discount": [
+    {
+      "version": "2026-01-23",
+      "spec": "https://ucp.dev/2026-01-23/specification/discount",
+      "schema": "https://ucp.dev/2026-01-23/schemas/shopping/discount.json",
+      "extends": ["dev.ucp.shopping.checkout", "dev.ucp.shopping.cart"]
+    }
+  ]
+}
+```
+
+When an extension declares multiple parents:
+
+- The extension **MAY** define different fields for each capability it extends (e.g., `loyalty_earned` for checkout, `loyalty_preview` for cart)
+- See [Intersection Algorithm](#intersection-algorithm) for negotiation rules
 
 Extensions can be:
 
@@ -796,13 +818,14 @@ Extensions can add new fields and modify shared structures (e.g., discounts modi
 
 #### Extension Schema Pattern
 
-Extension schemas define composed types using `allOf`. An example is as follows:
+Extension schemas define composed types using `allOf`. The `$defs` key **MUST** use the full parent capability name (reverse-domain format) to enable deterministic schema resolution:
 
 ```json
 {
   "$defs": {
     "discounts_object": { ... },
-    "checkout": {
+    "dev.ucp.shopping.checkout": {
+      "title": "Checkout with Discount",
       "allOf": [
         {"$ref": "checkout.json"},
         {
@@ -819,7 +842,29 @@ Extension schemas define composed types using `allOf`. An example is as follows:
 }
 ```
 
-Composed type names **MUST** use the pattern: `{capability-name}.{TypeName}`
+**Requirements:**
+
+- Extension schemas **MUST** have a `$defs` entry for each parent declared in `extends`
+- The `$defs` key **MUST** match the parent's full capability name exactly
+
+This convention ensures:
+
+- **Self-documenting**: The schema declares exactly which parents it extends
+- **Deterministic resolution**: The `extends` value maps directly to the `$defs` key
+- **Verifiable**: Build-time checks can confirm each `extends` entry has a matching `$defs` key
+
+#### Schema Resolution Convention
+
+To validate payloads, implementations resolve extension schemas as follows:
+
+1. Determine the root capability from the operation (e.g., checkout operations use `dev.ucp.shopping.checkout`)
+1. For each active extension, resolve and apply its `$defs[{root_capability}]`
+
+**Example:** A checkout response includes the discount extension.
+
+- Root capability: `dev.ucp.shopping.checkout`
+- Extension schema: `discount.json`
+- Resolve: `discount.json#/$defs/dev.ucp.shopping.checkout`
 
 #### Resolution Flow
 
@@ -1076,7 +1121,12 @@ Content-Type: application/json
 The capability intersection algorithm determines which capabilities are active for a session:
 
 1. **Compute intersection**: For each business capability, include it in the result if a platform capability with the same `name` exists.
-1. **Prune orphaned extensions**: Remove any capability where `extends` is set but the parent capability is not in the intersection.
+
+1. **Prune orphaned extensions**: Remove any capability where `extends` is set but **none** of its parent capabilities are in the intersection.
+
+   - For single-parent extensions (`extends: "string"`): parent must be present
+   - For multi-parent extensions (`extends: ["a", "b"]`): at least one parent must be present
+
 1. **Repeat pruning**: Continue step 2 until no more capabilities are removed (handles transitive extension chains).
 
 The result is the set of capabilities both parties support, with extension dependencies satisfied.
@@ -1124,6 +1174,33 @@ The `capabilities` registry in responses indicates active capabilities:
   ... other fields
 }
 ```
+
+#### Response Capability Selection
+
+Businesses **MUST** include in `ucp.capabilities` only the capabilities that are:
+
+1. In the negotiated intersection for this session, AND
+1. Relevant to this response's operation type
+
+**Root Capability Relevance:**
+
+A root capability is relevant if it matches the operation type:
+
+- `create_checkout` / `update_checkout` / `complete_checkout` → `dev.ucp.shopping.checkout`
+- `create_cart` / `update_cart` → `dev.ucp.shopping.cart`
+- Order webhooks → `dev.ucp.shopping.order`
+
+**Extension Relevance:**
+
+An extension is relevant if **any** of its `extends` values matches a relevant root capability.
+
+**Selection Examples:**
+
+| Response Type | Includes                        | Does NOT Include             |
+| ------------- | ------------------------------- | ---------------------------- |
+| Checkout      | checkout, discount, fulfillment | cart, order                  |
+| Cart          | cart, discount                  | checkout, fulfillment, order |
+| Order         | order                           | checkout, cart, discount     |
 
 ## Payment Architecture
 
@@ -4486,22 +4563,7 @@ Once the `dev.ucp.shopping.ap2_mandate` capability is negotiated, the session is
 
 The platform initiates the session. The business returns the `Checkout` object with `ap2.merchant_authorization` embedded in the response body.
 
-| Name         | Type          | Required | Description                                                                                                                                                                                                                                                     |
-| ------------ | ------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ucp          | any           | **Yes**  | UCP metadata for checkout responses.                                                                                                                                                                                                                            |
-| id           | string        | **Yes**  | Unique identifier of the checkout session.                                                                                                                                                                                                                      |
-| line_items   | Array[object] | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                           |
-| buyer        | object        | No       | Representation of the buyer.                                                                                                                                                                                                                                    |
-| status       | string        | **Yes**  | Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details. **Enum:** `incomplete`, `requires_escalation`, `ready_for_complete`, `complete_in_progress`, `completed`, `canceled` |
-| currency     | string        | **Yes**  | ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.                                                                                          |
-| totals       | Array[object] | **Yes**  | Different cart totals.                                                                                                                                                                                                                                          |
-| messages     | Array[object] | No       | List of messages with error and info about the checkout session state.                                                                                                                                                                                          |
-| links        | Array[object] | **Yes**  | Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.                                                                                                                                                                    |
-| expires_at   | string        | No       | RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.                                                                                                                                                                                    |
-| continue_url | string        | No       | URL for checkout handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements.                                                                                                 |
-| payment      | object        | No       | Payment configuration containing handlers.                                                                                                                                                                                                                      |
-| order        | object        | No       | Details about an order created for this checkout session.                                                                                                                                                                                                       |
-| ap2          | any           | No       |                                                                                                                                                                                                                                                                 |
+**Error:** Definition '#/$defs/checkout' not found in 'source/schemas/shopping/ap2_mandate.json'
 
 **Example Response:**
 

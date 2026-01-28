@@ -20,7 +20,7 @@
     "fulfillment": {
       "$ref": "https://ucp.dev/draft/schemas/shopping/types/fulfillment.json"
     },
-    "checkout": {
+    "dev.ucp.shopping.checkout": {
       "title": "Checkout with Fulfillment",
       "description": "Checkout extended with hierarchical fulfillment.",
       "allOf": [
