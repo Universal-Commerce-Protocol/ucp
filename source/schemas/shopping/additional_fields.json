@@ -1,0 +1,172 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/additional_fields.json",
+  "name": "dev.ucp.shopping.additional_fields",
+  "title": "Additional Fields Extension",
+  "description": "Extends Checkout with merchant-defined additional fields mapped to cart, buyer, or fulfillment data via JSONPath.",
+  "$defs": {
+    "input_type": {
+      "type": "string",
+      "description": "UI control type for the additional field.",
+      "enum": [
+        "single_line_text",
+        "multi_line_text",
+        "checkbox",
+        "date",
+        "date_time"
+      ]
+    },
+    "validation_hints": {
+      "type": "object",
+      "description": "Optional validation hints for platforms. Enforcement is communicated via messages.",
+      "properties": {
+        "pattern": {
+          "type": "string",
+          "description": "Regular expression hint for text inputs."
+        },
+        "min_length": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Minimum characters for text inputs."
+        },
+        "max_length": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Maximum characters for text inputs."
+        },
+        "min_date": {
+          "type": "string",
+          "format": "date",
+          "description": "Earliest allowed date for date inputs (RFC 3339 full-date)."
+        },
+        "max_date": {
+          "type": "string",
+          "format": "date",
+          "description": "Latest allowed date for date inputs (RFC 3339 full-date)."
+        },
+        "min_date_time": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Earliest allowed timestamp for date_time inputs (RFC 3339 date-time)."
+        },
+        "max_date_time": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Latest allowed timestamp for date_time inputs (RFC 3339 date-time)."
+        }
+      }
+    },
+    "additional_field": {
+      "type": "object",
+      "description": "Definition for a merchant-requested input.",
+      "required": [
+        "key",
+        "label",
+        "type",
+        "path"
+      ],
+      "properties": {
+        "key": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "description": "Stable identifier for the field. Used in values object keys and in messages.path (e.g., $.additional_fields.values.po_number)."
+        },
+        "label": {
+          "type": "string",
+          "description": "Buyer-facing label for the field."
+        },
+        "description": {
+          "type": "string",
+          "description": "Additional context or instructions for the buyer."
+        },
+        "type": {
+          "$ref": "#/$defs/input_type"
+        },
+        "required": {
+          "type": "boolean",
+          "default": false,
+          "description": "If true, checkout remains incomplete until a value is provided."
+        },
+        "default_value": {
+          "description": "Default value used when the platform does not provide buyer input.",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "boolean"
+            }
+          ]
+        },
+        "path": {
+          "type": "string",
+          "description": "RFC 9535 JSONPath to the target checkout data (e.g., buyer, cart totals, fulfillment option, or specific line items)."
+        },
+        "validation_hints": {
+          "$ref": "#/$defs/validation_hints"
+        }
+      }
+    },
+    "values": {
+      "type": "object",
+      "description": "Buyer-provided values keyed by additional field key.",
+      "propertyNames": {
+        "pattern": "^[A-Za-z0-9_-]+$"
+      },
+      "additionalProperties": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "boolean"
+          }
+        ]
+      }
+    },
+    "additional_fields": {
+      "type": "object",
+      "description": "Definitions provided by the business and values supplied by the platform.",
+      "properties": {
+        "fields": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/additional_field"
+          },
+          "description": "Available fields and how they map into checkout data.",
+          "ucp_request": "omit"
+        },
+        "values": {
+          "$ref": "#/$defs/values",
+          "ucp_request": {
+            "create": "optional",
+            "update": "optional",
+            "complete": "omit"
+          }
+        }
+      }
+    },
+    "dev.ucp.shopping.checkout": {
+      "title": "Checkout with Additional Fields",
+      "description": "Checkout extended with merchant-defined additional fields.",
+      "allOf": [
+        {
+          "$ref": "checkout.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "additional_fields": {
+              "$ref": "#/$defs/additional_fields",
+              "ucp_request": {
+                "create": "optional",
+                "update": "optional",
+                "complete": "omit"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
