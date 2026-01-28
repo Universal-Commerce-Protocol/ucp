@@ -21,6 +21,7 @@ dev = [
     "mkdocs-material[imaging]>=9.0.0",
     "mkdocs-redirects==1.2.2",
     "mkdocs-site-urls==0.3.1",
+    "pyyaml>=6.0.3",
     "yamllint==1.35.1",
 ]
 
