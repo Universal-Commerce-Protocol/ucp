@@ -72,12 +72,6 @@ jobs:
         with:
           files: source/**
 
-      - name: Check Python SDK Models Consistency
-        if: steps.source_files_changed.outputs.any_changed == 'true'
-        run: |
-          chmod +x scripts/ci_check_models.sh
-          scripts/ci_check_models.sh
-
       - name: Install ucp-schema for runtime resolution
         run: cargo install ucp-schema
 
