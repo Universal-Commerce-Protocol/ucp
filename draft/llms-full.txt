@@ -1133,17 +1133,113 @@ The result is the set of capabilities both parties support, with extension depen
 
 #### Error Handling
 
-If negotiation fails, businesses **MUST** return an error response:
+UCP negotiation can fail in two ways:
+
+1. **Discovery failure**: The business cannot fetch or parse the platform's profile.
+1. **Negotiation failure**: The provided profile is valid but capability intersection is empty or versions are incompatible.
+
+These failure types require different handling:
+
+- **Discovery failure** → transport error with optional `continue_url`
+- **Negotiation failure** → UCP response with optional `continue_url`
+
+##### Error Codes
+
+| Code                        | Description                                          | REST | MCP    |
+| --------------------------- | ---------------------------------------------------- | ---- | ------ |
+| `INVALID_PROFILE_URL`       | Profile URL is malformed, missing, or unresolvable   | 400  | error  |
+| `PROFILE_UNREACHABLE`       | Resolved URL but fetch failed (timeout, non-2xx)     | 424  | error  |
+| `PROFILE_MALFORMED`         | Fetched content is not valid JSON or violates schema | 422  | error  |
+| `CAPABILITIES_INCOMPATIBLE` | No compatible capabilities in intersection           | 200  | result |
+| `VERSION_UNSUPPORTED`       | Platform's UCP version is not supported              | 200  | result |
+
+##### The `continue_url` Field
+
+When UCP negotiation fails, `continue_url` provides a fallback web experience. Businesses **SHOULD** provide the most contextually relevant URL:
+
+- For checkout operations: link to the cart or checkout page
+- For catalog operations: link to the product or search results
+- As a fallback: link to the storefront homepage
+
+This enables graceful degradation—agents can redirect buyers to complete their task through the standard web interface.
+
+##### Transport Bindings
+
+**Discovery Failure (424):**
+
+```http
+HTTP/1.1 424 Failed Dependency
+Content-Type: application/json
+
+{
+  "code": "PROFILE_UNREACHABLE",
+  "content": "Unable to fetch agent profile: connection timeout",
+  "continue_url": "https://merchant.com/cart"
+}
+```
+
+**Negotiation Failure (200):**
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "ucp": {
+    "version": "2026-01-11",
+    "capabilities": {}
+  },
+  "messages": [
+    {
+      "type": "error",
+      "code": "VERSION_UNSUPPORTED",
+      "content": "Platform UCP version 2024-01-01 is not supported",
+      "severity": "requires_buyer_input"
+    }
+  ],
+  "continue_url": "https://merchant.com/cart"
+}
+```
+
+**Discovery Failure (JSON-RPC error):**
 
 ```json
 {
-  "status": "requires_escalation",
-  "messages": [{
-    "type": "error",
-    "code": "version_unsupported",
-    "message": "Version 2026-01-11 is not supported.",
-    "severity": "requires_buyer_input"
-  }]
+  "jsonrpc": "2.0",
+  "id": 1,
+  "error": {
+    "code": -32001,
+    "message": "UCP discovery failed",
+    "data": {
+      "code": "PROFILE_UNREACHABLE",
+      "content": "Unable to fetch agent profile: connection timeout",
+      "continue_url": "https://merchant.com/cart"
+    }
+  }
+}
+```
+
+**Negotiation Failure (JSON-RPC result):**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "ucp": {
+      "version": "2026-01-11",
+      "capabilities": {}
+    },
+    "messages": [
+      {
+        "type": "error",
+        "code": "VERSION_UNSUPPORTED",
+        "content": "Platform UCP version 2024-01-01 is not supported",
+        "severity": "requires_buyer_input"
+      }
+    ],
+    "continue_url": "https://merchant.com/cart"
+  }
 }
 ```
 
@@ -1725,7 +1821,7 @@ Version unsupported error:
   "messages": [{
     "type": "error",
     "code": "version_unsupported",
-    "message": "Version 2026-01-12 is not supported. This business implements version 2026-01-11.",
+    "content": "Version 2026-01-12 is not supported. This business implements version 2026-01-11.",
     "severity": "requires_buyer_input"
   }]
 }
@@ -3421,27 +3517,48 @@ UCP uses standard HTTP status codes to indicate the success or failure of an API
 | `400 Bad Request`           | The request was invalid or cannot be served.                                       |
 | `401 Unauthorized`          | Authentication is required and has failed or has not been provided.                |
 | `403 Forbidden`             | The request is authenticated but the user does not have the necessary permissions. |
-| `404 Not Found`             | The requested resource could not be found.                                         |
 | `409 Conflict`              | The request could not be completed due to a conflict (e.g., idempotent key reuse). |
+| `422 Unprocessable Entity`  | The profile content is malformed (discovery failure).                              |
+| `424 Failed Dependency`     | The profile URL is valid but fetch failed (discovery failure).                     |
 | `429 Too Many Requests`     | Rate limit exceeded.                                                               |
 | `503 Service Unavailable`   | Temporary unavailability.                                                          |
 | `500 Internal Server Error` | An unexpected condition was encountered on the server.                             |
 
 ### Error Responses
 
-Error responses follow the standard UCP error structure:
+See the [Core Specification](https://ucp.dev/draft/specification/overview/#error-handling) for negotiation error handling (discovery failures, negotiation failures).
+
+#### Business Outcomes
+
+Business outcomes (including errors like unavailable merchandise) are returned with HTTP 200 and the UCP envelope containing `messages`:
 
 ```json
 {
-  "status": "requires_escalation",
+  "ucp": {
+    "version": "2026-01-11",
+    "capabilities": {
+      "dev.ucp.shopping.checkout": [{"version": "2026-01-11"}]
+    }
+  },
+  "id": "checkout_abc123",
+  "status": "incomplete",
+  "line_items": [
+    {
+      "id": "item_456",
+      "quantity": 100,
+      "available_quantity": 12
+    }
+  ],
   "messages": [
     {
       "type": "error",
-      "code": "invalid_cart_items",
-      "content": "One or more cart items are invalid",
+      "code": "INSUFFICIENT_STOCK",
+      "content": "Requested 100 units but only 12 available",
       "severity": "requires_buyer_input",
+      "path": "$.line_items[0].quantity"
     }
-  ]
+  ],
+  "continue_url": "https://merchant.com/checkout/checkout_abc123"
 }
 ```
 
@@ -3990,28 +4107,42 @@ Maps to the [Cancel Checkout](https://ucp.dev/draft/specification/checkout/#canc
 
 ## Error Handling
 
-Error responses follow JSON-RPC 2.0 format while using the UCP error structure defined in the [Core Specification](https://ucp.dev/draft/specification/overview/index.md). The UCP error object is embedded in the JSON-RPC error's `data` field:
+See the [Core Specification](https://ucp.dev/draft/specification/overview/#error-handling) for negotiation error handling (discovery failures, negotiation failures).
+
+### Business Outcomes
+
+Business outcomes (including errors like unavailable merchandise) are returned as JSON-RPC `result` with the UCP envelope and `messages`:
 
 ```json
 {
   "jsonrpc": "2.0",
   "id": 1,
-  "error": {
-    "code": -32603,
-    "message": "Internal error",
-    "data": {
-      "status": "error",
-      "errors": [
-        {
-          "code": "MERCHANDISE_NOT_AVAILABLE",
-          "message": "One or more cart items are not available",
-          "severity": "requires_buyer_input",
-          "details": {
-            "invalid_items": ["sku_999"]
-          }
-        }
-      ]
-    }
+  "result": {
+    "ucp": {
+      "version": "2026-01-11",
+      "capabilities": {
+        "dev.ucp.shopping.checkout": [{"version": "2026-01-11"}]
+      }
+    },
+    "id": "checkout_abc123",
+    "status": "incomplete",
+    "line_items": [
+      {
+        "id": "item_456",
+        "quantity": 100,
+        "available_quantity": 12
+      }
+    ],
+    "messages": [
+      {
+        "type": "error",
+        "code": "INSUFFICIENT_STOCK",
+        "content": "Requested 100 units but only 12 available",
+        "severity": "requires_buyer_input",
+        "path": "$.line_items[0].quantity"
+      }
+    ],
+    "continue_url": "https://merchant.com/checkout/checkout_abc123"
   }
 }
 ```
@@ -4022,7 +4153,8 @@ A conforming MCP transport implementation **MUST**:
 
 1. Implement JSON-RPC 2.0 protocol correctly.
 1. Provide all core checkout tools defined in this specification.
-1. Handle errors with UCP-specific error codes embedded in the JSON-RPC error object.
+1. Return negotiation failures per the [Core Specification](https://ucp.dev/draft/specification/overview/#error-handling).
+1. Return business outcomes as JSON-RPC `result` with UCP envelope and `messages` array.
 1. Validate tool inputs against UCP schemas.
 1. Support HTTP transport with streaming.
 
@@ -7072,7 +7204,7 @@ If an incomplete checkout already exists for the given `cart_id`, the business M
 When checkout is initialized via `cart_id`, the cart and checkout sessions SHOULD be linked for the duration of the checkout.
 
 - **During active checkout** — Business SHOULD maintain the cart and reflect relevant checkout modifications (quantity changes, item removals) back to the cart. This supports back-to-storefront flows when buyers transition between checkout and storefront.
-- **After checkout completion** — Business MAY clear the cart based on TTL, completion of the checkout, or other business logic. Subsequent operations on a cleared cart ID return 404; the platform can start a new session with `create_cart`.
+- **After checkout completion** — Business MAY clear the cart based on TTL, completion of the checkout, or other business logic. Subsequent operations on a cleared cart ID return `NOT_FOUND`; the platform can start a new session with `create_cart`.
 
 ## Guidelines
 
@@ -7081,7 +7213,7 @@ When checkout is initialized via `cart_id`, the cart and checkout sessions SHOUL
 - **MAY** use carts for pre-purchase exploration and session persistence.
 - **SHOULD** convert cart to checkout when user expresses purchase intent.
 - **MAY** display `continue_url` for handoff to business UI.
-- **SHOULD** handle 404 gracefully when cart expires or is canceled.
+- **SHOULD** handle `NOT_FOUND` gracefully when cart expires or is canceled.
 
 ### Business
 
@@ -7129,7 +7261,7 @@ Creates a new cart session with line items and optional buyer/context informatio
 
 ### Get Cart
 
-Retrieves the latest state of a cart session. Returns 404 if the cart does not exist, has expired, or was canceled.
+Retrieves the latest state of a cart session. Returns `NOT_FOUND` if the cart does not exist, has expired, or was canceled.
 
 - [REST Binding](https://ucp.dev/draft/specification/cart-rest/#get-cart)
 - [MCP Binding](https://ucp.dev/draft/specification/cart-mcp/#get_cart)
@@ -7143,7 +7275,7 @@ Performs a full replacement of the cart session. The platform **MUST** send the 
 
 ### Cancel Cart
 
-Cancels a cart session. Business MUST return the cart state before deletion. Subsequent operations for this cart ID SHOULD return 404.
+Cancels a cart session. Business MUST return the cart state before deletion. Subsequent operations for this cart ID SHOULD return `NOT_FOUND`.
 
 - [REST Binding](https://ucp.dev/draft/specification/cart-rest/#cancel-cart)
 - [MCP Binding](https://ucp.dev/draft/specification/cart-mcp/#cancel_cart)
@@ -7484,8 +7616,29 @@ Content-Type: application/json
 }
 ```
 
-```text
-HTTP/1.1 404 Not Found
+```json
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "ucp": {
+    "version": "2026-01-15",
+    "capabilities": [
+      {
+        "name": "dev.ucp.shopping.cart",
+        "version": "2026-01-15"
+      }
+    ]
+  },
+  "messages": [
+    {
+      "type": "error",
+      "code": "NOT_FOUND",
+      "content": "Cart not found or has expired"
+    }
+  ],
+  "continue_url": "https://merchant.com/"
+}
 ```
 
 ### Update Cart
@@ -7714,37 +7867,37 @@ The following headers are defined for the HTTP binding and apply to all operatio
 | `400 Bad Request`           | The request was invalid or cannot be served.                                       |
 | `401 Unauthorized`          | Authentication is required and has failed or has not been provided.                |
 | `403 Forbidden`             | The request is authenticated but the user does not have the necessary permissions. |
-| `404 Not Found`             | The cart does not exist, has expired, or was canceled.                             |
 | `409 Conflict`              | The request could not be completed due to a conflict (e.g., idempotent key reuse). |
+| `422 Unprocessable Entity`  | The profile content is malformed (discovery failure).                              |
+| `424 Failed Dependency`     | The profile URL is valid but fetch failed (discovery failure).                     |
 | `429 Too Many Requests`     | Rate limit exceeded.                                                               |
 | `500 Internal Server Error` | An unexpected condition was encountered on the server.                             |
 | `503 Service Unavailable`   | Temporary unavailability.                                                          |
 
 ### Error Responses
 
-Transport errors (404, 500, etc.) are signaled via HTTP status code. The response body is optional.
+See the [Core Specification](https://ucp.dev/draft/specification/overview/#error-handling) for negotiation error handling (discovery failures, negotiation failures).
 
-Validation errors return HTTP 200 with the cart containing a `messages` array:
+#### Business Outcomes
+
+Business outcomes (including not found and validation errors) are returned with HTTP 200 and the UCP envelope containing `messages`:
 
 ```json
-HTTP/1.1 200 OK
-Content-Type: application/json
-
 {
-  "ucp": { ... },
-  "id": "cart_abc123",
-  "line_items": [ ... ],
-  "currency": "USD",
-  "totals": [ ... ],
+  "ucp": {
+    "version": "2026-01-11",
+    "capabilities": {
+      "dev.ucp.shopping.cart": [{"version": "2026-01-11"}]
+    }
+  },
   "messages": [
     {
       "type": "error",
-      "code": "invalid_quantity",
-      "path": "$.line_items[0].quantity",
-      "content": "Quantity must be at least 1"
+      "code": "NOT_FOUND",
+      "content": "Cart not found or has expired"
     }
   ],
-  "continue_url": "https://business.example.com/checkout?cart=cart_abc123"
+  "continue_url": "https://merchant.com/"
 }
 ```
 
@@ -8049,9 +8202,24 @@ Maps to the [Get Cart](https://ucp.dev/draft/specification/cart/#get-cart) opera
 {
   "jsonrpc": "2.0",
   "id": 1,
-  "error": {
-    "code": -32602,
-    "message": "Invalid params: cart not found"
+  "result": {
+    "ucp": {
+      "version": "2026-01-15",
+      "capabilities": [
+        {
+          "name": "dev.ucp.shopping.cart",
+          "version": "2026-01-15"
+        }
+      ]
+    },
+    "messages": [
+      {
+        "type": "error",
+        "code": "NOT_FOUND",
+        "content": "Cart not found or has expired"
+      }
+    ],
+    "continue_url": "https://merchant.com/"
   }
 }
 ```
@@ -8281,44 +8449,31 @@ Maps to the [Cancel Cart](https://ucp.dev/draft/specification/cart/#cancel-cart)
 
 ## Error Handling
 
-Error responses follow JSON-RPC 2.0 format.
+See the [Core Specification](https://ucp.dev/draft/specification/overview/#error-handling) for negotiation error handling (discovery failures, negotiation failures).
 
-### Not Found (-32602)
+### Business Outcomes
 
-Returned when cart does not exist, has expired, or was canceled:
-
-```json
-{
-  "jsonrpc": "2.0",
-  "id": 1,
-  "error": {
-    "code": -32602,
-    "message": "Invalid params: cart not found"
-  }
-}
-```
-
-### Validation Errors
-
-Validation errors are returned in the cart's `messages` array. The operation succeeds and returns the cart state with messages indicating issues:
+Business outcomes (including not found and validation errors) are returned as JSON-RPC `result` with the UCP envelope and `messages`:
 
 ```json
 {
   "jsonrpc": "2.0",
   "id": 1,
   "result": {
-    "ucp": { ... },
-    "id": "cart_abc123",
-    "line_items": [ ... ],
+    "ucp": {
+      "version": "2026-01-11",
+      "capabilities": {
+        "dev.ucp.shopping.cart": [{"version": "2026-01-11"}]
+      }
+    },
     "messages": [
       {
         "type": "error",
-        "code": "invalid_quantity",
-        "path": "$.line_items[0].quantity",
-        "content": "Quantity must be at least 1"
+        "code": "NOT_FOUND",
+        "content": "Cart not found or has expired"
       }
     ],
-    ...
+    "continue_url": "https://merchant.com/"
   }
 }
 ```
@@ -8329,7 +8484,8 @@ A conforming MCP transport implementation **MUST**:
 
 1. Implement JSON-RPC 2.0 protocol correctly.
 1. Provide all core cart tools defined in this specification.
-1. Handle errors with appropriate JSON-RPC error codes.
+1. Return negotiation failures per the [Core Specification](https://ucp.dev/draft/specification/overview/#error-handling).
+1. Return business outcomes as JSON-RPC `result` with UCP envelope and `messages` array.
 1. Validate tool inputs against UCP schemas.
 1. Support HTTP transport with streaming.
 # Order Capability

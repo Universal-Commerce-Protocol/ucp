@@ -240,8 +240,29 @@ Content-Type: application/json
 }
 ```
 
-```text
-HTTP/1.1 404 Not Found
+```json
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "ucp": {
+    "version": "2026-01-15",
+    "capabilities": [
+      {
+        "name": "dev.ucp.shopping.cart",
+        "version": "2026-01-15"
+      }
+    ]
+  },
+  "messages": [
+    {
+      "type": "error",
+      "code": "NOT_FOUND",
+      "content": "Cart not found or has expired"
+    }
+  ],
+  "continue_url": "https://merchant.com/"
+}
 ```
 
 ### Update Cart
@@ -470,37 +491,37 @@ The following headers are defined for the HTTP binding and apply to all operatio
 | `400 Bad Request`           | The request was invalid or cannot be served.                                       |
 | `401 Unauthorized`          | Authentication is required and has failed or has not been provided.                |
 | `403 Forbidden`             | The request is authenticated but the user does not have the necessary permissions. |
-| `404 Not Found`             | The cart does not exist, has expired, or was canceled.                             |
 | `409 Conflict`              | The request could not be completed due to a conflict (e.g., idempotent key reuse). |
+| `422 Unprocessable Entity`  | The profile content is malformed (discovery failure).                              |
+| `424 Failed Dependency`     | The profile URL is valid but fetch failed (discovery failure).                     |
 | `429 Too Many Requests`     | Rate limit exceeded.                                                               |
 | `500 Internal Server Error` | An unexpected condition was encountered on the server.                             |
 | `503 Service Unavailable`   | Temporary unavailability.                                                          |
 
 ### Error Responses
 
-Transport errors (404, 500, etc.) are signaled via HTTP status code. The response body is optional.
+See the [Core Specification](https://ucp.dev/draft/specification/overview/#error-handling) for negotiation error handling (discovery failures, negotiation failures).
 
-Validation errors return HTTP 200 with the cart containing a `messages` array:
+#### Business Outcomes
+
+Business outcomes (including not found and validation errors) are returned with HTTP 200 and the UCP envelope containing `messages`:
 
 ```json
-HTTP/1.1 200 OK
-Content-Type: application/json
-
 {
-  "ucp": { ... },
-  "id": "cart_abc123",
-  "line_items": [ ... ],
-  "currency": "USD",
-  "totals": [ ... ],
+  "ucp": {
+    "version": "2026-01-11",
+    "capabilities": {
+      "dev.ucp.shopping.cart": [{"version": "2026-01-11"}]
+    }
+  },
   "messages": [
     {
       "type": "error",
-      "code": "invalid_quantity",
-      "path": "$.line_items[0].quantity",
-      "content": "Quantity must be at least 1"
+      "code": "NOT_FOUND",
+      "content": "Cart not found or has expired"
     }
   ],
-  "continue_url": "https://business.example.com/checkout?cart=cart_abc123"
+  "continue_url": "https://merchant.com/"
 }
 ```
 

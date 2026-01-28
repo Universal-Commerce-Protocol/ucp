@@ -530,28 +530,42 @@ Maps to the [Cancel Checkout](https://ucp.dev/draft/specification/checkout/#canc
 
 ## Error Handling
 
-Error responses follow JSON-RPC 2.0 format while using the UCP error structure defined in the [Core Specification](https://ucp.dev/draft/specification/overview/index.md). The UCP error object is embedded in the JSON-RPC error's `data` field:
+See the [Core Specification](https://ucp.dev/draft/specification/overview/#error-handling) for negotiation error handling (discovery failures, negotiation failures).
+
+### Business Outcomes
+
+Business outcomes (including errors like unavailable merchandise) are returned as JSON-RPC `result` with the UCP envelope and `messages`:
 
 ```json
 {
   "jsonrpc": "2.0",
   "id": 1,
-  "error": {
-    "code": -32603,
-    "message": "Internal error",
-    "data": {
-      "status": "error",
-      "errors": [
-        {
-          "code": "MERCHANDISE_NOT_AVAILABLE",
-          "message": "One or more cart items are not available",
-          "severity": "requires_buyer_input",
-          "details": {
-            "invalid_items": ["sku_999"]
-          }
-        }
-      ]
-    }
+  "result": {
+    "ucp": {
+      "version": "2026-01-11",
+      "capabilities": {
+        "dev.ucp.shopping.checkout": [{"version": "2026-01-11"}]
+      }
+    },
+    "id": "checkout_abc123",
+    "status": "incomplete",
+    "line_items": [
+      {
+        "id": "item_456",
+        "quantity": 100,
+        "available_quantity": 12
+      }
+    ],
+    "messages": [
+      {
+        "type": "error",
+        "code": "INSUFFICIENT_STOCK",
+        "content": "Requested 100 units but only 12 available",
+        "severity": "requires_buyer_input",
+        "path": "$.line_items[0].quantity"
+      }
+    ],
+    "continue_url": "https://merchant.com/checkout/checkout_abc123"
   }
 }
 ```
@@ -562,7 +576,8 @@ A conforming MCP transport implementation **MUST**:
 
 1. Implement JSON-RPC 2.0 protocol correctly.
 1. Provide all core checkout tools defined in this specification.
-1. Handle errors with UCP-specific error codes embedded in the JSON-RPC error object.
+1. Return negotiation failures per the [Core Specification](https://ucp.dev/draft/specification/overview/#error-handling).
+1. Return business outcomes as JSON-RPC `result` with UCP envelope and `messages` array.
 1. Validate tool inputs against UCP schemas.
 1. Support HTTP transport with streaming.
 

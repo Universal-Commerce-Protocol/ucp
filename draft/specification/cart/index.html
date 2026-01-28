@@ -2366,8 +2366,8 @@ SHOULD be linked for the duration of the checkout.</p>
 <li>
 <p><strong>After checkout completion</strong> — Business MAY clear the cart based on TTL,
     completion of the checkout, or other business logic. Subsequent operations
-    on a cleared cart ID return 404; the platform can start a new session with
-    <code>create_cart</code>.</p>
+    on a cleared cart ID return <code>NOT_FOUND</code>; the platform can start a new
+    session with <code>create_cart</code>.</p>
 </li>
 </ul>
 <h2 id="guidelines">Guidelines<a class="headerlink" href="#guidelines" title="Permanent link">&para;</a></h2>
@@ -2376,7 +2376,7 @@ SHOULD be linked for the duration of the checkout.</p>
 <li><strong>MAY</strong> use carts for pre-purchase exploration and session persistence.</li>
 <li><strong>SHOULD</strong> convert cart to checkout when user expresses purchase intent.</li>
 <li><strong>MAY</strong> display <code>continue_url</code> for handoff to business UI.</li>
-<li><strong>SHOULD</strong> handle 404 gracefully when cart expires or is canceled.</li>
+<li><strong>SHOULD</strong> handle <code>NOT_FOUND</code> gracefully when cart expires or is canceled.</li>
 </ul>
 <h3 id="business">Business<a class="headerlink" href="#business" title="Permanent link">&para;</a></h3>
 <ul>
@@ -2504,7 +2504,7 @@ information for localized pricing estimates.</p>
 <li><a href="../cart-mcp/#create_cart">MCP Binding</a></li>
 </ul>
 <h3 id="get-cart">Get Cart<a class="headerlink" href="#get-cart" title="Permanent link">&para;</a></h3>
-<p>Retrieves the latest state of a cart session. Returns 404 if the cart
+<p>Retrieves the latest state of a cart session. Returns <code>NOT_FOUND</code> if the cart
 does not exist, has expired, or was canceled.</p>
 <ul>
 <li><a href="../cart-rest/#get-cart">REST Binding</a></li>
@@ -2520,7 +2520,7 @@ state on the business side.</p>
 </ul>
 <h3 id="cancel-cart">Cancel Cart<a class="headerlink" href="#cancel-cart" title="Permanent link">&para;</a></h3>
 <p>Cancels a cart session. Business MUST return the cart state before deletion.
-Subsequent operations for this cart ID SHOULD return 404.</p>
+Subsequent operations for this cart ID SHOULD return <code>NOT_FOUND</code>.</p>
 <ul>
 <li><a href="../cart-rest/#cancel-cart">REST Binding</a></li>
 <li><a href="../cart-mcp/#cancel_cart">MCP Binding</a></li>
