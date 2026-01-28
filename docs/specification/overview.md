@@ -505,16 +505,18 @@ metadata:
 ```json
 {
   "jsonrpc": "2.0",
-  "method": "create_checkout",
+  "method": "tools/call",
   "params": {
-    "meta": {
-      "ucp-agent": {
-        "profile": "https://agent.example/profiles/shopping-agent.json"
+    "name": "create_checkout",
+    "arguments": {
+      "meta": {
+        "ucp-agent": {
+          "profile": "https://agent.example/profiles/shopping-agent.json"
+        }
       },
-      "idempotency-key": "550e8400-e29b-41d4-a716-446655440000"
-    },
-    "checkout": {
-      "line_items": [...]
+      "checkout": {
+        "line_items": [...]
+      }
     }
   },
   "id": 1
@@ -673,19 +675,24 @@ task through the standard web interface.
       "jsonrpc": "2.0",
       "id": 1,
       "result": {
-        "ucp": {
-          "version": "2026-01-11",
-          "capabilities": {}
+        "structuredContent": {
+          "ucp": {
+            "version": "2026-01-11",
+            "capabilities": {}
+          },
+          "messages": [
+            {
+              "type": "error",
+              "code": "VERSION_UNSUPPORTED",
+              "content": "Platform UCP version 2024-01-01 is not supported",
+              "severity": "requires_buyer_input"
+            }
+          ],
+          "continue_url": "https://merchant.com/cart"
         },
-        "messages": [
-          {
-            "type": "error",
-            "code": "VERSION_UNSUPPORTED",
-            "content": "Platform UCP version 2024-01-01 is not supported",
-            "severity": "requires_buyer_input"
-          }
-        ],
-        "continue_url": "https://merchant.com/cart"
+        "content": [
+          {"type": "text", "text": "{\"ucp\":{...},\"messages\":[...],\"continue_url\":\"...\"}"}
+        ]
       }
     }
     ```
