@@ -57,29 +57,14 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libcairo2-dev libfreetype6-dev libffi-dev libjpeg-dev libpng-dev libz-dev
 
-      - name: Setup Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: 3.13
-
-      - name: Restore pip cache
-        uses: actions/cache@v4
-        with:
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements-docs.txt') }}
-          path: ~/.cache/pip
-          restore-keys: |
-            ${{ runner.os }}-pip-
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@v7
 
       - name: Install documentation dependencies
-        run: pip install -r requirements-docs.txt
+        run: uv sync
 
       - name: Lint YAML files
-        run: yamllint -c .github/linters/.yamllint.yml .
-
-      - name: Install uv
-        run: |
-          curl -LsSf https://astral.sh/uv/install.sh | sh
-          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+        run: uv run yamllint -c .github/linters/.yamllint.yml .
 
       - name: Check for changed files in spec
         id: spec_files_changed
@@ -102,12 +87,12 @@ jobs:
 
       - name: Build Documentation (PR Check)
         if: github.event_name == 'pull_request'
-        run: mkdocs build --strict
+        run: uv run mkdocs build --strict
 
       - name: Deploy development version from main branch
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
-          mike deploy --push draft
+          uv run mike deploy --push draft
 
       - name: Deploy release version
         if: startsWith(github.ref, 'refs/heads/release/')
@@ -116,8 +101,8 @@ jobs:
           VERSION_NAME=${GITHUB_REF#refs/heads/release/}
 
           # Deploy this version, tag it as 'latest', and set it as the default site root
-          mike deploy --push --update-aliases $VERSION_NAME latest
-          mike set-default --push latest
+          uv run mike deploy --push --update-aliases $VERSION_NAME latest
+          uv run mike set-default --push latest
 
       - name: Create GitHub Release and Tag
         if: startsWith(github.ref, 'refs/heads/release/')

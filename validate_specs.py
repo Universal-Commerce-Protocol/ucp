@@ -14,7 +14,7 @@
 
 """Standalone script to validate JSON and YAML syntax in the 'spec' folder.
 
-Usage: python validate_specs.py
+Usage: uv run validate_specs.py
 """
 
 import json
