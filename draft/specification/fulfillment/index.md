@@ -1,7 +1,5 @@
 # Fulfillment Extension
 
-**Version:** `2026-01-11`
-
 ## Overview
 
 The fulfillment extension enables businesses to advertise support for physical goods fulfillment (shipping, pickup, etc).
@@ -35,33 +33,31 @@ Fulfillment applies only to items requiring physical delivery. Items not requiri
 
 ### Properties
 
-| Name        | Type                                                         | Required | Description          |
-| ----------- | ------------------------------------------------------------ | -------- | -------------------- |
-| fulfillment | [Fulfillment](/draft/specification/fulfillment/#fulfillment) | No       | Fulfillment details. |
+**Error loading extension 'fulfillment_resp':** [Errno 2] No such file or directory: 'source/schemas/shopping/fulfillment_resp.json'
 
 ### Entities
 
 #### Fulfillment
 
-| Name              | Type                                                                                                                      | Required | Description                         |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------- | -------- | ----------------------------------- |
-| methods           | Array\[[Fulfillment Method Response](/draft/specification/fulfillment/#fulfillment-method-response)\]                     | No       | Fulfillment methods for cart items. |
-| available_methods | Array\[[Fulfillment Available Method Response](/draft/specification/fulfillment/#fulfillment-available-method-response)\] | No       | Inventory availability hints.       |
+| Name              | Type                                                                                                    | Required | Description                         |
+| ----------------- | ------------------------------------------------------------------------------------------------------- | -------- | ----------------------------------- |
+| methods           | Array\[[Fulfillment Method](/draft/specification/fulfillment/#fulfillment-method)\]                     | No       | Fulfillment methods for cart items. |
+| available_methods | Array\[[Fulfillment Available Method](/draft/specification/fulfillment/#fulfillment-available-method)\] | No       | Inventory availability hints.       |
 
 #### Fulfillment Method Response
 
-| Name                    | Type                                                                                                            | Required | Description                                                                                                  |
-| ----------------------- | --------------------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------ |
-| id                      | string                                                                                                          | **Yes**  | Unique fulfillment method identifier.                                                                        |
-| type                    | string                                                                                                          | **Yes**  | Fulfillment method type. **Enum:** `shipping`, `pickup`                                                      |
-| line_item_ids           | Array[string]                                                                                                   | **Yes**  | Line item IDs fulfilled via this method.                                                                     |
-| destinations            | Array\[[Fulfillment Destination Response](/draft/specification/fulfillment/#fulfillment-destination-response)\] | No       | Available destinations. For shipping: addresses. For pickup: retail locations.                               |
-| selected_destination_id | ['string', 'null']                                                                                              | No       | ID of the selected destination.                                                                              |
-| groups                  | Array\[[Fulfillment Group Response](/draft/specification/fulfillment/#fulfillment-group-response)\]             | No       | Fulfillment groups for selecting options. Agent sets selected_option_id on groups to choose shipping method. |
+| Name                    | Type                                                                                          | Required | Description                                                                                                  |
+| ----------------------- | --------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------ |
+| id                      | string                                                                                        | **Yes**  | Unique fulfillment method identifier.                                                                        |
+| type                    | string                                                                                        | **Yes**  | Fulfillment method type. **Enum:** `shipping`, `pickup`                                                      |
+| line_item_ids           | Array[string]                                                                                 | **Yes**  | Line item IDs fulfilled via this method.                                                                     |
+| destinations            | Array\[[Fulfillment Destination](/draft/specification/fulfillment/#fulfillment-destination)\] | No       | Available destinations. For shipping: addresses. For pickup: retail locations.                               |
+| selected_destination_id | ['string', 'null']                                                                            | No       | ID of the selected destination.                                                                              |
+| groups                  | Array\[[Fulfillment Group](/draft/specification/fulfillment/#fulfillment-group)\]             | No       | Fulfillment groups for selecting options. Agent sets selected_option_id on groups to choose shipping method. |
 
 #### Fulfillment Destination Response
 
-This object MUST be one of the following types: [Shipping Destination Response](/draft/specification/fulfillment/#shipping-destination-response), [Retail Location Response](/draft/specification/fulfillment/#retail-location-response).
+This object MUST be one of the following types: [Shipping Destination](/draft/specification/fulfillment/#shipping-destination), [Retail Location](/draft/specification/fulfillment/#retail-location).
 
 #### Shipping Destination Response
 
@@ -88,24 +84,24 @@ This object MUST be one of the following types: [Shipping Destination Response](
 
 #### Fulfillment Group Response
 
-| Name               | Type                                                                                                  | Required | Description                                                            |
-| ------------------ | ----------------------------------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------- |
-| id                 | string                                                                                                | **Yes**  | Group identifier for referencing merchant-generated groups in updates. |
-| line_item_ids      | Array[string]                                                                                         | **Yes**  | Line item IDs included in this group/package.                          |
-| options            | Array\[[Fulfillment Option Response](/draft/specification/fulfillment/#fulfillment-option-response)\] | No       | Available fulfillment options for this group.                          |
-| selected_option_id | ['string', 'null']                                                                                    | No       | ID of the selected fulfillment option for this group.                  |
+| Name               | Type                                                                                | Required | Description                                                            |
+| ------------------ | ----------------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------- |
+| id                 | string                                                                              | **Yes**  | Group identifier for referencing merchant-generated groups in updates. |
+| line_item_ids      | Array[string]                                                                       | **Yes**  | Line item IDs included in this group/package.                          |
+| options            | Array\[[Fulfillment Option](/draft/specification/fulfillment/#fulfillment-option)\] | No       | Available fulfillment options for this group.                          |
+| selected_option_id | ['string', 'null']                                                                  | No       | ID of the selected fulfillment option for this group.                  |
 
 #### Fulfillment Option Response
 
-| Name                      | Type                                                                        | Required | Description                                                                |
-| ------------------------- | --------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------- |
-| id                        | string                                                                      | **Yes**  | Unique fulfillment option identifier.                                      |
-| title                     | string                                                                      | **Yes**  | Short label (e.g., 'Express Shipping', 'Curbside Pickup').                 |
-| description               | string                                                                      | No       | Complete context for buyer decision (e.g., 'Arrives Dec 12-15 via FedEx'). |
-| carrier                   | string                                                                      | No       | Carrier name (for shipping).                                               |
-| earliest_fulfillment_time | string                                                                      | No       | Earliest fulfillment date.                                                 |
-| latest_fulfillment_time   | string                                                                      | No       | Latest fulfillment date.                                                   |
-| totals                    | Array\[[Total Response](/draft/specification/fulfillment/#total-response)\] | **Yes**  | Fulfillment option totals breakdown.                                       |
+| Name                      | Type                                                      | Required | Description                                                                |
+| ------------------------- | --------------------------------------------------------- | -------- | -------------------------------------------------------------------------- |
+| id                        | string                                                    | **Yes**  | Unique fulfillment option identifier.                                      |
+| title                     | string                                                    | **Yes**  | Short label (e.g., 'Express Shipping', 'Curbside Pickup').                 |
+| description               | string                                                    | No       | Complete context for buyer decision (e.g., 'Arrives Dec 12-15 via FedEx'). |
+| carrier                   | string                                                    | No       | Carrier name (for shipping).                                               |
+| earliest_fulfillment_time | string                                                    | No       | Earliest fulfillment date.                                                 |
+| latest_fulfillment_time   | string                                                    | No       | Latest fulfillment date.                                                   |
+| totals                    | Array\[[Total](/draft/specification/fulfillment/#total)\] | **Yes**  | Fulfillment option totals breakdown.                                       |
 
 #### Fulfillment Available Method Response
 

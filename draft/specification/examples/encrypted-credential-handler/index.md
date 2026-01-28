@@ -1,7 +1,6 @@
 # Encrypted Credential Handler
 
 - **Handler Name:** `com.example.encrypted_credential`
-- **Version:** `2026-01-11`
 - **Type:** Payment Handler Example
 
 ## Introduction

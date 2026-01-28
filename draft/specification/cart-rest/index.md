@@ -68,11 +68,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
 #### Input Schema
 
-| Name       | Type                                                                                     | Required | Description                                                                                                                                        |
-| ---------- | ---------------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| line_items | Array\[[Line Item Create Request](/draft/specification/cart/#line-item-create-request)\] | **Yes**  | Cart line items. Same structure as checkout. Full replacement on update.                                                                           |
-| context    | [Context](/draft/specification/cart/#context)                                            | No       | Buyer signals for localization (country, region, postal_code). Merchant uses for pricing, availability, currency. Falls back to geo-IP if omitted. |
-| buyer      | [Buyer](/draft/specification/cart/#buyer)                                                | No       | Optional buyer information for personalized estimates.                                                                                             |
+**Error:** Schema 'cart.create' not found in any schema directory.
 
 #### Output Schema
 
@@ -87,7 +83,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 | totals       | Array\[[Total Response](/draft/specification/cart/#total-response)\]            | **Yes**  | Estimated cost breakdown. May be partial if shipping/tax not yet calculable.                                                                       |
 | messages     | Array\[[Message](/draft/specification/cart/#message)\]                          | No       | Validation messages, warnings, or informational notices.                                                                                           |
 | links        | Array\[[Link](/draft/specification/cart/#link)\]                                | No       | Optional merchant links (policies, FAQs).                                                                                                          |
-| checkout_url | string                                                                          | **Yes**  | URL to convert cart to checkout. Always provided by merchant. Enables sharing, recovery, and cart-to-checkout conversion.                          |
+| continue_url | string                                                                          | No       | URL for cart handoff and session recovery. Enables sharing and human-in-the-loop flows.                                                            |
 | expires_at   | string                                                                          | No       | Cart expiry timestamp (RFC 3339). Optional.                                                                                                        |
 
 #### Example
@@ -184,7 +180,7 @@ Content-Type: application/json
 | totals       | Array\[[Total Response](/draft/specification/cart/#total-response)\]            | **Yes**  | Estimated cost breakdown. May be partial if shipping/tax not yet calculable.                                                                       |
 | messages     | Array\[[Message](/draft/specification/cart/#message)\]                          | No       | Validation messages, warnings, or informational notices.                                                                                           |
 | links        | Array\[[Link](/draft/specification/cart/#link)\]                                | No       | Optional merchant links (policies, FAQs).                                                                                                          |
-| checkout_url | string                                                                          | **Yes**  | URL to convert cart to checkout. Always provided by merchant. Enables sharing, recovery, and cart-to-checkout conversion.                          |
+| continue_url | string                                                                          | No       | URL for cart handoff and session recovery. Enables sharing and human-in-the-loop flows.                                                            |
 | expires_at   | string                                                                          | No       | Cart expiry timestamp (RFC 3339). Optional.                                                                                                        |
 
 #### Example
@@ -254,12 +250,7 @@ HTTP/1.1 404 Not Found
 
 - `id` (String, required): The cart session ID (path parameter).
 
-| Name       | Type                                                                                     | Required | Description                                                                                                                                        |
-| ---------- | ---------------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| id         | string                                                                                   | **Yes**  | Unique cart identifier.                                                                                                                            |
-| line_items | Array\[[Line Item Update Request](/draft/specification/cart/#line-item-update-request)\] | **Yes**  | Cart line items. Same structure as checkout. Full replacement on update.                                                                           |
-| context    | [Context](/draft/specification/cart/#context)                                            | No       | Buyer signals for localization (country, region, postal_code). Merchant uses for pricing, availability, currency. Falls back to geo-IP if omitted. |
-| buyer      | [Buyer](/draft/specification/cart/#buyer)                                                | No       | Optional buyer information for personalized estimates.                                                                                             |
+**Error:** Schema 'cart.update' not found in any schema directory.
 
 #### Output Schema
 
@@ -274,7 +265,7 @@ HTTP/1.1 404 Not Found
 | totals       | Array\[[Total Response](/draft/specification/cart/#total-response)\]            | **Yes**  | Estimated cost breakdown. May be partial if shipping/tax not yet calculable.                                                                       |
 | messages     | Array\[[Message](/draft/specification/cart/#message)\]                          | No       | Validation messages, warnings, or informational notices.                                                                                           |
 | links        | Array\[[Link](/draft/specification/cart/#link)\]                                | No       | Optional merchant links (policies, FAQs).                                                                                                          |
-| checkout_url | string                                                                          | **Yes**  | URL to convert cart to checkout. Always provided by merchant. Enables sharing, recovery, and cart-to-checkout conversion.                          |
+| continue_url | string                                                                          | No       | URL for cart handoff and session recovery. Enables sharing and human-in-the-loop flows.                                                            |
 | expires_at   | string                                                                          | No       | Cart expiry timestamp (RFC 3339). Optional.                                                                                                        |
 
 #### Example
@@ -392,7 +383,7 @@ Content-Type: application/json
 | totals       | Array\[[Total Response](/draft/specification/cart/#total-response)\]            | **Yes**  | Estimated cost breakdown. May be partial if shipping/tax not yet calculable.                                                                       |
 | messages     | Array\[[Message](/draft/specification/cart/#message)\]                          | No       | Validation messages, warnings, or informational notices.                                                                                           |
 | links        | Array\[[Link](/draft/specification/cart/#link)\]                                | No       | Optional merchant links (policies, FAQs).                                                                                                          |
-| checkout_url | string                                                                          | **Yes**  | URL to convert cart to checkout. Always provided by merchant. Enables sharing, recovery, and cart-to-checkout conversion.                          |
+| continue_url | string                                                                          | No       | URL for cart handoff and session recovery. Enables sharing and human-in-the-loop flows.                                                            |
 | expires_at   | string                                                                          | No       | Cart expiry timestamp (RFC 3339). Optional.                                                                                                        |
 
 #### Example
@@ -458,20 +449,7 @@ Content-Type: application/json
 
 The following headers are defined for the HTTP binding and apply to all operations unless otherwise noted.
 
-**Request Headers**
-
-| Header              | Required | Description                                                                                                                                                                                   |
-| ------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Authorization`     | No       | Should contain oauth token representing the following 2 schemes: 1. Platform self authenticating (client_credentials). 2. Platform authenticating on behalf of end user (authorization_code). |
-| `X-API-Key`         | No       | Authenticates the platform with a reusable api key allocated to the platform by the business.                                                                                                 |
-| `Request-Signature` | **Yes**  | Ensure the authenticity and integrity of an HTTP message.                                                                                                                                     |
-| `Idempotency-Key`   | **Yes**  | Ensures duplicate operations don't happen during retries.                                                                                                                                     |
-| `Request-Id`        | **Yes**  | For tracing the requests across network layers and components.                                                                                                                                |
-| `User-Agent`        | No       | Identifies the user agent string making the call.                                                                                                                                             |
-| `Content-Type`      | No       | Representation Metadata. Tells the receiver what the data in the message body actually is.                                                                                                    |
-| `Accept`            | No       | Content Negotiation. The client tells the server what data formats it is capable of understanding.                                                                                            |
-| `Accept-Language`   | No       | Localization. Tells the receiver the user's preferred natural languages, often with "weights" or priorities.                                                                                  |
-| `Accept-Encoding`   | No       | Compression. The client tells the server which content-codings it supports, usually for compression                                                                                           |
+**Error processing OpenAPI:** [Errno 2] No such file or directory: 'source/services/shopping/rest.openapi.json'
 
 ### Specific Header Requirements
 

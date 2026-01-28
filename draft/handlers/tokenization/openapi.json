@@ -23,11 +23,11 @@
                 ],
                 "properties": {
                   "credential": {
-                    "$ref": "https://ucp.dev/schemas/shopping/types/payment_credential.json",
+                    "$ref": "https://ucp.dev/draft/schemas/shopping/types/payment_credential.json",
                     "description": "Credential to tokenize. Handlers define accepted credential types in their specification."
                   },
                   "binding": {
-                    "$ref": "https://ucp.dev/schemas/shopping/types/binding.json",
+                    "$ref": "https://ucp.dev/draft/schemas/shopping/types/binding.json",
                     "description": "Binding context that ties this token to a specific checkout and participant identity."
                   }
                 }
@@ -147,7 +147,7 @@
                     "description": "The token value."
                   },
                   "binding": {
-                    "$ref": "https://ucp.dev/schemas/shopping/types/binding.json",
+                    "$ref": "https://ucp.dev/draft/schemas/shopping/types/binding.json",
                     "description": "Binding context that must match the original tokenization request."
                   }
                 }
@@ -184,7 +184,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "https://ucp.dev/schemas/shopping/types/payment_credential.json"
+                  "$ref": "https://ucp.dev/draft/schemas/shopping/types/payment_credential.json"
                 },
                 "examples": {
                   "card_credential_fpan": {

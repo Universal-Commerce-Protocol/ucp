@@ -1,7 +1,5 @@
 # Payment Handler Specification Guide
 
-**Version:** `2026-01-11`
-
 ## Introduction
 
 This guide defines the standard structure and vocabulary for specifying UCP payment handlers. All payment handler specifications **SHOULD** follow this structure to ensure consistency, completeness, and clarity for implementers.

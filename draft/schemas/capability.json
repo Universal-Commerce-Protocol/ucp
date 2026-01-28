@@ -1,13 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/schemas/capability.json",
+  "$id": "https://ucp.dev/draft/schemas/capability.json",
   "title": "UCP Capability",
   "description": "Schema for UCP capabilities and extensions. Extensions are capabilities with an 'extends' field. Uses reverse-domain naming for governance.",
   "$defs": {
     "base": {
       "allOf": [
         {
-          "$ref": "https://ucp.dev/schemas/ucp.json#/$defs/entity"
+          "$ref": "https://ucp.dev/draft/schemas/ucp.json#/$defs/entity"
         },
         {
           "type": "object",

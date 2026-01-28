@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/schemas/shopping/types/account_info.json",
+  "$id": "https://ucp.dev/draft/schemas/shopping/types/account_info.json",
   "title": "Payment Account Info",
   "type": "object",
   "description": "Non-sensitive backend identifiers for linking.",

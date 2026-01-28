@@ -2345,7 +2345,6 @@
 -->
 
 <h1 id="ap2-mandates-extension">AP2 Mandates Extension<a class="headerlink" href="#ap2-mandates-extension" title="Permanent link">&para;</a></h1>
-<p><strong>Version:</strong> <code>2026-01-11</code></p>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
 <p>The AP2 Mandates extension enables the secure exchange of user intents and
 authorizations using <strong>Verifiable Digital Credentials</strong>. It extends the
@@ -2578,7 +2577,102 @@ a completion request without mandates <strong>MUST</strong> result in a session 
 <h3 id="step-1-checkout-creation-signing">Step 1: Checkout Creation &amp; Signing<a class="headerlink" href="#step-1-checkout-creation-signing" title="Permanent link">&para;</a></h3>
 <p>The platform initiates the session. The business returns the <code>Checkout</code> object
 with <code>ap2.merchant_authorization</code> embedded in the response body.</p>
-<p><strong>Error:</strong> Schema file 'ap2_mandate.json' not found in any schema directory.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">ucp</td>
+<td style="text-align: left;">any</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">UCP metadata for checkout responses.</td>
+</tr>
+<tr>
+<td style="text-align: left;">id</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Unique identifier of the checkout session.</td>
+</tr>
+<tr>
+<td style="text-align: left;">line_items</td>
+<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">List of line items being checked out.</td>
+</tr>
+<tr>
+<td style="text-align: left;">buyer</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Representation of the buyer.</td>
+</tr>
+<tr>
+<td style="text-align: left;">status</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details.<br><strong>Enum:</strong> <code>incomplete</code>, <code>requires_escalation</code>, <code>ready_for_complete</code>, <code>complete_in_progress</code>, <code>completed</code>, <code>canceled</code></td>
+</tr>
+<tr>
+<td style="text-align: left;">currency</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.</td>
+</tr>
+<tr>
+<td style="text-align: left;">totals</td>
+<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Different cart totals.</td>
+</tr>
+<tr>
+<td style="text-align: left;">messages</td>
+<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">List of messages with error and info about the checkout session state.</td>
+</tr>
+<tr>
+<td style="text-align: left;">links</td>
+<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.</td>
+</tr>
+<tr>
+<td style="text-align: left;">expires_at</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.</td>
+</tr>
+<tr>
+<td style="text-align: left;">continue_url</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">URL for checkout handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements.</td>
+</tr>
+<tr>
+<td style="text-align: left;">payment</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Payment configuration containing handlers.</td>
+</tr>
+<tr>
+<td style="text-align: left;">order</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Details about an order created for this checkout session.</td>
+</tr>
+<tr>
+<td style="text-align: left;">ap2</td>
+<td style="text-align: left;">any</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;"></td>
+</tr>
+</tbody>
+</table>
 <p><strong>Example Response:</strong></p>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="p">{</span>
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;chk_abc123&quot;</span><span class="p">,</span>
@@ -2647,7 +2741,24 @@ Binding (+kb) signature.</p>
 <h3 id="step-3-submission-complete_checkout">Step 3: Submission (<code>complete_checkout</code>)<a class="headerlink" href="#step-3-submission-complete_checkout" title="Permanent link">&para;</a></h3>
 <p>Once the mandates are generated, the platform submits them in the completion
 request:</p>
-<p><strong>Error:</strong> Schema file 'ap2_mandate.json' not found in any schema directory.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">checkout_mandate</td>
+<td style="text-align: left;"><a href="/draft/specification/ap2-mandates/#checkout-mandate">Checkout Mandate</a></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">SD-JWT+kb proving user authorized this checkout.</td>
+</tr>
+</tbody>
+</table>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="p">{</span>
 </span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">  </span><span class="nt">&quot;payment&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 </span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">    </span><span class="nt">&quot;instruments&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
@@ -2727,17 +2838,54 @@ including signature validation, expiration, and correlation with the
 checkout.</p>
 <h2 id="schema">Schema<a class="headerlink" href="#schema" title="Permanent link">&para;</a></h2>
 <h3 id="business-authorization_1">Business Authorization<a class="headerlink" href="#business-authorization_1" title="Permanent link">&para;</a></h3>
-<p><strong>Error:</strong> Schema file 'ap2_mandate.json' not found in any schema directory.</p>
+<p>JWS Detached Content signature (RFC 7515 Appendix F) over the checkout response body (excluding ap2 field). Format: <code>&lt;base64url-header&gt;..&lt;base64url-signature&gt;</code>. The header MUST contain 'alg' (ES256/ES384/ES512) and 'kid' claims. The signature covers both the header and JCS-canonicalized checkout payload.</p>
+<p><strong>Pattern:</strong> <code>^[A-Za-z0-9_-]+\.\.[A-Za-z0-9_-]+$</code></p>
 <h3 id="ap2-checkout-response">AP2 Checkout Response<a class="headerlink" href="#ap2-checkout-response" title="Permanent link">&para;</a></h3>
 <p>The <code>ap2</code> object included in checkout responses.</p>
-<p><strong>Error:</strong> Schema file 'ap2_mandate.json' not found in any schema directory.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">merchant_authorization</td>
+<td style="text-align: left;"><a href="/draft/specification/ap2-mandates/#merchant-authorization">Merchant Authorization</a></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Merchant's signature proving checkout terms are authentic.</td>
+</tr>
+</tbody>
+</table>
 <h3 id="checkout-mandate">Checkout Mandate<a class="headerlink" href="#checkout-mandate" title="Permanent link">&para;</a></h3>
-<p><strong>Error:</strong> Schema file 'ap2_mandate.json' not found in any schema directory.</p>
+<p>SD-JWT+kb credential in <code>ap2.checkout_mandate</code>. Proving user authorization for the checkout. Contains the full checkout including <code>ap2.merchant_authorization</code>.</p>
+<p><strong>Pattern:</strong> <code>^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]*\.[A-Za-z0-9_-]+(~[A-Za-z0-9_-]+)*$</code></p>
 <h3 id="ap2-complete-request">AP2 Complete Request<a class="headerlink" href="#ap2-complete-request" title="Permanent link">&para;</a></h3>
 <p>The <code>ap2</code> object included in COMPLETE checkout requests.</p>
-<p><strong>Error:</strong> Schema file 'ap2_mandate.json' not found in any schema directory.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">checkout_mandate</td>
+<td style="text-align: left;"><a href="/draft/specification/ap2-mandates/#checkout-mandate">Checkout Mandate</a></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">SD-JWT+kb proving user authorized this checkout.</td>
+</tr>
+</tbody>
+</table>
 <h3 id="error-codes">Error Codes<a class="headerlink" href="#error-codes" title="Permanent link">&para;</a></h3>
-<p><strong>Error:</strong> Schema file 'ap2_mandate.json' not found in any schema directory.</p>
+<p>Error codes specific to AP2 mandate verification.</p>
+<p><strong>Enum:</strong> <code>mandate_required</code>, <code>agent_missing_key</code>, <code>mandate_invalid_signature</code>, <code>mandate_expired</code>, <code>mandate_scope_mismatch</code>, <code>merchant_authorization_invalid</code>, <code>merchant_authorization_missing</code></p>
 <table>
 <thead>
 <tr>
@@ -2769,10 +2917,6 @@ checkout.</p>
 <tr>
 <td style="text-align: left;"><code>merchant_authorization_invalid</code></td>
 <td style="text-align: left;">The business authorization signature could not be verified.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><code>merchant_authorization_missing</code></td>
-<td style="text-align: left;">AP2 negotiated but response lacks <code>ap2.merchant_authorization</code>.</td>
 </tr>
 </tbody>
 </table>

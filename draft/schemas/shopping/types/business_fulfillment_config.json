@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/schemas/shopping/types/business_fulfillment_config.json",
+  "$id": "https://ucp.dev/draft/schemas/shopping/types/business_fulfillment_config.json",
   "title": "Business Fulfillment Config",
   "description": "Business's fulfillment configuration.",
   "type": "object",

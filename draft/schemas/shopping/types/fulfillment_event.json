@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/schemas/shopping/types/fulfillment_event.json",
+  "$id": "https://ucp.dev/draft/schemas/shopping/types/fulfillment_event.json",
   "title": "Fulfillment Event",
   "description": "Append-only fulfillment event representing an actual shipment. References line items by ID.",
   "type": "object",

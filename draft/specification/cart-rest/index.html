@@ -2500,36 +2500,7 @@ cart capability is defined in the <code>rest.endpoint</code> field of the busine
 </table>
 <h3 id="create-cart">Create Cart<a class="headerlink" href="#create-cart" title="Permanent link">&para;</a></h3>
 <h4 id="input-schema">Input Schema<a class="headerlink" href="#input-schema" title="Permanent link">&para;</a></h4>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Name</th>
-<th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
-<th style="text-align: left;">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;">line_items</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/cart/#line-item-create-request">Line Item Create Request</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Cart line items. Same structure as checkout. Full replacement on update.</td>
-</tr>
-<tr>
-<td style="text-align: left;">context</td>
-<td style="text-align: left;"><a href="/draft/specification/cart/#context">Context</a></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Buyer signals for localization (country, region, postal_code). Merchant uses for pricing, availability, currency. Falls back to geo-IP if omitted.</td>
-</tr>
-<tr>
-<td style="text-align: left;">buyer</td>
-<td style="text-align: left;"><a href="/draft/specification/cart/#buyer">Buyer</a></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Optional buyer information for personalized estimates.</td>
-</tr>
-</tbody>
-</table>
+<p><strong>Error:</strong> Schema 'cart.create' not found in any schema directory.</p>
 <h4 id="output-schema">Output Schema<a class="headerlink" href="#output-schema" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
@@ -2596,10 +2567,10 @@ cart capability is defined in the <code>rest.endpoint</code> field of the busine
 <td style="text-align: left;">Optional merchant links (policies, FAQs).</td>
 </tr>
 <tr>
-<td style="text-align: left;">checkout_url</td>
+<td style="text-align: left;">continue_url</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">URL to convert cart to checkout. Always provided by merchant. Enables sharing, recovery, and cart-to-checkout conversion.</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">URL for cart handoff and session recovery. Enables sharing and human-in-the-loop flows.</td>
 </tr>
 <tr>
 <td style="text-align: left;">expires_at</td>
@@ -2758,10 +2729,10 @@ cart capability is defined in the <code>rest.endpoint</code> field of the busine
 <td style="text-align: left;">Optional merchant links (policies, FAQs).</td>
 </tr>
 <tr>
-<td style="text-align: left;">checkout_url</td>
+<td style="text-align: left;">continue_url</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">URL to convert cart to checkout. Always provided by merchant. Enables sharing, recovery, and cart-to-checkout conversion.</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">URL for cart handoff and session recovery. Enables sharing and human-in-the-loop flows.</td>
 </tr>
 <tr>
 <td style="text-align: left;">expires_at</td>
@@ -2840,42 +2811,7 @@ cart capability is defined in the <code>rest.endpoint</code> field of the busine
 <ul>
 <li><code>id</code> (String, required): The cart session ID (path parameter).</li>
 </ul>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Name</th>
-<th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
-<th style="text-align: left;">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;">id</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Unique cart identifier.</td>
-</tr>
-<tr>
-<td style="text-align: left;">line_items</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/cart/#line-item-update-request">Line Item Update Request</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Cart line items. Same structure as checkout. Full replacement on update.</td>
-</tr>
-<tr>
-<td style="text-align: left;">context</td>
-<td style="text-align: left;"><a href="/draft/specification/cart/#context">Context</a></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Buyer signals for localization (country, region, postal_code). Merchant uses for pricing, availability, currency. Falls back to geo-IP if omitted.</td>
-</tr>
-<tr>
-<td style="text-align: left;">buyer</td>
-<td style="text-align: left;"><a href="/draft/specification/cart/#buyer">Buyer</a></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Optional buyer information for personalized estimates.</td>
-</tr>
-</tbody>
-</table>
+<p><strong>Error:</strong> Schema 'cart.update' not found in any schema directory.</p>
 <h4 id="output-schema_2">Output Schema<a class="headerlink" href="#output-schema_2" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
@@ -2942,10 +2878,10 @@ cart capability is defined in the <code>rest.endpoint</code> field of the busine
 <td style="text-align: left;">Optional merchant links (policies, FAQs).</td>
 </tr>
 <tr>
-<td style="text-align: left;">checkout_url</td>
+<td style="text-align: left;">continue_url</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">URL to convert cart to checkout. Always provided by merchant. Enables sharing, recovery, and cart-to-checkout conversion.</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">URL for cart handoff and session recovery. Enables sharing and human-in-the-loop flows.</td>
 </tr>
 <tr>
 <td style="text-align: left;">expires_at</td>
@@ -3125,10 +3061,10 @@ cart capability is defined in the <code>rest.endpoint</code> field of the busine
 <td style="text-align: left;">Optional merchant links (policies, FAQs).</td>
 </tr>
 <tr>
-<td style="text-align: left;">checkout_url</td>
+<td style="text-align: left;">continue_url</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">URL to convert cart to checkout. Always provided by merchant. Enables sharing, recovery, and cart-to-checkout conversion.</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">URL for cart handoff and session recovery. Enables sharing and human-in-the-loop flows.</td>
 </tr>
 <tr>
 <td style="text-align: left;">expires_at</td>
@@ -3203,68 +3139,7 @@ cart capability is defined in the <code>rest.endpoint</code> field of the busine
 <h2 id="http-headers">HTTP Headers<a class="headerlink" href="#http-headers" title="Permanent link">&para;</a></h2>
 <p>The following headers are defined for the HTTP binding and apply to all
 operations unless otherwise noted.</p>
-<p><strong>Request Headers</strong></p>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Header</th>
-<th style="text-align: left;">Required</th>
-<th style="text-align: left;">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;"><code>Authorization</code></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Should contain oauth token representing the following 2 schemes: 1. Platform self authenticating (client_credentials). 2. Platform authenticating on behalf of end user (authorization_code).</td>
-</tr>
-<tr>
-<td style="text-align: left;"><code>X-API-Key</code></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Authenticates the platform with a reusable api key allocated to the platform by the business.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><code>Request-Signature</code></td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Ensure the authenticity and integrity of an HTTP message.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><code>Idempotency-Key</code></td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Ensures duplicate operations don't happen during retries.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><code>Request-Id</code></td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">For tracing the requests across network layers and components.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><code>User-Agent</code></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Identifies the user agent string making the call.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><code>Content-Type</code></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Representation Metadata. Tells the receiver what the data in the message body actually is.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><code>Accept</code></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Content Negotiation. The client tells the server what data formats it is capable of understanding.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><code>Accept-Language</code></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Localization. Tells the receiver the user's preferred natural languages, often with "weights" or priorities.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><code>Accept-Encoding</code></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Compression. The client tells the server which content-codings it supports, usually for compression</td>
-</tr>
-</tbody>
-</table>
+<p><strong>Error processing OpenAPI:</strong> [Errno 2] No such file or directory: 'source/services/shopping/rest.openapi.json'</p>
 <h3 id="specific-header-requirements">Specific Header Requirements<a class="headerlink" href="#specific-header-requirements" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>UCP-Agent</strong>: All requests <strong>MUST</strong> include the <code>UCP-Agent</code> header

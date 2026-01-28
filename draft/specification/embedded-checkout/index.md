@@ -1136,7 +1136,9 @@ The object returned upon successful completion of a checkout, containing confirm
 
 ### Payment
 
-**Error:** Schema 'payment_resp' not found in any schema directory.
+| Name        | Type                                                                                                        | Required | Description                                                                                                                                                                                                                |
+| ----------- | ----------------------------------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| instruments | Array\[[Selected Payment Instrument](/draft/specification/embedded-checkout/#selected-payment-instrument)\] | No       | The payment instruments available for this payment. Each instrument is associated with a specific handler via the handler_id field. Handlers can extend the base payment_instrument schema to add handler-specific fields. |
 
 ### Payment Instrument
 
@@ -1155,4 +1157,4 @@ Represents a specific method of payment (e.g., a specific credit card, bank acco
 
 Represents the processor or wallet provider responsible for authenticating and processing a specific payment instrument (e.g., Google Pay, Stripe, or a Bank App).
 
-**Error:** Schema 'payment_handler_resp' not found in any schema directory.
+*No properties defined.*

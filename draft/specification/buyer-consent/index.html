@@ -1889,7 +1889,6 @@
 -->
 
 <h1 id="buyer-consent-extension">Buyer Consent Extension<a class="headerlink" href="#buyer-consent-extension" title="Permanent link">&para;</a></h1>
-<p><strong>Version:</strong> <code>2026-01-11</code></p>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
 <p>The Buyer Consent extension enables platforms to transmit buyer consent choices
 to businesses regarding data usage and communication preferences. It allows
@@ -1922,42 +1921,7 @@ operations.</p>
 </ul>
 <h2 id="schema-definition">Schema Definition<a class="headerlink" href="#schema-definition" title="Permanent link">&para;</a></h2>
 <h3 id="consent-object">Consent Object<a class="headerlink" href="#consent-object" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Name</th>
-<th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
-<th style="text-align: left;">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;">analytics</td>
-<td style="text-align: left;">boolean</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Consent for analytics and performance tracking.</td>
-</tr>
-<tr>
-<td style="text-align: left;">preferences</td>
-<td style="text-align: left;">boolean</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Consent for storing user preferences.</td>
-</tr>
-<tr>
-<td style="text-align: left;">marketing</td>
-<td style="text-align: left;">boolean</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Consent for marketing communications.</td>
-</tr>
-<tr>
-<td style="text-align: left;">sale_of_data</td>
-<td style="text-align: left;">boolean</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Consent for selling data to third parties (CCPA).</td>
-</tr>
-</tbody>
-</table>
+<p><strong>Error:</strong> Schema file 'buyer_consent_resp.json' not found in any schema directory.</p>
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h2>
 <p>The platform includes consent within the <code>buyer</code> object in checkout operations:</p>
 <h3 id="example-create-checkout-with-consent">Example: Create Checkout with Consent<a class="headerlink" href="#example-create-checkout-with-consent" title="Permanent link">&para;</a></h3>
@@ -2020,7 +1984,6 @@ operations.</p>
 <li><strong>Legal compliance</strong> remains the business's responsibility</li>
 <li><strong>Platforms should not</strong> assume consent without explicit user action</li>
 <li><strong>Default behavior</strong> when consent is not provided is business-specific</li>
-<li><strong>Consent states</strong> should align with actual user choices, not platform defaults</li>
 </ol>
 
 

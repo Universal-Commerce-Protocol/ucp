@@ -1,7 +1,6 @@
 # Order Capability
 
 - **Capability Name:** `dev.ucp.shopping.order`
-- **Version:** `2026-01-11`
 
 ## Overview
 
@@ -91,14 +90,14 @@ Expectations can be split, merged, or adjusted post-order. For example:
 
 Line items reflect what was purchased at checkout and their current state. Status and quantity counts should reflect the event logs.
 
-| Name      | Type                                                                  | Required | Description                                                                                                                                                                |
-| --------- | --------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| id        | string                                                                | **Yes**  | Line item identifier.                                                                                                                                                      |
-| item      | [Item Response](/draft/specification/order/#item-response)            | **Yes**  | Product data (id, title, price, image_url).                                                                                                                                |
-| quantity  | object                                                                | **Yes**  | Quantity tracking. Both total and fulfilled are derived from events.                                                                                                       |
-| totals    | Array\[[Total Response](/draft/specification/order/#total-response)\] | **Yes**  | Line item totals breakdown.                                                                                                                                                |
-| status    | string                                                                | **Yes**  | Derived status: fulfilled if quantity.fulfilled == quantity.total, partial if quantity.fulfilled > 0, otherwise processing. **Enum:** `processing`, `partial`, `fulfilled` |
-| parent_id | string                                                                | No       | Parent line item identifier for any nested structures.                                                                                                                     |
+| Name      | Type                                                | Required | Description                                                                                                                                                                |
+| --------- | --------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| id        | string                                              | **Yes**  | Line item identifier.                                                                                                                                                      |
+| item      | [Item](/draft/specification/order/#item)            | **Yes**  | Product data (id, title, price, image_url).                                                                                                                                |
+| quantity  | object                                              | **Yes**  | Quantity tracking. Both total and fulfilled are derived from events.                                                                                                       |
+| totals    | Array\[[Total](/draft/specification/order/#total)\] | **Yes**  | Line item totals breakdown.                                                                                                                                                |
+| status    | string                                              | **Yes**  | Derived status: fulfilled if quantity.fulfilled == quantity.total, partial if quantity.fulfilled > 0, otherwise processing. **Enum:** `processing`, `partial`, `fulfilled` |
+| parent_id | string                                              | No       | Parent line item identifier for any nested structures.                                                                                                                     |
 
 **Quantity Structure:**
 
@@ -273,26 +272,7 @@ Businesses send order status changes as events after order placement.
 
 Businesses POST order events to a webhook URL provided by the platform during partner onboarding. The URL format is platform-specific.
 
-**Inputs**
-
-| Name          | Type                                                                               | Required | Description                                                                                                                                  |
-| ------------- | ---------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| ucp           | [UCP Response Order Schema](/draft/specification/order/#ucp-response-order-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                      |
-| id            | string                                                                             | **Yes**  | Unique order identifier.                                                                                                                     |
-| checkout_id   | string                                                                             | **Yes**  | Associated checkout ID for reconciliation.                                                                                                   |
-| permalink_url | string                                                                             | **Yes**  | Permalink to access the order on merchant site.                                                                                              |
-| line_items    | Array\[[Order Line Item](/draft/specification/order/#order-line-item)\]            | **Yes**  | Immutable line items — source of truth for what was ordered.                                                                                 |
-| fulfillment   | object                                                                             | **Yes**  | Fulfillment data: buyer expectations and what actually happened.                                                                             |
-| adjustments   | Array\[[Adjustment](/draft/specification/order/#adjustment)\]                      | No       | Append-only event log of money movements (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment. |
-| totals        | Array\[[Total Response](/draft/specification/order/#total-response)\]              | **Yes**  | Different totals for the order.                                                                                                              |
-| event_id      | string                                                                             | **Yes**  | Unique event identifier.                                                                                                                     |
-| created_time  | string                                                                             | **Yes**  | Event creation timestamp in RFC 3339 format.                                                                                                 |
-
-**Output**
-
-| Name | Type                                   | Required | Description |
-| ---- | -------------------------------------- | -------- | ----------- |
-| ucp  | [Ucp](/draft/specification/order/#ucp) | **Yes**  |             |
+**Error processing OpenAPI:** [Errno 2] No such file or directory: 'source/services/shopping/rest.openapi.json'
 
 ### Webhook URL Configuration
 
@@ -386,14 +366,9 @@ The `signing_keys` array supports multiple keys to enable zero-downtime rotation
 
 ### Response
 
-| Name    | Type   | Required | Description                                                                                     |
-| ------- | ------ | -------- | ----------------------------------------------------------------------------------------------- |
-| version | string | **Yes**  | UCP version in YYYY-MM-DD format.Entity version in YYYY-MM-DD format.                           |
-| spec    | string | No       | URL to human-readable specification document.                                                   |
-| schema  | string | No       | URL to JSON Schema defining this entity's structure and payloads.                               |
-| id      | string | No       | Unique identifier for this entity instance. Used to disambiguate when multiple instances exist. |
-| config  | object | No       | Entity-specific configuration. Structure defined by each entity's schema.                       |
-| extends | string | No       | Parent capability this extends. Present for extensions, absent for root capabilities.           |
+| Name                                                                                        | Type | Required | Description |
+| ------------------------------------------------------------------------------------------- | ---- | -------- | ----------- |
+| **Error:** Failed to resolve ''. Ensure ucp-schema is installed: `cargo install ucp-schema` |      |          |             |
 
 ### Total Response
 
@@ -405,9 +380,7 @@ The `signing_keys` array supports multiple keys to enable zero-downtime rotation
 
 ### UCP Response Order
 
-| Name             | Type   | Required | Description                                            |
-| ---------------- | ------ | -------- | ------------------------------------------------------ |
-| version          | string | **Yes**  | UCP version in YYYY-MM-DD format.                      |
-| services         | object | No       | Service registry keyed by reverse-domain name.         |
-| capabilities     | any    | No       |                                                        |
-| payment_handlers | object | No       | Payment handler registry keyed by reverse-domain name. |
+| Name                                                                                        | Type | Required | Description |
+| ------------------------------------------------------------------------------------------- | ---- | -------- | ----------- |
+| **Error:** Failed to resolve ''. Ensure ucp-schema is installed: `cargo install ucp-schema` |      |          |             |
+| capabilities                                                                                | any  | No       |             |

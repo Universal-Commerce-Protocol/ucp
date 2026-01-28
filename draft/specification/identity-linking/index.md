@@ -1,7 +1,6 @@
 # Identity Linking Capability
 
 - **Capability Name:** `dev.ucp.common.identity_linking`
-- **Version:** `2026-01-11`
 
 ## Overview
 

@@ -4,93 +4,42 @@ This page provides a reference for all the capability data models and types used
 
 ## Capability Schemas
 
-### Cart Create Request
-
-| Name       | Type                                                                                          | Required | Description                                                                                                                                        |
-| ---------- | --------------------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| line_items | Array\[[Line Item Create Request](/draft/specification/reference/#line-item-create-request)\] | **Yes**  | Cart line items. Same structure as checkout. Full replacement on update.                                                                           |
-| context    | [Context](/draft/specification/reference/#context)                                            | No       | Buyer signals for localization (country, region, postal_code). Merchant uses for pricing, availability, currency. Falls back to geo-IP if omitted. |
-| buyer      | [Buyer](/draft/specification/reference/#buyer)                                                | No       | Optional buyer information for personalized estimates.                                                                                             |
-
-______________________________________________________________________
-
-### Cart Update Request
-
-| Name       | Type                                                                                          | Required | Description                                                                                                                                        |
-| ---------- | --------------------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| id         | string                                                                                        | **Yes**  | Unique cart identifier.                                                                                                                            |
-| line_items | Array\[[Line Item Update Request](/draft/specification/reference/#line-item-update-request)\] | **Yes**  | Cart line items. Same structure as checkout. Full replacement on update.                                                                           |
-| context    | [Context](/draft/specification/reference/#context)                                            | No       | Buyer signals for localization (country, region, postal_code). Merchant uses for pricing, availability, currency. Falls back to geo-IP if omitted. |
-| buyer      | [Buyer](/draft/specification/reference/#buyer)                                                | No       | Optional buyer information for personalized estimates.                                                                                             |
-
-______________________________________________________________________
-
-### Cart Response
+### Cart
 
 | Name         | Type                                                                                 | Required | Description                                                                                                                                        |
 | ------------ | ------------------------------------------------------------------------------------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
 | ucp          | [UCP Response Cart Schema](/draft/specification/reference/#ucp-response-cart-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                            |
 | id           | string                                                                               | **Yes**  | Unique cart identifier.                                                                                                                            |
-| line_items   | Array\[[Line Item Response](/draft/specification/reference/#line-item-response)\]    | **Yes**  | Cart line items. Same structure as checkout. Full replacement on update.                                                                           |
+| line_items   | Array\[[Line Item](/draft/specification/reference/#line-item)\]                      | **Yes**  | Cart line items. Same structure as checkout. Full replacement on update.                                                                           |
 | context      | [Context](/draft/specification/reference/#context)                                   | No       | Buyer signals for localization (country, region, postal_code). Merchant uses for pricing, availability, currency. Falls back to geo-IP if omitted. |
 | buyer        | [Buyer](/draft/specification/reference/#buyer)                                       | No       | Optional buyer information for personalized estimates.                                                                                             |
 | currency     | string                                                                               | **Yes**  | ISO 4217 currency code. Determined by merchant based on context or geo-IP.                                                                         |
-| totals       | Array\[[Total Response](/draft/specification/reference/#total-response)\]            | **Yes**  | Estimated cost breakdown. May be partial if shipping/tax not yet calculable.                                                                       |
+| totals       | Array\[[Total](/draft/specification/reference/#total)\]                              | **Yes**  | Estimated cost breakdown. May be partial if shipping/tax not yet calculable.                                                                       |
 | messages     | Array\[[Message](/draft/specification/reference/#message)\]                          | No       | Validation messages, warnings, or informational notices.                                                                                           |
 | links        | Array\[[Link](/draft/specification/reference/#link)\]                                | No       | Optional merchant links (policies, FAQs).                                                                                                          |
-| checkout_url | string                                                                               | **Yes**  | URL to convert cart to checkout. Always provided by merchant. Enables sharing, recovery, and cart-to-checkout conversion.                          |
+| continue_url | string                                                                               | No       | URL for cart handoff and session recovery. Enables sharing and human-in-the-loop flows.                                                            |
 | expires_at   | string                                                                               | No       | Cart expiry timestamp (RFC 3339). Optional.                                                                                                        |
 
 ______________________________________________________________________
 
-### Checkout Complete Request
+### Checkout
 
-| Name    | Type                                               | Required | Description                                |
-| ------- | -------------------------------------------------- | -------- | ------------------------------------------ |
-| payment | [Payment](/draft/specification/reference/#payment) | **Yes**  | Payment configuration containing handlers. |
-
-______________________________________________________________________
-
-### Checkout Create Request
-
-| Name       | Type                                                                                          | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| ---------- | --------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| line_items | Array\[[Line Item Create Request](/draft/specification/reference/#line-item-create-request)\] | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| buyer      | [Buyer](/draft/specification/reference/#buyer)                                                | No       | Representation of the buyer.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| context    | [Context](/draft/specification/reference/#context)                                            | No       | Provisional buyer signals for relevance and localization: product availability, pricing, currency, tax, shipping, payment methods, and eligibility (e.g., student or affiliation discounts). Businesses SHOULD use these values when authoritative data (e.g., address) is absent, and MAY ignore unsupported values without returning errors. Context can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. Platforms SHOULD progressively enhance context throughout the buyer journey. |
-| payment    | [Payment](/draft/specification/reference/#payment)                                            | No       | Payment configuration containing handlers.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-
-______________________________________________________________________
-
-### Checkout Update Request
-
-| Name       | Type                                                                                          | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| ---------- | --------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| id         | string                                                                                        | **Yes**  | Unique identifier of the checkout session.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| line_items | Array\[[Line Item Update Request](/draft/specification/reference/#line-item-update-request)\] | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| buyer      | [Buyer](/draft/specification/reference/#buyer)                                                | No       | Representation of the buyer.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| context    | [Context](/draft/specification/reference/#context)                                            | No       | Provisional buyer signals for relevance and localization: product availability, pricing, currency, tax, shipping, payment methods, and eligibility (e.g., student or affiliation discounts). Businesses SHOULD use these values when authoritative data (e.g., address) is absent, and MAY ignore unsupported values without returning errors. Context can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. Platforms SHOULD progressively enhance context throughout the buyer journey. |
-| payment    | [Payment](/draft/specification/reference/#payment)                                            | No       | Payment configuration containing handlers.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-
-______________________________________________________________________
-
-### Checkout Response
-
-| Name         | Type                                                                                         | Required | Description                                                                                                                                                                                                                                                     |
-| ------------ | -------------------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ucp          | [UCP Response Checkout Schema](/draft/specification/reference/#ucp-response-checkout-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                                                                                                                                         |
-| id           | string                                                                                       | **Yes**  | Unique identifier of the checkout session.                                                                                                                                                                                                                      |
-| line_items   | Array\[[Line Item Response](/draft/specification/reference/#line-item-response)\]            | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                           |
-| buyer        | [Buyer](/draft/specification/reference/#buyer)                                               | No       | Representation of the buyer.                                                                                                                                                                                                                                    |
-| status       | string                                                                                       | **Yes**  | Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details. **Enum:** `incomplete`, `requires_escalation`, `ready_for_complete`, `complete_in_progress`, `completed`, `canceled` |
-| currency     | string                                                                                       | **Yes**  | ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.                                                                                          |
-| totals       | Array\[[Total Response](/draft/specification/reference/#total-response)\]                    | **Yes**  | Different cart totals.                                                                                                                                                                                                                                          |
-| messages     | Array\[[Message](/draft/specification/reference/#message)\]                                  | No       | List of messages with error and info about the checkout session state.                                                                                                                                                                                          |
-| links        | Array\[[Link](/draft/specification/reference/#link)\]                                        | **Yes**  | Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.                                                                                                                                                                    |
-| expires_at   | string                                                                                       | No       | RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.                                                                                                                                                                                    |
-| continue_url | string                                                                                       | No       | URL for checkout handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements.                                                                                                 |
-| payment      | [Payment](/draft/specification/reference/#payment)                                           | No       | Payment configuration containing handlers.                                                                                                                                                                                                                      |
-| order        | [Order Confirmation](/draft/specification/reference/#order-confirmation)                     | No       | Details about an order created for this checkout session.                                                                                                                                                                                                       |
+| Name         | Type                                                                                         | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| ------------ | -------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ucp          | [UCP Response Checkout Schema](/draft/specification/reference/#ucp-response-checkout-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| id           | string                                                                                       | **Yes**  | Unique identifier of the checkout session.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| line_items   | Array\[[Line Item](/draft/specification/reference/#line-item)\]                              | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| buyer        | [Buyer](/draft/specification/reference/#buyer)                                               | No       | Representation of the buyer.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| context      | [Context](/draft/specification/reference/#context)                                           | No       | Provisional buyer signals for relevance and localization: product availability, pricing, currency, tax, shipping, payment methods, and eligibility (e.g., student or affiliation discounts). Businesses SHOULD use these values when authoritative data (e.g., address) is absent, and MAY ignore unsupported values without returning errors. Context can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. Platforms SHOULD progressively enhance context throughout the buyer journey. |
+| status       | string                                                                                       | **Yes**  | Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details. **Enum:** `incomplete`, `requires_escalation`, `ready_for_complete`, `complete_in_progress`, `completed`, `canceled`                                                                                                                                                                                                                                                                                                                                                     |
+| currency     | string                                                                                       | **Yes**  | ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| totals       | Array\[[Total](/draft/specification/reference/#total)\]                                      | **Yes**  | Different cart totals.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| messages     | Array\[[Message](/draft/specification/reference/#message)\]                                  | No       | List of messages with error and info about the checkout session state.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| links        | Array\[[Link](/draft/specification/reference/#link)\]                                        | **Yes**  | Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| expires_at   | string                                                                                       | No       | RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| continue_url | string                                                                                       | No       | URL for checkout handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements.                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| payment      | [Payment](/draft/specification/reference/#payment)                                           | No       | Payment configuration containing handlers.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| order        | [Order Confirmation](/draft/specification/reference/#order-confirmation)                     | No       | Details about an order created for this checkout session.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 
 ______________________________________________________________________
 
@@ -105,7 +54,7 @@ ______________________________________________________________________
 | line_items    | Array\[[Order Line Item](/draft/specification/reference/#order-line-item)\]            | **Yes**  | Immutable line items — source of truth for what was ordered.                                                                                 |
 | fulfillment   | object                                                                                 | **Yes**  | Fulfillment data: buyer expectations and what actually happened.                                                                             |
 | adjustments   | Array\[[Adjustment](/draft/specification/reference/#adjustment)\]                      | No       | Append-only event log of money movements (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment. |
-| totals        | Array\[[Total Response](/draft/specification/reference/#total-response)\]              | **Yes**  | Different totals for the order.                                                                                                              |
+| totals        | Array\[[Total](/draft/specification/reference/#total)\]                                | **Yes**  | Different totals for the order.                                                                                                              |
 
 ______________________________________________________________________
 
@@ -225,7 +174,16 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-### Fulfillment Available Method Response
+### Fulfillment
+
+| Name              | Type                                                                                                  | Required | Description                         |
+| ----------------- | ----------------------------------------------------------------------------------------------------- | -------- | ----------------------------------- |
+| methods           | Array\[[Fulfillment Method](/draft/specification/reference/#fulfillment-method)\]                     | No       | Fulfillment methods for cart items. |
+| available_methods | Array\[[Fulfillment Available Method](/draft/specification/reference/#fulfillment-available-method)\] | No       | Inventory availability hints.       |
+
+______________________________________________________________________
+
+### Fulfillment Available Method
 
 | Name           | Type               | Required | Description                                                                              |
 | -------------- | ------------------ | -------- | ---------------------------------------------------------------------------------------- |
@@ -236,15 +194,9 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-### Fulfillment Destination Request
+### Fulfillment Destination
 
-This object MUST be one of the following types: [Shipping Destination Request](/draft/specification/reference/#shipping-destination-request), [Retail Location Request](/draft/specification/reference/#retail-location-request).
-
-______________________________________________________________________
-
-### Fulfillment Destination Response
-
-This object MUST be one of the following types: [Shipping Destination Response](/draft/specification/reference/#shipping-destination-response), [Retail Location Response](/draft/specification/reference/#retail-location-response).
+This object MUST be one of the following types: [Shipping Destination](/draft/specification/reference/#shipping-destination), [Retail Location](/draft/specification/reference/#retail-location).
 
 ______________________________________________________________________
 
@@ -263,149 +215,45 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-### Fulfillment Group Complete Request
+### Fulfillment Group
 
-| Name               | Type               | Required | Description                                                            |
-| ------------------ | ------------------ | -------- | ---------------------------------------------------------------------- |
-| id                 | string             | **Yes**  | Group identifier for referencing merchant-generated groups in updates. |
-| selected_option_id | ['string', 'null'] | No       | ID of the selected fulfillment option for this group.                  |
-
-______________________________________________________________________
-
-### Fulfillment Group Create Request
-
-| Name               | Type               | Required | Description                                           |
-| ------------------ | ------------------ | -------- | ----------------------------------------------------- |
-| selected_option_id | ['string', 'null'] | No       | ID of the selected fulfillment option for this group. |
+| Name               | Type                                                                              | Required | Description                                                            |
+| ------------------ | --------------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------- |
+| id                 | string                                                                            | **Yes**  | Group identifier for referencing merchant-generated groups in updates. |
+| line_item_ids      | Array[string]                                                                     | **Yes**  | Line item IDs included in this group/package.                          |
+| options            | Array\[[Fulfillment Option](/draft/specification/reference/#fulfillment-option)\] | No       | Available fulfillment options for this group.                          |
+| selected_option_id | ['string', 'null']                                                                | No       | ID of the selected fulfillment option for this group.                  |
 
 ______________________________________________________________________
 
-### Fulfillment Group Update Request
+### Fulfillment Method
 
-| Name               | Type               | Required | Description                                                            |
-| ------------------ | ------------------ | -------- | ---------------------------------------------------------------------- |
-| id                 | string             | **Yes**  | Group identifier for referencing merchant-generated groups in updates. |
-| selected_option_id | ['string', 'null'] | No       | ID of the selected fulfillment option for this group.                  |
-
-______________________________________________________________________
-
-### Fulfillment Group Response
-
-| Name               | Type                                                                                                | Required | Description                                                            |
-| ------------------ | --------------------------------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------- |
-| id                 | string                                                                                              | **Yes**  | Group identifier for referencing merchant-generated groups in updates. |
-| line_item_ids      | Array[string]                                                                                       | **Yes**  | Line item IDs included in this group/package.                          |
-| options            | Array\[[Fulfillment Option Response](/draft/specification/reference/#fulfillment-option-response)\] | No       | Available fulfillment options for this group.                          |
-| selected_option_id | ['string', 'null']                                                                                  | No       | ID of the selected fulfillment option for this group.                  |
+| Name                    | Type                                                                                        | Required | Description                                                                                                  |
+| ----------------------- | ------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------ |
+| id                      | string                                                                                      | **Yes**  | Unique fulfillment method identifier.                                                                        |
+| type                    | string                                                                                      | **Yes**  | Fulfillment method type. **Enum:** `shipping`, `pickup`                                                      |
+| line_item_ids           | Array[string]                                                                               | **Yes**  | Line item IDs fulfilled via this method.                                                                     |
+| destinations            | Array\[[Fulfillment Destination](/draft/specification/reference/#fulfillment-destination)\] | No       | Available destinations. For shipping: addresses. For pickup: retail locations.                               |
+| selected_destination_id | ['string', 'null']                                                                          | No       | ID of the selected destination.                                                                              |
+| groups                  | Array\[[Fulfillment Group](/draft/specification/reference/#fulfillment-group)\]             | No       | Fulfillment groups for selecting options. Agent sets selected_option_id on groups to choose shipping method. |
 
 ______________________________________________________________________
 
-### Fulfillment Method Complete Request
+### Fulfillment Option
 
-| Name                    | Type                                                                                                          | Required | Description                                                                                                  |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------ |
-| id                      | string                                                                                                        | **Yes**  | Unique fulfillment method identifier.                                                                        |
-| type                    | string                                                                                                        | **Yes**  | Fulfillment method type. **Enum:** `shipping`, `pickup`                                                      |
-| line_item_ids           | Array[string]                                                                                                 | **Yes**  | Line item IDs fulfilled via this method.                                                                     |
-| destinations            | Array\[[Fulfillment Destination Request](/draft/specification/reference/#fulfillment-destination-request)\]   | No       | Available destinations. For shipping: addresses. For pickup: retail locations.                               |
-| selected_destination_id | ['string', 'null']                                                                                            | No       | ID of the selected destination.                                                                              |
-| groups                  | Array\[[Fulfillment Group Complete Request](/draft/specification/reference/#fulfillment-group-complete_req)\] | No       | Fulfillment groups for selecting options. Agent sets selected_option_id on groups to choose shipping method. |
-
-______________________________________________________________________
-
-### Fulfillment Method Create Request
-
-| Name                    | Type                                                                                                          | Required | Description                                                                                                  |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------ |
-| type                    | string                                                                                                        | **Yes**  | Fulfillment method type. **Enum:** `shipping`, `pickup`                                                      |
-| line_item_ids           | Array[string]                                                                                                 | No       | Line item IDs fulfilled via this method.                                                                     |
-| destinations            | Array\[[Fulfillment Destination Request](/draft/specification/reference/#fulfillment-destination-request)\]   | No       | Available destinations. For shipping: addresses. For pickup: retail locations.                               |
-| selected_destination_id | ['string', 'null']                                                                                            | No       | ID of the selected destination.                                                                              |
-| groups                  | Array\[[Fulfillment Group Create Request](/draft/specification/reference/#fulfillment-group-create-request)\] | No       | Fulfillment groups for selecting options. Agent sets selected_option_id on groups to choose shipping method. |
+| Name                      | Type                                                    | Required | Description                                                                |
+| ------------------------- | ------------------------------------------------------- | -------- | -------------------------------------------------------------------------- |
+| id                        | string                                                  | **Yes**  | Unique fulfillment option identifier.                                      |
+| title                     | string                                                  | **Yes**  | Short label (e.g., 'Express Shipping', 'Curbside Pickup').                 |
+| description               | string                                                  | No       | Complete context for buyer decision (e.g., 'Arrives Dec 12-15 via FedEx'). |
+| carrier                   | string                                                  | No       | Carrier name (for shipping).                                               |
+| earliest_fulfillment_time | string                                                  | No       | Earliest fulfillment date.                                                 |
+| latest_fulfillment_time   | string                                                  | No       | Latest fulfillment date.                                                   |
+| totals                    | Array\[[Total](/draft/specification/reference/#total)\] | **Yes**  | Fulfillment option totals breakdown.                                       |
 
 ______________________________________________________________________
 
-### Fulfillment Method Update Request
-
-| Name                    | Type                                                                                                          | Required | Description                                                                                                  |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------ |
-| id                      | string                                                                                                        | **Yes**  | Unique fulfillment method identifier.                                                                        |
-| line_item_ids           | Array[string]                                                                                                 | **Yes**  | Line item IDs fulfilled via this method.                                                                     |
-| destinations            | Array\[[Fulfillment Destination Request](/draft/specification/reference/#fulfillment-destination-request)\]   | No       | Available destinations. For shipping: addresses. For pickup: retail locations.                               |
-| selected_destination_id | ['string', 'null']                                                                                            | No       | ID of the selected destination.                                                                              |
-| groups                  | Array\[[Fulfillment Group Update Request](/draft/specification/reference/#fulfillment-group-update-request)\] | No       | Fulfillment groups for selecting options. Agent sets selected_option_id on groups to choose shipping method. |
-
-______________________________________________________________________
-
-### Fulfillment Method Response
-
-| Name                    | Type                                                                                                          | Required | Description                                                                                                  |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------ |
-| id                      | string                                                                                                        | **Yes**  | Unique fulfillment method identifier.                                                                        |
-| type                    | string                                                                                                        | **Yes**  | Fulfillment method type. **Enum:** `shipping`, `pickup`                                                      |
-| line_item_ids           | Array[string]                                                                                                 | **Yes**  | Line item IDs fulfilled via this method.                                                                     |
-| destinations            | Array\[[Fulfillment Destination Response](/draft/specification/reference/#fulfillment-destination-response)\] | No       | Available destinations. For shipping: addresses. For pickup: retail locations.                               |
-| selected_destination_id | ['string', 'null']                                                                                            | No       | ID of the selected destination.                                                                              |
-| groups                  | Array\[[Fulfillment Group Response](/draft/specification/reference/#fulfillment-group-response)\]             | No       | Fulfillment groups for selecting options. Agent sets selected_option_id on groups to choose shipping method. |
-
-______________________________________________________________________
-
-### Fulfillment Option Response
-
-| Name                      | Type                                                                      | Required | Description                                                                |
-| ------------------------- | ------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------- |
-| id                        | string                                                                    | **Yes**  | Unique fulfillment option identifier.                                      |
-| title                     | string                                                                    | **Yes**  | Short label (e.g., 'Express Shipping', 'Curbside Pickup').                 |
-| description               | string                                                                    | No       | Complete context for buyer decision (e.g., 'Arrives Dec 12-15 via FedEx'). |
-| carrier                   | string                                                                    | No       | Carrier name (for shipping).                                               |
-| earliest_fulfillment_time | string                                                                    | No       | Earliest fulfillment date.                                                 |
-| latest_fulfillment_time   | string                                                                    | No       | Latest fulfillment date.                                                   |
-| totals                    | Array\[[Total Response](/draft/specification/reference/#total-response)\] | **Yes**  | Fulfillment option totals breakdown.                                       |
-
-______________________________________________________________________
-
-### Fulfillment Request
-
-| Name    | Type                                                                                                            | Required | Description                         |
-| ------- | --------------------------------------------------------------------------------------------------------------- | -------- | ----------------------------------- |
-| methods | Array\[[Fulfillment Method Create Request](/draft/specification/reference/#fulfillment-method-create-request)\] | No       | Fulfillment methods for cart items. |
-
-______________________________________________________________________
-
-### Fulfillment Response
-
-| Name              | Type                                                                                                                    | Required | Description                         |
-| ----------------- | ----------------------------------------------------------------------------------------------------------------------- | -------- | ----------------------------------- |
-| methods           | Array\[[Fulfillment Method Response](/draft/specification/reference/#fulfillment-method-response)\]                     | No       | Fulfillment methods for cart items. |
-| available_methods | Array\[[Fulfillment Available Method Response](/draft/specification/reference/#fulfillment-available-method-response)\] | No       | Inventory availability hints.       |
-
-______________________________________________________________________
-
-### Item Complete Request
-
-| Name | Type   | Required | Description                                                                                                                                                                 |
-| ---- | ------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| id   | string | **Yes**  | The product identifier, often the SKU, required to resolve the product details associated with this line item. Should be recognized by both the Platform, and the Business. |
-
-______________________________________________________________________
-
-### Item Create Request
-
-| Name | Type   | Required | Description                                                                                                                                                                 |
-| ---- | ------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| id   | string | **Yes**  | The product identifier, often the SKU, required to resolve the product details associated with this line item. Should be recognized by both the Platform, and the Business. |
-
-______________________________________________________________________
-
-### Item Update Request
-
-| Name | Type   | Required | Description                                                                                                                                                                 |
-| ---- | ------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| id   | string | **Yes**  | The product identifier, often the SKU, required to resolve the product details associated with this line item. Should be recognized by both the Platform, and the Business. |
-
-______________________________________________________________________
-
-### Item Response
+### Item
 
 | Name      | Type    | Required | Description                                                                                                                                                                 |
 | --------- | ------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -416,46 +264,15 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-### Line Item Complete Request
+### Line Item
 
-| Name      | Type                                                                       | Required | Description                                            |
-| --------- | -------------------------------------------------------------------------- | -------- | ------------------------------------------------------ |
-| id        | string                                                                     | **Yes**  |                                                        |
-| item      | [Item Complete Request](/draft/specification/reference/#item-complete_req) | **Yes**  |                                                        |
-| quantity  | integer                                                                    | **Yes**  | Quantity of the item being purchased.                  |
-| parent_id | string                                                                     | No       | Parent line item identifier for any nested structures. |
-
-______________________________________________________________________
-
-### Line Item Create Request
-
-| Name     | Type                                                                       | Required | Description                           |
-| -------- | -------------------------------------------------------------------------- | -------- | ------------------------------------- |
-| item     | [Item Create Request](/draft/specification/reference/#item-create-request) | **Yes**  |                                       |
-| quantity | integer                                                                    | **Yes**  | Quantity of the item being purchased. |
-
-______________________________________________________________________
-
-### Line Item Update Request
-
-| Name      | Type                                                                       | Required | Description                                            |
-| --------- | -------------------------------------------------------------------------- | -------- | ------------------------------------------------------ |
-| id        | string                                                                     | No       |                                                        |
-| item      | [Item Update Request](/draft/specification/reference/#item-update-request) | **Yes**  |                                                        |
-| quantity  | integer                                                                    | **Yes**  | Quantity of the item being purchased.                  |
-| parent_id | string                                                                     | No       | Parent line item identifier for any nested structures. |
-
-______________________________________________________________________
-
-### Line Item Response
-
-| Name      | Type                                                                      | Required | Description                                            |
-| --------- | ------------------------------------------------------------------------- | -------- | ------------------------------------------------------ |
-| id        | string                                                                    | **Yes**  |                                                        |
-| item      | [Item Response](/draft/specification/reference/#item-response)            | **Yes**  |                                                        |
-| quantity  | integer                                                                   | **Yes**  | Quantity of the item being purchased.                  |
-| totals    | Array\[[Total Response](/draft/specification/reference/#total-response)\] | **Yes**  | Line item totals breakdown.                            |
-| parent_id | string                                                                    | No       | Parent line item identifier for any nested structures. |
+| Name      | Type                                                    | Required | Description                                            |
+| --------- | ------------------------------------------------------- | -------- | ------------------------------------------------------ |
+| id        | string                                                  | **Yes**  |                                                        |
+| item      | [Item](/draft/specification/reference/#item)            | **Yes**  |                                                        |
+| quantity  | integer                                                 | **Yes**  | Quantity of the item being purchased.                  |
+| totals    | Array\[[Total](/draft/specification/reference/#total)\] | **Yes**  | Line item totals breakdown.                            |
+| parent_id | string                                                  | No       | Parent line item identifier for any nested structures. |
 
 ______________________________________________________________________
 
@@ -532,14 +349,14 @@ ______________________________________________________________________
 
 ### Order Line Item
 
-| Name      | Type                                                                      | Required | Description                                                                                                                                                                |
-| --------- | ------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| id        | string                                                                    | **Yes**  | Line item identifier.                                                                                                                                                      |
-| item      | [Item Response](/draft/specification/reference/#item-response)            | **Yes**  | Product data (id, title, price, image_url).                                                                                                                                |
-| quantity  | object                                                                    | **Yes**  | Quantity tracking. Both total and fulfilled are derived from events.                                                                                                       |
-| totals    | Array\[[Total Response](/draft/specification/reference/#total-response)\] | **Yes**  | Line item totals breakdown.                                                                                                                                                |
-| status    | string                                                                    | **Yes**  | Derived status: fulfilled if quantity.fulfilled == quantity.total, partial if quantity.fulfilled > 0, otherwise processing. **Enum:** `processing`, `partial`, `fulfilled` |
-| parent_id | string                                                                    | No       | Parent line item identifier for any nested structures.                                                                                                                     |
+| Name      | Type                                                    | Required | Description                                                                                                                                                                |
+| --------- | ------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| id        | string                                                  | **Yes**  | Line item identifier.                                                                                                                                                      |
+| item      | [Item](/draft/specification/reference/#item)            | **Yes**  | Product data (id, title, price, image_url).                                                                                                                                |
+| quantity  | object                                                  | **Yes**  | Quantity tracking. Both total and fulfilled are derived from events.                                                                                                       |
+| totals    | Array\[[Total](/draft/specification/reference/#total)\] | **Yes**  | Line item totals breakdown.                                                                                                                                                |
+| status    | string                                                  | **Yes**  | Derived status: fulfilled if quantity.fulfilled == quantity.total, partial if quantity.fulfilled > 0, otherwise processing. **Enum:** `processing`, `partial`, `fulfilled` |
+| parent_id | string                                                  | No       | Parent line item identifier for any nested structures.                                                                                                                     |
 
 ______________________________________________________________________
 
@@ -596,16 +413,7 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-### Retail Location Request
-
-| Name    | Type                                                             | Required | Description                       |
-| ------- | ---------------------------------------------------------------- | -------- | --------------------------------- |
-| name    | string                                                           | **Yes**  | Location name (e.g., store name). |
-| address | [Postal Address](/draft/specification/reference/#postal-address) | No       | Physical address of the location. |
-
-______________________________________________________________________
-
-### Retail Location Response
+### Retail Location
 
 | Name    | Type                                                             | Required | Description                       |
 | ------- | ---------------------------------------------------------------- | -------- | --------------------------------- |
@@ -615,24 +423,7 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-### Shipping Destination Request
-
-| Name             | Type   | Required | Description                                                                                                                                                                                                                               |
-| ---------------- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| extended_address | string | No       | An address extension such as an apartment number, C/O or alternative name.                                                                                                                                                                |
-| street_address   | string | No       | The street address.                                                                                                                                                                                                                       |
-| address_locality | string | No       | The locality in which the street address is, and which is in the region. For example, Mountain View.                                                                                                                                      |
-| address_region   | string | No       | The region in which the locality is, and which is in the country. Required for applicable countries (i.e. state in US, province in CA). For example, California or another appropriate first-level Administrative division.               |
-| address_country  | string | No       | The country. Recommended to be in 2-letter ISO 3166-1 alpha-2 format, for example "US". For backward compatibility, a 3-letter ISO 3166-1 alpha-3 country code such as "SGP" or a full country name such as "Singapore" can also be used. |
-| postal_code      | string | No       | The postal code. For example, 94043.                                                                                                                                                                                                      |
-| first_name       | string | No       | Optional. First name of the contact associated with the address.                                                                                                                                                                          |
-| last_name        | string | No       | Optional. Last name of the contact associated with the address.                                                                                                                                                                           |
-| phone_number     | string | No       | Optional. Phone number of the contact associated with the address.                                                                                                                                                                        |
-| id               | string | No       | ID specific to this shipping destination.                                                                                                                                                                                                 |
-
-______________________________________________________________________
-
-### Shipping Destination Response
+### Shipping Destination
 
 | Name             | Type   | Required | Description                                                                                                                                                                                                                               |
 | ---------------- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -649,7 +440,7 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-### Token Credential Complete Request
+### Token Credential
 
 | Name  | Type   | Required | Description                                                                                  |
 | ----- | ------ | -------- | -------------------------------------------------------------------------------------------- |
@@ -659,36 +450,7 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-### Token Credential Create Request
-
-| Name  | Type   | Required | Description                                                                                  |
-| ----- | ------ | -------- | -------------------------------------------------------------------------------------------- |
-| type  | string | **Yes**  | The credential type discriminator. Specific schemas will constrain this to a constant value. |
-| type  | string | **Yes**  | The specific type of token produced by the handler (e.g., 'stripe_token').                   |
-| token | string | **Yes**  | The token value.                                                                             |
-
-______________________________________________________________________
-
-### Token Credential Update Request
-
-| Name  | Type   | Required | Description                                                                                  |
-| ----- | ------ | -------- | -------------------------------------------------------------------------------------------- |
-| type  | string | **Yes**  | The credential type discriminator. Specific schemas will constrain this to a constant value. |
-| type  | string | **Yes**  | The specific type of token produced by the handler (e.g., 'stripe_token').                   |
-| token | string | **Yes**  | The token value.                                                                             |
-
-______________________________________________________________________
-
-### Token Credential Response
-
-| Name | Type   | Required | Description                                                                                  |
-| ---- | ------ | -------- | -------------------------------------------------------------------------------------------- |
-| type | string | **Yes**  | The credential type discriminator. Specific schemas will constrain this to a constant value. |
-| type | string | **Yes**  | The specific type of token produced by the handler (e.g., 'stripe_token').                   |
-
-______________________________________________________________________
-
-### Total Response
+### Total
 
 | Name         | Type    | Required | Description                                                                                                                   |
 | ------------ | ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
@@ -700,133 +462,15 @@ ______________________________________________________________________
 
 ## Extension Schemas
 
-### AP2 Mandate Extension Complete Request
+### AP2 Mandate Extension
 
-#### Merchant Authorization Complete Request
-
-JWS Detached Content signature (RFC 7515 Appendix F) over the checkout response body (excluding ap2 field). Format: `<base64url-header>..<base64url-signature>`. The header MUST contain 'alg' (ES256/ES384/ES512) and 'kid' claims. The signature covers both the header and JCS-canonicalized checkout payload.
-
-**Pattern:** `^[A-Za-z0-9_-]+\.\.[A-Za-z0-9_-]+$`
-
-#### Checkout Mandate Complete Request
-
-SD-JWT+kb credential in `ap2.checkout_mandate`. Proving user authorization for the checkout. Contains the full checkout including `ap2.merchant_authorization`.
-
-**Pattern:** `^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]*\.[A-Za-z0-9_-]+(~[A-Za-z0-9_-]+)*$`
-
-#### Ap2 With Merchant Authorization
-
-AP2 extension data including merchant authorization.
-
-#### Ap2 With Checkout Mandate
-
-| Name             | Type                                                                 | Required | Description                                      |
-| ---------------- | -------------------------------------------------------------------- | -------- | ------------------------------------------------ |
-| checkout_mandate | [Checkout Mandate](/draft/specification/reference/#checkout-mandate) | No       | SD-JWT+kb proving user authorized this checkout. |
-
-#### Checkout with AP2 Mandate Complete Request
-
-| Name    | Type                                               | Required | Description                                |
-| ------- | -------------------------------------------------- | -------- | ------------------------------------------ |
-| payment | [Payment](/draft/specification/reference/#payment) | **Yes**  | Payment configuration containing handlers. |
-| ap2     | any                                                | No       |                                            |
-
-#### AP2 Error Code Complete Request
-
-Error codes specific to AP2 mandate verification.
-
-**Enum:** `mandate_required`, `agent_missing_key`, `mandate_invalid_signature`, `mandate_expired`, `mandate_scope_mismatch`, `merchant_authorization_invalid`, `merchant_authorization_missing`
-
-______________________________________________________________________
-
-### AP2 Mandate Extension Create Request
-
-#### Merchant Authorization Create Request
+#### Merchant Authorization
 
 JWS Detached Content signature (RFC 7515 Appendix F) over the checkout response body (excluding ap2 field). Format: `<base64url-header>..<base64url-signature>`. The header MUST contain 'alg' (ES256/ES384/ES512) and 'kid' claims. The signature covers both the header and JCS-canonicalized checkout payload.
 
 **Pattern:** `^[A-Za-z0-9_-]+\.\.[A-Za-z0-9_-]+$`
 
-#### Checkout Mandate Create Request
-
-SD-JWT+kb credential in `ap2.checkout_mandate`. Proving user authorization for the checkout. Contains the full checkout including `ap2.merchant_authorization`.
-
-**Pattern:** `^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]*\.[A-Za-z0-9_-]+(~[A-Za-z0-9_-]+)*$`
-
-#### Ap2 With Merchant Authorization
-
-AP2 extension data including merchant authorization.
-
-#### Ap2 With Checkout Mandate
-
-AP2 extension data including checkout mandate.
-
-#### Checkout with AP2 Mandate Create Request
-
-| Name       | Type                                                                                          | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| ---------- | --------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| line_items | Array\[[Line Item Create Request](/draft/specification/reference/#line-item-create-request)\] | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| buyer      | [Buyer](/draft/specification/reference/#buyer)                                                | No       | Representation of the buyer.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| context    | [Context](/draft/specification/reference/#context)                                            | No       | Provisional buyer signals for relevance and localization: product availability, pricing, currency, tax, shipping, payment methods, and eligibility (e.g., student or affiliation discounts). Businesses SHOULD use these values when authoritative data (e.g., address) is absent, and MAY ignore unsupported values without returning errors. Context can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. Platforms SHOULD progressively enhance context throughout the buyer journey. |
-| payment    | [Payment](/draft/specification/reference/#payment)                                            | No       | Payment configuration containing handlers.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-
-#### AP2 Error Code Create Request
-
-Error codes specific to AP2 mandate verification.
-
-**Enum:** `mandate_required`, `agent_missing_key`, `mandate_invalid_signature`, `mandate_expired`, `mandate_scope_mismatch`, `merchant_authorization_invalid`, `merchant_authorization_missing`
-
-______________________________________________________________________
-
-### AP2 Mandate Extension Update Request
-
-#### Merchant Authorization Update Request
-
-JWS Detached Content signature (RFC 7515 Appendix F) over the checkout response body (excluding ap2 field). Format: `<base64url-header>..<base64url-signature>`. The header MUST contain 'alg' (ES256/ES384/ES512) and 'kid' claims. The signature covers both the header and JCS-canonicalized checkout payload.
-
-**Pattern:** `^[A-Za-z0-9_-]+\.\.[A-Za-z0-9_-]+$`
-
-#### Checkout Mandate Update Request
-
-SD-JWT+kb credential in `ap2.checkout_mandate`. Proving user authorization for the checkout. Contains the full checkout including `ap2.merchant_authorization`.
-
-**Pattern:** `^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]*\.[A-Za-z0-9_-]+(~[A-Za-z0-9_-]+)*$`
-
-#### Ap2 With Merchant Authorization
-
-AP2 extension data including merchant authorization.
-
-#### Ap2 With Checkout Mandate
-
-AP2 extension data including checkout mandate.
-
-#### Checkout with AP2 Mandate Update Request
-
-| Name       | Type                                                                                          | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| ---------- | --------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| id         | string                                                                                        | **Yes**  | Unique identifier of the checkout session.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| line_items | Array\[[Line Item Update Request](/draft/specification/reference/#line-item-update-request)\] | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| buyer      | [Buyer](/draft/specification/reference/#buyer)                                                | No       | Representation of the buyer.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| context    | [Context](/draft/specification/reference/#context)                                            | No       | Provisional buyer signals for relevance and localization: product availability, pricing, currency, tax, shipping, payment methods, and eligibility (e.g., student or affiliation discounts). Businesses SHOULD use these values when authoritative data (e.g., address) is absent, and MAY ignore unsupported values without returning errors. Context can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. Platforms SHOULD progressively enhance context throughout the buyer journey. |
-| payment    | [Payment](/draft/specification/reference/#payment)                                            | No       | Payment configuration containing handlers.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-
-#### AP2 Error Code Update Request
-
-Error codes specific to AP2 mandate verification.
-
-**Enum:** `mandate_required`, `agent_missing_key`, `mandate_invalid_signature`, `mandate_expired`, `mandate_scope_mismatch`, `merchant_authorization_invalid`, `merchant_authorization_missing`
-
-______________________________________________________________________
-
-### AP2 Mandate Extension Response
-
-#### Merchant Authorization Response
-
-JWS Detached Content signature (RFC 7515 Appendix F) over the checkout response body (excluding ap2 field). Format: `<base64url-header>..<base64url-signature>`. The header MUST contain 'alg' (ES256/ES384/ES512) and 'kid' claims. The signature covers both the header and JCS-canonicalized checkout payload.
-
-**Pattern:** `^[A-Za-z0-9_-]+\.\.[A-Za-z0-9_-]+$`
-
-#### Checkout Mandate Response
+#### Checkout Mandate
 
 SD-JWT+kb credential in `ap2.checkout_mandate`. Proving user authorization for the checkout. Contains the full checkout including `ap2.merchant_authorization`.
 
@@ -844,26 +488,26 @@ SD-JWT+kb credential in `ap2.checkout_mandate`. Proving user authorization for t
 | ---------------- | -------------------------------------------------------------------- | -------- | ------------------------------------------------ |
 | checkout_mandate | [Checkout Mandate](/draft/specification/reference/#checkout-mandate) | No       | SD-JWT+kb proving user authorized this checkout. |
 
-#### Checkout with AP2 Mandate Response
+#### Checkout with AP2 Mandate
 
-| Name         | Type                                                                                         | Required | Description                                                                                                                                                                                                                                                     |
-| ------------ | -------------------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ucp          | [UCP Response Checkout Schema](/draft/specification/reference/#ucp-response-checkout-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                                                                                                                                         |
-| id           | string                                                                                       | **Yes**  | Unique identifier of the checkout session.                                                                                                                                                                                                                      |
-| line_items   | Array\[[Line Item Response](/draft/specification/reference/#line-item-response)\]            | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                           |
-| buyer        | [Buyer](/draft/specification/reference/#buyer)                                               | No       | Representation of the buyer.                                                                                                                                                                                                                                    |
-| status       | string                                                                                       | **Yes**  | Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details. **Enum:** `incomplete`, `requires_escalation`, `ready_for_complete`, `complete_in_progress`, `completed`, `canceled` |
-| currency     | string                                                                                       | **Yes**  | ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.                                                                                          |
-| totals       | Array\[[Total Response](/draft/specification/reference/#total-response)\]                    | **Yes**  | Different cart totals.                                                                                                                                                                                                                                          |
-| messages     | Array\[[Message](/draft/specification/reference/#message)\]                                  | No       | List of messages with error and info about the checkout session state.                                                                                                                                                                                          |
-| links        | Array\[[Link](/draft/specification/reference/#link)\]                                        | **Yes**  | Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.                                                                                                                                                                    |
-| expires_at   | string                                                                                       | No       | RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.                                                                                                                                                                                    |
-| continue_url | string                                                                                       | No       | URL for checkout handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements.                                                                                                 |
-| payment      | [Payment](/draft/specification/reference/#payment)                                           | No       | Payment configuration containing handlers.                                                                                                                                                                                                                      |
-| order        | [Order Confirmation](/draft/specification/reference/#order-confirmation)                     | No       | Details about an order created for this checkout session.                                                                                                                                                                                                       |
-| ap2          | any                                                                                          | No       |                                                                                                                                                                                                                                                                 |
+| Name         | Type          | Required | Description                                                                                                                                                                                                                                                     |
+| ------------ | ------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ucp          | any           | **Yes**  | UCP metadata for checkout responses.                                                                                                                                                                                                                            |
+| id           | string        | **Yes**  | Unique identifier of the checkout session.                                                                                                                                                                                                                      |
+| line_items   | Array[object] | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                           |
+| buyer        | object        | No       | Representation of the buyer.                                                                                                                                                                                                                                    |
+| status       | string        | **Yes**  | Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details. **Enum:** `incomplete`, `requires_escalation`, `ready_for_complete`, `complete_in_progress`, `completed`, `canceled` |
+| currency     | string        | **Yes**  | ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.                                                                                          |
+| totals       | Array[object] | **Yes**  | Different cart totals.                                                                                                                                                                                                                                          |
+| messages     | Array[object] | No       | List of messages with error and info about the checkout session state.                                                                                                                                                                                          |
+| links        | Array[object] | **Yes**  | Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.                                                                                                                                                                    |
+| expires_at   | string        | No       | RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.                                                                                                                                                                                    |
+| continue_url | string        | No       | URL for checkout handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements.                                                                                                 |
+| payment      | object        | No       | Payment configuration containing handlers.                                                                                                                                                                                                                      |
+| order        | object        | No       | Details about an order created for this checkout session.                                                                                                                                                                                                       |
+| ap2          | any           | No       |                                                                                                                                                                                                                                                                 |
 
-#### AP2 Error Code Response
+#### AP2 Error Code
 
 Error codes specific to AP2 mandate verification.
 
@@ -871,7 +515,7 @@ Error codes specific to AP2 mandate verification.
 
 ______________________________________________________________________
 
-### Buyer Consent Extension Complete Request
+### Buyer Consent Extension
 
 #### Consent
 
@@ -882,7 +526,7 @@ ______________________________________________________________________
 | marketing    | boolean | No       | Consent for marketing communications.             |
 | sale_of_data | boolean | No       | Consent for selling data to third parties (CCPA). |
 
-#### Buyer with Consent Complete Request
+#### Buyer with Consent
 
 | Name         | Type                                               | Required | Description              |
 | ------------ | -------------------------------------------------- | -------- | ------------------------ |
@@ -892,121 +536,28 @@ ______________________________________________________________________
 | phone_number | string                                             | No       | E.164 standard.          |
 | consent      | [Consent](/draft/specification/reference/#consent) | No       | Consent tracking fields. |
 
-#### Checkout with Buyer Consent Complete Request
+#### Checkout with Buyer Consent
 
-| Name    | Type                                               | Required | Description                                |
-| ------- | -------------------------------------------------- | -------- | ------------------------------------------ |
-| payment | [Payment](/draft/specification/reference/#payment) | **Yes**  | Payment configuration containing handlers. |
-
-______________________________________________________________________
-
-### Buyer Consent Extension Create Request
-
-#### Consent
-
-| Name         | Type    | Required | Description                                       |
-| ------------ | ------- | -------- | ------------------------------------------------- |
-| analytics    | boolean | No       | Consent for analytics and performance tracking.   |
-| preferences  | boolean | No       | Consent for storing user preferences.             |
-| marketing    | boolean | No       | Consent for marketing communications.             |
-| sale_of_data | boolean | No       | Consent for selling data to third parties (CCPA). |
-
-#### Buyer with Consent Create Request
-
-| Name         | Type                                               | Required | Description              |
-| ------------ | -------------------------------------------------- | -------- | ------------------------ |
-| first_name   | string                                             | No       | First name of the buyer. |
-| last_name    | string                                             | No       | Last name of the buyer.  |
-| email        | string                                             | No       | Email of the buyer.      |
-| phone_number | string                                             | No       | E.164 standard.          |
-| consent      | [Consent](/draft/specification/reference/#consent) | No       | Consent tracking fields. |
-
-#### Checkout with Buyer Consent Create Request
-
-| Name       | Type                                                                                          | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| ---------- | --------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| line_items | Array\[[Line Item Create Request](/draft/specification/reference/#line-item-create-request)\] | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| buyer      | [Buyer](/draft/specification/reference/#buyer)                                                | No       | Buyer with consent tracking.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| context    | [Context](/draft/specification/reference/#context)                                            | No       | Provisional buyer signals for relevance and localization: product availability, pricing, currency, tax, shipping, payment methods, and eligibility (e.g., student or affiliation discounts). Businesses SHOULD use these values when authoritative data (e.g., address) is absent, and MAY ignore unsupported values without returning errors. Context can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. Platforms SHOULD progressively enhance context throughout the buyer journey. |
-| payment    | [Payment](/draft/specification/reference/#payment)                                            | No       | Payment configuration containing handlers.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| Name         | Type                                           | Required | Description                                                                                                                                                                                                                                                     |
+| ------------ | ---------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ucp          | any                                            | **Yes**  | UCP metadata for checkout responses.                                                                                                                                                                                                                            |
+| id           | string                                         | **Yes**  | Unique identifier of the checkout session.                                                                                                                                                                                                                      |
+| line_items   | Array[object]                                  | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                           |
+| buyer        | object                                         | No       | Representation of the buyer.                                                                                                                                                                                                                                    |
+| status       | string                                         | **Yes**  | Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details. **Enum:** `incomplete`, `requires_escalation`, `ready_for_complete`, `complete_in_progress`, `completed`, `canceled` |
+| currency     | string                                         | **Yes**  | ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.                                                                                          |
+| totals       | Array[object]                                  | **Yes**  | Different cart totals.                                                                                                                                                                                                                                          |
+| messages     | Array[object]                                  | No       | List of messages with error and info about the checkout session state.                                                                                                                                                                                          |
+| links        | Array[object]                                  | **Yes**  | Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.                                                                                                                                                                    |
+| expires_at   | string                                         | No       | RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.                                                                                                                                                                                    |
+| continue_url | string                                         | No       | URL for checkout handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements.                                                                                                 |
+| payment      | object                                         | No       | Payment configuration containing handlers.                                                                                                                                                                                                                      |
+| order        | object                                         | No       | Details about an order created for this checkout session.                                                                                                                                                                                                       |
+| buyer        | [Buyer](/draft/specification/reference/#buyer) | No       | Buyer with consent tracking.                                                                                                                                                                                                                                    |
 
 ______________________________________________________________________
 
-### Buyer Consent Extension Update Request
-
-#### Consent
-
-| Name         | Type    | Required | Description                                       |
-| ------------ | ------- | -------- | ------------------------------------------------- |
-| analytics    | boolean | No       | Consent for analytics and performance tracking.   |
-| preferences  | boolean | No       | Consent for storing user preferences.             |
-| marketing    | boolean | No       | Consent for marketing communications.             |
-| sale_of_data | boolean | No       | Consent for selling data to third parties (CCPA). |
-
-#### Buyer with Consent Update Request
-
-| Name         | Type                                               | Required | Description              |
-| ------------ | -------------------------------------------------- | -------- | ------------------------ |
-| first_name   | string                                             | No       | First name of the buyer. |
-| last_name    | string                                             | No       | Last name of the buyer.  |
-| email        | string                                             | No       | Email of the buyer.      |
-| phone_number | string                                             | No       | E.164 standard.          |
-| consent      | [Consent](/draft/specification/reference/#consent) | No       | Consent tracking fields. |
-
-#### Checkout with Buyer Consent Update Request
-
-| Name       | Type                                                                                          | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| ---------- | --------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| id         | string                                                                                        | **Yes**  | Unique identifier of the checkout session.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| line_items | Array\[[Line Item Update Request](/draft/specification/reference/#line-item-update-request)\] | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| buyer      | [Buyer](/draft/specification/reference/#buyer)                                                | No       | Buyer with consent tracking.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| context    | [Context](/draft/specification/reference/#context)                                            | No       | Provisional buyer signals for relevance and localization: product availability, pricing, currency, tax, shipping, payment methods, and eligibility (e.g., student or affiliation discounts). Businesses SHOULD use these values when authoritative data (e.g., address) is absent, and MAY ignore unsupported values without returning errors. Context can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. Platforms SHOULD progressively enhance context throughout the buyer journey. |
-| payment    | [Payment](/draft/specification/reference/#payment)                                            | No       | Payment configuration containing handlers.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-
-______________________________________________________________________
-
-### Buyer Consent Extension Response
-
-#### Consent
-
-| Name         | Type    | Required | Description                                       |
-| ------------ | ------- | -------- | ------------------------------------------------- |
-| analytics    | boolean | No       | Consent for analytics and performance tracking.   |
-| preferences  | boolean | No       | Consent for storing user preferences.             |
-| marketing    | boolean | No       | Consent for marketing communications.             |
-| sale_of_data | boolean | No       | Consent for selling data to third parties (CCPA). |
-
-#### Buyer with Consent Response
-
-| Name         | Type                                               | Required | Description              |
-| ------------ | -------------------------------------------------- | -------- | ------------------------ |
-| first_name   | string                                             | No       | First name of the buyer. |
-| last_name    | string                                             | No       | Last name of the buyer.  |
-| email        | string                                             | No       | Email of the buyer.      |
-| phone_number | string                                             | No       | E.164 standard.          |
-| consent      | [Consent](/draft/specification/reference/#consent) | No       | Consent tracking fields. |
-
-#### Checkout with Buyer Consent Response
-
-| Name         | Type                                                                                         | Required | Description                                                                                                                                                                                                                                                     |
-| ------------ | -------------------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ucp          | [UCP Response Checkout Schema](/draft/specification/reference/#ucp-response-checkout-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                                                                                                                                         |
-| id           | string                                                                                       | **Yes**  | Unique identifier of the checkout session.                                                                                                                                                                                                                      |
-| line_items   | Array\[[Line Item Response](/draft/specification/reference/#line-item-response)\]            | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                           |
-| buyer        | [Buyer](/draft/specification/reference/#buyer)                                               | No       | Buyer with consent tracking.                                                                                                                                                                                                                                    |
-| status       | string                                                                                       | **Yes**  | Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details. **Enum:** `incomplete`, `requires_escalation`, `ready_for_complete`, `complete_in_progress`, `completed`, `canceled` |
-| currency     | string                                                                                       | **Yes**  | ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.                                                                                          |
-| totals       | Array\[[Total Response](/draft/specification/reference/#total-response)\]                    | **Yes**  | Different cart totals.                                                                                                                                                                                                                                          |
-| messages     | Array\[[Message](/draft/specification/reference/#message)\]                                  | No       | List of messages with error and info about the checkout session state.                                                                                                                                                                                          |
-| links        | Array\[[Link](/draft/specification/reference/#link)\]                                        | **Yes**  | Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.                                                                                                                                                                    |
-| expires_at   | string                                                                                       | No       | RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.                                                                                                                                                                                    |
-| continue_url | string                                                                                       | No       | URL for checkout handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements.                                                                                                 |
-| payment      | [Payment](/draft/specification/reference/#payment)                                           | No       | Payment configuration containing handlers.                                                                                                                                                                                                                      |
-| order        | [Order Confirmation](/draft/specification/reference/#order-confirmation)                     | No       | Details about an order created for this checkout session.                                                                                                                                                                                                       |
-
-______________________________________________________________________
-
-### Discount Extension Complete Request
+### Discount Extension
 
 #### Allocation
 
@@ -1034,321 +585,60 @@ ______________________________________________________________________
 | codes   | Array[string]                                                                 | No       | Discount codes to apply. Case-insensitive. Replaces previously submitted codes. Send empty array to clear. |
 | applied | Array\[[Applied Discount](/draft/specification/reference/#applied-discount)\] | No       | Discounts successfully applied (code-based and automatic).                                                 |
 
-#### Checkout with Discount Complete Request
+#### Checkout with Discount
 
-| Name    | Type                                               | Required | Description                                |
-| ------- | -------------------------------------------------- | -------- | ------------------------------------------ |
-| payment | [Payment](/draft/specification/reference/#payment) | **Yes**  | Payment configuration containing handlers. |
-
-______________________________________________________________________
-
-### Discount Extension Create Request
-
-#### Allocation
-
-| Name   | Type    | Required | Description                                                                       |
-| ------ | ------- | -------- | --------------------------------------------------------------------------------- |
-| path   | string  | **Yes**  | JSONPath to the allocation target (e.g., '$.line_items[0]', '$.totals.shipping'). |
-| amount | integer | **Yes**  | Amount allocated to this target in minor (cents) currency units.                  |
-
-#### Applied Discount
-
-| Name        | Type                                                              | Required | Description                                                                                                                      |
-| ----------- | ----------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| code        | string                                                            | No       | The discount code. Omitted for automatic discounts.                                                                              |
-| title       | string                                                            | **Yes**  | Human-readable discount name (e.g., 'Summer Sale 20% Off').                                                                      |
-| amount      | integer                                                           | **Yes**  | Total discount amount in minor (cents) currency units.                                                                           |
-| automatic   | boolean                                                           | No       | True if applied automatically by merchant rules (no code required).                                                              |
-| method      | string                                                            | No       | Allocation method. 'each' = applied independently per item. 'across' = split proportionally by value. **Enum:** `each`, `across` |
-| priority    | integer                                                           | No       | Stacking order for discount calculation. Lower numbers applied first (1 = first).                                                |
-| allocations | Array\[[Allocation](/draft/specification/reference/#allocation)\] | No       | Breakdown of where this discount was allocated. Sum of allocation amounts equals total amount.                                   |
-
-#### Discounts Object
-
-| Name    | Type                                                                          | Required | Description                                                                                                |
-| ------- | ----------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------- |
-| codes   | Array[string]                                                                 | No       | Discount codes to apply. Case-insensitive. Replaces previously submitted codes. Send empty array to clear. |
-| applied | Array\[[Applied Discount](/draft/specification/reference/#applied-discount)\] | No       | Discounts successfully applied (code-based and automatic).                                                 |
-
-#### Checkout with Discount Create Request
-
-| Name       | Type                                                                                          | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| ---------- | --------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| line_items | Array\[[Line Item Create Request](/draft/specification/reference/#line-item-create-request)\] | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| buyer      | [Buyer](/draft/specification/reference/#buyer)                                                | No       | Representation of the buyer.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| context    | [Context](/draft/specification/reference/#context)                                            | No       | Provisional buyer signals for relevance and localization: product availability, pricing, currency, tax, shipping, payment methods, and eligibility (e.g., student or affiliation discounts). Businesses SHOULD use these values when authoritative data (e.g., address) is absent, and MAY ignore unsupported values without returning errors. Context can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. Platforms SHOULD progressively enhance context throughout the buyer journey. |
-| payment    | [Payment](/draft/specification/reference/#payment)                                            | No       | Payment configuration containing handlers.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| discounts  | [Discounts Object](/draft/specification/reference/#discounts-object)                          | No       |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| Name         | Type                                                                 | Required | Description                                                                                                                                                                                                                                                     |
+| ------------ | -------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ucp          | any                                                                  | **Yes**  | UCP metadata for checkout responses.                                                                                                                                                                                                                            |
+| id           | string                                                               | **Yes**  | Unique identifier of the checkout session.                                                                                                                                                                                                                      |
+| line_items   | Array[object]                                                        | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                           |
+| buyer        | object                                                               | No       | Representation of the buyer.                                                                                                                                                                                                                                    |
+| status       | string                                                               | **Yes**  | Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details. **Enum:** `incomplete`, `requires_escalation`, `ready_for_complete`, `complete_in_progress`, `completed`, `canceled` |
+| currency     | string                                                               | **Yes**  | ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.                                                                                          |
+| totals       | Array[object]                                                        | **Yes**  | Different cart totals.                                                                                                                                                                                                                                          |
+| messages     | Array[object]                                                        | No       | List of messages with error and info about the checkout session state.                                                                                                                                                                                          |
+| links        | Array[object]                                                        | **Yes**  | Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.                                                                                                                                                                    |
+| expires_at   | string                                                               | No       | RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.                                                                                                                                                                                    |
+| continue_url | string                                                               | No       | URL for checkout handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements.                                                                                                 |
+| payment      | object                                                               | No       | Payment configuration containing handlers.                                                                                                                                                                                                                      |
+| order        | object                                                               | No       | Details about an order created for this checkout session.                                                                                                                                                                                                       |
+| discounts    | [Discounts Object](/draft/specification/reference/#discounts-object) | No       |                                                                                                                                                                                                                                                                 |
 
 ______________________________________________________________________
 
-### Discount Extension Update Request
-
-#### Allocation
-
-| Name   | Type    | Required | Description                                                                       |
-| ------ | ------- | -------- | --------------------------------------------------------------------------------- |
-| path   | string  | **Yes**  | JSONPath to the allocation target (e.g., '$.line_items[0]', '$.totals.shipping'). |
-| amount | integer | **Yes**  | Amount allocated to this target in minor (cents) currency units.                  |
-
-#### Applied Discount
-
-| Name        | Type                                                              | Required | Description                                                                                                                      |
-| ----------- | ----------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| code        | string                                                            | No       | The discount code. Omitted for automatic discounts.                                                                              |
-| title       | string                                                            | **Yes**  | Human-readable discount name (e.g., 'Summer Sale 20% Off').                                                                      |
-| amount      | integer                                                           | **Yes**  | Total discount amount in minor (cents) currency units.                                                                           |
-| automatic   | boolean                                                           | No       | True if applied automatically by merchant rules (no code required).                                                              |
-| method      | string                                                            | No       | Allocation method. 'each' = applied independently per item. 'across' = split proportionally by value. **Enum:** `each`, `across` |
-| priority    | integer                                                           | No       | Stacking order for discount calculation. Lower numbers applied first (1 = first).                                                |
-| allocations | Array\[[Allocation](/draft/specification/reference/#allocation)\] | No       | Breakdown of where this discount was allocated. Sum of allocation amounts equals total amount.                                   |
-
-#### Discounts Object
-
-| Name    | Type                                                                          | Required | Description                                                                                                |
-| ------- | ----------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------- |
-| codes   | Array[string]                                                                 | No       | Discount codes to apply. Case-insensitive. Replaces previously submitted codes. Send empty array to clear. |
-| applied | Array\[[Applied Discount](/draft/specification/reference/#applied-discount)\] | No       | Discounts successfully applied (code-based and automatic).                                                 |
-
-#### Checkout with Discount Update Request
-
-| Name       | Type                                                                                          | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| ---------- | --------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| id         | string                                                                                        | **Yes**  | Unique identifier of the checkout session.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| line_items | Array\[[Line Item Update Request](/draft/specification/reference/#line-item-update-request)\] | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| buyer      | [Buyer](/draft/specification/reference/#buyer)                                                | No       | Representation of the buyer.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| context    | [Context](/draft/specification/reference/#context)                                            | No       | Provisional buyer signals for relevance and localization: product availability, pricing, currency, tax, shipping, payment methods, and eligibility (e.g., student or affiliation discounts). Businesses SHOULD use these values when authoritative data (e.g., address) is absent, and MAY ignore unsupported values without returning errors. Context can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. Platforms SHOULD progressively enhance context throughout the buyer journey. |
-| payment    | [Payment](/draft/specification/reference/#payment)                                            | No       | Payment configuration containing handlers.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| discounts  | [Discounts Object](/draft/specification/reference/#discounts-object)                          | No       |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-
-______________________________________________________________________
-
-### Discount Extension Response
-
-#### Allocation
-
-| Name   | Type    | Required | Description                                                                       |
-| ------ | ------- | -------- | --------------------------------------------------------------------------------- |
-| path   | string  | **Yes**  | JSONPath to the allocation target (e.g., '$.line_items[0]', '$.totals.shipping'). |
-| amount | integer | **Yes**  | Amount allocated to this target in minor (cents) currency units.                  |
-
-#### Applied Discount
-
-| Name        | Type                                                              | Required | Description                                                                                                                      |
-| ----------- | ----------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| code        | string                                                            | No       | The discount code. Omitted for automatic discounts.                                                                              |
-| title       | string                                                            | **Yes**  | Human-readable discount name (e.g., 'Summer Sale 20% Off').                                                                      |
-| amount      | integer                                                           | **Yes**  | Total discount amount in minor (cents) currency units.                                                                           |
-| automatic   | boolean                                                           | No       | True if applied automatically by merchant rules (no code required).                                                              |
-| method      | string                                                            | No       | Allocation method. 'each' = applied independently per item. 'across' = split proportionally by value. **Enum:** `each`, `across` |
-| priority    | integer                                                           | No       | Stacking order for discount calculation. Lower numbers applied first (1 = first).                                                |
-| allocations | Array\[[Allocation](/draft/specification/reference/#allocation)\] | No       | Breakdown of where this discount was allocated. Sum of allocation amounts equals total amount.                                   |
-
-#### Discounts Object
-
-| Name    | Type                                                                          | Required | Description                                                                                                |
-| ------- | ----------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------- |
-| codes   | Array[string]                                                                 | No       | Discount codes to apply. Case-insensitive. Replaces previously submitted codes. Send empty array to clear. |
-| applied | Array\[[Applied Discount](/draft/specification/reference/#applied-discount)\] | No       | Discounts successfully applied (code-based and automatic).                                                 |
-
-#### Checkout with Discount Response
-
-| Name         | Type                                                                                         | Required | Description                                                                                                                                                                                                                                                     |
-| ------------ | -------------------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ucp          | [UCP Response Checkout Schema](/draft/specification/reference/#ucp-response-checkout-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                                                                                                                                         |
-| id           | string                                                                                       | **Yes**  | Unique identifier of the checkout session.                                                                                                                                                                                                                      |
-| line_items   | Array\[[Line Item Response](/draft/specification/reference/#line-item-response)\]            | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                           |
-| buyer        | [Buyer](/draft/specification/reference/#buyer)                                               | No       | Representation of the buyer.                                                                                                                                                                                                                                    |
-| status       | string                                                                                       | **Yes**  | Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details. **Enum:** `incomplete`, `requires_escalation`, `ready_for_complete`, `complete_in_progress`, `completed`, `canceled` |
-| currency     | string                                                                                       | **Yes**  | ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.                                                                                          |
-| totals       | Array\[[Total Response](/draft/specification/reference/#total-response)\]                    | **Yes**  | Different cart totals.                                                                                                                                                                                                                                          |
-| messages     | Array\[[Message](/draft/specification/reference/#message)\]                                  | No       | List of messages with error and info about the checkout session state.                                                                                                                                                                                          |
-| links        | Array\[[Link](/draft/specification/reference/#link)\]                                        | **Yes**  | Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.                                                                                                                                                                    |
-| expires_at   | string                                                                                       | No       | RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.                                                                                                                                                                                    |
-| continue_url | string                                                                                       | No       | URL for checkout handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements.                                                                                                 |
-| payment      | [Payment](/draft/specification/reference/#payment)                                           | No       | Payment configuration containing handlers.                                                                                                                                                                                                                      |
-| order        | [Order Confirmation](/draft/specification/reference/#order-confirmation)                     | No       | Details about an order created for this checkout session.                                                                                                                                                                                                       |
-| discounts    | [Discounts Object](/draft/specification/reference/#discounts-object)                         | No       |                                                                                                                                                                                                                                                                 |
-
-______________________________________________________________________
-
-### Fulfillment Extension Complete Request
+### Fulfillment Extension
 
 #### Fulfillment Option
 
-A fulfillment option within a group (e.g., Standard Shipping $5, Express $15).
+| Name                      | Type          | Required | Description                                                                |
+| ------------------------- | ------------- | -------- | -------------------------------------------------------------------------- |
+| id                        | string        | **Yes**  | Unique fulfillment option identifier.                                      |
+| title                     | string        | **Yes**  | Short label (e.g., 'Express Shipping', 'Curbside Pickup').                 |
+| description               | string        | No       | Complete context for buyer decision (e.g., 'Arrives Dec 12-15 via FedEx'). |
+| carrier                   | string        | No       | Carrier name (for shipping).                                               |
+| earliest_fulfillment_time | string        | No       | Earliest fulfillment date.                                                 |
+| latest_fulfillment_time   | string        | No       | Latest fulfillment date.                                                   |
+| totals                    | Array[object] | **Yes**  | Fulfillment option totals breakdown.                                       |
 
 #### Fulfillment Group
 
 | Name               | Type               | Required | Description                                                            |
 | ------------------ | ------------------ | -------- | ---------------------------------------------------------------------- |
 | id                 | string             | **Yes**  | Group identifier for referencing merchant-generated groups in updates. |
+| line_item_ids      | Array[string]      | **Yes**  | Line item IDs included in this group/package.                          |
+| options            | Array[object]      | No       | Available fulfillment options for this group.                          |
 | selected_option_id | ['string', 'null'] | No       | ID of the selected fulfillment option for this group.                  |
 
 #### Fulfillment Method
 
-| Name                    | Type                                                                                                          | Required | Description                                                                                                  |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------ |
-| id                      | string                                                                                                        | **Yes**  | Unique fulfillment method identifier.                                                                        |
-| type                    | string                                                                                                        | **Yes**  | Fulfillment method type. **Enum:** `shipping`, `pickup`                                                      |
-| line_item_ids           | Array[string]                                                                                                 | **Yes**  | Line item IDs fulfilled via this method.                                                                     |
-| destinations            | Array\[[Fulfillment Destination Request](/draft/specification/reference/#fulfillment-destination-request)\]   | No       | Available destinations. For shipping: addresses. For pickup: retail locations.                               |
-| selected_destination_id | ['string', 'null']                                                                                            | No       | ID of the selected destination.                                                                              |
-| groups                  | Array\[[Fulfillment Group Complete Request](/draft/specification/reference/#fulfillment-group-complete_req)\] | No       | Fulfillment groups for selecting options. Agent sets selected_option_id on groups to choose shipping method. |
-
-#### Fulfillment Available Method
-
-Inventory availability hint for a fulfillment method type.
-
-#### Fulfillment
-
-| Name    | Type                                                                                                            | Required | Description                         |
-| ------- | --------------------------------------------------------------------------------------------------------------- | -------- | ----------------------------------- |
-| methods | Array\[[Fulfillment Method Create Request](/draft/specification/reference/#fulfillment-method-create-request)\] | No       | Fulfillment methods for cart items. |
-
-#### Checkout with Fulfillment Complete Request
-
-| Name    | Type                                               | Required | Description                                |
-| ------- | -------------------------------------------------- | -------- | ------------------------------------------ |
-| payment | [Payment](/draft/specification/reference/#payment) | **Yes**  | Payment configuration containing handlers. |
-
-#### Dev.Ucp.Shopping.Fulfillment
-
-*No properties defined.*
-
-______________________________________________________________________
-
-### Fulfillment Extension Create Request
-
-#### Fulfillment Option
-
-A fulfillment option within a group (e.g., Standard Shipping $5, Express $15).
-
-#### Fulfillment Group
-
-| Name               | Type               | Required | Description                                           |
-| ------------------ | ------------------ | -------- | ----------------------------------------------------- |
-| selected_option_id | ['string', 'null'] | No       | ID of the selected fulfillment option for this group. |
-
-#### Fulfillment Method
-
-| Name                    | Type                                                                                                          | Required | Description                                                                                                  |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------ |
-| type                    | string                                                                                                        | **Yes**  | Fulfillment method type. **Enum:** `shipping`, `pickup`                                                      |
-| line_item_ids           | Array[string]                                                                                                 | No       | Line item IDs fulfilled via this method.                                                                     |
-| destinations            | Array\[[Fulfillment Destination Request](/draft/specification/reference/#fulfillment-destination-request)\]   | No       | Available destinations. For shipping: addresses. For pickup: retail locations.                               |
-| selected_destination_id | ['string', 'null']                                                                                            | No       | ID of the selected destination.                                                                              |
-| groups                  | Array\[[Fulfillment Group Create Request](/draft/specification/reference/#fulfillment-group-create-request)\] | No       | Fulfillment groups for selecting options. Agent sets selected_option_id on groups to choose shipping method. |
-
-#### Fulfillment Available Method
-
-Inventory availability hint for a fulfillment method type.
-
-#### Fulfillment
-
-| Name    | Type                                                                                                            | Required | Description                         |
-| ------- | --------------------------------------------------------------------------------------------------------------- | -------- | ----------------------------------- |
-| methods | Array\[[Fulfillment Method Create Request](/draft/specification/reference/#fulfillment-method-create-request)\] | No       | Fulfillment methods for cart items. |
-
-#### Checkout with Fulfillment Create Request
-
-| Name        | Type                                                                                          | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| ----------- | --------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| line_items  | Array\[[Line Item Create Request](/draft/specification/reference/#line-item-create-request)\] | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| buyer       | [Buyer](/draft/specification/reference/#buyer)                                                | No       | Representation of the buyer.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| context     | [Context](/draft/specification/reference/#context)                                            | No       | Provisional buyer signals for relevance and localization: product availability, pricing, currency, tax, shipping, payment methods, and eligibility (e.g., student or affiliation discounts). Businesses SHOULD use these values when authoritative data (e.g., address) is absent, and MAY ignore unsupported values without returning errors. Context can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. Platforms SHOULD progressively enhance context throughout the buyer journey. |
-| payment     | [Payment](/draft/specification/reference/#payment)                                            | No       | Payment configuration containing handlers.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| fulfillment | [Fulfillment](/draft/specification/reference/#fulfillment)                                    | No       | Fulfillment details.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-
-#### Dev.Ucp.Shopping.Fulfillment
-
-*No properties defined.*
-
-______________________________________________________________________
-
-### Fulfillment Extension Update Request
-
-#### Fulfillment Option
-
-A fulfillment option within a group (e.g., Standard Shipping $5, Express $15).
-
-#### Fulfillment Group
-
-| Name               | Type               | Required | Description                                                            |
-| ------------------ | ------------------ | -------- | ---------------------------------------------------------------------- |
-| id                 | string             | **Yes**  | Group identifier for referencing merchant-generated groups in updates. |
-| selected_option_id | ['string', 'null'] | No       | ID of the selected fulfillment option for this group.                  |
-
-#### Fulfillment Method
-
-| Name                    | Type                                                                                                          | Required | Description                                                                                                  |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------ |
-| id                      | string                                                                                                        | **Yes**  | Unique fulfillment method identifier.                                                                        |
-| line_item_ids           | Array[string]                                                                                                 | **Yes**  | Line item IDs fulfilled via this method.                                                                     |
-| destinations            | Array\[[Fulfillment Destination Request](/draft/specification/reference/#fulfillment-destination-request)\]   | No       | Available destinations. For shipping: addresses. For pickup: retail locations.                               |
-| selected_destination_id | ['string', 'null']                                                                                            | No       | ID of the selected destination.                                                                              |
-| groups                  | Array\[[Fulfillment Group Update Request](/draft/specification/reference/#fulfillment-group-update-request)\] | No       | Fulfillment groups for selecting options. Agent sets selected_option_id on groups to choose shipping method. |
-
-#### Fulfillment Available Method
-
-Inventory availability hint for a fulfillment method type.
-
-#### Fulfillment
-
-| Name    | Type                                                                                                            | Required | Description                         |
-| ------- | --------------------------------------------------------------------------------------------------------------- | -------- | ----------------------------------- |
-| methods | Array\[[Fulfillment Method Create Request](/draft/specification/reference/#fulfillment-method-create-request)\] | No       | Fulfillment methods for cart items. |
-
-#### Checkout with Fulfillment Update Request
-
-| Name        | Type                                                                                          | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| ----------- | --------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| id          | string                                                                                        | **Yes**  | Unique identifier of the checkout session.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| line_items  | Array\[[Line Item Update Request](/draft/specification/reference/#line-item-update-request)\] | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| buyer       | [Buyer](/draft/specification/reference/#buyer)                                                | No       | Representation of the buyer.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| context     | [Context](/draft/specification/reference/#context)                                            | No       | Provisional buyer signals for relevance and localization: product availability, pricing, currency, tax, shipping, payment methods, and eligibility (e.g., student or affiliation discounts). Businesses SHOULD use these values when authoritative data (e.g., address) is absent, and MAY ignore unsupported values without returning errors. Context can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. Platforms SHOULD progressively enhance context throughout the buyer journey. |
-| payment     | [Payment](/draft/specification/reference/#payment)                                            | No       | Payment configuration containing handlers.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| fulfillment | [Fulfillment](/draft/specification/reference/#fulfillment)                                    | No       | Fulfillment details.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-
-#### Dev.Ucp.Shopping.Fulfillment
-
-*No properties defined.*
-
-______________________________________________________________________
-
-### Fulfillment Extension Response
-
-#### Fulfillment Option
-
-| Name                      | Type                                                                      | Required | Description                                                                |
-| ------------------------- | ------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------- |
-| id                        | string                                                                    | **Yes**  | Unique fulfillment option identifier.                                      |
-| title                     | string                                                                    | **Yes**  | Short label (e.g., 'Express Shipping', 'Curbside Pickup').                 |
-| description               | string                                                                    | No       | Complete context for buyer decision (e.g., 'Arrives Dec 12-15 via FedEx'). |
-| carrier                   | string                                                                    | No       | Carrier name (for shipping).                                               |
-| earliest_fulfillment_time | string                                                                    | No       | Earliest fulfillment date.                                                 |
-| latest_fulfillment_time   | string                                                                    | No       | Latest fulfillment date.                                                   |
-| totals                    | Array\[[Total Response](/draft/specification/reference/#total-response)\] | **Yes**  | Fulfillment option totals breakdown.                                       |
-
-#### Fulfillment Group
-
-| Name               | Type                                                                                                | Required | Description                                                            |
-| ------------------ | --------------------------------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------- |
-| id                 | string                                                                                              | **Yes**  | Group identifier for referencing merchant-generated groups in updates. |
-| line_item_ids      | Array[string]                                                                                       | **Yes**  | Line item IDs included in this group/package.                          |
-| options            | Array\[[Fulfillment Option Response](/draft/specification/reference/#fulfillment-option-response)\] | No       | Available fulfillment options for this group.                          |
-| selected_option_id | ['string', 'null']                                                                                  | No       | ID of the selected fulfillment option for this group.                  |
-
-#### Fulfillment Method
-
-| Name                    | Type                                                                                                          | Required | Description                                                                                                  |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------ |
-| id                      | string                                                                                                        | **Yes**  | Unique fulfillment method identifier.                                                                        |
-| type                    | string                                                                                                        | **Yes**  | Fulfillment method type. **Enum:** `shipping`, `pickup`                                                      |
-| line_item_ids           | Array[string]                                                                                                 | **Yes**  | Line item IDs fulfilled via this method.                                                                     |
-| destinations            | Array\[[Fulfillment Destination Response](/draft/specification/reference/#fulfillment-destination-response)\] | No       | Available destinations. For shipping: addresses. For pickup: retail locations.                               |
-| selected_destination_id | ['string', 'null']                                                                                            | No       | ID of the selected destination.                                                                              |
-| groups                  | Array\[[Fulfillment Group Response](/draft/specification/reference/#fulfillment-group-response)\]             | No       | Fulfillment groups for selecting options. Agent sets selected_option_id on groups to choose shipping method. |
+| Name                    | Type               | Required | Description                                                                                                  |
+| ----------------------- | ------------------ | -------- | ------------------------------------------------------------------------------------------------------------ |
+| id                      | string             | **Yes**  | Unique fulfillment method identifier.                                                                        |
+| type                    | string             | **Yes**  | Fulfillment method type. **Enum:** `shipping`, `pickup`                                                      |
+| line_item_ids           | Array[string]      | **Yes**  | Line item IDs fulfilled via this method.                                                                     |
+| destinations            | Array[object]      | No       | Available destinations. For shipping: addresses. For pickup: retail locations.                               |
+| selected_destination_id | ['string', 'null'] | No       | ID of the selected destination.                                                                              |
+| groups                  | Array[object]      | No       | Fulfillment groups for selecting options. Agent sets selected_option_id on groups to choose shipping method. |
 
 #### Fulfillment Available Method
 
@@ -1361,29 +651,29 @@ ______________________________________________________________________
 
 #### Fulfillment
 
-| Name              | Type                                                                                                                    | Required | Description                         |
-| ----------------- | ----------------------------------------------------------------------------------------------------------------------- | -------- | ----------------------------------- |
-| methods           | Array\[[Fulfillment Method Response](/draft/specification/reference/#fulfillment-method-response)\]                     | No       | Fulfillment methods for cart items. |
-| available_methods | Array\[[Fulfillment Available Method Response](/draft/specification/reference/#fulfillment-available-method-response)\] | No       | Inventory availability hints.       |
+| Name              | Type          | Required | Description                         |
+| ----------------- | ------------- | -------- | ----------------------------------- |
+| methods           | Array[object] | No       | Fulfillment methods for cart items. |
+| available_methods | Array[object] | No       | Inventory availability hints.       |
 
-#### Checkout with Fulfillment Response
+#### Checkout with Fulfillment
 
-| Name         | Type                                                                                         | Required | Description                                                                                                                                                                                                                                                     |
-| ------------ | -------------------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ucp          | [UCP Response Checkout Schema](/draft/specification/reference/#ucp-response-checkout-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                                                                                                                                         |
-| id           | string                                                                                       | **Yes**  | Unique identifier of the checkout session.                                                                                                                                                                                                                      |
-| line_items   | Array\[[Line Item Response](/draft/specification/reference/#line-item-response)\]            | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                           |
-| buyer        | [Buyer](/draft/specification/reference/#buyer)                                               | No       | Representation of the buyer.                                                                                                                                                                                                                                    |
-| status       | string                                                                                       | **Yes**  | Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details. **Enum:** `incomplete`, `requires_escalation`, `ready_for_complete`, `complete_in_progress`, `completed`, `canceled` |
-| currency     | string                                                                                       | **Yes**  | ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.                                                                                          |
-| totals       | Array\[[Total Response](/draft/specification/reference/#total-response)\]                    | **Yes**  | Different cart totals.                                                                                                                                                                                                                                          |
-| messages     | Array\[[Message](/draft/specification/reference/#message)\]                                  | No       | List of messages with error and info about the checkout session state.                                                                                                                                                                                          |
-| links        | Array\[[Link](/draft/specification/reference/#link)\]                                        | **Yes**  | Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.                                                                                                                                                                    |
-| expires_at   | string                                                                                       | No       | RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.                                                                                                                                                                                    |
-| continue_url | string                                                                                       | No       | URL for checkout handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements.                                                                                                 |
-| payment      | [Payment](/draft/specification/reference/#payment)                                           | No       | Payment configuration containing handlers.                                                                                                                                                                                                                      |
-| order        | [Order Confirmation](/draft/specification/reference/#order-confirmation)                     | No       | Details about an order created for this checkout session.                                                                                                                                                                                                       |
-| fulfillment  | [Fulfillment](/draft/specification/reference/#fulfillment)                                   | No       | Fulfillment details.                                                                                                                                                                                                                                            |
+| Name         | Type                                                       | Required | Description                                                                                                                                                                                                                                                     |
+| ------------ | ---------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ucp          | any                                                        | **Yes**  | UCP metadata for checkout responses.                                                                                                                                                                                                                            |
+| id           | string                                                     | **Yes**  | Unique identifier of the checkout session.                                                                                                                                                                                                                      |
+| line_items   | Array[object]                                              | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                           |
+| buyer        | object                                                     | No       | Representation of the buyer.                                                                                                                                                                                                                                    |
+| status       | string                                                     | **Yes**  | Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details. **Enum:** `incomplete`, `requires_escalation`, `ready_for_complete`, `complete_in_progress`, `completed`, `canceled` |
+| currency     | string                                                     | **Yes**  | ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.                                                                                          |
+| totals       | Array[object]                                              | **Yes**  | Different cart totals.                                                                                                                                                                                                                                          |
+| messages     | Array[object]                                              | No       | List of messages with error and info about the checkout session state.                                                                                                                                                                                          |
+| links        | Array[object]                                              | **Yes**  | Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.                                                                                                                                                                    |
+| expires_at   | string                                                     | No       | RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.                                                                                                                                                                                    |
+| continue_url | string                                                     | No       | URL for checkout handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements.                                                                                                 |
+| payment      | object                                                     | No       | Payment configuration containing handlers.                                                                                                                                                                                                                      |
+| order        | object                                                     | No       | Details about an order created for this checkout session.                                                                                                                                                                                                       |
+| fulfillment  | [Fulfillment](/draft/specification/reference/#fulfillment) | No       | Fulfillment details.                                                                                                                                                                                                                                            |
 
 #### Dev.Ucp.Shopping.Fulfillment
 
@@ -1399,45 +689,43 @@ The following schemas define the structure of UCP metadata used in discovery and
 
 The top-level structure of a platform profile document (hosted at a URI advertised by the platform).
 
-| Name             | Type   | Required | Description                       |
-| ---------------- | ------ | -------- | --------------------------------- |
-| version          | string | **Yes**  | UCP version in YYYY-MM-DD format. |
-| services         | any    | **Yes**  |                                   |
-| capabilities     | any    | No       |                                   |
-| payment_handlers | any    | **Yes**  |                                   |
+| Name                                                                                        | Type | Required | Description |
+| ------------------------------------------------------------------------------------------- | ---- | -------- | ----------- |
+| **Error:** Failed to resolve ''. Ensure ucp-schema is installed: `cargo install ucp-schema` |      |          |             |
+| services                                                                                    | any  | **Yes**  |             |
+| capabilities                                                                                | any  | No       |             |
+| payment_handlers                                                                            | any  | **Yes**  |             |
 
 ### Business Discovery Profile
 
 The top-level structure of a business discovery document (`/.well-known/ucp`).
 
-| Name             | Type   | Required | Description                       |
-| ---------------- | ------ | -------- | --------------------------------- |
-| version          | string | **Yes**  | UCP version in YYYY-MM-DD format. |
-| services         | any    | **Yes**  |                                   |
-| capabilities     | any    | No       |                                   |
-| payment_handlers | any    | **Yes**  |                                   |
+| Name                                                                                        | Type | Required | Description |
+| ------------------------------------------------------------------------------------------- | ---- | -------- | ----------- |
+| **Error:** Failed to resolve ''. Ensure ucp-schema is installed: `cargo install ucp-schema` |      |          |             |
+| services                                                                                    | any  | **Yes**  |             |
+| capabilities                                                                                | any  | No       |             |
+| payment_handlers                                                                            | any  | **Yes**  |             |
 
 ### Checkout Response Metadata
 
 The `ucp` object included in checkout responses.
 
-| Name             | Type   | Required | Description                       |
-| ---------------- | ------ | -------- | --------------------------------- |
-| version          | string | **Yes**  | UCP version in YYYY-MM-DD format. |
-| services         | any    | No       |                                   |
-| capabilities     | any    | No       |                                   |
-| payment_handlers | any    | **Yes**  |                                   |
+| Name                                                                                        | Type | Required | Description |
+| ------------------------------------------------------------------------------------------- | ---- | -------- | ----------- |
+| **Error:** Failed to resolve ''. Ensure ucp-schema is installed: `cargo install ucp-schema` |      |          |             |
+| services                                                                                    | any  | No       |             |
+| capabilities                                                                                | any  | No       |             |
+| payment_handlers                                                                            | any  | **Yes**  |             |
 
 ### Order Response Metadata
 
 The `ucp` object included in order responses or events.
 
-| Name             | Type   | Required | Description                                            |
-| ---------------- | ------ | -------- | ------------------------------------------------------ |
-| version          | string | **Yes**  | UCP version in YYYY-MM-DD format.                      |
-| services         | object | No       | Service registry keyed by reverse-domain name.         |
-| capabilities     | any    | No       |                                                        |
-| payment_handlers | object | No       | Payment handler registry keyed by reverse-domain name. |
+| Name                                                                                        | Type | Required | Description |
+| ------------------------------------------------------------------------------------------- | ---- | -------- | ----------- |
+| **Error:** Failed to resolve ''. Ensure ucp-schema is installed: `cargo install ucp-schema` |      |          |             |
+| capabilities                                                                                | any  | No       |             |
 
 ### Capability
 
@@ -1447,17 +735,12 @@ This object describes a single capability or extension. It appears in the `capab
 
 As seen in discovery profiles.
 
-**Error:** Definition '#/$defs/discovery' not found in 'spec/schemas/capability.json'
+**Error:** Definition '#/$defs/discovery' not found in 'source/schemas/capability.json'
 
 #### Capability (Response)
 
 As seen in response messages.
 
-| Name    | Type   | Required | Description                                                                                     |
-| ------- | ------ | -------- | ----------------------------------------------------------------------------------------------- |
-| version | string | **Yes**  | UCP version in YYYY-MM-DD format.Entity version in YYYY-MM-DD format.                           |
-| spec    | string | No       | URL to human-readable specification document.                                                   |
-| schema  | string | No       | URL to JSON Schema defining this entity's structure and payloads.                               |
-| id      | string | No       | Unique identifier for this entity instance. Used to disambiguate when multiple instances exist. |
-| config  | object | No       | Entity-specific configuration. Structure defined by each entity's schema.                       |
-| extends | string | No       | Parent capability this extends. Present for extensions, absent for root capabilities.           |
+| Name                                                                                        | Type | Required | Description |
+| ------------------------------------------------------------------------------------------- | ---- | -------- | ----------- |
+| **Error:** Failed to resolve ''. Ensure ucp-schema is installed: `cargo install ucp-schema` |      |          |             |

@@ -3659,7 +3659,6 @@
 -->
 
 <h1 id="universal-commerce-protocol-ucp-official-specification">Universal Commerce Protocol (UCP) Official Specification<a class="headerlink" href="#universal-commerce-protocol-ucp-official-specification" title="Permanent link">&para;</a></h1>
-<p><strong>Version:</strong> <code>2026-01-11</code></p>
 <h2 id="overarching-guidelines">Overarching guidelines<a class="headerlink" href="#overarching-guidelines" title="Permanent link">&para;</a></h2>
 <p>The key words <strong>MUST</strong>, <strong>MUST NOT</strong>, <strong>REQUIRED</strong>, <strong>SHALL</strong>, <strong>SHALL NOT</strong>,
 <strong>SHOULD</strong>, <strong>SHOULD NOT</strong>, <strong>RECOMMENDED</strong>, <strong>MAY</strong>, and <strong>OPTIONAL</strong> in this
@@ -3905,7 +3904,7 @@ appended to this endpoint to form the complete URL.</p>
 <p>A <strong>capability</strong> is a feature within a service. It declares what
 functionality is supported and where to find documentation and schemas.</p>
 <h4 id="capability-definition">Capability Definition<a class="headerlink" href="#capability-definition" title="Permanent link">&para;</a></h4>
-<p><strong>Error:</strong> Definition '#/$defs/discovery' not found in 'spec/schemas/capability.json'</p>
+<p><strong>Error:</strong> Definition '#/$defs/discovery' not found in 'source/schemas/capability.json'</p>
 <h4 id="extensions">Extensions<a class="headerlink" href="#extensions" title="Permanent link">&para;</a></h4>
 <p>An <strong>extension</strong> is an optional module that augments another capability.
 Extensions use the <code>extends</code> field to declare their parent:</p>
@@ -4943,11 +4942,6 @@ Vendors control their own release schedules and versioning strategy.</p>
 <td style="text-align: left;"><strong>Verifiable Digital Credential</strong></td>
 <td style="text-align: left;">VDC</td>
 <td style="text-align: left;">An Issuer-signed credential (set of claims) whose authenticity can be verified cryptographically. Used in UCP for secure payment authorizations.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong>Verifiable Presentation</strong></td>
-<td style="text-align: left;">VP</td>
-<td style="text-align: left;">A presentation of one or more VDCs that includes a cryptographic proof of binding, used to prove authorization to a business or PSP.</td>
 </tr>
 </tbody>
 </table>

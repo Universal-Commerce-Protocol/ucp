@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/schemas/shopping/types/order_confirmation.json",
+  "$id": "https://ucp.dev/draft/schemas/shopping/types/order_confirmation.json",
   "title": "Order Confirmation",
   "description": "Order details available at the time of checkout completion.",
   "type": "object",

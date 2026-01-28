@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/schemas/shopping/payment.json",
+  "$id": "https://ucp.dev/draft/schemas/shopping/payment.json",
   "title": "Payment",
   "description": "Payment configuration containing handlers.",
   "type": "object",
@@ -8,7 +8,7 @@
     "instruments": {
       "type": "array",
       "items": {
-        "$ref": "https://ucp.dev/schemas/shopping/types/payment_instrument.json#/$defs/selected_payment_instrument"
+        "$ref": "https://ucp.dev/draft/schemas/shopping/types/payment_instrument.json#/$defs/selected_payment_instrument"
       },
       "description": "The payment instruments available for this payment. Each instrument is associated with a specific handler via the handler_id field. Handlers can extend the base payment_instrument schema to add handler-specific fields."
     }

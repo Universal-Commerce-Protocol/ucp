@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/schemas/ucp.json",
+  "$id": "https://ucp.dev/draft/schemas/ucp.json",
   "title": "UCP Metadata",
   "description": "Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.",
   "$defs": {
@@ -65,7 +65,7 @@
           "additionalProperties": {
             "type": "array",
             "items": {
-              "$ref": "https://ucp.dev/schemas/service.json#/$defs/base"
+              "$ref": "https://ucp.dev/draft/schemas/service.json#/$defs/base"
             }
           }
         },
@@ -78,7 +78,7 @@
           "additionalProperties": {
             "type": "array",
             "items": {
-              "$ref": "https://ucp.dev/schemas/capability.json#/$defs/base"
+              "$ref": "https://ucp.dev/draft/schemas/capability.json#/$defs/base"
             }
           }
         },
@@ -91,7 +91,7 @@
           "additionalProperties": {
             "type": "array",
             "items": {
-              "$ref": "https://ucp.dev/schemas/payment_handler.json#/$defs/base"
+              "$ref": "https://ucp.dev/draft/schemas/payment_handler.json#/$defs/base"
             }
           }
         }
@@ -113,21 +113,21 @@
             "services": {
               "additionalProperties": {
                 "items": {
-                  "$ref": "https://ucp.dev/schemas/service.json#/$defs/platform_schema"
+                  "$ref": "https://ucp.dev/draft/schemas/service.json#/$defs/platform_schema"
                 }
               }
             },
             "capabilities": {
               "additionalProperties": {
                 "items": {
-                  "$ref": "https://ucp.dev/schemas/capability.json#/$defs/platform_schema"
+                  "$ref": "https://ucp.dev/draft/schemas/capability.json#/$defs/platform_schema"
                 }
               }
             },
             "payment_handlers": {
               "additionalProperties": {
                 "items": {
-                  "$ref": "https://ucp.dev/schemas/payment_handler.json#/$defs/platform_schema"
+                  "$ref": "https://ucp.dev/draft/schemas/payment_handler.json#/$defs/platform_schema"
                 }
               }
             }
@@ -151,21 +151,21 @@
             "services": {
               "additionalProperties": {
                 "items": {
-                  "$ref": "https://ucp.dev/schemas/service.json#/$defs/business_schema"
+                  "$ref": "https://ucp.dev/draft/schemas/service.json#/$defs/business_schema"
                 }
               }
             },
             "capabilities": {
               "additionalProperties": {
                 "items": {
-                  "$ref": "https://ucp.dev/schemas/capability.json#/$defs/business_schema"
+                  "$ref": "https://ucp.dev/draft/schemas/capability.json#/$defs/business_schema"
                 }
               }
             },
             "payment_handlers": {
               "additionalProperties": {
                 "items": {
-                  "$ref": "https://ucp.dev/schemas/payment_handler.json#/$defs/business_schema"
+                  "$ref": "https://ucp.dev/draft/schemas/payment_handler.json#/$defs/business_schema"
                 }
               }
             }
@@ -188,21 +188,21 @@
             "services": {
               "additionalProperties": {
                 "items": {
-                  "$ref": "https://ucp.dev/schemas/service.json#/$defs/response_schema"
+                  "$ref": "https://ucp.dev/draft/schemas/service.json#/$defs/response_schema"
                 }
               }
             },
             "capabilities": {
               "additionalProperties": {
                 "items": {
-                  "$ref": "https://ucp.dev/schemas/capability.json#/$defs/response_schema"
+                  "$ref": "https://ucp.dev/draft/schemas/capability.json#/$defs/response_schema"
                 }
               }
             },
             "payment_handlers": {
               "additionalProperties": {
                 "items": {
-                  "$ref": "https://ucp.dev/schemas/payment_handler.json#/$defs/response_schema"
+                  "$ref": "https://ucp.dev/draft/schemas/payment_handler.json#/$defs/response_schema"
                 }
               }
             }
@@ -222,7 +222,7 @@
             "capabilities": {
               "additionalProperties": {
                 "items": {
-                  "$ref": "https://ucp.dev/schemas/capability.json#/$defs/response_schema"
+                  "$ref": "https://ucp.dev/draft/schemas/capability.json#/$defs/response_schema"
                 }
               }
             }
@@ -242,7 +242,7 @@
             "capabilities": {
               "additionalProperties": {
                 "items": {
-                  "$ref": "https://ucp.dev/schemas/capability.json#/$defs/response_schema"
+                  "$ref": "https://ucp.dev/draft/schemas/capability.json#/$defs/response_schema"
                 }
               }
             }

@@ -1,8 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/schemas/shopping/order.json",
+  "$id": "https://ucp.dev/draft/schemas/shopping/order.json",
   "name": "dev.ucp.shopping.order",
-  "version": "2026-01-11",
   "title": "Order",
   "description": "Order schema with immutable line items, buyer-facing fulfillment expectations, and append-only event logs.",
   "$defs": {
@@ -34,7 +33,7 @@
   ],
   "properties": {
     "ucp": {
-      "$ref": "https://ucp.dev/schemas/ucp.json#/$defs/response_order_schema"
+      "$ref": "https://ucp.dev/draft/schemas/ucp.json#/$defs/response_order_schema"
     },
     "id": {
       "type": "string",
@@ -52,7 +51,7 @@
     "line_items": {
       "type": "array",
       "items": {
-        "$ref": "https://ucp.dev/schemas/shopping/types/order_line_item.json"
+        "$ref": "https://ucp.dev/draft/schemas/shopping/types/order_line_item.json"
       },
       "description": "Immutable line items — source of truth for what was ordered."
     },
@@ -62,14 +61,14 @@
         "expectations": {
           "type": "array",
           "items": {
-            "$ref": "https://ucp.dev/schemas/shopping/types/expectation.json"
+            "$ref": "https://ucp.dev/draft/schemas/shopping/types/expectation.json"
           },
           "description": "Buyer-facing groups representing when/how items will be delivered. Can be split, merged, or adjusted post-order."
         },
         "events": {
           "type": "array",
           "items": {
-            "$ref": "https://ucp.dev/schemas/shopping/types/fulfillment_event.json"
+            "$ref": "https://ucp.dev/draft/schemas/shopping/types/fulfillment_event.json"
           },
           "description": "Append-only event log of actual shipments. Each event references line items by ID."
         }
@@ -79,16 +78,17 @@
     "adjustments": {
       "type": "array",
       "items": {
-        "$ref": "https://ucp.dev/schemas/shopping/types/adjustment.json"
+        "$ref": "https://ucp.dev/draft/schemas/shopping/types/adjustment.json"
       },
       "description": "Append-only event log of money movements (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment."
     },
     "totals": {
       "type": "array",
       "items": {
-        "$ref": "https://ucp.dev/schemas/shopping/types/total.json"
+        "$ref": "https://ucp.dev/draft/schemas/shopping/types/total.json"
       },
       "description": "Different totals for the order."
     }
-  }
+  },
+  "version": "2026-01-28"
 }

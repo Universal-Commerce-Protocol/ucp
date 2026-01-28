@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/schemas/shopping/types/message_warning.json",
+  "$id": "https://ucp.dev/draft/schemas/shopping/types/message_warning.json",
   "title": "Message Warning",
   "type": "object",
   "required": [

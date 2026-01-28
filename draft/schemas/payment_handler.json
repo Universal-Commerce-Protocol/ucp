@@ -1,13 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/schemas/payment_handler.json",
+  "$id": "https://ucp.dev/draft/schemas/payment_handler.json",
   "title": "Payment Handler",
   "description": "Schema for UCP payment handlers. Handlers define how payment instruments are processed.",
   "$defs": {
     "base": {
       "allOf": [
         {
-          "$ref": "https://ucp.dev/schemas/ucp.json#/$defs/entity"
+          "$ref": "https://ucp.dev/draft/schemas/ucp.json#/$defs/entity"
         },
         {
           "type": "object",

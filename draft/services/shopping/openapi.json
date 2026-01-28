@@ -60,7 +60,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/checkout_create_request"
+                "$ref": "#/components/schemas/checkout"
               }
             }
           }
@@ -76,7 +76,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/checkout_response"
+                  "$ref": "#/components/schemas/checkout"
                 }
               }
             }
@@ -134,7 +134,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/checkout_response"
+                  "$ref": "#/components/schemas/checkout"
                 }
               }
             }
@@ -182,7 +182,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/checkout_update_request"
+                "$ref": "#/components/schemas/checkout"
               }
             }
           }
@@ -198,7 +198,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/checkout_response"
+                  "$ref": "#/components/schemas/checkout"
                 }
               }
             }
@@ -255,7 +255,7 @@
               "schema": {
                 "allOf": [
                   {
-                    "$ref": "#/components/schemas/checkout_complete_request"
+                    "$ref": "#/components/schemas/checkout"
                   },
                   {
                     "title": "Risk Signals",
@@ -284,7 +284,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/checkout_response"
+                  "$ref": "#/components/schemas/checkout"
                 }
               }
             }
@@ -345,7 +345,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/checkout_response"
+                  "$ref": "#/components/schemas/checkout"
                 }
               }
             }
@@ -395,7 +395,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/cart_create_request"
+                "$ref": "#/components/schemas/cart"
               }
             }
           }
@@ -411,7 +411,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/cart_response"
+                  "$ref": "#/components/schemas/cart"
                 }
               }
             }
@@ -469,7 +469,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/cart_response"
+                  "$ref": "#/components/schemas/cart"
                 }
               }
             }
@@ -520,7 +520,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/cart_update_request"
+                "$ref": "#/components/schemas/cart"
               }
             }
           }
@@ -536,7 +536,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/cart_response"
+                  "$ref": "#/components/schemas/cart"
                 }
               }
             }
@@ -553,7 +553,7 @@
       "post": {
         "operationId": "cancel_cart",
         "summary": "Cancel Cart",
-        "description": "Cancel a cart session.",
+        "description": "Cancel a cart session. Returns the cart state at time of cancellation.",
         "parameters": [
           {
             "$ref": "#/components/parameters/authorization"
@@ -597,7 +597,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/cart_response"
+                  "$ref": "#/components/schemas/cart"
                 }
               }
             }
@@ -798,35 +798,20 @@
       }
     },
     "schemas": {
+      "checkout": {
+        "$ref": "https://ucp.dev/draft/schemas/shopping/checkout.json"
+      },
+      "cart": {
+        "$ref": "https://ucp.dev/draft/schemas/shopping/cart.json"
+      },
       "order": {
-        "$ref": "https://ucp.dev/schemas/shopping/order.json"
+        "$ref": "https://ucp.dev/draft/schemas/shopping/order.json"
       },
       "payment": {
-        "$ref": "https://ucp.dev/schemas/shopping/payment.json"
+        "$ref": "https://ucp.dev/draft/schemas/shopping/payment.json"
       },
       "ucp": {
-        "$ref": "https://ucp.dev/schemas/ucp.json"
-      },
-      "checkout_response": {
-        "$ref": "https://ucp.dev/schemas/shopping/checkout.json"
-      },
-      "checkout_create_request": {
-        "$ref": "https://ucp.dev/schemas/shopping/checkout.create_req.json"
-      },
-      "checkout_update_request": {
-        "$ref": "https://ucp.dev/schemas/shopping/checkout.update_req.json"
-      },
-      "checkout_complete_request": {
-        "$ref": "https://ucp.dev/schemas/shopping/checkout.complete_req.json"
-      },
-      "cart_response": {
-        "$ref": "https://ucp.dev/schemas/shopping/cart.json"
-      },
-      "cart_create_request": {
-        "$ref": "https://ucp.dev/schemas/shopping/cart.create_req.json"
-      },
-      "cart_update_request": {
-        "$ref": "https://ucp.dev/schemas/shopping/cart.update_req.json"
+        "$ref": "https://ucp.dev/draft/schemas/ucp.json"
       }
     }
   }

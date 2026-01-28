@@ -1,9 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/schemas/shopping/checkout.json",
+  "$id": "https://ucp.dev/draft/schemas/shopping/checkout.json",
   "name": "dev.ucp.shopping.checkout",
-  "version": "2026-01-11",
-  "title": "Checkout Response",
+  "title": "Checkout",
   "description": "Base checkout schema. Extensions compose onto this using allOf.",
   "type": "object",
   "required": [
@@ -18,22 +17,47 @@
   "additionalProperties": true,
   "properties": {
     "ucp": {
-      "$ref": "https://ucp.dev/schemas/ucp.json#/$defs/response_checkout_schema"
+      "$ref": "https://ucp.dev/draft/schemas/ucp.json#/$defs/response_checkout_schema",
+      "ucp_request": "omit"
     },
     "id": {
       "type": "string",
-      "description": "Unique identifier of the checkout session."
+      "description": "Unique identifier of the checkout session.",
+      "ucp_request": {
+        "create": "omit",
+        "update": "required",
+        "complete": "omit"
+      }
     },
     "line_items": {
       "type": "array",
       "items": {
-        "$ref": "https://ucp.dev/schemas/shopping/types/line_item.json"
+        "$ref": "https://ucp.dev/draft/schemas/shopping/types/line_item.json"
       },
-      "description": "List of line items being checked out."
+      "description": "List of line items being checked out.",
+      "ucp_request": {
+        "create": "required",
+        "update": "required",
+        "complete": "omit"
+      }
     },
     "buyer": {
-      "$ref": "https://ucp.dev/schemas/shopping/types/buyer.json",
-      "description": "Representation of the buyer."
+      "$ref": "https://ucp.dev/draft/schemas/shopping/types/buyer.json",
+      "description": "Representation of the buyer.",
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional",
+        "complete": "omit"
+      }
+    },
+    "context": {
+      "$ref": "https://ucp.dev/draft/schemas/shopping/types/context.json",
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional",
+        "complete": "omit"
+      },
+      "ucp_response": "omit"
     },
     "status": {
       "type": "string",
@@ -45,49 +69,67 @@
         "completed",
         "canceled"
       ],
-      "description": "Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details."
+      "description": "Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details.",
+      "ucp_request": "omit"
     },
     "currency": {
       "type": "string",
-      "description": "ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency."
+      "description": "ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.",
+      "ucp_request": {
+        "create": "omit",
+        "update": "omit",
+        "complete": "omit"
+      }
     },
     "totals": {
       "type": "array",
       "items": {
-        "$ref": "https://ucp.dev/schemas/shopping/types/total.json"
+        "$ref": "https://ucp.dev/draft/schemas/shopping/types/total.json"
       },
-      "description": "Different cart totals."
+      "description": "Different cart totals.",
+      "ucp_request": "omit"
     },
     "messages": {
       "type": "array",
       "items": {
-        "$ref": "https://ucp.dev/schemas/shopping/types/message.json"
+        "$ref": "https://ucp.dev/draft/schemas/shopping/types/message.json"
       },
-      "description": "List of messages with error and info about the checkout session state."
+      "description": "List of messages with error and info about the checkout session state.",
+      "ucp_request": "omit"
     },
     "links": {
       "type": "array",
       "items": {
-        "$ref": "https://ucp.dev/schemas/shopping/types/link.json"
+        "$ref": "https://ucp.dev/draft/schemas/shopping/types/link.json"
       },
-      "description": "Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance."
+      "description": "Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.",
+      "ucp_request": "omit"
     },
     "expires_at": {
       "type": "string",
       "format": "date-time",
-      "description": "RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent."
+      "description": "RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.",
+      "ucp_request": "omit"
     },
     "continue_url": {
       "type": "string",
       "format": "uri",
-      "description": "URL for checkout handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements."
+      "description": "URL for checkout handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements.",
+      "ucp_request": "omit"
     },
     "payment": {
-      "$ref": "https://ucp.dev/schemas/shopping/payment.json"
+      "$ref": "https://ucp.dev/draft/schemas/shopping/payment.json",
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional",
+        "complete": "required"
+      }
     },
     "order": {
-      "$ref": "https://ucp.dev/schemas/shopping/types/order_confirmation.json",
-      "description": "Details about an order created for this checkout session."
+      "$ref": "https://ucp.dev/draft/schemas/shopping/types/order_confirmation.json",
+      "description": "Details about an order created for this checkout session.",
+      "ucp_request": "omit"
     }
-  }
+  },
+  "version": "2026-01-28"
 }

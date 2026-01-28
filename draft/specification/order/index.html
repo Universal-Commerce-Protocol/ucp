@@ -2371,7 +2371,6 @@
 <h1 id="order-capability">Order Capability<a class="headerlink" href="#order-capability" title="Permanent link">&para;</a></h1>
 <ul>
 <li><strong>Capability Name:</strong> <code>dev.ucp.shopping.order</code></li>
-<li><strong>Version:</strong> <code>2026-01-11</code></li>
 </ul>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
 <p>Orders represent confirmed transactions resulting from a successful checkout
@@ -2521,7 +2520,7 @@ Status and quantity counts should reflect the event logs.</p>
 </tr>
 <tr>
 <td style="text-align: left;">item</td>
-<td style="text-align: left;"><a href="/draft/specification/order/#item-response">Item Response</a></td>
+<td style="text-align: left;"><a href="/draft/specification/order/#item">Item</a></td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Product data (id, title, price, image_url).</td>
 </tr>
@@ -2533,7 +2532,7 @@ Status and quantity counts should reflect the event logs.</p>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/order/#total-response">Total Response</a>]</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/order/#total">Total</a>]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Line item totals breakdown.</td>
 </tr>
@@ -2858,98 +2857,7 @@ sense to them.</p>
 <h3 id="order-event-webhook">Order Event Webhook<a class="headerlink" href="#order-event-webhook" title="Permanent link">&para;</a></h3>
 <p>Businesses POST order events to a webhook URL provided by the platform
 during partner onboarding. The URL format is platform-specific.</p>
-<p><strong>Inputs</strong></p>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Name</th>
-<th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
-<th style="text-align: left;">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;">ucp</td>
-<td style="text-align: left;"><a href="/draft/specification/order/#ucp-response-order-schema">UCP Response Order Schema</a></td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.</td>
-</tr>
-<tr>
-<td style="text-align: left;">id</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Unique order identifier.</td>
-</tr>
-<tr>
-<td style="text-align: left;">checkout_id</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Associated checkout ID for reconciliation.</td>
-</tr>
-<tr>
-<td style="text-align: left;">permalink_url</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Permalink to access the order on merchant site.</td>
-</tr>
-<tr>
-<td style="text-align: left;">line_items</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/order/#order-line-item">Order Line Item</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Immutable line items — source of truth for what was ordered.</td>
-</tr>
-<tr>
-<td style="text-align: left;">fulfillment</td>
-<td style="text-align: left;">object</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Fulfillment data: buyer expectations and what actually happened.</td>
-</tr>
-<tr>
-<td style="text-align: left;">adjustments</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/order/#adjustment">Adjustment</a>]</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Append-only event log of money movements (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment.</td>
-</tr>
-<tr>
-<td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/order/#total-response">Total Response</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Different totals for the order.</td>
-</tr>
-<tr>
-<td style="text-align: left;">event_id</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Unique event identifier.</td>
-</tr>
-<tr>
-<td style="text-align: left;">created_time</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Event creation timestamp in RFC 3339 format.</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Output</strong></p>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Name</th>
-<th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
-<th style="text-align: left;">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;">ucp</td>
-<td style="text-align: left;"><a href="/draft/specification/order/#ucp">Ucp</a></td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;"></td>
-</tr>
-</tbody>
-</table>
+<p><strong>Error processing OpenAPI:</strong> [Errno 2] No such file or directory: 'source/services/shopping/rest.openapi.json'</p>
 <h3 id="webhook-url-configuration">Webhook URL Configuration<a class="headerlink" href="#webhook-url-configuration" title="Permanent link">&para;</a></h3>
 <p>The platform provides its webhook URL in the order capability's <code>config</code> field
 during capability negotiation. The business discovers this URL from the
@@ -3146,40 +3054,10 @@ rotation:</p>
 </thead>
 <tbody>
 <tr>
-<td style="text-align: left;">version</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">UCP version in YYYY-MM-DD format.Entity version in YYYY-MM-DD format.</td>
-</tr>
-<tr>
-<td style="text-align: left;">spec</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">URL to human-readable specification document.</td>
-</tr>
-<tr>
-<td style="text-align: left;">schema</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">URL to JSON Schema defining this entity's structure and payloads.</td>
-</tr>
-<tr>
-<td style="text-align: left;">id</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Unique identifier for this entity instance. Used to disambiguate when multiple instances exist.</td>
-</tr>
-<tr>
-<td style="text-align: left;">config</td>
-<td style="text-align: left;">object</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Entity-specific configuration. Structure defined by each entity's schema.</td>
-</tr>
-<tr>
-<td style="text-align: left;">extends</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Parent capability this extends. Present for extensions, absent for root capabilities.</td>
+<td style="text-align: left;"><strong>Error:</strong> Failed to resolve ''. Ensure ucp-schema is installed: <code>cargo install ucp-schema</code></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
 </tr>
 </tbody>
 </table>
@@ -3226,28 +3104,16 @@ rotation:</p>
 </thead>
 <tbody>
 <tr>
-<td style="text-align: left;">version</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">UCP version in YYYY-MM-DD format.</td>
-</tr>
-<tr>
-<td style="text-align: left;">services</td>
-<td style="text-align: left;">object</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Service registry keyed by reverse-domain name.</td>
+<td style="text-align: left;"><strong>Error:</strong> Failed to resolve ''. Ensure ucp-schema is installed: <code>cargo install ucp-schema</code></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
 </tr>
 <tr>
 <td style="text-align: left;">capabilities</td>
 <td style="text-align: left;">any</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;">payment_handlers</td>
-<td style="text-align: left;">object</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Payment handler registry keyed by reverse-domain name.</td>
 </tr>
 </tbody>
 </table>

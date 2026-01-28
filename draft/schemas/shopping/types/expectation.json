@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/schemas/shopping/types/expectation.json",
+  "$id": "https://ucp.dev/draft/schemas/shopping/types/expectation.json",
   "title": "Expectation",
   "description": "Buyer-facing fulfillment expectation representing logical groupings of items (e.g., 'package'). Can be split, merged, or adjusted post-order to set buyer expectations for when/how items arrive.",
   "type": "object",
@@ -47,7 +47,7 @@
       "description": "Delivery method type (shipping, pickup, digital)."
     },
     "destination": {
-      "$ref": "https://ucp.dev/schemas/shopping/types/postal_address.json",
+      "$ref": "https://ucp.dev/draft/schemas/shopping/types/postal_address.json",
       "description": "Delivery destination address."
     },
     "description": {

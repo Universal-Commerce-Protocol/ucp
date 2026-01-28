@@ -86,7 +86,7 @@ When checkout is initialized via `cart_id`, the cart and checkout sessions SHOUL
 | totals       | Array\[[Total Response](/draft/specification/cart/#total-response)\]            | **Yes**  | Estimated cost breakdown. May be partial if shipping/tax not yet calculable.                                                                       |
 | messages     | Array\[[Message](/draft/specification/cart/#message)\]                          | No       | Validation messages, warnings, or informational notices.                                                                                           |
 | links        | Array\[[Link](/draft/specification/cart/#link)\]                                | No       | Optional merchant links (policies, FAQs).                                                                                                          |
-| checkout_url | string                                                                          | **Yes**  | URL to convert cart to checkout. Always provided by merchant. Enables sharing, recovery, and cart-to-checkout conversion.                          |
+| continue_url | string                                                                          | No       | URL for cart handoff and session recovery. Enables sharing and human-in-the-loop flows.                                                            |
 | expires_at   | string                                                                          | No       | Cart expiry timestamp (RFC 3339). Optional.                                                                                                        |
 
 ## Operations
@@ -136,29 +136,21 @@ Cart reuses the same entity schemas as [Checkout](https://ucp.dev/draft/specific
 
 #### Line Item Create Request
 
-| Name     | Type                                                                      | Required | Description                           |
-| -------- | ------------------------------------------------------------------------- | -------- | ------------------------------------- |
-| item     | [Item Create Request](/draft/specification/checkout/#item-create-request) | **Yes**  |                                       |
-| quantity | integer                                                                   | **Yes**  | Quantity of the item being purchased. |
+**Error:** Schema 'types/line_item.create' not found in any schema directory.
 
 #### Line Item Update Request
 
-| Name      | Type                                                                      | Required | Description                                            |
-| --------- | ------------------------------------------------------------------------- | -------- | ------------------------------------------------------ |
-| id        | string                                                                    | No       |                                                        |
-| item      | [Item Update Request](/draft/specification/checkout/#item-update-request) | **Yes**  |                                                        |
-| quantity  | integer                                                                   | **Yes**  | Quantity of the item being purchased.                  |
-| parent_id | string                                                                    | No       | Parent line item identifier for any nested structures. |
+**Error:** Schema 'types/line_item.update' not found in any schema directory.
 
 #### Line Item Response
 
-| Name      | Type                                                                     | Required | Description                                            |
-| --------- | ------------------------------------------------------------------------ | -------- | ------------------------------------------------------ |
-| id        | string                                                                   | **Yes**  |                                                        |
-| item      | [Item Response](/draft/specification/checkout/#item-response)            | **Yes**  |                                                        |
-| quantity  | integer                                                                  | **Yes**  | Quantity of the item being purchased.                  |
-| totals    | Array\[[Total Response](/draft/specification/checkout/#total-response)\] | **Yes**  | Line item totals breakdown.                            |
-| parent_id | string                                                                   | No       | Parent line item identifier for any nested structures. |
+| Name      | Type                                                   | Required | Description                                            |
+| --------- | ------------------------------------------------------ | -------- | ------------------------------------------------------ |
+| id        | string                                                 | **Yes**  |                                                        |
+| item      | [Item](/draft/specification/checkout/#item)            | **Yes**  |                                                        |
+| quantity  | integer                                                | **Yes**  | Quantity of the item being purchased.                  |
+| totals    | Array\[[Total](/draft/specification/checkout/#total)\] | **Yes**  | Line item totals breakdown.                            |
+| parent_id | string                                                 | No       | Parent line item identifier for any nested structures. |
 
 ### Buyer
 

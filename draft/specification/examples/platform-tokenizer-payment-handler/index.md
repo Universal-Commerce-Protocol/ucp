@@ -1,7 +1,6 @@
 # Platform Tokenizer Payment Handler
 
 - **Handler Name:** `com.example.platform_tokenizer`
-- **Version:** `2026-01-11`
 - **Type:** Payment Handler Example
 
 ## Introduction

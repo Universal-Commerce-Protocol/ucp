@@ -1,7 +1,5 @@
 # Universal Commerce Protocol (UCP) Official Specification
 
-**Version:** `2026-01-11`
-
 ## Overarching guidelines
 
 The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**, **SHOULD**, **SHOULD NOT**, **RECOMMENDED**, **MAY**, and **OPTIONAL** in this document are to be interpreted as described in [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119.html) and [RFC 8174](https://www.rfc-editor.org/rfc/rfc8174.html).
@@ -126,7 +124,7 @@ A **capability** is a feature within a service. It declares what functionality i
 
 #### Capability Definition
 
-**Error:** Definition '#/$defs/discovery' not found in 'spec/schemas/capability.json'
+**Error:** Definition '#/$defs/discovery' not found in 'source/schemas/capability.json'
 
 #### Extensions
 
@@ -1078,4 +1076,3 @@ Capabilities outside the `dev.ucp.*` namespace version fully independently. Vend
 | **Payment Service Provider**      | PSP     | The financial infrastructure provider that processes payments, authorizations, and settlements on behalf of the business.                                 |
 | **Platform**                      | -       | The consumer-facing surface (AI agent, app, website) acting on behalf of the user to discover businesses and facilitate commerce.                         |
 | **Verifiable Digital Credential** | VDC     | An Issuer-signed credential (set of claims) whose authenticity can be verified cryptographically. Used in UCP for secure payment authorizations.          |
-| **Verifiable Presentation**       | VP      | A presentation of one or more VDCs that includes a cryptographic proof of binding, used to prove authorization to a business or PSP.                      |

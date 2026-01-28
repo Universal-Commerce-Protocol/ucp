@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/schemas/shopping/types/fulfillment_method.json",
-  "title": "Fulfillment Method Response",
+  "$id": "https://ucp.dev/draft/schemas/shopping/types/fulfillment_method.json",
+  "title": "Fulfillment Method",
   "description": "A fulfillment method (shipping or pickup) with destinations and groups.",
   "type": "object",
   "required": [
@@ -13,7 +13,11 @@
   "properties": {
     "id": {
       "type": "string",
-      "description": "Unique fulfillment method identifier."
+      "description": "Unique fulfillment method identifier.",
+      "ucp_request": {
+        "create": "omit",
+        "update": "required"
+      }
     },
     "type": {
       "type": "string",
@@ -21,20 +25,28 @@
         "shipping",
         "pickup"
       ],
-      "description": "Fulfillment method type."
+      "description": "Fulfillment method type.",
+      "ucp_request": {
+        "create": "required",
+        "update": "omit"
+      }
     },
     "line_item_ids": {
       "type": "array",
       "description": "Line item IDs fulfilled via this method.",
       "items": {
         "type": "string"
+      },
+      "ucp_request": {
+        "create": "optional",
+        "update": "required"
       }
     },
     "destinations": {
       "type": "array",
       "description": "Available destinations. For shipping: addresses. For pickup: retail locations.",
       "items": {
-        "$ref": "https://ucp.dev/schemas/shopping/types/fulfillment_destination.json"
+        "$ref": "https://ucp.dev/draft/schemas/shopping/types/fulfillment_destination.json"
       }
     },
     "selected_destination_id": {
@@ -48,7 +60,7 @@
       "type": "array",
       "description": "Fulfillment groups for selecting options. Agent sets selected_option_id on groups to choose shipping method.",
       "items": {
-        "$ref": "https://ucp.dev/schemas/shopping/types/fulfillment_group.json"
+        "$ref": "https://ucp.dev/draft/schemas/shopping/types/fulfillment_group.json"
       }
     }
   }

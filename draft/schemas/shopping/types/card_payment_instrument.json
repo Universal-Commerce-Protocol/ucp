@@ -1,11 +1,11 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/schemas/shopping/types/card_payment_instrument.json",
+  "$id": "https://ucp.dev/draft/schemas/shopping/types/card_payment_instrument.json",
   "title": "Card Payment Instrument",
   "description": "A basic card payment instrument with visible card details. Can be inherited by a handler's instrument schema to define handler-specific display details or more complex credential structures.",
   "allOf": [
     {
-      "$ref": "https://ucp.dev/schemas/shopping/types/payment_instrument.json"
+      "$ref": "https://ucp.dev/draft/schemas/shopping/types/payment_instrument.json"
     },
     {
       "type": "object",

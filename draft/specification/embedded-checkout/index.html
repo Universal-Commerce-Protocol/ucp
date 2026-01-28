@@ -4802,7 +4802,24 @@ confirmation details.</p>
 </tbody>
 </table>
 <h3 id="payment">Payment<a class="headerlink" href="#payment" title="Permanent link">&para;</a></h3>
-<p><strong>Error:</strong> Schema 'payment_resp' not found in any schema directory.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">instruments</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/embedded-checkout/#selected-payment-instrument">Selected Payment Instrument</a>]</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">The payment instruments available for this payment. Each instrument is associated with a specific handler via the handler_id field. Handlers can extend the base payment_instrument schema to add handler-specific fields.</td>
+</tr>
+</tbody>
+</table>
 <h3 id="payment-instrument">Payment Instrument<a class="headerlink" href="#payment-instrument" title="Permanent link">&para;</a></h3>
 <p>Represents a specific method of payment (e.g., a specific credit card, bank
 account, or wallet credential) available to the buyer.</p>
@@ -4858,7 +4875,7 @@ account, or wallet credential) available to the buyer.</p>
 <p>Represents the processor or wallet provider responsible for authenticating and
 processing a specific payment instrument (e.g., Google Pay, Stripe, or a Bank
 App).</p>
-<p><strong>Error:</strong> Schema 'payment_handler_resp' not found in any schema directory.</p>
+<p><em>No properties defined.</em></p>
 
 
 

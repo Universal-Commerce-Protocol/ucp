@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/schemas/discovery/profile.json",
+  "$id": "https://ucp.dev/draft/schemas/discovery/profile.json",
   "title": "UCP Discovery Profile",
   "description": "Schema for UCP discovery profiles. Business profiles are hosted at /.well-known/ucp; platform profiles are hosted at URIs advertised in request headers.",
   "oneOf": [
@@ -71,7 +71,7 @@
       ],
       "properties": {
         "ucp": {
-          "$ref": "https://ucp.dev/schemas/ucp.json#/$defs/base"
+          "$ref": "https://ucp.dev/draft/schemas/ucp.json#/$defs/base"
         },
         "signing_keys": {
           "type": "array",
@@ -92,7 +92,7 @@
         {
           "properties": {
             "ucp": {
-              "$ref": "https://ucp.dev/schemas/ucp.json#/$defs/platform_schema"
+              "$ref": "https://ucp.dev/draft/schemas/ucp.json#/$defs/platform_schema"
             }
           }
         }
@@ -108,7 +108,7 @@
         {
           "properties": {
             "ucp": {
-              "$ref": "https://ucp.dev/schemas/ucp.json#/$defs/business_schema"
+              "$ref": "https://ucp.dev/draft/schemas/ucp.json#/$defs/business_schema"
             }
           }
         }

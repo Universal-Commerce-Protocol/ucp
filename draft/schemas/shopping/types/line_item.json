@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/schemas/shopping/types/line_item.json",
-  "title": "Line Item Response",
+  "$id": "https://ucp.dev/draft/schemas/shopping/types/line_item.json",
+  "title": "Line Item",
   "type": "object",
   "description": "Line item object. Expected to use the currency of the parent object.",
   "required": [
@@ -12,10 +12,14 @@
   ],
   "properties": {
     "id": {
-      "type": "string"
+      "type": "string",
+      "ucp_request": {
+        "create": "omit",
+        "update": "optional"
+      }
     },
     "item": {
-      "$ref": "https://ucp.dev/schemas/shopping/types/item.json"
+      "$ref": "https://ucp.dev/draft/schemas/shopping/types/item.json"
     },
     "quantity": {
       "type": "integer",
@@ -25,13 +29,18 @@
     "totals": {
       "type": "array",
       "items": {
-        "$ref": "https://ucp.dev/schemas/shopping/types/total.json"
+        "$ref": "https://ucp.dev/draft/schemas/shopping/types/total.json"
       },
-      "description": "Line item totals breakdown."
+      "description": "Line item totals breakdown.",
+      "ucp_request": "omit"
     },
     "parent_id": {
       "type": "string",
-      "description": "Parent line item identifier for any nested structures."
+      "description": "Parent line item identifier for any nested structures.",
+      "ucp_request": {
+        "create": "omit",
+        "update": "optional"
+      }
     }
   }
 }

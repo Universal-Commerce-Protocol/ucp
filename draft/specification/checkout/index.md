@@ -1,7 +1,6 @@
 # Checkout Capability
 
 - **Capability Name:** `dev.ucp.shopping.checkout`
-- **Version:** `2026-01-11`
 
 ## Overview
 
@@ -228,32 +227,7 @@ To be invoked by the platform when the user has expressed purchase intent (e.g.,
 
 **Recommendation**: To minimize discrepancies and a streamlined user experience, product data (price/title etc.) provided by the business through the feeds **SHOULD** match the actual attributes returned in the response.
 
-**Inputs**
-
-| Name       | Type                                                                                         | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| ---------- | -------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| line_items | Array\[[Line Item Create Request](/draft/specification/checkout/#line-item-create-request)\] | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| buyer      | [Buyer](/draft/specification/checkout/#buyer)                                                | No       | Representation of the buyer.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| context    | [Context](/draft/specification/checkout/#context)                                            | No       | Provisional buyer signals for relevance and localization: product availability, pricing, currency, tax, shipping, payment methods, and eligibility (e.g., student or affiliation discounts). Businesses SHOULD use these values when authoritative data (e.g., address) is absent, and MAY ignore unsupported values without returning errors. Context can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. Platforms SHOULD progressively enhance context throughout the buyer journey. |
-| payment    | [Payment](/draft/specification/checkout/#payment)                                            | No       | Payment configuration containing handlers.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-
-**Output**
-
-| Name         | Type                                                                                        | Required | Description                                                                                                                                                                                                                                                     |
-| ------------ | ------------------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ucp          | [UCP Response Checkout Schema](/draft/specification/checkout/#ucp-response-checkout-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                                                                                                                                         |
-| id           | string                                                                                      | **Yes**  | Unique identifier of the checkout session.                                                                                                                                                                                                                      |
-| line_items   | Array\[[Line Item Response](/draft/specification/checkout/#line-item-response)\]            | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                           |
-| buyer        | [Buyer](/draft/specification/checkout/#buyer)                                               | No       | Representation of the buyer.                                                                                                                                                                                                                                    |
-| status       | string                                                                                      | **Yes**  | Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details. **Enum:** `incomplete`, `requires_escalation`, `ready_for_complete`, `complete_in_progress`, `completed`, `canceled` |
-| currency     | string                                                                                      | **Yes**  | ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.                                                                                          |
-| totals       | Array\[[Total Response](/draft/specification/checkout/#total-response)\]                    | **Yes**  | Different cart totals.                                                                                                                                                                                                                                          |
-| messages     | Array\[[Message](/draft/specification/checkout/#message)\]                                  | No       | List of messages with error and info about the checkout session state.                                                                                                                                                                                          |
-| links        | Array\[[Link](/draft/specification/checkout/#link)\]                                        | **Yes**  | Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.                                                                                                                                                                    |
-| expires_at   | string                                                                                      | No       | RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.                                                                                                                                                                                    |
-| continue_url | string                                                                                      | No       | URL for checkout handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements.                                                                                                 |
-| payment      | [Payment](/draft/specification/checkout/#payment)                                           | No       | Payment configuration containing handlers.                                                                                                                                                                                                                      |
-| order        | [Order Confirmation](/draft/specification/checkout/#order-confirmation)                     | No       | Details about an order created for this checkout session.                                                                                                                                                                                                       |
+**Error processing OpenAPI:** [Errno 2] No such file or directory: 'source/services/shopping/rest.openapi.json'
 
 ### Get Checkout
 
@@ -261,62 +235,13 @@ It provides the latest state of the checkout resource. After cancellation or com
 
 The platform will honor the TTL provided by the business via `expires_at` at the time of checkout session creation.
 
-**Inputs**
-
-| Name | Type   | Required | Description                                                    |
-| ---- | ------ | -------- | -------------------------------------------------------------- |
-| id   | string | **Yes**  | The unique identifier of the checkout session.Defined in path. |
-
-**Output**
-
-| Name         | Type                                                                                        | Required | Description                                                                                                                                                                                                                                                     |
-| ------------ | ------------------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ucp          | [UCP Response Checkout Schema](/draft/specification/checkout/#ucp-response-checkout-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                                                                                                                                         |
-| id           | string                                                                                      | **Yes**  | Unique identifier of the checkout session.                                                                                                                                                                                                                      |
-| line_items   | Array\[[Line Item Response](/draft/specification/checkout/#line-item-response)\]            | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                           |
-| buyer        | [Buyer](/draft/specification/checkout/#buyer)                                               | No       | Representation of the buyer.                                                                                                                                                                                                                                    |
-| status       | string                                                                                      | **Yes**  | Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details. **Enum:** `incomplete`, `requires_escalation`, `ready_for_complete`, `complete_in_progress`, `completed`, `canceled` |
-| currency     | string                                                                                      | **Yes**  | ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.                                                                                          |
-| totals       | Array\[[Total Response](/draft/specification/checkout/#total-response)\]                    | **Yes**  | Different cart totals.                                                                                                                                                                                                                                          |
-| messages     | Array\[[Message](/draft/specification/checkout/#message)\]                                  | No       | List of messages with error and info about the checkout session state.                                                                                                                                                                                          |
-| links        | Array\[[Link](/draft/specification/checkout/#link)\]                                        | **Yes**  | Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.                                                                                                                                                                    |
-| expires_at   | string                                                                                      | No       | RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.                                                                                                                                                                                    |
-| continue_url | string                                                                                      | No       | URL for checkout handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements.                                                                                                 |
-| payment      | [Payment](/draft/specification/checkout/#payment)                                           | No       | Payment configuration containing handlers.                                                                                                                                                                                                                      |
-| order        | [Order Confirmation](/draft/specification/checkout/#order-confirmation)                     | No       | Details about an order created for this checkout session.                                                                                                                                                                                                       |
+**Error processing OpenAPI:** [Errno 2] No such file or directory: 'source/services/shopping/rest.openapi.json'
 
 ### Update Checkout
 
 Performs a full replacement of the checkout resource. The platform is **REQUIRED** to send the entire checkout resource containing any data updates to write-only data fields. The resource provided in the request will replace the existing checkout session state on the business side.
 
-**Inputs**
-
-| Name       | Type                                                                                         | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| ---------- | -------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| id         | string                                                                                       | **Yes**  | The unique identifier of the checkout session.Defined in path.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| id         | string                                                                                       | **Yes**  | Unique identifier of the checkout session.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| line_items | Array\[[Line Item Update Request](/draft/specification/checkout/#line-item-update-request)\] | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| buyer      | [Buyer](/draft/specification/checkout/#buyer)                                                | No       | Representation of the buyer.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| context    | [Context](/draft/specification/checkout/#context)                                            | No       | Provisional buyer signals for relevance and localization: product availability, pricing, currency, tax, shipping, payment methods, and eligibility (e.g., student or affiliation discounts). Businesses SHOULD use these values when authoritative data (e.g., address) is absent, and MAY ignore unsupported values without returning errors. Context can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. Platforms SHOULD progressively enhance context throughout the buyer journey. |
-| payment    | [Payment](/draft/specification/checkout/#payment)                                            | No       | Payment configuration containing handlers.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-
-**Output**
-
-| Name         | Type                                                                                        | Required | Description                                                                                                                                                                                                                                                     |
-| ------------ | ------------------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ucp          | [UCP Response Checkout Schema](/draft/specification/checkout/#ucp-response-checkout-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                                                                                                                                         |
-| id           | string                                                                                      | **Yes**  | Unique identifier of the checkout session.                                                                                                                                                                                                                      |
-| line_items   | Array\[[Line Item Response](/draft/specification/checkout/#line-item-response)\]            | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                           |
-| buyer        | [Buyer](/draft/specification/checkout/#buyer)                                               | No       | Representation of the buyer.                                                                                                                                                                                                                                    |
-| status       | string                                                                                      | **Yes**  | Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details. **Enum:** `incomplete`, `requires_escalation`, `ready_for_complete`, `complete_in_progress`, `completed`, `canceled` |
-| currency     | string                                                                                      | **Yes**  | ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.                                                                                          |
-| totals       | Array\[[Total Response](/draft/specification/checkout/#total-response)\]                    | **Yes**  | Different cart totals.                                                                                                                                                                                                                                          |
-| messages     | Array\[[Message](/draft/specification/checkout/#message)\]                                  | No       | List of messages with error and info about the checkout session state.                                                                                                                                                                                          |
-| links        | Array\[[Link](/draft/specification/checkout/#link)\]                                        | **Yes**  | Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.                                                                                                                                                                    |
-| expires_at   | string                                                                                      | No       | RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.                                                                                                                                                                                    |
-| continue_url | string                                                                                      | No       | URL for checkout handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements.                                                                                                 |
-| payment      | [Payment](/draft/specification/checkout/#payment)                                           | No       | Payment configuration containing handlers.                                                                                                                                                                                                                      |
-| order        | [Order Confirmation](/draft/specification/checkout/#order-confirmation)                     | No       | Details about an order created for this checkout session.                                                                                                                                                                                                       |
+**Error processing OpenAPI:** [Errno 2] No such file or directory: 'source/services/shopping/rest.openapi.json'
 
 ### Complete Checkout
 
@@ -324,59 +249,13 @@ This is the final checkout placement call. To be invoked when the user has commi
 
 After this call, other details will be updated through subsequent events as the order, and its associated items, moves through the supply chain.
 
-**Inputs**
-
-| Name         | Type                                              | Required | Description                                                    |
-| ------------ | ------------------------------------------------- | -------- | -------------------------------------------------------------- |
-| id           | string                                            | **Yes**  | The unique identifier of the checkout session.Defined in path. |
-| payment      | [Payment](/draft/specification/checkout/#payment) | **Yes**  | Payment configuration containing handlers.                     |
-| risk_signals | object                                            | No       | Key-value pairs of risk signals.                               |
-
-**Output**
-
-| Name         | Type                                                                                        | Required | Description                                                                                                                                                                                                                                                     |
-| ------------ | ------------------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ucp          | [UCP Response Checkout Schema](/draft/specification/checkout/#ucp-response-checkout-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                                                                                                                                         |
-| id           | string                                                                                      | **Yes**  | Unique identifier of the checkout session.                                                                                                                                                                                                                      |
-| line_items   | Array\[[Line Item Response](/draft/specification/checkout/#line-item-response)\]            | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                           |
-| buyer        | [Buyer](/draft/specification/checkout/#buyer)                                               | No       | Representation of the buyer.                                                                                                                                                                                                                                    |
-| status       | string                                                                                      | **Yes**  | Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details. **Enum:** `incomplete`, `requires_escalation`, `ready_for_complete`, `complete_in_progress`, `completed`, `canceled` |
-| currency     | string                                                                                      | **Yes**  | ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.                                                                                          |
-| totals       | Array\[[Total Response](/draft/specification/checkout/#total-response)\]                    | **Yes**  | Different cart totals.                                                                                                                                                                                                                                          |
-| messages     | Array\[[Message](/draft/specification/checkout/#message)\]                                  | No       | List of messages with error and info about the checkout session state.                                                                                                                                                                                          |
-| links        | Array\[[Link](/draft/specification/checkout/#link)\]                                        | **Yes**  | Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.                                                                                                                                                                    |
-| expires_at   | string                                                                                      | No       | RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.                                                                                                                                                                                    |
-| continue_url | string                                                                                      | No       | URL for checkout handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements.                                                                                                 |
-| payment      | [Payment](/draft/specification/checkout/#payment)                                           | No       | Payment configuration containing handlers.                                                                                                                                                                                                                      |
-| order        | [Order Confirmation](/draft/specification/checkout/#order-confirmation)                     | No       | Details about an order created for this checkout session.                                                                                                                                                                                                       |
+**Error processing OpenAPI:** [Errno 2] No such file or directory: 'source/services/shopping/rest.openapi.json'
 
 ### Cancel Checkout
 
 This operation will be used to cancel a checkout session, if it can be canceled. If the checkout session cannot be canceled (e.g. checkout session is already canceled or completed), then businesses **SHOULD** send back an error indicating the operation is not allowed. Any checkout session with a status that is not equal to `completed` or `canceled` **SHOULD** be cancelable.
 
-**Inputs**
-
-| Name | Type   | Required | Description                                                    |
-| ---- | ------ | -------- | -------------------------------------------------------------- |
-| id   | string | **Yes**  | The unique identifier of the checkout session.Defined in path. |
-
-**Output**
-
-| Name         | Type                                                                                        | Required | Description                                                                                                                                                                                                                                                     |
-| ------------ | ------------------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ucp          | [UCP Response Checkout Schema](/draft/specification/checkout/#ucp-response-checkout-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                                                                                                                                         |
-| id           | string                                                                                      | **Yes**  | Unique identifier of the checkout session.                                                                                                                                                                                                                      |
-| line_items   | Array\[[Line Item Response](/draft/specification/checkout/#line-item-response)\]            | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                           |
-| buyer        | [Buyer](/draft/specification/checkout/#buyer)                                               | No       | Representation of the buyer.                                                                                                                                                                                                                                    |
-| status       | string                                                                                      | **Yes**  | Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details. **Enum:** `incomplete`, `requires_escalation`, `ready_for_complete`, `complete_in_progress`, `completed`, `canceled` |
-| currency     | string                                                                                      | **Yes**  | ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.                                                                                          |
-| totals       | Array\[[Total Response](/draft/specification/checkout/#total-response)\]                    | **Yes**  | Different cart totals.                                                                                                                                                                                                                                          |
-| messages     | Array\[[Message](/draft/specification/checkout/#message)\]                                  | No       | List of messages with error and info about the checkout session state.                                                                                                                                                                                          |
-| links        | Array\[[Link](/draft/specification/checkout/#link)\]                                        | **Yes**  | Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.                                                                                                                                                                    |
-| expires_at   | string                                                                                      | No       | RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.                                                                                                                                                                                    |
-| continue_url | string                                                                                      | No       | URL for checkout handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements.                                                                                                 |
-| payment      | [Payment](/draft/specification/checkout/#payment)                                           | No       | Payment configuration containing handlers.                                                                                                                                                                                                                      |
-| order        | [Order Confirmation](/draft/specification/checkout/#order-confirmation)                     | No       | Details about an order created for this checkout session.                                                                                                                                                                                                       |
+**Error processing OpenAPI:** [Errno 2] No such file or directory: 'source/services/shopping/rest.openapi.json'
 
 ## Transport Bindings
 
@@ -410,29 +289,17 @@ Context signals are provisional hints. Businesses SHOULD use these values when a
 
 ### Fulfillment Option
 
-| Name                      | Type                                                                     | Required | Description                                                                |
-| ------------------------- | ------------------------------------------------------------------------ | -------- | -------------------------------------------------------------------------- |
-| id                        | string                                                                   | **Yes**  | Unique fulfillment option identifier.                                      |
-| title                     | string                                                                   | **Yes**  | Short label (e.g., 'Express Shipping', 'Curbside Pickup').                 |
-| description               | string                                                                   | No       | Complete context for buyer decision (e.g., 'Arrives Dec 12-15 via FedEx'). |
-| carrier                   | string                                                                   | No       | Carrier name (for shipping).                                               |
-| earliest_fulfillment_time | string                                                                   | No       | Earliest fulfillment date.                                                 |
-| latest_fulfillment_time   | string                                                                   | No       | Latest fulfillment date.                                                   |
-| totals                    | Array\[[Total Response](/draft/specification/checkout/#total-response)\] | **Yes**  | Fulfillment option totals breakdown.                                       |
+**Error:** Schema file 'fulfillment_resp.json' not found in any schema directory.
 
 ### Item
 
 #### Item Create Request
 
-| Name | Type   | Required | Description                                                                                                                                                                 |
-| ---- | ------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| id   | string | **Yes**  | The product identifier, often the SKU, required to resolve the product details associated with this line item. Should be recognized by both the Platform, and the Business. |
+**Error:** Schema 'types/item.create' not found in any schema directory.
 
 #### Item Update Request
 
-| Name | Type   | Required | Description                                                                                                                                                                 |
-| ---- | ------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| id   | string | **Yes**  | The product identifier, often the SKU, required to resolve the product details associated with this line item. Should be recognized by both the Platform, and the Business. |
+**Error:** Schema 'types/item.update' not found in any schema directory.
 
 #### Item Response
 
@@ -447,29 +314,21 @@ Context signals are provisional hints. Businesses SHOULD use these values when a
 
 #### Line Item Create Request
 
-| Name     | Type                                                                      | Required | Description                           |
-| -------- | ------------------------------------------------------------------------- | -------- | ------------------------------------- |
-| item     | [Item Create Request](/draft/specification/checkout/#item-create-request) | **Yes**  |                                       |
-| quantity | integer                                                                   | **Yes**  | Quantity of the item being purchased. |
+**Error:** Schema 'types/line_item.create' not found in any schema directory.
 
 #### Line Item Update Request
 
-| Name      | Type                                                                      | Required | Description                                            |
-| --------- | ------------------------------------------------------------------------- | -------- | ------------------------------------------------------ |
-| id        | string                                                                    | No       |                                                        |
-| item      | [Item Update Request](/draft/specification/checkout/#item-update-request) | **Yes**  |                                                        |
-| quantity  | integer                                                                   | **Yes**  | Quantity of the item being purchased.                  |
-| parent_id | string                                                                    | No       | Parent line item identifier for any nested structures. |
+**Error:** Schema 'types/line_item.update' not found in any schema directory.
 
 #### Line Item Response
 
-| Name      | Type                                                                     | Required | Description                                            |
-| --------- | ------------------------------------------------------------------------ | -------- | ------------------------------------------------------ |
-| id        | string                                                                   | **Yes**  |                                                        |
-| item      | [Item Response](/draft/specification/checkout/#item-response)            | **Yes**  |                                                        |
-| quantity  | integer                                                                  | **Yes**  | Quantity of the item being purchased.                  |
-| totals    | Array\[[Total Response](/draft/specification/checkout/#total-response)\] | **Yes**  | Line item totals breakdown.                            |
-| parent_id | string                                                                   | No       | Parent line item identifier for any nested structures. |
+| Name      | Type                                                   | Required | Description                                            |
+| --------- | ------------------------------------------------------ | -------- | ------------------------------------------------------ |
+| id        | string                                                 | **Yes**  |                                                        |
+| item      | [Item](/draft/specification/checkout/#item)            | **Yes**  |                                                        |
+| quantity  | integer                                                | **Yes**  | Quantity of the item being purchased.                  |
+| totals    | Array\[[Total](/draft/specification/checkout/#total)\] | **Yes**  | Line item totals breakdown.                            |
+| parent_id | string                                                 | No       | Parent line item identifier for any nested structures. |
 
 ### Link
 
@@ -567,14 +426,9 @@ This object MUST be one of the following types: [Message Error](/draft/specifica
 
 ### Response
 
-| Name    | Type   | Required | Description                                                                                     |
-| ------- | ------ | -------- | ----------------------------------------------------------------------------------------------- |
-| version | string | **Yes**  | UCP version in YYYY-MM-DD format.Entity version in YYYY-MM-DD format.                           |
-| spec    | string | No       | URL to human-readable specification document.                                                   |
-| schema  | string | No       | URL to JSON Schema defining this entity's structure and payloads.                               |
-| id      | string | No       | Unique identifier for this entity instance. Used to disambiguate when multiple instances exist. |
-| config  | object | No       | Entity-specific configuration. Structure defined by each entity's schema.                       |
-| extends | string | No       | Parent capability this extends. Present for extensions, absent for root capabilities.           |
+| Name                                                                                        | Type | Required | Description |
+| ------------------------------------------------------------------------------------------- | ---- | -------- | ----------- |
+| **Error:** Failed to resolve ''. Ensure ucp-schema is installed: `cargo install ucp-schema` |      |          |             |
 
 ### Total
 
@@ -588,12 +442,12 @@ This object MUST be one of the following types: [Message Error](/draft/specifica
 
 ### UCP Response Checkout
 
-| Name             | Type   | Required | Description                       |
-| ---------------- | ------ | -------- | --------------------------------- |
-| version          | string | **Yes**  | UCP version in YYYY-MM-DD format. |
-| services         | any    | No       |                                   |
-| capabilities     | any    | No       |                                   |
-| payment_handlers | any    | **Yes**  |                                   |
+| Name                                                                                        | Type | Required | Description |
+| ------------------------------------------------------------------------------------------- | ---- | -------- | ----------- |
+| **Error:** Failed to resolve ''. Ensure ucp-schema is installed: `cargo install ucp-schema` |      |          |             |
+| services                                                                                    | any  | No       |             |
+| capabilities                                                                                | any  | No       |             |
+| payment_handlers                                                                            | any  | **Yes**  |             |
 
 ### Order Confirmation
 

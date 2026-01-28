@@ -2365,7 +2365,6 @@
 -->
 
 <h1 id="fulfillment-extension">Fulfillment Extension<a class="headerlink" href="#fulfillment-extension" title="Permanent link">&para;</a></h1>
-<p><strong>Version:</strong> <code>2026-01-11</code></p>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
 <p>The fulfillment extension enables businesses to advertise support for physical
 goods fulfillment (shipping, pickup, etc).</p>
@@ -2407,24 +2406,7 @@ goods fulfillment (shipping, pickup, etc).</p>
 requiring fulfillment (e.g., digital goods) do not need to be assigned to a
 method.</p>
 <h3 id="properties">Properties<a class="headerlink" href="#properties" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Name</th>
-<th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
-<th style="text-align: left;">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;">fulfillment</td>
-<td style="text-align: left;"><a href="/draft/specification/fulfillment/#fulfillment">Fulfillment</a></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Fulfillment details.</td>
-</tr>
-</tbody>
-</table>
+<p><strong>Error loading extension 'fulfillment_resp':</strong> [Errno 2] No such file or directory: 'source/schemas/shopping/fulfillment_resp.json'</p>
 <h3 id="entities">Entities<a class="headerlink" href="#entities" title="Permanent link">&para;</a></h3>
 <h4 id="fulfillment">Fulfillment<a class="headerlink" href="#fulfillment" title="Permanent link">&para;</a></h4>
 <table>
@@ -2439,13 +2421,13 @@ method.</p>
 <tbody>
 <tr>
 <td style="text-align: left;">methods</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/fulfillment/#fulfillment-method-response">Fulfillment Method Response</a>]</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/fulfillment/#fulfillment-method">Fulfillment Method</a>]</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Fulfillment methods for cart items.</td>
 </tr>
 <tr>
 <td style="text-align: left;">available_methods</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/fulfillment/#fulfillment-available-method-response">Fulfillment Available Method Response</a>]</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/fulfillment/#fulfillment-available-method">Fulfillment Available Method</a>]</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Inventory availability hints.</td>
 </tr>
@@ -2482,7 +2464,7 @@ method.</p>
 </tr>
 <tr>
 <td style="text-align: left;">destinations</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/fulfillment/#fulfillment-destination-response">Fulfillment Destination Response</a>]</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/fulfillment/#fulfillment-destination">Fulfillment Destination</a>]</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Available destinations. For shipping: addresses. For pickup: retail locations.</td>
 </tr>
@@ -2494,14 +2476,14 @@ method.</p>
 </tr>
 <tr>
 <td style="text-align: left;">groups</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/fulfillment/#fulfillment-group-response">Fulfillment Group Response</a>]</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/fulfillment/#fulfillment-group">Fulfillment Group</a>]</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Fulfillment groups for selecting options. Agent sets selected_option_id on groups to choose shipping method.</td>
 </tr>
 </tbody>
 </table>
 <h4 id="fulfillment-destination-response">Fulfillment Destination Response<a class="headerlink" href="#fulfillment-destination-response" title="Permanent link">&para;</a></h4>
-<p>This object MUST be one of the following types: <a href="/draft/specification/fulfillment/#shipping-destination-response">Shipping Destination Response</a>, <a href="/draft/specification/fulfillment/#retail-location-response">Retail Location Response</a>.</p>
+<p>This object MUST be one of the following types: <a href="/draft/specification/fulfillment/#shipping-destination">Shipping Destination</a>, <a href="/draft/specification/fulfillment/#retail-location">Retail Location</a>.</p>
 <h4 id="shipping-destination-response">Shipping Destination Response<a class="headerlink" href="#shipping-destination-response" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
@@ -2631,7 +2613,7 @@ method.</p>
 </tr>
 <tr>
 <td style="text-align: left;">options</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/fulfillment/#fulfillment-option-response">Fulfillment Option Response</a>]</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/fulfillment/#fulfillment-option">Fulfillment Option</a>]</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Available fulfillment options for this group.</td>
 </tr>
@@ -2692,7 +2674,7 @@ method.</p>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/fulfillment/#total-response">Total Response</a>]</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/fulfillment/#total">Total</a>]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Fulfillment option totals breakdown.</td>
 </tr>

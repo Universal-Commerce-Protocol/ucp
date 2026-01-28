@@ -1,7 +1,6 @@
 # Processor Tokenizer Payment Handler
 
 - **Handler Name:** `com.example.processor_tokenizer`
-- **Version:** `2026-01-11`
 - **Type:** Payment Handler Example
 
 ## Introduction

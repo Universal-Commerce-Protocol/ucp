@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/schemas/transports/embedded_config.json",
+  "$id": "https://ucp.dev/draft/schemas/transports/embedded_config.json",
   "title": "Embedded Transport Config",
   "description": "Per-checkout configuration for embedded transport binding. Allows businesses to vary ECP availability and delegations based on cart contents, agent authorization, or policy.",
   "type": "object",

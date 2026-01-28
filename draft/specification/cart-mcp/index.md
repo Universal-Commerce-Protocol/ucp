@@ -87,11 +87,7 @@ Maps to the [Create Cart](https://ucp.dev/draft/specification/cart/#create-cart)
 
 #### Input Schema
 
-| Name       | Type                                                                                     | Required | Description                                                                                                                                        |
-| ---------- | ---------------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| line_items | Array\[[Line Item Create Request](/draft/specification/cart/#line-item-create-request)\] | **Yes**  | Cart line items. Same structure as checkout. Full replacement on update.                                                                           |
-| context    | [Context](/draft/specification/cart/#context)                                            | No       | Buyer signals for localization (country, region, postal_code). Merchant uses for pricing, availability, currency. Falls back to geo-IP if omitted. |
-| buyer      | [Buyer](/draft/specification/cart/#buyer)                                                | No       | Optional buyer information for personalized estimates.                                                                                             |
+**Error:** Schema 'cart.create' not found in any schema directory.
 
 #### Output Schema
 
@@ -106,7 +102,7 @@ Maps to the [Create Cart](https://ucp.dev/draft/specification/cart/#create-cart)
 | totals       | Array\[[Total Response](/draft/specification/cart/#total-response)\]            | **Yes**  | Estimated cost breakdown. May be partial if shipping/tax not yet calculable.                                                                       |
 | messages     | Array\[[Message](/draft/specification/cart/#message)\]                          | No       | Validation messages, warnings, or informational notices.                                                                                           |
 | links        | Array\[[Link](/draft/specification/cart/#link)\]                                | No       | Optional merchant links (policies, FAQs).                                                                                                          |
-| checkout_url | string                                                                          | **Yes**  | URL to convert cart to checkout. Always provided by merchant. Enables sharing, recovery, and cart-to-checkout conversion.                          |
+| continue_url | string                                                                          | No       | URL for cart handoff and session recovery. Enables sharing and human-in-the-loop flows.                                                            |
 | expires_at   | string                                                                          | No       | Cart expiry timestamp (RFC 3339). Optional.                                                                                                        |
 
 #### Example
@@ -214,7 +210,7 @@ Maps to the [Get Cart](https://ucp.dev/draft/specification/cart/#get-cart) opera
 | totals       | Array\[[Total Response](/draft/specification/cart/#total-response)\]            | **Yes**  | Estimated cost breakdown. May be partial if shipping/tax not yet calculable.                                                                       |
 | messages     | Array\[[Message](/draft/specification/cart/#message)\]                          | No       | Validation messages, warnings, or informational notices.                                                                                           |
 | links        | Array\[[Link](/draft/specification/cart/#link)\]                                | No       | Optional merchant links (policies, FAQs).                                                                                                          |
-| checkout_url | string                                                                          | **Yes**  | URL to convert cart to checkout. Always provided by merchant. Enables sharing, recovery, and cart-to-checkout conversion.                          |
+| continue_url | string                                                                          | No       | URL for cart handoff and session recovery. Enables sharing and human-in-the-loop flows.                                                            |
 | expires_at   | string                                                                          | No       | Cart expiry timestamp (RFC 3339). Optional.                                                                                                        |
 
 #### Example
@@ -305,12 +301,7 @@ Maps to the [Update Cart](https://ucp.dev/draft/specification/cart/#update-cart)
 
 - `id` (String, required): The ID of the cart session to update.
 
-| Name       | Type                                                                                     | Required | Description                                                                                                                                        |
-| ---------- | ---------------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| id         | string                                                                                   | **Yes**  | Unique cart identifier.                                                                                                                            |
-| line_items | Array\[[Line Item Update Request](/draft/specification/cart/#line-item-update-request)\] | **Yes**  | Cart line items. Same structure as checkout. Full replacement on update.                                                                           |
-| context    | [Context](/draft/specification/cart/#context)                                            | No       | Buyer signals for localization (country, region, postal_code). Merchant uses for pricing, availability, currency. Falls back to geo-IP if omitted. |
-| buyer      | [Buyer](/draft/specification/cart/#buyer)                                                | No       | Optional buyer information for personalized estimates.                                                                                             |
+**Error:** Schema 'cart.update' not found in any schema directory.
 
 #### Output Schema
 
@@ -325,7 +316,7 @@ Maps to the [Update Cart](https://ucp.dev/draft/specification/cart/#update-cart)
 | totals       | Array\[[Total Response](/draft/specification/cart/#total-response)\]            | **Yes**  | Estimated cost breakdown. May be partial if shipping/tax not yet calculable.                                                                       |
 | messages     | Array\[[Message](/draft/specification/cart/#message)\]                          | No       | Validation messages, warnings, or informational notices.                                                                                           |
 | links        | Array\[[Link](/draft/specification/cart/#link)\]                                | No       | Optional merchant links (policies, FAQs).                                                                                                          |
-| checkout_url | string                                                                          | **Yes**  | URL to convert cart to checkout. Always provided by merchant. Enables sharing, recovery, and cart-to-checkout conversion.                          |
+| continue_url | string                                                                          | No       | URL for cart handoff and session recovery. Enables sharing and human-in-the-loop flows.                                                            |
 | expires_at   | string                                                                          | No       | Cart expiry timestamp (RFC 3339). Optional.                                                                                                        |
 
 #### Example
@@ -453,7 +444,7 @@ Maps to the [Cancel Cart](https://ucp.dev/draft/specification/cart/#cancel-cart)
 | totals       | Array\[[Total Response](/draft/specification/cart/#total-response)\]            | **Yes**  | Estimated cost breakdown. May be partial if shipping/tax not yet calculable.                                                                       |
 | messages     | Array\[[Message](/draft/specification/cart/#message)\]                          | No       | Validation messages, warnings, or informational notices.                                                                                           |
 | links        | Array\[[Link](/draft/specification/cart/#link)\]                                | No       | Optional merchant links (policies, FAQs).                                                                                                          |
-| checkout_url | string                                                                          | **Yes**  | URL to convert cart to checkout. Always provided by merchant. Enables sharing, recovery, and cart-to-checkout conversion.                          |
+| continue_url | string                                                                          | No       | URL for cart handoff and session recovery. Enables sharing and human-in-the-loop flows.                                                            |
 | expires_at   | string                                                                          | No       | Cart expiry timestamp (RFC 3339). Optional.                                                                                                        |
 
 #### Example

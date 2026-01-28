@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/schemas/shopping/types/item.json",
-  "title": "Item Response",
+  "$id": "https://ucp.dev/draft/schemas/shopping/types/item.json",
+  "title": "Item",
   "type": "object",
   "required": [
     "id",
@@ -15,17 +15,20 @@
     },
     "title": {
       "type": "string",
-      "description": "Product title."
+      "description": "Product title.",
+      "ucp_request": "omit"
     },
     "price": {
       "type": "integer",
       "description": "Unit price in minor (cents) currency units.",
-      "minimum": 0
+      "minimum": 0,
+      "ucp_request": "omit"
     },
     "image_url": {
       "type": "string",
       "description": "Product image URI.",
-      "format": "uri"
+      "format": "uri",
+      "ucp_request": "omit"
     }
   }
 }

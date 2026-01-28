@@ -2403,36 +2403,7 @@ to enable version compatibility checking and capability negotiation.</p>
 <h3 id="create_cart"><code>create_cart</code><a class="headerlink" href="#create_cart" title="Permanent link">&para;</a></h3>
 <p>Maps to the <a href="../cart/#create-cart">Create Cart</a> operation.</p>
 <h4 id="input-schema">Input Schema<a class="headerlink" href="#input-schema" title="Permanent link">&para;</a></h4>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Name</th>
-<th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
-<th style="text-align: left;">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;">line_items</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/cart/#line-item-create-request">Line Item Create Request</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Cart line items. Same structure as checkout. Full replacement on update.</td>
-</tr>
-<tr>
-<td style="text-align: left;">context</td>
-<td style="text-align: left;"><a href="/draft/specification/cart/#context">Context</a></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Buyer signals for localization (country, region, postal_code). Merchant uses for pricing, availability, currency. Falls back to geo-IP if omitted.</td>
-</tr>
-<tr>
-<td style="text-align: left;">buyer</td>
-<td style="text-align: left;"><a href="/draft/specification/cart/#buyer">Buyer</a></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Optional buyer information for personalized estimates.</td>
-</tr>
-</tbody>
-</table>
+<p><strong>Error:</strong> Schema 'cart.create' not found in any schema directory.</p>
 <h4 id="output-schema">Output Schema<a class="headerlink" href="#output-schema" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
@@ -2499,10 +2470,10 @@ to enable version compatibility checking and capability negotiation.</p>
 <td style="text-align: left;">Optional merchant links (policies, FAQs).</td>
 </tr>
 <tr>
-<td style="text-align: left;">checkout_url</td>
+<td style="text-align: left;">continue_url</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">URL to convert cart to checkout. Always provided by merchant. Enables sharing, recovery, and cart-to-checkout conversion.</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">URL for cart handoff and session recovery. Enables sharing and human-in-the-loop flows.</td>
 </tr>
 <tr>
 <td style="text-align: left;">expires_at</td>
@@ -2671,10 +2642,10 @@ to enable version compatibility checking and capability negotiation.</p>
 <td style="text-align: left;">Optional merchant links (policies, FAQs).</td>
 </tr>
 <tr>
-<td style="text-align: left;">checkout_url</td>
+<td style="text-align: left;">continue_url</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">URL to convert cart to checkout. Always provided by merchant. Enables sharing, recovery, and cart-to-checkout conversion.</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">URL for cart handoff and session recovery. Enables sharing and human-in-the-loop flows.</td>
 </tr>
 <tr>
 <td style="text-align: left;">expires_at</td>
@@ -2773,42 +2744,7 @@ to enable version compatibility checking and capability negotiation.</p>
 <ul>
 <li><code>id</code> (String, required): The ID of the cart session to update.</li>
 </ul>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Name</th>
-<th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
-<th style="text-align: left;">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;">id</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Unique cart identifier.</td>
-</tr>
-<tr>
-<td style="text-align: left;">line_items</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/cart/#line-item-update-request">Line Item Update Request</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Cart line items. Same structure as checkout. Full replacement on update.</td>
-</tr>
-<tr>
-<td style="text-align: left;">context</td>
-<td style="text-align: left;"><a href="/draft/specification/cart/#context">Context</a></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Buyer signals for localization (country, region, postal_code). Merchant uses for pricing, availability, currency. Falls back to geo-IP if omitted.</td>
-</tr>
-<tr>
-<td style="text-align: left;">buyer</td>
-<td style="text-align: left;"><a href="/draft/specification/cart/#buyer">Buyer</a></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Optional buyer information for personalized estimates.</td>
-</tr>
-</tbody>
-</table>
+<p><strong>Error:</strong> Schema 'cart.update' not found in any schema directory.</p>
 <h4 id="output-schema_2">Output Schema<a class="headerlink" href="#output-schema_2" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
@@ -2875,10 +2811,10 @@ to enable version compatibility checking and capability negotiation.</p>
 <td style="text-align: left;">Optional merchant links (policies, FAQs).</td>
 </tr>
 <tr>
-<td style="text-align: left;">checkout_url</td>
+<td style="text-align: left;">continue_url</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">URL to convert cart to checkout. Always provided by merchant. Enables sharing, recovery, and cart-to-checkout conversion.</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">URL for cart handoff and session recovery. Enables sharing and human-in-the-loop flows.</td>
 </tr>
 <tr>
 <td style="text-align: left;">expires_at</td>
@@ -3067,10 +3003,10 @@ to enable version compatibility checking and capability negotiation.</p>
 <td style="text-align: left;">Optional merchant links (policies, FAQs).</td>
 </tr>
 <tr>
-<td style="text-align: left;">checkout_url</td>
+<td style="text-align: left;">continue_url</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">URL to convert cart to checkout. Always provided by merchant. Enables sharing, recovery, and cart-to-checkout conversion.</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">URL for cart handoff and session recovery. Enables sharing and human-in-the-loop flows.</td>
 </tr>
 <tr>
 <td style="text-align: left;">expires_at</td>

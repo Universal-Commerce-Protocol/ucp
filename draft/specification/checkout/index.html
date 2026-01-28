@@ -2923,7 +2923,6 @@
 <h1 id="checkout-capability">Checkout Capability<a class="headerlink" href="#checkout-capability" title="Permanent link">&para;</a></h1>
 <ul>
 <li><strong>Capability Name:</strong> <code>dev.ucp.shopping.checkout</code></li>
-<li><strong>Version:</strong> <code>2026-01-11</code></li>
 </ul>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
 <p>Allows platforms to facilitate checkout sessions. The checkout has to be
@@ -3299,134 +3298,7 @@ redirect to the checkout UI or renders the checkout page directly.</p>
 <p><strong>Recommendation</strong>: To minimize discrepancies and a streamlined user experience,
 product data (price/title etc.) provided by the business through the feeds
 <strong>SHOULD</strong> match the actual attributes returned in the response.</p>
-<p><strong>Inputs</strong></p>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Name</th>
-<th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
-<th style="text-align: left;">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;">line_items</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/checkout/#line-item-create-request">Line Item Create Request</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">List of line items being checked out.</td>
-</tr>
-<tr>
-<td style="text-align: left;">buyer</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#buyer">Buyer</a></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Representation of the buyer.</td>
-</tr>
-<tr>
-<td style="text-align: left;">context</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#context">Context</a></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Provisional buyer signals for relevance and localization: product availability, pricing, currency, tax, shipping, payment methods, and eligibility (e.g., student or affiliation discounts). Businesses SHOULD use these values when authoritative data (e.g., address) is absent, and MAY ignore unsupported values without returning errors. Context can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. Platforms SHOULD progressively enhance context throughout the buyer journey.</td>
-</tr>
-<tr>
-<td style="text-align: left;">payment</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#payment">Payment</a></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Payment configuration containing handlers.</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Output</strong></p>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Name</th>
-<th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
-<th style="text-align: left;">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;">ucp</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#ucp-response-checkout-schema">UCP Response Checkout Schema</a></td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.</td>
-</tr>
-<tr>
-<td style="text-align: left;">id</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Unique identifier of the checkout session.</td>
-</tr>
-<tr>
-<td style="text-align: left;">line_items</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/checkout/#line-item-response">Line Item Response</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">List of line items being checked out.</td>
-</tr>
-<tr>
-<td style="text-align: left;">buyer</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#buyer">Buyer</a></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Representation of the buyer.</td>
-</tr>
-<tr>
-<td style="text-align: left;">status</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details.<br><strong>Enum:</strong> <code>incomplete</code>, <code>requires_escalation</code>, <code>ready_for_complete</code>, <code>complete_in_progress</code>, <code>completed</code>, <code>canceled</code></td>
-</tr>
-<tr>
-<td style="text-align: left;">currency</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.</td>
-</tr>
-<tr>
-<td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/checkout/#total-response">Total Response</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Different cart totals.</td>
-</tr>
-<tr>
-<td style="text-align: left;">messages</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/checkout/#message">Message</a>]</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">List of messages with error and info about the checkout session state.</td>
-</tr>
-<tr>
-<td style="text-align: left;">links</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/checkout/#link">Link</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.</td>
-</tr>
-<tr>
-<td style="text-align: left;">expires_at</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.</td>
-</tr>
-<tr>
-<td style="text-align: left;">continue_url</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">URL for checkout handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements.</td>
-</tr>
-<tr>
-<td style="text-align: left;">payment</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#payment">Payment</a></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Payment configuration containing handlers.</td>
-</tr>
-<tr>
-<td style="text-align: left;">order</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#order-confirmation">Order Confirmation</a></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Details about an order created for this checkout session.</td>
-</tr>
-</tbody>
-</table>
+<p><strong>Error processing OpenAPI:</strong> [Errno 2] No such file or directory: 'source/services/shopping/rest.openapi.json'</p>
 <h3 id="get-checkout">Get Checkout<a class="headerlink" href="#get-checkout" title="Permanent link">&para;</a></h3>
 <p>It provides the latest state of the checkout resource. After cancellation or
 completion it is up to the business on what to return (i.e this can be a long
@@ -3435,261 +3307,13 @@ error). From the platform there is no specific enforcement for a TTL of the
 checkout.</p>
 <p>The platform will honor the TTL provided by the business via <code>expires_at</code> at the
 time of checkout session creation.</p>
-<p><strong>Inputs</strong></p>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Name</th>
-<th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
-<th style="text-align: left;">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;">id</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">The unique identifier of the checkout session.Defined in path.</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Output</strong></p>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Name</th>
-<th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
-<th style="text-align: left;">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;">ucp</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#ucp-response-checkout-schema">UCP Response Checkout Schema</a></td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.</td>
-</tr>
-<tr>
-<td style="text-align: left;">id</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Unique identifier of the checkout session.</td>
-</tr>
-<tr>
-<td style="text-align: left;">line_items</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/checkout/#line-item-response">Line Item Response</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">List of line items being checked out.</td>
-</tr>
-<tr>
-<td style="text-align: left;">buyer</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#buyer">Buyer</a></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Representation of the buyer.</td>
-</tr>
-<tr>
-<td style="text-align: left;">status</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details.<br><strong>Enum:</strong> <code>incomplete</code>, <code>requires_escalation</code>, <code>ready_for_complete</code>, <code>complete_in_progress</code>, <code>completed</code>, <code>canceled</code></td>
-</tr>
-<tr>
-<td style="text-align: left;">currency</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.</td>
-</tr>
-<tr>
-<td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/checkout/#total-response">Total Response</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Different cart totals.</td>
-</tr>
-<tr>
-<td style="text-align: left;">messages</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/checkout/#message">Message</a>]</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">List of messages with error and info about the checkout session state.</td>
-</tr>
-<tr>
-<td style="text-align: left;">links</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/checkout/#link">Link</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.</td>
-</tr>
-<tr>
-<td style="text-align: left;">expires_at</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.</td>
-</tr>
-<tr>
-<td style="text-align: left;">continue_url</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">URL for checkout handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements.</td>
-</tr>
-<tr>
-<td style="text-align: left;">payment</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#payment">Payment</a></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Payment configuration containing handlers.</td>
-</tr>
-<tr>
-<td style="text-align: left;">order</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#order-confirmation">Order Confirmation</a></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Details about an order created for this checkout session.</td>
-</tr>
-</tbody>
-</table>
+<p><strong>Error processing OpenAPI:</strong> [Errno 2] No such file or directory: 'source/services/shopping/rest.openapi.json'</p>
 <h3 id="update-checkout">Update Checkout<a class="headerlink" href="#update-checkout" title="Permanent link">&para;</a></h3>
 <p>Performs a full replacement of the checkout resource.
 The platform is <strong>REQUIRED</strong> to send the entire checkout resource containing any
 data updates to write-only data fields. The resource provided in the request
 will replace the existing checkout session state on the business side.</p>
-<p><strong>Inputs</strong></p>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Name</th>
-<th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
-<th style="text-align: left;">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;">id</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">The unique identifier of the checkout session.Defined in path.</td>
-</tr>
-<tr>
-<td style="text-align: left;">id</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Unique identifier of the checkout session.</td>
-</tr>
-<tr>
-<td style="text-align: left;">line_items</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/checkout/#line-item-update-request">Line Item Update Request</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">List of line items being checked out.</td>
-</tr>
-<tr>
-<td style="text-align: left;">buyer</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#buyer">Buyer</a></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Representation of the buyer.</td>
-</tr>
-<tr>
-<td style="text-align: left;">context</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#context">Context</a></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Provisional buyer signals for relevance and localization: product availability, pricing, currency, tax, shipping, payment methods, and eligibility (e.g., student or affiliation discounts). Businesses SHOULD use these values when authoritative data (e.g., address) is absent, and MAY ignore unsupported values without returning errors. Context can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. Platforms SHOULD progressively enhance context throughout the buyer journey.</td>
-</tr>
-<tr>
-<td style="text-align: left;">payment</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#payment">Payment</a></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Payment configuration containing handlers.</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Output</strong></p>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Name</th>
-<th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
-<th style="text-align: left;">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;">ucp</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#ucp-response-checkout-schema">UCP Response Checkout Schema</a></td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.</td>
-</tr>
-<tr>
-<td style="text-align: left;">id</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Unique identifier of the checkout session.</td>
-</tr>
-<tr>
-<td style="text-align: left;">line_items</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/checkout/#line-item-response">Line Item Response</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">List of line items being checked out.</td>
-</tr>
-<tr>
-<td style="text-align: left;">buyer</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#buyer">Buyer</a></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Representation of the buyer.</td>
-</tr>
-<tr>
-<td style="text-align: left;">status</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details.<br><strong>Enum:</strong> <code>incomplete</code>, <code>requires_escalation</code>, <code>ready_for_complete</code>, <code>complete_in_progress</code>, <code>completed</code>, <code>canceled</code></td>
-</tr>
-<tr>
-<td style="text-align: left;">currency</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.</td>
-</tr>
-<tr>
-<td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/checkout/#total-response">Total Response</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Different cart totals.</td>
-</tr>
-<tr>
-<td style="text-align: left;">messages</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/checkout/#message">Message</a>]</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">List of messages with error and info about the checkout session state.</td>
-</tr>
-<tr>
-<td style="text-align: left;">links</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/checkout/#link">Link</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.</td>
-</tr>
-<tr>
-<td style="text-align: left;">expires_at</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.</td>
-</tr>
-<tr>
-<td style="text-align: left;">continue_url</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">URL for checkout handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements.</td>
-</tr>
-<tr>
-<td style="text-align: left;">payment</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#payment">Payment</a></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Payment configuration containing handlers.</td>
-</tr>
-<tr>
-<td style="text-align: left;">order</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#order-confirmation">Order Confirmation</a></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Details about an order created for this checkout session.</td>
-</tr>
-</tbody>
-</table>
+<p><strong>Error processing OpenAPI:</strong> [Errno 2] No such file or directory: 'source/services/shopping/rest.openapi.json'</p>
 <h3 id="complete-checkout">Complete Checkout<a class="headerlink" href="#complete-checkout" title="Permanent link">&para;</a></h3>
 <p>This is the final checkout placement call. To be invoked when the user has
 committed to pay and place an order for the chosen items. The response of this
@@ -3701,244 +3325,14 @@ to construct the order representation (i.e. information like <code>line_items</c
 <code>fulfillment</code> will be used to create the initial order representation).</p>
 <p>After this call, other details will be updated through subsequent events
 as the order, and its associated items, moves through the supply chain.</p>
-<p><strong>Inputs</strong></p>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Name</th>
-<th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
-<th style="text-align: left;">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;">id</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">The unique identifier of the checkout session.Defined in path.</td>
-</tr>
-<tr>
-<td style="text-align: left;">payment</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#payment">Payment</a></td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Payment configuration containing handlers.</td>
-</tr>
-<tr>
-<td style="text-align: left;">risk_signals</td>
-<td style="text-align: left;">object</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Key-value pairs of risk signals.</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Output</strong></p>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Name</th>
-<th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
-<th style="text-align: left;">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;">ucp</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#ucp-response-checkout-schema">UCP Response Checkout Schema</a></td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.</td>
-</tr>
-<tr>
-<td style="text-align: left;">id</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Unique identifier of the checkout session.</td>
-</tr>
-<tr>
-<td style="text-align: left;">line_items</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/checkout/#line-item-response">Line Item Response</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">List of line items being checked out.</td>
-</tr>
-<tr>
-<td style="text-align: left;">buyer</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#buyer">Buyer</a></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Representation of the buyer.</td>
-</tr>
-<tr>
-<td style="text-align: left;">status</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details.<br><strong>Enum:</strong> <code>incomplete</code>, <code>requires_escalation</code>, <code>ready_for_complete</code>, <code>complete_in_progress</code>, <code>completed</code>, <code>canceled</code></td>
-</tr>
-<tr>
-<td style="text-align: left;">currency</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.</td>
-</tr>
-<tr>
-<td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/checkout/#total-response">Total Response</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Different cart totals.</td>
-</tr>
-<tr>
-<td style="text-align: left;">messages</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/checkout/#message">Message</a>]</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">List of messages with error and info about the checkout session state.</td>
-</tr>
-<tr>
-<td style="text-align: left;">links</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/checkout/#link">Link</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.</td>
-</tr>
-<tr>
-<td style="text-align: left;">expires_at</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.</td>
-</tr>
-<tr>
-<td style="text-align: left;">continue_url</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">URL for checkout handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements.</td>
-</tr>
-<tr>
-<td style="text-align: left;">payment</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#payment">Payment</a></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Payment configuration containing handlers.</td>
-</tr>
-<tr>
-<td style="text-align: left;">order</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#order-confirmation">Order Confirmation</a></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Details about an order created for this checkout session.</td>
-</tr>
-</tbody>
-</table>
+<p><strong>Error processing OpenAPI:</strong> [Errno 2] No such file or directory: 'source/services/shopping/rest.openapi.json'</p>
 <h3 id="cancel-checkout">Cancel Checkout<a class="headerlink" href="#cancel-checkout" title="Permanent link">&para;</a></h3>
 <p>This operation will be used to cancel a checkout session, if it can be canceled.
 If the checkout session cannot be canceled (e.g. checkout session is
 already canceled or completed), then businesses <strong>SHOULD</strong> send back an error
 indicating the operation is not allowed. Any checkout session with a status
 that is not equal to <code>completed</code> or <code>canceled</code> <strong>SHOULD</strong> be cancelable.</p>
-<p><strong>Inputs</strong></p>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Name</th>
-<th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
-<th style="text-align: left;">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;">id</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">The unique identifier of the checkout session.Defined in path.</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Output</strong></p>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Name</th>
-<th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
-<th style="text-align: left;">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;">ucp</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#ucp-response-checkout-schema">UCP Response Checkout Schema</a></td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.</td>
-</tr>
-<tr>
-<td style="text-align: left;">id</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Unique identifier of the checkout session.</td>
-</tr>
-<tr>
-<td style="text-align: left;">line_items</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/checkout/#line-item-response">Line Item Response</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">List of line items being checked out.</td>
-</tr>
-<tr>
-<td style="text-align: left;">buyer</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#buyer">Buyer</a></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Representation of the buyer.</td>
-</tr>
-<tr>
-<td style="text-align: left;">status</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details.<br><strong>Enum:</strong> <code>incomplete</code>, <code>requires_escalation</code>, <code>ready_for_complete</code>, <code>complete_in_progress</code>, <code>completed</code>, <code>canceled</code></td>
-</tr>
-<tr>
-<td style="text-align: left;">currency</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.</td>
-</tr>
-<tr>
-<td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/checkout/#total-response">Total Response</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Different cart totals.</td>
-</tr>
-<tr>
-<td style="text-align: left;">messages</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/checkout/#message">Message</a>]</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">List of messages with error and info about the checkout session state.</td>
-</tr>
-<tr>
-<td style="text-align: left;">links</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/checkout/#link">Link</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.</td>
-</tr>
-<tr>
-<td style="text-align: left;">expires_at</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.</td>
-</tr>
-<tr>
-<td style="text-align: left;">continue_url</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">URL for checkout handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements.</td>
-</tr>
-<tr>
-<td style="text-align: left;">payment</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#payment">Payment</a></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Payment configuration containing handlers.</td>
-</tr>
-<tr>
-<td style="text-align: left;">order</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#order-confirmation">Order Confirmation</a></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Details about an order created for this checkout session.</td>
-</tr>
-</tbody>
-</table>
+<p><strong>Error processing OpenAPI:</strong> [Errno 2] No such file or directory: 'source/services/shopping/rest.openapi.json'</p>
 <h2 id="transport-bindings">Transport Bindings<a class="headerlink" href="#transport-bindings" title="Permanent link">&para;</a></h2>
 <p>The abstract operations above are bound to specific transport protocols as
 defined below:</p>
@@ -4022,99 +3416,12 @@ require explicit validation and error feedback.</p>
 </tbody>
 </table>
 <h3 id="fulfillment-option">Fulfillment Option<a class="headerlink" href="#fulfillment-option" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Name</th>
-<th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
-<th style="text-align: left;">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;">id</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Unique fulfillment option identifier.</td>
-</tr>
-<tr>
-<td style="text-align: left;">title</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Short label (e.g., 'Express Shipping', 'Curbside Pickup').</td>
-</tr>
-<tr>
-<td style="text-align: left;">description</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Complete context for buyer decision (e.g., 'Arrives Dec 12-15 via FedEx').</td>
-</tr>
-<tr>
-<td style="text-align: left;">carrier</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Carrier name (for shipping).</td>
-</tr>
-<tr>
-<td style="text-align: left;">earliest_fulfillment_time</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Earliest fulfillment date.</td>
-</tr>
-<tr>
-<td style="text-align: left;">latest_fulfillment_time</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Latest fulfillment date.</td>
-</tr>
-<tr>
-<td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/checkout/#total-response">Total Response</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Fulfillment option totals breakdown.</td>
-</tr>
-</tbody>
-</table>
+<p><strong>Error:</strong> Schema file 'fulfillment_resp.json' not found in any schema directory.</p>
 <h3 id="item">Item<a class="headerlink" href="#item" title="Permanent link">&para;</a></h3>
 <h4 id="item-create-request">Item Create Request<a class="headerlink" href="#item-create-request" title="Permanent link">&para;</a></h4>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Name</th>
-<th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
-<th style="text-align: left;">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;">id</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">The product identifier, often the SKU, required to resolve the product details associated with this line item. Should be recognized by both the Platform, and the Business.</td>
-</tr>
-</tbody>
-</table>
+<p><strong>Error:</strong> Schema 'types/item.create' not found in any schema directory.</p>
 <h4 id="item-update-request">Item Update Request<a class="headerlink" href="#item-update-request" title="Permanent link">&para;</a></h4>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Name</th>
-<th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
-<th style="text-align: left;">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;">id</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">The product identifier, often the SKU, required to resolve the product details associated with this line item. Should be recognized by both the Platform, and the Business.</td>
-</tr>
-</tbody>
-</table>
+<p><strong>Error:</strong> Schema 'types/item.update' not found in any schema directory.</p>
 <h4 id="item-response">Item Response<a class="headerlink" href="#item-response" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
@@ -4154,67 +3461,9 @@ require explicit validation and error feedback.</p>
 </table>
 <h3 id="line-item">Line Item<a class="headerlink" href="#line-item" title="Permanent link">&para;</a></h3>
 <h4 id="line-item-create-request">Line Item Create Request<a class="headerlink" href="#line-item-create-request" title="Permanent link">&para;</a></h4>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Name</th>
-<th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
-<th style="text-align: left;">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;">item</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#item-create-request">Item Create Request</a></td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;">quantity</td>
-<td style="text-align: left;">integer</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Quantity of the item being purchased.</td>
-</tr>
-</tbody>
-</table>
+<p><strong>Error:</strong> Schema 'types/line_item.create' not found in any schema directory.</p>
 <h4 id="line-item-update-request">Line Item Update Request<a class="headerlink" href="#line-item-update-request" title="Permanent link">&para;</a></h4>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Name</th>
-<th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
-<th style="text-align: left;">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;">id</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;">item</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#item-update-request">Item Update Request</a></td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;">quantity</td>
-<td style="text-align: left;">integer</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Quantity of the item being purchased.</td>
-</tr>
-<tr>
-<td style="text-align: left;">parent_id</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Parent line item identifier for any nested structures.</td>
-</tr>
-</tbody>
-</table>
+<p><strong>Error:</strong> Schema 'types/line_item.update' not found in any schema directory.</p>
 <h4 id="line-item-response">Line Item Response<a class="headerlink" href="#line-item-response" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
@@ -4234,7 +3483,7 @@ require explicit validation and error feedback.</p>
 </tr>
 <tr>
 <td style="text-align: left;">item</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#item-response">Item Response</a></td>
+<td style="text-align: left;"><a href="/draft/specification/checkout/#item">Item</a></td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;"></td>
 </tr>
@@ -4246,7 +3495,7 @@ require explicit validation and error feedback.</p>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/checkout/#total-response">Total Response</a>]</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/checkout/#total">Total</a>]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Line item totals breakdown.</td>
 </tr>
@@ -4628,40 +3877,10 @@ field or omitting them.</p>
 </thead>
 <tbody>
 <tr>
-<td style="text-align: left;">version</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">UCP version in YYYY-MM-DD format.Entity version in YYYY-MM-DD format.</td>
-</tr>
-<tr>
-<td style="text-align: left;">spec</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">URL to human-readable specification document.</td>
-</tr>
-<tr>
-<td style="text-align: left;">schema</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">URL to JSON Schema defining this entity's structure and payloads.</td>
-</tr>
-<tr>
-<td style="text-align: left;">id</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Unique identifier for this entity instance. Used to disambiguate when multiple instances exist.</td>
-</tr>
-<tr>
-<td style="text-align: left;">config</td>
-<td style="text-align: left;">object</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Entity-specific configuration. Structure defined by each entity's schema.</td>
-</tr>
-<tr>
-<td style="text-align: left;">extends</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Parent capability this extends. Present for extensions, absent for root capabilities.</td>
+<td style="text-align: left;"><strong>Error:</strong> Failed to resolve ''. Ensure ucp-schema is installed: <code>cargo install ucp-schema</code></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
 </tr>
 </tbody>
 </table>
@@ -4709,10 +3928,10 @@ field or omitting them.</p>
 </thead>
 <tbody>
 <tr>
-<td style="text-align: left;">version</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">UCP version in YYYY-MM-DD format.</td>
+<td style="text-align: left;"><strong>Error:</strong> Failed to resolve ''. Ensure ucp-schema is installed: <code>cargo install ucp-schema</code></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
 </tr>
 <tr>
 <td style="text-align: left;">services</td>

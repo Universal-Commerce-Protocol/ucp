@@ -1,7 +1,5 @@
 # Buyer Consent Extension
 
-**Version:** `2026-01-11`
-
 ## Overview
 
 The Buyer Consent extension enables platforms to transmit buyer consent choices to businesses regarding data usage and communication preferences. It allows buyers to communicate their consent status for various categories, such as analytics, marketing, and data sales, helping businesses comply with privacy regulations like CCPA and GDPR.
@@ -39,12 +37,7 @@ The consent extension extends the **buyer object** within checkout:
 
 ### Consent Object
 
-| Name         | Type    | Required | Description                                       |
-| ------------ | ------- | -------- | ------------------------------------------------- |
-| analytics    | boolean | No       | Consent for analytics and performance tracking.   |
-| preferences  | boolean | No       | Consent for storing user preferences.             |
-| marketing    | boolean | No       | Consent for marketing communications.             |
-| sale_of_data | boolean | No       | Consent for selling data to third parties (CCPA). |
+**Error:** Schema file 'buyer_consent_resp.json' not found in any schema directory.
 
 ## Usage
 
@@ -116,4 +109,3 @@ POST /checkouts
 1. **Legal compliance** remains the business's responsibility
 1. **Platforms should not** assume consent without explicit user action
 1. **Default behavior** when consent is not provided is business-specific
-1. **Consent states** should align with actual user choices, not platform defaults

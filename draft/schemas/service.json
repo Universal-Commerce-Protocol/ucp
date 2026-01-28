@@ -1,13 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/schemas/service.json",
+  "$id": "https://ucp.dev/draft/schemas/service.json",
   "title": "UCP Service",
   "description": "Service binding for a specific transport. Each transport binding is a separate entry in the service array.",
   "$defs": {
     "base": {
       "allOf": [
         {
-          "$ref": "https://ucp.dev/schemas/ucp.json#/$defs/entity"
+          "$ref": "https://ucp.dev/draft/schemas/ucp.json#/$defs/entity"
         },
         {
           "type": "object",
@@ -53,28 +53,42 @@
                 "transport": {
                   "const": "rest"
                 }
-              }
+              },
+              "required": [
+                "schema",
+                "endpoint"
+              ]
             },
             {
               "properties": {
                 "transport": {
                   "const": "mcp"
                 }
-              }
+              },
+              "required": [
+                "schema",
+                "endpoint"
+              ]
             },
             {
               "properties": {
                 "transport": {
                   "const": "a2a"
                 }
-              }
+              },
+              "required": [
+                "endpoint"
+              ]
             },
             {
               "properties": {
                 "transport": {
                   "const": "embedded"
                 }
-              }
+              },
+              "required": [
+                "schema"
+              ]
             }
           ]
         }
@@ -94,21 +108,30 @@
                 "transport": {
                   "const": "rest"
                 }
-              }
+              },
+              "required": [
+                "endpoint"
+              ]
             },
             {
               "properties": {
                 "transport": {
                   "const": "mcp"
                 }
-              }
+              },
+              "required": [
+                "endpoint"
+              ]
             },
             {
               "properties": {
                 "transport": {
                   "const": "a2a"
                 }
-              }
+              },
+              "required": [
+                "endpoint"
+              ]
             },
             {
               "properties": {
@@ -116,7 +139,7 @@
                   "const": "embedded"
                 },
                 "config": {
-                  "$ref": "https://ucp.dev/schemas/transports/embedded_config.json"
+                  "$ref": "https://ucp.dev/draft/schemas/transports/embedded_config.json"
                 }
               }
             }
@@ -160,7 +183,7 @@
                   "const": "embedded"
                 },
                 "config": {
-                  "$ref": "https://ucp.dev/schemas/transports/embedded_config.json"
+                  "$ref": "https://ucp.dev/draft/schemas/transports/embedded_config.json"
                 }
               }
             }
