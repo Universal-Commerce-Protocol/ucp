@@ -190,7 +190,7 @@ You can run many of these checks locally before committing by installing and
 using `pre-commit`:
 
 ```bash
-pip install pre-commit
+uv tool install pre-commit
 pre-commit install
 ```
 
@@ -212,12 +212,12 @@ This will set up pre-commit hooks to run automatically when you `git commit`.
 ### Spec Development
 
 1. Make relevant updates to JSON files in `source/`
-2. Run `python generate_schemas.py` to generate updated files in `spec/`
+2. Run `uv run generate_schemas.py` to generate updated files in `spec/`
 3. Check outputs from step above to ensure deltas are expected. You may need to
    extend `generate_schemas.py` if you are introducing a new generation concept
 
 To validate JSON and YAML files format and references in `spec/`, run
-`python validate_specs.py`.
+`uv run validate_specs.py`.
 
 If you change any JSON schemas in `spec/`, you must regenerate any SDK client
 libraries that depend on them. For example, to regenerate Python Pydantic
@@ -230,25 +230,26 @@ are updated to ensure there are no broken references or stale/missing contents.
 
 ### Documentation Development
 
-1. Ensure dependencies are installed: `pip install -r requirements-docs.txt`
-2. Run the development server: `mkdocs serve --watch spec`
+1. Ensure dependencies are installed: `uv sync`
+2. Run the development server: `uv run mkdocs serve --watch spec`
 3. Open **<http://127.0.0.1:8000>** in your browser
 4. Before submitting a pull request with documentation changes, run
-    `mkdocs build --strict` to ensure there are no warnings or errors. Our CI
+    `uv run mkdocs build --strict` to ensure there are no warnings or errors. Our CI
     build uses this command and will fail if warnings are present (e.g.,
     broken links).
 
-### Using a virtual environment (Recommended)
+### Using uv (Recommended)
 
-To avoid polluting your global environment, use a virtual environment. Prefix
-the virtual environment name with a `.` so the versioning control systems don't
-track pip install files:
+This project uses `uv` to manage dependencies and virtual environments. To set up
+your development environment:
 
 ```bash
-$ sudo apt-get install virtualenv python3-venv
-$ virtualenv .ucp # or python3 -m venv .ucp
-$ source .ucp/bin/activate
-(.ucp) $ pip install -r requirements-docs.txt
-(.ucp) $ mkdocs serve --watch spec
-(.ucp) $ deactivate # when done
+# Install dependencies and set up the virtual environment
+$ uv sync
+
+# Run development commands using 'uv run'
+$ uv run mkdocs serve --watch spec
 ```
+
+`uv` will automatically manage a virtual environment in the `.venv` directory.
+You don't need to manually activate it if you use `uv run`.
