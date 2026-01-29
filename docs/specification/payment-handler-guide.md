@@ -55,29 +55,29 @@ function calls. Spec authors must map these logical flows to the actual
 transport protocol used by their implementation.
 
 ```text
-┌──────────────────────────────────────────────────────────────────────────────┐
-│                        Payment Handler Framework                             │
-├──────────────────────────────────────────────────────────────────────────────┤
-│                                                                              │
-│   ┌──────────────┐                                                           │
-│   │ PARTICIPANTS │  Who participates in this handler?                        │
-│   └──────┬───────┘                                                           │
-│          │                                                                   │
-│          ▼                                                                   │
-│   ┌──────────────┐                                                           │
-│   │PREREQUISITES │  How does each participant obtain identity & configs?     │
-│   └──────┬───────┘                                                           │
-│          │                                                                   │
-│          ├────────────────────┬──────────────────────┐                       │
-│          ▼                    ▼                      ▼                       │
-│   ┌──────────────┐    ┌──────────────┐      ┌──────────────┐                 │
-│   │   HANDLER    │    │  INSTRUMENT  │      │  PROCESSING  │                 │
-│   │ DECLARATION  │    │  ACQUISITION │      │              │                 │
-│   └──────────────┘    └──────────────┘      └──────────────┘                 │
-│   Business advertises  platform acquires     Participant                     │
-│   handler config       checkout instrument   processes instrument            │
-│                                                                              │
-└──────────────────────────────────────────────────────────────────────────────┘
++------------------------------------------------------------------------------+
+|                        Payment Handler Framework                             |
++------------------------------------------------------------------------------+
+|                                                                              |
+|   +--------------+                                                           |
+|   | PARTICIPANTS |  Who participates in this handler?                        |
+|   +------+-------+                                                           |
+|          |                                                                   |
+|          v                                                                   |
+|   +--------------+                                                           |
+|   |PREREQUISITES |  How does each participant obtain identity & configs?     |
+|   +------+-------+                                                           |
+|          |                                                                   |
+|          +--------------------+----------------------+                       |
+|          v                    v                      v                       |
+|   +--------------+    +--------------+      +--------------+                 |
+|   |   HANDLER    |    |  INSTRUMENT  |      |  PROCESSING  |                 |
+|   | DECLARATION  |    |  ACQUISITION |      |              |                 |
+|   +--------------+    +--------------+      +--------------+                 |
+|   Business advertises  platform acquires     Participant                     |
+|   handler config       checkout instrument   processes instrument            |
+|                                                                              |
++------------------------------------------------------------------------------+
 ```
 
 ### Participants
