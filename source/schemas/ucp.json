@@ -206,6 +206,23 @@
           }
         }
       ]
+    },
+
+    "response_catalog_schema": {
+      "title": "UCP Catalog Response Schema",
+      "description": "UCP metadata for catalog responses.",
+      "allOf": [
+        { "$ref": "#/$defs/base" },
+        {
+          "properties": {
+            "capabilities": {
+              "additionalProperties": {
+                "items": { "$ref": "capability.json#/$defs/response_schema" }
+              }
+            }
+          }
+        }
+      ]
     }
   }
 }

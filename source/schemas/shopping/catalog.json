@@ -7,21 +7,6 @@
   "description": "Product catalog search and item retrieval capability.",
   "type": "object",
   "$defs": {
-    "context": {
-      "allOf": [
-        { "$ref": "types/context.json" },
-        {
-          "type": "object",
-          "properties": {
-            "intent": {
-              "type": "string",
-              "description": "Background context for semantic search (e.g., 'looking for gift under $50', 'need something durable for outdoor use')."
-            }
-          }
-        }
-      ],
-      "description": "Location and market context for catalog operations. Extends base context with 'intent' for semantic search."
-    },
     "search_request": {
       "type": "object",
       "required": ["query"],
@@ -31,7 +16,7 @@
           "description": "Free-text search query."
         },
         "context": {
-          "$ref": "#/$defs/context"
+          "$ref": "types/context.json"
         },
         "filters": {
           "$ref": "types/search_filters.json"
@@ -49,7 +34,7 @@
       ],
       "properties": {
         "ucp": {
-          "$ref": "../ucp.json#/$defs/response"
+          "$ref": "../ucp.json#/$defs/response_catalog_schema"
         },
         "products": {
           "type": "array",
@@ -77,7 +62,7 @@
       ],
       "properties": {
         "ucp": {
-          "$ref": "../ucp.json#/$defs/response"
+          "$ref": "../ucp.json#/$defs/response_catalog_schema"
         },
         "product": {
           "$ref": "types/product.json",
