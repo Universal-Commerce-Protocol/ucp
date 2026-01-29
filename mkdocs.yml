@@ -38,6 +38,7 @@ nav:
       - EP Binding: specification/embedded-checkout.md
       - AP2 Mandates Extension: specification/ap2-mandates.md
       - Buyer Consent Extension: specification/buyer-consent.md
+      - Additional Fields Extension: specification/additional-fields.md
       - Discounts Extension: specification/discount.md
       - Fulfillment Extension: specification/fulfillment.md
     - Cart Capability:
