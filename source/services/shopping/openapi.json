@@ -12,7 +12,7 @@
       "variables": {
         "endpoint": {
           "default": "https://merchant.example.com/ucp",
-          "description": "Obtain from /.well-known/ucp → services[\"dev.ucp.shopping\"][transport=rest].endpoint"
+          "description": "Obtain from /.well-known/ucp \u2192 services[\"dev.ucp.shopping\"][transport=rest].endpoint"
         }
       }
     }
@@ -34,6 +34,9 @@
         },
         {
           "$ref": "#/components/parameters/user_agent"
+        },
+        {
+          "$ref": "#/components/parameters/ucp_agent"
         },
         {
           "$ref": "#/components/parameters/content_type"
@@ -114,6 +117,9 @@
         },
         {
           "$ref": "#/components/parameters/user_agent"
+        },
+        {
+          "$ref": "#/components/parameters/ucp_agent"
         },
         {
           "$ref": "#/components/parameters/content_type"
@@ -233,6 +239,9 @@
           "$ref": "#/components/parameters/user_agent"
         },
         {
+          "$ref": "#/components/parameters/ucp_agent"
+        },
+        {
           "$ref": "#/components/parameters/content_type"
         },
         {
@@ -331,6 +340,9 @@
           "$ref": "#/components/parameters/user_agent"
         },
         {
+          "$ref": "#/components/parameters/ucp_agent"
+        },
+        {
           "$ref": "#/components/parameters/content_type"
         },
         {
@@ -399,6 +411,9 @@
         },
         {
           "$ref": "#/components/parameters/user_agent"
+        },
+        {
+          "$ref": "#/components/parameters/ucp_agent"
         },
         {
           "$ref": "#/components/parameters/content_type"
@@ -479,6 +494,9 @@
         },
         {
           "$ref": "#/components/parameters/user_agent"
+        },
+        {
+          "$ref": "#/components/parameters/ucp_agent"
         },
         {
           "$ref": "#/components/parameters/content_type"
@@ -596,6 +614,9 @@
         },
         {
           "$ref": "#/components/parameters/user_agent"
+        },
+        {
+          "$ref": "#/components/parameters/ucp_agent"
         },
         {
           "$ref": "#/components/parameters/content_type"
@@ -831,6 +852,15 @@
           "type": "string"
         },
         "description": "Compression. The client tells the server which content-codings it supports, usually for compression"
+      },
+      "ucp_agent": {
+        "name": "UCP-Agent",
+        "in": "header",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "description": "Identifies the UCP agent making the call. All requests MUST include the UCP-Agent header containing the platform profile URI using Dictionary Structured Field syntax (RFC 8941). Format: profile=\"https://platform.example/profile\"."
       }
     },
     "headers": {

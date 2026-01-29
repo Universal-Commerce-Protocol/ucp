@@ -196,6 +196,11 @@ pre-commit install
 
 This will set up pre-commit hooks to run automatically when you `git commit`.
 
+You can also run [super-linter](https://github.com/super-linter/super-linter)
+locally by running `./scripts/super_linter_local.py`. This assumes you have
+either [docker](https://www.docker.com/) or [podman](https://podman.io/)
+installed on your system.
+
 ### Submitting a Pull Request
 
 1. Fork the repository and create your branch from `main`.
