@@ -228,7 +228,7 @@ Maps to the [Create Checkout](checkout.md#create-checkout) operation.
         },
         "line_items": [
           {
-            "id": "item_123",
+            "id": "li_1",
             "item": {
               "id": "item_123",
               "title": "Blue Jeans",
@@ -262,7 +262,7 @@ Maps to the [Create Checkout](checkout.md#create-checkout) operation.
             {
               "id": "shipping_1",
               "type": "shipping",
-              "line_item_ids": ["item_123"],
+              "line_item_ids": ["li_1"],
               "selected_destination_id": "dest_home",
               "destinations": [
                 {
@@ -277,7 +277,7 @@ Maps to the [Create Checkout](checkout.md#create-checkout) operation.
               "groups": [
                 {
                   "id": "package_1",
-                  "line_item_ids": ["item_123"],
+                  "line_item_ids": ["li_1"],
                   "selected_option_id": "standard",
                   "options": [
                     {
@@ -381,6 +381,7 @@ Maps to the [Update Checkout](checkout.md#update-checkout) operation.
               "item": {
                 "id": "item_123"
               },
+              "id": "li_1",
               "quantity": 1
             }
           ],
@@ -389,7 +390,7 @@ Maps to the [Update Checkout](checkout.md#update-checkout) operation.
             "methods": [
               {
                 "id": "shipping_1",
-                "line_item_ids": ["item_123"],
+                "line_item_ids": ["li_1"],
                 "groups": [
                   {
                     "id": "package_1",
@@ -437,7 +438,7 @@ Maps to the [Update Checkout](checkout.md#update-checkout) operation.
         },
         "line_items": [
           {
-            "id": "item_123",
+            "id": "li_1",
             "item": {
               "id": "item_123",
               "title": "Blue Jeans",
@@ -471,7 +472,7 @@ Maps to the [Update Checkout](checkout.md#update-checkout) operation.
             {
               "id": "shipping_1",
               "type": "shipping",
-              "line_item_ids": ["item_123"],
+              "line_item_ids": ["li_1"],
               "selected_destination_id": "dest_home",
               "destinations": [
                 {
@@ -486,7 +487,7 @@ Maps to the [Update Checkout](checkout.md#update-checkout) operation.
               "groups": [
                 {
                   "id": "package_1",
-                  "line_item_ids": ["item_123"],
+                  "line_item_ids": ["li_1"],
                   "selected_option_id": "express",
                   "options": [
                     {
