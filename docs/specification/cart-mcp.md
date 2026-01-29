@@ -497,7 +497,6 @@ Maps to the [Cancel Cart](cart.md#cancel-cart) operation.
 #### Input Schema
 
 * `id` (String, required): The ID of the cart session.
-* `idempotency_key` (String, UUID, required): Unique key for retry safety.
 
 #### Output Schema
 
