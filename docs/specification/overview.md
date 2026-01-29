@@ -590,11 +590,11 @@ These failure types require different handling:
 
 | Code                        | Description                                          | REST | MCP    |
 | --------------------------- | ---------------------------------------------------- | ---- | ------ |
-| `INVALID_PROFILE_URL`       | Profile URL is malformed, missing, or unresolvable   | 400  | error  |
-| `PROFILE_UNREACHABLE`       | Resolved URL but fetch failed (timeout, non-2xx)     | 424  | error  |
-| `PROFILE_MALFORMED`         | Fetched content is not valid JSON or violates schema | 422  | error  |
-| `CAPABILITIES_INCOMPATIBLE` | No compatible capabilities in intersection           | 200  | result |
-| `VERSION_UNSUPPORTED`       | Platform's UCP version is not supported              | 200  | result |
+| `invalid_profile_url`       | Profile URL is malformed, missing, or unresolvable   | 400  | error  |
+| `profile_unreachable`       | Resolved URL but fetch failed (timeout, non-2xx)     | 424  | error  |
+| `profile_malformed`         | Fetched content is not valid JSON or violates schema | 422  | error  |
+| `capabilities_incompatible` | No compatible capabilities in intersection           | 200  | result |
+| `version_unsupported`       | Platform's UCP version is not supported              | 200  | result |
 
 ##### The `continue_url` Field
 
@@ -619,7 +619,7 @@ task through the standard web interface.
     Content-Type: application/json
 
     {
-      "code": "PROFILE_UNREACHABLE",
+      "code": "profile_unreachable",
       "content": "Unable to fetch agent profile: connection timeout",
       "continue_url": "https://merchant.com/cart"
     }
@@ -639,12 +639,12 @@ task through the standard web interface.
       "messages": [
         {
           "type": "error",
-          "code": "VERSION_UNSUPPORTED",
-          "content": "Platform UCP version 2024-01-01 is not supported",
+          "code": "version_unsupported",
+          "content": "UCP version 2024-01-01 is not supported",
           "severity": "requires_buyer_input"
         }
       ],
-      "continue_url": "https://merchant.com/cart"
+      "continue_url": "https://merchant.com"
     }
     ```
 
@@ -660,7 +660,7 @@ task through the standard web interface.
         "code": -32001,
         "message": "UCP discovery failed",
         "data": {
-          "code": "PROFILE_UNREACHABLE",
+          "code": "profile_unreachable",
           "content": "Unable to fetch agent profile: connection timeout",
           "continue_url": "https://merchant.com/cart"
         }
@@ -683,12 +683,12 @@ task through the standard web interface.
           "messages": [
             {
               "type": "error",
-              "code": "VERSION_UNSUPPORTED",
-              "content": "Platform UCP version 2024-01-01 is not supported",
+              "code": "version_unsupported",
+              "content": "UCP version 2024-01-01 is not supported",
               "severity": "requires_buyer_input"
             }
           ],
-          "continue_url": "https://merchant.com/cart"
+          "continue_url": "https://merchant.com"
         },
         "content": [
           {"type": "text", "text": "{\"ucp\":{...},\"messages\":[...],\"continue_url\":\"...\"}"}

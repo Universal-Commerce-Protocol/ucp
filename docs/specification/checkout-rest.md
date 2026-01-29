@@ -1268,10 +1268,9 @@ with HTTP 200 and the UCP envelope containing `messages`:
   ],
   "messages": [
     {
-      "type": "error",
-      "code": "INSUFFICIENT_STOCK",
-      "content": "Requested 100 units but only 12 available",
-      "severity": "requires_buyer_input",
+      "type": "warning",
+      "code": "quantity_adjusted",
+      "content": "Quantity adjusted, requested 100 units but only 12 available",
       "path": "$.line_items[0].quantity"
     }
   ],

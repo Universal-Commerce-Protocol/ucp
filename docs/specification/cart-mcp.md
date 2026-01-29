@@ -339,7 +339,7 @@ Maps to the [Get Cart](cart.md#get-cart) operation.
             "messages": [
               {
                 "type": "error",
-                "code": "NOT_FOUND",
+                "code": "not_found",
                 "content": "Cart not found or has expired"
               }
             ],
@@ -616,7 +616,7 @@ JSON-RPC `result` with `structuredContent` containing the UCP envelope and
         "messages": [
           {
             "type": "error",
-            "code": "NOT_FOUND",
+            "code": "not_found",
             "content": "Cart not found or has expired"
           }
         ],

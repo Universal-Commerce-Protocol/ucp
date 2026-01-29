@@ -263,7 +263,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
       "messages": [
         {
           "type": "error",
-          "code": "NOT_FOUND",
+          "code": "not_found",
           "content": "Cart not found or has expired"
         }
       ],
@@ -514,7 +514,7 @@ HTTP 200 and the UCP envelope containing `messages`:
   "messages": [
     {
       "type": "error",
-      "code": "NOT_FOUND",
+      "code": "not_found",
       "content": "Cart not found or has expired"
     }
   ],
