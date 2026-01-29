@@ -1470,6 +1470,7 @@ dev = [
     { name = "mkdocs-material", extra = ["imaging"] },
     { name = "mkdocs-redirects" },
     { name = "mkdocs-site-urls" },
+    { name = "pyyaml" },
     { name = "yamllint" },
 ]
 
@@ -1484,6 +1485,7 @@ dev = [
     { name = "mkdocs-material", extras = ["imaging"], specifier = ">=9.0.0" },
     { name = "mkdocs-redirects", specifier = "==1.2.2" },
     { name = "mkdocs-site-urls", specifier = "==0.3.1" },
+    { name = "pyyaml", specifier = ">=6.0.3" },
     { name = "yamllint", specifier = "==1.35.1" },
 ]
 

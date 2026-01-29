@@ -43,6 +43,9 @@
             "$ref": "#/components/parameters/user_agent"
           },
           {
+            "$ref": "#/components/parameters/ucp_agent"
+          },
+          {
             "$ref": "#/components/parameters/content_type"
           },
           {
@@ -107,6 +110,9 @@
             "$ref": "#/components/parameters/user_agent"
           },
           {
+            "$ref": "#/components/parameters/ucp_agent"
+          },
+          {
             "$ref": "#/components/parameters/content_type"
           },
           {
@@ -159,6 +165,9 @@
           },
           {
             "$ref": "#/components/parameters/user_agent"
+          },
+          {
+            "$ref": "#/components/parameters/ucp_agent"
           },
           {
             "$ref": "#/components/parameters/content_type"
@@ -226,6 +235,9 @@
           },
           {
             "$ref": "#/components/parameters/user_agent"
+          },
+          {
+            "$ref": "#/components/parameters/ucp_agent"
           },
           {
             "$ref": "#/components/parameters/content_type"
@@ -306,6 +318,9 @@
           },
           {
             "$ref": "#/components/parameters/user_agent"
+          },
+          {
+            "$ref": "#/components/parameters/ucp_agent"
           },
           {
             "$ref": "#/components/parameters/content_type"
@@ -393,6 +408,7 @@
           { "$ref": "#/components/parameters/request_signature" },
           { "$ref": "#/components/parameters/request_id" },
           { "$ref": "#/components/parameters/user_agent" },
+          { "$ref": "#/components/parameters/ucp_agent" },
           { "$ref": "#/components/parameters/content_type" },
           { "$ref": "#/components/parameters/accept" },
           { "$ref": "#/components/parameters/accept_language" },
@@ -426,6 +442,7 @@
           { "$ref": "#/components/parameters/idempotency_key" },
           { "$ref": "#/components/parameters/request_id" },
           { "$ref": "#/components/parameters/user_agent" },
+          { "$ref": "#/components/parameters/ucp_agent" },
           { "$ref": "#/components/parameters/content_type" },
           { "$ref": "#/components/parameters/accept" },
           { "$ref": "#/components/parameters/accept_language" },
@@ -469,6 +486,7 @@
           { "$ref": "#/components/parameters/idempotency_key" },
           { "$ref": "#/components/parameters/request_id" },
           { "$ref": "#/components/parameters/user_agent" },
+          { "$ref": "#/components/parameters/ucp_agent" },
           { "$ref": "#/components/parameters/content_type" },
           { "$ref": "#/components/parameters/accept" },
           { "$ref": "#/components/parameters/accept_language" },
@@ -623,6 +641,15 @@
           "type": "string"
         },
         "description": "Identifies the user agent string making the call."
+      },
+      "ucp_agent": {
+        "name": "UCP-Agent",
+        "in": "header",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "description": "Identifies the UCP agent making the call. All requests MUST include the UCP-Agent header containing the platform profile URI using Dictionary Structured Field syntax (RFC 8941). Format: profile=\"https://platform.example/profile\"."
       },
       "content_type": {
         "name": "Content-Type",
