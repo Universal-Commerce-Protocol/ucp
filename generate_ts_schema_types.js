@@ -2,7 +2,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { compile } = require('json-schema-to-typescript');
 
-const SOURCE_ROOT = path.resolve(__dirname, 'spec');
+const SOURCE_ROOT = path.resolve(__dirname, 'source');
 const OUTPUT_FILE = path.resolve(__dirname, './generated/schema-types.ts');
 const WRAPPER_NAME = 'SCHEMA_WRAPPER';
 
@@ -16,17 +16,30 @@ async function generate() {
 
   const properties = {};
 
-  // Add shopping schemas
-  const shoppingDir = path.join(SOURCE_ROOT, 'schemas/shopping');
-  if (fs.existsSync(shoppingDir)) {
-    for (const file of fs.readdirSync(shoppingDir)) {
-      if (file.endsWith('.json')) {
-        properties[path.basename(file, '.json')] = {
-          $ref: path.join(shoppingDir, file)
-        };
+  const addSchemasFromDir = (dir, prefix = '') => {
+    if (fs.existsSync(dir)) {
+      for (const file of fs.readdirSync(dir)) {
+        const fullPath = path.join(dir, file);
+        const stat = fs.statSync(fullPath);
+        if (stat.isDirectory()) {
+          // Skip types directory as they are pulled in by refs
+          continue;
+        } else if (file.endsWith('.json')) {
+          const name = (prefix + path.basename(file, '.json')).replace(/[-.]/g, '_');
+          properties[name] = { $ref: fullPath };
+        }
       }
     }
-  }
+  };
+
+  // Add core schemas
+  addSchemasFromDir(path.join(SOURCE_ROOT, 'schemas'));
+  // Add transport schemas
+  addSchemasFromDir(path.join(SOURCE_ROOT, 'schemas/transports'), 'transport_');
+  // Add shopping schemas
+  addSchemasFromDir(path.join(SOURCE_ROOT, 'schemas/shopping'));
+  // Add discovery schemas
+  addSchemasFromDir(path.join(SOURCE_ROOT, 'discovery'));
 
   // Add handler schemas
   const handlersDir = path.join(SOURCE_ROOT, 'handlers');
@@ -34,13 +47,18 @@ async function generate() {
     for (const handler of fs.readdirSync(handlersDir)) {
       const handlerPath = path.join(handlersDir, handler);
       if (fs.statSync(handlerPath).isDirectory()) {
-        for (const file of fs.readdirSync(handlerPath)) {
-          if (file.endsWith('.json')) {
-            const name =
-                `${handler}_${path.basename(file, '.json')}`.replace(/-/g, '_');
-            properties[name] = {$ref: path.join(handlerPath, file)};
-          }
-        }
+        addSchemasFromDir(handlerPath, `${handler}_`);
+      }
+    }
+  }
+
+  // Add service schemas
+  const servicesDir = path.join(SOURCE_ROOT, 'services');
+  if (fs.existsSync(servicesDir)) {
+    for (const service of fs.readdirSync(servicesDir)) {
+      const servicePath = path.join(servicesDir, service);
+      if (fs.statSync(servicePath).isDirectory()) {
+        addSchemasFromDir(servicePath, `${service}_`);
       }
     }
   }
