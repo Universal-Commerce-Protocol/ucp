@@ -178,7 +178,7 @@ When a product is available but has delayed fulfillment, return the product with
   "messages": [
     {
       "type": "warning",
-      "code": "DELAYED_FULFILLMENT",
+      "code": "delayed_fulfillment",
       "path": "$.product.variants[0]",
       "content": "12-piece set on backorder, ships in 2-3 weeks"
     }
@@ -198,7 +198,7 @@ When a requested product/variant ID doesn't exist, return success with an error 
   "messages": [
     {
       "type": "error",
-      "code": "NOT_FOUND",
+      "code": "not_found",
       "content": "The requested product ID does not exist",
       "severity": "recoverable"
     }

@@ -9,7 +9,22 @@
   "$defs": {
     "lookup_request": {
       "type": "object",
+      "description": "Context for GET /catalog/item/{id} (id provided in path).",
       "properties": {
+        "context": {
+          "$ref": "types/context.json"
+        }
+      }
+    },
+    "lookup_post_request": {
+      "type": "object",
+      "description": "Request for POST /catalog/lookup with explicit context.",
+      "required": ["id"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Product or variant ID."
+        },
         "context": {
           "$ref": "types/context.json"
         }

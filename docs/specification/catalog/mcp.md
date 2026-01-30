@@ -366,7 +366,7 @@ for message semantics and common scenarios.
       "messages": [
         {
           "type": "error",
-          "code": "NOT_FOUND",
+          "code": "not_found",
           "content": "The requested product ID does not exist",
           "severity": "recoverable"
         }
