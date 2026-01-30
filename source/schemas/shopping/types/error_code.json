@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/error_code.json",
+  "title": "Error Code",
+  "description": "Error code identifying the type of error. First-class errors have standardized semantics; freeform codes are also permitted.",
+  "oneOf": [
+    {
+      "const": "out_of_stock",
+      "description": "Specific item or variant is unavailable."
+    },
+    {
+      "const": "item_unavailable",
+      "description": "Item cannot be purchased (e.g., delisted)."
+    },
+    {
+      "const": "address_undeliverable",
+      "description": "Cannot deliver to the provided address."
+    },
+    {
+      "const": "payment_failed",
+      "description": "Payment processing failed."
+    },
+    {
+      "type": "string",
+      "description": "Other error codes: missing, invalid, payment_declined, requires_sign_in, requires_3ds, requires_identity_linking, or any freeform code."
+    }
+  ]
+}

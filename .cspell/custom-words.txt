@@ -81,3 +81,4 @@ upsells
 vulnz
 yaml
 yml
+delisted
