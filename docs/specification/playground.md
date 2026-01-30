@@ -961,7 +961,7 @@ class UcpApp {
   }
 
   prepareUpdatePayload(checkoutResponse) {
-    const patch = { id: checkoutResponse.id };
+    const patch = {};
     const errors = checkoutResponse.messages || [];
 
     if (errors.some(e => e.path === "$.buyer.email")) {

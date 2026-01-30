@@ -23,11 +23,7 @@
     "id": {
       "type": "string",
       "description": "Unique identifier of the checkout session.",
-      "ucp_request": {
-        "create": "omit",
-        "update": "required",
-        "complete": "omit"
-      }
+      "ucp_request": "omit"
     },
     "line_items": {
       "type": "array",
