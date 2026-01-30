@@ -72,7 +72,9 @@ currency; response prices include explicit currency codes.
 
 A catalog item representing a sellable item with one or more purchasable variants.
 
-`media` and `variants` are ordered arrays. Businesses SHOULD return the most relevant variant and image first—default for lookups, best match based on query and context for search. Platforms SHOULD treat the first element as featured.
+`media` and `variants` are ordered arrays. Businesses SHOULD return the most
+relevant variant and image first—default for lookups, best match based on query
+and context for search. Platforms SHOULD treat the first element as featured.
 
 {{ schema_fields('types/product', 'catalog') }}
 
