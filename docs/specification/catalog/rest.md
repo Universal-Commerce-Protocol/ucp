@@ -14,10 +14,10 @@
    limitations under the License.
 -->
 
-# Catalog Capability - REST Binding
+# Catalog - REST Binding
 
 This document specifies the HTTP/REST binding for the
-[Catalog Capability](catalog.md).
+[Catalog Capability](index.md).
 
 ## Protocol Fundamentals
 
@@ -42,10 +42,16 @@ Businesses advertise REST transport availability through their UCP profile at
     },
     "capabilities": [
       {
-        "name": "dev.ucp.shopping.catalog",
+        "name": "dev.ucp.shopping.catalog.search",
         "version": "2026-01-11",
-        "spec": "https://ucp.dev/specification/catalog",
-        "schema": "https://ucp.dev/schemas/shopping/catalog.json"
+        "spec": "https://ucp.dev/specification/catalog/search",
+        "schema": "https://ucp.dev/schemas/shopping/catalog_search.json"
+      },
+      {
+        "name": "dev.ucp.shopping.catalog.lookup",
+        "version": "2026-01-11",
+        "spec": "https://ucp.dev/specification/catalog/lookup",
+        "schema": "https://ucp.dev/schemas/shopping/catalog_lookup.json"
       }
     ]
   }
@@ -54,14 +60,14 @@ Businesses advertise REST transport availability through their UCP profile at
 
 ## Endpoints
 
-| Endpoint | Method | Operation | Description |
+| Endpoint | Method | Capability | Description |
 | :--- | :--- | :--- | :--- |
-| `/catalog/search` | POST | [Search Catalog](catalog.md#search-catalog) | Search for products. |
-| `/catalog/item/{id}` | GET | [Get Catalog Item](catalog.md#get-catalog-item) | Get a product or variant by ID. |
+| `/catalog/search` | POST | [Search](search.md) | Search for products. |
+| `/catalog/item/{id}` | GET | [Lookup](lookup.md) | Get a product or variant by ID. |
 
 ### `POST /catalog/search`
 
-Maps to the [Search Catalog](catalog.md#search-catalog) operation.
+Maps to the [Catalog Search](search.md) capability.
 
 {{ method_fields('search_catalog', 'rest.openapi.json', 'catalog-rest') }}
 
@@ -97,7 +103,7 @@ Maps to the [Search Catalog](catalog.md#search-catalog) operation.
         "version": "2026-01-11",
         "capabilities": [
           {
-            "name": "dev.ucp.shopping.catalog",
+            "name": "dev.ucp.shopping.catalog.search",
             "version": "2026-01-11"
           }
         ]
@@ -173,7 +179,7 @@ Maps to the [Search Catalog](catalog.md#search-catalog) operation.
 
 ### `GET /catalog/item/{id}`
 
-Maps to the [Get Catalog Item](catalog.md#get-catalog-item) operation.
+Maps to the [Catalog Lookup](lookup.md) capability.
 
 The `id` path parameter accepts either a product ID or variant ID. The response
 MUST return the parent product with full context. For product ID lookups,
@@ -181,7 +187,7 @@ MUST return the parent product with full context. For product ID lookups,
 buyer context or other criteria). For variant ID lookups, `variants` MUST contain
 only the requested variant.
 
-{{ method_fields('get_catalog_item', 'rest.openapi.json', 'catalog-rest') }}
+{{ method_fields('lookup_catalog', 'rest.openapi.json', 'catalog-rest') }}
 
 #### Example
 
@@ -207,7 +213,7 @@ only the requested variant.
         "version": "2026-01-11",
         "capabilities": [
           {
-            "name": "dev.ucp.shopping.catalog",
+            "name": "dev.ucp.shopping.catalog.lookup",
             "version": "2026-01-11"
           }
         ]
@@ -268,10 +274,10 @@ Use HTTP status codes for protocol-level issues that prevent request processing:
 ### Business Outcomes
 
 All application-level outcomes return HTTP 200 with the UCP envelope and optional
-`messages` array. See [Catalog Capability](catalog.md#messages-and-error-handling)
+`messages` array. See [Catalog Overview](index.md#messages-and-error-handling)
 for message semantics and common scenarios.
 
-**Example: Product Not Found**
+#### Example: Product Not Found
 
 ```json
 {
@@ -279,7 +285,7 @@ for message semantics and common scenarios.
     "version": "2026-01-11",
     "capabilities": [
       {
-        "name": "dev.ucp.shopping.catalog",
+        "name": "dev.ucp.shopping.catalog.lookup",
         "version": "2026-01-11"
       }
     ]

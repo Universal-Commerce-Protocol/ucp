@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/catalog_lookup.json",
+  "name": "dev.ucp.shopping.catalog.lookup",
+  "version": "2026-01-11",
+  "title": "Catalog Lookup",
+  "description": "Product/variant lookup by ID capability.",
+  "type": "object",
+  "$defs": {
+    "lookup_request": {
+      "type": "object",
+      "properties": {
+        "context": {
+          "$ref": "types/context.json"
+        }
+      }
+    },
+    "lookup_response": {
+      "type": "object",
+      "required": [
+        "ucp"
+      ],
+      "properties": {
+        "ucp": {
+          "$ref": "../ucp.json#/$defs/response_catalog_schema"
+        },
+        "product": {
+          "$ref": "types/product.json",
+          "description": "The product containing the requested ID. For product ID lookups, variants may contain a representative set. For variant ID lookups, variants contains only the requested variant."
+        },
+        "messages": {
+          "type": "array",
+          "items": {
+            "$ref": "types/message.json"
+          },
+          "description": "Errors, warnings, or informational messages about the requested item."
+        }
+      }
+    }
+  }
+}

@@ -45,9 +45,11 @@ nav:
       - HTTP/REST Binding: specification/cart-rest.md
       - MCP Binding: specification/cart-mcp.md
     - Catalog Capability:
-      - Overview: specification/catalog.md
-      - HTTP/REST Binding: specification/catalog-rest.md
-      - MCP Binding: specification/catalog-mcp.md
+      - Overview: specification/catalog/index.md
+      - Search: specification/catalog/search.md
+      - Lookup: specification/catalog/lookup.md
+      - HTTP/REST Binding: specification/catalog/rest.md
+      - MCP Binding: specification/catalog/mcp.md
     - Order Capability: specification/order.md
     - Identity Linking Capability: specification/identity-linking.md
     - Payment Handlers:
@@ -221,9 +223,11 @@ plugins:
           - specification/cart-rest.md
           - specification/cart-mcp.md
         Catalog Capability:
-          - specification/catalog.md
-          - specification/catalog-rest.md
-          - specification/catalog-mcp.md
+          - specification/catalog/index.md
+          - specification/catalog/search.md
+          - specification/catalog/lookup.md
+          - specification/catalog/rest.md
+          - specification/catalog/mcp.md
         Order Capability:
           - specification/order.md
         Identity Linking Capability:

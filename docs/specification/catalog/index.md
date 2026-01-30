@@ -16,92 +16,49 @@
 
 # Catalog Capability
 
-* **Capability Name:** `dev.ucp.shopping.catalog`
-* **Version:** `DRAFT`
-
 ## Overview
 
-Allows platforms to search and browse business product catalogs. This capability
-enables product discovery before checkout, supporting use cases like:
+The Catalog capability allows platforms to search and browse business product catalogs.
+This enables product discovery before checkout, supporting use cases like:
 
 * Free-text product search
 * Category and filter-based browsing
 * Direct product/variant retrieval by ID
 * Price comparison across variants
 
-**Key Concepts**
+## Capabilities
 
-* **Product**: A catalog entry with title, description, media, and one or more
+| Capability | Description |
+| :--- | :--- |
+| [`dev.ucp.shopping.catalog.search`](search.md) | Search for products using query text and filters. |
+| [`dev.ucp.shopping.catalog.lookup`](lookup.md) | Retrieve a specific product or variant by ID. |
+
+## Key Concepts
+
+* **Product**: A catalog item with title, description, media, and one or more
   variants.
-* **Variant**: A purchasable SKU with specific option selections (e.g., "Blue /
+* **Variant**: A purchasable item with specific option selections (e.g., "Blue /
   Large"), price, and availability.
 * **Price**: Price values include both amount (in minor currency units) and
   currency code, enabling multi-currency catalogs.
 
-**Relationship to Checkout**
+### Relationship to Checkout
 
 Catalog operations return product and variant IDs that can be used directly in
 checkout `line_items[].item.id`. The variant ID from catalog retrieval should match
 the item ID expected by checkout.
 
-## Operations
-
-The Catalog capability defines the following logical operations.
-
-| Operation | Description |
-| :--- | :--- |
-| **Search Catalog** | Search for products using query text and filters. |
-| **Get Catalog Item** | Retrieve a specific product or variant by ID. |
-
-### Search Catalog
-
-Performs a search against the business's product catalog. Supports free-text
-queries, filtering by category and price, and pagination.
-
-**Use Cases:**
-
-* User searches for "blue running shoes"
-* Agent browses products in a category
-* Platform fetches featured or trending products
-
-{{ method_fields('search_catalog', 'rest.openapi.json', 'catalog') }}
-
-### Get Catalog Item
-
-Retrieves a specific product or variant by its Global ID (GID). Use this when
-you already have an ID (e.g., from a saved list, deep link, or cart validation).
-
-**Use Cases:**
-
-* Validating cart items before checkout
-* Fetching full product details from a product ID
-* Resolving variant details for display
-
-**ID Resolution Behavior:**
-
-The `id` parameter accepts either a product ID or variant ID. The response MUST
-return the parent product with full context (title, description, media, options):
-
-* **Product ID lookup**: `variants` MAY contain a representative set.
-* **Variant ID lookup**: `variants` MUST contain only the requested variant.
-
-When the full variant set is large, a representative set MAY be returned based on
-buyer context or other criteria. This ensures agents always have product context
-for display while getting exactly what they requested.
-
-{{ method_fields('get_catalog_item', 'rest.openapi.json', 'catalog') }}
-
-## Entities
+## Shared Entities
 
 ### Context
 
 Location and market context for catalog operations. All fields are optional. Platforms MAY geo-detect context from request IP/headers. When context fields are provided, they MUST override any auto-detected values.
 
-{{ extension_schema_fields('catalog.json#/$defs/context', 'catalog') }}
+{{ schema_fields('types/context', 'catalog') }}
 
 ### Product
 
-A catalog entry representing a sellable item with one or more purchasable variants.
+A catalog item representing a sellable item with one or more purchasable variants.
 
 `media` and `variants` are ordered arrays. Businesses SHOULD return the featured
 image and default variant as the first element. Platforms SHOULD treat the first
@@ -111,7 +68,7 @@ element as the featured item for display.
 
 ### Variant
 
-A purchasable SKU with specific option selections, price, and availability.
+A purchasable item with specific option selections, price, and availability.
 
 `media` is an ordered array. Businesses SHOULD return the featured variant image
 as the first element. Platforms SHOULD treat the first element as featured.
@@ -146,29 +103,6 @@ as the first element. Platforms SHOULD treat the first element as featured.
 
 {{ schema_fields('types/rating', 'catalog') }}
 
-### Search Filters
-
-Filter criteria for narrowing search results. Standard filters are defined below;
-merchants MAY support additional custom filters via `additionalProperties`.
-
-{{ schema_fields('types/search_filters', 'catalog') }}
-
-### Price Filter
-
-{{ schema_fields('types/price_filter', 'catalog') }}
-
-### Pagination
-
-Cursor-based pagination for list operations.
-
-#### Pagination Request
-
-{{ extension_schema_fields('types/pagination.json#/$defs/request', 'catalog') }}
-
-#### Pagination Response
-
-{{ extension_schema_fields('types/pagination.json#/$defs/response', 'catalog') }}
-
 ## Messages and Error Handling
 
 All catalog responses include an optional `messages` array that allows businesses
@@ -200,7 +134,7 @@ Messages communicate business outcomes and provide context:
 
 ### Common Scenarios
 
-**Empty Search**
+#### Empty Search
 
 When search finds no matches, return an empty array without messages.
 
@@ -211,9 +145,9 @@ When search finds no matches, return an empty array without messages.
 }
 ```
 
-This is not an error—the query was valid but returned no results.
+This is not an error - the query was valid but returned no results.
 
-**Backorder Warning**
+#### Backorder Warning
 
 When a product is available but has delayed fulfillment, return the product with a warning message. Use the `path` field to target specific variants.
 
@@ -246,7 +180,7 @@ When a product is available but has delayed fulfillment, return the product with
 
 Agents can present the option and inform the user about the delay. The `path` field uses RFC 9535 JSONPath to target specific components.
 
-**Product Not Found**
+#### Product Not Found
 
 When a requested product/variant ID doesn't exist, return success with an error message and omit the `product` field.
 
@@ -268,8 +202,7 @@ Agents should handle this gracefully (e.g., ask user for a different product).
 
 ## Transport Bindings
 
-The abstract operations above are bound to specific transport protocols as
-defined below:
+The capabilities above are bound to specific transport protocols:
 
-* [REST Binding](catalog-rest.md): RESTful API mapping.
-* [MCP Binding](catalog-mcp.md): Model Context Protocol mapping via JSONRPC.
+* [REST Binding](rest.md): RESTful API mapping.
+* [MCP Binding](mcp.md): Model Context Protocol mapping via JSON-RPC.

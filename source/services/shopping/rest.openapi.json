@@ -590,6 +590,7 @@
           { "$ref": "#/components/parameters/request_signature" },
           { "$ref": "#/components/parameters/request_id" },
           { "$ref": "#/components/parameters/user_agent" },
+          { "$ref": "#/components/parameters/ucp_agent" },
           { "$ref": "#/components/parameters/content_type" },
           { "$ref": "#/components/parameters/accept" },
           { "$ref": "#/components/parameters/accept_language" },
@@ -617,9 +618,9 @@
     },
     "/catalog/item/{id}": {
       "get": {
-        "operationId": "get_catalog_item",
-        "summary": "Get Catalog Item",
-        "description": "Get a product or variant by ID. Returns the parent product with context.",
+        "operationId": "lookup_catalog",
+        "summary": "Lookup Catalog Item",
+        "description": "Look up a product or variant by ID. Returns the parent product with context. TODO: context?",
         "parameters": [
           {
             "name": "id",
@@ -633,6 +634,7 @@
           { "$ref": "#/components/parameters/request_signature" },
           { "$ref": "#/components/parameters/request_id" },
           { "$ref": "#/components/parameters/user_agent" },
+          { "$ref": "#/components/parameters/ucp_agent" },
           { "$ref": "#/components/parameters/accept" },
           { "$ref": "#/components/parameters/accept_language" },
           { "$ref": "#/components/parameters/accept_encoding" }
@@ -642,7 +644,7 @@
             "description": "Item details",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/catalog_get_item_response" }
+                "schema": { "$ref": "#/components/schemas/catalog_lookup_response" }
               }
             }
           }
@@ -889,6 +891,15 @@
       },
       "ucp": {
         "$ref": "../../schemas/ucp.json"
+      },
+      "catalog_search_request": {
+        "$ref": "../../schemas/shopping/catalog_search.json#/$defs/search_request"
+      },
+      "catalog_search_response": {
+        "$ref": "../../schemas/shopping/catalog_search.json#/$defs/search_response"
+      },
+      "catalog_lookup_response": {
+        "$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/lookup_response"
       }
     }
   }

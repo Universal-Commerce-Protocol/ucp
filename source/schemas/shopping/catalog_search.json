@@ -1,10 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/schemas/shopping/catalog.json",
-  "name": "dev.ucp.shopping.catalog",
+  "$id": "https://ucp.dev/schemas/shopping/catalog_search.json",
+  "name": "dev.ucp.shopping.catalog.search",
   "version": "2026-01-11",
-  "title": "Catalog",
-  "description": "Product catalog search and item retrieval capability.",
+  "title": "Catalog Search",
+  "description": "Product catalog search capability.",
   "type": "object",
   "$defs": {
     "search_request": {
@@ -52,28 +52,6 @@
             "$ref": "types/message.json"
           },
           "description": "Errors, warnings, or informational messages about the search results."
-        }
-      }
-    },
-    "get_item_response": {
-      "type": "object",
-      "required": [
-        "ucp"
-      ],
-      "properties": {
-        "ucp": {
-          "$ref": "../ucp.json#/$defs/response_catalog_schema"
-        },
-        "product": {
-          "$ref": "types/product.json",
-          "description": "The product containing the requested ID. For product ID lookups, variants may contain a representative set. For variant ID lookups, variants contains only the requested variant."
-        },
-        "messages": {
-          "type": "array",
-          "items": {
-            "$ref": "types/message.json"
-          },
-          "description": "Errors, warnings, or informational messages about the requested item."
         }
       }
     }
