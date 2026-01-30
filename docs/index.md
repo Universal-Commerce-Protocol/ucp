@@ -559,7 +559,7 @@ image: assets/banner.png
         <img src="assets/partner/endorsed/Ulta.svg" alt="Ulta" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
         <span>Ulta</span>
       </div>
-    <div class="partner-logo">
+      <div class="partner-logo">
         <img src="assets/partner/endorsed/Visa.svg" alt="Visa" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
         <span>Visa</span>
       </div>
@@ -570,6 +570,18 @@ image: assets/banner.png
       <div class="partner-logo">
         <img src="assets/partner/endorsed/Zalando.svg" alt="Zalando" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
         <span>Zalando</span>
+      </div>
+      <div class="partner-logo">
+        <img src="assets/partner/endorsed/Splitit.svg" alt="Splitit" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+        <span>Splitit</span>
+      </div>
+      <div class="partner-logo">
+        <img src="assets/partner/endorsed/Klarna.svg" alt="Klarna" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+        <span>Klarna</span>
+      </div>
+      <div class="partner-logo">
+        <img src="assets/partner/endorsed/Fiserv.svg" alt="Fiserv" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+        <span>Fiserv</span>
       </div>
       <div class="partner-logo">
         <img src="assets/partner/endorsed/Adyen.svg" alt="Adyen" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
@@ -651,7 +663,7 @@ image: assets/banner.png
         <img src="assets/partner/endorsed/Ulta.svg" alt="Ulta" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
         <span>Ulta</span>
       </div>
-    <div class="partner-logo">
+      <div class="partner-logo">
         <img src="assets/partner/endorsed/Visa.svg" alt="Visa" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
         <span>Visa</span>
       </div>
@@ -662,6 +674,18 @@ image: assets/banner.png
       <div class="partner-logo">
         <img src="assets/partner/endorsed/Zalando.svg" alt="Zalando" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
         <span>Zalando</span>
+      </div>
+      <div class="partner-logo">
+        <img src="assets/partner/endorsed/Splitit.svg" alt="Splitit" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+        <span>Splitit</span>
+      </div>
+      <div class="partner-logo">
+        <img src="assets/partner/endorsed/Klarna.svg" alt="Klarna" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+        <span>Klarna</span>
+      </div>
+      <div class="partner-logo">
+        <img src="assets/partner/endorsed/Fiserv.svg" alt="Fiserv" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+        <span>Fiserv</span>
       </div>
 
     </div>
