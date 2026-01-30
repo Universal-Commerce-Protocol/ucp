@@ -14,11 +14,13 @@ Credentialless
 Depot
 EWALLET
 Etsy
+Fiserv
 Flipkart
 Gap
 GitHub
 Google
 Gpay
+Klarna
 Kroger
 Lowe's
 Macy's
@@ -30,6 +32,7 @@ Queensway
 Sephora
 Shopify
 Shopee
+Splitit
 Stripe
 Target
 UCP
