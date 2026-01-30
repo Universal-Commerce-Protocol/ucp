@@ -196,6 +196,26 @@ ELSE IF requires_buyer_review is not empty
   handoff_context = "ready for final review by the buyer"
 ```
 
+#### Standard Errors
+
+Standard errors are standardized error codes that platforms are expected to
+handle with specific, appropriate UX rather than generic error treatment.
+
+| Code                     | Description                                                                |
+| :----------------------- | :------------------------------------------------------------------------- |
+| `out_of_stock`           | Specific item or variant is unavailable                                    |
+| `item_unavailable`       | Item cannot be purchased (e.g. delisted)                                   |
+| `address_undeliverable`  | Cannot deliver to the provided address                                     |
+| `payment_failed`         | Payment processing failed                                                  |
+
+Businesses **SHOULD** mark standard errors with `severity: recoverable` to
+signal that platforms should provide appropriate UX (out-of-stock messaging,
+address validation prompts, payment method changes) rather than generic error
+messages or deferring to checkout completion.
+
+Example: `out_of_stock` requires specific upfront UX, whereas
+`payment_required` can be handled generically at submission.
+
 ## Continue URL
 
 The `continue_url` field enables checkout handoff from platform to business UI,
