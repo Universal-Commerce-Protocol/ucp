@@ -52,7 +52,15 @@ the item ID expected by checkout.
 
 ### Context
 
-Location and market context for catalog operations. All fields are optional. Platforms MAY geo-detect context from request IP/headers. When context fields are provided, they MUST override any auto-detected values.
+Location and market context for catalog operations. All fields are optional.
+Platforms MAY geo-detect context from request IP/headers. When context fields
+are provided, they MUST override any auto-detected values.
+
+Context signals are provisional hints. Businesses SHOULD use these values when
+authoritative data (e.g., address) is absent, and MAY ignore unsupported values
+without returning errors. Businesses determine market assignment—including
+currency—based on context signals. Price filter values are interpreted in the
+business's assigned currency; response prices include explicit currency codes.
 
 {{ schema_fields('types/context', 'catalog') }}
 
