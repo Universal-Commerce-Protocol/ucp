@@ -198,6 +198,7 @@ only the requested variant.
 | `region` | Region/state within country (e.g., `CA`). Hint for localization. |
 | `postal_code` | Postal code (e.g., `94043`). Hint for regional refinement. |
 | `language` | BCP 47 language tag (e.g., `en`, `fr-CA`). Overrides `Accept-Language` header when provided. |
+| `currency` | ISO 4217 currency code (e.g., `EUR`, `USD`). Hint for multi-currency markets. |
 
 For full context control (including `intent`), use `POST /catalog/lookup`.
 
@@ -394,4 +395,4 @@ A conforming REST transport implementation **MUST**:
 3. Implement the `POST /catalog/lookup` endpoint with required `id` parameter.
 4. Return products with valid `Price` objects (amount + currency).
 5. Support cursor-based pagination with default limit of 10.
-6. Return HTTP 200 with `NOT_FOUND` message for item requests with unknown IDs.
+6. Return HTTP 200 with `not_found` message for item requests with unknown IDs.

@@ -18,7 +18,7 @@
     },
     "handle": {
       "type": "string",
-      "description": "URL-safe product handle/slug."
+      "description": "URL-safe slug for SEO-friendly URLs (e.g., 'blue-runner-pro'). Use id for stable API references."
     },
     "title": {
       "type": "string",
@@ -34,7 +34,7 @@
         },
         "html": {
           "type": "string",
-          "description": "HTML-formatted description."
+          "description": "HTML-formatted description. Security: Platforms MUST sanitize before rendering—strip scripts, event handlers, and untrusted elements. Treat all rich text as untrusted input."
         },
         "markdown": {
           "type": "string",

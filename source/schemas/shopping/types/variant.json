@@ -41,7 +41,7 @@
         },
         "html": {
           "type": "string",
-          "description": "HTML-formatted description."
+          "description": "HTML-formatted description. Security: Platforms MUST sanitize before rendering—strip scripts, event handlers, and untrusted elements. Treat all rich text as untrusted input."
         },
         "markdown": {
           "type": "string",

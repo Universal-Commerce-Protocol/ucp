@@ -52,15 +52,19 @@ the item ID expected by checkout.
 
 ### Context
 
-Location and market context for catalog operations. All fields are optional.
-Platforms MAY geo-detect context from request IP/headers. When context fields
-are provided, they MUST override any auto-detected values.
+Location and market context for catalog operations. All fields are optional
+hints for relevance and localization. Platforms MAY geo-detect context from
+request headers.
 
-Context signals are provisional hints. Businesses SHOULD use these values when
-authoritative data (e.g., address) is absent, and MAY ignore unsupported values
-without returning errors. Businesses determine market assignment—including
-currency—based on context signals. Price filter values are interpreted in the
-business's assigned currency; response prices include explicit currency codes.
+Context signals are provisional—not authorization. Businesses SHOULD use these
+values when authoritative data (e.g., shipping address) is absent, and MAY
+ignore or down-rank them if inconsistent with stronger signals (authenticated
+account, fraud rules, export controls). Eligibility and policy enforcement
+MUST occur at checkout/order time with authoritative data.
+
+Businesses determine market assignment—including currency—based on context
+signals. Price filter values are interpreted in the business's assigned
+currency; response prices include explicit currency codes.
 
 {{ schema_fields('types/context', 'catalog') }}
 
@@ -68,9 +72,7 @@ business's assigned currency; response prices include explicit currency codes.
 
 A catalog item representing a sellable item with one or more purchasable variants.
 
-`media` and `variants` are ordered arrays. Businesses SHOULD return the featured
-image and default variant as the first element. Platforms SHOULD treat the first
-element as the featured item for display.
+`media` and `variants` are ordered arrays. Businesses SHOULD return the most relevant variant and image first—default for lookups, best match based on query and context for search. Platforms SHOULD treat the first element as featured.
 
 {{ schema_fields('types/product', 'catalog') }}
 
@@ -165,6 +167,11 @@ When a product is available but has delayed fulfillment, return the product with
   "product": {
     "id": "prod_xyz789",
     "title": "Professional Chef Knife Set",
+    "description": { "plain": "Complete professional knife collection." },
+    "price": {
+      "min": { "amount": 29900, "currency": "USD" },
+      "max": { "amount": 29900, "currency": "USD" }
+    },
     "variants": [
       {
         "id": "var_abc",

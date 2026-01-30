@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/shopping/types/price_filter.json",
   "title": "Price Filter",
-  "description": "Price range filter in minor currency units. Currency determined by context.",
+  "description": "Price range filter in minor currency units. Merchant determines currency from context (e.g., country=US → USD). Response prices include explicit currency.",
   "type": "object",
   "properties": {
     "min": {

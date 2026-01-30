@@ -657,6 +657,13 @@
             "schema": { "type": "string" },
             "description": "BCP 47 language tag (e.g., 'en', 'fr-CA'). Overrides Accept-Language header when provided."
           },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string" },
+            "description": "ISO 4217 currency code (e.g., 'EUR', 'USD'). Hint for multi-currency markets."
+          },
           { "$ref": "#/components/parameters/authorization" },
           { "$ref": "#/components/parameters/x_api_key" },
           { "$ref": "#/components/parameters/request_signature" },

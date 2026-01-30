@@ -14,6 +14,12 @@
       "minimum": 0,
       "description": "Average rating value."
     },
+    "scale_min": {
+      "type": "number",
+      "minimum": 0,
+      "default": 1,
+      "description": "Minimum value on the rating scale (e.g., 1 for 1-5 stars)."
+    },
     "scale_max": {
       "type": "number",
       "minimum": 1,
