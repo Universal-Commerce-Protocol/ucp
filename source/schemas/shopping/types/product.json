@@ -8,7 +8,7 @@
     "id",
     "title",
     "description",
-    "price",
+    "price_range",
     "variants"
   ],
   "properties": {
@@ -52,11 +52,11 @@
       "type": "string",
       "description": "Category: taxonomy path (e.g., 'Apparel > Shirts') or merchant-defined type (e.g., 'Premium Tee')."
     },
-    "price": {
+    "price_range": {
       "$ref": "price_range.json",
       "description": "Price range across all variants."
     },
-    "list_price": {
+    "list_price_range": {
       "$ref": "price_range.json",
       "description": "List price range before discounts (for strikethrough display)."
     },
