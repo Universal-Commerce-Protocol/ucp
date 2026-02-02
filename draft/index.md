@@ -278,15 +278,21 @@ Ant International
 
 Best Buy
 
+Block
+
 Carrefour
 
 Chewy
 
 Commerce
 
+Fiserv
+
 Flipkart
 
 Gap
+
+Klarna
 
 Kroger
 
@@ -303,6 +309,8 @@ Salesforce
 Sephora
 
 Shopee
+
+Splitit
 
 Stripe
 
@@ -324,15 +332,21 @@ Ant International
 
 Best Buy
 
+Block
+
 Carrefour
 
 Chewy
 
 Commerce
 
+Fiserv
+
 Flipkart
 
 Gap
+
+Klarna
 
 Kroger
 
@@ -349,6 +363,8 @@ Salesforce
 Sephora
 
 Shopee
+
+Splitit
 
 Stripe
 
