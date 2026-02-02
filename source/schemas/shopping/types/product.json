@@ -49,8 +49,11 @@
       "description": "Canonical product page URL."
     },
     "category": {
-      "type": "string",
-      "description": "Category: taxonomy path (e.g., 'Apparel > Shirts') or merchant-defined type (e.g., 'Premium Tee')."
+      "type": "array",
+      "items": {
+        "$ref": "category.json"
+      },
+      "description": "Product categories with optional taxonomy identifiers."
     },
     "price_range": {
       "$ref": "price_range.json",
