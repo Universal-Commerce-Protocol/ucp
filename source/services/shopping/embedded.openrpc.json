@@ -52,6 +52,38 @@
     },
 
     {
+      "name": "ec.auth",
+      "summary": "Authorization exchange between host & business.",
+      "description": "Augments Embedded Checkout Protocol by doing auth exchanges per business requirement. Can be used by business to request initial authorization during handshake or refresh a previously exchanged authorization.",
+      "params": [
+        {
+          "name": "type",
+          "description": "The type of authorization business is requesting from the host.",
+          "type": "string",
+          "enum": ["api_key", "oauth"]
+        }
+      ],
+      "result": {
+        "name": "authResult",
+        "schema": {
+          "type": "object",
+          "description": "Auth response from host containing the requested authorization and optional checkout state.",
+          "required": ["authorization"],
+          "properties": {
+            "authorization": {
+              "type": "string",
+              "description": "Requested authorization. Some common examples include API key and OAuth token."
+            },
+            "cart": {
+              "$ref": "../../schemas/shopping/checkout.json",
+              "description": "Optional checkout state known to the host."
+            }
+          }
+        }
+      }
+    },
+
+    {
       "name": "ec.start",
       "summary": "Checkout visible to buyer",
       "description": "Merchant notifies host that checkout UI is visible and ready for interaction. Sent after successful ec.ready handshake.",
@@ -237,6 +269,217 @@
           }
         }
       }
+    },
+
+    {
+      "name": "ect.ready",
+      "summary": "Handshake from business to host",
+      "description": "Initiates the Embedded Cart Protocol. Business declares which delegation it supports, host responds with optional channel upgrade and initial cart state.",
+      "params": [
+        {
+          "name": "delegate",
+          "required": true,
+          "schema": {
+            "type": "array",
+            "description": "Delegation types the merchant accepts.",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z_]+(?:\\.[a-z_]+)*$"
+            },
+            "uniqueItems": true
+          }
+        }
+      ],
+      "result": {
+        "name": "readyResult",
+        "schema": {
+          "type": "object",
+          "description": "Handshake response from host.",
+          "properties": {
+            "upgrade": {
+              "type": "object",
+              "description": "Channel upgrade instructions. If present, switch to provided MessagePort.",
+              "properties": {
+                "port": {
+                  "type": "object",
+                  "description": "MessagePort for upgraded channel. Runtime type is MessagePort."
+                }
+              }
+            },
+            "cart": {
+              "$ref": "../../schemas/shopping/cart.json",
+              "description": "Optional cart state with host-provided data (line_items)."
+            }
+          }
+        }
+      }
+    },
+
+    {
+      "name": "ect.auth",
+      "summary": "Authorization exchange between host & business.",
+      "description": "Augments Embedded Cart Protocol by doing auth exchanges per business requirement. Can be used by business to request initial authorization during handshake or refresh a previously exchanged authorization.",
+      "params": [
+        {
+          "name": "type",
+          "description": "The type of authorization business is requesting from the host.",
+          "type": "string",
+          "enum": ["api_key", "oauth"]
+        }
+      ],
+      "result": {
+        "name": "authResult",
+        "schema": {
+          "type": "object",
+          "description": "Auth response from host containing the requested authorization and optional cart state.",
+          "required": ["authorization"],
+          "properties": {
+            "authorization": {
+              "type": "string",
+              "description": "Requested authorization. Some common examples include API key and OAuth token."
+            },
+            "cart": {
+              "$ref": "../../schemas/shopping/cart.json",
+              "description": "Optional cart state known to the host."
+            }
+          }
+        }
+      }
+    },
+
+    {
+      "name": "ect.start",
+      "summary": "Cart visible to buyer",
+      "description": "Business notifies host that checkout UI is visible and ready for interaction.",
+      "params": [
+        {
+          "name": "cart",
+          "required": true,
+          "schema": {
+            "$ref": "../../schemas/shopping/cart.json",
+            "description": "Current cart state."
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "ect.complete",
+      "summary": "Cart completed successfully",
+      "description": "Business notifies host that cart building has completed.",
+      "params": [
+        {
+          "name": "cart",
+          "required": true,
+          "schema": {
+            "$ref": "../../schemas/shopping/cart.json",
+            "description": "Final cart state."
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "ect.line_items.change_request",
+      "summary": "Request line item change validation",
+      "description": "Business notifies host that cart.line_items has changed (item added, removed, quantity updated) and requests host to validate change request.",
+      "params": [
+        {
+          "name": "cart",
+          "required": true,
+          "schema": {
+            "$ref": "../../schemas/shopping/cart.json",
+            "description": "Current cart state with updated line items."
+          }
+        }
+      ],
+      "result": {
+        "name": "changeResult",
+        "schema": {
+          "type": "object",
+          "description": "Cart state after line item update validation.",
+          "required": ["cart"],
+          "properties": {
+            "cart": {
+              "type": "object",
+              "description": "Partial cart update with line items.",
+              "properties": {
+                "line_items": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "types/line_item.json"
+                  },
+                  "description": "Cart line items after passing host validations."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    {
+      "name": "ect.line_items.change",
+      "summary": "Line items changed",
+      "description": "Business notifies host that cart.line_items has changed (item added, removed, quantity updated).",
+      "params": [
+        {
+          "name": "cart",
+          "required": true,
+          "schema": {
+            "$ref": "../../schemas/shopping/cart.json",
+            "description": "Current cart state with updated line items."
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "ect.buyer.change",
+      "summary": "Buyer information changed",
+      "description": "Business notifies host that cart.buyer has changed (email, phone, address updated).",
+      "params": [
+        {
+          "name": "cart",
+          "required": true,
+          "schema": {
+            "$ref": "../../schemas/shopping/cart.json",
+            "description": "Current cart state with updated buyer."
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "ect.context.change",
+      "summary": "Buyer context changed",
+      "description": "Business notifies host that cart.context (localization signals) has changed.",
+      "params": [
+        {
+          "name": "cart",
+          "required": true,
+          "schema": {
+            "$ref": "../../schemas/shopping/cart.json",
+            "description": "Current cart state with updated context."
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "ect.messages.change",
+      "summary": "Cart messages changed",
+      "description": "Business notifies host that cart.messages has changed. Includes errors, warnings, and info. Host should update UI accordingly.",
+      "params": [
+        {
+          "name": "cart",
+          "required": true,
+          "schema": {
+            "$ref": "../../schemas/shopping/cart.json",
+            "description": "Current cart state with updated messages."
+          }
+        }
+      ]
     }
   ],
   "x-delegations": ["payment.instruments_change", "payment.credential"]

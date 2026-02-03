@@ -91,3 +91,5 @@ worktree
 yaml
 yml
 keyid
+reauth
+reprepare
