@@ -70,7 +70,7 @@ different required fields in each context.
 
 As seen in discovery profiles.
 
-{{ extension_schema_fields('capability.json#/$defs/discovery', 'reference') }}
+{{ extension_schema_fields('capability.json#/$defs/platform_schema', 'reference') }}
 
 #### Capability (Response)
 

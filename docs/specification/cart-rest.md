@@ -88,7 +88,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
 #### Input Schema
 
-{{ schema_fields('cart.create_req', 'cart') }}
+{{ schema_fields('cart_create_req', 'cart') }}
 
 #### Output Schema
 
@@ -277,7 +277,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
 * `id` (String, required): The cart session ID (path parameter).
 
-{{ schema_fields('cart.update_req', 'cart') }}
+{{ schema_fields('cart_update_req', 'cart') }}
 
 #### Output Schema
 

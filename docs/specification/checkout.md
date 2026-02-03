@@ -374,17 +374,17 @@ require explicit validation and error feedback.
 
 ### Fulfillment Option
 
-{{ extension_schema_fields('fulfillment_resp.json#/$defs/fulfillment_option', 'checkout') }}
+{{ extension_schema_fields('fulfillment.json#/$defs/fulfillment_option', 'checkout') }}
 
 ### Item
 
 #### Item Create Request
 
-{{ schema_fields('types/item.create_req', 'checkout') }}
+{{ schema_fields('types/item_create_req', 'checkout') }}
 
 #### Item Update Request
 
-{{ schema_fields('types/item.update_req', 'checkout') }}
+{{ schema_fields('types/item_update_req', 'checkout') }}
 
 #### Item Response
 
@@ -394,11 +394,11 @@ require explicit validation and error feedback.
 
 #### Line Item Create Request
 
-{{ schema_fields('types/line_item.create_req', 'checkout') }}
+{{ schema_fields('types/line_item_create_req', 'checkout') }}
 
 #### Line Item Update Request
 
-{{ schema_fields('types/line_item.update_req', 'checkout') }}
+{{ schema_fields('types/line_item_update_req', 'checkout') }}
 
 #### Line Item Response
 

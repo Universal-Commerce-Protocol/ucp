@@ -160,7 +160,7 @@ functionality is supported and where to find documentation and schemas.
 
 #### Capability Definition
 
-{{ extension_schema_fields('capability.json#/$defs/discovery', 'capability-schema') }}
+{{ extension_schema_fields('capability.json#/$defs/platform_schema', 'capability-schema') }}
 
 #### Extensions
 

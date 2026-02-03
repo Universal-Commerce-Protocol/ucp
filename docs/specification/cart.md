@@ -166,11 +166,11 @@ consistent data structures when converting a cart to a checkout session.
 
 #### Line Item Create Request
 
-{{ schema_fields('types/line_item.create_req', 'checkout') }}
+{{ schema_fields('types/line_item_create_req', 'checkout') }}
 
 #### Line Item Update Request
 
-{{ schema_fields('types/line_item.update_req', 'checkout') }}
+{{ schema_fields('types/line_item_update_req', 'checkout') }}
 
 #### Line Item Response
 
