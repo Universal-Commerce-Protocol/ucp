@@ -703,6 +703,19 @@ def define_env(env):
         # Extract the $def from the bundled result
         embedded_schema_data = _resolve_json_pointer(def_path, bundled)
         if embedded_schema_data is not None:
+          # Resolve internal refs (like #/$defs/base) against the bundled root
+          # Inline logic to avoid module-level helper as requested
+          if "allOf" in embedded_schema_data:
+            new_all_of = []
+            for item in embedded_schema_data["allOf"]:
+              if "$ref" in item and item["$ref"].startswith("#/"):
+                resolved = _resolve_json_pointer(item["$ref"], bundled)
+                new_all_of.append(resolved if resolved else item)
+              else:
+                new_all_of.append(item)
+            embedded_schema_data = embedded_schema_data.copy()
+            embedded_schema_data["allOf"] = new_all_of
+
           return _render_table_from_schema(
             embedded_schema_data,
             spec_file_name,
