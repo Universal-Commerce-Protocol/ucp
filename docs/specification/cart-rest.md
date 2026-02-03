@@ -34,7 +34,7 @@ Businesses advertise REST transport availability through their UCP profile at
         "version": "2026-01-15",
         "spec": "https://ucp.dev/specification/overview",
         "rest": {
-          "schema": "https://ucp.dev/services/shopping/rest.openapi.json",
+          "schema": "https://ucp.dev/services/shopping/openapi.json",
           "endpoint": "https://business.example.com/ucp/v1"
         }
       }
@@ -461,7 +461,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 The following headers are defined for the HTTP binding and apply to all
 operations unless otherwise noted.
 
-{{ header_fields('create_cart', 'rest.openapi.json') }}
+{{ header_fields('create_cart', 'openapi.json') }}
 
 ### Specific Header Requirements
 
