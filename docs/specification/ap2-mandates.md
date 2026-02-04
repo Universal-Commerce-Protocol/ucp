@@ -72,16 +72,16 @@ Businesses declare support by adding `dev.ucp.shopping.ap2_mandate` to their
   "capabilities": {
     "dev.ucp.shopping.checkout": [
       {
-        "version": "2026-01-11",
+        "version": "2026-01-23",
         "spec": "https://ucp.dev/specification/checkout",
-        "schema": "https://ucp.dev/schemas/shopping/checkout.json"
+        "schema": "https://ucp.dev/2026-01-23/schemas/shopping/checkout.json"
       }
     ],
     "dev.ucp.shopping.ap2_mandate": [
       {
-        "version": "2026-01-11",
+        "version": "2026-01-23",
         "spec": "https://ucp.dev/specification/ap2-mandates",
-        "schema": "https://ucp.dev/schemas/shopping/ap2_mandate.json",
+        "schema": "https://ucp.dev/2026-01-23/schemas/shopping/ap2_mandate.json",
         "extends": "dev.ucp.shopping.checkout",
         "config": {
           "vp_formats_supported": {

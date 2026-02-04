@@ -195,12 +195,12 @@ credential type (e.g., PCI DSS for cards).
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "2026-01-23",
     "payment_handlers": {
       "com.example.platform_tokenizer": [
         {
           "id": "platform_wallet",
-          "version": "2026-01-11",
+          "version": "2026-01-23",
           "spec": "https://platform.example.com/ucp/handler.json",
           "schema": "https://platform.example.com/ucp/handler/schema.json",
           "config": {
@@ -308,12 +308,12 @@ registry using `platform_config`.
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "2026-01-23",
     "payment_handlers": {
       "com.example.platform_tokenizer": [
         {
           "id": "platform_wallet",
-          "version": "2026-01-11",
+          "version": "2026-01-23",
           "spec": "https://platform.example.com/ucp/handler.json",
           "schema": "https://platform.example.com/ucp/handler/schema.json",
           "config": {

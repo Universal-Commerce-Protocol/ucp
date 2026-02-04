@@ -111,12 +111,12 @@ The handler's specification (referenced via the `spec` field) documents the
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "2026-01-23",
     "payment_handlers": {
       "com.example.processor_tokenizer": [
         {
           "id": "processor_tokenizer",
-          "version": "2026-01-11",
+          "version": "2026-01-23",
           "spec": "https://example.com/ucp/processor-tokenizer.json",
           "schema": "https://example.com/ucp/processor-tokenizer/schema.json",
           "config": {
@@ -185,7 +185,7 @@ business's configuration.
       "com.example.processor_tokenizer": [
         {
           "id": "processor_tokenizer",
-          "version": "2026-01-11",
+          "version": "2026-01-23",
           "config": {
             "environment": "production",
             "business_id": "merchant_xyz789"

@@ -145,12 +145,12 @@ have their own compliance requirements.
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "2026-01-23",
     "payment_handlers": {
       "com.example.platform_encrypted": [
         {
           "id": "platform_encrypted",
-          "version": "2026-01-11",
+          "version": "2026-01-23",
           "spec": "https://platform.example.com/ucp/encrypted-handler.json",
           "schema": "https://platform.example.com/ucp/encrypted-handler/schema.json",
           "config": {
@@ -237,12 +237,12 @@ registry using `platform_config`.
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "2026-01-23",
     "payment_handlers": {
       "com.example.platform_encrypted": [
         {
           "id": "platform_encrypted",
-          "version": "2026-01-11",
+          "version": "2026-01-23",
           "spec": "https://platform.example.com/ucp/encrypted-handler.json",
           "schema": "https://platform.example.com/ucp/encrypted-handler/schema.json",
           "config": {

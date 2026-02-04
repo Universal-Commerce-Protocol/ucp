@@ -284,10 +284,10 @@ within each method.
 
 ```json
 // Default: single group per method
-{ "dev.ucp.shopping.fulfillment": [{"version": "2026-01-11"}] }
+{ "dev.ucp.shopping.fulfillment": [{"version": "2026-01-23"}] }
 
 // Opt-in: business MAY return multiple groups per method
-{ "dev.ucp.shopping.fulfillment": [{"version": "2026-01-11", "config": { "supports_multi_group": true }}] }
+{ "dev.ucp.shopping.fulfillment": [{"version": "2026-01-23", "config": { "supports_multi_group": true }}] }
 ```
 
 ### Business Profile
@@ -302,7 +302,7 @@ Businesses declare what fulfillment configurations they support using
   "capabilities": {
     "dev.ucp.shopping.fulfillment": [
       {
-        "version": "2026-01-11",
+        "version": "2026-01-23",
         "config": {
           "allows_multi_destination": {
             "shipping": true

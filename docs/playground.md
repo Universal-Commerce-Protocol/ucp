@@ -405,7 +405,7 @@ Accept: application/json</pre>
  * ------------------------------------------------------------------
  */
 const UcpData = {
-  version: "2026-01-11",
+  version: "2026-01-23",
 
   inventory: {
     "sku_stickers": { title: "UCP Demo Sticker Pack", price: 599, image_url: "https://example.com/images/stickers.jpg" },
@@ -416,7 +416,7 @@ const UcpData = {
     "com.shopify.shop_pay": [
       {
         id: "shop_pay",
-        version: "2026-01-11",
+        version: "2026-01-23",
         spec: "https://shopify.dev/docs/agents/checkout/shop-pay-handler",
         config_schema: "https://shopify.dev/ucp/shop-pay-handler/2026-01-11/config.json",
         instrument_schemas: ["https://shopify.dev/ucp/shop-pay-handler/2026-01-11/instrument.json"],
@@ -426,7 +426,7 @@ const UcpData = {
     "com.google.pay": [
       {
         id: "gpay",
-        version: "2026-01-11",
+        version: "2026-01-23",
         spec: "https://pay.google.com/gp/p/ucp/2026-01-11/",
         config_schema: "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/config.json",
         instrument_schemas: [
@@ -466,14 +466,14 @@ const UcpData = {
   capabilities: {
     "dev.ucp.shopping.checkout": [
       {
-        version: "2026-01-11",
+        version: "2026-01-23",
         spec: "https://ucp.dev/specs/checkout",
         schema: "https://ucp.dev/schemas/shopping/checkout.json"
       }
     ],
     "dev.ucp.shopping.order": [
       {
-        version: "2026-01-11",
+        version: "2026-01-23",
         spec: "https://ucp.dev/specs/order",
         schema: "https://ucp.dev/schemas/shopping/order.json"
       }
@@ -481,7 +481,7 @@ const UcpData = {
     "dev.ucp.shopping.fulfillment": [
       {
         extends: "dev.ucp.shopping.checkout",
-        version: "2026-01-11",
+        version: "2026-01-23",
         spec: "https://ucp.dev/specs/fulfillment",
         schema: "https://ucp.dev/schemas/shopping/fulfillment.json",
         config: {
@@ -499,7 +499,7 @@ const UcpData = {
     "dev.ucp.shopping.discount": [
       {
         extends: "dev.ucp.shopping.checkout",
-        version: "2026-01-11",
+        version: "2026-01-23",
         spec: "https://ucp.dev/specs/discount",
         schema: "https://ucp.dev/schemas/shopping/discount.json"
       }
@@ -507,7 +507,7 @@ const UcpData = {
     "dev.ucp.shopping.buyer_consent": [
       {
         extends: "dev.ucp.shopping.checkout",
-        version: "2026-01-11",
+        version: "2026-01-23",
         spec: "https://ucp.dev/specs/buyer_consent",
         schema: "https://ucp.dev/schemas/shopping/buyer_consent.json"
       }
@@ -515,7 +515,7 @@ const UcpData = {
     "dev.ucp.shopping.ap2_mandates": [
       {
         extends: "dev.ucp.shopping.checkout",
-        version: "2026-01-11",
+        version: "2026-01-23",
         spec: "https://ucp.dev/specs/ap2_mandates",
         schema: "https://ucp.dev/schemas/shopping/ap2_mandates.json"
       }

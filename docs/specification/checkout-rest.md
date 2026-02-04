@@ -85,17 +85,17 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
 
     {
       "ucp": {
-        "version": "2026-01-11",
+        "version": "2026-01-23",
         "capabilities": {
           "dev.ucp.shopping.checkout": [
-            {"version": "2026-01-11"}
+            {"version": "2026-01-23"}
           ]
         },
         "payment_handlers": {
           "com.shopify.shop_pay": [
             {
               "id": "shop_pay_1234",
-              "version": "2026-01-11",
+              "version": "2026-01-23",
               "config": {
                 "merchant_id": "shop_merchant_123"
               }
@@ -210,17 +210,17 @@ so clients must include all previously set fields they wish to retain.
 
     {
       "ucp": {
-        "version": "2026-01-11",
+        "version": "2026-01-23",
         "capabilities": {
           "dev.ucp.shopping.checkout": [
-            {"version": "2026-01-11"}
+            {"version": "2026-01-23"}
           ]
         },
         "payment_handlers": {
           "com.shopify.shop_pay": [
             {
               "id": "shop_pay_1234",
-              "version": "2026-01-11",
+              "version": "2026-01-23",
               "config": {
                 "merchant_id": "shop_merchant_123"
               }
@@ -354,17 +354,17 @@ type & addresses.
 
     {
       "ucp": {
-        "version": "2026-01-11",
+        "version": "2026-01-23",
         "capabilities": {
           "dev.ucp.shopping.checkout": [
-            {"version": "2026-01-11"}
+            {"version": "2026-01-23"}
           ]
         },
         "payment_handlers": {
           "com.google.pay": [
             {
               "id": "gpay_1234",
-              "version": "2026-01-11",
+              "version": "2026-01-23",
               "config": {
                 "allowed_payment_methods": [
                   {
@@ -566,17 +566,17 @@ Follow-up calls after initial `fulfillment` data to update selection.
 
     {
       "ucp": {
-        "version": "2026-01-11",
+        "version": "2026-01-23",
         "capabilities": {
           "dev.ucp.shopping.checkout": [
-            {"version": "2026-01-11"}
+            {"version": "2026-01-23"}
           ]
         },
         "payment_handlers": {
           "com.shopify.shop_pay": [
             {
               "id": "shop_pay_1234",
-              "version": "2026-01-11",
+              "version": "2026-01-23",
               "config": {
                 "merchant_id": "shop_merchant_123"
               }
@@ -749,17 +749,17 @@ place to set these expectations via `messages`.
 
     {
       "ucp": {
-        "version": "2026-01-11",
+        "version": "2026-01-23",
         "capabilities": {
           "dev.ucp.shopping.checkout": [
-            {"version": "2026-01-11"}
+            {"version": "2026-01-23"}
           ]
         },
         "payment_handlers": {
           "com.google.pay": [
             {
               "id": "gpay_1234",
-              "version": "2026-01-11",
+              "version": "2026-01-23",
               "config": {
                 "allowed_payment_methods": [
                   {
@@ -910,17 +910,17 @@ place to set these expectations via `messages`.
 
     {
       "ucp": {
-        "version": "2026-01-11",
+        "version": "2026-01-23",
         "capabilities": {
           "dev.ucp.shopping.checkout": [
-            {"version": "2026-01-11"}
+            {"version": "2026-01-23"}
           ]
         },
         "payment_handlers": {
           "com.shopify.shop_pay": [
             {
               "id": "shop_pay_1234",
-              "version": "2026-01-11",
+              "version": "2026-01-23",
               "config": {
                 "merchant_id": "shop_merchant_123"
               }
@@ -1062,17 +1062,17 @@ place to set these expectations via `messages`.
 
     {
       "ucp": {
-        "version": "2026-01-11",
+        "version": "2026-01-23",
         "capabilities": {
           "dev.ucp.shopping.checkout": [
-            {"version": "2026-01-11"}
+            {"version": "2026-01-23"}
           ]
         },
         "payment_handlers": {
           "com.google.pay": [
             {
               "id": "gpay_1234",
-              "version": "2026-01-11",
+              "version": "2026-01-23",
               "config": {
                 "allowed_payment_methods": [
                   {

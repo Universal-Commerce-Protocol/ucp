@@ -29,14 +29,14 @@ Businesses advertise MCP transport availability through their UCP profile at
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "2026-01-23",
     "services": {
       "dev.ucp.shopping": [
         {
-          "version": "2026-01-11",
+          "version": "2026-01-23",
           "spec": "https://ucp.dev/specification/overview",
           "transport": "mcp",
-          "schema": "https://ucp.dev/services/shopping/mcp.openrpc.json",
+          "schema": "https://ucp.dev/2026-01-23/services/shopping/mcp.openrpc.json",
           "endpoint": "https://business.example.com/ucp/mcp"
         }
       ]
@@ -44,16 +44,16 @@ Businesses advertise MCP transport availability through their UCP profile at
     "capabilities": {
       "dev.ucp.shopping.checkout": [
         {
-          "version": "2026-01-11",
+          "version": "2026-01-23",
           "spec": "https://ucp.dev/specification/checkout",
-          "schema": "https://ucp.dev/schemas/shopping/checkout.json"
+          "schema": "https://ucp.dev/2026-01-23/schemas/shopping/checkout.json"
         }
       ],
       "dev.ucp.shopping.fulfillment": [
         {
-          "version": "2026-01-11",
+          "version": "2026-01-23",
           "spec": "https://ucp.dev/specification/fulfillment",
-          "schema": "https://ucp.dev/schemas/shopping/fulfillment.json",
+          "schema": "https://ucp.dev/2026-01-23/schemas/shopping/fulfillment.json",
           "extends": "dev.ucp.shopping.checkout"
         }
       ]
@@ -62,7 +62,7 @@ Businesses advertise MCP transport availability through their UCP profile at
       "com.example.vendor.delegate_payment": [
         {
           "id": "handler_1",
-          "version": "2026-01-11",
+          "version": "2026-01-23",
           "spec": "https://example.vendor.com/specs/delegate-payment",
           "schema": "https://example.vendor.com/schemas/delegate-payment-config.json",
           "config": {}
@@ -204,18 +204,18 @@ Maps to the [Create Checkout](checkout.md#create-checkout) operation.
       "id": 1,
       "result": {
         "ucp": {
-          "version": "2026-01-11",
+          "version": "2026-01-23",
           "capabilities": {
             "dev.ucp.shopping.checkout": [
-              {"version": "2026-01-11"}
+              {"version": "2026-01-23"}
             ],
             "dev.ucp.shopping.fulfillment": [
-              {"version": "2026-01-11"}
+              {"version": "2026-01-23"}
             ]
           },
           "payment_handlers": {
             "com.example.vendor.delegate_payment": [
-              {"id": "handler_1", "version": "2026-01-11", "config": {}}
+              {"id": "handler_1", "version": "2026-01-23", "config": {}}
             ]
           }
         },
@@ -413,18 +413,18 @@ Maps to the [Update Checkout](checkout.md#update-checkout) operation.
       "id": 2,
       "result": {
         "ucp": {
-          "version": "2026-01-11",
+          "version": "2026-01-23",
           "capabilities": {
             "dev.ucp.shopping.checkout": [
-              {"version": "2026-01-11"}
+              {"version": "2026-01-23"}
             ],
             "dev.ucp.shopping.fulfillment": [
-              {"version": "2026-01-11"}
+              {"version": "2026-01-23"}
             ]
           },
           "payment_handlers": {
             "com.example.vendor.delegate_payment": [
-              {"id": "handler_1", "version": "2026-01-11", "config": {}}
+              {"id": "handler_1", "version": "2026-01-23", "config": {}}
             ]
           }
         },

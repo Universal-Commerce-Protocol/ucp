@@ -177,7 +177,7 @@ and desired configuration.
       "com.example.handler": [
         {
           "id": "processor_tokenizer_1234",
-          "version": "2026-01-11",
+          "version": "2026-01-23",
           "spec": "https://example.com/ucp/handler",
           "schema": "https://example.com/ucp/handler/schema.json",
           "config": {
@@ -209,7 +209,7 @@ and typically includes different configuration:
 ```json
 {
   "id": "processor_tokenizer_1234",
-  "version": "2026-01-11",
+  "version": "2026-01-23",
   "spec": "https://example.com/ucp/handler",
   "schema": "https://example.com/ucp/handler/schema.json",
   "config": {
@@ -224,7 +224,7 @@ and typically includes different configuration:
 ```json
 {
   "id": "platform_tokenizer_2345", // note: ids are for disambiguation, they may differ between business and platform
-  "version": "2026-01-11",
+  "version": "2026-01-23",
   "spec": "https://example.com/ucp/handler",
   "schema": "https://example.com/ucp/handler/schema.json",
   "config": {
@@ -239,7 +239,7 @@ and typically includes different configuration:
 ```json
 {
   "id": "processor_tokenizer_1234",
-  "version": "2026-01-11",
+  "version": "2026-01-23",
   "config": {
     "api_version": 2,
     "environment": "production",
@@ -276,7 +276,7 @@ Authors typically define each shape in its own file and reference them:
   "title": "Tokenizer Handler Schema",
   "description": "Schema for the com.example.tokenizer payment handler.",
   "name": "com.example.tokenizer",
-  "version": "2026-01-11",
+  "version": "2026-01-23",
 
   "$defs": {
     "tokenizer_token": { "$ref": "types/tokenizer_token.json" },
