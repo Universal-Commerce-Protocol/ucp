@@ -257,7 +257,7 @@ Content-Type: application/json
   "messages": [
     {
       "type": "error",
-      "code": "NOT_FOUND",
+      "code": "not_found",
       "content": "Cart not found or has expired"
     }
   ],
@@ -500,7 +500,10 @@ The following headers are defined for the HTTP binding and apply to all operatio
 
 ### Error Responses
 
-See the [Core Specification](https://ucp.dev/draft/specification/overview/#error-handling) for negotiation error handling (discovery failures, negotiation failures).
+See the [Core Specification](https://ucp.dev/draft/specification/overview/#error-handling) for the complete error code registry and transport binding examples.
+
+- **Protocol errors**: Return appropriate HTTP status code (401, 403, 409, 429, 503) with JSON body containing `code` and `content`.
+- **Business outcomes**: Return HTTP 200 with UCP envelope and `messages` array.
 
 #### Business Outcomes
 
@@ -517,7 +520,7 @@ Business outcomes (including not found and validation errors) are returned with 
   "messages": [
     {
       "type": "error",
-      "code": "NOT_FOUND",
+      "code": "not_found",
       "content": "Cart not found or has expired"
     }
   ],

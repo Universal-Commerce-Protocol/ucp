@@ -1098,16 +1098,18 @@ Content-Type: application/json
 ```json
 {
   "jsonrpc": "2.0",
-  "method": "create_checkout",
+  "method": "tools/call",
   "params": {
-    "meta": {
-      "ucp-agent": {
-        "profile": "https://agent.example/profiles/shopping-agent.json"
+    "name": "create_checkout",
+    "arguments": {
+      "meta": {
+        "ucp-agent": {
+          "profile": "https://agent.example/profiles/shopping-agent.json"
+        }
       },
-      "idempotency-key": "550e8400-e29b-41d4-a716-446655440000"
-    },
-    "checkout": {
-      "line_items": [...]
+      "checkout": {
+        "line_items": [...]
+      }
     }
   },
   "id": 1
@@ -1161,13 +1163,28 @@ These failure types require different handling:
 
 ##### Error Codes
 
+**Negotiation Errors:**
+
 | Code                        | Description                                          | REST | MCP    |
 | --------------------------- | ---------------------------------------------------- | ---- | ------ |
-| `INVALID_PROFILE_URL`       | Profile URL is malformed, missing, or unresolvable   | 400  | error  |
-| `PROFILE_UNREACHABLE`       | Resolved URL but fetch failed (timeout, non-2xx)     | 424  | error  |
-| `PROFILE_MALFORMED`         | Fetched content is not valid JSON or violates schema | 422  | error  |
-| `CAPABILITIES_INCOMPATIBLE` | No compatible capabilities in intersection           | 200  | result |
-| `VERSION_UNSUPPORTED`       | Platform's UCP version is not supported              | 200  | result |
+| `invalid_profile_url`       | Profile URL is malformed, missing, or unresolvable   | 400  | -32001 |
+| `profile_unreachable`       | Resolved URL but fetch failed (timeout, non-2xx)     | 424  | -32001 |
+| `profile_malformed`         | Fetched content is not valid JSON or violates schema | 422  | -32001 |
+| `capabilities_incompatible` | No compatible capabilities in intersection           | 200  | result |
+| `version_unsupported`       | Platform's UCP version is not supported              | 200  | result |
+
+**Protocol Errors:**
+
+| HTTP | Description                                    | MCP    |
+| ---- | ---------------------------------------------- | ------ |
+| 401  | Authentication required or credentials invalid | -32000 |
+| 403  | Authenticated but insufficient permissions     | -32000 |
+| 409  | Idempotency key reused with different payload  | -32000 |
+| 429  | Too many requests                              | -32000 |
+| 500  | Unexpected server error                        | -32603 |
+| 503  | Server temporarily unable to handle requests   | -32000 |
+
+For MCP over HTTP, the HTTP status code is the primary signal; the JSON-RPC `error.code` provides a secondary signal. Both transports **SHOULD** include `Retry-After` header (REST) or `error.data.retry_after` (MCP) for 429 and 503 responses.
 
 ##### The `continue_url` Field
 
@@ -1188,7 +1205,7 @@ HTTP/1.1 424 Failed Dependency
 Content-Type: application/json
 
 {
-  "code": "PROFILE_UNREACHABLE",
+  "code": "profile_unreachable",
   "content": "Unable to fetch agent profile: connection timeout",
   "continue_url": "https://merchant.com/cart"
 }
@@ -1208,14 +1225,30 @@ Content-Type: application/json
   "messages": [
     {
       "type": "error",
-      "code": "VERSION_UNSUPPORTED",
-      "content": "Platform UCP version 2024-01-01 is not supported",
+      "code": "version_unsupported",
+      "content": "UCP version 2024-01-01 is not supported",
       "severity": "requires_buyer_input"
     }
   ],
-  "continue_url": "https://merchant.com/cart"
+  "continue_url": "https://merchant.com"
 }
 ```
+
+**Protocol Error — Rate Limit (429):**
+
+```http
+HTTP/1.1 429 Too Many Requests
+Retry-After: 60
+```
+
+**Protocol Error — Unauthorized (401):**
+
+```http
+HTTP/1.1 401 Unauthorized
+WWW-Authenticate: Bearer realm="ucp"
+```
+
+Protocol errors use standard HTTP status codes and headers. Response bodies are optional.
 
 **Discovery Failure (JSON-RPC error):**
 
@@ -1227,7 +1260,7 @@ Content-Type: application/json
     "code": -32001,
     "message": "UCP discovery failed",
     "data": {
-      "code": "PROFILE_UNREACHABLE",
+      "code": "profile_unreachable",
       "content": "Unable to fetch agent profile: connection timeout",
       "continue_url": "https://merchant.com/cart"
     }
@@ -1242,22 +1275,58 @@ Content-Type: application/json
   "jsonrpc": "2.0",
   "id": 1,
   "result": {
-    "ucp": {
-      "version": "2026-01-11",
-      "capabilities": {}
+    "structuredContent": {
+      "ucp": {
+        "version": "2026-01-11",
+        "capabilities": {}
+      },
+      "messages": [
+        {
+          "type": "error",
+          "code": "version_unsupported",
+          "content": "UCP version 2024-01-01 is not supported",
+          "severity": "requires_buyer_input"
+        }
+      ],
+      "continue_url": "https://merchant.com"
     },
-    "messages": [
-      {
-        "type": "error",
-        "code": "VERSION_UNSUPPORTED",
-        "content": "Platform UCP version 2024-01-01 is not supported",
-        "severity": "requires_buyer_input"
-      }
-    ],
-    "continue_url": "https://merchant.com/cart"
+    "content": [
+      {"type": "text", "text": "{\"ucp\":{...},\"messages\":[...],\"continue_url\":\"...\"}"}
+    ]
   }
 }
 ```
+
+**Protocol Error — Rate Limit (JSON-RPC error):**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "error": {
+    "code": -32000,
+    "message": "Rate limit exceeded",
+    "data": {
+      "retry_after": 60
+    }
+  }
+}
+```
+
+**Protocol Error — Unauthorized (JSON-RPC error):**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "error": {
+    "code": -32000,
+    "message": "Unauthorized"
+  }
+}
+```
+
+When using Streamable HTTP transport, servers **MUST** return the corresponding HTTP status code (e.g., `429` for rate limit) alongside the JSON-RPC error. The HTTP status code is the primary signal for error type.
 
 #### Capability Declaration in Responses
 
@@ -1708,7 +1777,7 @@ UCP supports multiple transport protocols. Platforms and businesses effectively 
 
 ### REST Transport (Core)
 
-The primary transport for UCP is **HTTP/1.1** (or higher) using RESTful patterns.
+UCP supports **HTTP/1.1** (or higher) using RESTful patterns.
 
 - **Content-Type:** Requests and responses **MUST** use `application/json`.
 - **Methods:** Implementations **MUST** use standard HTTP verbs (e.g., `POST` for creation, `GET` for retrieval).
@@ -1716,7 +1785,54 @@ The primary transport for UCP is **HTTP/1.1** (or higher) using RESTful patterns
 
 ### Model Context Protocol (MCP)
 
-UCP capabilities map 1:1 to MCP tools. A business **MAY** expose an MCP server that wraps their UCP implementation, allowing LLMs to call tools like `create_checkout` directly.
+UCP supports **[MCP protocol](https://modelcontextprotocol.io/specification/)**, which operates over JSON-RPC.
+
+#### Request Format
+
+MCP requests use the `tools/call` method with the operation name in `params.name` and UCP payload in `params.arguments`:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "tools/call",
+  "params": {
+    "name": "create_checkout",
+    "arguments": {
+      "meta": {"ucp-agent": {"profile": "https://..."}},
+      "checkout": {"line_items": [...]}
+    }
+  },
+  "id": 1
+}
+```
+
+#### Response Format
+
+MCP tool responses use a dual-output pattern for backward compatibility. UCP MCP servers:
+
+- **MUST** return the UCP response payload in `structuredContent`
+- **SHOULD** declare `outputSchema` in tool definitions, referencing the appropriate UCP JSON Schema for the capability
+- **SHOULD** also return serialized JSON in `content[]` for backward compatibility with clients not supporting `structuredContent`
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "structuredContent": {
+      "checkout": {
+        "ucp": {"version": "2026-01-11", "capabilities": {...}},
+        "id": "checkout_abc123",
+        "status": "incomplete",
+        ...
+      }
+    },
+    "content": [
+      {"type": "text", "text": "{\"checkout\":{\"ucp\":{...},\"id\":\"checkout_abc123\",...}}"}
+    ]
+  }
+}
+```
 
 ### Agent-to-Agent Protocol (A2A)
 
@@ -3543,7 +3659,10 @@ UCP uses standard HTTP status codes to indicate the success or failure of an API
 
 ### Error Responses
 
-See the [Core Specification](https://ucp.dev/draft/specification/overview/#error-handling) for negotiation error handling (discovery failures, negotiation failures).
+See the [Core Specification](https://ucp.dev/draft/specification/overview/#error-handling) for the complete error code registry and transport binding examples.
+
+- **Protocol errors**: Return appropriate HTTP status code (401, 403, 409, 429, 503) with JSON body containing `code` and `content`.
+- **Business outcomes**: Return HTTP 200 with UCP envelope and `messages` array.
 
 #### Business Outcomes
 
@@ -3568,10 +3687,9 @@ Business outcomes (including errors like unavailable merchandise) are returned w
   ],
   "messages": [
     {
-      "type": "error",
-      "code": "INSUFFICIENT_STOCK",
-      "content": "Requested 100 units but only 12 available",
-      "severity": "requires_buyer_input",
+      "type": "warning",
+      "code": "quantity_adjusted",
+      "content": "Quantity adjusted, requested 100 units but only 12 available",
       "path": "$.line_items[0].quantity"
     }
   ],
@@ -3717,47 +3835,50 @@ Maps to the [Create Checkout](https://ucp.dev/draft/specification/checkout/#crea
 ```json
 {
   "jsonrpc": "2.0",
-  "method": "create_checkout",
+  "id": 1,
+  "method": "tools/call",
   "params": {
-    "meta": {
-      "ucp-agent": {
-        "profile": "https://platform.example/profiles/v2026-01/shopping-agent.json"
-      }
-    },
-    "checkout": {
-      "buyer": {
-        "email": "jane.doe@example.com",
-        "first_name": "Jane",
-        "last_name": "Doe"
-      },
-      "line_items": [
-        {
-          "item": {
-            "id": "item_123"
-          },
-          "quantity": 1
+    "name": "create_checkout",
+    "arguments": {
+      "meta": {
+        "ucp-agent": {
+          "profile": "https://platform.example/profiles/v2026-01/shopping-agent.json"
         }
-      ],
-      "currency": "USD",
-      "fulfillment": {
-        "methods": [
+      },
+      "checkout": {
+        "buyer": {
+          "email": "jane.doe@example.com",
+          "first_name": "Jane",
+          "last_name": "Doe"
+        },
+        "line_items": [
           {
-            "type": "shipping",
-            "destinations": [
-              {
-                "street_address": "123 Main St",
-                "address_locality": "Springfield",
-                "address_region": "IL",
-                "postal_code": "62701",
-                "address_country": "US"
-              }
-            ]
+            "item": {
+              "id": "item_123"
+            },
+            "quantity": 1
           }
-        ]
+        ],
+        "currency": "USD",
+        "fulfillment": {
+          "methods": [
+            {
+              "type": "shipping",
+              "destinations": [
+                {
+                  "street_address": "123 Main St",
+                  "address_locality": "Springfield",
+                  "address_region": "IL",
+                  "postal_code": "62701",
+                  "address_country": "US"
+                }
+              ]
+            }
+          ]
+        }
       }
     }
-  },
-  "id": 1
+  }
 }
 ```
 
@@ -3766,123 +3887,133 @@ Maps to the [Create Checkout](https://ucp.dev/draft/specification/checkout/#crea
   "jsonrpc": "2.0",
   "id": 1,
   "result": {
-    "ucp": {
-      "version": "2026-01-11",
-      "capabilities": {
-        "dev.ucp.shopping.checkout": [
-          {"version": "2026-01-11"}
-        ],
-        "dev.ucp.shopping.fulfillment": [
-          {"version": "2026-01-11"}
-        ]
-      },
-      "payment_handlers": {
-        "com.example.vendor.delegate_payment": [
-          {"id": "handler_1", "version": "2026-01-11", "config": {}}
-        ]
-      }
-    },
-    "id": "checkout_abc123",
-    "status": "incomplete",
-    "buyer": {
-      "email": "jane.doe@example.com",
-      "first_name": "Jane",
-      "last_name": "Doe"
-    },
-    "line_items": [
-      {
-        "id": "item_123",
-        "item": {
-          "id": "item_123",
-          "title": "Blue Jeans",
-          "price": 5000
+    "structuredContent": {
+      "checkout": {
+        "ucp": {
+          "version": "2026-01-11",
+          "capabilities": {
+            "dev.ucp.shopping.checkout": [
+              {"version": "2026-01-11"}
+            ],
+            "dev.ucp.shopping.fulfillment": [
+              {"version": "2026-01-11"}
+            ]
+          },
+          "payment_handlers": {
+            "com.example.vendor.delegate_payment": [
+              {"id": "handler_1", "version": "2026-01-11", "config": {}}
+            ]
+          }
         },
-        "quantity": 1,
+        "id": "checkout_abc123",
+        "status": "incomplete",
+        "buyer": {
+          "email": "jane.doe@example.com",
+          "first_name": "Jane",
+          "last_name": "Doe"
+        },
+        "line_items": [
+          {
+            "id": "item_123",
+            "item": {
+              "id": "item_123",
+              "title": "Blue Jeans",
+              "price": 5000
+            },
+            "quantity": 1,
+            "totals": [
+              {"type": "subtotal", "amount": 5000},
+              {"type": "total", "amount": 5000}
+            ]
+          }
+        ],
+        "currency": "USD",
         "totals": [
-          {"type": "subtotal", "amount": 5000},
-          {"type": "total", "amount": 5000}
-        ]
-      }
-    ],
-    "currency": "USD",
-    "totals": [
-      {
-        "type": "subtotal",
-        "amount": 5000
-      },
-      {
-        "type": "fulfillment",
-        "display_text": "Shipping",
-        "amount": 500
-      },
-      {
-        "type": "total",
-        "amount": 5500
-      }
-    ],
-    "fulfillment": {
-      "methods": [
-        {
-          "id": "shipping_1",
-          "type": "shipping",
-          "line_item_ids": ["item_123"],
-          "selected_destination_id": "dest_home",
-          "destinations": [
+          {
+            "type": "subtotal",
+            "amount": 5000
+          },
+          {
+            "type": "fulfillment",
+            "display_text": "Shipping",
+            "amount": 500
+          },
+          {
+            "type": "total",
+            "amount": 5500
+          }
+        ],
+        "fulfillment": {
+          "methods": [
             {
-              "id": "dest_home",
-              "street_address": "123 Main St",
-              "address_locality": "Springfield",
-              "address_region": "IL",
-              "postal_code": "62701",
-              "address_country": "US"
-            }
-          ],
-          "groups": [
-            {
-              "id": "package_1",
+              "id": "shipping_1",
+              "type": "shipping",
               "line_item_ids": ["item_123"],
-              "selected_option_id": "standard",
-              "options": [
+              "selected_destination_id": "dest_home",
+              "destinations": [
                 {
-                  "id": "standard",
-                  "title": "Standard Shipping",
-                  "description": "Arrives in 5-7 business days",
-                  "totals": [
-                    {
-                      "type": "total",
-                      "amount": 500
-                    }
-                  ]
-                },
+                  "id": "dest_home",
+                  "street_address": "123 Main St",
+                  "address_locality": "Springfield",
+                  "address_region": "IL",
+                  "postal_code": "62701",
+                  "address_country": "US"
+                }
+              ],
+              "groups": [
                 {
-                  "id": "express",
-                  "title": "Express Shipping",
-                  "description": "Arrives in 2-3 business days",
-                  "totals": [
+                  "id": "package_1",
+                  "line_item_ids": ["item_123"],
+                  "selected_option_id": "standard",
+                  "options": [
                     {
-                      "type": "total",
-                      "amount": 1000
+                      "id": "standard",
+                      "title": "Standard Shipping",
+                      "description": "Arrives in 5-7 business days",
+                      "totals": [
+                        {
+                          "type": "total",
+                          "amount": 500
+                        }
+                      ]
+                    },
+                    {
+                      "id": "express",
+                      "title": "Express Shipping",
+                      "description": "Arrives in 2-3 business days",
+                      "totals": [
+                        {
+                          "type": "total",
+                          "amount": 1000
+                        }
+                      ]
                     }
                   ]
                 }
               ]
             }
           ]
-        }
-      ]
-    },
-    "links": [
-      {
-        "type": "privacy_policy",
-        "url": "https://business.example.com/privacy"
-      },
-      {
-        "type": "terms_of_service",
-        "url": "https://business.example.com/terms"
+        },
+        "links": [
+          {
+            "type": "privacy_policy",
+            "url": "https://business.example.com/privacy"
+          },
+          {
+            "type": "terms_of_service",
+            "url": "https://business.example.com/terms"
+          }
+        ],
+        "continue_url": "https://business.example.com/checkout-sessions/checkout_abc123",
+        "expires_at": "2026-01-11T18:30:00Z"
       }
-    ],
-    "continue_url": "https://business.example.com/checkout-sessions/checkout_abc123",
-    "expires_at": "2026-01-11T18:30:00Z"
+    },
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"checkout\":{\"ucp\":{...},\"id\":\"checkout_abc123\",...}}"
+      }
+    ]
   }
 }
 ```
@@ -3922,46 +4053,49 @@ Maps to the [Update Checkout](https://ucp.dev/draft/specification/checkout/#upda
 ```json
 {
   "jsonrpc": "2.0",
-  "method": "update_checkout",
+  "id": 2,
+  "method": "tools/call",
   "params": {
-    "meta": {
-      "ucp-agent": {
-        "profile": "https://platform.example/profiles/v2026-01/shopping-agent.json"
-      }
-    },
-    "id": "checkout_abc123",
-    "checkout": {
-      "buyer": {
-        "email": "jane.doe@example.com",
-        "first_name": "Jane",
-        "last_name": "Doe"
-      },
-      "line_items": [
-        {
-          "item": {
-            "id": "item_123"
-          },
-          "quantity": 1
+    "name": "update_checkout",
+    "arguments": {
+      "meta": {
+        "ucp-agent": {
+          "profile": "https://platform.example/profiles/v2026-01/shopping-agent.json"
         }
-      ],
-      "currency": "USD",
-      "fulfillment": {
-        "methods": [
+      },
+      "id": "checkout_abc123",
+      "checkout": {
+        "buyer": {
+          "email": "jane.doe@example.com",
+          "first_name": "Jane",
+          "last_name": "Doe"
+        },
+        "line_items": [
           {
-            "id": "shipping_1",
-            "line_item_ids": ["item_123"],
-            "groups": [
-              {
-                "id": "package_1",
-                "selected_option_id": "express"
-              }
-            ]
+            "item": {
+              "id": "item_123"
+            },
+            "quantity": 1
           }
-        ]
+        ],
+        "currency": "USD",
+        "fulfillment": {
+          "methods": [
+            {
+              "id": "shipping_1",
+              "line_item_ids": ["item_123"],
+              "groups": [
+                {
+                  "id": "package_1",
+                  "selected_option_id": "express"
+                }
+              ]
+            }
+          ]
+        }
       }
     }
-  },
-  "id": 2
+  }
 }
 ```
 
@@ -3970,123 +4104,133 @@ Maps to the [Update Checkout](https://ucp.dev/draft/specification/checkout/#upda
   "jsonrpc": "2.0",
   "id": 2,
   "result": {
-    "ucp": {
-      "version": "2026-01-11",
-      "capabilities": {
-        "dev.ucp.shopping.checkout": [
-          {"version": "2026-01-11"}
-        ],
-        "dev.ucp.shopping.fulfillment": [
-          {"version": "2026-01-11"}
-        ]
-      },
-      "payment_handlers": {
-        "com.example.vendor.delegate_payment": [
-          {"id": "handler_1", "version": "2026-01-11", "config": {}}
-        ]
-      }
-    },
-    "id": "checkout_abc123",
-    "status": "incomplete",
-    "buyer": {
-      "email": "jane.doe@example.com",
-      "first_name": "Jane",
-      "last_name": "Doe"
-    },
-    "line_items": [
-      {
-        "id": "item_123",
-        "item": {
-          "id": "item_123",
-          "title": "Blue Jeans",
-          "price": 5000
+    "structuredContent": {
+      "checkout": {
+        "ucp": {
+          "version": "2026-01-11",
+          "capabilities": {
+            "dev.ucp.shopping.checkout": [
+              {"version": "2026-01-11"}
+            ],
+            "dev.ucp.shopping.fulfillment": [
+              {"version": "2026-01-11"}
+            ]
+          },
+          "payment_handlers": {
+            "com.example.vendor.delegate_payment": [
+              {"id": "handler_1", "version": "2026-01-11", "config": {}}
+            ]
+          }
         },
-        "quantity": 1,
+        "id": "checkout_abc123",
+        "status": "incomplete",
+        "buyer": {
+          "email": "jane.doe@example.com",
+          "first_name": "Jane",
+          "last_name": "Doe"
+        },
+        "line_items": [
+          {
+            "id": "item_123",
+            "item": {
+              "id": "item_123",
+              "title": "Blue Jeans",
+              "price": 5000
+            },
+            "quantity": 1,
+            "totals": [
+              {"type": "subtotal", "amount": 5000},
+              {"type": "total", "amount": 5000}
+            ]
+          }
+        ],
+        "currency": "USD",
         "totals": [
-          {"type": "subtotal", "amount": 5000},
-          {"type": "total", "amount": 5000}
-        ]
-      }
-    ],
-    "currency": "USD",
-    "totals": [
-      {
-        "type": "subtotal",
-        "amount": 5000
-      },
-      {
-        "type": "fulfillment",
-        "display_text": "Shipping",
-        "amount": 1000
-      },
-      {
-        "type": "total",
-        "amount": 6000
-      }
-    ],
-    "fulfillment": {
-      "methods": [
-        {
-          "id": "shipping_1",
-          "type": "shipping",
-          "line_item_ids": ["item_123"],
-          "selected_destination_id": "dest_home",
-          "destinations": [
+          {
+            "type": "subtotal",
+            "amount": 5000
+          },
+          {
+            "type": "fulfillment",
+            "display_text": "Shipping",
+            "amount": 1000
+          },
+          {
+            "type": "total",
+            "amount": 6000
+          }
+        ],
+        "fulfillment": {
+          "methods": [
             {
-              "id": "dest_home",
-              "street_address": "123 Main St",
-              "address_locality": "Springfield",
-              "address_region": "IL",
-              "postal_code": "62701",
-              "address_country": "US"
-            }
-          ],
-          "groups": [
-            {
-              "id": "package_1",
+              "id": "shipping_1",
+              "type": "shipping",
               "line_item_ids": ["item_123"],
-              "selected_option_id": "express",
-              "options": [
+              "selected_destination_id": "dest_home",
+              "destinations": [
                 {
-                  "id": "standard",
-                  "title": "Standard Shipping",
-                  "description": "Arrives in 5-7 business days",
-                  "totals": [
-                    {
-                      "type": "total",
-                      "amount": 500
-                    }
-                  ]
-                },
+                  "id": "dest_home",
+                  "street_address": "123 Main St",
+                  "address_locality": "Springfield",
+                  "address_region": "IL",
+                  "postal_code": "62701",
+                  "address_country": "US"
+                }
+              ],
+              "groups": [
                 {
-                  "id": "express",
-                  "title": "Express Shipping",
-                  "description": "Arrives in 2-3 business days",
-                  "totals": [
+                  "id": "package_1",
+                  "line_item_ids": ["item_123"],
+                  "selected_option_id": "express",
+                  "options": [
                     {
-                      "type": "total",
-                      "amount": 1000
+                      "id": "standard",
+                      "title": "Standard Shipping",
+                      "description": "Arrives in 5-7 business days",
+                      "totals": [
+                        {
+                          "type": "total",
+                          "amount": 500
+                        }
+                      ]
+                    },
+                    {
+                      "id": "express",
+                      "title": "Express Shipping",
+                      "description": "Arrives in 2-3 business days",
+                      "totals": [
+                        {
+                          "type": "total",
+                          "amount": 1000
+                        }
+                      ]
                     }
                   ]
                 }
               ]
             }
           ]
-        }
-      ]
-    },
-    "links": [
-      {
-        "type": "privacy_policy",
-        "url": "https://business.example.com/privacy"
-      },
-      {
-        "type": "terms_of_service",
-        "url": "https://business.example.com/terms"
+        },
+        "links": [
+          {
+            "type": "privacy_policy",
+            "url": "https://business.example.com/privacy"
+          },
+          {
+            "type": "terms_of_service",
+            "url": "https://business.example.com/terms"
+          }
+        ],
+        "continue_url": "https://business.example.com/checkout-sessions/checkout_abc123",
+        "expires_at": "2026-01-11T18:30:00Z"
       }
-    ],
-    "continue_url": "https://business.example.com/checkout-sessions/checkout_abc123",
-    "expires_at": "2026-01-11T18:30:00Z"
+    },
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"checkout\":{\"ucp\":{...},\"id\":\"checkout_abc123\",...}}"
+      }
+    ]
   }
 }
 ```
@@ -4124,42 +4268,51 @@ Maps to the [Cancel Checkout](https://ucp.dev/draft/specification/checkout/#canc
 
 ## Error Handling
 
-See the [Core Specification](https://ucp.dev/draft/specification/overview/#error-handling) for negotiation error handling (discovery failures, negotiation failures).
+UCP distinguishes between protocol errors and business outcomes. See the [Core Specification](https://ucp.dev/draft/specification/overview/#error-handling) for the complete error code registry and transport binding examples.
+
+- **Protocol errors**: Transport-level failures (authentication, rate limiting, unavailability) that prevent request processing. Returned as JSON-RPC `error` with code `-32000` (or `-32001` for discovery errors).
+- **Business outcomes**: Application-level results from successful request processing, returned as JSON-RPC `result` with UCP envelope and `messages`.
 
 ### Business Outcomes
 
-Business outcomes (including errors like unavailable merchandise) are returned as JSON-RPC `result` with the UCP envelope and `messages`:
+Business outcomes (including errors like unavailable merchandise) are returned as JSON-RPC `result` with `structuredContent` containing the UCP envelope and `messages`:
 
 ```json
 {
   "jsonrpc": "2.0",
   "id": 1,
   "result": {
-    "ucp": {
-      "version": "2026-01-11",
-      "capabilities": {
-        "dev.ucp.shopping.checkout": [{"version": "2026-01-11"}]
+    "structuredContent": {
+      "checkout": {
+        "ucp": {
+          "version": "2026-01-11",
+          "capabilities": {
+            "dev.ucp.shopping.checkout": [{"version": "2026-01-11"}]
+          }
+        },
+        "id": "checkout_abc123",
+        "status": "incomplete",
+        "line_items": [
+          {
+            "id": "item_456",
+            "quantity": 100,
+            "available_quantity": 12
+          }
+        ],
+        "messages": [
+          {
+            "type": "warning",
+            "code": "quantity_adjusted",
+            "content": "Quantity adjusted, requested 100 units but only 12 available",
+            "path": "$.line_items[0].quantity"
+          }
+        ],
+        "continue_url": "https://merchant.com/checkout/checkout_abc123"
       }
     },
-    "id": "checkout_abc123",
-    "status": "incomplete",
-    "line_items": [
-      {
-        "id": "item_456",
-        "quantity": 100,
-        "available_quantity": 12
-      }
-    ],
-    "messages": [
-      {
-        "type": "error",
-        "code": "INSUFFICIENT_STOCK",
-        "content": "Requested 100 units but only 12 available",
-        "severity": "requires_buyer_input",
-        "path": "$.line_items[0].quantity"
-      }
-    ],
-    "continue_url": "https://merchant.com/checkout/checkout_abc123"
+    "content": [
+      {"type": "text", "text": "{\"checkout\":{\"ucp\":{...},\"id\":\"checkout_abc123\",...}}"}
+    ]
   }
 }
 ```
@@ -4170,7 +4323,7 @@ A conforming MCP transport implementation **MUST**:
 
 1. Implement JSON-RPC 2.0 protocol correctly.
 1. Provide all core checkout tools defined in this specification.
-1. Return negotiation failures per the [Core Specification](https://ucp.dev/draft/specification/overview/#error-handling).
+1. Return errors per the [Core Specification](https://ucp.dev/draft/specification/overview/#error-handling).
 1. Return business outcomes as JSON-RPC `result` with UCP envelope and `messages` array.
 1. Validate tool inputs against UCP schemas.
 1. Support HTTP transport with streaming.
@@ -7651,7 +7804,7 @@ Content-Type: application/json
   "messages": [
     {
       "type": "error",
-      "code": "NOT_FOUND",
+      "code": "not_found",
       "content": "Cart not found or has expired"
     }
   ],
@@ -7894,7 +8047,10 @@ The following headers are defined for the HTTP binding and apply to all operatio
 
 ### Error Responses
 
-See the [Core Specification](https://ucp.dev/draft/specification/overview/#error-handling) for negotiation error handling (discovery failures, negotiation failures).
+See the [Core Specification](https://ucp.dev/draft/specification/overview/#error-handling) for the complete error code registry and transport binding examples.
+
+- **Protocol errors**: Return appropriate HTTP status code (401, 403, 409, 429, 503) with JSON body containing `code` and `content`.
+- **Business outcomes**: Return HTTP 200 with UCP envelope and `messages` array.
 
 #### Business Outcomes
 
@@ -7911,7 +8067,7 @@ Business outcomes (including not found and validation errors) are returned with 
   "messages": [
     {
       "type": "error",
-      "code": "NOT_FOUND",
+      "code": "not_found",
       "content": "Cart not found or has expired"
     }
   ],
@@ -7974,27 +8130,30 @@ Businesses advertise MCP transport availability through their UCP profile at `/.
 }
 ```
 
-### Platform Profile Advertisement
+### Request Metadata
 
-MCP clients **MUST** include the UCP platform profile URI with every request. The platform profile is included in the `_meta.ucp` structure within the request parameters:
+MCP clients **MUST** include a `meta` object in every request containing protocol metadata:
 
 ```json
 {
   "jsonrpc": "2.0",
   "id": 1,
-  "method": "create_cart",
+  "method": "tools/call",
   "params": {
-    "_meta": {
-      "ucp": {
-        "profile": "https://platform.example/profiles/v2026-01/shopping-agent.json"
-      }
-    },
-    "idempotency_key": "..."
+    "name": "create_cart",
+    "arguments": {
+      "meta": {
+        "ucp-agent": {
+          "profile": "https://platform.example/profiles/shopping-agent.json"
+        }
+      },
+      "cart": { ... }
+    }
   }
 }
 ```
 
-The `_meta.ucp.profile` field **MUST** be present in every MCP tool invocation to enable version compatibility checking and capability negotiation.
+The `meta["ucp-agent"]` field is **required** on all requests to enable [capability negotiation](https://ucp.dev/draft/specification/overview/#negotiation-protocol). Platforms **MAY** include additional metadata fields.
 
 ## Tools
 
@@ -8044,31 +8203,33 @@ Maps to the [Create Cart](https://ucp.dev/draft/specification/cart/#create-cart)
 ```json
 {
   "jsonrpc": "2.0",
-  "method": "create_cart",
+  "id": 1,
+  "method": "tools/call",
   "params": {
-    "_meta": {
-      "ucp": {
-        "profile": "https://platform.example/profiles/v2026-01/shopping-agent.json"
-      }
-    },
-    "idempotency_key": "550e8400-e29b-41d4-a716-446655440000",
-    "cart": {
-      "line_items": [
-        {
-          "item": {
-            "id": "item_123"
-          },
-          "quantity": 2
+    "name": "create_cart",
+    "arguments": {
+      "meta": {
+        "ucp-agent": {
+          "profile": "https://platform.example/profiles/v2026-01/shopping-agent.json"
         }
-      ],
-      "context": {
-        "address_country": "US",
-        "address_region": "CA",
-        "postal_code": "94105"
+      },
+      "cart": {
+        "line_items": [
+          {
+            "item": {
+              "id": "item_123"
+            },
+            "quantity": 2
+          }
+        ],
+        "context": {
+          "address_country": "US",
+          "address_region": "CA",
+          "postal_code": "94105"
+        }
       }
     }
-  },
-  "id": 1
+  }
 }
 ```
 
@@ -8077,48 +8238,58 @@ Maps to the [Create Cart](https://ucp.dev/draft/specification/cart/#create-cart)
   "jsonrpc": "2.0",
   "id": 1,
   "result": {
-    "ucp": {
-      "version": "2026-01-15",
-      "capabilities": [
-        {
-          "name": "dev.ucp.shopping.checkout",
-          "version": "2026-01-11"
+    "structuredContent": {
+      "cart": {
+        "ucp": {
+          "version": "2026-01-15",
+          "capabilities": [
+            {
+              "name": "dev.ucp.shopping.checkout",
+              "version": "2026-01-11"
+            },
+            {
+              "name": "dev.ucp.shopping.cart",
+              "version": "2026-01-15"
+            }
+          ]
         },
-        {
-          "name": "dev.ucp.shopping.cart",
-          "version": "2026-01-15"
-        }
-      ]
-    },
-    "id": "cart_abc123",
-    "line_items": [
-      {
-        "id": "li_1",
-        "item": {
-          "id": "item_123",
-          "title": "Red T-Shirt",
-          "price": 2500
-        },
-        "quantity": 2,
+        "id": "cart_abc123",
+        "line_items": [
+          {
+            "id": "li_1",
+            "item": {
+              "id": "item_123",
+              "title": "Red T-Shirt",
+              "price": 2500
+            },
+            "quantity": 2,
+            "totals": [
+              {"type": "subtotal", "amount": 5000},
+              {"type": "total", "amount": 5000}
+            ]
+          }
+        ],
+        "currency": "USD",
         "totals": [
-          {"type": "subtotal", "amount": 5000},
-          {"type": "total", "amount": 5000}
-        ]
+          {
+            "type": "subtotal",
+            "amount": 5000
+          },
+          {
+            "type": "total",
+            "amount": 5000
+          }
+        ],
+        "continue_url": "https://business.example.com/checkout?cart=cart_abc123",
+        "expires_at": "2026-01-16T12:00:00Z"
       }
-    ],
-    "currency": "USD",
-    "totals": [
+    },
+    "content": [
       {
-        "type": "subtotal",
-        "amount": 5000
-      },
-      {
-        "type": "total",
-        "amount": 5000
+        "type": "text",
+        "text": "{\"cart\":{\"ucp\":{...},\"id\":\"cart_abc123\",...}}"
       }
-    ],
-    "continue_url": "https://business.example.com/checkout?cart=cart_abc123",
-    "expires_at": "2026-01-16T12:00:00Z"
+    ]
   }
 }
 ```
@@ -8152,66 +8323,18 @@ Maps to the [Get Cart](https://ucp.dev/draft/specification/cart/#get-cart) opera
 ```json
 {
   "jsonrpc": "2.0",
-  "method": "get_cart",
-  "params": {
-    "_meta": {
-      "ucp": {
-        "profile": "https://platform.example/profiles/v2026-01/shopping-agent.json"
-      }
-    },
-    "id": "cart_abc123"
-  },
-  "id": 1
-}
-```
-
-```json
-{
-  "jsonrpc": "2.0",
   "id": 1,
-  "result": {
-    "ucp": {
-      "version": "2026-01-15",
-      "capabilities": [
-        {
-          "name": "dev.ucp.shopping.checkout",
-          "version": "2026-01-11"
-        },
-        {
-          "name": "dev.ucp.shopping.cart",
-          "version": "2026-01-15"
+  "method": "tools/call",
+  "params": {
+    "name": "get_cart",
+    "arguments": {
+      "meta": {
+        "ucp-agent": {
+          "profile": "https://platform.example/profiles/v2026-01/shopping-agent.json"
         }
-      ]
-    },
-    "id": "cart_abc123",
-    "line_items": [
-      {
-        "id": "li_1",
-        "item": {
-          "id": "item_123",
-          "title": "Red T-Shirt",
-          "price": 2500
-        },
-        "quantity": 2,
-        "totals": [
-          {"type": "subtotal", "amount": 5000},
-          {"type": "total", "amount": 5000}
-        ]
-      }
-    ],
-    "currency": "USD",
-    "totals": [
-      {
-        "type": "subtotal",
-        "amount": 5000
       },
-      {
-        "type": "total",
-        "amount": 5000
-      }
-    ],
-    "continue_url": "https://business.example.com/checkout?cart=cart_abc123",
-    "expires_at": "2026-01-16T12:00:00Z"
+      "id": "cart_abc123"
+    }
   }
 }
 ```
@@ -8221,23 +8344,94 @@ Maps to the [Get Cart](https://ucp.dev/draft/specification/cart/#get-cart) opera
   "jsonrpc": "2.0",
   "id": 1,
   "result": {
-    "ucp": {
-      "version": "2026-01-15",
-      "capabilities": [
-        {
-          "name": "dev.ucp.shopping.cart",
-          "version": "2026-01-15"
-        }
-      ]
-    },
-    "messages": [
-      {
-        "type": "error",
-        "code": "NOT_FOUND",
-        "content": "Cart not found or has expired"
+    "structuredContent": {
+      "cart": {
+        "ucp": {
+          "version": "2026-01-15",
+          "capabilities": [
+            {
+              "name": "dev.ucp.shopping.checkout",
+              "version": "2026-01-11"
+            },
+            {
+              "name": "dev.ucp.shopping.cart",
+              "version": "2026-01-15"
+            }
+          ]
+        },
+        "id": "cart_abc123",
+        "line_items": [
+          {
+            "id": "li_1",
+            "item": {
+              "id": "item_123",
+              "title": "Red T-Shirt",
+              "price": 2500
+            },
+            "quantity": 2,
+            "totals": [
+              {"type": "subtotal", "amount": 5000},
+              {"type": "total", "amount": 5000}
+            ]
+          }
+        ],
+        "currency": "USD",
+        "totals": [
+          {
+            "type": "subtotal",
+            "amount": 5000
+          },
+          {
+            "type": "total",
+            "amount": 5000
+          }
+        ],
+        "continue_url": "https://business.example.com/checkout?cart=cart_abc123",
+        "expires_at": "2026-01-16T12:00:00Z"
       }
-    ],
-    "continue_url": "https://merchant.com/"
+    },
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"cart\":{\"ucp\":{...},\"id\":\"cart_abc123\",...}}"
+      }
+    ]
+  }
+}
+```
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "structuredContent": {
+      "cart": {
+        "ucp": {
+          "version": "2026-01-15",
+          "capabilities": [
+            {
+              "name": "dev.ucp.shopping.cart",
+              "version": "2026-01-15"
+            }
+          ]
+        },
+        "messages": [
+          {
+            "type": "error",
+            "code": "not_found",
+            "content": "Cart not found or has expired"
+          }
+        ],
+        "continue_url": "https://merchant.com/"
+      }
+    },
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"cart\":{\"ucp\":{...},\"messages\":[...],\"continue_url\":\"...\"}}"
+      }
+    ]
   }
 }
 ```
@@ -8273,37 +8467,40 @@ Maps to the [Update Cart](https://ucp.dev/draft/specification/cart/#update-cart)
 ```json
 {
   "jsonrpc": "2.0",
-  "method": "update_cart",
+  "id": 2,
+  "method": "tools/call",
   "params": {
-    "_meta": {
-      "ucp": {
-        "profile": "https://platform.example/profiles/v2026-01/shopping-agent.json"
-      }
-    },
-    "id": "cart_abc123",
-    "cart": {
-      "line_items": [
-        {
-          "item": {
-            "id": "item_123"
-          },
-          "quantity": 3
-        },
-        {
-          "item": {
-            "id": "item_456"
-          },
-          "quantity": 1
+    "name": "update_cart",
+    "arguments": {
+      "meta": {
+        "ucp-agent": {
+          "profile": "https://platform.example/profiles/v2026-01/shopping-agent.json"
         }
-      ],
-      "context": {
-        "address_country": "US",
-        "address_region": "CA",
-        "postal_code": "94105"
+      },
+      "id": "cart_abc123",
+      "cart": {
+        "line_items": [
+          {
+            "item": {
+              "id": "item_123"
+            },
+            "quantity": 3
+          },
+          {
+            "item": {
+              "id": "item_456"
+            },
+            "quantity": 1
+          }
+        ],
+        "context": {
+          "address_country": "US",
+          "address_region": "CA",
+          "postal_code": "94105"
+        }
       }
     }
-  },
-  "id": 2
+  }
 }
 ```
 
@@ -8312,61 +8509,71 @@ Maps to the [Update Cart](https://ucp.dev/draft/specification/cart/#update-cart)
   "jsonrpc": "2.0",
   "id": 2,
   "result": {
-    "ucp": {
-      "version": "2026-01-15",
-      "capabilities": [
-        {
-          "name": "dev.ucp.shopping.checkout",
-          "version": "2026-01-11"
+    "structuredContent": {
+      "cart": {
+        "ucp": {
+          "version": "2026-01-15",
+          "capabilities": [
+            {
+              "name": "dev.ucp.shopping.checkout",
+              "version": "2026-01-11"
+            },
+            {
+              "name": "dev.ucp.shopping.cart",
+              "version": "2026-01-15"
+            }
+          ]
         },
-        {
-          "name": "dev.ucp.shopping.cart",
-          "version": "2026-01-15"
-        }
-      ]
+        "id": "cart_abc123",
+        "line_items": [
+          {
+            "id": "li_1",
+            "item": {
+              "id": "item_123",
+              "title": "Red T-Shirt",
+              "price": 2500
+            },
+            "quantity": 3,
+            "totals": [
+              {"type": "subtotal", "amount": 7500},
+              {"type": "total", "amount": 7500}
+            ]
+          },
+          {
+            "id": "li_2",
+            "item": {
+              "id": "item_456",
+              "title": "Blue Jeans",
+              "price": 7500
+            },
+            "quantity": 1,
+            "totals": [
+              {"type": "subtotal", "amount": 7500},
+              {"type": "total", "amount": 7500}
+            ]
+          }
+        ],
+        "currency": "USD",
+        "totals": [
+          {
+            "type": "subtotal",
+            "amount": 15000
+          },
+          {
+            "type": "total",
+            "amount": 15000
+          }
+        ],
+        "continue_url": "https://business.example.com/checkout?cart=cart_abc123",
+        "expires_at": "2026-01-16T12:00:00Z"
+      }
     },
-    "id": "cart_abc123",
-    "line_items": [
+    "content": [
       {
-        "id": "li_1",
-        "item": {
-          "id": "item_123",
-          "title": "Red T-Shirt",
-          "price": 2500
-        },
-        "quantity": 3,
-        "totals": [
-          {"type": "subtotal", "amount": 7500},
-          {"type": "total", "amount": 7500}
-        ]
-      },
-      {
-        "id": "li_2",
-        "item": {
-          "id": "item_456",
-          "title": "Blue Jeans",
-          "price": 7500
-        },
-        "quantity": 1,
-        "totals": [
-          {"type": "subtotal", "amount": 7500},
-          {"type": "total", "amount": 7500}
-        ]
+        "type": "text",
+        "text": "{\"cart\":{\"ucp\":{...},\"id\":\"cart_abc123\",...}}"
       }
-    ],
-    "currency": "USD",
-    "totals": [
-      {
-        "type": "subtotal",
-        "amount": 15000
-      },
-      {
-        "type": "total",
-        "amount": 15000
-      }
-    ],
-    "continue_url": "https://business.example.com/checkout?cart=cart_abc123",
-    "expires_at": "2026-01-16T12:00:00Z"
+    ]
   }
 }
 ```
@@ -8378,7 +8585,6 @@ Maps to the [Cancel Cart](https://ucp.dev/draft/specification/cart/#cancel-cart)
 #### Input Schema
 
 - `id` (String, required): The ID of the cart session.
-- `idempotency_key` (String, UUID, required): Unique key for retry safety.
 
 #### Output Schema
 
@@ -8401,17 +8607,20 @@ Maps to the [Cancel Cart](https://ucp.dev/draft/specification/cart/#cancel-cart)
 ```json
 {
   "jsonrpc": "2.0",
-  "method": "cancel_cart",
+  "id": 1,
+  "method": "tools/call",
   "params": {
-    "_meta": {
-      "ucp": {
-        "profile": "https://platform.example/profiles/v2026-01/shopping-agent.json"
-      }
-    },
-    "id": "cart_abc123",
-    "idempotency_key": "660e8400-e29b-41d4-a716-446655440001"
-  },
-  "id": 1
+    "name": "cancel_cart",
+    "arguments": {
+      "meta": {
+        "ucp-agent": {
+          "profile": "https://platform.example/profiles/v2026-01/shopping-agent.json"
+        },
+        "idempotency-key": "660e8400-e29b-41d4-a716-446655440001"
+      },
+      "id": "cart_abc123"
+    }
+  }
 }
 ```
 
@@ -8420,78 +8629,98 @@ Maps to the [Cancel Cart](https://ucp.dev/draft/specification/cart/#cancel-cart)
   "jsonrpc": "2.0",
   "id": 1,
   "result": {
-    "ucp": {
-      "version": "2026-01-15",
-      "capabilities": [
-        {
-          "name": "dev.ucp.shopping.checkout",
-          "version": "2026-01-11"
+    "structuredContent": {
+      "cart": {
+        "ucp": {
+          "version": "2026-01-15",
+          "capabilities": [
+            {
+              "name": "dev.ucp.shopping.checkout",
+              "version": "2026-01-11"
+            },
+            {
+              "name": "dev.ucp.shopping.cart",
+              "version": "2026-01-15"
+            }
+          ]
         },
-        {
-          "name": "dev.ucp.shopping.cart",
-          "version": "2026-01-15"
-        }
-      ]
-    },
-    "id": "cart_abc123",
-    "line_items": [
-      {
-        "id": "li_1",
-        "item": {
-          "id": "item_123",
-          "title": "Red T-Shirt",
-          "price": 2500
-        },
-        "quantity": 2,
+        "id": "cart_abc123",
+        "line_items": [
+          {
+            "id": "li_1",
+            "item": {
+              "id": "item_123",
+              "title": "Red T-Shirt",
+              "price": 2500
+            },
+            "quantity": 2,
+            "totals": [
+              {"type": "subtotal", "amount": 5000},
+              {"type": "total", "amount": 5000}
+            ]
+          }
+        ],
+        "currency": "USD",
         "totals": [
-          {"type": "subtotal", "amount": 5000},
-          {"type": "total", "amount": 5000}
-        ]
+          {
+            "type": "subtotal",
+            "amount": 5000
+          },
+          {
+            "type": "total",
+            "amount": 5000
+          }
+        ],
+        "continue_url": "https://business.example.com/checkout?cart=cart_abc123"
       }
-    ],
-    "currency": "USD",
-    "totals": [
+    },
+    "content": [
       {
-        "type": "subtotal",
-        "amount": 5000
-      },
-      {
-        "type": "total",
-        "amount": 5000
+        "type": "text",
+        "text": "{\"cart\":{\"ucp\":{...},\"id\":\"cart_abc123\",...}}"
       }
-    ],
-    "continue_url": "https://business.example.com/checkout?cart=cart_abc123"
+    ]
   }
 }
 ```
 
 ## Error Handling
 
-See the [Core Specification](https://ucp.dev/draft/specification/overview/#error-handling) for negotiation error handling (discovery failures, negotiation failures).
+UCP distinguishes between protocol errors and business outcomes. See the [Core Specification](https://ucp.dev/draft/specification/overview/#error-handling) for the complete error code registry and transport binding examples.
+
+- **Protocol errors**: Transport-level failures (authentication, rate limiting, unavailability) that prevent request processing. Returned as JSON-RPC `error` with code `-32000` (or `-32001` for discovery errors).
+- **Business outcomes**: Application-level results from successful request processing, returned as JSON-RPC `result` with UCP envelope and `messages`.
 
 ### Business Outcomes
 
-Business outcomes (including not found and validation errors) are returned as JSON-RPC `result` with the UCP envelope and `messages`:
+Business outcomes (including not found and validation errors) are returned as JSON-RPC `result` with `structuredContent` containing the UCP envelope and `messages`:
 
 ```json
 {
   "jsonrpc": "2.0",
   "id": 1,
   "result": {
-    "ucp": {
-      "version": "2026-01-11",
-      "capabilities": {
-        "dev.ucp.shopping.cart": [{"version": "2026-01-11"}]
+    "structuredContent": {
+      "cart": {
+        "ucp": {
+          "version": "2026-01-11",
+          "capabilities": {
+            "dev.ucp.shopping.cart": [{"version": "2026-01-11"}]
+          }
+        },
+        "messages": [
+          {
+            "type": "error",
+            "code": "not_found",
+            "content": "Cart not found or has expired"
+          }
+        ],
+        "continue_url": "https://merchant.com/"
       }
     },
-    "messages": [
-      {
-        "type": "error",
-        "code": "NOT_FOUND",
-        "content": "Cart not found or has expired"
-      }
-    ],
-    "continue_url": "https://merchant.com/"
+    "content": [
+      {"type": "text", "text": "{\"cart\":{...}}"}
+    ]
   }
 }
 ```
@@ -8502,7 +8731,7 @@ A conforming MCP transport implementation **MUST**:
 
 1. Implement JSON-RPC 2.0 protocol correctly.
 1. Provide all core cart tools defined in this specification.
-1. Return negotiation failures per the [Core Specification](https://ucp.dev/draft/specification/overview/#error-handling).
+1. Return errors per the [Core Specification](https://ucp.dev/draft/specification/overview/#error-handling).
 1. Return business outcomes as JSON-RPC `result` with UCP envelope and `messages` array.
 1. Validate tool inputs against UCP schemas.
 1. Support HTTP transport with streaming.

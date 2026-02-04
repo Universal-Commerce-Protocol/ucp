@@ -1179,7 +1179,10 @@ UCP uses standard HTTP status codes to indicate the success or failure of an API
 
 ### Error Responses
 
-See the [Core Specification](https://ucp.dev/draft/specification/overview/#error-handling) for negotiation error handling (discovery failures, negotiation failures).
+See the [Core Specification](https://ucp.dev/draft/specification/overview/#error-handling) for the complete error code registry and transport binding examples.
+
+- **Protocol errors**: Return appropriate HTTP status code (401, 403, 409, 429, 503) with JSON body containing `code` and `content`.
+- **Business outcomes**: Return HTTP 200 with UCP envelope and `messages` array.
 
 #### Business Outcomes
 
@@ -1204,10 +1207,9 @@ Business outcomes (including errors like unavailable merchandise) are returned w
   ],
   "messages": [
     {
-      "type": "error",
-      "code": "INSUFFICIENT_STOCK",
-      "content": "Requested 100 units but only 12 available",
-      "severity": "requires_buyer_input",
+      "type": "warning",
+      "code": "quantity_adjusted",
+      "content": "Quantity adjusted, requested 100 units but only 12 available",
       "path": "$.line_items[0].quantity"
     }
   ],
