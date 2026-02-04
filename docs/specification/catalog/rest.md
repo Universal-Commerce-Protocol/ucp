@@ -63,8 +63,7 @@ Businesses advertise REST transport availability through their UCP profile at
 | Endpoint | Method | Capability | Description |
 | :--- | :--- | :--- | :--- |
 | `/catalog/search` | POST | [Search](search.md) | Search for products. |
-| `/catalog/item/{id}` | GET | [Lookup](lookup.md) | Lookup an item by ID. |
-| `/catalog/lookup` | POST | [Lookup](lookup.md) | Lookup an item by ID. |
+| `/catalog/lookup` | POST | [Lookup](lookup.md) | Lookup one or more products by ID. |
 
 ### `POST /catalog/search`
 
@@ -178,110 +177,17 @@ Maps to the [Catalog Search](search.md) capability.
     }
     ```
 
-### `GET /catalog/item/{id}`
+### `POST /catalog/lookup`
 
-Maps to the [Catalog Lookup](lookup.md) capability. Context is extensible, but
-only a well-known subset is supported via query parameters. For the full set of
-context capabilities, use `POST /catalog/lookup`.
+Maps to the [Catalog Lookup](lookup.md) capability. See capability documentation
+for supported identifiers, resolution behavior, and client correlation requirements.
 
-The `id` path parameter accepts either a product ID or variant ID. The response
-MUST return the parent product with full context. For product ID lookups,
-`variants` MAY contain a representative set (when the full set is large, based on
-buyer context or other criteria). For variant ID lookups, `variants` MUST contain
-only the requested variant.
-
-**Query Parameters:**
-
-| Parameter | Description |
-| :--- | :--- |
-| `country` | ISO 3166-1 alpha-2 country code (e.g., `US`). Hint for market context. |
-| `region` | Region/state within country (e.g., `CA`). Hint for localization. |
-| `postal_code` | Postal code (e.g., `94043`). Hint for regional refinement. |
-| `language` | BCP 47 language tag (e.g., `en`, `fr-CA`). Overrides `Accept-Language` header when provided. |
-| `currency` | ISO 4217 currency code (e.g., `EUR`, `USD`). Hint for multi-currency markets. |
-
-For full context control (including `intent`), use `POST /catalog/lookup`.
+The request body contains an array of identifiers and optional context that
+applies to all lookups in the batch.
 
 {{ method_fields('lookup_catalog', 'rest.openapi.json', 'catalog-rest') }}
 
-#### Example
-
-=== "Request"
-
-    ```http
-    GET /catalog/item/prod_abc123?country=US&region=CA HTTP/1.1
-    Host: business.example.com
-    Accept-Language: en-US
-    ```
-
-    Or get by variant ID (returns parent product with only this variant):
-
-    ```http
-    GET /catalog/item/prod_abc123_size10?country=US HTTP/1.1
-    Host: business.example.com
-    ```
-
-=== "Response"
-
-    ```json
-    {
-      "ucp": {
-        "version": "2026-01-11",
-        "capabilities": [
-          {
-            "name": "dev.ucp.shopping.catalog.lookup",
-            "version": "2026-01-11"
-          }
-        ]
-      },
-      "product": {
-        "id": "prod_abc123",
-        "title": "Blue Runner Pro",
-        "description": {
-          "plain": "Lightweight running shoes with responsive cushioning."
-        },
-        "price": {
-          "min": { "amount": 12000, "currency": "USD" },
-          "max": { "amount": 12000, "currency": "USD" }
-        },
-        "variants": [
-          {
-            "id": "prod_abc123_size10",
-            "sku": "BRP-BLU-10",
-            "title": "Size 10",
-            "description": { "plain": "Size 10 variant" },
-            "price": { "amount": 12000, "currency": "USD" },
-            "availability": { "available": true },
-            "tags": ["running", "road", "neutral"],
-            "seller": {
-              "name": "Example Store",
-              "links": [
-                { "type": "refund_policy", "url": "https://business.example.com/policies/refunds" }
-              ]
-            }
-          }
-        ],
-        "metadata": {
-          "collection": "Winter 2026",
-          "technology": {
-            "midsole": "React foam",
-            "outsole": "Continental rubber"
-          }
-        }
-      }
-    }
-    ```
-
-### `POST /catalog/lookup`
-
-Maps to the [Catalog Lookup](lookup.md) capability. Use this endpoint when you
-need explicit market context.
-
-The request body contains the product/variant ID and optional context.
-
-{{ method_fields('lookup_catalog_post', 'rest.openapi.json', 'catalog-rest') }}
-
-#### Example: Single Lookup with Context
+#### Example: Batch Lookup with Context
 
 === "Request"
 
@@ -291,12 +197,10 @@ The request body contains the product/variant ID and optional context.
     Content-Type: application/json
 
     {
-      "id": "prod_abc123",
+      "ids": ["prod_abc123", "prod_def456"],
       "context": {
-        "address_country": "US",
-        "address_region": "CA",
-        "language": "es",
-        "intent": "looking for comfortable everyday shoes"
+        "country": "US",
+        "language": "es"
       }
     }
     ```
@@ -314,27 +218,104 @@ The request body contains the product/variant ID and optional context.
           }
         ]
       },
-      "product": {
-        "id": "prod_abc123",
-        "title": "Blue Runner Pro",
-        "description": {
-          "plain": "Zapatillas ligeras con amortiguación reactiva."
+      "products": [
+        {
+          "id": "prod_abc123",
+          "title": "Blue Runner Pro",
+          "description": {
+            "plain": "Zapatillas ligeras con amortiguación reactiva."
+          },
+          "price": {
+            "min": { "amount": 12000, "currency": "USD" },
+            "max": { "amount": 12000, "currency": "USD" }
+          },
+          "variants": [
+            {
+              "id": "prod_abc123_size10",
+              "sku": "BRP-BLU-10",
+              "title": "Talla 10",
+              "description": { "plain": "Variante talla 10" },
+              "price": { "amount": 12000, "currency": "USD" },
+              "availability": { "available": true }
+            }
+          ]
         },
-        "price": {
-          "min": { "amount": 12000, "currency": "USD" },
-          "max": { "amount": 12000, "currency": "USD" }
-        },
-        "variants": [
+        {
+          "id": "prod_def456",
+          "title": "Trail Blazer X",
+          "description": {
+            "plain": "Zapatillas de trail con tracción superior."
+          },
+          "price": {
+            "min": { "amount": 15000, "currency": "USD" },
+            "max": { "amount": 15000, "currency": "USD" }
+          },
+          "variants": [
+            {
+              "id": "prod_def456_size10",
+              "sku": "TBX-GRN-10",
+              "title": "Talla 10",
+              "price": { "amount": 15000, "currency": "USD" },
+              "availability": { "available": true }
+            }
+          ]
+        }
+      ]
+    }
+    ```
+
+#### Example: Partial Success (Some Identifiers Not Found)
+
+When some identifiers in the batch are not found, the response includes the
+found products in the `products` array. The response MAY include informational
+messages indicating which identifiers were not found.
+
+=== "Request"
+
+    ```json
+    {
+      "ids": ["prod_abc123", "prod_invalid", "prod_def456"]
+    }
+    ```
+
+=== "Response"
+
+    ```json
+    {
+      "ucp": {
+        "version": "2026-01-11",
+        "capabilities": [
           {
-            "id": "prod_abc123_size10",
-            "sku": "BRP-BLU-10",
-            "title": "Talla 10",
-            "description": { "plain": "Variante talla 10" },
-            "price": { "amount": 12000, "currency": "USD" },
-            "availability": { "available": true }
+            "name": "dev.ucp.shopping.catalog.lookup",
+            "version": "2026-01-11"
           }
         ]
-      }
+      },
+      "products": [
+        {
+          "id": "prod_abc123",
+          "title": "Blue Runner Pro",
+          "price": {
+            "min": { "amount": 12000, "currency": "USD" },
+            "max": { "amount": 12000, "currency": "USD" }
+          }
+        },
+        {
+          "id": "prod_def456",
+          "title": "Trail Blazer X",
+          "price": {
+            "min": { "amount": 15000, "currency": "USD" },
+            "max": { "amount": 15000, "currency": "USD" }
+          }
+        }
+      ],
+      "messages": [
+        {
+          "type": "info",
+          "code": "not_found",
+          "content": "prod_invalid"
+        }
+      ]
     }
     ```
 
@@ -359,7 +340,10 @@ All application-level outcomes return HTTP 200 with the UCP envelope and optiona
 `messages` array. See [Catalog Overview](index.md#messages-and-error-handling)
 for message semantics and common scenarios.
 
-#### Example: Product Not Found
+#### Example: All Products Not Found
+
+When all requested identifiers fail lookup, the `products` array is empty. The response
+MAY include informational messages indicating which identifiers were not found.
 
 ```json
 {
@@ -372,27 +356,31 @@ for message semantics and common scenarios.
       }
     ]
   },
+  "products": [],
   "messages": [
     {
-      "type": "error",
+      "type": "info",
       "code": "not_found",
-      "content": "The requested product ID does not exist",
-      "severity": "recoverable"
+      "content": "prod_invalid1"
+    },
+    {
+      "type": "info",
+      "code": "not_found",
+      "content": "prod_invalid2"
     }
   ]
 }
 ```
 
-The `product` field is omitted when the ID doesn't exist. Business outcomes use the
-standard HTTP 200 status with messages in the response body.
+Business outcomes use the standard HTTP 200 status with messages in the response body.
 
 ## Conformance
 
 A conforming REST transport implementation **MUST**:
 
 1. Implement the `POST /catalog/search` endpoint with required `query` parameter.
-2. Implement the `GET /catalog/item/{id}` endpoint with required `id` path parameter.
-3. Implement the `POST /catalog/lookup` endpoint with required `id` parameter.
-4. Return products with valid `Price` objects (amount + currency).
-5. Support cursor-based pagination with default limit of 10.
-6. Return HTTP 200 with `not_found` message for item requests with unknown IDs.
+2. Implement the `POST /catalog/lookup` endpoint per [Catalog Lookup](lookup.md) capability requirements.
+3. Return products with valid `Price` objects (amount + currency).
+4. Support cursor-based pagination with default limit of 10.
+5. Return HTTP 200 for lookup requests; unknown identifiers result in fewer products returned (MAY include informational `not_found` messages).
+6. Return HTTP 400 with `request_too_large` error for requests exceeding batch size limits.

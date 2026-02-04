@@ -287,8 +287,8 @@
     },
     {
       "name": "lookup_catalog",
-      "summary": "Look up a product or variant by ID",
-      "description": "Returns the parent product with context. For product IDs, variants may contain a representative set. For variant IDs, variants contains only the requested variant.",
+      "summary": "Batch lookup products or variants by identifier",
+      "description": "Batch lookup of products or variants by identifier. See Catalog Lookup capability for supported identifier types and resolution behavior.",
       "params": [
         {
           "name": "meta",
@@ -296,12 +296,8 @@
           "schema": {"$ref": "#/components/schemas/meta"}
         },
         {
-          "name": "id",
-          "required": true,
-          "schema": {"type": "string", "description": "Global ID (GID) of product or variant."}
-        },
-        {
           "name": "catalog",
+          "required": true,
           "schema": {"$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/lookup_request"}
         }
       ],

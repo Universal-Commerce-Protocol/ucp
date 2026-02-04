@@ -616,86 +616,15 @@
         }
       }
     },
-    "/catalog/item/{id}": {
-      "get": {
-        "operationId": "lookup_catalog",
-        "summary": "Lookup Catalog Item",
-        "description": "Lookup a product or variant by ID. Context is extensible, but only a well-known subset is supported via query params. For full context capabilities, use POST /catalog/lookup.",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": { "type": "string" },
-            "description": "Global ID (GID) of product or variant."
-          },
-          {
-            "name": "country",
-            "in": "query",
-            "required": false,
-            "schema": { "type": "string" },
-            "description": "ISO 3166-1 alpha-2 country code (e.g., 'US'). Hint for market context."
-          },
-          {
-            "name": "region",
-            "in": "query",
-            "required": false,
-            "schema": { "type": "string" },
-            "description": "Region/state within country (e.g., 'CA'). Hint for localization."
-          },
-          {
-            "name": "postal_code",
-            "in": "query",
-            "required": false,
-            "schema": { "type": "string" },
-            "description": "Postal code (e.g., '94043'). Hint for regional refinement."
-          },
-          {
-            "name": "language",
-            "in": "query",
-            "required": false,
-            "schema": { "type": "string" },
-            "description": "BCP 47 language tag (e.g., 'en', 'fr-CA'). Overrides Accept-Language header when provided."
-          },
-          {
-            "name": "currency",
-            "in": "query",
-            "required": false,
-            "schema": { "type": "string" },
-            "description": "ISO 4217 currency code (e.g., 'EUR', 'USD'). Hint for multi-currency markets."
-          },
-          { "$ref": "#/components/parameters/authorization" },
-          { "$ref": "#/components/parameters/x_api_key" },
-          { "$ref": "#/components/parameters/request_signature" },
-          { "$ref": "#/components/parameters/request_id" },
-          { "$ref": "#/components/parameters/user_agent" },
-          { "$ref": "#/components/parameters/ucp_agent" },
-          { "$ref": "#/components/parameters/accept" },
-          { "$ref": "#/components/parameters/accept_language" },
-          { "$ref": "#/components/parameters/accept_encoding" }
-        ],
-        "responses": {
-          "200": {
-            "description": "Item details",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/catalog_lookup_response" }
-              }
-            }
-          }
-        }
-      }
-    },
     "/catalog/lookup": {
       "post": {
-        "operationId": "lookup_catalog_post",
-        "summary": "Lookup Catalog Item with Context",
-        "description": "Lookup a product by ID with explicit market context. For simple lookups without context, use GET /catalog/item/{id}.",
+        "operationId": "lookup_catalog",
+        "summary": "Batch Lookup Catalog Items",
+        "description": "Lookup one or more products by ID with explicit market context. Supports batch lookups of multiple items in a single request.",
         "parameters": [
           { "$ref": "#/components/parameters/authorization" },
           { "$ref": "#/components/parameters/x_api_key" },
           { "$ref": "#/components/parameters/request_signature" },
-          { "$ref": "#/components/parameters/idempotency_key" },
           { "$ref": "#/components/parameters/request_id" },
           { "$ref": "#/components/parameters/user_agent" },
           { "$ref": "#/components/parameters/ucp_agent" },
@@ -972,7 +901,7 @@
         "$ref": "../../schemas/shopping/catalog_search.json#/$defs/search_response"
       },
       "catalog_lookup_request": {
-        "$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/lookup_post_request"
+        "$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/lookup_request"
       },
       "catalog_lookup_response": {
         "$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/lookup_response"

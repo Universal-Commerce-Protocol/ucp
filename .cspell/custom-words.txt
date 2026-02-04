@@ -91,6 +91,7 @@ shopify
 streamable
 superfences
 talla
+tracción
 upsell
 upsells
 variante

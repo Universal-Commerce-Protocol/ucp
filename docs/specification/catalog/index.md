@@ -23,7 +23,7 @@ This enables product discovery before checkout, supporting use cases like:
 
 * Free-text product search
 * Category and filter-based browsing
-* Direct product/variant retrieval by ID
+* Batch product/variant retrieval by identifier
 * Price comparison across variants
 
 ## Capabilities
@@ -31,7 +31,7 @@ This enables product discovery before checkout, supporting use cases like:
 | Capability | Description |
 | :--- | :--- |
 | [`dev.ucp.shopping.catalog.search`](search.md) | Search for products using query text and filters. |
-| [`dev.ucp.shopping.catalog.lookup`](lookup.md) | Retrieve a specific product or variant by ID. |
+| [`dev.ucp.shopping.catalog.lookup`](lookup.md) | Retrieve products or variants by identifier. |
 
 ## Key Concepts
 
@@ -161,61 +161,68 @@ This is not an error - the query was valid but returned no results.
 
 #### Backorder Warning
 
-When a product is available but has delayed fulfillment, return the product with a warning message. Use the `path` field to target specific variants.
+When a product is available but has delayed fulfillment, return the product with
+a warning message. Use the `path` field to target specific variants.
 
 ```json
 {
   "ucp": {...},
-  "product": {
-    "id": "prod_xyz789",
-    "title": "Professional Chef Knife Set",
-    "description": { "plain": "Complete professional knife collection." },
-    "price": {
-      "min": { "amount": 29900, "currency": "USD" },
-      "max": { "amount": 29900, "currency": "USD" }
-    },
-    "variants": [
-      {
-        "id": "var_abc",
-        "title": "12-piece Set",
-        "description": { "plain": "Complete professional knife collection." },
-        "price": { "amount": 29900, "currency": "USD" },
-        "availability": { "available": true }
-      }
-    ]
-  },
+  "products": [
+    {
+      "id": "prod_xyz789",
+      "title": "Professional Chef Knife Set",
+      "description": { "plain": "Complete professional knife collection." },
+      "price": {
+        "min": { "amount": 29900, "currency": "USD" },
+        "max": { "amount": 29900, "currency": "USD" }
+      },
+      "variants": [
+        {
+          "id": "var_abc",
+          "title": "12-piece Set",
+          "description": { "plain": "Complete professional knife collection." },
+          "price": { "amount": 29900, "currency": "USD" },
+          "availability": { "available": true }
+        }
+      ]
+    }
+  ],
   "messages": [
     {
       "type": "warning",
       "code": "delayed_fulfillment",
-      "path": "$.product.variants[0]",
+      "path": "$.products[0].variants[0]",
       "content": "12-piece set on backorder, ships in 2-3 weeks"
     }
   ]
 }
 ```
 
-Agents can present the option and inform the user about the delay. The `path` field uses RFC 9535 JSONPath to target specific components.
+Agents can present the option and inform the user about the delay. The `path`
+field uses RFC 9535 JSONPath to target specific components.
 
-#### Product Not Found
+#### Identifiers Not Found
 
-When a requested product/variant ID doesn't exist, return success with an error message and omit the `product` field.
+When requested identifiers don't exist, return success with the found products
+(if any). The response MAY include informational messages indicating which
+identifiers were not found.
 
 ```json
 {
   "ucp": {...},
+  "products": [],
   "messages": [
     {
-      "type": "error",
+      "type": "info",
       "code": "not_found",
-      "content": "The requested product ID does not exist",
-      "severity": "recoverable"
+      "content": "prod_invalid"
     }
   ]
 }
 ```
 
-Agents should handle this gracefully (e.g., ask user for a different product).
+Agents correlate results by matching fields in returned products against
+requested identifiers.
 
 ## Transport Bindings
 

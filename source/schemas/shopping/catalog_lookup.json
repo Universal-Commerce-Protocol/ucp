@@ -4,26 +4,19 @@
   "name": "dev.ucp.shopping.catalog.lookup",
   "version": "2026-01-11",
   "title": "Catalog Lookup",
-  "description": "Product/variant lookup by ID capability.",
+  "description": "Product/variant lookup by identifier capability.",
   "type": "object",
   "$defs": {
     "lookup_request": {
       "type": "object",
-      "description": "Context for GET /catalog/item/{id} (id provided in path).",
+      "description": "Request body for catalog lookup.",
+      "required": ["ids"],
       "properties": {
-        "context": {
-          "$ref": "types/context.json"
-        }
-      }
-    },
-    "lookup_post_request": {
-      "type": "object",
-      "description": "Request for POST /catalog/lookup with explicit context.",
-      "required": ["id"],
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Product or variant ID."
+        "ids": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1,
+          "description": "Identifiers to lookup. Implementations MUST support product ID and variant ID; MAY support secondary identifiers (SKU, handle, etc.)."
         },
         "context": {
           "$ref": "types/context.json"
@@ -33,22 +26,26 @@
     "lookup_response": {
       "type": "object",
       "required": [
-        "ucp"
+        "ucp",
+        "products"
       ],
       "properties": {
         "ucp": {
           "$ref": "../ucp.json#/$defs/response_catalog_schema"
         },
-        "product": {
-          "$ref": "types/product.json",
-          "description": "The product containing the requested ID. For product ID lookups, variants may contain a representative set. For variant ID lookups, variants contains only the requested variant."
+        "products": {
+          "type": "array",
+          "items": {
+            "$ref": "types/product.json"
+          },
+          "description": "Products matching the requested identifiers. May contain fewer items if some identifiers not found, or more if identifiers match multiple products."
         },
         "messages": {
           "type": "array",
           "items": {
             "$ref": "types/message.json"
           },
-          "description": "Errors, warnings, or informational messages about the requested item."
+          "description": "Errors, warnings, or informational messages about the requested items."
         }
       }
     }
