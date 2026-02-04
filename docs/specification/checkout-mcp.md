@@ -650,6 +650,83 @@ as JSON-RPC `result` with `structuredContent` containing the UCP envelope and
 }
 ```
 
+## Message Signing
+
+All checkout operations **MUST** include message signatures per the
+[Message Signatures](signatures.md) specification.
+
+### Request Signing
+
+Platforms **MUST** sign all requests using JWS Detached Content (RFC 7515
+Appendix F). The signature is placed in `meta.signature`:
+
+| Field                  | Required | Description                        |
+| :--------------------- | :------- | :--------------------------------- |
+| `meta.signature`       | Yes      | Detached JWS (`header..signature`) |
+| `meta.ucp-agent`       | Yes      | Signer identity                    |
+| `meta.idempotency-key` | Cond.*   | Unique key for replay protection   |
+
+\* Required for `complete_checkout` and `cancel_checkout`
+
+**Example Signed Request:**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "tools/call",
+  "params": {
+    "name": "complete_checkout",
+    "arguments": {
+      "meta": {
+        "ucp-agent": {"profile": "https://platform.example/.well-known/ucp"},
+        "signature": "eyJhbGciOiJFUzI1NiIsImtpZCI6InBsYXRmb3JtLTIwMjUifQ..MEUCIQD...",
+        "idempotency-key": "550e8400-e29b-41d4-a716-446655440000"
+      },
+      "id": "checkout_abc123",
+      "checkout": {"payment": {...}}
+    }
+  }
+}
+```
+
+The signed payload is the entire JSON-RPC message with only `meta.signature`
+removed, then JCS-canonicalized.
+
+See [Message Signatures - MCP Request Signing](signatures.md#mcp-request-signing)
+for the complete signing algorithm.
+
+### Response Signing
+
+Response signatures are **REQUIRED** for:
+
+* `complete_checkout` responses (order confirmation)
+
+Response signatures are **OPTIONAL** for:
+
+* `create_checkout`, `get_checkout`, `update_checkout`, `cancel_checkout`
+
+**Example Signed Response:**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "content": [{"type": "text", "text": "..."}],
+    "structuredContent": {
+      "meta": {
+        "signature": "eyJhbGciOiJFUzI1NiIsImtpZCI6Im1lcmNoYW50LTIwMjUifQ..MFQCIH..."
+      },
+      "checkout": {"id": "checkout_abc123", "status": "completed", ...}
+    }
+  }
+}
+```
+
+See [Message Signatures - MCP Response Signing](signatures.md#mcp-response-signing)
+for the complete signing algorithm.
+
 ## Conformance
 
 A conforming MCP transport implementation **MUST**:
@@ -661,6 +738,8 @@ A conforming MCP transport implementation **MUST**:
     `messages` array.
 5. Validate tool inputs against UCP schemas.
 6. Support HTTP transport with streaming.
+7. Sign all requests per [Message Signatures](signatures.md) specification.
+8. Verify signatures on incoming requests before processing.
 
 ## Implementation
 

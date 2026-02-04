@@ -598,6 +598,18 @@ These failure types require different handling:
 | `capabilities_incompatible` | No compatible capabilities in intersection           | 200  | result |
 | `version_unsupported`       | Platform's UCP version is not supported              | 200  | result |
 
+**Signature Errors:**
+
+| Code                   | Description                                            | REST | MCP    |
+| ---------------------- | ------------------------------------------------------ | ---- | ------ |
+| `signature_missing`    | Required signature header/field not present            | 401  | -32000 |
+| `signature_invalid`    | Signature verification failed                          | 401  | -32000 |
+| `key_not_found`        | Key ID not found in signer's `signing_keys`            | 401  | -32000 |
+| `digest_mismatch`      | Body digest doesn't match `UCP-Content-Digest-JCS`     | 400  | -32600 |
+| `algorithm_unsupported`| Signature algorithm not supported                      | 400  | -32600 |
+
+See [Message Signatures](signatures.md) for signature verification details.
+
 **Protocol Errors:**
 
 | HTTP | Description                                     | MCP        |

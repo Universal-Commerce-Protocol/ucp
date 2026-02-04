@@ -1282,6 +1282,65 @@ with HTTP 200 and the UCP envelope containing `messages`:
 }
 ```
 
+## Message Signing
+
+All checkout operations **MUST** include message signatures per the
+[Message Signatures](signatures.md) specification.
+
+### Request Signing
+
+Platforms **MUST** sign all requests using RFC 9421 HTTP Message Signatures:
+
+| Header                   | Required | Description                              |
+| :----------------------- | :------- | :--------------------------------------- |
+| `Signature-Input`        | Yes      | Describes signed components              |
+| `Signature`              | Yes      | Contains the signature value             |
+| `UCP-Content-Digest-JCS` | Cond.*   | JCS-canonicalized body digest            |
+
+\* Required for requests with a body (POST, PUT)
+
+**Example Signed Request:**
+
+```http
+POST /checkout-sessions HTTP/1.1
+Host: merchant.example.com
+Content-Type: application/json
+UCP-Agent: profile="https://platform.example/.well-known/ucp"
+UCP-Content-Digest-JCS: sha-256=:X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=:
+Signature-Input: sig1=("@method" "@path" "ucp-content-digest-jcs" "content-type");created=1738617600;keyid="platform-2025"
+Signature: sig1=:MEUCIQDTxNq8h7LGHpvVZQp1iHkFp9+3N8Mxk2zH1wK4YuVN8w...:
+
+{"line_items":[{"item":{"id":"item_123"},"quantity":2}]}
+```
+
+See [Message Signatures - REST Request Signing](signatures.md#rest-request-signing)
+for the complete signing algorithm.
+
+### Response Signing
+
+Response signatures are **REQUIRED** for:
+
+* `complete_checkout` responses (order confirmation)
+
+Response signatures are **OPTIONAL** for:
+
+* `create_checkout`, `get_checkout`, `update_checkout`, `cancel_checkout`
+
+**Example Signed Response:**
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json
+UCP-Content-Digest-JCS: sha-256=:Y5fK8nLmPqRsT3vWxYzAbCdEfGhIjKlMnO...:
+Signature-Input: sig1=("@status" "ucp-content-digest-jcs" "content-type");created=1738617601;keyid="merchant-2025"
+Signature: sig1=:MFQCIH7kL9nM2oP5qR8sT1uV4wX6yZaB3cD...:
+
+{"id":"chk_123","status":"completed","order":{"id":"ord_456"}}
+```
+
+See [Message Signatures - REST Response Signing](signatures.md#rest-response-signing)
+for the complete signing algorithm.
+
 ## Security Considerations
 
 ### Authentication
