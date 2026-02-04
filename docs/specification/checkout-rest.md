@@ -1241,8 +1241,12 @@ request.
 
 ### Error Responses
 
-See the [Core Specification](overview.md#error-handling) for negotiation error
-handling (discovery failures, negotiation failures).
+See the [Core Specification](overview.md#error-handling) for the complete error
+code registry and transport binding examples.
+
+* **Protocol errors**: Return appropriate HTTP status code (401, 403, 409, 429,
+    503) with JSON body containing `code` and `content`.
+* **Business outcomes**: Return HTTP 200 with UCP envelope and `messages` array.
 
 #### Business Outcomes
 

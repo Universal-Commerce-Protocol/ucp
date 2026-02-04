@@ -588,13 +588,31 @@ These failure types require different handling:
 
 ##### Error Codes
 
+**Negotiation Errors:**
+
 | Code                        | Description                                          | REST | MCP    |
 | --------------------------- | ---------------------------------------------------- | ---- | ------ |
-| `invalid_profile_url`       | Profile URL is malformed, missing, or unresolvable   | 400  | error  |
-| `profile_unreachable`       | Resolved URL but fetch failed (timeout, non-2xx)     | 424  | error  |
-| `profile_malformed`         | Fetched content is not valid JSON or violates schema | 422  | error  |
+| `invalid_profile_url`       | Profile URL is malformed, missing, or unresolvable   | 400  | -32001 |
+| `profile_unreachable`       | Resolved URL but fetch failed (timeout, non-2xx)     | 424  | -32001 |
+| `profile_malformed`         | Fetched content is not valid JSON or violates schema | 422  | -32001 |
 | `capabilities_incompatible` | No compatible capabilities in intersection           | 200  | result |
 | `version_unsupported`       | Platform's UCP version is not supported              | 200  | result |
+
+**Protocol Errors:**
+
+| HTTP | Description                                     | MCP        |
+| ---- | ----------------------------------------------- | ---------- |
+| 401  | Authentication required or credentials invalid  | -32000     |
+| 403  | Authenticated but insufficient permissions      | -32000     |
+| 409  | Idempotency key reused with different payload   | -32000     |
+| 429  | Too many requests                               | -32000     |
+| 500  | Unexpected server error                         | -32603     |
+| 503  | Server temporarily unable to handle requests    | -32000     |
+
+For MCP over HTTP, the HTTP status code is the primary signal; the JSON-RPC
+`error.code` provides a secondary signal. Both transports **SHOULD** include
+`Retry-After` header (REST) or `error.data.retry_after` (MCP) for 429 and 503
+responses.
 
 ##### The `continue_url` Field
 
@@ -648,6 +666,23 @@ task through the standard web interface.
     }
     ```
 
+    **Protocol Error — Rate Limit (429):**
+
+    ```http
+    HTTP/1.1 429 Too Many Requests
+    Retry-After: 60
+    ```
+
+    **Protocol Error — Unauthorized (401):**
+
+    ```http
+    HTTP/1.1 401 Unauthorized
+    WWW-Authenticate: Bearer realm="ucp"
+    ```
+
+    Protocol errors use standard HTTP status codes and headers. Response bodies
+    are optional.
+
 === "MCP"
 
     **Discovery Failure (JSON-RPC error):**
@@ -696,6 +731,40 @@ task through the standard web interface.
       }
     }
     ```
+
+    **Protocol Error — Rate Limit (JSON-RPC error):**
+
+    ```json
+    {
+      "jsonrpc": "2.0",
+      "id": 1,
+      "error": {
+        "code": -32000,
+        "message": "Rate limit exceeded",
+        "data": {
+          "retry_after": 60
+        }
+      }
+    }
+    ```
+
+    **Protocol Error — Unauthorized (JSON-RPC error):**
+
+    ```json
+    {
+      "jsonrpc": "2.0",
+      "id": 1,
+      "error": {
+        "code": -32000,
+        "message": "Unauthorized"
+      }
+    }
+    ```
+
+    When using Streamable HTTP transport, servers **MUST** return the
+    corresponding HTTP status code (e.g., `429` for rate limit) alongside
+    the JSON-RPC error. The HTTP status code is the primary signal for
+    error type.
 
 #### Capability Declaration in Responses
 

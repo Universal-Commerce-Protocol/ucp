@@ -590,8 +590,15 @@ Maps to the [Cancel Cart](cart.md#cancel-cart) operation.
 
 ## Error Handling
 
-See the [Core Specification](overview.md#error-handling) for negotiation error
-handling (discovery failures, negotiation failures).
+UCP distinguishes between protocol errors and business outcomes. See the
+[Core Specification](overview.md#error-handling) for the complete error code
+registry and transport binding examples.
+
+* **Protocol errors**: Transport-level failures (authentication, rate limiting,
+    unavailability) that prevent request processing. Returned as JSON-RPC
+    `error` with code `-32000` (or `-32001` for discovery errors).
+* **Business outcomes**: Application-level results from successful request
+    processing, returned as JSON-RPC `result` with UCP envelope and `messages`.
 
 ### Business Outcomes
 
@@ -635,8 +642,7 @@ A conforming MCP transport implementation **MUST**:
 
 1. Implement JSON-RPC 2.0 protocol correctly.
 2. Provide all core cart tools defined in this specification.
-3. Return negotiation failures per the
-    [Core Specification](overview.md#error-handling).
+3. Return errors per the [Core Specification](overview.md#error-handling).
 4. Return business outcomes as JSON-RPC `result` with UCP envelope and
     `messages` array.
 5. Validate tool inputs against UCP schemas.
