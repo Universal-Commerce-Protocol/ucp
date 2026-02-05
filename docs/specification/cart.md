@@ -157,6 +157,15 @@ Subsequent operations for this cart ID SHOULD return `NOT_FOUND`.
 * [REST Binding](cart-rest.md#cancel-cart)
 * [MCP Binding](cart-mcp.md#cancel_cart)
 
+## Transport Bindings
+
+The abstract operations above are bound to specific transport protocols as
+defined below:
+
+* [REST Binding](cart-rest.md): RESTful API mapping using standard HTTP verbs and JSON payloads.
+* [MCP Binding](cart-mcp.md): Model Context Protocol mapping for agentic interaction.
+* [Embedded Cart Binding](embedded-cart.md): JSON-RPC for powering embedded cart.
+
 ## Entities
 
 Cart reuses the same entity schemas as [Checkout](checkout.md). This ensures
