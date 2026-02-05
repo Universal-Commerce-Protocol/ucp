@@ -1,11 +1,11 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/services/shopping/embedded.json",
-  "title": "Embedded Protocol",
-  "description": "Embedded Protocol (EP) methods for UCP capabilities. Methods are sent from Merchant to Host via postMessage/JSON-RPC 2.0. Method prefixes indicate capability scope: ec.* (checkout). Future capabilities may define additional prefixes (e.g., eo.* for order).",
-
-  "delegations": ["payment.instruments_change", "payment.credential"],
-
+  "openrpc": "1.3.2",
+  "info": {
+    "title": "UCP Shopping Embedded Protocol",
+    "version": "2026-01-11",
+    "description": "Embedded Protocol (EP) methods for the UCP shopping service. Methods are sent from Merchant to Host via postMessage using JSON-RPC 2.0. Method prefixes indicate capability scope: ec.* (checkout). Future capabilities may define additional prefixes (e.g., eo.* for order). Schema references are logical pointers - actual payload shape is determined by negotiated capabilities.\n\nEmbedded Protocol is a client-to-client postMessage interface, so there is no endpoint URL to access this API. Platforms detect merchant support for this protocol based on the presence of `services[\"dev.ucp.shopping\"][transport=embedded]` in discovery responses."
+  },
+  "servers": [],
   "methods": [
     {
       "name": "ec.ready",
@@ -238,5 +238,6 @@
         }
       }
     }
-  ]
+  ],
+  "x-delegations": ["payment.instruments_change", "payment.credential"]
 }
