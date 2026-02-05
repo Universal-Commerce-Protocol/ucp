@@ -104,20 +104,24 @@ data, ensuring signatures can be verified regardless of:
 
 ### Signature Algorithms
 
-All signatures **MUST** use one of the following algorithms:
+UCP supports ECDSA signatures with the following algorithms:
 
-| Algorithm | Curve   | Hash    | Required | Description                    |
-| :-------- | :------ | :------ | :------- | :----------------------------- |
-| `ES256`   | P-256   | SHA-256 | Yes      | ECDSA (**RECOMMENDED**)        |
-| `ES384`   | P-384   | SHA-384 | No       | ECDSA with higher security     |
-| `ES512`   | P-521   | SHA-512 | No       | ECDSA with highest security    |
+| Algorithm | Curve   | Hash    |
+| :-------- | :------ | :------ |
+| `ES256`   | P-256   | SHA-256 |
+| `ES384`   | P-384   | SHA-384 |
+| `ES512`   | P-521   | SHA-512 |
 
-Implementations **MUST** support `ES256`. Support for `ES384` and `ES512` is
-**OPTIONAL**.
+**Implementation requirements:**
 
-**Security Note:** ES256 provides approximately 128 bits of security, which is
-sufficient for commercial applications. Use ES384 or ES512 for higher security
-requirements.
+* All implementations **MUST** support verifying `ES256` signatures
+* Support for `ES384` and `ES512` is **OPTIONAL**
+
+**Usage guidance:**
+
+* Signers **SHOULD** use `ES256` for maximum compatibility
+* Signers **MAY** use `ES384` or `ES512` when both parties support them
+* The algorithm is indicated by the `alg` field in the signing key's JWK
 
 ### Key Format (JWK)
 
@@ -260,7 +264,6 @@ To rotate keys without service interruption:
 
 * Rotate keys every 90 days
 * Support multiple active keys during transitions
-* Signers: use newest key
 * Verifiers: accept any key in `signing_keys[]`
 
 **Key Compromise Response:**
