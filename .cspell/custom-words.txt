@@ -33,6 +33,7 @@ Sephora
 Shopify
 Shopee
 Splitit
+Streamable
 Stripe
 Target
 UCP

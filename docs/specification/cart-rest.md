@@ -263,7 +263,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
       "messages": [
         {
           "type": "error",
-          "code": "NOT_FOUND",
+          "code": "not_found",
           "content": "Cart not found or has expired"
         }
       ],
@@ -495,8 +495,12 @@ operations unless otherwise noted.
 
 ### Error Responses
 
-See the [Core Specification](overview.md#error-handling) for negotiation error
-handling (discovery failures, negotiation failures).
+See the [Core Specification](overview.md#error-handling) for the complete error
+code registry and transport binding examples.
+
+* **Protocol errors**: Return appropriate HTTP status code (401, 403, 409, 429,
+    503) with JSON body containing `code` and `content`.
+* **Business outcomes**: Return HTTP 200 with UCP envelope and `messages` array.
 
 #### Business Outcomes
 
@@ -514,7 +518,7 @@ HTTP 200 and the UCP envelope containing `messages`:
   "messages": [
     {
       "type": "error",
-      "code": "NOT_FOUND",
+      "code": "not_found",
       "content": "Cart not found or has expired"
     }
   ],

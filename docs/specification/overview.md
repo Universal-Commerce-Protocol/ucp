@@ -505,16 +505,18 @@ metadata:
 ```json
 {
   "jsonrpc": "2.0",
-  "method": "create_checkout",
+  "method": "tools/call",
   "params": {
-    "meta": {
-      "ucp-agent": {
-        "profile": "https://agent.example/profiles/shopping-agent.json"
+    "name": "create_checkout",
+    "arguments": {
+      "meta": {
+        "ucp-agent": {
+          "profile": "https://agent.example/profiles/shopping-agent.json"
+        }
       },
-      "idempotency-key": "550e8400-e29b-41d4-a716-446655440000"
-    },
-    "checkout": {
-      "line_items": [...]
+      "checkout": {
+        "line_items": [...]
+      }
     }
   },
   "id": 1
@@ -586,13 +588,31 @@ These failure types require different handling:
 
 ##### Error Codes
 
+**Negotiation Errors:**
+
 | Code                        | Description                                          | REST | MCP    |
 | --------------------------- | ---------------------------------------------------- | ---- | ------ |
-| `INVALID_PROFILE_URL`       | Profile URL is malformed, missing, or unresolvable   | 400  | error  |
-| `PROFILE_UNREACHABLE`       | Resolved URL but fetch failed (timeout, non-2xx)     | 424  | error  |
-| `PROFILE_MALFORMED`         | Fetched content is not valid JSON or violates schema | 422  | error  |
-| `CAPABILITIES_INCOMPATIBLE` | No compatible capabilities in intersection           | 200  | result |
-| `VERSION_UNSUPPORTED`       | Platform's UCP version is not supported              | 200  | result |
+| `invalid_profile_url`       | Profile URL is malformed, missing, or unresolvable   | 400  | -32001 |
+| `profile_unreachable`       | Resolved URL but fetch failed (timeout, non-2xx)     | 424  | -32001 |
+| `profile_malformed`         | Fetched content is not valid JSON or violates schema | 422  | -32001 |
+| `capabilities_incompatible` | No compatible capabilities in intersection           | 200  | result |
+| `version_unsupported`       | Platform's UCP version is not supported              | 200  | result |
+
+**Protocol Errors:**
+
+| HTTP | Description                                     | MCP        |
+| ---- | ----------------------------------------------- | ---------- |
+| 401  | Authentication required or credentials invalid  | -32000     |
+| 403  | Authenticated but insufficient permissions      | -32000     |
+| 409  | Idempotency key reused with different payload   | -32000     |
+| 429  | Too many requests                               | -32000     |
+| 500  | Unexpected server error                         | -32603     |
+| 503  | Server temporarily unable to handle requests    | -32000     |
+
+For MCP over HTTP, the HTTP status code is the primary signal; the JSON-RPC
+`error.code` provides a secondary signal. Both transports **SHOULD** include
+`Retry-After` header (REST) or `error.data.retry_after` (MCP) for 429 and 503
+responses.
 
 ##### The `continue_url` Field
 
@@ -617,7 +637,7 @@ task through the standard web interface.
     Content-Type: application/json
 
     {
-      "code": "PROFILE_UNREACHABLE",
+      "code": "profile_unreachable",
       "content": "Unable to fetch agent profile: connection timeout",
       "continue_url": "https://merchant.com/cart"
     }
@@ -637,14 +657,31 @@ task through the standard web interface.
       "messages": [
         {
           "type": "error",
-          "code": "VERSION_UNSUPPORTED",
-          "content": "Platform UCP version 2024-01-01 is not supported",
+          "code": "version_unsupported",
+          "content": "UCP version 2024-01-01 is not supported",
           "severity": "requires_buyer_input"
         }
       ],
-      "continue_url": "https://merchant.com/cart"
+      "continue_url": "https://merchant.com"
     }
     ```
+
+    **Protocol Error — Rate Limit (429):**
+
+    ```http
+    HTTP/1.1 429 Too Many Requests
+    Retry-After: 60
+    ```
+
+    **Protocol Error — Unauthorized (401):**
+
+    ```http
+    HTTP/1.1 401 Unauthorized
+    WWW-Authenticate: Bearer realm="ucp"
+    ```
+
+    Protocol errors use standard HTTP status codes and headers. Response bodies
+    are optional.
 
 === "MCP"
 
@@ -658,7 +695,7 @@ task through the standard web interface.
         "code": -32001,
         "message": "UCP discovery failed",
         "data": {
-          "code": "PROFILE_UNREACHABLE",
+          "code": "profile_unreachable",
           "content": "Unable to fetch agent profile: connection timeout",
           "continue_url": "https://merchant.com/cart"
         }
@@ -673,22 +710,61 @@ task through the standard web interface.
       "jsonrpc": "2.0",
       "id": 1,
       "result": {
-        "ucp": {
-          "version": "2026-01-11",
-          "capabilities": {}
+        "structuredContent": {
+          "ucp": {
+            "version": "2026-01-11",
+            "capabilities": {}
+          },
+          "messages": [
+            {
+              "type": "error",
+              "code": "version_unsupported",
+              "content": "UCP version 2024-01-01 is not supported",
+              "severity": "requires_buyer_input"
+            }
+          ],
+          "continue_url": "https://merchant.com"
         },
-        "messages": [
-          {
-            "type": "error",
-            "code": "VERSION_UNSUPPORTED",
-            "content": "Platform UCP version 2024-01-01 is not supported",
-            "severity": "requires_buyer_input"
-          }
-        ],
-        "continue_url": "https://merchant.com/cart"
+        "content": [
+          {"type": "text", "text": "{\"ucp\":{...},\"messages\":[...],\"continue_url\":\"...\"}"}
+        ]
       }
     }
     ```
+
+    **Protocol Error — Rate Limit (JSON-RPC error):**
+
+    ```json
+    {
+      "jsonrpc": "2.0",
+      "id": 1,
+      "error": {
+        "code": -32000,
+        "message": "Rate limit exceeded",
+        "data": {
+          "retry_after": 60
+        }
+      }
+    }
+    ```
+
+    **Protocol Error — Unauthorized (JSON-RPC error):**
+
+    ```json
+    {
+      "jsonrpc": "2.0",
+      "id": 1,
+      "error": {
+        "code": -32000,
+        "message": "Unauthorized"
+      }
+    }
+    ```
+
+    When using Streamable HTTP transport, servers **MUST** return the
+    corresponding HTTP status code (e.g., `429` for rate limit) alongside
+    the JSON-RPC error. The HTTP status code is the primary signal for
+    error type.
 
 #### Capability Declaration in Responses
 
@@ -1209,8 +1285,7 @@ negotiate the transport via `services` on their profiles.
 
 ### REST Transport (Core)
 
-The primary transport for UCP is **HTTP/1.1** (or higher) using RESTful
-patterns.
+UCP supports **HTTP/1.1** (or higher) using RESTful patterns.
 
 - **Content-Type:** Requests and responses **MUST** use `application/json`.
 - **Methods:** Implementations **MUST** use standard HTTP verbs (e.g., `POST`
@@ -1220,9 +1295,59 @@ patterns.
 
 ### Model Context Protocol (MCP)
 
-UCP capabilities map 1:1 to MCP tools. A business **MAY** expose an MCP server
-that wraps their UCP implementation, allowing LLMs to call tools like
-`create_checkout` directly.
+UCP supports **[MCP protocol](https://modelcontextprotocol.io/specification/)**,
+which operates over JSON-RPC.
+
+#### Request Format
+
+MCP requests use the `tools/call` method with the operation name in
+`params.name` and UCP payload in `params.arguments`:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "tools/call",
+  "params": {
+    "name": "create_checkout",
+    "arguments": {
+      "meta": {"ucp-agent": {"profile": "https://..."}},
+      "checkout": {"line_items": [...]}
+    }
+  },
+  "id": 1
+}
+```
+
+#### Response Format
+
+MCP tool responses use a dual-output pattern for backward compatibility. UCP
+MCP servers:
+
+- **MUST** return the UCP response payload in `structuredContent`
+- **SHOULD** declare `outputSchema` in tool definitions, referencing the
+    appropriate UCP JSON Schema for the capability
+- **SHOULD** also return serialized JSON in `content[]` for backward
+    compatibility with clients not supporting `structuredContent`
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "structuredContent": {
+      "checkout": {
+        "ucp": {"version": "2026-01-11", "capabilities": {...}},
+        "id": "checkout_abc123",
+        "status": "incomplete",
+        ...
+      }
+    },
+    "content": [
+      {"type": "text", "text": "{\"checkout\":{\"ucp\":{...},\"id\":\"checkout_abc123\",...}}"}
+    ]
+  }
+}
+```
 
 ### Agent-to-Agent Protocol (A2A)
 
