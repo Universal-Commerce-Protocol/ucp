@@ -168,7 +168,11 @@ Maps to the [Catalog Search](search.md) capability.
                 "plain": "Lightweight running shoes with responsive cushioning."
               },
               "url": "https://business.example.com/products/blue-runner-pro",
-              "category": "Footwear > Running",
+              "category": [
+                { "value": "187", "taxonomy": "google_product_category" },
+                { "value": "aa-8-1", "taxonomy": "shopify" },
+                { "value": "Footwear > Running", "taxonomy": "merchant" }
+              ],
               "price": {
                 "min": { "amount": 12000, "currency": "USD" },
                 "max": { "amount": 12000, "currency": "USD" }
