@@ -59,17 +59,17 @@ Content-Type: application/json
 
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "2026-01-23",
     "capabilities": {
       "dev.ucp.shopping.checkout": [
-        {"version": "2026-01-11"}
+        {"version": "2026-01-23"}
       ]
     },
     "payment_handlers": {
       "com.shopify.shop_pay": [
         {
           "id": "shop_pay_1234",
-          "version": "2026-01-11",
+          "version": "2026-01-23",
           "config": {
             "merchant_id": "shop_merchant_123"
           }
@@ -178,17 +178,17 @@ Content-Type: application/json
 
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "2026-01-23",
     "capabilities": {
       "dev.ucp.shopping.checkout": [
-        {"version": "2026-01-11"}
+        {"version": "2026-01-23"}
       ]
     },
     "payment_handlers": {
       "com.shopify.shop_pay": [
         {
           "id": "shop_pay_1234",
-          "version": "2026-01-11",
+          "version": "2026-01-23",
           "config": {
             "merchant_id": "shop_merchant_123"
           }
@@ -316,17 +316,17 @@ Content-Type: application/json
 
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "2026-01-23",
     "capabilities": {
       "dev.ucp.shopping.checkout": [
-        {"version": "2026-01-11"}
+        {"version": "2026-01-23"}
       ]
     },
     "payment_handlers": {
       "com.google.pay": [
         {
           "id": "gpay_1234",
-          "version": "2026-01-11",
+          "version": "2026-01-23",
           "config": {
             "allowed_payment_methods": [
               {
@@ -524,17 +524,17 @@ Content-Type: application/json
 
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "2026-01-23",
     "capabilities": {
       "dev.ucp.shopping.checkout": [
-        {"version": "2026-01-11"}
+        {"version": "2026-01-23"}
       ]
     },
     "payment_handlers": {
       "com.shopify.shop_pay": [
         {
           "id": "shop_pay_1234",
-          "version": "2026-01-11",
+          "version": "2026-01-23",
           "config": {
             "merchant_id": "shop_merchant_123"
           }
@@ -701,17 +701,17 @@ Content-Type: application/json
 
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "2026-01-23",
     "capabilities": {
       "dev.ucp.shopping.checkout": [
-        {"version": "2026-01-11"}
+        {"version": "2026-01-23"}
       ]
     },
     "payment_handlers": {
       "com.google.pay": [
         {
           "id": "gpay_1234",
-          "version": "2026-01-11",
+          "version": "2026-01-23",
           "config": {
             "allowed_payment_methods": [
               {
@@ -858,17 +858,17 @@ Content-Type: application/json
 
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "2026-01-23",
     "capabilities": {
       "dev.ucp.shopping.checkout": [
-        {"version": "2026-01-11"}
+        {"version": "2026-01-23"}
       ]
     },
     "payment_handlers": {
       "com.shopify.shop_pay": [
         {
           "id": "shop_pay_1234",
-          "version": "2026-01-11",
+          "version": "2026-01-23",
           "config": {
             "merchant_id": "shop_merchant_123"
           }
@@ -1006,17 +1006,17 @@ Content-Type: application/json
 
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "2026-01-23",
     "capabilities": {
       "dev.ucp.shopping.checkout": [
-        {"version": "2026-01-11"}
+        {"version": "2026-01-23"}
       ]
     },
     "payment_handlers": {
       "com.google.pay": [
         {
           "id": "gpay_1234",
-          "version": "2026-01-11",
+          "version": "2026-01-23",
           "config": {
             "allowed_payment_methods": [
               {

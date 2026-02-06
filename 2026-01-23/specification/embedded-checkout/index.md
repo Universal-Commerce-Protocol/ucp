@@ -54,21 +54,21 @@ When a business advertises the `embedded` transport in their `/.well-known/ucp` 
     "services": {
         "dev.ucp.shopping": [
             {
-                "version": "2026-01-11",
+                "version": "2026-01-23",
                 "transport": "rest",
-                "schema": "https://ucp.dev/services/shopping/rest.openapi.json",
+                "schema": "https://ucp.dev/2026-01-23/services/shopping/rest.openapi.json",
                 "endpoint": "https://merchant.example.com/ucp/v1"
             },
             {
-                "version": "2026-01-11",
+                "version": "2026-01-23",
                 "transport": "mcp",
-                "schema": "https://ucp.dev/services/shopping/mcp.openrpc.json",
+                "schema": "https://ucp.dev/2026-01-23/services/shopping/mcp.openrpc.json",
                 "endpoint": "https://merchant.example.com/ucp/mcp"
             },
             {
-                "version": "2026-01-11",
+                "version": "2026-01-23",
                 "transport": "embedded",
-                "schema": "https://ucp.dev/services/shopping/embedded.openrpc.json"
+                "schema": "https://ucp.dev/2026-01-23/services/shopping/embedded.openrpc.json"
             }
         ]
     }
@@ -89,11 +89,11 @@ Service-level discovery declares that a business supports ECP, but does not guar
     "status": "open",
     "continue_url": "https://merchant.example.com/checkout/abc123",
     "ucp": {
-        "version": "2026-01-11",
+        "version": "2026-01-23",
         "services": {
             "dev.ucp.shopping": [
                 {
-                    "version": "2026-01-11",
+                    "version": "2026-01-23",
                     "transport": "embedded",
                     "config": {
                         "delegate": ["payment.credential", "fulfillment.address_change"]

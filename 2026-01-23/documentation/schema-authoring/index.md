@@ -116,17 +116,17 @@ UCP organizes capabilities, services, and handlers in **registries**—objects k
 ```json
 {
   "capabilities": {
-    "dev.ucp.shopping.checkout": [{"version": "2026-01-11"}],
-    "dev.ucp.shopping.fulfillment": [{"version": "2026-01-11"}]
+    "dev.ucp.shopping.checkout": [{"version": "2026-01-23"}],
+    "dev.ucp.shopping.fulfillment": [{"version": "2026-01-23"}]
   },
   "services": {
     "dev.ucp.shopping": [
-      {"version": "2026-01-11", "transport": "rest"},
-      {"version": "2026-01-11", "transport": "mcp"}
+      {"version": "2026-01-23", "transport": "rest"},
+      {"version": "2026-01-23", "transport": "mcp"}
     ]
   },
   "payment_handlers": {
-    "com.google.pay": [{"id": "gpay_1234", "version": "2026-01-11"}]
+    "com.google.pay": [{"id": "gpay_1234", "version": "2026-01-23"}]
   }
 }
 ```
@@ -162,9 +162,9 @@ Each entity type defines **three variants** for different contexts:
 ```json
 {
   "dev.ucp.shopping.fulfillment": [{
-    "version": "2026-01-11",
+    "version": "2026-01-23",
     "spec": "https://ucp.dev/specification/fulfillment",
-    "schema": "https://ucp.dev/schemas/shopping/fulfillment.json",
+    "schema": "https://ucp.dev/2026-01-23/schemas/shopping/fulfillment.json",
     "config": {
       "supports_multi_group": true
     }
@@ -177,7 +177,7 @@ Each entity type defines **three variants** for different contexts:
 ```json
 {
   "dev.ucp.shopping.fulfillment": [{
-    "version": "2026-01-11",
+    "version": "2026-01-23",
     "config": {
       "allows_multi_destination": {"shipping": true}
     }
@@ -191,7 +191,7 @@ Each entity type defines **three variants** for different contexts:
 {
   "ucp": {
     "capabilities": {
-      "dev.ucp.shopping.fulfillment": [{"version": "2026-01-11"}]
+      "dev.ucp.shopping.fulfillment": [{"version": "2026-01-23"}]
     }
   }
 }
@@ -241,9 +241,9 @@ A capability schema defines both payload structure and declaration variants:
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/schemas/shopping/checkout.json",
+  "$id": "https://ucp.dev/2026-01-23/schemas/shopping/checkout.json",
   "name": "dev.ucp.shopping.checkout",
-  "version": "2026-01-11",
+  "version": "2026-01-23",
   "title": "Checkout",
   "description": "Base checkout schema. Extensions compose via allOf.",
 

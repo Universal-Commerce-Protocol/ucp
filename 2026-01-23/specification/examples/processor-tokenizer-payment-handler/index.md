@@ -84,12 +84,12 @@ The business advertises their tokenization endpoint and identity during discover
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "2026-01-23",
     "payment_handlers": {
       "com.example.processor_tokenizer": [
         {
           "id": "processor_tokenizer",
-          "version": "2026-01-11",
+          "version": "2026-01-23",
           "spec": "https://example.com/ucp/processor-tokenizer.json",
           "schema": "https://example.com/ucp/processor-tokenizer/schema.json",
           "config": {
@@ -154,7 +154,7 @@ Platform identifies the processor tokenizer handler and retrieves the business's
       "com.example.processor_tokenizer": [
         {
           "id": "processor_tokenizer",
-          "version": "2026-01-11",
+          "version": "2026-01-23",
           "config": {
             "environment": "production",
             "business_id": "merchant_xyz789"

@@ -102,7 +102,7 @@ The handler schema defines three config variants for different contexts. See [Pa
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "2026-01-23",
     "payment_handlers": {
       "{handler_name}": [
         {
@@ -165,7 +165,7 @@ Platforms advertise support for this handler in their UCP profile's `payment_han
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "2026-01-23",
     "payment_handlers": {
       "{handler_name}": [
         {

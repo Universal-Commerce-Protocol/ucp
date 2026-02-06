@@ -9,11 +9,11 @@ Businesses that support A2A transport must specify the agent card endpoint as pa
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "2026-01-23",
     "services": {
       "dev.ucp.shopping": [
         {
-          "version": "2026-01-11",
+          "version": "2026-01-23",
           "spec": "https://ucp.dev/specification/overview",
           "transport": "a2a",
           "endpoint": "https://example-business.com/.well-known/agent-card.json"
@@ -61,11 +61,11 @@ An example:
       "params": {
         "capabilities": {
           "dev.ucp.shopping.checkout": [
-            {"version": "2026-01-11"}
+            {"version": "2026-01-23"}
           ],
           "dev.ucp.shopping.fulfillment": [
             {
-              "version": "2026-01-11",
+              "version": "2026-01-23",
               "extends": "dev.ucp.shopping.checkout"
             }
           ]

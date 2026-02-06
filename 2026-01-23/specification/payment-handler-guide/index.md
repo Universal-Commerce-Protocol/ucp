@@ -136,7 +136,7 @@ The handler declaration conforms to the [`PaymentHandler`](https://ucp.dev/schem
       "com.example.handler": [
         {
           "id": "processor_tokenizer_1234",
-          "version": "2026-01-11",
+          "version": "2026-01-23",
           "spec": "https://example.com/ucp/handler",
           "schema": "https://example.com/ucp/handler/schema.json",
           "config": {
@@ -166,7 +166,7 @@ The `PaymentHandler` schema defines three variants for different contexts. While
 ```json
 {
   "id": "processor_tokenizer_1234",
-  "version": "2026-01-11",
+  "version": "2026-01-23",
   "spec": "https://example.com/ucp/handler",
   "schema": "https://example.com/ucp/handler/schema.json",
   "config": {
@@ -181,7 +181,7 @@ The `PaymentHandler` schema defines three variants for different contexts. While
 ```json
 {
   "id": "platform_tokenizer_2345", // note: ids are for disambiguation, they may differ between business and platform
-  "version": "2026-01-11",
+  "version": "2026-01-23",
   "spec": "https://example.com/ucp/handler",
   "schema": "https://example.com/ucp/handler/schema.json",
   "config": {
@@ -196,7 +196,7 @@ The `PaymentHandler` schema defines three variants for different contexts. While
 ```json
 {
   "id": "processor_tokenizer_1234",
-  "version": "2026-01-11",
+  "version": "2026-01-23",
   "config": {
     "api_version": 2,
     "environment": "production",
@@ -232,7 +232,7 @@ The `schema` field points to a JSON schema that defines handler-specific shapes.
   "title": "Tokenizer Handler Schema",
   "description": "Schema for the com.example.tokenizer payment handler.",
   "name": "com.example.tokenizer",
-  "version": "2026-01-11",
+  "version": "2026-01-23",
 
   "$defs": {
     "tokenizer_token": { "$ref": "types/tokenizer_token.json" },
