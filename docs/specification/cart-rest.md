@@ -461,7 +461,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 The following headers are defined for the HTTP binding and apply to all
 operations unless otherwise noted.
 
-{{ header_fields('create_cart', 'openapi.json') }}
+{{ header_fields('create_cart', 'rest.openapi.json') }}
 
 ### Specific Header Requirements
 

@@ -297,7 +297,7 @@ To be invoked by the platform when the user has expressed purchase intent
 product data (price/title etc.) provided by the business through the feeds
 **SHOULD** match the actual attributes returned in the response.
 
-{{ method_fields('create_checkout', 'openapi.json', 'checkout') }}
+{{ method_fields('create_checkout', 'rest.openapi.json', 'checkout') }}
 
 ### Get Checkout
 
@@ -310,7 +310,7 @@ checkout.
 The platform will honor the TTL provided by the business via `expires_at` at the
 time of checkout session creation.
 
-{{ method_fields('get_checkout', 'openapi.json', 'checkout') }}
+{{ method_fields('get_checkout', 'rest.openapi.json', 'checkout') }}
 
 ### Update Checkout
 
@@ -319,7 +319,7 @@ The platform is **REQUIRED** to send the entire checkout resource containing any
 data updates to write-only data fields. The resource provided in the request
 will replace the existing checkout session state on the business side.
 
-{{ method_fields('update_checkout', 'openapi.json', 'checkout') }}
+{{ method_fields('update_checkout', 'rest.openapi.json', 'checkout') }}
 
 ### Complete Checkout
 
@@ -335,7 +335,7 @@ to construct the order representation (i.e. information like `line_items`,
 After this call, other details will be updated through subsequent events
 as the order, and its associated items, moves through the supply chain.
 
-{{ method_fields('complete_checkout', 'openapi.json', 'checkout') }}
+{{ method_fields('complete_checkout', 'rest.openapi.json', 'checkout') }}
 
 ### Cancel Checkout
 
@@ -345,7 +345,7 @@ already canceled or completed), then businesses **SHOULD** send back an error
 indicating the operation is not allowed. Any checkout session with a status
 that is not equal to `completed` or `canceled` **SHOULD** be cancelable.
 
-{{ method_fields('cancel_checkout', 'openapi.json', 'checkout') }}
+{{ method_fields('cancel_checkout', 'rest.openapi.json', 'checkout') }}
 
 ## Transport Bindings
 

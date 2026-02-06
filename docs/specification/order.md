@@ -265,7 +265,7 @@ Businesses send order status changes as events after order placement.
 Businesses POST order events to a webhook URL provided by the platform
 during partner onboarding. The URL format is platform-specific.
 
-{{ method_fields('order_event_webhook', 'openapi.json', 'order') }}
+{{ method_fields('order_event_webhook', 'rest.openapi.json', 'order') }}
 
 ### Webhook URL Configuration
 

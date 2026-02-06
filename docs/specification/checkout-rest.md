@@ -1204,7 +1204,7 @@ place to set these expectations via `messages`.
 The following headers are defined for the HTTP binding and apply to all
 operations unless otherwise noted.
 
-{{ header_fields('create_checkout', 'openapi.json') }}
+{{ header_fields('create_checkout', 'rest.openapi.json') }}
 
 ### Specific Header Requirements
 
