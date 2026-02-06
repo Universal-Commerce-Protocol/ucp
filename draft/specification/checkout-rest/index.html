@@ -3434,7 +3434,73 @@ place to set these expectations via <code>messages</code>.</p>
 <h2 id="http-headers">HTTP Headers<a class="headerlink" href="#http-headers" title="Permanent link">&para;</a></h2>
 <p>The following headers are defined for the HTTP binding and apply to all
 operations unless otherwise noted.</p>
-<p><strong>Error processing OpenAPI:</strong> [Errno 2] No such file or directory: 'source/services/shopping/rest.openapi.json'</p>
+<p><strong>Request Headers</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Header</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>Authorization</code></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Should contain oauth token representing the following 2 schemes: 1. Platform self authenticating (client_credentials). 2. Platform authenticating on behalf of end user (authorization_code).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>X-API-Key</code></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Authenticates the platform with a reusable api key allocated to the platform by the business.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>Request-Signature</code></td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Ensure the authenticity and integrity of an HTTP message.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>Idempotency-Key</code></td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Ensures duplicate operations don't happen during retries.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>Request-Id</code></td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">For tracing the requests across network layers and components.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>User-Agent</code></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Identifies the user agent string making the call.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>UCP-Agent</code></td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Identifies the UCP agent making the call. All requests MUST include the UCP-Agent header containing the platform profile URI using Dictionary Structured Field syntax (RFC 8941). Format: profile="https://platform.example/profile".</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>Content-Type</code></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Representation Metadata. Tells the receiver what the data in the message body actually is.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>Accept</code></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Content Negotiation. The client tells the server what data formats it is capable of understanding.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>Accept-Language</code></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Localization. Tells the receiver the user's preferred natural languages, often with "weights" or priorities.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>Accept-Encoding</code></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Compression. The client tells the server which content-codings it supports, usually for compression</td>
+</tr>
+</tbody>
+</table>
 <h3 id="specific-header-requirements">Specific Header Requirements<a class="headerlink" href="#specific-header-requirements" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>UCP-Agent</strong>: All requests <strong>MUST</strong> include the <code>UCP-Agent</code> header

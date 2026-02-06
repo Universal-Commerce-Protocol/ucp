@@ -2857,7 +2857,98 @@ sense to them.</p>
 <h3 id="order-event-webhook">Order Event Webhook<a class="headerlink" href="#order-event-webhook" title="Permanent link">&para;</a></h3>
 <p>Businesses POST order events to a webhook URL provided by the platform
 during partner onboarding. The URL format is platform-specific.</p>
-<p><strong>Error processing OpenAPI:</strong> [Errno 2] No such file or directory: 'source/services/shopping/rest.openapi.json'</p>
+<p><strong>Inputs</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">ucp</td>
+<td style="text-align: left;"><a href="/draft/specification/order/#ucp-response-order-schema">UCP Response Order Schema</a></td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.</td>
+</tr>
+<tr>
+<td style="text-align: left;">id</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Unique order identifier.</td>
+</tr>
+<tr>
+<td style="text-align: left;">checkout_id</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Associated checkout ID for reconciliation.</td>
+</tr>
+<tr>
+<td style="text-align: left;">permalink_url</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Permalink to access the order on merchant site.</td>
+</tr>
+<tr>
+<td style="text-align: left;">line_items</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/order/#order-line-item">Order Line Item</a>]</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Immutable line items — source of truth for what was ordered.</td>
+</tr>
+<tr>
+<td style="text-align: left;">fulfillment</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Fulfillment data: buyer expectations and what actually happened.</td>
+</tr>
+<tr>
+<td style="text-align: left;">adjustments</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/order/#adjustment">Adjustment</a>]</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Append-only event log of money movements (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment.</td>
+</tr>
+<tr>
+<td style="text-align: left;">totals</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/order/#total">Total</a>]</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Different totals for the order.</td>
+</tr>
+<tr>
+<td style="text-align: left;">event_id</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Unique event identifier.</td>
+</tr>
+<tr>
+<td style="text-align: left;">created_time</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Event creation timestamp in RFC 3339 format.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Output</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">ucp</td>
+<td style="text-align: left;"><a href="/draft/specification/order/#ucp">Ucp</a></td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"></td>
+</tr>
+</tbody>
+</table>
 <h3 id="webhook-url-configuration">Webhook URL Configuration<a class="headerlink" href="#webhook-url-configuration" title="Permanent link">&para;</a></h3>
 <p>The platform provides its webhook URL in the order capability's <code>config</code> field
 during capability negotiation. The business discovers this URL from the

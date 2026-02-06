@@ -272,7 +272,26 @@ Businesses send order status changes as events after order placement.
 
 Businesses POST order events to a webhook URL provided by the platform during partner onboarding. The URL format is platform-specific.
 
-**Error processing OpenAPI:** [Errno 2] No such file or directory: 'source/services/shopping/rest.openapi.json'
+**Inputs**
+
+| Name          | Type                                                                               | Required | Description                                                                                                                                  |
+| ------------- | ---------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| ucp           | [UCP Response Order Schema](/draft/specification/order/#ucp-response-order-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                      |
+| id            | string                                                                             | **Yes**  | Unique order identifier.                                                                                                                     |
+| checkout_id   | string                                                                             | **Yes**  | Associated checkout ID for reconciliation.                                                                                                   |
+| permalink_url | string                                                                             | **Yes**  | Permalink to access the order on merchant site.                                                                                              |
+| line_items    | Array\[[Order Line Item](/draft/specification/order/#order-line-item)\]            | **Yes**  | Immutable line items — source of truth for what was ordered.                                                                                 |
+| fulfillment   | object                                                                             | **Yes**  | Fulfillment data: buyer expectations and what actually happened.                                                                             |
+| adjustments   | Array\[[Adjustment](/draft/specification/order/#adjustment)\]                      | No       | Append-only event log of money movements (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment. |
+| totals        | Array\[[Total](/draft/specification/order/#total)\]                                | **Yes**  | Different totals for the order.                                                                                                              |
+| event_id      | string                                                                             | **Yes**  | Unique event identifier.                                                                                                                     |
+| created_time  | string                                                                             | **Yes**  | Event creation timestamp in RFC 3339 format.                                                                                                 |
+
+**Output**
+
+| Name | Type                                   | Required | Description |
+| ---- | -------------------------------------- | -------- | ----------- |
+| ucp  | [Ucp](/draft/specification/order/#ucp) | **Yes**  |             |
 
 ### Webhook URL Configuration
 
