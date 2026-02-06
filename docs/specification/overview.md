@@ -605,7 +605,7 @@ These failure types require different handling:
 | `signature_missing`    | Required signature header/field not present            | 401  | -32000 |
 | `signature_invalid`    | Signature verification failed                          | 401  | -32000 |
 | `key_not_found`        | Key ID not found in signer's `signing_keys`            | 401  | -32000 |
-| `digest_mismatch`      | Body digest doesn't match `UCP-Content-Digest-JCS`     | 400  | -32600 |
+| `digest_mismatch`      | Body digest doesn't match `Content-Digest` header      | 400  | -32600 |
 | `algorithm_unsupported`| Signature algorithm not supported                      | 400  | -32600 |
 
 See [Message Signatures](signatures.md) for signature verification details.

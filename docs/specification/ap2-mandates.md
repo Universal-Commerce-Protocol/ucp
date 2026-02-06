@@ -131,8 +131,8 @@ This extension uses the cryptographic primitives defined in the
 * **Key Format:** JWK ([RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517))
 * **Key Discovery:** `signing_keys[]` in `/.well-known/ucp`
 
-See [Message Signatures - Shared Foundation](signatures.md#shared-foundation)
-for complete details on algorithms, key format, and key rotation.
+See [Message Signatures](signatures.md) for complete details on algorithms,
+key format, and key rotation.
 
 ### Business Authorization
 
@@ -216,8 +216,20 @@ selective disclosure, key binding) is defined by the
 
 All JSON payloads **MUST** be canonicalized using **JSON Canonicalization
 Scheme (JCS)** per [RFC 8785](https://datatracker.ietf.org/doc/html/rfc8785).
-See [Message Signatures - JSON Canonicalization](signatures.md#json-canonicalization-jcs)
-for canonicalization rules.
+
+**Why JCS for Mandates?** UCP request signatures use `Content-Digest` (raw
+bytes) without canonicalization — the request is signed and verified
+immediately over the same HTTP connection. Mandates are different:
+
+* **Durability** — Mandates are stored as evidence of user consent. They may
+    be retrieved and verified days or months later.
+* **Cross-system transmission** — Mandates pass through multiple systems
+    (platform → business → PSP → card network) that may re-serialize JSON.
+* **Reproducibility** — Any party must reconstruct the exact signed bytes
+    from the logical JSON content, regardless of serialization differences.
+
+JCS ensures that semantically identical JSON produces byte-identical output,
+making signatures reproducible across implementations and time.
 
 **AP2-Specific Rule:** When computing the business's `merchant_authorization`
 signature, exclude the `ap2` field entirely. This ensures future AP2 fields

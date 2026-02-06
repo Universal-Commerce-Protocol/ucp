@@ -299,12 +299,12 @@ to ensure authenticity and integrity. Signatures follow the
 
 **Required Headers:**
 
-| Header                   | Description                                |
-| :----------------------- | :----------------------------------------- |
-| `UCP-Agent`              | Business profile URL (RFC 8941 Dictionary) |
-| `Signature-Input`        | Describes signed components                |
-| `Signature`              | Contains the signature value               |
-| `UCP-Content-Digest-JCS` | JCS-canonicalized body digest              |
+| Header           | Description                                |
+| :--------------- | :----------------------------------------- |
+| `UCP-Agent`      | Business profile URL (RFC 8941 Dictionary) |
+| `Signature-Input`| Describes signed components                |
+| `Signature`      | Contains the signature value               |
+| `Content-Digest` | Body digest (RFC 9530)                     |
 
 **Example Webhook Request:**
 
@@ -313,8 +313,8 @@ POST /webhooks/ucp/orders HTTP/1.1
 Host: platform.example.com
 Content-Type: application/json
 UCP-Agent: profile="https://merchant.example/.well-known/ucp"
-UCP-Content-Digest-JCS: sha-256=:X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=:
-Signature-Input: sig1=("@method" "@path" "ucp-content-digest-jcs" "content-type");keyid="merchant-2026"
+Content-Digest: sha-256=:X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=:
+Signature-Input: sig1=("@method" "@path" "content-digest" "content-type");keyid="merchant-2026"
 Signature: sig1=:MEUCIQDTxNq8h7LGHpvVZQp1iHkFp9+3N8Mxk2zH1wK4YuVN8w...:
 
 {"id":"order_abc123","event_id":"evt_123","created_time":"2026-01-15T12:00:00Z",...}
@@ -322,11 +322,10 @@ Signature: sig1=:MEUCIQDTxNq8h7LGHpvVZQp1iHkFp9+3N8Mxk2zH1wK4YuVN8w...:
 
 #### Signing (Business)
 
-1. JCS-canonicalize the webhook payload ([RFC 8785](https://datatracker.ietf.org/doc/html/rfc8785))
-2. Compute SHA-256 digest and set `UCP-Content-Digest-JCS` header
-3. Build signature base per [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421)
-4. Sign using a key from `signing_keys` in the business's UCP profile
-5. Set `Signature-Input` and `Signature` headers
+1. Compute SHA-256 digest of the raw request body and set `Content-Digest` header
+2. Build signature base per [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421)
+3. Sign using a key from `signing_keys` in the business's UCP profile
+4. Set `Signature-Input` and `Signature` headers
 
 See [Message Signatures - REST Request Signing](signatures.md#rest-request-signing)
 for complete algorithm.
@@ -338,7 +337,7 @@ for complete algorithm.
 1. Parse `Signature-Input` to extract `keyid` and signed components
 2. Fetch business's UCP profile from `/.well-known/ucp` (cache as appropriate)
 3. Locate key in `signing_keys` with matching `kid`
-4. Verify `UCP-Content-Digest-JCS` matches JCS-canonicalized body
+4. Verify `Content-Digest` matches SHA-256 of raw body
 5. Reconstruct signature base and verify signature
 
 See [Message Signatures - REST Request Verification](signatures.md#rest-request-verification)
@@ -373,7 +372,7 @@ zero-downtime key rotation procedures.
 * **MUST** include `UCP-Agent` header with profile URL for signer identification
 * **MUST** sign all webhook payloads per the
   [Message Signatures](signatures.md) specification using RFC 9421 headers
-  (`Signature`, `Signature-Input`, `UCP-Content-Digest-JCS`).
+  (`Signature`, `Signature-Input`, `Content-Digest`).
 * **MUST** send "Order created" event with fully populated order entity
 * **MUST** send full order entity on updates (not incremental deltas)
 * **MUST** retry failed webhook deliveries

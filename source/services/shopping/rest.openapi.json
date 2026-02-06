@@ -37,7 +37,7 @@
             "$ref": "#/components/parameters/signature_input"
           },
           {
-            "$ref": "#/components/parameters/ucp_content_digest_jcs"
+            "$ref": "#/components/parameters/content_digest"
           },
           {
             "$ref": "#/components/parameters/idempotency_key"
@@ -82,8 +82,8 @@
               "Signature-Input": {
                 "$ref": "#/components/headers/signature_input"
               },
-              "UCP-Content-Digest-JCS": {
-                "$ref": "#/components/headers/ucp_content_digest_jcs"
+              "Content-Digest": {
+                "$ref": "#/components/headers/content_digest"
               }
             },
             "content": {
@@ -150,8 +150,8 @@
               "Signature-Input": {
                 "$ref": "#/components/headers/signature_input"
               },
-              "UCP-Content-Digest-JCS": {
-                "$ref": "#/components/headers/ucp_content_digest_jcs"
+              "Content-Digest": {
+                "$ref": "#/components/headers/content_digest"
               }
             },
             "content": {
@@ -182,7 +182,7 @@
             "$ref": "#/components/parameters/signature_input"
           },
           {
-            "$ref": "#/components/parameters/ucp_content_digest_jcs"
+            "$ref": "#/components/parameters/content_digest"
           },
           {
             "$ref": "#/components/parameters/idempotency_key"
@@ -227,8 +227,8 @@
               "Signature-Input": {
                 "$ref": "#/components/headers/signature_input"
               },
-              "UCP-Content-Digest-JCS": {
-                "$ref": "#/components/headers/ucp_content_digest_jcs"
+              "Content-Digest": {
+                "$ref": "#/components/headers/content_digest"
               }
             },
             "content": {
@@ -264,7 +264,7 @@
             "$ref": "#/components/parameters/signature_input"
           },
           {
-            "$ref": "#/components/parameters/ucp_content_digest_jcs"
+            "$ref": "#/components/parameters/content_digest"
           },
           {
             "$ref": "#/components/parameters/idempotency_key"
@@ -324,8 +324,8 @@
               "Signature-Input": {
                 "$ref": "#/components/headers/signature_input"
               },
-              "UCP-Content-Digest-JCS": {
-                "$ref": "#/components/headers/ucp_content_digest_jcs"
+              "Content-Digest": {
+                "$ref": "#/components/headers/content_digest"
               }
             },
             "content": {
@@ -359,7 +359,7 @@
             "$ref": "#/components/parameters/signature_input"
           },
           {
-            "$ref": "#/components/parameters/ucp_content_digest_jcs"
+            "$ref": "#/components/parameters/content_digest"
           },
           {
             "$ref": "#/components/parameters/idempotency_key"
@@ -396,8 +396,8 @@
               "Signature-Input": {
                 "$ref": "#/components/headers/signature_input"
               },
-              "UCP-Content-Digest-JCS": {
-                "$ref": "#/components/headers/ucp_content_digest_jcs"
+              "Content-Digest": {
+                "$ref": "#/components/headers/content_digest"
               }
             },
             "content": {
@@ -421,7 +421,7 @@
           { "$ref": "#/components/parameters/x_api_key" },
           { "$ref": "#/components/parameters/signature" },
           { "$ref": "#/components/parameters/signature_input" },
-          { "$ref": "#/components/parameters/ucp_content_digest_jcs" },
+          { "$ref": "#/components/parameters/content_digest" },
           { "$ref": "#/components/parameters/idempotency_key" },
           { "$ref": "#/components/parameters/request_id" },
           { "$ref": "#/components/parameters/user_agent" },
@@ -444,7 +444,7 @@
             "headers": {
               "Signature": { "$ref": "#/components/headers/signature" },
               "Signature-Input": { "$ref": "#/components/headers/signature_input" },
-              "UCP-Content-Digest-JCS": { "$ref": "#/components/headers/ucp_content_digest_jcs" }
+              "Content-Digest": { "$ref": "#/components/headers/content_digest" }
             },
             "content": {
               "application/json": {
@@ -482,7 +482,7 @@
             "headers": {
               "Signature": { "$ref": "#/components/headers/signature" },
               "Signature-Input": { "$ref": "#/components/headers/signature_input" },
-              "UCP-Content-Digest-JCS": { "$ref": "#/components/headers/ucp_content_digest_jcs" }
+              "Content-Digest": { "$ref": "#/components/headers/content_digest" }
             },
             "content": {
               "application/json": {
@@ -504,7 +504,7 @@
           { "$ref": "#/components/parameters/x_api_key" },
           { "$ref": "#/components/parameters/signature" },
           { "$ref": "#/components/parameters/signature_input" },
-          { "$ref": "#/components/parameters/ucp_content_digest_jcs" },
+          { "$ref": "#/components/parameters/content_digest" },
           { "$ref": "#/components/parameters/idempotency_key" },
           { "$ref": "#/components/parameters/request_id" },
           { "$ref": "#/components/parameters/user_agent" },
@@ -528,7 +528,7 @@
             "headers": {
               "Signature": { "$ref": "#/components/headers/signature" },
               "Signature-Input": { "$ref": "#/components/headers/signature_input" },
-              "UCP-Content-Digest-JCS": { "$ref": "#/components/headers/ucp_content_digest_jcs" }
+              "Content-Digest": { "$ref": "#/components/headers/content_digest" }
             },
             "content": {
               "application/json": {
@@ -552,7 +552,7 @@
           { "$ref": "#/components/parameters/x_api_key" },
           { "$ref": "#/components/parameters/signature" },
           { "$ref": "#/components/parameters/signature_input" },
-          { "$ref": "#/components/parameters/ucp_content_digest_jcs" },
+          { "$ref": "#/components/parameters/content_digest" },
           { "$ref": "#/components/parameters/idempotency_key" },
           { "$ref": "#/components/parameters/request_id" },
           { "$ref": "#/components/parameters/user_agent" },
@@ -568,7 +568,7 @@
             "headers": {
               "Signature": { "$ref": "#/components/headers/signature" },
               "Signature-Input": { "$ref": "#/components/headers/signature_input" },
-              "UCP-Content-Digest-JCS": { "$ref": "#/components/headers/ucp_content_digest_jcs" }
+              "Content-Digest": { "$ref": "#/components/headers/content_digest" }
             },
             "content": {
               "application/json": {
@@ -589,7 +589,7 @@
         "parameters": [
           { "$ref": "#/components/parameters/signature" },
           { "$ref": "#/components/parameters/signature_input" },
-          { "$ref": "#/components/parameters/ucp_content_digest_jcs" },
+          { "$ref": "#/components/parameters/content_digest" },
           { "$ref": "#/components/parameters/ucp_agent" },
           { "$ref": "#/components/parameters/x_api_key" }
         ],
@@ -697,24 +697,14 @@
         },
         "description": "RFC 9421 Signature-Input header. Describes signed components, timestamp, and key ID. Format: `sig1=(\"@method\" \"@path\" ...);created=<timestamp>;keyid=\"<key-id>\"`."
       },
-      "ucp_content_digest_jcs": {
-        "name": "UCP-Content-Digest-JCS",
+      "content_digest": {
+        "name": "Content-Digest",
         "in": "header",
         "required": false,
         "schema": {
           "type": "string"
         },
-        "description": "JCS-canonicalized body digest per RFC 8785. Required for requests/responses with a body. Format: `sha-256=:<base64-digest>:`."
-      },
-      "request_signature": {
-        "name": "Request-Signature",
-        "in": "header",
-        "required": false,
-        "deprecated": true,
-        "schema": {
-          "type": "string"
-        },
-        "description": "DEPRECATED: Use Signature + Signature-Input headers instead. Will be removed 2026-08-01."
+        "description": "Body digest per RFC 9530. Required for requests/responses with a body. Format: `sha-256=:<base64-digest>:`."
       },
       "idempotency_key": {
         "name": "Idempotency-Key",
@@ -806,7 +796,7 @@
         },
         "description": "RFC 9421 Signature-Input header for response. Describes signed components, timestamp, and key ID."
       },
-      "ucp_content_digest_jcs": {
+      "content_digest": {
         "required": false,
         "schema": {
           "type": "string"
