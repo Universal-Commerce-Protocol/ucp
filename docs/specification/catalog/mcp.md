@@ -173,7 +173,7 @@ Maps to the [Catalog Search](search.md) capability.
                 { "value": "aa-8-1", "taxonomy": "shopify" },
                 { "value": "Footwear > Running", "taxonomy": "merchant" }
               ],
-              "price": {
+              "price_range": {
                 "min": { "amount": 12000, "currency": "USD" },
                 "max": { "amount": 12000, "currency": "USD" }
               },
@@ -294,7 +294,7 @@ The `catalog.ids` parameter accepts an array of identifiers and optional context
               "description": {
                 "plain": "Lightweight running shoes with responsive cushioning."
               },
-              "price": {
+              "price_range": {
                 "min": { "amount": 12000, "currency": "USD" },
                 "max": { "amount": 12000, "currency": "USD" }
               },
@@ -329,7 +329,7 @@ The `catalog.ids` parameter accepts an array of identifiers and optional context
               "description": {
                 "plain": "Rugged trail running shoes with aggressive tread."
               },
-              "price": {
+              "price_range": {
                 "min": { "amount": 15000, "currency": "USD" },
                 "max": { "amount": 15000, "currency": "USD" }
               },
@@ -377,7 +377,7 @@ response MAY include informational messages indicating which identifiers were no
         {
           "id": "prod_abc123",
           "title": "Blue Runner Pro",
-          "price": {
+          "price_range": {
             "min": { "amount": 12000, "currency": "USD" },
             "max": { "amount": 12000, "currency": "USD" }
           },

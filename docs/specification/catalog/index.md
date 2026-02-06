@@ -172,7 +172,7 @@ a warning message. Use the `path` field to target specific variants.
       "id": "prod_xyz789",
       "title": "Professional Chef Knife Set",
       "description": { "plain": "Complete professional knife collection." },
-      "price": {
+      "price_range": {
         "min": { "amount": 29900, "currency": "USD" },
         "max": { "amount": 29900, "currency": "USD" }
       },

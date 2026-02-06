@@ -122,7 +122,7 @@ Maps to the [Catalog Search](search.md) capability.
             { "value": "aa-8-1", "taxonomy": "shopify" },
             { "value": "Footwear > Running", "taxonomy": "merchant" }
           ],
-          "price": {
+          "price_range": {
             "min": { "amount": 12000, "currency": "USD" },
             "max": { "amount": 12000, "currency": "USD" }
           },
@@ -229,7 +229,7 @@ applies to all lookups in the batch.
           "description": {
             "plain": "Zapatillas ligeras con amortiguación reactiva."
           },
-          "price": {
+          "price_range": {
             "min": { "amount": 12000, "currency": "USD" },
             "max": { "amount": 12000, "currency": "USD" }
           },
@@ -250,7 +250,7 @@ applies to all lookups in the batch.
           "description": {
             "plain": "Zapatillas de trail con tracción superior."
           },
-          "price": {
+          "price_range": {
             "min": { "amount": 15000, "currency": "USD" },
             "max": { "amount": 15000, "currency": "USD" }
           },
@@ -299,7 +299,7 @@ messages indicating which identifiers were not found.
         {
           "id": "prod_abc123",
           "title": "Blue Runner Pro",
-          "price": {
+          "price_range": {
             "min": { "amount": 12000, "currency": "USD" },
             "max": { "amount": 12000, "currency": "USD" }
           }
@@ -307,7 +307,7 @@ messages indicating which identifiers were not found.
         {
           "id": "prod_def456",
           "title": "Trail Blazer X",
-          "price": {
+          "price_range": {
             "min": { "amount": 15000, "currency": "USD" },
             "max": { "amount": 15000, "currency": "USD" }
           }
