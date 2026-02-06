@@ -696,7 +696,8 @@ def define_env(env):
     """
     if ".json#/" not in entity_name:
       raise ValueError(
-        f"Invalid entity name format for def: {entity_name}{get_error_context()}"
+        f"Invalid entity name format for def: {entity_name}"
+        f"{get_error_context()}"
       )
 
     try:
@@ -738,7 +739,8 @@ def define_env(env):
           )
         else:
           raise RuntimeError(
-            f"Definition '{def_path}' not found in '{full_path}'{get_error_context()}"
+            f"Definition '{def_path}' not found in '{full_path}'"
+            f"{get_error_context()}"
           )
       # Try next directory if resolution failed
 
@@ -805,12 +807,14 @@ def define_env(env):
         )
       # ucp-schema failed - fail loudly, don't silently use raw JSON
       raise RuntimeError(
-        f"Failed to resolve schema '{full_path}' with ucp-schema{get_error_context()}. "
+        f"Failed to resolve schema '{full_path}' with ucp-schema"
+        f"{get_error_context()}. "
         f"Ensure ucp-schema is installed: `cargo install ucp-schema`"
       )
 
     raise FileNotFoundError(
-      f"Schema '{base_name}' not found in any schema directory{get_error_context()}."
+      f"Schema '{base_name}' not found in any schema directory"
+      f"{get_error_context()}."
     )
 
   @env.macro
@@ -983,7 +987,8 @@ def define_env(env):
               return _render_table_from_schema(item, spec_file_name)
 
       raise RuntimeError(
-        f"Could not find extension properties in '{entity_name}'{get_error_context()}"
+        f"Could not find extension properties in '{entity_name}'"
+        f"{get_error_context()}"
       )
     except (FileNotFoundError, json.JSONDecodeError) as e:
       raise RuntimeError(
