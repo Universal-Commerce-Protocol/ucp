@@ -32,23 +32,8 @@
       "description": "Variant display title (e.g., 'Blue / Large')."
     },
     "description": {
-      "type": "object",
-      "description": "Variant description in one or more formats. At least one format must be provided.",
-      "properties": {
-        "plain": {
-          "type": "string",
-          "description": "Plain text description."
-        },
-        "html": {
-          "type": "string",
-          "description": "HTML-formatted description. Security: Platforms MUST sanitize before rendering—strip scripts, event handlers, and untrusted elements. Treat all rich text as untrusted input."
-        },
-        "markdown": {
-          "type": "string",
-          "description": "Markdown-formatted description."
-        }
-      },
-      "minProperties": 1
+      "$ref": "description.json",
+      "description": "Variant description in one or more formats."
     },
     "url": {
       "type": "string",
