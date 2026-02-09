@@ -23,7 +23,11 @@
     "id": {
       "type": "string",
       "description": "Unique identifier of the checkout session.",
-      "ucp_request": "omit"
+      "ucp_request": {
+        "create": "omit",
+        "update": {"from": "required", "to": "omit", "description": "The id field from the transport request is expected to be used."},
+        "complete": "omit"
+      }
     },
     "line_items": {
       "type": "array",
