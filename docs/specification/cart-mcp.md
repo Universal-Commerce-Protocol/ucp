@@ -58,30 +58,33 @@ Businesses advertise MCP transport availability through their UCP profile at
 }
 ```
 
-### Platform Profile Advertisement
+### Request Metadata
 
-MCP clients **MUST** include the UCP platform profile URI with every request.
-The platform profile is included in the `_meta.ucp` structure within the request
-parameters:
+MCP clients **MUST** include a `meta` object in every request containing
+protocol metadata:
 
 ```json
 {
   "jsonrpc": "2.0",
   "id": 1,
-  "method": "create_cart",
+  "method": "tools/call",
   "params": {
-    "_meta": {
-      "ucp": {
-        "profile": "https://platform.example/profiles/v2026-01/shopping-agent.json"
-      }
-    },
-    "idempotency_key": "..."
+    "name": "create_cart",
+    "arguments": {
+      "meta": {
+        "ucp-agent": {
+          "profile": "https://platform.example/profiles/shopping-agent.json"
+        }
+      },
+      "cart": { ... }
+    }
   }
 }
 ```
 
-The `_meta.ucp.profile` field **MUST** be present in every MCP tool invocation
-to enable version compatibility checking and capability negotiation.
+The `meta["ucp-agent"]` field is **required** on all requests to enable
+[capability negotiation](overview.md#negotiation-protocol). Platforms **MAY**
+include additional metadata fields.
 
 ## Tools
 
@@ -124,31 +127,33 @@ Maps to the [Create Cart](cart.md#create-cart) operation.
     ```json
     {
       "jsonrpc": "2.0",
-      "method": "create_cart",
+      "id": 1,
+      "method": "tools/call",
       "params": {
-        "_meta": {
-          "ucp": {
-            "profile": "https://platform.example/profiles/v2026-01/shopping-agent.json"
-          }
-        },
-        "idempotency_key": "550e8400-e29b-41d4-a716-446655440000",
-        "cart": {
-          "line_items": [
-            {
-              "item": {
-                "id": "item_123"
-              },
-              "quantity": 2
+        "name": "create_cart",
+        "arguments": {
+          "meta": {
+            "ucp-agent": {
+              "profile": "https://platform.example/profiles/v2026-01/shopping-agent.json"
             }
-          ],
-          "context": {
-            "address_country": "US",
-            "address_region": "CA",
-            "postal_code": "94105"
+          },
+          "cart": {
+            "line_items": [
+              {
+                "item": {
+                  "id": "item_123"
+                },
+                "quantity": 2
+              }
+            ],
+            "context": {
+              "address_country": "US",
+              "address_region": "CA",
+              "postal_code": "94105"
+            }
           }
         }
-      },
-      "id": 1
+      }
     }
     ```
 
@@ -159,48 +164,58 @@ Maps to the [Create Cart](cart.md#create-cart) operation.
       "jsonrpc": "2.0",
       "id": 1,
       "result": {
-        "ucp": {
-          "version": "2026-01-15",
-          "capabilities": [
-            {
-              "name": "dev.ucp.shopping.checkout",
-              "version": "2026-01-11"
+        "structuredContent": {
+          "cart": {
+            "ucp": {
+              "version": "2026-01-15",
+              "capabilities": [
+                {
+                  "name": "dev.ucp.shopping.checkout",
+                  "version": "2026-01-11"
+                },
+                {
+                  "name": "dev.ucp.shopping.cart",
+                  "version": "2026-01-15"
+                }
+              ]
             },
-            {
-              "name": "dev.ucp.shopping.cart",
-              "version": "2026-01-15"
-            }
-          ]
-        },
-        "id": "cart_abc123",
-        "line_items": [
-          {
-            "id": "li_1",
-            "item": {
-              "id": "item_123",
-              "title": "Red T-Shirt",
-              "price": 2500
-            },
-            "quantity": 2,
+            "id": "cart_abc123",
+            "line_items": [
+              {
+                "id": "li_1",
+                "item": {
+                  "id": "item_123",
+                  "title": "Red T-Shirt",
+                  "price": 2500
+                },
+                "quantity": 2,
+                "totals": [
+                  {"type": "subtotal", "amount": 5000},
+                  {"type": "total", "amount": 5000}
+                ]
+              }
+            ],
+            "currency": "USD",
             "totals": [
-              {"type": "subtotal", "amount": 5000},
-              {"type": "total", "amount": 5000}
-            ]
+              {
+                "type": "subtotal",
+                "amount": 5000
+              },
+              {
+                "type": "total",
+                "amount": 5000
+              }
+            ],
+            "continue_url": "https://business.example.com/checkout?cart=cart_abc123",
+            "expires_at": "2026-01-16T12:00:00Z"
           }
-        ],
-        "currency": "USD",
-        "totals": [
+        },
+        "content": [
           {
-            "type": "subtotal",
-            "amount": 5000
-          },
-          {
-            "type": "total",
-            "amount": 5000
+            "type": "text",
+            "text": "{\"cart\":{\"ucp\":{...},\"id\":\"cart_abc123\",...}}"
           }
-        ],
-        "continue_url": "https://business.example.com/checkout?cart=cart_abc123",
-        "expires_at": "2026-01-16T12:00:00Z"
+        ]
       }
     }
     ```
@@ -224,16 +239,19 @@ Maps to the [Get Cart](cart.md#get-cart) operation.
     ```json
     {
       "jsonrpc": "2.0",
-      "method": "get_cart",
+      "id": 1,
+      "method": "tools/call",
       "params": {
-        "_meta": {
-          "ucp": {
-            "profile": "https://platform.example/profiles/v2026-01/shopping-agent.json"
-          }
-        },
-        "id": "cart_abc123"
-      },
-      "id": 1
+        "name": "get_cart",
+        "arguments": {
+          "meta": {
+            "ucp-agent": {
+              "profile": "https://platform.example/profiles/v2026-01/shopping-agent.json"
+            }
+          },
+          "id": "cart_abc123"
+        }
+      }
     }
     ```
 
@@ -244,48 +262,58 @@ Maps to the [Get Cart](cart.md#get-cart) operation.
       "jsonrpc": "2.0",
       "id": 1,
       "result": {
-        "ucp": {
-          "version": "2026-01-15",
-          "capabilities": [
-            {
-              "name": "dev.ucp.shopping.checkout",
-              "version": "2026-01-11"
+        "structuredContent": {
+          "cart": {
+            "ucp": {
+              "version": "2026-01-15",
+              "capabilities": [
+                {
+                  "name": "dev.ucp.shopping.checkout",
+                  "version": "2026-01-11"
+                },
+                {
+                  "name": "dev.ucp.shopping.cart",
+                  "version": "2026-01-15"
+                }
+              ]
             },
-            {
-              "name": "dev.ucp.shopping.cart",
-              "version": "2026-01-15"
-            }
-          ]
-        },
-        "id": "cart_abc123",
-        "line_items": [
-          {
-            "id": "li_1",
-            "item": {
-              "id": "item_123",
-              "title": "Red T-Shirt",
-              "price": 2500
-            },
-            "quantity": 2,
+            "id": "cart_abc123",
+            "line_items": [
+              {
+                "id": "li_1",
+                "item": {
+                  "id": "item_123",
+                  "title": "Red T-Shirt",
+                  "price": 2500
+                },
+                "quantity": 2,
+                "totals": [
+                  {"type": "subtotal", "amount": 5000},
+                  {"type": "total", "amount": 5000}
+                ]
+              }
+            ],
+            "currency": "USD",
             "totals": [
-              {"type": "subtotal", "amount": 5000},
-              {"type": "total", "amount": 5000}
-            ]
+              {
+                "type": "subtotal",
+                "amount": 5000
+              },
+              {
+                "type": "total",
+                "amount": 5000
+              }
+            ],
+            "continue_url": "https://business.example.com/checkout?cart=cart_abc123",
+            "expires_at": "2026-01-16T12:00:00Z"
           }
-        ],
-        "currency": "USD",
-        "totals": [
+        },
+        "content": [
           {
-            "type": "subtotal",
-            "amount": 5000
-          },
-          {
-            "type": "total",
-            "amount": 5000
+            "type": "text",
+            "text": "{\"cart\":{\"ucp\":{...},\"id\":\"cart_abc123\",...}}"
           }
-        ],
-        "continue_url": "https://business.example.com/checkout?cart=cart_abc123",
-        "expires_at": "2026-01-16T12:00:00Z"
+        ]
       }
     }
     ```
@@ -297,23 +325,33 @@ Maps to the [Get Cart](cart.md#get-cart) operation.
       "jsonrpc": "2.0",
       "id": 1,
       "result": {
-        "ucp": {
-          "version": "2026-01-15",
-          "capabilities": [
-            {
-              "name": "dev.ucp.shopping.cart",
-              "version": "2026-01-15"
-            }
-          ]
-        },
-        "messages": [
-          {
-            "type": "error",
-            "code": "NOT_FOUND",
-            "content": "Cart not found or has expired"
+        "structuredContent": {
+          "cart": {
+            "ucp": {
+              "version": "2026-01-15",
+              "capabilities": [
+                {
+                  "name": "dev.ucp.shopping.cart",
+                  "version": "2026-01-15"
+                }
+              ]
+            },
+            "messages": [
+              {
+                "type": "error",
+                "code": "not_found",
+                "content": "Cart not found or has expired"
+              }
+            ],
+            "continue_url": "https://merchant.com/"
           }
-        ],
-        "continue_url": "https://merchant.com/"
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"cart\":{\"ucp\":{...},\"messages\":[...],\"continue_url\":\"...\"}}"
+          }
+        ]
       }
     }
     ```
@@ -339,37 +377,40 @@ Maps to the [Update Cart](cart.md#update-cart) operation.
     ```json
     {
       "jsonrpc": "2.0",
-      "method": "update_cart",
+      "id": 2,
+      "method": "tools/call",
       "params": {
-        "_meta": {
-          "ucp": {
-            "profile": "https://platform.example/profiles/v2026-01/shopping-agent.json"
-          }
-        },
-        "id": "cart_abc123",
-        "cart": {
-          "line_items": [
-            {
-              "item": {
-                "id": "item_123"
-              },
-              "quantity": 3
-            },
-            {
-              "item": {
-                "id": "item_456"
-              },
-              "quantity": 1
+        "name": "update_cart",
+        "arguments": {
+          "meta": {
+            "ucp-agent": {
+              "profile": "https://platform.example/profiles/v2026-01/shopping-agent.json"
             }
-          ],
-          "context": {
-            "address_country": "US",
-            "address_region": "CA",
-            "postal_code": "94105"
+          },
+          "id": "cart_abc123",
+          "cart": {
+            "line_items": [
+              {
+                "item": {
+                  "id": "item_123"
+                },
+                "quantity": 3
+              },
+              {
+                "item": {
+                  "id": "item_456"
+                },
+                "quantity": 1
+              }
+            ],
+            "context": {
+              "address_country": "US",
+              "address_region": "CA",
+              "postal_code": "94105"
+            }
           }
         }
-      },
-      "id": 2
+      }
     }
     ```
 
@@ -380,61 +421,71 @@ Maps to the [Update Cart](cart.md#update-cart) operation.
       "jsonrpc": "2.0",
       "id": 2,
       "result": {
-        "ucp": {
-          "version": "2026-01-15",
-          "capabilities": [
-            {
-              "name": "dev.ucp.shopping.checkout",
-              "version": "2026-01-11"
+        "structuredContent": {
+          "cart": {
+            "ucp": {
+              "version": "2026-01-15",
+              "capabilities": [
+                {
+                  "name": "dev.ucp.shopping.checkout",
+                  "version": "2026-01-11"
+                },
+                {
+                  "name": "dev.ucp.shopping.cart",
+                  "version": "2026-01-15"
+                }
+              ]
             },
-            {
-              "name": "dev.ucp.shopping.cart",
-              "version": "2026-01-15"
-            }
-          ]
+            "id": "cart_abc123",
+            "line_items": [
+              {
+                "id": "li_1",
+                "item": {
+                  "id": "item_123",
+                  "title": "Red T-Shirt",
+                  "price": 2500
+                },
+                "quantity": 3,
+                "totals": [
+                  {"type": "subtotal", "amount": 7500},
+                  {"type": "total", "amount": 7500}
+                ]
+              },
+              {
+                "id": "li_2",
+                "item": {
+                  "id": "item_456",
+                  "title": "Blue Jeans",
+                  "price": 7500
+                },
+                "quantity": 1,
+                "totals": [
+                  {"type": "subtotal", "amount": 7500},
+                  {"type": "total", "amount": 7500}
+                ]
+              }
+            ],
+            "currency": "USD",
+            "totals": [
+              {
+                "type": "subtotal",
+                "amount": 15000
+              },
+              {
+                "type": "total",
+                "amount": 15000
+              }
+            ],
+            "continue_url": "https://business.example.com/checkout?cart=cart_abc123",
+            "expires_at": "2026-01-16T12:00:00Z"
+          }
         },
-        "id": "cart_abc123",
-        "line_items": [
+        "content": [
           {
-            "id": "li_1",
-            "item": {
-              "id": "item_123",
-              "title": "Red T-Shirt",
-              "price": 2500
-            },
-            "quantity": 3,
-            "totals": [
-              {"type": "subtotal", "amount": 7500},
-              {"type": "total", "amount": 7500}
-            ]
-          },
-          {
-            "id": "li_2",
-            "item": {
-              "id": "item_456",
-              "title": "Blue Jeans",
-              "price": 7500
-            },
-            "quantity": 1,
-            "totals": [
-              {"type": "subtotal", "amount": 7500},
-              {"type": "total", "amount": 7500}
-            ]
+            "type": "text",
+            "text": "{\"cart\":{\"ucp\":{...},\"id\":\"cart_abc123\",...}}"
           }
-        ],
-        "currency": "USD",
-        "totals": [
-          {
-            "type": "subtotal",
-            "amount": 15000
-          },
-          {
-            "type": "total",
-            "amount": 15000
-          }
-        ],
-        "continue_url": "https://business.example.com/checkout?cart=cart_abc123",
-        "expires_at": "2026-01-16T12:00:00Z"
+        ]
       }
     }
     ```
@@ -446,7 +497,6 @@ Maps to the [Cancel Cart](cart.md#cancel-cart) operation.
 #### Input Schema
 
 * `id` (String, required): The ID of the cart session.
-* `idempotency_key` (String, UUID, required): Unique key for retry safety.
 
 #### Output Schema
 
@@ -459,17 +509,20 @@ Maps to the [Cancel Cart](cart.md#cancel-cart) operation.
     ```json
     {
       "jsonrpc": "2.0",
-      "method": "cancel_cart",
+      "id": 1,
+      "method": "tools/call",
       "params": {
-        "_meta": {
-          "ucp": {
-            "profile": "https://platform.example/profiles/v2026-01/shopping-agent.json"
-          }
-        },
-        "id": "cart_abc123",
-        "idempotency_key": "660e8400-e29b-41d4-a716-446655440001"
-      },
-      "id": 1
+        "name": "cancel_cart",
+        "arguments": {
+          "meta": {
+            "ucp-agent": {
+              "profile": "https://platform.example/profiles/v2026-01/shopping-agent.json"
+            },
+            "idempotency-key": "660e8400-e29b-41d4-a716-446655440001"
+          },
+          "id": "cart_abc123"
+        }
+      }
     }
     ```
 
@@ -480,80 +533,105 @@ Maps to the [Cancel Cart](cart.md#cancel-cart) operation.
       "jsonrpc": "2.0",
       "id": 1,
       "result": {
-        "ucp": {
-          "version": "2026-01-15",
-          "capabilities": [
-            {
-              "name": "dev.ucp.shopping.checkout",
-              "version": "2026-01-11"
+        "structuredContent": {
+          "cart": {
+            "ucp": {
+              "version": "2026-01-15",
+              "capabilities": [
+                {
+                  "name": "dev.ucp.shopping.checkout",
+                  "version": "2026-01-11"
+                },
+                {
+                  "name": "dev.ucp.shopping.cart",
+                  "version": "2026-01-15"
+                }
+              ]
             },
-            {
-              "name": "dev.ucp.shopping.cart",
-              "version": "2026-01-15"
-            }
-          ]
-        },
-        "id": "cart_abc123",
-        "line_items": [
-          {
-            "id": "li_1",
-            "item": {
-              "id": "item_123",
-              "title": "Red T-Shirt",
-              "price": 2500
-            },
-            "quantity": 2,
+            "id": "cart_abc123",
+            "line_items": [
+              {
+                "id": "li_1",
+                "item": {
+                  "id": "item_123",
+                  "title": "Red T-Shirt",
+                  "price": 2500
+                },
+                "quantity": 2,
+                "totals": [
+                  {"type": "subtotal", "amount": 5000},
+                  {"type": "total", "amount": 5000}
+                ]
+              }
+            ],
+            "currency": "USD",
             "totals": [
-              {"type": "subtotal", "amount": 5000},
-              {"type": "total", "amount": 5000}
-            ]
+              {
+                "type": "subtotal",
+                "amount": 5000
+              },
+              {
+                "type": "total",
+                "amount": 5000
+              }
+            ],
+            "continue_url": "https://business.example.com/checkout?cart=cart_abc123"
           }
-        ],
-        "currency": "USD",
-        "totals": [
+        },
+        "content": [
           {
-            "type": "subtotal",
-            "amount": 5000
-          },
-          {
-            "type": "total",
-            "amount": 5000
+            "type": "text",
+            "text": "{\"cart\":{\"ucp\":{...},\"id\":\"cart_abc123\",...}}"
           }
-        ],
-        "continue_url": "https://business.example.com/checkout?cart=cart_abc123"
+        ]
       }
     }
     ```
 
 ## Error Handling
 
-See the [Core Specification](overview.md#error-handling) for negotiation error
-handling (discovery failures, negotiation failures).
+UCP distinguishes between protocol errors and business outcomes. See the
+[Core Specification](overview.md#error-handling) for the complete error code
+registry and transport binding examples.
+
+* **Protocol errors**: Transport-level failures (authentication, rate limiting,
+    unavailability) that prevent request processing. Returned as JSON-RPC
+    `error` with code `-32000` (or `-32001` for discovery errors).
+* **Business outcomes**: Application-level results from successful request
+    processing, returned as JSON-RPC `result` with UCP envelope and `messages`.
 
 ### Business Outcomes
 
 Business outcomes (including not found and validation errors) are returned as
-JSON-RPC `result` with the UCP envelope and `messages`:
+JSON-RPC `result` with `structuredContent` containing the UCP envelope and
+`messages`:
 
 ```json
 {
   "jsonrpc": "2.0",
   "id": 1,
   "result": {
-    "ucp": {
-      "version": "2026-01-11",
-      "capabilities": {
-        "dev.ucp.shopping.cart": [{"version": "2026-01-11"}]
+    "structuredContent": {
+      "cart": {
+        "ucp": {
+          "version": "2026-01-11",
+          "capabilities": {
+            "dev.ucp.shopping.cart": [{"version": "2026-01-11"}]
+          }
+        },
+        "messages": [
+          {
+            "type": "error",
+            "code": "not_found",
+            "content": "Cart not found or has expired"
+          }
+        ],
+        "continue_url": "https://merchant.com/"
       }
     },
-    "messages": [
-      {
-        "type": "error",
-        "code": "NOT_FOUND",
-        "content": "Cart not found or has expired"
-      }
-    ],
-    "continue_url": "https://merchant.com/"
+    "content": [
+      {"type": "text", "text": "{\"cart\":{...}}"}
+    ]
   }
 }
 ```
@@ -564,8 +642,7 @@ A conforming MCP transport implementation **MUST**:
 
 1. Implement JSON-RPC 2.0 protocol correctly.
 2. Provide all core cart tools defined in this specification.
-3. Return negotiation failures per the
-    [Core Specification](overview.md#error-handling).
+3. Return errors per the [Core Specification](overview.md#error-handling).
 4. Return business outcomes as JSON-RPC `result` with UCP envelope and
     `messages` array.
 5. Validate tool inputs against UCP schemas.

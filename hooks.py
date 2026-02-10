@@ -119,9 +119,17 @@ def _set_schema_version(data, version):
 
   Named entities (schemas with top-level 'name' field) require version per
   ucp.json#/$defs/entity. Build injects version so source files don't need it.
+
+  Additionally, for OpenAPI and OpenRPC transport specifications, set the
+  required info.version field.
   """
   if "name" in data:
     data["version"] = version
+
+  if ("openapi" in data or "openrpc" in data) and isinstance(
+    data["info"], dict
+  ):
+    data["info"]["version"] = version
 
 
 def on_post_build(config):

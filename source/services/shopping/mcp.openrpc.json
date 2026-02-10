@@ -137,11 +137,6 @@
           "name": "checkout",
           "required": true,
           "schema": {"$ref": "../../schemas/shopping/checkout.json"}
-        },
-        {
-          "name": "idempotency_key",
-          "required": true,
-          "schema": {"type": "string", "format": "uuid"}
         }
       ],
       "result": {
@@ -230,14 +225,19 @@
       "summary": "Cancel cart",
       "params": [
         {
+          "name": "meta",
+          "required": true,
+          "schema": {
+            "allOf": [
+              {"$ref": "#/components/schemas/meta"},
+              {"required": ["ucp-agent", "idempotency-key"]}
+            ]
+          }
+        },
+        {
           "name": "id",
           "required": true,
           "schema": {"type": "string"}
-        },
-        {
-          "name": "idempotency_key",
-          "required": true,
-          "schema": {"type": "string", "format": "uuid"}
         }
       ],
       "result": {
