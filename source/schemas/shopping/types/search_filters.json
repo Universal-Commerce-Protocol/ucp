@@ -6,8 +6,9 @@
   "type": "object",
   "properties": {
     "category": {
-      "type": "string",
-      "description": "Filter by product category. Categories are merchant-defined strings representing product taxonomy. Valid values can be discovered from the category field in search results, merchant documentation, or standard taxonomies that businesses may align with."
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Filter by product categories (OR logic — matches products in any listed category). Values match against the value field in product category entries. Valid values can be discovered from the category field in search results, merchant documentation, or standard taxonomies that businesses may align with."
     },
     "price": {
       "$ref": "price_filter.json"

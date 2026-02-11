@@ -129,7 +129,7 @@ Maps to the [Catalog Search](search.md) capability.
               "intent": "looking for comfortable everyday shoes"
             },
             "filters": {
-              "category": "Footwear",
+              "category": ["Footwear"],
               "price": {
                 "max": 15000
               }
