@@ -2052,38 +2052,36 @@ Fulfillment is optional in the checkout object. This is done to enable a platfor
 The checkout `status` field indicates the current phase of the session and determines what action is required next. The business sets the status; the platform receives messages indicating what's needed to progress.
 
 ```text
-┌────────────┐    ┌─────────────────────┐
-│ incomplete │◀──▶│ requires_escalation │
-└─────┬──────┘    │                     │
-      │           │  (buyer handoff     │
-      │           │   via continue_url) │
-      │           └──────────┬──────────┘
-      │                      │
-      │ all info collected   │ continue_url
-      ▼                      │
-┌──────────────────┐         │
-│ready_for_complete│         │
-│                  │         │
-│ (platform can    │         │
-│ call Complete    │         │
-│   Checkout).     │         │
-└────────┬─────────┘         │
-         │                   │
-         │ Complete Checkout │
-         ▼                   │
-┌────────────────────┐       │
-│complete_in_progress│       │
-└─────────┬──────────┘       │
-          │                  │
-          └────────┬─────────┘
-                   ▼
-            ┌─────────────┐
-            │  completed  │
-            └─────────────┘
+       +------------+                         +---------------------+
+       | incomplete |<----------------------->| requires_escalation |
+       +-----+------+                         |   (buyer handoff    |
+             |                                |  via continue_url)  |
+             | all info collected             +----------+----------+
+             v                                           |
+    +------------------+                                 |
+    |ready_for_complete|                                 |
+    |                  |                                 |
+    | (platform can    |                                 | continue_url
+    | call Complete    |                                 |
+    |   Checkout)      |                                 |
+    +--------+---------+                                 |
+             |                                           |
+             | Complete Checkout                         |
+             v                                           |
+   +--------------------+                                |
+   |complete_in_progress|                                |
+   +---------+----------+                                |
+             |                                           |
+             +-----------------------+-------------------+
+                                     v
+                               +-------------+
+                               |  completed  |
+                               +-------------+
 
-            ┌─────────────┐
-            │  canceled   │  (session invalid/expired - can occur from any state)
-            └─────────────┘
+                               +-------------+
+                               |  canceled   |
+                               +-------------+
+          (session invalid/expired - can occur from any state)
 ```
 
 ### Status Values
@@ -9423,29 +9421,29 @@ Every payment handler specification **MUST** define the core elements below.
 **Note on Protocol Signatures:**: The function signatures provided in this section (e.g., `PROCESSING(...)`) represent **logical data flows**, not literal function calls. Spec authors must map these logical flows to the actual transport protocol used by their implementation.
 
 ```text
-┌──────────────────────────────────────────────────────────────────────────────┐
-│                        Payment Handler Framework                             │
-├──────────────────────────────────────────────────────────────────────────────┤
-│                                                                              │
-│   ┌──────────────┐                                                           │
-│   │ PARTICIPANTS │  Who participates in this handler?                        │
-│   └──────┬───────┘                                                           │
-│          │                                                                   │
-│          ▼                                                                   │
-│   ┌──────────────┐                                                           │
-│   │PREREQUISITES │  How does each participant obtain identity & configs?     │
-│   └──────┬───────┘                                                           │
-│          │                                                                   │
-│          ├────────────────────┬──────────────────────┐                       │
-│          ▼                    ▼                      ▼                       │
-│   ┌──────────────┐    ┌──────────────┐      ┌──────────────┐                 │
-│   │   HANDLER    │    │  INSTRUMENT  │      │  PROCESSING  │                 │
-│   │ DECLARATION  │    │  ACQUISITION │      │              │                 │
-│   └──────────────┘    └──────────────┘      └──────────────┘                 │
-│   Business advertises  platform acquires     Participant                     │
-│   handler config       checkout instrument   processes instrument            │
-│                                                                              │
-└──────────────────────────────────────────────────────────────────────────────┘
++------------------------------------------------------------------------------+
+|                        Payment Handler Framework                             |
++------------------------------------------------------------------------------+
+|                                                                              |
+|   +--------------+                                                           |
+|   | PARTICIPANTS |  Who participates in this handler?                        |
+|   +------+-------+                                                           |
+|          |                                                                   |
+|          v                                                                   |
+|   +--------------+                                                           |
+|   |PREREQUISITES |  How does each participant obtain identity & configs?     |
+|   +------+-------+                                                           |
+|          |                                                                   |
+|          +--------------------+----------------------+                       |
+|          v                    v                      v                       |
+|   +--------------+    +--------------+      +--------------+                 |
+|   |   HANDLER    |    |  INSTRUMENT  |      |  PROCESSING  |                 |
+|   | DECLARATION  |    |  ACQUISITION |      |              |                 |
+|   +--------------+    +--------------+      +--------------+                 |
+|   Business advertises  platform acquires     Participant                     |
+|   handler config       checkout instrument   processes instrument            |
+|                                                                              |
++------------------------------------------------------------------------------+
 ```
 
 ### Participants
@@ -10138,18 +10136,18 @@ ______________________________________________________________________
 {Optional: ASCII diagram showing participant relationships}
 
 ```text
-┌─────────┐     ┌───────────────┐     ┌────────────┐
-│Platform │     │   {Provider}  │     │  Business  │
-└────┬────┘     └───────┬───────┘     └──────┬─────┘
-     │                  │                    │
-     │  {step 1}        │                    │
-     │─────────────────>│                    │
-     │                  │                    │
-     │  {step 2}        │                    │
-     │<─────────────────│                    │
-     │                  │                    │
-     │  {step 3}                             │
-     │──────────────────────────────────────>│
++---------+     +---------------+     +------------+
+|Platform |     |   {Provider}  |     |  Business  |
++----+----+     +-------+-------+     +------+-----+
+     |                  |                    |
+     |  {step 1}        |                    |
+     |----------------->|                    |
+     |                  |                    |
+     |  {step 2}        |                    |
+     |<-----------------|                    |
+     |                  |                    |
+     |  {step 3}                             |
+     |-------------------------------------->|
 ```
 
 ______________________________________________________________________
@@ -10424,23 +10422,23 @@ ______________________________________________________________________
 Tokenization handlers transform credentials between source and checkout forms:
 
 ```text
-┌─────────────────────────────────────────────────────────────────────────┐
-│                     Tokenization Payment Flow                           │
-├─────────────────────────────────────────────────────────────────────────┤
-│                                                                         │
-│   Platform has:            Tokenizer            Business receives:      │
-│   Source Credential  ──▶  /tokenize  ──▶         TokenCredential        │
-│                                                                         │
-│   ┌─────────────────┐                      ┌─────────────────────────┐  │
-│   │ source_         │                      │ checkout_               │  │
-│   │ credentials     │    What goes IN      │ credentials             │  │
-│   │                 │◀───────────────      │                         │  │
-│   │ • card/fpan     │                      │ What comes OUT          │  │
-│   │ • card/dpan     │                ─────▶│ • token                 │  │
-│   │                 │                      │                         │  │
-│   └─────────────────┘                      └─────────────────────────┘  │
-│                                                                         │
-└─────────────────────────────────────────────────────────────────────────┘
++-------------------------------------------------------------------------+
+|                     Tokenization Payment Flow                           |
++-------------------------------------------------------------------------+
+|                                                                         |
+|   Platform has:            Tokenizer            Business receives:      |
+|   Source Credential    -->  /tokenize  -->         TokenCredential      |
+|                                                                         |
+|   +-----------------+                      +-------------------------+  |
+|   | source_         |                      | checkout_               |  |
+|   | credentials     |    What goes IN      | credentials             |  |
+|   |                 |<---------------      |                         |  |
+|   | * card/fpan     |                      | What comes OUT          |  |
+|   | * card/dpan     |                ----->| * token                 |  |
+|   |                 |                      |                         |  |
+|   +-----------------+                      +-------------------------+  |
+|                                                                         |
++-------------------------------------------------------------------------+
 ```
 
 Tokenization handlers accept source credentials (e.g., card with FPAN) and produce checkout credentials (e.g., tokens).
@@ -10450,13 +10448,13 @@ Tokenization handlers accept source credentials (e.g., card with FPAN) and produ
 Tokens move through distinct phases. Your handler specification must document which lifecycle policy you use:
 
 ```text
-┌──────────────┐    ┌──────────────┐    ┌──────────────┐    ┌──────────────┐
-│  Generation  │───▶│   Storage    │───▶│ Detokenize   │───▶│ Invalidation │
-│              │    │              │    │              │    │              │
-│Platform calls│    │ Tokenizer    │    │ Business/PSP │    │ Token expires│
-│ /tokenize    │    │ holds token  │    │ calls        │    │ or is used   │
-│              │    │ → credential │    │ /detokenize  │    │              │
-└──────────────┘    └──────────────┘    └──────────────┘    └──────────────┘
++--------------+    +--------------+    +--------------+    +--------------+
+|  Generation  |--->|   Storage    |--->| Detokenize   |--->| Invalidation |
+|              |    |              |    |              |    |              |
+|Platform calls|    | Tokenizer    |    | Business/PSP |    | Token expires|
+| /tokenize    |    | holds token  |    | calls        |    | or is used   |
+|              |    | -> credential|    | /detokenize  |    |              |
++--------------+    +--------------+    +--------------+    +--------------+
 ```
 
 | Policy             | Description                                 | Use Case                                        |
@@ -10685,30 +10683,30 @@ ______________________________________________________________________
 ### Pattern Flow
 
 ```text
-┌────────────┐                         ┌───────────────────────────────────┐
-│  Platform  │                         │       Tokenizer / Processor       │
-│ (Collector)│                         │      (Business or PSP)            │
-└─────┬──────┘                         └─────────────────┬─────────────────┘
-      │                                                  │
-      │  1. GET ucp.payment_handlers                     │
-      │─────────────────────────────────────────────────>│
-      │                                                  │
-      │  2. Handler Config (URL + Identity)              │
-      │<─────────────────────────────────────────────────│
-      │                                                  │
-      │  3. POST /tokenize (Credential + Identity)       │
-      │─────────────────────────────────────────────────>│
-      │                                                  │
-      │  4. Token                                        │
-      │<─────────────────────────────────────────────────│
-      │                                                  │
-      │  5. POST checkout with TokenCredential           │
-      │─────────────────────────────────────────────────>│
-      │                                                  │
-      │        (Internal Resolution: Token -> Info)      │
-      │                                                  │
-      │  6. Payment Result                               │
-      │<─────────────────────────────────────────────────│
++------------+                         +-----------------------------------+
+|  Platform  |                         |       Tokenizer / Processor       |
+| (Collector)|                         |      (Business or PSP)            |
++-----+------+                         +-----------------+-----------------+
+      |                                                  |
+      |  1. GET ucp.payment_handlers                     |
+      |------------------------------------------------->|
+      |                                                  |
+      |  2. Handler Config (URL + Identity)              |
+      |<-------------------------------------------------|
+      |                                                  |
+      |  3. POST /tokenize (Credential + Identity)       |
+      |------------------------------------------------->|
+      |                                                  |
+      |  4. Token                                        |
+      |<-------------------------------------------------|
+      |                                                  |
+      |  5. POST checkout with TokenCredential           |
+      |------------------------------------------------->|
+      |                                                  |
+      |        (Internal Resolution: Token -> Info)      |
+      |                                                  |
+      |  6. Payment Result                               |
+      |<-------------------------------------------------|
 ```
 
 ______________________________________________________________________
@@ -10941,76 +10939,77 @@ ______________________________________________________________________
 ### Pattern Flow: Business Detokenizes
 
 ```text
-┌─────────────────┐                              ┌────────────┐
-│    Platform     │                              │  Business  │
-│  (Tokenizer)    │                              │            │
-└────────┬────────┘                              └──────┬─────┘
-         │                                              │
-         │  1. Business registers with Platform (out-of-band)
-         │<─────────────────────────────────────────────│
-         │                                              │
-         │  2. API credentials                          │
-         │─────────────────────────────────────────────>│
-         │                                              │
-         │  3. GET ucp.payment_handlers                 │
-         │─────────────────────────────────────────────>│
-         │                                              │
-         │  4. Handler with business identity           │
-         │<─────────────────────────────────────────────│
-         │                                              │
-         │5. Platforms's Credential Provider generates token│
-         │                                              │
-         │  6. POST checkout with TokenCredential       │
-         │─────────────────────────────────────────────>│
-         │                                              │
-         │  7. POST /detokenize (to Credential Provider)│
-         │<─────────────────────────────────────────────│
-         │                                              │
-         │  8. Sensitive Data                           │
-         │─────────────────────────────────────────────>│
-         │                                              │
-         │  9. Checkout complete                        │
-         │<─────────────────────────────────────────────│
++-----------------+                              +------------+
+|    Platform     |                              |  Business  |
+|  (Tokenizer)    |                              |            |
++--------+--------+                              +------+-----+
+         |                                              |
+         |  1. Business registers with Platform (out-of-band)
+         |<---------------------------------------------|
+         |                                              |
+         |  2. API credentials                          |
+         |--------------------------------------------->|
+         |                                              |
+         |  3. GET ucp.payment_handlers                 |
+         |--------------------------------------------->|
+         |                                              |
+         |  4. Handler with business identity           |
+         |<---------------------------------------------|
+         |                                              |
+         |5. Platforms's Credential Provider generates token
+         |                                              |
+         |  6. POST checkout with TokenCredential       |
+         |--------------------------------------------->|
+         |                                              |
+         |  7. POST /detokenize (to Credential Provider)|
+         |<---------------------------------------------|
+         |                                              |
+         |  8. Sensitive Data                           |
+         |--------------------------------------------->|
+         |                                              |
+         |  9. Checkout complete                        |
+         |<---------------------------------------------|
 ```
 
 ### Pattern Flow: PSP Detokenizes
 
 ```text
-┌─────────────────┐     ┌────────────┐      ┌─────────┐
-│    Platform     │     │  Business  │      │   PSP   │
-│  (Tokenizer)    │     │            │      │         │
-└────────┬────────┘     └──────┬─────┘      └────┬────┘
-         │                     │                 │
-         │  1. Business + PSP register with Platform (out-of-band)
-         │<────────────────────│                 │
-         │<──────────────────────────────────────│
-         │                     │                 │
-         │  2. API credentials │                 │
-         │────────────────────>│                 │
-         │──────────────────────────────────────>│
-         │                     │                 │
-         │  3. Payment Credential Provider       │
-         │     generates token                   │
-         │                     │                 │
-         │  4. POST checkout with TokenCredential│
-         │────────────────────>│                 │
-         │                     │                 │
-         │                     │  5. Forward     │
-         │                     │  token to PSP   │
-         │                     │────────────────>│
-         │                     │                 │
-         │  6. POST /detokenize (to Credential Provider, with business identity)
-         │<──────────────────────────────────────│
-         │                     │                 │
-         │  7. Sensitive Data  │                 │
-         │──────────────────────────────────────>│
-         │                     │                 │
-         │                     │  8. Payment     │
-         │                     │  result         │
-         │                     │<────────────────│
-         │                     │                 │
-         │  9. Checkout complete                 │
-         │<────────────────────│                 │
++-----------------+     +------------+      +---------+
+|    Platform     |     |  Business  |      |   PSP   |
+|  (Tokenizer)    |     |            |      |         |
++--------+--------+     +------+-----+      +----+----+
+         |                     |                 |
+         |  1. Business + PSP register with Platform (out-of-band)
+         |<--------------------|                 |
+         |<--------------------------------------|
+         |                     |                 |
+         |  2. API credentials |                 |
+         |-------------------->|                 |
+         |-------------------------------------->|
+         |                     |                 |
+         |  3. Payment Credential Provider       |
+         |     generates token                   |
+         |                     |                 |
+         |  4. POST checkout with TokenCredential|
+         |-------------------->|                 |
+         |                     |                 |
+         |                     |  5. Forward     |
+         |                     |  token to PSP   |
+         |                     |---------------->|
+         |                     |                 |
+         |  6. POST /detokenize (to Credential Provider, with business identity)
+         |<--------------------------------------|
+         |                     |                 |
+         |  7. Sensitive Data  |                 |
+         |-------------------------------------->|
+         |                     |                 |
+         |                     |  8. Payment     |
+         |                     |  result         |
+         |                     |                  |
+         |                     |<----------------|
+         |                     |                 |
+         |  9. Checkout complete                 |
+         |<--------------------|                 |
 ```
 
 ______________________________________________________________________
@@ -11353,33 +11352,33 @@ ______________________________________________________________________
 ### Pattern Flow
 
 ```text
-┌─────────────────┐                              ┌────────────┐
-│  Platform       │                              │  Business  │
-│                 │                              │            │
-└────────┬────────┘                              └──────┬─────┘
-         │                                              │
-         │  1. Business registers public key (out-of-band)
-         │<─────────────────────────────────────────────│
-         │                                              │
-         │  2. Confirmation                             │
-         │─────────────────────────────────────────────>│
-         │                                              │
-         │  3. GET ucp.payment_handlers                 │
-         │─────────────────────────────────────────────>│
-         │                                              │
-         │  4. Handler with business identity           │
-         │<─────────────────────────────────────────────│
-         │                                              │
-         │  5. Platform's vaulting service encrypts     │
-         │     credential with business's key           │
-         │                                              │
-         │  6. POST checkout with EncryptedCredential   │
-         │─────────────────────────────────────────────>│
-         │                                              │
-         │       (Business decrypts locally)            │
-         │                                              │
-         │  7. Checkout complete                        │
-         │<─────────────────────────────────────────────│
++-----------------+                              +------------+
+|  Platform       |                              |  Business  |
+|                 |                              |            |
++--------+--------+                              +------+-----+
+         |                                              |
+         |  1. Business registers public key (out-of-band)
+         |<---------------------------------------------|
+         |                                              |
+         |  2. Confirmation                             |
+         |--------------------------------------------->|
+         |                                              |
+         |  3. GET ucp.payment_handlers                 |
+         |--------------------------------------------->|
+         |                                              |
+         |  4. Handler with business identity           |
+         |<---------------------------------------------|
+         |                                              |
+         |  5. Platform's vaulting service encrypts     |
+         |     credential with business's key           |
+         |                                              |
+         |  6. POST checkout with EncryptedCredential   |
+         |--------------------------------------------->|
+         |                                              |
+         |       (Business decrypts locally)            |
+         |                                              |
+         |  7. Checkout complete                        |
+         |<---------------------------------------------|
 ```
 
 ______________________________________________________________________

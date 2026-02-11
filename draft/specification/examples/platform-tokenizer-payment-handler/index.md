@@ -40,76 +40,77 @@ ______________________________________________________________________
 ### Pattern Flow: Business Detokenizes
 
 ```text
-┌─────────────────┐                              ┌────────────┐
-│    Platform     │                              │  Business  │
-│  (Tokenizer)    │                              │            │
-└────────┬────────┘                              └──────┬─────┘
-         │                                              │
-         │  1. Business registers with Platform (out-of-band)
-         │<─────────────────────────────────────────────│
-         │                                              │
-         │  2. API credentials                          │
-         │─────────────────────────────────────────────>│
-         │                                              │
-         │  3. GET ucp.payment_handlers                 │
-         │─────────────────────────────────────────────>│
-         │                                              │
-         │  4. Handler with business identity           │
-         │<─────────────────────────────────────────────│
-         │                                              │
-         │5. Platforms's Credential Provider generates token│
-         │                                              │
-         │  6. POST checkout with TokenCredential       │
-         │─────────────────────────────────────────────>│
-         │                                              │
-         │  7. POST /detokenize (to Credential Provider)│
-         │<─────────────────────────────────────────────│
-         │                                              │
-         │  8. Sensitive Data                           │
-         │─────────────────────────────────────────────>│
-         │                                              │
-         │  9. Checkout complete                        │
-         │<─────────────────────────────────────────────│
++-----------------+                              +------------+
+|    Platform     |                              |  Business  |
+|  (Tokenizer)    |                              |            |
++--------+--------+                              +------+-----+
+         |                                              |
+         |  1. Business registers with Platform (out-of-band)
+         |<---------------------------------------------|
+         |                                              |
+         |  2. API credentials                          |
+         |--------------------------------------------->|
+         |                                              |
+         |  3. GET ucp.payment_handlers                 |
+         |--------------------------------------------->|
+         |                                              |
+         |  4. Handler with business identity           |
+         |<---------------------------------------------|
+         |                                              |
+         |5. Platforms's Credential Provider generates token
+         |                                              |
+         |  6. POST checkout with TokenCredential       |
+         |--------------------------------------------->|
+         |                                              |
+         |  7. POST /detokenize (to Credential Provider)|
+         |<---------------------------------------------|
+         |                                              |
+         |  8. Sensitive Data                           |
+         |--------------------------------------------->|
+         |                                              |
+         |  9. Checkout complete                        |
+         |<---------------------------------------------|
 ```
 
 ### Pattern Flow: PSP Detokenizes
 
 ```text
-┌─────────────────┐     ┌────────────┐      ┌─────────┐
-│    Platform     │     │  Business  │      │   PSP   │
-│  (Tokenizer)    │     │            │      │         │
-└────────┬────────┘     └──────┬─────┘      └────┬────┘
-         │                     │                 │
-         │  1. Business + PSP register with Platform (out-of-band)
-         │<────────────────────│                 │
-         │<──────────────────────────────────────│
-         │                     │                 │
-         │  2. API credentials │                 │
-         │────────────────────>│                 │
-         │──────────────────────────────────────>│
-         │                     │                 │
-         │  3. Payment Credential Provider       │
-         │     generates token                   │
-         │                     │                 │
-         │  4. POST checkout with TokenCredential│
-         │────────────────────>│                 │
-         │                     │                 │
-         │                     │  5. Forward     │
-         │                     │  token to PSP   │
-         │                     │────────────────>│
-         │                     │                 │
-         │  6. POST /detokenize (to Credential Provider, with business identity)
-         │<──────────────────────────────────────│
-         │                     │                 │
-         │  7. Sensitive Data  │                 │
-         │──────────────────────────────────────>│
-         │                     │                 │
-         │                     │  8. Payment     │
-         │                     │  result         │
-         │                     │<────────────────│
-         │                     │                 │
-         │  9. Checkout complete                 │
-         │<────────────────────│                 │
++-----------------+     +------------+      +---------+
+|    Platform     |     |  Business  |      |   PSP   |
+|  (Tokenizer)    |     |            |      |         |
++--------+--------+     +------+-----+      +----+----+
+         |                     |                 |
+         |  1. Business + PSP register with Platform (out-of-band)
+         |<--------------------|                 |
+         |<--------------------------------------|
+         |                     |                 |
+         |  2. API credentials |                 |
+         |-------------------->|                 |
+         |-------------------------------------->|
+         |                     |                 |
+         |  3. Payment Credential Provider       |
+         |     generates token                   |
+         |                     |                 |
+         |  4. POST checkout with TokenCredential|
+         |-------------------->|                 |
+         |                     |                 |
+         |                     |  5. Forward     |
+         |                     |  token to PSP   |
+         |                     |---------------->|
+         |                     |                 |
+         |  6. POST /detokenize (to Credential Provider, with business identity)
+         |<--------------------------------------|
+         |                     |                 |
+         |  7. Sensitive Data  |                 |
+         |-------------------------------------->|
+         |                     |                 |
+         |                     |  8. Payment     |
+         |                     |  result         |
+         |                     |                  |
+         |                     |<----------------|
+         |                     |                 |
+         |  9. Checkout complete                 |
+         |<--------------------|                 |
 ```
 
 ______________________________________________________________________
