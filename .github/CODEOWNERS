@@ -10,8 +10,22 @@
 # Governance
 /GOVERNANCE.md  @Universal-Commerce-Protocol/governance-council
 /CONTRIBUTING.md  @Universal-Commerce-Protocol/governance-council
+/CODE_OF_CONDUCT.md @Universal-Commerce-Protocol/governance-council
+/SECURITY.md @Universal-Commerce-Protocol/governance-council
 
-# Infrastructure & Tooling
-/.github/  @Universal-Commerce-Protocol/devops-maintainers
-/scripts/  @Universal-Commerce-Protocol/devops-maintainers
+# Infrastructure, Tooling & Configuration
+/.github/                 @Universal-Commerce-Protocol/devops-maintainers
+/scripts/                 @Universal-Commerce-Protocol/devops-maintainers
+/.cspell/                 @Universal-Commerce-Protocol/devops-maintainers
+/.cspell.json             @Universal-Commerce-Protocol/devops-maintainers
 /.pre-commit-config.yaml  @Universal-Commerce-Protocol/devops-maintainers
+/.prettierignore          @Universal-Commerce-Protocol/devops-maintainers
+/.prettierrc              @Universal-Commerce-Protocol/devops-maintainers
+/.stylelintrc.json        @Universal-Commerce-Protocol/devops-maintainers
+/biome.json               @Universal-Commerce-Protocol/devops-maintainers
+/mkdocs.yml               @Universal-Commerce-Protocol/devops-maintainers
+/.gitignore               @Universal-Commerce-Protocol/devops-maintainers
+/pyproject.toml           @Universal-Commerce-Protocol/devops-maintainers
+/uv.lock                  @Universal-Commerce-Protocol/devops-maintainers
+/package.json             @Universal-Commerce-Protocol/devops-maintainers
+/package-lock.json        @Universal-Commerce-Protocol/devops-maintainers
