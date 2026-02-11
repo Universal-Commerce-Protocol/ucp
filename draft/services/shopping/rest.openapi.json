@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "UCP Shopping Service",
-    "version": "2026-02-10",
+    "version": "2026-02-11",
     "description": "Canonical REST interface for UCP Shopping service. Schema references are logical pointers - actual payload shape is determined by negotiated capabilities.\n\n**Endpoint Resolution:** This spec defines operations only. The base URL MUST be obtained from the merchant's discovery profile at `/.well-known/ucp` under `services[\"dev.ucp.shopping\"][transport=rest].endpoint`. The `{endpoint}` server variable below is a placeholder for tooling compatibility."
   },
   "servers": [

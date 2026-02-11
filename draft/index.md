@@ -272,6 +272,8 @@ Universal payments that are provable—every authorization backed by cryptograph
 
 Adyen
 
+Affirm
+
 Amex
 
 Ant International
@@ -325,6 +327,8 @@ Worldpay
 Zalando
 
 Adyen
+
+Affirm
 
 Amex
 

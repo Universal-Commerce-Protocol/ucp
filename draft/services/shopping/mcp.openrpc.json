@@ -2,7 +2,7 @@
   "openrpc": "1.3.2",
   "info": {
     "title": "UCP Shopping Service",
-    "version": "2026-02-10",
+    "version": "2026-02-11",
     "description": "Canonical MCP/JSON-RPC interface for UCP Shopping service. Schema references are logical pointers - actual payload shape is determined by negotiated capabilities.\n\n**Endpoint Resolution:** This spec defines methods only. The endpoint URL MUST be obtained from the merchant's discovery profile at `/.well-known/ucp` under `services[\"dev.ucp.shopping\"][transport=mcp].endpoint`. The server entry below is a placeholder for tooling compatibility."
   },
   "servers": [

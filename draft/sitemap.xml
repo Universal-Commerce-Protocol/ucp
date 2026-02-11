@@ -2,118 +2,118 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://ucp.dev/draft/</loc>
-         <lastmod>2026-02-10</lastmod>
+         <lastmod>2026-02-11</lastmod>
     </url>
     <url>
          <loc>https://ucp.dev/draft/playground/</loc>
-         <lastmod>2026-02-10</lastmod>
+         <lastmod>2026-02-11</lastmod>
     </url>
     <url>
          <loc>https://ucp.dev/draft/documentation/core-concepts/</loc>
-         <lastmod>2026-02-10</lastmod>
+         <lastmod>2026-02-11</lastmod>
     </url>
     <url>
          <loc>https://ucp.dev/draft/documentation/roadmap/</loc>
-         <lastmod>2026-02-10</lastmod>
+         <lastmod>2026-02-11</lastmod>
     </url>
     <url>
          <loc>https://ucp.dev/draft/documentation/schema-authoring/</loc>
-         <lastmod>2026-02-10</lastmod>
+         <lastmod>2026-02-11</lastmod>
     </url>
     <url>
          <loc>https://ucp.dev/draft/documentation/ucp-and-ap2/</loc>
-         <lastmod>2026-02-10</lastmod>
+         <lastmod>2026-02-11</lastmod>
     </url>
     <url>
          <loc>https://ucp.dev/draft/specification/ap2-mandates/</loc>
-         <lastmod>2026-02-10</lastmod>
+         <lastmod>2026-02-11</lastmod>
     </url>
     <url>
          <loc>https://ucp.dev/draft/specification/buyer-consent/</loc>
-         <lastmod>2026-02-10</lastmod>
+         <lastmod>2026-02-11</lastmod>
     </url>
     <url>
          <loc>https://ucp.dev/draft/specification/cart-mcp/</loc>
-         <lastmod>2026-02-10</lastmod>
+         <lastmod>2026-02-11</lastmod>
     </url>
     <url>
          <loc>https://ucp.dev/draft/specification/cart-rest/</loc>
-         <lastmod>2026-02-10</lastmod>
+         <lastmod>2026-02-11</lastmod>
     </url>
     <url>
          <loc>https://ucp.dev/draft/specification/cart/</loc>
-         <lastmod>2026-02-10</lastmod>
+         <lastmod>2026-02-11</lastmod>
     </url>
     <url>
          <loc>https://ucp.dev/draft/specification/checkout-a2a/</loc>
-         <lastmod>2026-02-10</lastmod>
+         <lastmod>2026-02-11</lastmod>
     </url>
     <url>
          <loc>https://ucp.dev/draft/specification/checkout-mcp/</loc>
-         <lastmod>2026-02-10</lastmod>
+         <lastmod>2026-02-11</lastmod>
     </url>
     <url>
          <loc>https://ucp.dev/draft/specification/checkout-rest/</loc>
-         <lastmod>2026-02-10</lastmod>
+         <lastmod>2026-02-11</lastmod>
     </url>
     <url>
          <loc>https://ucp.dev/draft/specification/checkout/</loc>
-         <lastmod>2026-02-10</lastmod>
+         <lastmod>2026-02-11</lastmod>
     </url>
     <url>
          <loc>https://ucp.dev/draft/specification/discount/</loc>
-         <lastmod>2026-02-10</lastmod>
+         <lastmod>2026-02-11</lastmod>
     </url>
     <url>
          <loc>https://ucp.dev/draft/specification/embedded-checkout/</loc>
-         <lastmod>2026-02-10</lastmod>
+         <lastmod>2026-02-11</lastmod>
     </url>
     <url>
          <loc>https://ucp.dev/draft/specification/fulfillment/</loc>
-         <lastmod>2026-02-10</lastmod>
+         <lastmod>2026-02-11</lastmod>
     </url>
     <url>
          <loc>https://ucp.dev/draft/specification/identity-linking/</loc>
-         <lastmod>2026-02-10</lastmod>
+         <lastmod>2026-02-11</lastmod>
     </url>
     <url>
          <loc>https://ucp.dev/draft/specification/order/</loc>
-         <lastmod>2026-02-10</lastmod>
+         <lastmod>2026-02-11</lastmod>
     </url>
     <url>
          <loc>https://ucp.dev/draft/specification/overview/</loc>
-         <lastmod>2026-02-10</lastmod>
+         <lastmod>2026-02-11</lastmod>
     </url>
     <url>
          <loc>https://ucp.dev/draft/specification/payment-handler-guide/</loc>
-         <lastmod>2026-02-10</lastmod>
+         <lastmod>2026-02-11</lastmod>
     </url>
     <url>
          <loc>https://ucp.dev/draft/specification/payment-handler-template/</loc>
-         <lastmod>2026-02-10</lastmod>
+         <lastmod>2026-02-11</lastmod>
     </url>
     <url>
          <loc>https://ucp.dev/draft/specification/reference/</loc>
-         <lastmod>2026-02-10</lastmod>
+         <lastmod>2026-02-11</lastmod>
     </url>
     <url>
          <loc>https://ucp.dev/draft/specification/tokenization-guide/</loc>
-         <lastmod>2026-02-10</lastmod>
+         <lastmod>2026-02-11</lastmod>
     </url>
     <url>
          <loc>https://ucp.dev/draft/specification/versioning/</loc>
-         <lastmod>2026-02-10</lastmod>
+         <lastmod>2026-02-11</lastmod>
     </url>
     <url>
          <loc>https://ucp.dev/draft/specification/examples/encrypted-credential-handler/</loc>
-         <lastmod>2026-02-10</lastmod>
+         <lastmod>2026-02-11</lastmod>
     </url>
     <url>
          <loc>https://ucp.dev/draft/specification/examples/platform-tokenizer-payment-handler/</loc>
-         <lastmod>2026-02-10</lastmod>
+         <lastmod>2026-02-11</lastmod>
     </url>
     <url>
          <loc>https://ucp.dev/draft/specification/examples/processor-tokenizer-payment-handler/</loc>
-         <lastmod>2026-02-10</lastmod>
+         <lastmod>2026-02-11</lastmod>
     </url>
 </urlset>
