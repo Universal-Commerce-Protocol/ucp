@@ -2,13 +2,10 @@
 * @Universal-Commerce-Protocol/maintainers
 
 # Core Protocol
-/schemas/common/  @Universal-Commerce-Protocol/tech-council
-/schemas/core/  @Universal-Commerce-Protocol/tech-council
-/spec/  @Universal-Commerce-Protocol/tech-council
+/source/  @Universal-Commerce-Protocol/tech-council
 
-# Commerce Capabilities & Extensions
-/schemas/capabilities/  @Universal-Commerce-Protocol/tech-council @Universal-Commerce-Protocol/maintainers
-/schemas/extensions/  @Universal-Commerce-Protocol/tech-council @Universal-Commerce-Protocol/maintainers
+# Documentation
+/docs/  @Universal-Commerce-Protocol/maintainers
 
 # Governance
 /GOVERNANCE.md  @Universal-Commerce-Protocol/governance-council
