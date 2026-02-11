@@ -78,8 +78,6 @@ renderable
 repudiable
 schemas
 sdjwt
-shellcheck
-codespell
 shopify
 superfences
 upsell
