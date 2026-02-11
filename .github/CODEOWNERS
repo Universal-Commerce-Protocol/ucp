@@ -1,0 +1,20 @@
+# Universal Commerce Protocol (UCP) Codeowners
+* @Universal-Commerce-Protocol/maintainers
+
+# Core Protocol
+/schemas/common/  @Universal-Commerce-Protocol/tech-council
+/schemas/core/  @Universal-Commerce-Protocol/tech-council
+/spec/  @Universal-Commerce-Protocol/tech-council
+
+# Commerce Capabilities & Extensions
+/schemas/capabilities/  @Universal-Commerce-Protocol/tech-council @Universal-Commerce-Protocol/maintainers
+/schemas/extensions/  @Universal-Commerce-Protocol/tech-council @Universal-Commerce-Protocol/maintainers
+
+# Governance
+/GOVERNANCE.md  @Universal-Commerce-Protocol/governance-council
+/CONTRIBUTING.md  @Universal-Commerce-Protocol/governance-council
+
+# Infrastructure & Tooling
+/.github/  @Universal-Commerce-Protocol/devops-maintainers
+/scripts/  @Universal-Commerce-Protocol/devops-maintainers
+/.pre-commit-config.yaml  @Universal-Commerce-Protocol/devops-maintainers
