@@ -1,5 +1,6 @@
 # cspell-specific custom words related to UCP
 Adyen
+Affirm
 Alam
 Amex
 Ant
