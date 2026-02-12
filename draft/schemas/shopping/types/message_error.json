@@ -16,8 +16,7 @@
       "description": "Message type discriminator."
     },
     "code": {
-      "type": "string",
-      "description": "Error code. Possible values include: missing, invalid, out_of_stock, payment_declined, requires_sign_in, requires_3ds, requires_identity_linking. Freeform codes also allowed."
+      "$ref": "https://ucp.dev/draft/schemas/shopping/types/error_code.json"
     },
     "path": {
       "type": "string",

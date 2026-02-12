@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/draft/schemas/shopping/types/error_code.json",
+  "title": "Error Code",
+  "description": "Error code identifying the type of error. Standard errors are defined in specification (see examples), and have standardized semantics; freeform codes are permitted.",
+  "type": "string",
+  "examples": [
+    "out_of_stock",
+    "item_unavailable",
+    "address_undeliverable",
+    "payment_failed"
+  ]
+}

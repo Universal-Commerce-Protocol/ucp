@@ -743,6 +743,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#standard-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Standard Errors
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2281,6 +2292,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#standard-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Standard Errors
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -3103,6 +3125,41 @@ Businesses <strong>SHOULD</strong> surface such messages as early as possible, a
 </span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>ELSE IF requires_buyer_review is not empty
 </span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>  handoff_context = &quot;ready for final review by the buyer&quot;
 </span></code></pre></div>
+<h4 id="standard-errors">Standard Errors<a class="headerlink" href="#standard-errors" title="Permanent link">&para;</a></h4>
+<p>Standard errors are standardized error codes that platforms are expected to
+handle with specific, appropriate UX rather than generic error treatment.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Code</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>out_of_stock</code></td>
+<td style="text-align: left;">Specific item or variant is unavailable</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>item_unavailable</code></td>
+<td style="text-align: left;">Item cannot be purchased (e.g. delisted)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>address_undeliverable</code></td>
+<td style="text-align: left;">Cannot deliver to the provided address</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>payment_failed</code></td>
+<td style="text-align: left;">Payment processing failed</td>
+</tr>
+</tbody>
+</table>
+<p>Businesses <strong>SHOULD</strong> mark standard errors with <code>severity: recoverable</code> to
+signal that platforms should provide appropriate UX (out-of-stock messaging,
+address validation prompts, payment method changes) rather than generic error
+messages or deferring to checkout completion.</p>
+<p>Example: <code>out_of_stock</code> requires specific upfront UX, whereas
+<code>payment_required</code> can be handled generically at submission.</p>
 <h2 id="continue-url">Continue URL<a class="headerlink" href="#continue-url" title="Permanent link">&para;</a></h2>
 <p>The <code>continue_url</code> field enables checkout handoff from platform to business UI,
 allowing the buyer to continue and finalize the checkout session.</p>
@@ -4204,9 +4261,9 @@ field or omitting them.</p>
 </tr>
 <tr>
 <td style="text-align: left;">code</td>
-<td style="text-align: left;">string</td>
+<td style="text-align: left;"><a href="/draft/specification/checkout/#error-code">Error Code</a></td>
 <td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Error code. Possible values include: missing, invalid, out_of_stock, payment_declined, requires_sign_in, requires_3ds, requires_identity_linking. Freeform codes also allowed.</td>
+<td style="text-align: left;">Error code identifying the type of error. Standard errors are defined in specification (see examples), and have standardized semantics; freeform codes are permitted.</td>
 </tr>
 <tr>
 <td style="text-align: left;">path</td>
