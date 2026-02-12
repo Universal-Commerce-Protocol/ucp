@@ -51,6 +51,7 @@ checkout
 credentialless
 credentialization
 datamodel
+delisted
 dpan
 ewallet
 fontawesome

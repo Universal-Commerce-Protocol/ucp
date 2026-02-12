@@ -58,7 +58,7 @@ to use GitHub Discussions.
 
 Any significant change to the protocol requires a formal
 [Enhancement Proposal](../../issues/new?template=enhancement-proposal.md)
-and will require Technical Committee approval. Because a change to the protocol
+and will require Tech Council (TC) approval. Because a change to the protocol
 requires the entire adopting ecosystem to implement the change, we consider
 significant changes to include:
 

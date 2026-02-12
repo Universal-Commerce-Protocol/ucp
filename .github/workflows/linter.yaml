@@ -24,6 +24,7 @@ permissions:
   contents: read      # Required to checkout the code
   packages: read      # Required to pull the Super-Linter docker image
   statuses: write     # Required to fix the 403 error (updating status checks)
+  pull-requests: write # Required for posting comments on PRs
 
 jobs:
   build:
