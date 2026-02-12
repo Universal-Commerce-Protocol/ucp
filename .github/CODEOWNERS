@@ -8,7 +8,6 @@
 /docs/  @Universal-Commerce-Protocol/maintainers
 
 # Governance
-/.github/CODEOWNERS      @Universal-Commerce-Protocol/governance-council
 /GOVERNANCE.md  @Universal-Commerce-Protocol/governance-council
 /CONTRIBUTING.md  @Universal-Commerce-Protocol/governance-council
 /CODE_OF_CONDUCT.md @Universal-Commerce-Protocol/governance-council
@@ -30,3 +29,5 @@
 /uv.lock                  @Universal-Commerce-Protocol/devops-maintainers
 /package.json             @Universal-Commerce-Protocol/devops-maintainers
 /package-lock.json        @Universal-Commerce-Protocol/devops-maintainers
+
+/.github/CODEOWNERS      @Universal-Commerce-Protocol/governance-council
