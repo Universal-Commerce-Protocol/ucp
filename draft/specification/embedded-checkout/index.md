@@ -56,7 +56,7 @@ When a business advertises the `embedded` transport in their `/.well-known/ucp` 
             {
                 "version": "2026-01-11",
                 "transport": "rest",
-                "schema": "https://ucp.dev/services/shopping/rest.openapi.json",
+                "schema": "https://ucp.dev/services/shopping/openapi.json",
                 "endpoint": "https://merchant.example.com/ucp/v1"
             },
             {

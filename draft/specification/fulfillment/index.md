@@ -33,7 +33,9 @@ Fulfillment applies only to items requiring physical delivery. Items not requiri
 
 ### Properties
 
-**Error loading extension 'fulfillment_resp':** [Errno 2] No such file or directory: 'source/schemas/shopping/fulfillment_resp.json'
+| Name        | Type                                                         | Required | Description          |
+| ----------- | ------------------------------------------------------------ | -------- | -------------------- |
+| fulfillment | [Fulfillment](/draft/specification/fulfillment/#fulfillment) | No       | Fulfillment details. |
 
 ### Entities
 

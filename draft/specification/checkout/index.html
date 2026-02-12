@@ -4082,12 +4082,99 @@ require explicit validation and error feedback.</p>
 </tbody>
 </table>
 <h3 id="fulfillment-option">Fulfillment Option<a class="headerlink" href="#fulfillment-option" title="Permanent link">&para;</a></h3>
-<p><strong>Error:</strong> Schema file 'fulfillment_resp.json' not found in any schema directory.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">id</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Unique fulfillment option identifier.</td>
+</tr>
+<tr>
+<td style="text-align: left;">title</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Short label (e.g., 'Express Shipping', 'Curbside Pickup').</td>
+</tr>
+<tr>
+<td style="text-align: left;">description</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Complete context for buyer decision (e.g., 'Arrives Dec 12-15 via FedEx').</td>
+</tr>
+<tr>
+<td style="text-align: left;">carrier</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Carrier name (for shipping).</td>
+</tr>
+<tr>
+<td style="text-align: left;">earliest_fulfillment_time</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Earliest fulfillment date.</td>
+</tr>
+<tr>
+<td style="text-align: left;">latest_fulfillment_time</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Latest fulfillment date.</td>
+</tr>
+<tr>
+<td style="text-align: left;">totals</td>
+<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Fulfillment option totals breakdown.</td>
+</tr>
+</tbody>
+</table>
 <h3 id="item">Item<a class="headerlink" href="#item" title="Permanent link">&para;</a></h3>
 <h4 id="item-create-request">Item Create Request<a class="headerlink" href="#item-create-request" title="Permanent link">&para;</a></h4>
-<p><strong>Error:</strong> Schema 'types/item.create' not found in any schema directory.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">id</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">The product identifier, often the SKU, required to resolve the product details associated with this line item. Should be recognized by both the Platform, and the Business.</td>
+</tr>
+</tbody>
+</table>
 <h4 id="item-update-request">Item Update Request<a class="headerlink" href="#item-update-request" title="Permanent link">&para;</a></h4>
-<p><strong>Error:</strong> Schema 'types/item.update' not found in any schema directory.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">id</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">The product identifier, often the SKU, required to resolve the product details associated with this line item. Should be recognized by both the Platform, and the Business.</td>
+</tr>
+</tbody>
+</table>
 <h4 id="item-response">Item Response<a class="headerlink" href="#item-response" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
@@ -4127,9 +4214,67 @@ require explicit validation and error feedback.</p>
 </table>
 <h3 id="line-item">Line Item<a class="headerlink" href="#line-item" title="Permanent link">&para;</a></h3>
 <h4 id="line-item-create-request">Line Item Create Request<a class="headerlink" href="#line-item-create-request" title="Permanent link">&para;</a></h4>
-<p><strong>Error:</strong> Schema 'types/line_item.create' not found in any schema directory.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">item</td>
+<td style="text-align: left;"><a href="/draft/specification/checkout/#item">Item</a></td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">quantity</td>
+<td style="text-align: left;">integer</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Quantity of the item being purchased.</td>
+</tr>
+</tbody>
+</table>
 <h4 id="line-item-update-request">Line Item Update Request<a class="headerlink" href="#line-item-update-request" title="Permanent link">&para;</a></h4>
-<p><strong>Error:</strong> Schema 'types/line_item.update' not found in any schema directory.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">id</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">item</td>
+<td style="text-align: left;"><a href="/draft/specification/checkout/#item">Item</a></td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">quantity</td>
+<td style="text-align: left;">integer</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Quantity of the item being purchased.</td>
+</tr>
+<tr>
+<td style="text-align: left;">parent_id</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Parent line item identifier for any nested structures.</td>
+</tr>
+</tbody>
+</table>
 <h4 id="line-item-response">Line Item Response<a class="headerlink" href="#line-item-response" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
@@ -4543,10 +4688,40 @@ field or omitting them.</p>
 </thead>
 <tbody>
 <tr>
-<td style="text-align: left;"><strong>Error:</strong> Failed to resolve ''. Ensure ucp-schema is installed: <code>cargo install ucp-schema</code></td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
+<td style="text-align: left;">version</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Entity version in YYYY-MM-DD format.</td>
+</tr>
+<tr>
+<td style="text-align: left;">spec</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">URL to human-readable specification document.</td>
+</tr>
+<tr>
+<td style="text-align: left;">schema</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">URL to JSON Schema defining this entity's structure and payloads.</td>
+</tr>
+<tr>
+<td style="text-align: left;">id</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Unique identifier for this entity instance. Used to disambiguate when multiple instances exist.</td>
+</tr>
+<tr>
+<td style="text-align: left;">config</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Entity-specific configuration. Structure defined by each entity's schema.</td>
+</tr>
+<tr>
+<td style="text-align: left;">extends</td>
+<td style="text-align: left;">OneOf[]</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Parent capability(s) this extends. Present for extensions, absent for root capabilities. Use array for multi-parent extensions.</td>
 </tr>
 </tbody>
 </table>
@@ -4594,10 +4769,28 @@ field or omitting them.</p>
 </thead>
 <tbody>
 <tr>
-<td style="text-align: left;"><strong>Error:</strong> Failed to resolve ''. Ensure ucp-schema is installed: <code>cargo install ucp-schema</code></td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
+<td style="text-align: left;">version</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">UCP version in YYYY-MM-DD format.</td>
+</tr>
+<tr>
+<td style="text-align: left;">services</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Service registry keyed by reverse-domain name.</td>
+</tr>
+<tr>
+<td style="text-align: left;">capabilities</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Capability registry keyed by reverse-domain name.</td>
+</tr>
+<tr>
+<td style="text-align: left;">payment_handlers</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Payment handler registry keyed by reverse-domain name.</td>
 </tr>
 <tr>
 <td style="text-align: left;">services</td>

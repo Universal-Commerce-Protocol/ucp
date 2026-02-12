@@ -2460,7 +2460,7 @@
 </span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">        </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-01-15&quot;</span><span class="p">,</span>
 </span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">        </span><span class="nt">&quot;spec&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://ucp.dev/specification/overview&quot;</span><span class="p">,</span>
 </span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">        </span><span class="nt">&quot;rest&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">          </span><span class="nt">&quot;schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://ucp.dev/services/shopping/rest.openapi.json&quot;</span><span class="p">,</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">          </span><span class="nt">&quot;schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://ucp.dev/services/shopping/openapi.json&quot;</span><span class="p">,</span>
 </span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">          </span><span class="nt">&quot;endpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://business.example.com/ucp/v1&quot;</span>
 </span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">        </span><span class="p">}</span>
 </span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">      </span><span class="p">}</span>
@@ -2534,7 +2534,36 @@ cart capability is defined in the <code>rest.endpoint</code> field of the busine
 </table>
 <h3 id="create-cart">Create Cart<a class="headerlink" href="#create-cart" title="Permanent link">&para;</a></h3>
 <h4 id="input-schema">Input Schema<a class="headerlink" href="#input-schema" title="Permanent link">&para;</a></h4>
-<p><strong>Error:</strong> Schema 'cart.create' not found in any schema directory.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">line_items</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/cart/#line-item">Line Item</a>]</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Cart line items. Same structure as checkout. Full replacement on update.</td>
+</tr>
+<tr>
+<td style="text-align: left;">context</td>
+<td style="text-align: left;"><a href="/draft/specification/cart/#context">Context</a></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Buyer signals for localization (country, region, postal_code). Merchant uses for pricing, availability, currency. Falls back to geo-IP if omitted.</td>
+</tr>
+<tr>
+<td style="text-align: left;">buyer</td>
+<td style="text-align: left;"><a href="/draft/specification/cart/#buyer">Buyer</a></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional buyer information for personalized estimates.</td>
+</tr>
+</tbody>
+</table>
 <h4 id="output-schema">Output Schema<a class="headerlink" href="#output-schema" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
@@ -2866,7 +2895,42 @@ cart capability is defined in the <code>rest.endpoint</code> field of the busine
 <ul>
 <li><code>id</code> (String, required): The cart session ID (path parameter).</li>
 </ul>
-<p><strong>Error:</strong> Schema 'cart.update' not found in any schema directory.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">id</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Unique cart identifier.</td>
+</tr>
+<tr>
+<td style="text-align: left;">line_items</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/cart/#line-item">Line Item</a>]</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Cart line items. Same structure as checkout. Full replacement on update.</td>
+</tr>
+<tr>
+<td style="text-align: left;">context</td>
+<td style="text-align: left;"><a href="/draft/specification/cart/#context">Context</a></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Buyer signals for localization (country, region, postal_code). Merchant uses for pricing, availability, currency. Falls back to geo-IP if omitted.</td>
+</tr>
+<tr>
+<td style="text-align: left;">buyer</td>
+<td style="text-align: left;"><a href="/draft/specification/cart/#buyer">Buyer</a></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional buyer information for personalized estimates.</td>
+</tr>
+</tbody>
+</table>
 <h4 id="output-schema_2">Output Schema<a class="headerlink" href="#output-schema_2" title="Permanent link">&para;</a></h4>
 <table>
 <thead>

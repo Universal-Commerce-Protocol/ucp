@@ -385,9 +385,14 @@ The `signing_keys` array supports multiple keys to enable zero-downtime rotation
 
 ### Response
 
-| Name                                                                                        | Type | Required | Description |
-| ------------------------------------------------------------------------------------------- | ---- | -------- | ----------- |
-| **Error:** Failed to resolve ''. Ensure ucp-schema is installed: `cargo install ucp-schema` |      |          |             |
+| Name    | Type    | Required | Description                                                                                                                     |
+| ------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| version | string  | **Yes**  | Entity version in YYYY-MM-DD format.                                                                                            |
+| spec    | string  | No       | URL to human-readable specification document.                                                                                   |
+| schema  | string  | No       | URL to JSON Schema defining this entity's structure and payloads.                                                               |
+| id      | string  | No       | Unique identifier for this entity instance. Used to disambiguate when multiple instances exist.                                 |
+| config  | object  | No       | Entity-specific configuration. Structure defined by each entity's schema.                                                       |
+| extends | OneOf[] | No       | Parent capability(s) this extends. Present for extensions, absent for root capabilities. Use array for multi-parent extensions. |
 
 ### Total Response
 
@@ -399,7 +404,10 @@ The `signing_keys` array supports multiple keys to enable zero-downtime rotation
 
 ### UCP Response Order
 
-| Name                                                                                        | Type | Required | Description |
-| ------------------------------------------------------------------------------------------- | ---- | -------- | ----------- |
-| **Error:** Failed to resolve ''. Ensure ucp-schema is installed: `cargo install ucp-schema` |      |          |             |
-| capabilities                                                                                | any  | No       |             |
+| Name             | Type   | Required | Description                                            |
+| ---------------- | ------ | -------- | ------------------------------------------------------ |
+| version          | string | **Yes**  | UCP version in YYYY-MM-DD format.                      |
+| services         | object | No       | Service registry keyed by reverse-domain name.         |
+| capabilities     | object | No       | Capability registry keyed by reverse-domain name.      |
+| payment_handlers | object | No       | Payment handler registry keyed by reverse-domain name. |
+| capabilities     | any    | No       |                                                        |

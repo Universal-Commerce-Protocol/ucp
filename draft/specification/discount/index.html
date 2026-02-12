@@ -2157,11 +2157,110 @@ shared between the platform and the business.</p>
 <h2 id="schema">Schema<a class="headerlink" href="#schema" title="Permanent link">&para;</a></h2>
 <p>When this capability is active, checkout is extended with a <code>discounts</code> object.</p>
 <h3 id="discounts-object">Discounts Object<a class="headerlink" href="#discounts-object" title="Permanent link">&para;</a></h3>
-<p><strong>Error:</strong> Schema file 'discount_resp.json' not found in any schema directory.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">codes</td>
+<td style="text-align: left;">Array[string]</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Discount codes to apply. Case-insensitive. Replaces previously submitted codes. Send empty array to clear.</td>
+</tr>
+<tr>
+<td style="text-align: left;">applied</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/discount/#applied-discount">Applied Discount</a>]</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Discounts successfully applied (code-based and automatic).</td>
+</tr>
+</tbody>
+</table>
 <h3 id="applied-discount">Applied Discount<a class="headerlink" href="#applied-discount" title="Permanent link">&para;</a></h3>
-<p><strong>Error:</strong> Schema file 'discount_resp.json' not found in any schema directory.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">code</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">The discount code. Omitted for automatic discounts.</td>
+</tr>
+<tr>
+<td style="text-align: left;">title</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Human-readable discount name (e.g., 'Summer Sale 20% Off').</td>
+</tr>
+<tr>
+<td style="text-align: left;">amount</td>
+<td style="text-align: left;">integer</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Total discount amount in minor (cents) currency units.</td>
+</tr>
+<tr>
+<td style="text-align: left;">automatic</td>
+<td style="text-align: left;">boolean</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">True if applied automatically by merchant rules (no code required).</td>
+</tr>
+<tr>
+<td style="text-align: left;">method</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Allocation method. 'each' = applied independently per item. 'across' = split proportionally by value.<br><strong>Enum:</strong> <code>each</code>, <code>across</code></td>
+</tr>
+<tr>
+<td style="text-align: left;">priority</td>
+<td style="text-align: left;">integer</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Stacking order for discount calculation. Lower numbers applied first (1 = first).</td>
+</tr>
+<tr>
+<td style="text-align: left;">allocations</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/discount/#allocation">Allocation</a>]</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Breakdown of where this discount was allocated. Sum of allocation amounts equals total amount.</td>
+</tr>
+</tbody>
+</table>
 <h3 id="allocation">Allocation<a class="headerlink" href="#allocation" title="Permanent link">&para;</a></h3>
-<p><strong>Error:</strong> Schema file 'discount_resp.json' not found in any schema directory.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">path</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">JSONPath to the allocation target (e.g., '$.line_items[0]', '$.totals.shipping').</td>
+</tr>
+<tr>
+<td style="text-align: left;">amount</td>
+<td style="text-align: left;">integer</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Amount allocated to this target in minor (cents) currency units.</td>
+</tr>
+</tbody>
+</table>
 <h2 id="allocation-details">Allocation Details<a class="headerlink" href="#allocation-details" title="Permanent link">&para;</a></h2>
 <p>The <code>applied</code> array explains how discounts were calculated and distributed.</p>
 <h3 id="allocation-method">Allocation Method<a class="headerlink" href="#allocation-method" title="Permanent link">&para;</a></h3>

@@ -2530,9 +2530,67 @@ Subsequent operations for this cart ID SHOULD return <code>NOT_FOUND</code>.</p>
 consistent data structures when converting a cart to a checkout session.</p>
 <h3 id="line-item">Line Item<a class="headerlink" href="#line-item" title="Permanent link">&para;</a></h3>
 <h4 id="line-item-create-request">Line Item Create Request<a class="headerlink" href="#line-item-create-request" title="Permanent link">&para;</a></h4>
-<p><strong>Error:</strong> Schema 'types/line_item.create' not found in any schema directory.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">item</td>
+<td style="text-align: left;"><a href="/draft/specification/checkout/#item">Item</a></td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">quantity</td>
+<td style="text-align: left;">integer</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Quantity of the item being purchased.</td>
+</tr>
+</tbody>
+</table>
 <h4 id="line-item-update-request">Line Item Update Request<a class="headerlink" href="#line-item-update-request" title="Permanent link">&para;</a></h4>
-<p><strong>Error:</strong> Schema 'types/line_item.update' not found in any schema directory.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">id</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">item</td>
+<td style="text-align: left;"><a href="/draft/specification/checkout/#item">Item</a></td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">quantity</td>
+<td style="text-align: left;">integer</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Quantity of the item being purchased.</td>
+</tr>
+<tr>
+<td style="text-align: left;">parent_id</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Parent line item identifier for any nested structures.</td>
+</tr>
+</tbody>
+</table>
 <h4 id="line-item-response">Line Item Response<a class="headerlink" href="#line-item-response" title="Permanent link">&para;</a></h4>
 <table>
 <thead>

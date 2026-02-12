@@ -99,7 +99,7 @@ The `endpoint` field provides the base URL for API calls. OpenAPI paths are appe
 {
   "version": "2026-01-11",
   "transport": "rest",
-  "schema": "https://ucp.dev/services/shopping/rest.openapi.json",
+  "schema": "https://ucp.dev/services/shopping/openapi.json",
   "endpoint": "https://business.example.com/api/v2"
 }
 ```
@@ -124,7 +124,14 @@ A **capability** is a feature within a service. It declares what functionality i
 
 #### Capability Definition
 
-**Error:** Definition '#/$defs/discovery' not found in 'source/schemas/capability.json'
+| Name    | Type    | Required | Description                                                                                                                     |
+| ------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| version | string  | No       | Entity version in YYYY-MM-DD format.                                                                                            |
+| spec    | string  | **Yes**  | URL to human-readable specification document.                                                                                   |
+| schema  | string  | **Yes**  | URL to JSON Schema defining this entity's structure and payloads.                                                               |
+| id      | string  | No       | Unique identifier for this entity instance. Used to disambiguate when multiple instances exist.                                 |
+| config  | object  | No       | Entity-specific configuration. Structure defined by each entity's schema.                                                       |
+| extends | OneOf[] | No       | Parent capability(s) this extends. Present for extensions, absent for root capabilities. Use array for multi-parent extensions. |
 
 #### Extensions
 
@@ -257,7 +264,7 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
           "spec": "https://ucp.dev/specification/overview",
           "transport": "rest",
           "endpoint": "https://business.example.com/ucp/v1",
-          "schema": "https://ucp.dev/services/shopping/rest.openapi.json"
+          "schema": "https://ucp.dev/services/shopping/openapi.json"
         },
         {
           "version": "2026-01-11",
@@ -355,7 +362,7 @@ Platform profiles are similar and include signing keys for capabilities requirin
           "version": "2026-01-11",
           "spec": "https://ucp.dev/specification/overview",
           "transport": "rest",
-          "schema": "https://ucp.dev/services/shopping/rest.openapi.json"
+          "schema": "https://ucp.dev/services/shopping/openapi.json"
         }
       ]
     },
