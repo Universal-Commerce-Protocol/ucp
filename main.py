@@ -132,7 +132,7 @@ def _resolve_schema(
       data = json.loads(result.stdout)
       _resolved_schema_cache[cache_key] = data
       return data
-  except (subprocess.SubprocessError, json.JSONDecodeError, FileNotFoundError):
+  except (subprocess.SubprocessError):
     pass
   return None
 
