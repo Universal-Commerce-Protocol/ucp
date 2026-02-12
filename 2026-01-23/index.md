@@ -272,11 +272,15 @@ Universal payments that are provable—every authorization backed by cryptograph
 
 Adyen
 
+Affirm
+
 Amex
 
 Ant International
 
 Best Buy
+
+Block
 
 Carrefour
 
@@ -284,9 +288,13 @@ Chewy
 
 Commerce
 
+Fiserv
+
 Flipkart
 
 Gap
+
+Klarna
 
 Kroger
 
@@ -303,6 +311,8 @@ Salesforce
 Sephora
 
 Shopee
+
+Splitit
 
 Stripe
 
@@ -318,11 +328,15 @@ Zalando
 
 Adyen
 
+Affirm
+
 Amex
 
 Ant International
 
 Best Buy
+
+Block
 
 Carrefour
 
@@ -330,9 +344,13 @@ Chewy
 
 Commerce
 
+Fiserv
+
 Flipkart
 
 Gap
+
+Klarna
 
 Kroger
 
@@ -349,6 +367,8 @@ Salesforce
 Sephora
 
 Shopee
+
+Splitit
 
 Stripe
 
