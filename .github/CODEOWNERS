@@ -8,6 +8,7 @@
 /docs/  @Universal-Commerce-Protocol/maintainers
 
 # Governance
+/.github/CODEOWNERS      @Universal-Commerce-Protocol/governance-council
 /GOVERNANCE.md  @Universal-Commerce-Protocol/governance-council
 /CONTRIBUTING.md  @Universal-Commerce-Protocol/governance-council
 /CODE_OF_CONDUCT.md @Universal-Commerce-Protocol/governance-council
