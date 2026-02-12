@@ -1,0 +1,23 @@
+name: Weekly Metrics (Issues, PRs, Discussions)
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 2 * * 1" # Runs at 02:00 UTC every Monday
+
+jobs:
+  call-reusable-metrics:
+    # This job calls the reusable workflow.
+    # The path assumes your org-level repo is named '.github'.
+    uses: Universal-Commerce-Protocol/.github/.github/workflows/reusable-metrics.yml@main
+    with:
+      # Pass the full name of the current repository (e.g., Universal-Commerce-Protocol/ucp)
+      repo_full_name: ${{ github.repository }}
+    secrets:
+      # Pass the token to the reusable workflow. 
+      # GITHUB_TOKEN or a PAT can be used depending on permissions needed.
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    # The calling job needs permissions that the reusable workflow requires.
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: read
