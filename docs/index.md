@@ -484,6 +484,10 @@ image: assets/banner.png
         <span>Adyen</span>
       </div>
       <div class="partner-logo">
+        <img src="assets/partner/endorsed/Affirm.svg" alt="Affirm" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'" >
+        <span>Affirm</span>
+      </div>
+      <div class="partner-logo">
         <img src="assets/partner/endorsed/Amex.svg" alt="Amex" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
         <span>Amex</span>
       </div>
@@ -494,6 +498,10 @@ image: assets/banner.png
       <div class="partner-logo">
         <img src="assets/partner/endorsed/Best Buy.svg" alt="Best Buy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
         <span>Best Buy</span>
+      </div>
+      <div class="partner-logo">
+        <img src="assets/partner/endorsed/Block.svg" alt="Block" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+        <span>Block</span>
       </div>
       <div class="partner-logo">
         <img src="assets/partner/endorsed/Carrefour.svg" alt="Carrefour" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
@@ -508,12 +516,20 @@ image: assets/banner.png
         <span>Commerce</span>
       </div>
       <div class="partner-logo">
+        <img src="assets/partner/endorsed/Fiserv.svg" alt="Fiserv" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+        <span>Fiserv</span>
+      </div>
+      <div class="partner-logo">
         <img src="assets/partner/endorsed/Flipkart.svg" alt="Flipkart partner company logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
         <span>Flipkart</span>
       </div>
       <div class="partner-logo">
         <img src="assets/partner/endorsed/Gap.svg" alt="Gap" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
         <span>Gap</span>
+      </div>
+      <div class="partner-logo">
+        <img src="assets/partner/endorsed/Klarna.svg" alt="Klarna" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+        <span>Klarna</span>
       </div>
       <div class="partner-logo">
         <img src="assets/partner/endorsed/Kroger.svg" alt="Kroger" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
@@ -548,6 +564,10 @@ image: assets/banner.png
         <span>Shopee</span>
       </div>
       <div class="partner-logo">
+        <img src="assets/partner/endorsed/Splitit.svg" alt="Splitit" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+        <span>Splitit</span>
+      </div>
+      <div class="partner-logo">
         <img src="assets/partner/endorsed/Stripe.svg" alt="Stripe" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
         <span>Stripe</span>
       </div>
@@ -559,7 +579,7 @@ image: assets/banner.png
         <img src="assets/partner/endorsed/Ulta.svg" alt="Ulta" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
         <span>Ulta</span>
       </div>
-    <div class="partner-logo">
+      <div class="partner-logo">
         <img src="assets/partner/endorsed/Visa.svg" alt="Visa" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
         <span>Visa</span>
       </div>
@@ -571,9 +591,14 @@ image: assets/banner.png
         <img src="assets/partner/endorsed/Zalando.svg" alt="Zalando" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
         <span>Zalando</span>
       </div>
+      <!-- Duplicated the partner logos to provide a seamless infinite scroll in the carousel-->
       <div class="partner-logo">
         <img src="assets/partner/endorsed/Adyen.svg" alt="Adyen" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
         <span>Adyen</span>
+      </div>
+     <div class="partner-logo">
+        <img src="assets/partner/endorsed/Affirm.svg" alt="Affirm" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'" >
+        <span>Affirm</span>
       </div>
       <div class="partner-logo">
         <img src="assets/partner/endorsed/Amex.svg" alt="Amex" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
@@ -588,6 +613,10 @@ image: assets/banner.png
         <span>Best Buy</span>
       </div>
       <div class="partner-logo">
+        <img src="assets/partner/endorsed/Block.svg" alt="Block" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+        <span>Block</span>
+      </div>
+      <div class="partner-logo">
         <img src="assets/partner/endorsed/Carrefour.svg" alt="Carrefour" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
         <span>Carrefour</span>
       </div>
@@ -600,12 +629,20 @@ image: assets/banner.png
         <span>Commerce</span>
       </div>
       <div class="partner-logo">
+        <img src="assets/partner/endorsed/Fiserv.svg" alt="Fiserv" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+        <span>Fiserv</span>
+      </div>
+      <div class="partner-logo">
         <img src="assets/partner/endorsed/Flipkart.svg" alt="Flipkart" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
         <span>Flipkart</span>
       </div>
       <div class="partner-logo">
         <img src="assets/partner/endorsed/Gap.svg" alt="Gap" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
         <span>Gap</span>
+      </div>
+      <div class="partner-logo">
+        <img src="assets/partner/endorsed/Klarna.svg" alt="Klarna" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+        <span>Klarna</span>
       </div>
       <div class="partner-logo">
         <img src="assets/partner/endorsed/Kroger.svg" alt="Kroger" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
@@ -640,6 +677,10 @@ image: assets/banner.png
         <span>Shopee</span>
       </div>
       <div class="partner-logo">
+        <img src="assets/partner/endorsed/Splitit.svg" alt="Splitit" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+        <span>Splitit</span>
+      </div>
+      <div class="partner-logo">
         <img src="assets/partner/endorsed/Stripe.svg" alt="Stripe" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
         <span>Stripe</span>
       </div>
@@ -651,7 +692,7 @@ image: assets/banner.png
         <img src="assets/partner/endorsed/Ulta.svg" alt="Ulta" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
         <span>Ulta</span>
       </div>
-    <div class="partner-logo">
+      <div class="partner-logo">
         <img src="assets/partner/endorsed/Visa.svg" alt="Visa" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
         <span>Visa</span>
       </div>
