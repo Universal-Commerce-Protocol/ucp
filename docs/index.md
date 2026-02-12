@@ -484,6 +484,10 @@ image: assets/banner.png
         <span>Adyen</span>
       </div>
       <div class="partner-logo">
+        <img src="assets/partner/endorsed/Affirm.svg" alt="Affirm" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'" >
+        <span>Affirm</span>
+      </div>
+      <div class="partner-logo">
         <img src="assets/partner/endorsed/Amex.svg" alt="Amex" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
         <span>Amex</span>
       </div>
@@ -587,9 +591,14 @@ image: assets/banner.png
         <img src="assets/partner/endorsed/Zalando.svg" alt="Zalando" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
         <span>Zalando</span>
       </div>
+      <!-- Duplicated the partner logos to provide a seamless infinite scroll in the carousel-->
       <div class="partner-logo">
         <img src="assets/partner/endorsed/Adyen.svg" alt="Adyen" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
         <span>Adyen</span>
+      </div>
+     <div class="partner-logo">
+        <img src="assets/partner/endorsed/Affirm.svg" alt="Affirm" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'" >
+        <span>Affirm</span>
       </div>
       <div class="partner-logo">
         <img src="assets/partner/endorsed/Amex.svg" alt="Amex" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
