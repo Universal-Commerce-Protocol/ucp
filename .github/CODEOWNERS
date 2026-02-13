@@ -27,9 +27,5 @@
 /source/                  @Universal-Commerce-Protocol/tech-council
 
 # Governance
-/GOVERNANCE.md            @Universal-Commerce-Protocol/governance-council
-/CONTRIBUTING.md          @Universal-Commerce-Protocol/governance-council
-/CODE_OF_CONDUCT.md       @Universal-Commerce-Protocol/governance-council
-/SECURITY.md              @Universal-Commerce-Protocol/governance-council
 
 /.github/CODEOWNERS      @Universal-Commerce-Protocol/governance-council
