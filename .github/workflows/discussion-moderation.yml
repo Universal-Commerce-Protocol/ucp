@@ -29,7 +29,7 @@ jobs:
       - name: Checkout .github repository for org-level configuration
         uses: actions/checkout@v4
         with:
-          repository: ${{ github.repository_owner }}/.github
+          repository: ${{ github.repository_owner }}/.github-nan
           path: .github_org
           ref: discussion-moderation
           token: ${{ secrets.CROSS_REPO_READ_PAT }}
