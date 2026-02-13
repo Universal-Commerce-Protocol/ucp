@@ -59,7 +59,7 @@ The consent extension extends the **buyer object** within checkout:
 
 ### Consent Object
 
-{{ extension_schema_fields('buyer_consent_resp.json#/$defs/consent', 'buyer-consent') }}
+{{ extension_schema_fields('buyer_consent.json#/$defs/consent', 'buyer-consent') }}
 
 ## Usage
 
