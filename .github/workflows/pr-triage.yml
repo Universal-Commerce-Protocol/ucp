@@ -1,0 +1,58 @@
+name: UCP Pull Request Triaging Agent
+
+on:
+  pull_request:
+    types: [opened, reopened, edited, synchronize]
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'The Pull Request number to triage'
+        required: true
+        type: 'string'
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  agent-triage-pull-request:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Checkout .github repository for org-level configuration
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/.github
+          path: .github_org
+          ref: pr-triage
+          token: ${{ secrets.CROSS_REPO_READ_PAT }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests google-adk python-dotenv
+
+      - name: Run Triaging Script
+        env:
+          GITHUB_TOKEN: ${{ secrets.CROSS_REPO_READ_PAT }}
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          GOOGLE_GENAI_USE_VERTEXAI: 0
+          OWNER: ${{ github.repository_owner }}
+          REPO: ${{ github.event.repository.name }}
+          PULL_REQUEST_NUMBER: ${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+          INTERACTIVE: ${{ vars.UCP_PR_TRIAGE_INTERACTIVE || 0 }}
+          PYTHONPATH: ${{ github.workspace }}/.github_org/agents
+          CODEOWNERS_PATH: ${{ github.workspace }}/.github/CODEOWNERS
+          CONTRIBUTING_MD_PATH: ${{ github.workspace }}/.github_org/CONTRIBUTING.md
+          PULL_REQUEST_TEMPLATE_MD_PATH: ${{ github.workspace }}/.github_org/.github/pull_request_template.md
+        run: python -m pr_triage_agent.main

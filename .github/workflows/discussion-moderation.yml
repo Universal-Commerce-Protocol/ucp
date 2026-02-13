@@ -1,0 +1,57 @@
+name: UCP Discussion Moderation Agent
+
+on:
+  discussion:
+    types: [created, edited]
+  discussion_comment:
+    types: [created, edited]
+  schedule:
+    - cron: '0 8 * * *' # daily at 8am
+  workflow_dispatch:
+    inputs:
+      discussion_number:
+        description: 'The Discussion number to moderate'
+        required: false
+        type: 'string'
+
+permissions:
+  discussions: write
+  contents: read
+
+jobs:
+  agent-moderate-discussion:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Checkout .github repository for org-level configuration
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/.github
+          path: .github_org
+          ref: discussion-moderation
+          token: ${{ secrets.CROSS_REPO_READ_PAT }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests google-adk python-dotenv
+
+      - name: Run Moderation Script
+        env:
+          GITHUB_TOKEN: ${{ secrets.CROSS_REPO_READ_PAT }}
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          OWNER: ${{ github.repository_owner }}
+          REPO: ${{ github.event.repository.name }}
+          EVENT_NAME: ${{ github.event_name }}
+          DISCUSSION_NUMBER: ${{ github.event.discussion.number || github.event.inputs.discussion_number }}
+          INTERACTIVE: ${{ vars.UCP_DISCUSSION_MODERATION_INTERACTIVE || 0 }}
+          PYTHONPATH: ${{ github.workspace }}/.github_org/agents
+        run: python -m discussion_moderation_agent.main
