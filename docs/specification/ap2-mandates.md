@@ -237,7 +237,7 @@ a completion request without mandates **MUST** result in a session failure.
 The platform initiates the session. The business returns the `Checkout` object
 with `ap2.merchant_authorization` embedded in the response body.
 
-{{ extension_schema_fields('ap2_mandate.json#/$defs/checkout', 'ap2-mandates') }}
+{{ extension_schema_fields('ap2_mandate.json#/$defs/dev.ucp.shopping.checkout', 'ap2-mandates') }}
 
 **Example Response:**
 
