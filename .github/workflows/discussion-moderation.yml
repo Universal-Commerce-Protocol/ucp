@@ -31,7 +31,7 @@ jobs:
         with:
           repository: ${{ github.repository_owner }}/.github
           path: .github_org
-          ref: main
+          ref: discussion-moderation
           token: ${{ secrets.CROSS_REPO_READ_PAT }}
 
       - name: Set up Python
