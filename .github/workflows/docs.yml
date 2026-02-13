@@ -73,7 +73,9 @@ jobs:
           files: source/**
 
       - name: Install ucp-schema for runtime resolution
-        run: cargo install ucp-schema
+        run: |
+          cargo install ucp-schema
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
 
       - name: Lint source schemas
         if: steps.source_files_changed.outputs.any_changed == 'true'

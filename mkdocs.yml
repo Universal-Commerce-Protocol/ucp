@@ -181,7 +181,8 @@ hooks:
 # Plugins
 plugins:
   - search
-  - macros
+  - macros:
+      on_error_fail: true
   - site-urls
   - social
   - llmstxt:
