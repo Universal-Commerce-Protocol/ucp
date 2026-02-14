@@ -197,6 +197,9 @@ parameters from business-specific query parameters:
 - `ec_delegate` (string, **OPTIONAL**): Comma-delimited list of delegations
     the host wants to handle. **SHOULD** be a subset of `config.delegate`
     from the embedded service binding.
+- `ec_color_scheme` (string, **OPTIONAL**): The color scheme preference for
+    the checkout UI. Valid values: `light`, `dark`. When not provided, the
+    Embedded Checkout follows system preference.
 
 #### Authentication
 
@@ -253,6 +256,43 @@ specification for available options.
 
 ```text
 ?ec_version=2026-01-11&ec_delegate=payment.instruments_change,payment.credential,fulfillment.address_change
+```
+
+#### Color Scheme
+
+The optional `ec_color_scheme` parameter allows the host to specify which color
+scheme the Embedded Checkout should use, enabling visual consistency between
+the host application and the checkout UI.
+
+**Valid Values:**
+
+| Value   | Description                                          |
+| :------ | :--------------------------------------------------- |
+| `light` | Use light color scheme (light background, dark text) |
+| `dark`  | Use dark color scheme (dark background, light text)  |
+
+**Default Behavior:**
+
+When `ec_color_scheme` is not provided, the Embedded Checkout can
+use the buyer's system preference via the
+[`prefers-color-scheme`](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-color-scheme)
+media query or the
+[`Sec-CH-Prefers-Color-Scheme`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Sec-CH-Prefers-Color-Scheme)
+HTTP client hint, and **SHOULD** listen for changes and update accordingly.
+
+**Implementation Notes:**
+
+- By default, the Embedded Checkout **SHOULD** respect the buyer's system
+  color scheme preference and listen for changes to update accordingly
+- When `ec_color_scheme` is explicitly provided, it **MUST** override the
+  system preference, be applied immediately upon load, and be enforced
+  for the duration of the session.
+- Businesses **MAY** ignore unsupported values
+
+**Example:**
+
+```text
+https://example.com/checkout/abc123?ec_version=2026-01-11&ec_color_scheme=dark
 ```
 
 #### Delegation Negotiation
