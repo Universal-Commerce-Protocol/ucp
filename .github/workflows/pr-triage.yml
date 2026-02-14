@@ -42,6 +42,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install requests google-adk python-dotenv
 
+      - name: Debug - List org files
+        run: ls -R .github_org
+
       - name: Run Triaging Script
         env:
           GITHUB_TOKEN: ${{ secrets.CROSS_REPO_READ_PAT }}
