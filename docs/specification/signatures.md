@@ -29,6 +29,17 @@ message integrity. UCP supports multiple authentication mechanisms:
 * **mTLS** — Mutual TLS with client certificates
 * **HTTP Message Signatures** — Cryptographic signatures per RFC 9421 (this spec)
 
+**Identity binding:** Regardless of authentication mechanism, verifiers
+**MUST** ensure the authenticated identity is consistent with the `UCP-Agent`
+header:
+
+* **HTTP Message Signatures** — The signer's profile (from `UCP-Agent`) is
+    verified by signature validation; no additional check needed.
+* **API keys / OAuth / mTLS** — If a `UCP-Agent` header is present, verifiers
+    **MUST** confirm the authenticated principal is authorized to act on behalf
+    of the profile identified in `UCP-Agent`. Reject requests where the
+    authenticated identity and claimed profile conflict.
+
 HTTP Message Signatures are particularly valuable for **permissionless agent
 onboarding** — merchants can declaratively trust agents by their advertised
 public keys without negotiating shared secrets.
@@ -54,7 +65,7 @@ for all HTTP-based transports:
 ├─────────────────────────────────────────────────────────────────┤
 │  Signature Format: RFC 9421 (HTTP Message Signatures)           │
 │  Body Digest: RFC 9530 (Content-Digest, raw bytes)              │
-│  Algorithms: ES256 (required), ES384, ES512                     │
+│  Algorithms: ES256 (required), ES384 (optional)                 │
 │  Key Format: JWK (RFC 7517)                                     │
 │  Key Discovery: signing_keys[] in /.well-known/ucp              │
 │  Replay Protection: idempotency-key (business layer)            │
@@ -84,24 +95,24 @@ The following cryptographic primitives are shared across all UCP HTTP transports
 
 ### Signature Algorithms
 
-UCP supports ECDSA signatures with the following algorithms:
+UCP supports ECDSA signatures with the following curves:
 
-| Algorithm | Curve   | Hash    |
-| :-------- | :------ | :------ |
-| `ES256`   | P-256   | SHA-256 |
-| `ES384`   | P-384   | SHA-384 |
-| `ES512`   | P-521   | SHA-512 |
+| Curve | JWK `alg` | Hash |
+| :---- | :--------- | :--- |
+| P-256 | `ES256` | SHA-256 |
+| P-384 | `ES384` | SHA-384 |
 
 **Implementation requirements:**
 
-* All implementations **MUST** support verifying `ES256` signatures
-* Support for `ES384` and `ES512` is **OPTIONAL**
+* All implementations **MUST** support verifying P-256 (`ES256`) signatures
+* Support for P-384 (`ES384`) is **OPTIONAL**
 
 **Usage guidance:**
 
-* Signers **SHOULD** use `ES256` for maximum compatibility
-* Signers **MAY** use `ES384` or `ES512` when both parties support them
-* The algorithm is indicated by the `alg` field in the signing key's JWK
+* Signers **SHOULD** use P-256 for maximum compatibility
+* Signers **MAY** use P-384 when both parties support it
+* The algorithm is derived from the key's `crv` field in the JWK;
+  `alg` is **NOT** included in `Signature-Input` parameters
 
 ### Key Format (JWK)
 
@@ -114,11 +125,11 @@ defined in [RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517).
 | :---- | :----- | :------- | :--------------------------------------- |
 | `kid` | string | Yes      | Key ID (referenced in signatures)        |
 | `kty` | string | Yes      | Key type (`EC` for elliptic curve)       |
-| `crv` | string | Yes*     | Curve name (`P-256`, `P-384`, `P-521`)   |
+| `crv` | string | Yes*     | Curve name (`P-256`, `P-384`)            |
 | `x`   | string | Yes*     | X coordinate (base64url encoded)         |
 | `y`   | string | Yes*     | Y coordinate (base64url encoded)         |
 | `use` | string | No       | Key usage (`sig` for signing)            |
-| `alg` | string | No       | Algorithm (`ES256`, `ES384`, `ES512`)    |
+| `alg` | string | No       | Algorithm (`ES256`, `ES384`)             |
 
 \* Required for EC keys
 
@@ -282,18 +293,21 @@ verification.
 
 **Signed Components:**
 
-| Component         | Required | Description                             |
-| :---------------- | :------- | :-------------------------------------- |
-| `@method`         | Yes      | HTTP method (GET, POST, etc.)           |
-| `@path`           | Yes      | Request path                            |
-| `@query`          | Cond.*   | Query string (if present)               |
-| `idempotency-key` | Cond.**  | Idempotency header (state-changing ops) |
-| `content-digest`  | Cond.*** | Body digest (if body present)           |
-| `content-type`    | Cond.*** | Content-Type (if body present)          |
+| Component         | Required  | Description                            |
+| :---------------- | :-------- | :------------------------------------- |
+| `@method`         | Yes       | HTTP method (GET, POST, etc.)          |
+| `@authority`      | Yes       | Target host (prevents cross-host relay)|
+| `@path`           | Yes       | Request path                           |
+| `@query`          | Cond.\*   | Query string (if present)              |
+| `ucp-agent`       | Cond.\**  | Profile URL (binds identity)           |
+| `idempotency-key` | Cond.\*** | Idempotency header (state-changing)    |
+| `content-digest`  | Cond.†    | Body digest (if body present)          |
+| `content-type`    | Cond.†    | Content-Type (if body present)         |
 
 \* Required if request has query parameters
-\** Required for POST, PUT, DELETE, PATCH
-\*** Required if request has a body
+\** Required if `UCP-Agent` header is present
+\*** Required for POST, PUT, DELETE, PATCH
+† Required if request has a body
 
 **Signature Generation:**
 
@@ -305,8 +319,9 @@ sign_rest_request(method, path, query, body_bytes, idempotency_key, private_key,
         digest_header = "sha-256=:" + base64(digest) + ":"
 
     // 2. Build component list
-    components = ["@method", "@path"]
+    components = ["@method", "@authority", "@path"]
     if query: components.append("@query")
+    if ucp_agent: components.append("ucp-agent")
     if idempotency_key: components.append("idempotency-key")
     if body: components.extend(["content-digest", "content-type"])
 
@@ -336,15 +351,23 @@ sign_rest_request(method, path, query, body_bytes, idempotency_key, private_key,
     }
 ```
 
+**Signature Encoding:** ECDSA signatures **MUST** use fixed-width raw `r||s`
+encoding per RFC 9421, **not** ASN.1/DER. The signature value is the
+concatenation of `r` and `s` as fixed-length unsigned big-endian integers:
+64 bytes for P-256 (32 + 32), 96 bytes for P-384 (48 + 48). Many crypto
+libraries (OpenSSL, Java, .NET) default to DER encoding and require explicit
+conversion.
+
 **Complete Request Example:**
 
 ```http
 POST /checkout-sessions HTTP/1.1
 Host: merchant.example.com
 Content-Type: application/json
+UCP-Agent: profile="https://platform.example/.well-known/ucp"
 Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000
 Content-Digest: sha-256=:X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=:
-Signature-Input: sig1=("@method" "@path" "idempotency-key" "content-digest" "content-type");keyid="platform-2026"
+Signature-Input: sig1=("@method" "@authority" "@path" "ucp-agent" "idempotency-key" "content-digest" "content-type");keyid="platform-2026"
 Signature: sig1=:MEUCIQDTxNq8h7LGHpvVZQp1iHkFp9+3N8Mxk2zH1wK4YuVN8w...:
 
 {"checkout":{"line_items":[{"id":"prod_123","quantity":2}]}}
@@ -355,7 +378,7 @@ Signature: sig1=:MEUCIQDTxNq8h7LGHpvVZQp1iHkFp9+3N8Mxk2zH1wK4YuVN8w...:
 ```http
 GET /checkout-sessions/chk_123 HTTP/1.1
 Host: merchant.example.com
-Signature-Input: sig1=("@method" "@path");keyid="platform-2026"
+Signature-Input: sig1=("@method" "@authority" "@path");keyid="platform-2026"
 Signature: sig1=:MEQCIBx7kL9nM2oP5qR8sT1uV4wX6yZaB3cD...:
 ```
 
@@ -549,7 +572,7 @@ The `Idempotency-Key` header is included in the signed components:
 ```http
 POST /checkout-sessions HTTP/1.1
 Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000
-Signature-Input: sig1=("@method" "@path" "idempotency-key" ...);keyid="platform-2026"
+Signature-Input: sig1=("@method" "@authority" "@path" "idempotency-key" ...);keyid="platform-2026"
 Signature: sig1=:MEUCIQD...:
 ```
 
@@ -568,15 +591,17 @@ protection at the business layer through idempotency keys, not signature timesta
 Key rotation (removing compromised keys from `signing_keys`) provides the mechanism
 for invalidating old signatures.
 
-### When Signatures Are Recommended
+### When Signatures Apply
 
 **Requests:** Platforms **SHOULD** sign all requests when using HTTP Message
 Signatures. Alternative authentication mechanisms (API keys, OAuth, mTLS) may
 be used instead.
 
-**Responses:** Signatures are **RECOMMENDED** for:
+**Webhooks:** Webhook notifications **MUST** be signed. Recipients cannot
+otherwise verify authenticity of server-initiated push messages.
 
-* Order webhook notifications
+**Other responses:** Signatures are **RECOMMENDED** for:
+
 * Payment authorization responses
 * Checkout completion responses
 
@@ -605,7 +630,7 @@ Content-Type: application/json
 UCP-Agent: profile="https://platform.example/.well-known/ucp"
 Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000
 Content-Digest: sha-256=:RK/0qy18MlBSVnWgjwz6lZEWjP/lF5HF9bvEF8FabDg=:
-Signature-Input: sig1=("@method" "@path" "content-digest" "content-type" "ucp-agent" "idempotency-key");keyid="platform-2026"
+Signature-Input: sig1=("@method" "@authority" "@path" "content-digest" "content-type" "ucp-agent" "idempotency-key");keyid="platform-2026"
 Signature: sig1=:MEUCIQDXyK9N3p5Rt...:
 
 {"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"complete_checkout","arguments":{"id":"chk_123","checkout":{...}}}}

@@ -1284,13 +1284,16 @@ with HTTP 200 and the UCP envelope containing `messages`:
 
 ## Message Signing
 
-Platforms **SHOULD** authenticate agents when using REST transport. When using
+Platforms **MAY** choose among authentication mechanisms (API keys, OAuth,
+mTLS, HTTP Message Signatures). When using
 HTTP Message Signatures, checkout operations follow the
 [Message Signatures](signatures.md) specification.
 
 ### Request Signing
 
-Platforms using HTTP Message Signatures **SHOULD** sign requests using RFC 9421:
+When HTTP Message Signatures are used, requests **MUST** include valid
+`Signature-Input` and `Signature` headers (and `Content-Digest` when a body
+is present) per RFC 9421:
 
 | Header                   | Required | Description                              |
 | :----------------------- | :------- | :--------------------------------------- |
@@ -1309,7 +1312,7 @@ Content-Type: application/json
 UCP-Agent: profile="https://platform.example/.well-known/ucp"
 Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000
 Content-Digest: sha-256=:X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=:
-Signature-Input: sig1=("@method" "@path" "idempotency-key" "content-digest" "content-type");keyid="platform-2025"
+Signature-Input: sig1=("@method" "@authority" "@path" "idempotency-key" "content-digest" "content-type");keyid="platform-2025"
 Signature: sig1=:MEUCIQDTxNq8h7LGHpvVZQp1iHkFp9+3N8Mxk2zH1wK4YuVN8w...:
 
 {"line_items":[{"item":{"id":"item_123"},"quantity":2}]}

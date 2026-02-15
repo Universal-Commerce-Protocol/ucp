@@ -682,20 +682,20 @@
       "signature": {
         "name": "Signature",
         "in": "header",
-        "required": true,
+        "required": false,
         "schema": {
           "type": "string"
         },
-        "description": "RFC 9421 HTTP Message Signature. Contains the signature value in the format `sig1=:<base64-signature>:`."
+        "description": "RFC 9421 HTTP Message Signature. Required when using HTTP Message Signatures for authentication. Format: `sig1=:<base64-signature>:`."
       },
       "signature_input": {
         "name": "Signature-Input",
         "in": "header",
-        "required": true,
+        "required": false,
         "schema": {
           "type": "string"
         },
-        "description": "RFC 9421 Signature-Input header. Describes signed components, timestamp, and key ID. Format: `sig1=(\"@method\" \"@path\" ...);created=<timestamp>;keyid=\"<key-id>\"`."
+        "description": "RFC 9421 Signature-Input header. Required when using HTTP Message Signatures for authentication. Format: `sig1=(\"@method\" \"@path\" ...);created=<timestamp>;keyid=\"<key-id>\"`."
       },
       "content_digest": {
         "name": "Content-Digest",
