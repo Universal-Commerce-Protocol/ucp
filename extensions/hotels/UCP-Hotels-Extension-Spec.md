@@ -1,304 +1,231 @@
-UCP Hotels Extension
-Governance Submission Package
-
-Version: 1.0
-Status: Draft for Review
-Authors: [Your Name / Organization]
-Target: Google UCP Governance Review
+# UCP-Hotels Extension Specification (Normative)  
+Status: Draft – Governance Review Version  
+Version: 2026-02-15  
 
 ---------------------------------------------------------------------
-1. Executive Summary
+1. PURPOSE
 ---------------------------------------------------------------------
-This submission proposes a Hotels (Lodging) Extension to UCP to formally support:
-• Static discovery
-• Identity-enriched eligibility
-• Confirmation-ready offers
-• Optional cart intent stabilization
-• Checkout as execution boundary
-• Asynchronous confirmation handling
-• Order lifecycle and event publication
+Hotels require a dedicated UCP extension because lodging commerce differs structurally from catalog-based retail and single-leg travel products. Hotel booking involves multi-dimensional identity context, time-bound inventory, conditional pricing, asynchronous confirmation, and post-booking lifecycle complexity that cannot be cleanly modeled using generic commerce primitives alone.
 
-Hotels represent a structurally distinct commerce domain that cannot be safely modeled using generic Offer primitives alone.
+This extension formalizes those domain requirements while remaining fully aligned with UCP’s transport-agnostic, merchant-neutral design principles.
 
-This extension preserves:
-• UCP core principles
-• Transport neutrality
-• Merchant neutrality
-• Agent compatibility
+This extension standardizes hotel discovery, pricing, booking, and lifecycle servicing within UCP while remaining:
+
+• Merchant-neutral
+• Platform-neutral
+• CRS/PMS-neutral
+• Agent-runtime neutral
+• Transport agnostic (HTTP, MCP, A2A)
+
+This extension feeds into UCP Checkout and UCP Order capabilities. A dedicated extension enables explicit modeling of these dimensions without overloading generic Offer primitives.
 
 ---------------------------------------------------------------------
-2. Why Hotels Require a Dedicated Extension
+2. FLOW (NORMATIVE SEQUENCE)
 ---------------------------------------------------------------------
-Hotels differ from retail-style commerce in the following ways:
 
-2.1 Time-Bound Inventory
-
-Hotel pricing depends on:
-
-• Check-in / Check-out dates
-• Occupancy
-• Availability window
-
-Unlike static SKUs, hotel products are temporal.
-
-2.2 Multi-Dimensional Pricing
-
-Pricing varies by:
-
-• Loyalty tier
-• Corporate agreements
-• Market/POS
-• Stay window
-• Add-ons
-• Cancellation flexibility
-
-Without structured identity-aware pricing, implementations diverge.
-
-2.3 Strict Discovery vs Pricing Separation
-
-Discovery must:
-
-• Be cacheable
-• Be non-binding
-• Support ranking and filtering
-• Expose indicative price signals only
-
-Pricing must:
-
-• Be confirmation-ready
-• Include taxes and fees
-• Include cancellation rules
-• Be time-bound and revalidated
-
-The extension formalizes this boundary.
-
-2.4 Asynchronous Confirmation
-
-Hotel suppliers frequently:
-
-• Revalidate inventory
-• Confirm asynchronously
-• Issue confirmation after payment authorization
-
-Generic synchronous checkout assumptions are insufficient.
-
-2.5 Complex Order Lifecycle
-
-Hotels require:
-
-• Cancellation deadlines
-• Modification rules
-• Refund logic
-• Status updates via events
-
-Order state modeling must be explicit.
----------------------------------------------------------------------
-3. Scope of the Extension
----------------------------------------------------------------------
-The Hotels Extension defines:
-• HotelProduct (discovery)
-• RoomVariant (room identity, not rate plan)
-• IdentityContext
-• HotelOffer (confirmation-ready)
-• Cart (optional intent stabilization)
-• Checkout
-• HotelOrder
-• OrderEvent
+1. Product Discovery (pricing-agnostic, cacheable)
+2. Early Identity Context (optional, influences ranking)
+3. Variant Selection (room identity only)
+4. Identity Confirmation (if needed before pricing)
+5. Offer / Quotation (confirmation-ready)
+6. CartIntent (optional)
+7. Checkout (execution boundary + mandatory revalidation)
+8. Order lifecycle (system-of-record)
 
 ---------------------------------------------------------------------
-4. Architecture Overview
+3. IDENTITY INFLUENCE ON DISCOVERY (NEW – CLOSED GAP)
 ---------------------------------------------------------------------
-Flow:
 
-Discovery
-→ Identity Enrichment
-→ Offer / Pricing
-→ Cart (Optional)
-→ Checkout
-→ Order
-→ Events
+Discovery MAY accept identity_context_reference.
 
-The extension maintains strict state transitions and idempotency boundaries.
+Discovery MUST:
+• Work without identity.
+• Not block anonymous exploration.
 
----------------------------------------------------------------------
-5. Specification Summary
----------------------------------------------------------------------
-5.1 Discovery Layer (Non-Binding)
-
-Defines:
-• product_id
-• location
-• star_rating
-• amenities
-• image_urls
-• variant modeling
-• indicative price range
+Discovery MAY:
+• Adapt ranking based on loyalty tier or corporate contract.
+• Surface eligibility hints at property or variant level.
+• Adjust indicative availability signals based on eligibility.
 
 Discovery MUST NOT:
+• Require identity for property listing visibility.
 
-• Represent live guarantees
-• Represent confirmation-ready pricing
-• Trigger reservation holds
+---------------------------------------------------------------------
+4. LEAD / INDICATIVE PRICE SEMANTICS (NEW – CLOSED GAP)
+---------------------------------------------------------------------
 
-5.2 IdentityContext
+If indicative_price is provided:
 
-Supports:
-• traveler_id
-• loyalty_program_id
-• loyalty_tier
-• corporate_id
-• rate_access_code
-• market/POS
-• identity_confidence_level
+It MUST:
+• Be labeled type = "INDICATIVE"
+• Be marked non_binding = true
+• Include valid_until
+• Represent the lowest eligible public rate for provided dates and occupancy
+• Clarify currency source and conversion basis if converted
 
-Identity:
-• Enriches pricing and eligibility
-• Does not gate discovery
-• May be verified at offer or checkout
+It MUST NOT:
+• Be treated as confirmation-ready
+• Imply inventory reservation
 
-5.3 Offer Model (Binding)
+Indicative pricing TTL SHOULD NOT exceed 24 hours.
 
-HotelOffer:
+---------------------------------------------------------------------
+5. VARIANT-LEVEL ELIGIBILITY SIGNALING (NEW – CLOSED GAP)
+---------------------------------------------------------------------
 
-• offer_id
-• stay_dates
+HotelVariant MAY include:
+
+eligibility_signals: [
+  {
+    type: "LOYALTY_REQUIRED" | "CORPORATE_RATE_AVAILABLE" | "MEMBER_DISCOUNT_AVAILABLE",
+    program_id: string (optional),
+    description: string (optional)
+  }
+]
+
+This allows agents to reason about eligibility prior to invoking pricing.
+
+---------------------------------------------------------------------
+6. OFFER / QUOTATION REQUIREMENTS
+---------------------------------------------------------------------
+
+Offer MUST include:
+• offer_id (ephemeral)
+• property_id
+• variant_id
+• stay window
 • occupancy
-• total_price
-• taxes_and_fees
-• cancellation_policy
-• expires_at
+• full pricing breakdown
+• cancellation structure
+• payment requirements
+• offer_valid_until
 • requires_reprice_before_checkout
 
-Offers are:
-• Time-bound
-• Confirmation-ready
-• Revalidation-aware
+Offer MUST be confirmation-ready.
 
-5.4 Cart (Optional)
+Offer MUST NOT imply booking commitment.
 
-Cart:
-• Stabilizes intent
-• Does NOT reserve inventory
-• May reference offer_id
-• May expire
-• Cart ≠ booking commitment.
+---------------------------------------------------------------------
+7. CHECKOUT REVALIDATION (NEW – CLOSED GAP)
+---------------------------------------------------------------------
 
-5.5 Checkout (Execution Boundary)
+Before booking confirmation:
 
-Checkout requires:
-• Offer or cart-backed selection
-• Guest details
-• Payment method reference
-• Idempotency key
+Business MUST:
+• Revalidate price and availability at checkout completion.
+• Return price_changed if discrepancy exists.
+• Return not_available if inventory unavailable.
+• Provide updated offer if applicable.
 
-Checkout may result in:
-• CONFIRMED
+Platform MUST:
+• Handle reprice scenario before completion.
+• Respect idempotency for Complete Checkout.
+
+Checkout remains the execution boundary.
+
+---------------------------------------------------------------------
+8. ASYNC CONFIRMATION CONTRACT (NEW – CLOSED GAP)
+---------------------------------------------------------------------
+
+If booking confirmation is asynchronous:
+
+Order state MUST support:
 • PENDING
+• CONFIRMED
 • FAILED
 
-Async confirmation is supported.
+Business MUST:
+• Provide confirmation SLA guidance (e.g., expected response window).
+• Publish event or status update within reasonable operational timeframe.
+• Ensure Complete Checkout remains idempotent.
 
-5.6 Order Model
-
-HotelOrder defines:
-• order_id
-• confirmation_number
-• booking_status
-• order_state
-• cancellation_deadline
-• modification_rules
-• refund_rules
-• merchant_reference
-
-Order and booking state are independent.
-
-5.7 Event Model
-
-OrderEvent:
-
-• ORDER_CONFIRMED
-• ORDER_CANCELLED
-• ORDER_MODIFIED
-• PAYMENT_FAILED
-
-Supports agent subscription.
----------------------------------------------------------------------
-6. Explicit Non-Goals
----------------------------------------------------------------------
-This extension does NOT:
-
-• Define payment processing standards
-• Mandate cart usage
-• Standardize CRS/PMS internals
-• Define OTA commission flows
-• Mandate loyalty verification mechanisms
-• Replace core UCP primitives
-
-It defines protocol-level interoperability only.
----------------------------------------------------------------------
-7. Backward Compatibility & Versioning
----------------------------------------------------------------------
-• Discovery attributes are additive
-• IdentityContext fields are additive
-• Order state expansion must remain backward-compatible
-• Breaking changes require major version increment
----------------------------------------------------------------------
-8. Governance Checklist
----------------------------------------------------------------------
-8.1 Architectural Compliance
-
-• Transport-agnostic
-• Merchant-neutral
-• No dependency on specific CRS/PMS
-• No Sabre-specific constructs
-• Does not modify UCP core primitives
-
-8.2 Semantic Integrity
-• Discovery is non-binding
-• Offer is confirmation-ready
-• Cart does not reserve inventory
-• Checkout is execution boundary
-• Async confirmation supported
-• Order state model defined
-
-8.3 Identity Governance
-• Identity does not gate discovery
-• Confidence levels supported
-• Corporate and loyalty modeled
-• Market/POS explicitly modeled
-
-8.4 Event Model
-• Explicit event types
-• State transition clarity
-• Async-safe updates
-• Polling + event patterns supported
-
-8.5 Risk Mitigation
-
-This extension prevents:
-• Merchant-specific divergence
-• Unsafe overloading of Offer primitives
-• Ambiguity in async confirmation
-• Identity inconsistency across implementations
----------------------------------------------------------------------
-9. Open Questions for Governance
----------------------------------------------------------------------
-• Should Cart be standardized or remain optional?
-• Should IdentityContext be elevated to UCP core?
-• Should async confirmation be required capability?
-• Should hotel-specific Offer fields remain extension-only?
-• Should modification/cancellation be mandatory V1 capabilities?
+Platform MUST:
+• Support polling or event subscription for Order status changes.
 
 ---------------------------------------------------------------------
-10. Conclusion
+9. CART INTENT (OPTIONAL CAPABILITY)
 ---------------------------------------------------------------------
-The Hotels Extension enables:
-• Scalable discovery
-• Identity-aware pricing
-• Confirmation-ready offer handling
-• Async-safe checkout
-• Explicit order lifecycle modeling
-• Event-driven updates
 
-It formalizes hotel commerce semantics while preserving UCP’s extensibility and neutrality.
-Approval of this extension prevents fragmentation and establishes a reusable foundation for multi-merchant hotel interoperability within UCP.
+CartIntent:
+• Stabilizes user intent.
+• Is not an inventory hold.
+• MUST expire via expires_at.
+• MUST trigger reprice if expired.
+
+Cart is optional. Direct Offer → Checkout MUST be supported.
+
+---------------------------------------------------------------------
+10. MERCHANT MODEL CLARIFICATION (NEW – CLOSED GAP)
+---------------------------------------------------------------------
+
+The following models are permitted:
+
+1. Single-property merchant
+2. Multi-property chain merchant
+3. Aggregator merchant representing multiple hotels
+
+Merchant registration MUST:
+• Expose a UCP Business Profile
+• Declare payment handler support
+• Declare identity linking support if applicable
+
+Property-level identity MUST map to merchant-level UCP capability.
+
+---------------------------------------------------------------------
+11. MCP / A2A COMPATIBILITY (NEW – CLOSED GAP)
+---------------------------------------------------------------------
+
+This extension MUST be transport-agnostic.
+
+When using MCP:
+• Correlation IDs MUST propagate end-to-end.
+• Offer IDs MUST remain opaque tokens.
+• State transitions MUST be idempotent.
+
+When using A2A:
+• Offer and Checkout requests MUST preserve identity context tokens.
+• Event delivery MUST support asynchronous updates.
+
+---------------------------------------------------------------------
+12. DATA FRESHNESS GOVERNANCE (NEW – CLOSED GAP)
+---------------------------------------------------------------------
+
+Property discovery data MUST include:
+• last_updated timestamp
+
+Recommended:
+• TTL guidance not exceeding 48 hours for static metadata
+• Versioned catalog refresh via date-based schema versioning
+
+---------------------------------------------------------------------
+13. MULTI-ROOM SUPPORT (NEW)
+---------------------------------------------------------------------
+
+Offer MAY represent multiple rooms.
+
+If multi-room:
+• Offer MUST include quantity field.
+• Cancellation and pricing breakdown MUST apply per room and total.
+
+---------------------------------------------------------------------
+14. ERROR TAXONOMY
+---------------------------------------------------------------------
+
+Standardized codes:
+
+invalid_input  
+not_available  
+offer_expired  
+price_changed  
+identity_required  
+identity_not_verified  
+rate_not_eligible  
+payment_failed  
+supplier_timeout  
+duplicate_request  
+
+Each MUST indicate:
+• severity
+• retryable flag
+• requires_user_action flag
+ 
