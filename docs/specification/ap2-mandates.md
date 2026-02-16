@@ -129,7 +129,8 @@ This extension uses the cryptographic primitives defined in the
 * **Algorithms:** ES256 (required), ES384, ES512
 * **Canonicalization:** JCS ([RFC 8785](https://datatracker.ietf.org/doc/html/rfc8785))
 * **Key Format:** JWK ([RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517))
-* **Key Discovery:** `signing_keys[]` in `/.well-known/ucp`
+* **Key Discovery:** `signing_keys[]` in `/.well-known/ucp` (see
+  [Key Discovery](overview.md#key-discovery))
 
 See [Message Signatures](signatures.md) for complete details on algorithms,
 key format, and key rotation.

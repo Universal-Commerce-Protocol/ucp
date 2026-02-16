@@ -21,30 +21,13 @@ ensure authenticity and integrity.
 
 ## Overview
 
-Businesses **SHOULD** authenticate agents to prevent impersonation and ensure
-message integrity. UCP supports multiple authentication mechanisms:
+This specification defines how to sign and verify UCP messages using
+[RFC 9421](https://www.rfc-editor.org/rfc/rfc9421) HTTP Message Signatures.
+For UCP's identity model, supported authentication mechanisms, and key
+discovery protocol, see
+[Identity & Authentication](overview.md#identity--authentication).
 
-* **API Keys** — Pre-shared secrets exchanged out-of-band
-* **OAuth 2.0** — Client credentials or other OAuth flows
-* **mTLS** — Mutual TLS with client certificates
-* **HTTP Message Signatures** — Cryptographic signatures per RFC 9421 (this spec)
-
-**Identity binding:** Regardless of authentication mechanism, verifiers
-**MUST** ensure the authenticated identity is consistent with the `UCP-Agent`
-header:
-
-* **HTTP Message Signatures** — The signer's profile (from `UCP-Agent`) is
-    verified by signature validation; no additional check needed.
-* **API keys / OAuth / mTLS** — If a `UCP-Agent` header is present, verifiers
-    **MUST** confirm the authenticated principal is authorized to act on behalf
-    of the profile identified in `UCP-Agent`. Reject requests where the
-    authenticated identity and claimed profile conflict.
-
-HTTP Message Signatures are particularly valuable for **permissionless agent
-onboarding** — merchants can declaratively trust agents by their advertised
-public keys without negotiating shared secrets.
-
-When using HTTP Message Signatures, they protect against:
+HTTP Message Signatures protect against:
 
 * **Impersonation** — Attackers sending messages claiming to be legitimate
     participants
@@ -150,97 +133,9 @@ defined in [RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517).
 ### Key Discovery
 
 Public keys are published in the `signing_keys` array of the party's UCP
-profile at `/.well-known/ucp`.
-
-**Business Profile:**
-
-```json
-{
-  "ucp": { ... },
-  "signing_keys": [
-    {
-      "kid": "merchant-2026",
-      "kty": "EC",
-      "crv": "P-256",
-      "x": "WKn-ZIGevcwGIyyrzFoZNBdaq9_TsqzGl96oc0CWuis",
-      "y": "y77t-RvAHRKTsSGdIYUfweuOvwrvDD-Q3Hv5J0fSKbE",
-      "alg": "ES256"
-    }
-  ]
-}
-```
-
-**Platform Profile:**
-
-```json
-{
-  "ucp": { ... },
-  "signing_keys": [
-    {
-      "kid": "platform-2026",
-      "kty": "EC",
-      "crv": "P-256",
-      "x": "MKBCTNIcKUSDii11ySs3526iDZ8AiTo7Tu6KPAqv7D4",
-      "y": "4Etl6SRW2YiLUrN5vfvVHuhp7x8PxltmWWlbbM4IFyM",
-      "alg": "ES256"
-    }
-  ]
-}
-```
-
-**Key Lookup:**
-
-1. Extract `kid` (key ID) from signature header/parameter
-2. Fetch signer's UCP profile from `/.well-known/ucp`
-3. Search `signing_keys[]` for matching `kid`
-4. Use the corresponding public key for verification
-
-### Profile Trust Model
-
-**Profile URLs** identify the signer and locate their public keys. Implementations
-**MUST** validate profile URLs to prevent attacks where malicious actors use
-attacker-controlled profiles.
-
-**Validation Requirements:**
-
-1. **HTTPS required** — Profile URLs **MUST** use `https://` scheme
-2. **Well-known path** — URL **MUST** end with `/.well-known/ucp`
-3. **No open redirects** — Reject profiles that redirect to different domains
-4. **Domain binding** — The profile domain identifies the organization
-
-Profile trust is typically established through:
-
-* **Pre-registration** — Platform/business exchange profile URLs during onboarding
-* **Capability negotiation** — Profile URL discovered from partner's profile
-* **Allowlists** — Implementations SHOULD maintain explicit allowlists of trusted profiles
-
-**Example Allowlist Check:**
-
-```text
-validate_profile_url(url, allowlist):
-    // Parse and validate URL structure
-    parsed = parse_url(url)
-    if parsed.scheme != "https":
-        return error("invalid_profile_url")
-    if not parsed.path.endsWith("/.well-known/ucp"):
-        return error("invalid_profile_url")
-
-    // Check against allowlist (if configured)
-    if allowlist and parsed.host not in allowlist:
-        return error("profile_not_trusted")
-
-    return success()
-```
-
-**Profile Caching:**
-
-Implementations **SHOULD** cache fetched profiles to reduce latency and network
-load. Recommended cache policy:
-
-* **TTL:** 5-15 minutes for normal operations
-* **Stale-while-revalidate:** Accept stale profile during background refresh
-* **Force refresh:** On signature verification failure with unknown `kid`
-* **No cache:** For key compromise scenarios (see Key Rotation)
+profile at `/.well-known/ucp`. For the complete key discovery protocol,
+profile trust model, and profile fetch requirements, see
+[Identity & Authentication — Key Discovery](overview.md#key-discovery).
 
 ### Key Rotation
 
@@ -455,7 +350,8 @@ UCP-Agent: profile="https://platform.example/.well-known/ucp"
 1. Parse as RFC 8941 Dictionary
 2. Extract the `profile` key (REQUIRED)
 3. Value MUST be a quoted string containing an HTTPS URL
-4. URL MUST point to `/.well-known/ucp` at the signer's domain
+4. For business profiles, URL MUST point to `/.well-known/ucp`; platform
+   profile URLs are not path-constrained
 5. Reject non-HTTPS URLs
 
 **Example:**
@@ -481,9 +377,9 @@ verify_rest_request(request):
     components = sig_input.components
 
     // 2. Fetch signer's public key
+    // See overview.md#profile-requirements for URL validation and fetch rules
     profile_url = get_profile_url_from_ucp_agent(request.headers["UCP-Agent"])
-    validate_profile_url(profile_url)
-    profile = fetch_profile(profile_url)
+    profile = fetch_profile(profile_url)  // HTTPS-only, no redirects
     public_key = find_key_by_kid(profile.signing_keys, keyid)
     if not public_key:
         return error("key_not_found")
@@ -657,11 +553,11 @@ the complete error code registry and transport bindings.
 
 **Profile-related errors** (also used for capability negotiation):
 
-| Code                    | HTTP | Description                                          |
-| :---------------------- | :--- | :--------------------------------------------------- |
-| `invalid_profile_url`   | 400  | Profile URL malformed or invalid scheme              |
-| `profile_unreachable`   | 424  | Unable to fetch signer's profile                     |
-| `profile_not_trusted`   | 403  | Profile URL not in trusted allowlist                 |
+| Code                    | HTTP | Description                                               |
+| :---------------------- | :--- | :-------------------------------------------------------- |
+| `invalid_profile_url`   | 400  | Profile URL malformed or invalid scheme                   |
+| `profile_unreachable`   | 424  | Unable to fetch signer's profile                          |
+| `profile_not_trusted`   | 403  | Profile URL not in registry of pre-approved platforms     |
 
 **Note:** Replay protection is handled at the business layer through idempotency
 keys, not at the signature layer. Duplicate requests return cached responses
