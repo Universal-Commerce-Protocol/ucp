@@ -162,6 +162,12 @@ def define_env(env):
   # Use module-level constants for paths
   schemas_dirs = SCHEMAS_DIRS
 
+  def get_error_context():
+    try:
+      return f" (in file: {env.page.file.src_path})"
+    except AttributeError:
+      return ""
+
   def _resolve_with_ucp_schema(schema_path, direction, operation):
     """Resolve a schema using ucp-schema CLI (delegates to module-level fn)."""
     return _resolve_schema(schema_path, direction, operation, bundle=False)
@@ -408,8 +414,8 @@ def define_env(env):
       if properties_ref.startswith("http"):
         return f"_See [{properties_ref}]({properties_ref})_"
       # ucp-schema failed or schema not found - fail loudly
-      return (
-        f"**Error:** Failed to resolve '{ref_entity_name}'. "
+      raise RuntimeError(
+        f"Failed to resolve '{ref_entity_name}'{get_error_context()}. "
         f"Ensure ucp-schema is installed: `cargo install ucp-schema`"
       )
 
@@ -443,12 +449,23 @@ def define_env(env):
       and len(properties_list[1].keys()) == 1
       and "required" in properties_list[1]
     ):
-      return _read_schema_from_defs(
-        "capability.json" + properties_list[0].get("$ref", ""),
-        spec_file_name,
-        False,
-        properties_list[1].get("required", []),
-      )
+      ref = properties_list[0].get("$ref")
+      if ref:
+        return _read_schema_from_defs(
+          "capability.json" + ref,
+          spec_file_name,
+          False,
+          properties_list[1].get("required", []),
+        )
+      else:
+        # If the ref was already resolved, render the schema directly.
+        return _render_table_from_schema(
+          properties_list[0],
+          spec_file_name,
+          False,
+          properties_list[1].get("required", []),
+          context,
+        )
 
     md = []
     for properties in properties_list:
@@ -678,14 +695,19 @@ def define_env(env):
     Render a table.
     """
     if ".json#/" not in entity_name:
-      return f"**Error:** Invalid entity name format for def: {entity_name}"
+      raise ValueError(
+        f"Invalid entity name format for def: {entity_name}"
+        f"{get_error_context()}"
+      )
 
     try:
       core_entity_name, def_path = entity_name.split(".json#", 1)
       core_entity_name += ".json"
       def_path = "#" + def_path
     except ValueError:
-      return f"**Error:** Malformed entity name: {entity_name}"
+      raise ValueError(
+        f"Malformed entity name: {entity_name}{get_error_context()}"
+      ) from None
 
     for schemas_dir in schemas_dirs:
       full_path = Path(schemas_dir) / core_entity_name
@@ -697,6 +719,18 @@ def define_env(env):
         # Extract the $def from the bundled result
         embedded_schema_data = _resolve_json_pointer(def_path, bundled)
         if embedded_schema_data is not None:
+          # Resolve internal refs (like #/$defs/base) against the bundled root
+          if "allOf" in embedded_schema_data:
+            new_all_of = []
+            for item in embedded_schema_data["allOf"]:
+              if "$ref" in item and item["$ref"].startswith("#/"):
+                resolved = _resolve_json_pointer(item["$ref"], bundled)
+                new_all_of.append(resolved if resolved else item)
+              else:
+                new_all_of.append(item)
+            embedded_schema_data = embedded_schema_data.copy()
+            embedded_schema_data["allOf"] = new_all_of
+
           return _render_table_from_schema(
             embedded_schema_data,
             spec_file_name,
@@ -704,14 +738,15 @@ def define_env(env):
             parent_required_list,
           )
         else:
-          return (
-            f"**Error:** Definition '{def_path}' not found in '{full_path}'"
+          raise RuntimeError(
+            f"Definition '{def_path}' not found in '{full_path}'"
+            f"{get_error_context()}"
           )
       # Try next directory if resolution failed
 
-    return (
-      f"**Error:** Schema file '{core_entity_name}' not found in any schema"
-      " directory."
+    raise FileNotFoundError(
+      f"Schema file '{core_entity_name}' not found in any schema"
+      f" directory{get_error_context()}."
     )
 
   # --- MACRO 1: For Standalone JSON Schemas ---
@@ -771,12 +806,16 @@ def define_env(env):
           resolved_schema, spec_file_name, context=context
         )
       # ucp-schema failed - fail loudly, don't silently use raw JSON
-      return (
-        f"**Error:** Failed to resolve schema '{full_path}' with ucp-schema. "
+      raise RuntimeError(
+        f"Failed to resolve schema '{full_path}' with ucp-schema"
+        f"{get_error_context()}. "
         f"Ensure ucp-schema is installed: `cargo install ucp-schema`"
       )
 
-    return f"**Error:** Schema '{base_name}' not found in any schema directory."
+    raise FileNotFoundError(
+      f"Schema '{base_name}' not found in any schema directory"
+      f"{get_error_context()}."
+    )
 
   @env.macro
   def extension_schema_fields(entity_name, spec_file_name):
@@ -938,19 +977,23 @@ def define_env(env):
       # Extension schemas have their composed type in $defs.checkout
       # or $defs.order_line_item.
       defs = data.get("$defs", {})
-      # Find the composed type (checkout or order_line_item)
-      composed_type = defs.get("checkout") or defs.get("order_line_item")
-      if composed_type and "allOf" in composed_type:
-        # Get the extension-specific properties (second element of allOf)
-        for item in composed_type["allOf"]:
-          if "properties" in item:
-            return _render_table_from_schema(item, spec_file_name)
 
-      return (
-        f"**Error:** Could not find extension properties in '{entity_name}'"
+      # Dynamically find the composed type by looking for an entry with 'allOf'
+      # where one of the items defines 'properties'.
+      for schema_def in defs.values():
+        if isinstance(schema_def, dict) and "allOf" in schema_def:
+          for item in schema_def["allOf"]:
+            if "properties" in item:
+              return _render_table_from_schema(item, spec_file_name)
+
+      raise RuntimeError(
+        f"Could not find extension properties in '{entity_name}'"
+        f"{get_error_context()}"
       )
     except (FileNotFoundError, json.JSONDecodeError) as e:
-      return f"**Error loading extension '{entity_name}':** {e}"
+      raise RuntimeError(
+        f"Error loading extension '{entity_name}': {e}{get_error_context()}"
+      ) from e
 
   # --- MACRO 3: For Transport Operations ---
   @env.macro
@@ -1004,7 +1047,9 @@ def define_env(env):
             break
 
       if not operation:
-        return f"**Error:** Operation ID `{operation_id}` not found."
+        raise ValueError(
+          f"Operation ID `{operation_id}` not found{get_error_context()}."
+        )
 
       # 2. Extract Request Schema
       req_content = operation.get("requestBody", {}).get("content", {})
@@ -1139,7 +1184,9 @@ def define_env(env):
       return output
 
     except (FileNotFoundError, json.JSONDecodeError) as e:
-      return f"**Error processing OpenAPI:** {e}"
+      raise RuntimeError(
+        f"Error processing OpenAPI: {e}{get_error_context()}"
+      ) from e
 
   # --- MACRO 4: For HTTP Headers ---
   @env.macro
@@ -1176,7 +1223,9 @@ def define_env(env):
           break
 
       if not operation:
-        return f"**Error:** Operation ID `{operation_id}` not found."
+        raise ValueError(
+          f"Operation ID `{operation_id}` not found{get_error_context()}."
+        )
 
       # 2. Extract Request Parameters (Path + Operation)
       op_parameters = operation.get("parameters", [])
@@ -1245,4 +1294,6 @@ def define_env(env):
       return "\n\n".join(output_parts)
 
     except (FileNotFoundError, json.JSONDecodeError) as e:
-      return f"**Error processing OpenAPI:** {e}"
+      raise RuntimeError(
+        f"Error processing OpenAPI: {e}{get_error_context()}"
+      ) from e

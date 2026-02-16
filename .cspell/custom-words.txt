@@ -1,5 +1,6 @@
 # cspell-specific custom words related to UCP
 Adyen
+Affirm
 Alam
 Amex
 Ant
@@ -50,6 +51,7 @@ checkout
 credentialless
 credentialization
 datamodel
+delisted
 dpan
 ewallet
 fontawesome
