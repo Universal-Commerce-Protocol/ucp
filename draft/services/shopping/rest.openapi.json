@@ -31,7 +31,13 @@
             "$ref": "#/components/parameters/x_api_key"
           },
           {
-            "$ref": "#/components/parameters/request_signature"
+            "$ref": "#/components/parameters/signature"
+          },
+          {
+            "$ref": "#/components/parameters/signature_input"
+          },
+          {
+            "$ref": "#/components/parameters/content_digest"
           },
           {
             "$ref": "#/components/parameters/idempotency_key"
@@ -72,8 +78,14 @@
           "201": {
             "description": "Checkout session created",
             "headers": {
-              "X-Detached-JWT": {
-                "$ref": "#/components/headers/x_detached_jwt"
+              "Signature": {
+                "$ref": "#/components/headers/signature"
+              },
+              "Signature-Input": {
+                "$ref": "#/components/headers/signature_input"
+              },
+              "Content-Digest": {
+                "$ref": "#/components/headers/content_digest"
               }
             },
             "content": {
@@ -105,7 +117,10 @@
             "$ref": "#/components/parameters/x_api_key"
           },
           {
-            "$ref": "#/components/parameters/request_signature"
+            "$ref": "#/components/parameters/signature"
+          },
+          {
+            "$ref": "#/components/parameters/signature_input"
           },
           {
             "$ref": "#/components/parameters/request_id"
@@ -133,8 +148,14 @@
           "200": {
             "description": "Checkout session retrieved",
             "headers": {
-              "X-Detached-JWT": {
-                "$ref": "#/components/headers/x_detached_jwt"
+              "Signature": {
+                "$ref": "#/components/headers/signature"
+              },
+              "Signature-Input": {
+                "$ref": "#/components/headers/signature_input"
+              },
+              "Content-Digest": {
+                "$ref": "#/components/headers/content_digest"
               }
             },
             "content": {
@@ -159,7 +180,13 @@
             "$ref": "#/components/parameters/x_api_key"
           },
           {
-            "$ref": "#/components/parameters/request_signature"
+            "$ref": "#/components/parameters/signature"
+          },
+          {
+            "$ref": "#/components/parameters/signature_input"
+          },
+          {
+            "$ref": "#/components/parameters/content_digest"
           },
           {
             "$ref": "#/components/parameters/idempotency_key"
@@ -200,8 +227,14 @@
           "200": {
             "description": "Checkout session updated",
             "headers": {
-              "X-Detached-JWT": {
-                "$ref": "#/components/headers/x_detached_jwt"
+              "Signature": {
+                "$ref": "#/components/headers/signature"
+              },
+              "Signature-Input": {
+                "$ref": "#/components/headers/signature_input"
+              },
+              "Content-Digest": {
+                "$ref": "#/components/headers/content_digest"
               }
             },
             "content": {
@@ -233,7 +266,13 @@
             "$ref": "#/components/parameters/x_api_key"
           },
           {
-            "$ref": "#/components/parameters/request_signature"
+            "$ref": "#/components/parameters/signature"
+          },
+          {
+            "$ref": "#/components/parameters/signature_input"
+          },
+          {
+            "$ref": "#/components/parameters/content_digest"
           },
           {
             "$ref": "#/components/parameters/idempotency_key"
@@ -289,8 +328,14 @@
           "200": {
             "description": "Checkout session completed",
             "headers": {
-              "X-Detached-JWT": {
-                "$ref": "#/components/headers/x_detached_jwt"
+              "Signature": {
+                "$ref": "#/components/headers/signature"
+              },
+              "Signature-Input": {
+                "$ref": "#/components/headers/signature_input"
+              },
+              "Content-Digest": {
+                "$ref": "#/components/headers/content_digest"
               }
             },
             "content": {
@@ -322,7 +367,13 @@
             "$ref": "#/components/parameters/x_api_key"
           },
           {
-            "$ref": "#/components/parameters/request_signature"
+            "$ref": "#/components/parameters/signature"
+          },
+          {
+            "$ref": "#/components/parameters/signature_input"
+          },
+          {
+            "$ref": "#/components/parameters/content_digest"
           },
           {
             "$ref": "#/components/parameters/idempotency_key"
@@ -353,8 +404,14 @@
           "200": {
             "description": "Checkout session canceled",
             "headers": {
-              "X-Detached-JWT": {
-                "$ref": "#/components/headers/x_detached_jwt"
+              "Signature": {
+                "$ref": "#/components/headers/signature"
+              },
+              "Signature-Input": {
+                "$ref": "#/components/headers/signature_input"
+              },
+              "Content-Digest": {
+                "$ref": "#/components/headers/content_digest"
               }
             },
             "content": {
@@ -381,7 +438,13 @@
             "$ref": "#/components/parameters/x_api_key"
           },
           {
-            "$ref": "#/components/parameters/request_signature"
+            "$ref": "#/components/parameters/signature"
+          },
+          {
+            "$ref": "#/components/parameters/signature_input"
+          },
+          {
+            "$ref": "#/components/parameters/content_digest"
           },
           {
             "$ref": "#/components/parameters/idempotency_key"
@@ -419,8 +482,14 @@
           "201": {
             "description": "Cart created",
             "headers": {
-              "X-Detached-JWT": {
-                "$ref": "#/components/headers/x_detached_jwt"
+              "Signature": {
+                "$ref": "#/components/headers/signature"
+              },
+              "Signature-Input": {
+                "$ref": "#/components/headers/signature_input"
+              },
+              "Content-Digest": {
+                "$ref": "#/components/headers/content_digest"
               }
             },
             "content": {
@@ -452,7 +521,10 @@
             "$ref": "#/components/parameters/x_api_key"
           },
           {
-            "$ref": "#/components/parameters/request_signature"
+            "$ref": "#/components/parameters/signature"
+          },
+          {
+            "$ref": "#/components/parameters/signature_input"
           },
           {
             "$ref": "#/components/parameters/request_id"
@@ -480,8 +552,14 @@
           "200": {
             "description": "Cart retrieved",
             "headers": {
-              "X-Detached-JWT": {
-                "$ref": "#/components/headers/x_detached_jwt"
+              "Signature": {
+                "$ref": "#/components/headers/signature"
+              },
+              "Signature-Input": {
+                "$ref": "#/components/headers/signature_input"
+              },
+              "Content-Digest": {
+                "$ref": "#/components/headers/content_digest"
               }
             },
             "content": {
@@ -509,7 +587,13 @@
             "$ref": "#/components/parameters/x_api_key"
           },
           {
-            "$ref": "#/components/parameters/request_signature"
+            "$ref": "#/components/parameters/signature"
+          },
+          {
+            "$ref": "#/components/parameters/signature_input"
+          },
+          {
+            "$ref": "#/components/parameters/content_digest"
           },
           {
             "$ref": "#/components/parameters/idempotency_key"
@@ -550,8 +634,14 @@
           "200": {
             "description": "Cart updated",
             "headers": {
-              "X-Detached-JWT": {
-                "$ref": "#/components/headers/x_detached_jwt"
+              "Signature": {
+                "$ref": "#/components/headers/signature"
+              },
+              "Signature-Input": {
+                "$ref": "#/components/headers/signature_input"
+              },
+              "Content-Digest": {
+                "$ref": "#/components/headers/content_digest"
               }
             },
             "content": {
@@ -583,7 +673,13 @@
             "$ref": "#/components/parameters/x_api_key"
           },
           {
-            "$ref": "#/components/parameters/request_signature"
+            "$ref": "#/components/parameters/signature"
+          },
+          {
+            "$ref": "#/components/parameters/signature_input"
+          },
+          {
+            "$ref": "#/components/parameters/content_digest"
           },
           {
             "$ref": "#/components/parameters/idempotency_key"
@@ -614,8 +710,14 @@
           "200": {
             "description": "Cart cancelled",
             "headers": {
-              "X-Detached-JWT": {
-                "$ref": "#/components/headers/x_detached_jwt"
+              "Signature": {
+                "$ref": "#/components/headers/signature"
+              },
+              "Signature-Input": {
+                "$ref": "#/components/headers/signature_input"
+              },
+              "Content-Digest": {
+                "$ref": "#/components/headers/content_digest"
               }
             },
             "content": {
@@ -638,7 +740,16 @@
         "description": "Merchant sends order lifecycle events to the platform's registered webhook URL. The platform provides the webhook URL during partner onboarding.",
         "parameters": [
           {
-            "$ref": "#/components/parameters/request_signature"
+            "$ref": "#/components/parameters/signature"
+          },
+          {
+            "$ref": "#/components/parameters/signature_input"
+          },
+          {
+            "$ref": "#/components/parameters/content_digest"
+          },
+          {
+            "$ref": "#/components/parameters/ucp_agent"
           },
           {
             "$ref": "#/components/parameters/x_api_key"
@@ -737,14 +848,32 @@
         },
         "description": "Authenticates the platform with a reusable api key allocated to the platform by the business."
       },
-      "request_signature": {
-        "name": "Request-Signature",
+      "signature": {
+        "name": "Signature",
         "in": "header",
-        "required": true,
+        "required": false,
         "schema": {
           "type": "string"
         },
-        "description": "Ensure the authenticity and integrity of an HTTP message."
+        "description": "RFC 9421 HTTP Message Signature. Required when using HTTP Message Signatures for authentication. Format: `sig1=:<base64-signature>:`."
+      },
+      "signature_input": {
+        "name": "Signature-Input",
+        "in": "header",
+        "required": false,
+        "schema": {
+          "type": "string"
+        },
+        "description": "RFC 9421 Signature-Input header. Required when using HTTP Message Signatures for authentication. Format: `sig1=(\"@method\" \"@path\" ...);created=<timestamp>;keyid=\"<key-id>\"`."
+      },
+      "content_digest": {
+        "name": "Content-Digest",
+        "in": "header",
+        "required": false,
+        "schema": {
+          "type": "string"
+        },
+        "description": "Body digest per RFC 9530. Required for requests/responses with a body. Format: `sha-256=:<base64-digest>:`."
       },
       "idempotency_key": {
         "name": "Idempotency-Key",
@@ -782,7 +911,7 @@
         "schema": {
           "type": "string"
         },
-        "description": "Identifies the UCP agent making the call. All requests MUST include the UCP-Agent header containing the platform profile URI using Dictionary Structured Field syntax (RFC 8941). Format: profile=\"https://platform.example/profile\"."
+        "description": "Identifies the UCP agent making the call. All requests MUST include the UCP-Agent header containing the signer's profile URI using RFC 8941 Dictionary syntax. The URL MUST point to /.well-known/ucp. Format: profile=\"https://example.com/.well-known/ucp\"."
       },
       "content_type": {
         "name": "Content-Type",
@@ -822,12 +951,26 @@
       }
     },
     "headers": {
-      "x_detached_jwt": {
+      "signature": {
         "required": false,
         "schema": {
           "type": "string"
         },
-        "description": "Optional detached JWT signature for the response body. Verifies the response came from the server."
+        "description": "RFC 9421 HTTP Message Signature for response. Contains the signature value in the format `sig1=:<base64-signature>:`."
+      },
+      "signature_input": {
+        "required": false,
+        "schema": {
+          "type": "string"
+        },
+        "description": "RFC 9421 Signature-Input header for response. Describes signed components, timestamp, and key ID."
+      },
+      "content_digest": {
+        "required": false,
+        "schema": {
+          "type": "string"
+        },
+        "description": "JCS-canonicalized body digest per RFC 8785. Format: `sha-256=:<base64-digest>:`."
       }
     },
     "schemas": {

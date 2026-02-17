@@ -24,6 +24,10 @@
 
 - [Overview](https://ucp.dev/draft/specification/overview/index.md)
 
+## Message Signatures
+
+- [Signatures](https://ucp.dev/draft/specification/signatures/index.md)
+
 ## Checkout Capability
 
 - [Overview](https://ucp.dev/draft/specification/checkout/index.md)
@@ -67,7 +71,7 @@
 
 ## Schema Authoring
 
-- [Schema Authoring](https://ucp.dev/draft/documentation/schema-authoring/index.md)
+- [Authoring](https://ucp.dev/draft/documentation/schema-authoring/index.md)
 
 ## Reference
 

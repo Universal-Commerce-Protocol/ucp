@@ -1002,7 +1002,7 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
 }
 ```
 
-The `ucp` object contains protocol metadata: version, services, capabilities, and payment handlers. The `signing_keys` array contains public keys (JWK format) used to verify signatures on webhooks and other authenticated messages from the business.
+The `ucp` object contains protocol metadata: version, services, capabilities, and payment handlers. The `signing_keys` array contains public keys (JWK format) used to verify signatures on webhooks and other authenticated messages from the business. See [Key Discovery](#key-discovery) for key lookup and resolution, and [Message Signatures](https://ucp.dev/draft/specification/signatures/index.md) for signing mechanics.
 
 #### Platform Profile
 
@@ -1183,6 +1183,18 @@ These failure types require different handling:
 | `profile_malformed`         | Fetched content is not valid JSON or violates schema | 422  | -32001 |
 | `capabilities_incompatible` | No compatible capabilities in intersection           | 200  | result |
 | `version_unsupported`       | Platform's UCP version is not supported              | 200  | result |
+
+**Signature Errors:**
+
+| Code                    | Description                                       | REST | MCP    |
+| ----------------------- | ------------------------------------------------- | ---- | ------ |
+| `signature_missing`     | Required signature header/field not present       | 401  | -32000 |
+| `signature_invalid`     | Signature verification failed                     | 401  | -32000 |
+| `key_not_found`         | Key ID not found in signer's `signing_keys`       | 401  | -32000 |
+| `digest_mismatch`       | Body digest doesn't match `Content-Digest` header | 400  | -32600 |
+| `algorithm_unsupported` | Signature algorithm not supported                 | 400  | -32600 |
+
+See [Message Signatures](https://ucp.dev/draft/specification/signatures/index.md) for signature verification details.
 
 **Protocol Errors:**
 
@@ -1393,6 +1405,81 @@ An extension is relevant if **any** of its `extends` values matches a relevant r
 | Checkout      | checkout, discount, fulfillment | cart, order                  |
 | Cart          | cart, discount                  | checkout, fulfillment, order |
 | Order         | order                           | checkout, cart, discount     |
+
+## Identity & Authentication
+
+UCP profiles serve dual purpose: they declare a party's **capabilities** for negotiation (see [Profile Structure](#profile-structure)) and publish **signing keys** for identity verification — enabling both capability negotiation and cryptographic authentication from a single document.
+
+Businesses publish their profile at `/.well-known/ucp` as the discovery entry point — platforms fetch it to determine protocol support, locate endpoints, and negotiate capabilities. Platforms advertise their profile URL per-request via the `UCP-Agent` header, enabling businesses to negotiate capabilities and verify identity. This design enables **permissionless onboarding** — any platform with a discoverable profile can interact with any business without prior registration.
+
+### Authentication Mechanisms
+
+Businesses **SHOULD** authenticate platforms to prevent impersonation and ensure message integrity. UCP is compatible with multiple authentication mechanisms:
+
+- **API Keys** — Pre-shared secrets exchanged out-of-band
+- **OAuth 2.0** — Client credentials or other OAuth flows
+- **mTLS** — Mutual TLS with client certificates
+- **HTTP Message Signatures** — Cryptographic signatures per [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421) (see [Message Signatures](https://ucp.dev/draft/specification/signatures/index.md) for full specification)
+
+HTTP Message Signatures enable permissionless onboarding — businesses can verify platforms by their advertised public keys without negotiating shared secrets. The other mechanisms require prior credential exchange and imply a pre-established relationship.
+
+Business-to-platform webhooks **MUST** be signed. See [Message Signatures — When Signatures Apply](https://ucp.dev/draft/specification/signatures/#when-signatures-apply).
+
+#### Identity Binding
+
+Regardless of authentication mechanism, verifiers **MUST** ensure the authenticated identity is consistent with the `UCP-Agent` header:
+
+- **HTTP Message Signatures** — The signer's profile (from `UCP-Agent`) is verified by signature validation; no additional check needed.
+- **API keys / OAuth / mTLS** — Verifiers **MUST** confirm the authenticated principal is authorized to act on behalf of the profile identified in `UCP-Agent`. Reject requests where the authenticated identity and claimed profile conflict.
+
+### Key Discovery
+
+Both parties publish public keys in the `signing_keys` array of their UCP profile. Platforms fetch the business profile at `/.well-known/ucp`; businesses fetch the platform profile from the `UCP-Agent` header. The same profile that provides capabilities also provides verification keys — this is UCP's key resolution mechanism for [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421) HTTP Message Signatures.
+
+**Key Lookup:**
+
+1. Obtain the signer's profile URL
+1. Fetch profile (or serve from cache)
+1. Extract `keyid` from `Signature-Input` and match to `kid` in `signing_keys[]`
+1. Verify signature using the corresponding public key
+
+For key format (JWK), supported algorithms, key rotation procedures, and complete signing/verification mechanics, see [Message Signatures](https://ucp.dev/draft/specification/signatures/index.md).
+
+### Profile Requirements
+
+#### Hosting
+
+Both profiles must be reliably hosted. An unreliable or misconfigured profile endpoint may prevent the other party from processing requests.
+
+1. Profiles **MUST** be served over HTTPS.
+1. Profile endpoints **MUST NOT** use redirects (3xx).
+1. Profile responses **MUST** include a `Cache-Control` header with `public` and `max-age` of at least 60 seconds. Profiles **MUST NOT** be served with `private`, `no-store`, or `no-cache` directives.
+
+Profiles represent a party's stable identity and capabilities. Profile URLs are expected to remain consistent across requests and not contain per-transaction or per-session configuration — the caching policy above enforces this by requiring shared cache support with a minimum TTL.
+
+#### Fetching
+
+Businesses fetch platform profiles to perform capability negotiation and verify identity. UCP defines best practices that enable permissionless onboarding, but businesses retain full control over their access policies and **MAY** enforce additional rules based on established trust, observed behavior, or operational requirements.
+
+Businesses **SHOULD** maintain a registry of pre-approved platforms — platforms whose profiles have been validated and whose trust is established through out-of-band mechanisms (API key, OAuth credential, mTLS certificate, or prior vetting). Known platforms can be served efficiently based on cached identity and capabilities, and are not subject to discovery budget constraints.
+
+When a platform is *not recognized*, it triggers dynamic profile discovery. Businesses **SHOULD** establish a fixed discovery footprint so that resource consumption for resolving unrecognized platforms remains constant regardless of how many platforms request access. Strategies include:
+
+- **Fixed-size profile cache** (e.g., LRU) — bounds memory regardless of the number of unique profile URLs encountered
+- **Global rate limit** on discovery fetches — bounds outbound network without requiring per-origin state tracking
+- **Backoff on repeated failures** — reduces retries to persistently unavailable or malicious profile endpoints
+- **Asynchronous discovery** — defer profile resolution by responding with a `503` status code and `Retry-After` header, and resolve the profile in the background; when the platform retries, the validated profile is cached and capability negotiation proceeds synchronously
+
+When fetching profiles, the following apply:
+
+1. Implementations **MUST** reject profile URLs not served over HTTPS.
+1. Implementations **MUST NOT** follow redirects (3xx) on profile fetches.
+1. Implementations **SHOULD** enforce connect and response timeouts on profile fetches.
+1. Implementations **SHOULD** cache profiles with a minimum TTL floor of 60 seconds, regardless of the origin's `Cache-Control` headers.
+1. Implementations **MAY** refresh profiles asynchronously using stale-while-revalidate semantics.
+1. On signature verification failure with an unknown `kid`, implementations **MAY** force-refresh the cached profile — but **MUST NOT** do so more than once per TTL floor per origin.
+
+If a profile cannot be fetched (timeout, DNS failure, 5xx) or fails validation (invalid schema, signing keys, signature mismatch), businesses **MUST** reject the request with an appropriate error and status code (see [Error Handling](#error-handling)).
 
 ## Payment Architecture
 
@@ -1869,16 +1956,11 @@ UCP defines a set of standard capabilities:
 
 Detailed definitions for endpoints, schemas, and valid extensions for each capability are provided in their respective specification files. Extensions are typically versioned and defined alongside their parent capability.
 
-## Security & Authentication
+## Security
 
 ### Transport Security
 
 All UCP communication **MUST** occur over **HTTPS**.
-
-### Request Authentication
-
-- **Platform to Business:** Requests **SHOULD** be authenticated using standard headers (e.g., `Authorization: Bearer <token>`).
-- **Business to Platform (Webhooks):** Webhooks **MUST** be signed using a shared secret or asymmetric key to verify integrity and origin.
 
 ### Data Privacy
 
@@ -2028,6 +2110,542 @@ Capabilities outside the `dev.ucp.*` namespace version fully independently. Vend
 | **Payment Service Provider**      | PSP     | The financial infrastructure provider that processes payments, authorizations, and settlements on behalf of the business.                                 |
 | **Platform**                      | -       | The consumer-facing surface (AI agent, app, website) acting on behalf of the user to discover businesses and facilitate commerce.                         |
 | **Verifiable Digital Credential** | VDC     | An Issuer-signed credential (set of claims) whose authenticity can be verified cryptographically. Used in UCP for secure payment authorizations.          |
+# Message Signatures
+
+# Message Signatures
+
+This specification defines how UCP messages are cryptographically signed to ensure authenticity and integrity.
+
+## Overview
+
+This specification defines how to sign and verify UCP messages using [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421) HTTP Message Signatures. For UCP's identity model, supported authentication mechanisms, and key discovery protocol, see [Identity & Authentication](https://ucp.dev/draft/specification/overview/#identity--authentication).
+
+HTTP Message Signatures protect against:
+
+- **Impersonation** — Attackers sending messages claiming to be legitimate participants
+- **Tampering** — Modification of message contents in transit
+- **Replay attacks** — Captured messages resent to different endpoints or at different times
+- **Method/endpoint confusion** — Signed payloads replayed with different HTTP methods or to different paths
+
+### Architecture
+
+UCP uses HTTP Message Signatures ([RFC 9421](https://www.rfc-editor.org/rfc/rfc9421)) for all HTTP-based transports:
+
+```text
+┌─────────────────────────────────────────────────────────────────┐
+│                     SHARED FOUNDATION                           │
+├─────────────────────────────────────────────────────────────────┤
+│  Signature Format: RFC 9421 (HTTP Message Signatures)           │
+│  Body Digest: RFC 9530 (Content-Digest, raw bytes)              │
+│  Algorithms: ES256 (required), ES384 (optional)                 │
+│  Key Format: JWK (RFC 7517)                                     │
+│  Key Discovery: signing_keys[] in /.well-known/ucp              │
+│  Replay Protection: idempotency-key (business layer)            │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                     HTTP TRANSPORTS                             │
+├─────────────────────────────────────────────────────────────────┤
+│  REST API: Standard HTTP requests                               │
+│  MCP: Streamable HTTP transport (JSON-RPC over HTTP)            │
+├─────────────────────────────────────────────────────────────────┤
+│  Headers:                                                       │
+│    Signature-Input    (describes signed components)             │
+│    Signature          (contains signature value)                │
+│    Content-Digest     (body hash, raw bytes)                    │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Note:** UCP specifies streamable HTTP for MCP transport, replacing SSE-based transports. This allows the same RFC 9421 signature mechanism to apply uniformly across all UCP transports.
+
+## Shared Foundation
+
+The following cryptographic primitives are shared across all UCP HTTP transports.
+
+### Signature Algorithms
+
+UCP supports ECDSA signatures with the following curves:
+
+| Curve | JWK `alg` | Hash    |
+| ----- | --------- | ------- |
+| P-256 | `ES256`   | SHA-256 |
+| P-384 | `ES384`   | SHA-384 |
+
+**Implementation requirements:**
+
+- All implementations **MUST** support verifying P-256 (`ES256`) signatures
+- Support for P-384 (`ES384`) is **OPTIONAL**
+
+**Usage guidance:**
+
+- Signers **SHOULD** use P-256 for maximum compatibility
+- Signers **MAY** use P-384 when both parties support it
+- The algorithm is derived from the key's `crv` field in the JWK; `alg` is **NOT** included in `Signature-Input` parameters
+
+### Key Format (JWK)
+
+Public keys **MUST** be represented using **JSON Web Key (JWK)** format as defined in [RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517).
+
+**EC Key Structure:**
+
+| Field | Type   | Required | Description                        |
+| ----- | ------ | -------- | ---------------------------------- |
+| `kid` | string | Yes      | Key ID (referenced in signatures)  |
+| `kty` | string | Yes      | Key type (`EC` for elliptic curve) |
+| `crv` | string | Yes\*    | Curve name (`P-256`, `P-384`)      |
+| `x`   | string | Yes\*    | X coordinate (base64url encoded)   |
+| `y`   | string | Yes\*    | Y coordinate (base64url encoded)   |
+| `use` | string | No       | Key usage (`sig` for signing)      |
+| `alg` | string | No       | Algorithm (`ES256`, `ES384`)       |
+
+\* Required for EC keys
+
+**Example:**
+
+```json
+{
+  "kid": "key-2024-01-15",
+  "kty": "EC",
+  "crv": "P-256",
+  "x": "WKn-ZIGevcwGIyyrzFoZNBdaq9_TsqzGl96oc0CWuis",
+  "y": "y77t-RvAHRKTsSGdIYUfweuOvwrvDD-Q3Hv5J0fSKbE",
+  "use": "sig",
+  "alg": "ES256"
+}
+```
+
+### Key Discovery
+
+Public keys are published in the `signing_keys` array of the party's UCP profile at `/.well-known/ucp`. For the complete key discovery protocol, profile trust model, and profile fetch requirements, see [Identity & Authentication — Key Discovery](https://ucp.dev/draft/specification/overview/#key-discovery).
+
+### Key Rotation
+
+To rotate keys without service interruption:
+
+1. **Add new key** — Publish new key in `signing_keys[]` alongside existing keys
+1. **Start signing** — Begin signing with the new key
+1. **Grace period** — Continue accepting signatures from old keys (minimum 7 days)
+1. **Remove old key** — Remove the old key from `signing_keys[]`
+
+**Recommendations:**
+
+- Rotate keys every 90 days
+- Support multiple active keys during transitions
+- Verifiers: accept any key in `signing_keys[]`
+
+**Key Compromise Response:**
+
+1. Immediately remove compromised key from profile
+1. Add new key with different `kid`
+1. Reject all signatures made with compromised key
+
+## REST Binding
+
+For HTTP REST transport, UCP uses [RFC 9421 (HTTP Message Signatures)](https://www.rfc-editor.org/rfc/rfc9421).
+
+### Headers
+
+| Header            | Direction        | Required | Description                           |
+| ----------------- | ---------------- | -------- | ------------------------------------- |
+| `Signature-Input` | Request/Response | Yes      | Describes signed components           |
+| `Signature`       | Request/Response | Yes      | Contains signature value              |
+| `Content-Digest`  | Request/Response | Cond.\*  | SHA-256 hash of request/response body |
+
+\* Required when request/response has a body
+
+`Content-Digest` follows [RFC 9530](https://www.rfc-editor.org/rfc/rfc9530) and hashes the raw body bytes. This binds the message body to the signature without requiring JSON canonicalization. Implementations **MUST** use `sha-256`. For durable artifacts requiring canonicalization, see [AP2 Mandates - Canonicalization](https://ucp.dev/draft/specification/ap2-mandates/#canonicalization).
+
+**Intermediary Warning:** Proxies, API gateways, and other intermediaries **MUST NOT** re-serialize JSON bodies, as this would invalidate the signature. The `Content-Digest` is computed over raw bytes; any modification breaks verification.
+
+### REST Request Signing
+
+**Signed Components:**
+
+| Component         | Required    | Description                             |
+| ----------------- | ----------- | --------------------------------------- |
+| `@method`         | Yes         | HTTP method (GET, POST, etc.)           |
+| `@authority`      | Yes         | Target host (prevents cross-host relay) |
+| `@path`           | Yes         | Request path                            |
+| `@query`          | Cond.\*     | Query string (if present)               |
+| `ucp-agent`       | Cond.\*\*   | Profile URL (binds identity)            |
+| `idempotency-key` | Cond.\*\*\* | Idempotency header (state-changing)     |
+| `content-digest`  | Cond.†      | Body digest (if body present)           |
+| `content-type`    | Cond.†      | Content-Type (if body present)          |
+
+\* Required if request has query parameters * *Required if `UCP-Agent` header is present \**\* Required for POST, PUT, DELETE, PATCH † Required if request has a body
+
+**Signature Generation:**
+
+```text
+sign_rest_request(method, path, query, body_bytes, idempotency_key, private_key, kid):
+    // 1. Compute body digest (if body present)
+    if body_bytes:
+        digest = sha256(body_bytes)  // Hash raw bytes, no canonicalization
+        digest_header = "sha-256=:" + base64(digest) + ":"
+
+    // 2. Build component list
+    components = ["@method", "@authority", "@path"]
+    if query: components.append("@query")
+    if ucp_agent: components.append("ucp-agent")
+    if idempotency_key: components.append("idempotency-key")
+    if body: components.extend(["content-digest", "content-type"])
+
+    // 3. Build signature base (RFC 9421)
+    signature_base = build_signature_base(
+        components=components,
+        method=method,
+        path=path,
+        query=query,
+        headers={
+            "idempotency-key": idempotency_key,
+            "content-digest": digest_header,
+            "content-type": "application/json"
+        },
+        keyid=kid
+    )
+
+    // 4. Sign
+    signature = ecdsa_sign(signature_base, private_key)
+
+    // 5. Return headers
+    return {
+        "Idempotency-Key": idempotency_key,
+        "Content-Digest": digest_header,
+        "Signature-Input": format_signature_input(components, kid),
+        "Signature": "sig1=:" + base64(signature) + ":"
+    }
+```
+
+**Signature Encoding:** ECDSA signatures **MUST** use fixed-width raw `r||s` encoding per RFC 9421, **not** ASN.1/DER. The signature value is the concatenation of `r` and `s` as fixed-length unsigned big-endian integers: 64 bytes for P-256 (32 + 32), 96 bytes for P-384 (48 + 48). Many crypto libraries (OpenSSL, Java, .NET) default to DER encoding and require explicit conversion.
+
+**Complete Request Example:**
+
+```http
+POST /checkout-sessions HTTP/1.1
+Host: merchant.example.com
+Content-Type: application/json
+UCP-Agent: profile="https://platform.example/.well-known/ucp"
+Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000
+Content-Digest: sha-256=:X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=:
+Signature-Input: sig1=("@method" "@authority" "@path" "ucp-agent" "idempotency-key" "content-digest" "content-type");keyid="platform-2026"
+Signature: sig1=:MEUCIQDTxNq8h7LGHpvVZQp1iHkFp9+3N8Mxk2zH1wK4YuVN8w...:
+
+{"checkout":{"line_items":[{"id":"prod_123","quantity":2}]}}
+```
+
+**GET Request Example (no body, no idempotency):**
+
+```http
+GET /checkout-sessions/chk_123 HTTP/1.1
+Host: merchant.example.com
+Signature-Input: sig1=("@method" "@authority" "@path");keyid="platform-2026"
+Signature: sig1=:MEQCIBx7kL9nM2oP5qR8sT1uV4wX6yZaB3cD...:
+```
+
+### REST Response Signing
+
+Response signatures use `@status` instead of `@method`:
+
+**Signed Components:**
+
+| Component        | Required | Description                       |
+| ---------------- | -------- | --------------------------------- |
+| `@status`        | Yes      | HTTP status code (200, 201, etc.) |
+| `content-digest` | Cond.\*  | Body digest (if body present)     |
+| `content-type`   | Cond.\*  | Content-Type (if body present)    |
+
+\* Required if response has a body
+
+**Complete Response Example:**
+
+```http
+HTTP/1.1 201 Created
+Content-Type: application/json
+Content-Digest: sha-256=:Y5fK8nLmPqRsT3vWxYzAbCdEfGhIjKlMnO...:
+Signature-Input: sig1=("@status" "content-digest" "content-type");created=1738617601;keyid="merchant-2026"
+Signature: sig1=:MFQCIH7kL9nM2oP5qR8sT1uV4wX6yZaB3cD...:
+
+{"checkout":{"id":"chk_123","status":"ready_for_complete"}}
+```
+
+**Response Signature Generation:**
+
+Response signing mirrors request signing with `@status` replacing `@method`:
+
+```text
+sign_rest_response(status, body_bytes, private_key, kid):
+    // 1. Compute body digest (if body present)
+    if body_bytes:
+        digest = sha256(body_bytes)  // Hash raw bytes, no canonicalization
+        digest_header = "sha-256=:" + base64(digest) + ":"
+
+    // 2. Build signature base (RFC 9421)
+    signature_base = build_signature_base(
+        components=["@status", "content-digest", "content-type"],
+        status=status,
+        headers={"content-digest": digest_header, "content-type": "application/json"},
+        created=current_timestamp(),
+        keyid=kid
+    )
+
+    // 3. Sign
+    signature = ecdsa_sign(signature_base, private_key)
+
+    // 4. Return headers
+    return {
+        "Content-Digest": digest_header,
+        "Signature-Input": 'sig1=("@status" "content-digest" "content-type");created=...;keyid="..."',
+        "Signature": "sig1=:" + base64(signature) + ":"
+    }
+```
+
+### REST Request Verification
+
+**Determining Signer's Profile URL:**
+
+The signer's profile URL is obtained from the `UCP-Agent` header, which uses [RFC 8941 Dictionary](https://www.rfc-editor.org/rfc/rfc8941#section-3.2) syntax:
+
+```text
+UCP-Agent: profile="https://platform.example/.well-known/ucp"
+```
+
+**Parsing Rules:**
+
+1. Parse as RFC 8941 Dictionary
+1. Extract the `profile` key (REQUIRED)
+1. Value MUST be a quoted string containing an HTTPS URL
+1. For business profiles, URL MUST point to `/.well-known/ucp`; platform profile URLs are not path-constrained
+1. Reject non-HTTPS URLs
+
+**Example:**
+
+```text
+// Header
+UCP-Agent: profile="https://platform.example/.well-known/ucp"
+
+// Parsed
+profile_url = "https://platform.example/.well-known/ucp"
+```
+
+**Applicability:**
+
+- **Platform → Business requests:** Profile URL from `UCP-Agent` header
+- **Business → Platform webhooks:** Profile URL from `UCP-Agent` header
+
+```text
+verify_rest_request(request):
+    // 1. Parse Signature-Input
+    sig_input = parse_signature_input(request.headers["Signature-Input"])
+    keyid = sig_input.keyid
+    components = sig_input.components
+
+    // 2. Fetch signer's public key
+    // See overview.md#profile-requirements for URL validation and fetch rules
+    profile_url = get_profile_url_from_ucp_agent(request.headers["UCP-Agent"])
+    profile = fetch_profile(profile_url)  // HTTPS-only, no redirects
+    public_key = find_key_by_kid(profile.signing_keys, keyid)
+    if not public_key:
+        return error("key_not_found")
+
+    // 3. Verify body digest (if body present)
+    if "content-digest" in components:
+        expected = "sha-256=:" + base64(sha256(request.body_bytes)) + ":"
+        if request.headers["Content-Digest"] != expected:
+            return error("digest_mismatch")
+
+    // 4. Reconstruct signature base
+    signature_base = build_signature_base(
+        components, request.method, request.path, request.query,
+        request.headers, keyid
+    )
+
+    // 5. Verify signature
+    signature = parse_signature(request.headers["Signature"])
+    if not ecdsa_verify(signature_base, signature, public_key):
+        return error("signature_invalid")
+
+    return success()
+
+    // Note: Replay protection handled by idempotency keys in request payload
+```
+
+### REST Response Verification
+
+Response verification mirrors request verification with `@status` replacing `@method`:
+
+```text
+verify_rest_response(response, signer_profile_url):
+    // 1. Parse Signature-Input
+    sig_input = parse_signature_input(response.headers["Signature-Input"])
+    keyid = sig_input.keyid
+    components = sig_input.components
+
+    // 2. Fetch signer's public key
+    profile = fetch_profile(signer_profile_url)
+    public_key = find_key_by_kid(profile.signing_keys, keyid)
+    if not public_key:
+        return error("key_not_found")
+
+    // 3. Verify body digest (if body present)
+    if "content-digest" in components:
+        expected = "sha-256=:" + base64(sha256(response.body_bytes)) + ":"
+        if response.headers["Content-Digest"] != expected:
+            return error("digest_mismatch")
+
+    // 4. Reconstruct signature base
+    signature_base = build_signature_base(
+        components, response.status,
+        response.headers, keyid
+    )
+
+    // 5. Verify signature
+    signature = parse_signature(response.headers["Signature"])
+    if not ecdsa_verify(signature_base, signature, public_key):
+        return error("signature_invalid")
+
+    return success()
+```
+
+### Replay Protection
+
+UCP handles replay protection at the **business layer** through idempotency keys, not at the signature layer. This provides separation of concerns:
+
+| Layer           | Responsibility                         |
+| --------------- | -------------------------------------- |
+| **Signature**   | Authentication (who), Integrity (what) |
+| **Idempotency** | Safe retries, Replay protection        |
+
+**How it works:**
+
+1. State-changing operations include an `idempotency-key` in the request
+1. The idempotency key is part of the signed payload
+1. Attackers cannot modify the key without invalidating the signature
+1. Duplicate requests return cached responses (no new side effects)
+
+**Idempotency Key Placement:**
+
+The `Idempotency-Key` header is included in the signed components:
+
+```http
+POST /checkout-sessions HTTP/1.1
+Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000
+Signature-Input: sig1=("@method" "@authority" "@path" "idempotency-key" ...);keyid="platform-2026"
+Signature: sig1=:MEUCIQD...:
+```
+
+**Idempotency Key Requirements:**
+
+| Requirement            | Value                                                   |
+| ---------------------- | ------------------------------------------------------- |
+| **Entropy**            | Minimum 128 bits (e.g., UUID v4, 22+ char alphanumeric) |
+| **Uniqueness**         | Per-client, per-operation type                          |
+| **Server storage**     | Minimum 24 hours, recommended 48 hours                  |
+| **On duplicate**       | Return cached response, do not re-execute               |
+| **On storage failure** | Fail closed (reject request with 503)                   |
+
+**Note:** The RFC 9421 `created` parameter is **OPTIONAL**. UCP handles replay protection at the business layer through idempotency keys, not signature timestamps. Key rotation (removing compromised keys from `signing_keys`) provides the mechanism for invalidating old signatures.
+
+### When Signatures Apply
+
+**Requests:** Platforms **SHOULD** sign all requests when using HTTP Message Signatures. Alternative authentication mechanisms (API keys, OAuth, mTLS) may be used instead.
+
+**Webhooks:** Webhook notifications **MUST** be signed. Recipients cannot otherwise verify authenticity of server-initiated push messages.
+
+**Other responses:** Signatures are **RECOMMENDED** for:
+
+- Payment authorization responses
+- Checkout completion responses
+
+Signatures are **OPTIONAL** for:
+
+- Cart operations (low-value, synchronous)
+- Catalog queries (read-only)
+- Error responses (4xx, 5xx)
+
+## MCP Transport
+
+UCP specifies **streamable HTTP** for MCP transport, replacing SSE-based transports. Since MCP requests are standard HTTP requests with JSON-RPC bodies, the same RFC 9421 signature mechanism applies:
+
+- The `Content-Digest` header covers the JSON-RPC message body
+- The `Signature-Input` and `Signature` headers provide authentication
+- The `UCP-Agent` and `Idempotency-Key` headers work identically to REST
+
+**Example MCP Request with Signature:**
+
+```http
+POST /mcp HTTP/1.1
+Host: business.example.com
+Content-Type: application/json
+UCP-Agent: profile="https://platform.example/.well-known/ucp"
+Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000
+Content-Digest: sha-256=:RK/0qy18MlBSVnWgjwz6lZEWjP/lF5HF9bvEF8FabDg=:
+Signature-Input: sig1=("@method" "@authority" "@path" "content-digest" "content-type" "ucp-agent" "idempotency-key");keyid="platform-2026"
+Signature: sig1=:MEUCIQDXyK9N3p5Rt...:
+
+{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"complete_checkout","arguments":{"id":"chk_123","checkout":{...}}}}
+```
+
+The JSON-RPC message is the HTTP body. `Content-Digest` binds it to the signature. No JSON canonicalization is required.
+
+## Error Handling
+
+Signature verification errors use standard UCP error codes. See [Error Handling](https://ucp.dev/draft/specification/overview/#error-handling) in the specification overview for the complete error code registry and transport bindings.
+
+**Signature-specific errors:**
+
+| Code                    | HTTP | Description                                       |
+| ----------------------- | ---- | ------------------------------------------------- |
+| `signature_missing`     | 401  | Required signature header/field not present       |
+| `signature_invalid`     | 401  | Signature verification failed                     |
+| `key_not_found`         | 401  | Key ID not found in signer's `signing_keys`       |
+| `digest_mismatch`       | 400  | Body digest doesn't match `Content-Digest` header |
+| `algorithm_unsupported` | 400  | Signature algorithm not supported                 |
+
+**Profile-related errors** (also used for capability negotiation):
+
+| Code                  | HTTP | Description                                           |
+| --------------------- | ---- | ----------------------------------------------------- |
+| `invalid_profile_url` | 400  | Profile URL malformed or invalid scheme               |
+| `profile_unreachable` | 424  | Unable to fetch signer's profile                      |
+| `profile_not_trusted` | 403  | Profile URL not in registry of pre-approved platforms |
+
+**Note:** Replay protection is handled at the business layer through idempotency keys, not at the signature layer. Duplicate requests return cached responses rather than signature errors.
+
+### REST Error Response
+
+```http
+HTTP/1.1 401 Unauthorized
+Content-Type: application/json
+
+{
+  "code": "signature_invalid",
+  "content": "Request signature verification failed for key kid=platform-2026"
+}
+```
+
+### MCP Error Response
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "error": {
+    "code": -32000,
+    "message": "Signature verification failed",
+    "data": {
+      "code": "signature_invalid",
+      "content": "Signature verification failed for key kid=platform-2026"
+    }
+  }
+}
+```
+
+## References
+
+- [RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517) — JSON Web Key (JWK)
+- [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421) — HTTP Message Signatures
+- [RFC 9530](https://www.rfc-editor.org/rfc/rfc9530) — Digest Fields (Content-Digest)
 # Checkout Capability
 
 # Checkout Capability
@@ -3801,19 +4419,21 @@ The following headers are defined for the HTTP binding and apply to all operatio
 
 **Request Headers**
 
-| Header              | Required | Description                                                                                                                                                                                                                           |
-| ------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Authorization`     | No       | Should contain oauth token representing the following 2 schemes: 1. Platform self authenticating (client_credentials). 2. Platform authenticating on behalf of end user (authorization_code).                                         |
-| `X-API-Key`         | No       | Authenticates the platform with a reusable api key allocated to the platform by the business.                                                                                                                                         |
-| `Request-Signature` | **Yes**  | Ensure the authenticity and integrity of an HTTP message.                                                                                                                                                                             |
-| `Idempotency-Key`   | **Yes**  | Ensures duplicate operations don't happen during retries.                                                                                                                                                                             |
-| `Request-Id`        | **Yes**  | For tracing the requests across network layers and components.                                                                                                                                                                        |
-| `User-Agent`        | No       | Identifies the user agent string making the call.                                                                                                                                                                                     |
-| `UCP-Agent`         | **Yes**  | Identifies the UCP agent making the call. All requests MUST include the UCP-Agent header containing the platform profile URI using Dictionary Structured Field syntax (RFC 8941). Format: profile="https://platform.example/profile". |
-| `Content-Type`      | No       | Representation Metadata. Tells the receiver what the data in the message body actually is.                                                                                                                                            |
-| `Accept`            | No       | Content Negotiation. The client tells the server what data formats it is capable of understanding.                                                                                                                                    |
-| `Accept-Language`   | No       | Localization. Tells the receiver the user's preferred natural languages, often with "weights" or priorities.                                                                                                                          |
-| `Accept-Encoding`   | No       | Compression. The client tells the server which content-codings it supports, usually for compression                                                                                                                                   |
+| Header            | Required | Description                                                                                                                                                                                                                                                   |
+| ----------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Authorization`   | No       | Should contain oauth token representing the following 2 schemes: 1. Platform self authenticating (client_credentials). 2. Platform authenticating on behalf of end user (authorization_code).                                                                 |
+| `X-API-Key`       | No       | Authenticates the platform with a reusable api key allocated to the platform by the business.                                                                                                                                                                 |
+| `Signature`       | No       | RFC 9421 HTTP Message Signature. Required when using HTTP Message Signatures for authentication. Format: `sig1=:<base64-signature>:`.                                                                                                                         |
+| `Signature-Input` | No       | RFC 9421 Signature-Input header. Required when using HTTP Message Signatures for authentication. Format: `sig1=("@method" "@path" ...);created=<timestamp>;keyid="<key-id>"`.                                                                                 |
+| `Content-Digest`  | No       | Body digest per RFC 9530. Required for requests/responses with a body. Format: `sha-256=:<base64-digest>:`.                                                                                                                                                   |
+| `Idempotency-Key` | **Yes**  | Ensures duplicate operations don't happen during retries.                                                                                                                                                                                                     |
+| `Request-Id`      | **Yes**  | For tracing the requests across network layers and components.                                                                                                                                                                                                |
+| `User-Agent`      | No       | Identifies the user agent string making the call.                                                                                                                                                                                                             |
+| `UCP-Agent`       | **Yes**  | Identifies the UCP agent making the call. All requests MUST include the UCP-Agent header containing the signer's profile URI using RFC 8941 Dictionary syntax. The URL MUST point to /.well-known/ucp. Format: profile="https://example.com/.well-known/ucp". |
+| `Content-Type`    | No       | Representation Metadata. Tells the receiver what the data in the message body actually is.                                                                                                                                                                    |
+| `Accept`          | No       | Content Negotiation. The client tells the server what data formats it is capable of understanding.                                                                                                                                                            |
+| `Accept-Language` | No       | Localization. Tells the receiver the user's preferred natural languages, often with "weights" or priorities.                                                                                                                                                  |
+| `Accept-Encoding` | No       | Compression. The client tells the server which content-codings it supports, usually for compression                                                                                                                                                           |
 
 ### Specific Header Requirements
 
@@ -3883,6 +4503,63 @@ Business outcomes (including errors like unavailable merchandise) are returned w
 }
 ```
 
+## Message Signing
+
+Platforms **MAY** choose among authentication mechanisms (API keys, OAuth, mTLS, HTTP Message Signatures). When using HTTP Message Signatures, checkout operations follow the [Message Signatures](https://ucp.dev/draft/specification/signatures/index.md) specification.
+
+### Request Signing
+
+When HTTP Message Signatures are used, requests **MUST** include valid `Signature-Input` and `Signature` headers (and `Content-Digest` when a body is present) per RFC 9421:
+
+| Header            | Required | Description                  |
+| ----------------- | -------- | ---------------------------- |
+| `Signature-Input` | Yes      | Describes signed components  |
+| `Signature`       | Yes      | Contains the signature value |
+| `Content-Digest`  | Cond.\*  | SHA-256 hash of request body |
+
+\* Required for requests with a body (POST, PUT)
+
+**Example Signed Request:**
+
+```http
+POST /checkout-sessions HTTP/1.1
+Host: merchant.example.com
+Content-Type: application/json
+UCP-Agent: profile="https://platform.example/.well-known/ucp"
+Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000
+Content-Digest: sha-256=:X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=:
+Signature-Input: sig1=("@method" "@authority" "@path" "idempotency-key" "content-digest" "content-type");keyid="platform-2025"
+Signature: sig1=:MEUCIQDTxNq8h7LGHpvVZQp1iHkFp9+3N8Mxk2zH1wK4YuVN8w...:
+
+{"line_items":[{"item":{"id":"item_123"},"quantity":2}]}
+```
+
+See [Message Signatures - REST Request Signing](https://ucp.dev/draft/specification/signatures/#rest-request-signing) for the complete signing algorithm.
+
+### Response Signing
+
+Response signatures are **RECOMMENDED** for:
+
+- `complete_checkout` responses (order confirmation)
+
+Response signatures are **OPTIONAL** for:
+
+- `create_checkout`, `get_checkout`, `update_checkout`, `cancel_checkout`
+
+**Example Signed Response:**
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Digest: sha-256=:Y5fK8nLmPqRsT3vWxYzAbCdEfGhIjKlMnO...:
+Signature-Input: sig1=("@status" "content-digest" "content-type");keyid="merchant-2025"
+Signature: sig1=:MFQCIH7kL9nM2oP5qR8sT1uV4wX6yZaB3cD...:
+
+{"id":"chk_123","status":"completed","order":{"id":"ord_456"}}
+```
+
+See [Message Signatures - REST Response Signing](https://ucp.dev/draft/specification/signatures/#rest-response-signing) for the complete signing algorithm.
+
 ## Security Considerations
 
 ### Authentication
@@ -3893,6 +4570,7 @@ Authentication is optional and depends on business requirements. When authentica
 1. **API Keys**: Via `X-API-Key` header.
 1. **OAuth 2.0**: Via `Authorization: Bearer {token}` header, following [RFC 6749](https://tools.ietf.org/html/rfc6749).
 1. **Mutual TLS**: For high-security environments.
+1. **HTTP Message Signatures**: Per [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421) (see [Message Signing](#message-signing) above).
 
 Businesses **MAY** require authentication for some operations while leaving others open (e.g., public checkout without authentication).
 
@@ -4503,6 +5181,67 @@ Business outcomes (including errors like unavailable merchandise) are returned a
 }
 ```
 
+## Message Signing
+
+Platforms **SHOULD** authenticate agents when using MCP transport. When using HTTP Message Signatures, all checkout operations follow the [Message Signatures](https://ucp.dev/draft/specification/signatures/index.md) specification.
+
+### Request Signing
+
+UCP's MCP transport uses **streamable HTTP**, allowing the same RFC 9421 signature mechanism as REST. The signature is applied at the HTTP layer:
+
+| Header            | Required | Description                      |
+| ----------------- | -------- | -------------------------------- |
+| `Signature-Input` | Yes      | Describes signed components      |
+| `Signature`       | Yes      | Contains the signature value     |
+| `Content-Digest`  | Yes      | SHA-256 hash of request body     |
+| `UCP-Agent`       | Yes      | Signer identity (profile URL)    |
+| `Idempotency-Key` | Cond.\*  | Unique key for replay protection |
+
+\* Required for `complete_checkout` and `cancel_checkout`
+
+**Example Signed Request:**
+
+```http
+POST /mcp HTTP/1.1
+Host: business.example.com
+Content-Type: application/json
+UCP-Agent: profile="https://platform.example/.well-known/ucp"
+Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000
+Content-Digest: sha-256=:RK/0qy18MlBSVnWgjwz6lZEWjP/lF5HF9bvEF8FabDg=:
+Signature-Input: sig1=("@method" "@authority" "@path" "content-digest" "content-type" "ucp-agent" "idempotency-key");keyid="platform-2026"
+Signature: sig1=:MEUCIQDXyK9N3p5Rt...:
+
+{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"complete_checkout","arguments":{"id":"checkout_abc123","checkout":{"payment":{...}}}}}
+```
+
+The `Content-Digest` binds the JSON-RPC body to the signature. No JSON canonicalization is required.
+
+See [Message Signatures - MCP Transport](https://ucp.dev/draft/specification/signatures/#mcp-transport) for details.
+
+### Response Signing
+
+Response signatures are **RECOMMENDED** for:
+
+- `complete_checkout` responses (order confirmation)
+
+Response signatures are **OPTIONAL** for:
+
+- `create_checkout`, `get_checkout`, `update_checkout`, `cancel_checkout`
+
+**Example Signed Response:**
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Digest: sha-256=:Y5fK8nLmPqRsT3vWxYzAbCdEfGhIjKlMnO...:
+Signature-Input: sig1=("@status" "content-digest" "content-type");keyid="merchant-2026"
+Signature: sig1=:MFQCIH7kL9nM2oP5qR8sT1uV4wX6yZaB3cD...:
+
+{"jsonrpc":"2.0","id":1,"result":{"content":[{"type":"text","text":"..."}],"structuredContent":{"checkout":{"id":"checkout_abc123","status":"completed"}}}}
+```
+
+See [Message Signatures - REST Response Signing](https://ucp.dev/draft/specification/signatures/#rest-response-signing) for the signing algorithm (identical for MCP over HTTP).
+
 ## Conformance
 
 A conforming MCP transport implementation **MUST**:
@@ -4513,6 +5252,11 @@ A conforming MCP transport implementation **MUST**:
 1. Return business outcomes as JSON-RPC `result` with UCP envelope and `messages` array.
 1. Validate tool inputs against UCP schemas.
 1. Support HTTP transport with streaming.
+
+A conforming implementation **SHOULD**:
+
+1. Authenticate agents using one of the supported mechanisms (API keys, OAuth, mTLS, or HTTP Message Signatures per [Message Signatures](https://ucp.dev/draft/specification/signatures/index.md)).
+1. Verify authentication on incoming requests before processing.
 
 ## Implementation
 
@@ -4959,15 +5703,14 @@ If a public key cannot be resolved, or if the signature is invalid, the business
 
 ## Cryptographic Requirements
 
-### Signature Algorithm
+This extension uses the cryptographic primitives defined in the [Message Signatures](https://ucp.dev/draft/specification/signatures/index.md) specification:
 
-All signatures **MUST** use one of the following algorithms:
+- **Algorithms:** ES256 (required), ES384, ES512
+- **Canonicalization:** JCS ([RFC 8785](https://datatracker.ietf.org/doc/html/rfc8785))
+- **Key Format:** JWK ([RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517))
+- **Key Discovery:** `signing_keys[]` in `/.well-known/ucp` (see [Key Discovery](https://ucp.dev/draft/specification/overview/#key-discovery))
 
-| Algorithm | Description                                           |
-| --------- | ----------------------------------------------------- |
-| `ES256`   | ECDSA using P-256 curve and SHA-256 (**RECOMMENDED**) |
-| `ES384`   | ECDSA using P-384 curve and SHA-384                   |
-| `ES512`   | ECDSA using P-521 curve and SHA-512                   |
+See [Message Signatures](https://ucp.dev/draft/specification/signatures/index.md) for complete details on algorithms, key format, and key rotation.
 
 ### Business Authorization
 
@@ -5037,11 +5780,17 @@ The checkout mandate **MUST** contain the full checkout response including the `
 
 ### Canonicalization
 
-For signature computation over JSON payloads, implementations **MUST** use **JSON Canonicalization Scheme (JCS)** as defined in [RFC 8785](https://datatracker.ietf.org/doc/html/rfc8785).
+All JSON payloads **MUST** be canonicalized using **JSON Canonicalization Scheme (JCS)** per [RFC 8785](https://datatracker.ietf.org/doc/html/rfc8785).
 
-JCS produces a deterministic, byte-for-byte identical representation of JSON data, ensuring signatures can be verified regardless of whitespace, key ordering, or Unicode normalization differences.
+**Why JCS for Mandates?** UCP request signatures use `Content-Digest` (raw bytes) without canonicalization — the request is signed and verified immediately over the same HTTP connection. Mandates are different:
 
-**Canonicalization Rule:** When computing the business's signature, exclude the `ap2` field entirely. This ensures future AP2 fields are automatically handled.
+- **Durability** — Mandates are stored as evidence of user consent. They may be retrieved and verified days or months later.
+- **Cross-system transmission** — Mandates pass through multiple systems (platform → business → PSP → card network) that may re-serialize JSON.
+- **Reproducibility** — Any party must reconstruct the exact signed bytes from the logical JSON content, regardless of serialization differences.
+
+JCS ensures that semantically identical JSON produces byte-identical output, making signatures reproducible across implementations and time.
+
+**AP2-Specific Rule:** When computing the business's `merchant_authorization` signature, exclude the `ap2` field entirely. This ensures future AP2 fields are automatically handled.
 
 ## The Mandate Flow
 
@@ -7624,7 +8373,7 @@ If an incomplete checkout already exists for the given `cart_id`, the business M
 When checkout is initialized via `cart_id`, the cart and checkout sessions SHOULD be linked for the duration of the checkout.
 
 - **During active checkout** — Business SHOULD maintain the cart and reflect relevant checkout modifications (quantity changes, item removals) back to the cart. This supports back-to-storefront flows when buyers transition between checkout and storefront.
-- **After checkout completion** — Business MAY clear the cart based on TTL, completion of the checkout, or other business logic. Subsequent operations on a cleared cart ID return `NOT_FOUND`; the platform can start a new session with `create_cart`.
+- **After checkout completion** — Business MAY clear the cart based on TTL, completion of the checkout, or other business logic. Subsequent operations on a cleared cart ID return `not_found`; the platform can start a new session with `create_cart`.
 
 ## Guidelines
 
@@ -7633,7 +8382,7 @@ When checkout is initialized via `cart_id`, the cart and checkout sessions SHOUL
 - **MAY** use carts for pre-purchase exploration and session persistence.
 - **SHOULD** convert cart to checkout when user expresses purchase intent.
 - **MAY** display `continue_url` for handoff to business UI.
-- **SHOULD** handle `NOT_FOUND` gracefully when cart expires or is canceled.
+- **SHOULD** handle `not_found` gracefully when cart expires or is canceled.
 
 ### Business
 
@@ -7681,7 +8430,7 @@ Creates a new cart session with line items and optional buyer/context informatio
 
 ### Get Cart
 
-Retrieves the latest state of a cart session. Returns `NOT_FOUND` if the cart does not exist, has expired, or was canceled.
+Retrieves the latest state of a cart session. Returns `not_found` if the cart does not exist, has expired, or was canceled.
 
 - [REST Binding](https://ucp.dev/draft/specification/cart-rest/#get-cart)
 - [MCP Binding](https://ucp.dev/draft/specification/cart-mcp/#get_cart)
@@ -7695,7 +8444,7 @@ Performs a full replacement of the cart session. The platform **MUST** send the 
 
 ### Cancel Cart
 
-Cancels a cart session. Business MUST return the cart state before deletion. Subsequent operations for this cart ID SHOULD return `NOT_FOUND`.
+Cancels a cart session. Business MUST return the cart state before deletion. Subsequent operations for this cart ID SHOULD return `not_found`.
 
 - [REST Binding](https://ucp.dev/draft/specification/cart-rest/#cancel-cart)
 - [MCP Binding](https://ucp.dev/draft/specification/cart-mcp/#cancel_cart)
@@ -8286,18 +9035,20 @@ The following headers are defined for the HTTP binding and apply to all operatio
 
 **Request Headers**
 
-| Header              | Required | Description                                                                                                                                                                                   |
-| ------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Authorization`     | No       | Should contain oauth token representing the following 2 schemes: 1. Platform self authenticating (client_credentials). 2. Platform authenticating on behalf of end user (authorization_code). |
-| `X-API-Key`         | No       | Authenticates the platform with a reusable api key allocated to the platform by the business.                                                                                                 |
-| `Request-Signature` | **Yes**  | Ensure the authenticity and integrity of an HTTP message.                                                                                                                                     |
-| `Idempotency-Key`   | **Yes**  | Ensures duplicate operations don't happen during retries.                                                                                                                                     |
-| `Request-Id`        | **Yes**  | For tracing the requests across network layers and components.                                                                                                                                |
-| `User-Agent`        | No       | Identifies the user agent string making the call.                                                                                                                                             |
-| `Content-Type`      | No       | Representation Metadata. Tells the receiver what the data in the message body actually is.                                                                                                    |
-| `Accept`            | No       | Content Negotiation. The client tells the server what data formats it is capable of understanding.                                                                                            |
-| `Accept-Language`   | No       | Localization. Tells the receiver the user's preferred natural languages, often with "weights" or priorities.                                                                                  |
-| `Accept-Encoding`   | No       | Compression. The client tells the server which content-codings it supports, usually for compression                                                                                           |
+| Header            | Required | Description                                                                                                                                                                                   |
+| ----------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Authorization`   | No       | Should contain oauth token representing the following 2 schemes: 1. Platform self authenticating (client_credentials). 2. Platform authenticating on behalf of end user (authorization_code). |
+| `X-API-Key`       | No       | Authenticates the platform with a reusable api key allocated to the platform by the business.                                                                                                 |
+| `Signature`       | No       | RFC 9421 HTTP Message Signature. Required when using HTTP Message Signatures for authentication. Format: `sig1=:<base64-signature>:`.                                                         |
+| `Signature-Input` | No       | RFC 9421 Signature-Input header. Required when using HTTP Message Signatures for authentication. Format: `sig1=("@method" "@path" ...);created=<timestamp>;keyid="<key-id>"`.                 |
+| `Content-Digest`  | No       | Body digest per RFC 9530. Required for requests/responses with a body. Format: `sha-256=:<base64-digest>:`.                                                                                   |
+| `Idempotency-Key` | **Yes**  | Ensures duplicate operations don't happen during retries.                                                                                                                                     |
+| `Request-Id`      | **Yes**  | For tracing the requests across network layers and components.                                                                                                                                |
+| `User-Agent`      | No       | Identifies the user agent string making the call.                                                                                                                                             |
+| `Content-Type`    | No       | Representation Metadata. Tells the receiver what the data in the message body actually is.                                                                                                    |
+| `Accept`          | No       | Content Negotiation. The client tells the server what data formats it is capable of understanding.                                                                                            |
+| `Accept-Language` | No       | Localization. Tells the receiver the user's preferred natural languages, often with "weights" or priorities.                                                                                  |
+| `Accept-Encoding` | No       | Compression. The client tells the server which content-codings it supports, usually for compression                                                                                           |
 
 ### Specific Header Requirements
 
@@ -9346,30 +10097,65 @@ The platform provides its webhook URL in the order capability's `config` field d
 
 ### Webhook Signature Verification
 
-Webhook payloads **MUST** be signed by the business and verified by the platform to ensure authenticity and integrity.
+Webhook payloads **MUST** be signed by the business and verified by the platform to ensure authenticity and integrity. Signatures follow the [Message Signatures](https://ucp.dev/draft/specification/signatures/index.md) specification using the REST binding (RFC 9421).
+
+**Required Headers:**
+
+| Header            | Description                                |
+| ----------------- | ------------------------------------------ |
+| `UCP-Agent`       | Business profile URL (RFC 8941 Dictionary) |
+| `Signature-Input` | Describes signed components                |
+| `Signature`       | Contains the signature value               |
+| `Content-Digest`  | Body digest (RFC 9530)                     |
+
+**Example Webhook Request:**
+
+```http
+POST /webhooks/ucp/orders HTTP/1.1
+Host: platform.example.com
+Content-Type: application/json
+UCP-Agent: profile="https://merchant.example/.well-known/ucp"
+Content-Digest: sha-256=:X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=:
+Signature-Input: sig1=("@method" "@authority" "@path" "content-digest" "content-type");keyid="merchant-2026"
+Signature: sig1=:MEUCIQDTxNq8h7LGHpvVZQp1iHkFp9+3N8Mxk2zH1wK4YuVN8w...:
+
+{"id":"order_abc123","event_id":"evt_123","created_time":"2026-01-15T12:00:00Z",...}
+```
 
 #### Signing (Business)
 
-1. Select a key from the `signing_keys` array in UCP profile.
-1. Create a detached JWT (RFC 7797) over the request body using the selected key.
-1. Include the JWT in the `Request-Signature` header.
-1. Include the key ID in the JWT header's `kid` claim to allow the receiver to identify which key to use for verification.
+1. Compute SHA-256 digest of the raw request body and set `Content-Digest` header
+1. Build signature base per [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421)
+1. Sign using a key from `signing_keys` in the business's UCP profile
+1. Set `Signature-Input` and `Signature` headers
+
+See [Message Signatures - REST Request Signing](https://ucp.dev/draft/specification/signatures/#rest-request-signing) for complete algorithm.
 
 #### Verification (Platform)
 
-1. Extract the `Request-Signature` header from the incoming webhook request.
-1. Parse the JWT header to retrieve the `kid` (key ID).
-1. Fetch the business's UCP profile from `/.well-known/ucp` (cache as appropriate).
-1. Locate the key in `signing_keys` with the matching `kid`.
-1. Verify the JWT signature against the request body using the public key.
-1. If verification fails, reject the webhook with an appropriate error response.
+**Authentication** (signature verification):
+
+1. Parse `Signature-Input` to extract `keyid` and signed components
+1. Fetch business's UCP profile from `/.well-known/ucp` (cache as appropriate)
+1. Locate key in `signing_keys` with matching `kid`
+1. Verify `Content-Digest` matches SHA-256 of raw body
+1. Reconstruct signature base and verify signature
+
+See [Message Signatures - REST Request Verification](https://ucp.dev/draft/specification/signatures/#rest-request-verification) for complete algorithm.
+
+**Authorization** (order ownership):
+
+After verifying the signature, the platform **MUST** confirm the signer is authorized to send events for the referenced order:
+
+1. Extract the order ID from the webhook payload
+1. Verify the order was created with this business (profile URL matches)
+1. Reject webhooks where the signer's profile doesn't match the order's business
+
+This prevents a malicious business from sending fake events for another business's orders, even with a valid signature.
 
 #### Key Rotation
 
-The `signing_keys` array supports multiple keys to enable zero-downtime rotation:
-
-- **Adding a new key:** Add the new key to `signing_keys`, then start signing with it. Verifiers will find it by `kid`.
-- **Removing an old key:** After sufficient time for all in-flight webhooks to be delivered, remove the old key from `signing_keys`.
+See [Message Signatures - Key Rotation](https://ucp.dev/draft/specification/signatures/#key-rotation) for zero-downtime key rotation procedures.
 
 ## Guidelines
 
@@ -9380,11 +10166,11 @@ The `signing_keys` array supports multiple keys to enable zero-downtime rotation
 
 **Business:**
 
-- **MUST** sign all webhook payloads using a key from their `signing_keys` array (published in `/.well-known/ucp`). The signature **MUST** be included in the `Request-Signature` header as a detached JWT (RFC 7797).
+- **MUST** include `UCP-Agent` header with profile URL for signer identification
+- **MUST** sign all webhook payloads per the [Message Signatures](https://ucp.dev/draft/specification/signatures/index.md) specification using RFC 9421 headers (`Signature`, `Signature-Input`, `Content-Digest`).
 - **MUST** send "Order created" event with fully populated order entity
 - **MUST** send full order entity on updates (not incremental deltas)
 - **MUST** retry failed webhook deliveries
-- **MUST** include business identifier in webhook path or headers
 
 ## Entities
 

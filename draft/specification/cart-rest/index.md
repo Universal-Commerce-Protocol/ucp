@@ -481,18 +481,20 @@ The following headers are defined for the HTTP binding and apply to all operatio
 
 **Request Headers**
 
-| Header              | Required | Description                                                                                                                                                                                   |
-| ------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Authorization`     | No       | Should contain oauth token representing the following 2 schemes: 1. Platform self authenticating (client_credentials). 2. Platform authenticating on behalf of end user (authorization_code). |
-| `X-API-Key`         | No       | Authenticates the platform with a reusable api key allocated to the platform by the business.                                                                                                 |
-| `Request-Signature` | **Yes**  | Ensure the authenticity and integrity of an HTTP message.                                                                                                                                     |
-| `Idempotency-Key`   | **Yes**  | Ensures duplicate operations don't happen during retries.                                                                                                                                     |
-| `Request-Id`        | **Yes**  | For tracing the requests across network layers and components.                                                                                                                                |
-| `User-Agent`        | No       | Identifies the user agent string making the call.                                                                                                                                             |
-| `Content-Type`      | No       | Representation Metadata. Tells the receiver what the data in the message body actually is.                                                                                                    |
-| `Accept`            | No       | Content Negotiation. The client tells the server what data formats it is capable of understanding.                                                                                            |
-| `Accept-Language`   | No       | Localization. Tells the receiver the user's preferred natural languages, often with "weights" or priorities.                                                                                  |
-| `Accept-Encoding`   | No       | Compression. The client tells the server which content-codings it supports, usually for compression                                                                                           |
+| Header            | Required | Description                                                                                                                                                                                   |
+| ----------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Authorization`   | No       | Should contain oauth token representing the following 2 schemes: 1. Platform self authenticating (client_credentials). 2. Platform authenticating on behalf of end user (authorization_code). |
+| `X-API-Key`       | No       | Authenticates the platform with a reusable api key allocated to the platform by the business.                                                                                                 |
+| `Signature`       | No       | RFC 9421 HTTP Message Signature. Required when using HTTP Message Signatures for authentication. Format: `sig1=:<base64-signature>:`.                                                         |
+| `Signature-Input` | No       | RFC 9421 Signature-Input header. Required when using HTTP Message Signatures for authentication. Format: `sig1=("@method" "@path" ...);created=<timestamp>;keyid="<key-id>"`.                 |
+| `Content-Digest`  | No       | Body digest per RFC 9530. Required for requests/responses with a body. Format: `sha-256=:<base64-digest>:`.                                                                                   |
+| `Idempotency-Key` | **Yes**  | Ensures duplicate operations don't happen during retries.                                                                                                                                     |
+| `Request-Id`      | **Yes**  | For tracing the requests across network layers and components.                                                                                                                                |
+| `User-Agent`      | No       | Identifies the user agent string making the call.                                                                                                                                             |
+| `Content-Type`    | No       | Representation Metadata. Tells the receiver what the data in the message body actually is.                                                                                                    |
+| `Accept`          | No       | Content Negotiation. The client tells the server what data formats it is capable of understanding.                                                                                            |
+| `Accept-Language` | No       | Localization. Tells the receiver the user's preferred natural languages, often with "weights" or priorities.                                                                                  |
+| `Accept-Encoding` | No       | Compression. The client tells the server which content-codings it supports, usually for compression                                                                                           |
 
 ### Specific Header Requirements
 

@@ -450,6 +450,8 @@
       
         
       
+        
+      
     
     
     
@@ -1790,42 +1792,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../documentation/schema-authoring/" class="md-nav__link">
+      <a href="../signatures/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Schema Authoring
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../reference/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Reference
+    Signatures
   
 
     
@@ -1854,6 +1828,62 @@
     
   
     Versioning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../documentation/schema-authoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Authoring
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
   
 
     
@@ -3279,9 +3309,19 @@ operations unless otherwise noted.</p>
 <td style="text-align: left;">Authenticates the platform with a reusable api key allocated to the platform by the business.</td>
 </tr>
 <tr>
-<td style="text-align: left;"><code>Request-Signature</code></td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Ensure the authenticity and integrity of an HTTP message.</td>
+<td style="text-align: left;"><code>Signature</code></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">RFC 9421 HTTP Message Signature. Required when using HTTP Message Signatures for authentication. Format: <code>sig1=:&lt;base64-signature&gt;:</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>Signature-Input</code></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">RFC 9421 Signature-Input header. Required when using HTTP Message Signatures for authentication. Format: <code>sig1=("@method" "@path" ...);created=&lt;timestamp&gt;;keyid="&lt;key-id&gt;"</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>Content-Digest</code></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Body digest per RFC 9530. Required for requests/responses with a body. Format: <code>sha-256=:&lt;base64-digest&gt;:</code>.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>Idempotency-Key</code></td>

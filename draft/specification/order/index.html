@@ -450,6 +450,8 @@
       
         
       
+        
+      
     
     
     
@@ -1759,42 +1761,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../documentation/schema-authoring/" class="md-nav__link">
+      <a href="../signatures/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Schema Authoring
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../reference/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Reference
+    Signatures
   
 
     
@@ -1823,6 +1797,62 @@
     
   
     Versioning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../documentation/schema-authoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Authoring
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
   
 
     
@@ -2985,33 +3015,80 @@ platform's profile and uses it to send order lifecycle events.</p>
 </span></code></pre></div>
 <h3 id="webhook-signature-verification">Webhook Signature Verification<a class="headerlink" href="#webhook-signature-verification" title="Permanent link">&para;</a></h3>
 <p>Webhook payloads <strong>MUST</strong> be signed by the business and verified by the platform
-to ensure authenticity and integrity.</p>
+to ensure authenticity and integrity. Signatures follow the
+<a href="../signatures/">Message Signatures</a> specification using the REST binding
+(RFC 9421).</p>
+<p><strong>Required Headers:</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Header</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>UCP-Agent</code></td>
+<td style="text-align: left;">Business profile URL (RFC 8941 Dictionary)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>Signature-Input</code></td>
+<td style="text-align: left;">Describes signed components</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>Signature</code></td>
+<td style="text-align: left;">Contains the signature value</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>Content-Digest</code></td>
+<td style="text-align: left;">Body digest (RFC 9530)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example Webhook Request:</strong></p>
+<div class="language-http highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nf">POST</span> <span class="nn">/webhooks/ucp/orders</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="na">Host</span><span class="o">:</span> <span class="l">platform.example.com</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="na">UCP-Agent</span><span class="o">:</span> <span class="l">profile=&quot;https://merchant.example/.well-known/ucp&quot;</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="na">Content-Digest</span><span class="o">:</span> <span class="l">sha-256=:X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=:</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="na">Signature-Input</span><span class="o">:</span> <span class="l">sig1=(&quot;@method&quot; &quot;@authority&quot; &quot;@path&quot; &quot;content-digest&quot; &quot;content-type&quot;);keyid=&quot;merchant-2026&quot;</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="na">Signature</span><span class="o">:</span> <span class="l">sig1=:MEUCIQDTxNq8h7LGHpvVZQp1iHkFp9+3N8Mxk2zH1wK4YuVN8w...:</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="p">{</span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="s2">&quot;order_abc123&quot;</span><span class="p">,</span><span class="nt">&quot;event_id&quot;</span><span class="p">:</span><span class="s2">&quot;evt_123&quot;</span><span class="p">,</span><span class="nt">&quot;created_time&quot;</span><span class="p">:</span><span class="s2">&quot;2026-01-15T12:00:00Z&quot;</span><span class="p">,</span><span class="err">...</span><span class="p">}</span>
+</span></code></pre></div>
 <h4 id="signing-business">Signing (Business)<a class="headerlink" href="#signing-business" title="Permanent link">&para;</a></h4>
 <ol>
-<li>Select a key from the <code>signing_keys</code> array in UCP profile.</li>
-<li>Create a detached JWT (RFC 7797) over the request body using the selected key.</li>
-<li>Include the JWT in the <code>Request-Signature</code> header.</li>
-<li>Include the key ID in the JWT header's <code>kid</code> claim to allow the receiver to
-    identify which key to use for verification.</li>
+<li>Compute SHA-256 digest of the raw request body and set <code>Content-Digest</code> header</li>
+<li>Build signature base per <a href="https://www.rfc-editor.org/rfc/rfc9421">RFC 9421</a></li>
+<li>Sign using a key from <code>signing_keys</code> in the business's UCP profile</li>
+<li>Set <code>Signature-Input</code> and <code>Signature</code> headers</li>
 </ol>
+<p>See <a href="../signatures/#rest-request-signing">Message Signatures - REST Request Signing</a>
+for complete algorithm.</p>
 <h4 id="verification-platform">Verification (Platform)<a class="headerlink" href="#verification-platform" title="Permanent link">&para;</a></h4>
+<p><strong>Authentication</strong> (signature verification):</p>
 <ol>
-<li>Extract the <code>Request-Signature</code> header from the incoming webhook request.</li>
-<li>Parse the JWT header to retrieve the <code>kid</code> (key ID).</li>
-<li>Fetch the business's UCP profile from <code>/.well-known/ucp</code> (cache as appropriate).</li>
-<li>Locate the key in <code>signing_keys</code> with the matching <code>kid</code>.</li>
-<li>Verify the JWT signature against the request body using the public key.</li>
-<li>If verification fails, reject the webhook with an appropriate error response.</li>
+<li>Parse <code>Signature-Input</code> to extract <code>keyid</code> and signed components</li>
+<li>Fetch business's UCP profile from <code>/.well-known/ucp</code> (cache as appropriate)</li>
+<li>Locate key in <code>signing_keys</code> with matching <code>kid</code></li>
+<li>Verify <code>Content-Digest</code> matches SHA-256 of raw body</li>
+<li>Reconstruct signature base and verify signature</li>
 </ol>
+<p>See <a href="../signatures/#rest-request-verification">Message Signatures - REST Request Verification</a>
+for complete algorithm.</p>
+<p><strong>Authorization</strong> (order ownership):</p>
+<p>After verifying the signature, the platform <strong>MUST</strong> confirm the signer is
+authorized to send events for the referenced order:</p>
+<ol>
+<li>Extract the order ID from the webhook payload</li>
+<li>Verify the order was created with this business (profile URL matches)</li>
+<li>Reject webhooks where the signer's profile doesn't match the order's business</li>
+</ol>
+<p>This prevents a malicious business from sending fake events for another
+business's orders, even with a valid signature.</p>
 <h4 id="key-rotation">Key Rotation<a class="headerlink" href="#key-rotation" title="Permanent link">&para;</a></h4>
-<p>The <code>signing_keys</code> array supports multiple keys to enable zero-downtime
-rotation:</p>
-<ul>
-<li><strong>Adding a new key:</strong> Add the new key to <code>signing_keys</code>, then start signing
-    with it. Verifiers will find it by <code>kid</code>.</li>
-<li><strong>Removing an old key:</strong> After sufficient time for all in-flight webhooks to
-    be delivered, remove the old key from <code>signing_keys</code>.</li>
-</ul>
+<p>See <a href="../signatures/#key-rotation">Message Signatures - Key Rotation</a> for
+zero-downtime key rotation procedures.</p>
 <h2 id="guidelines">Guidelines<a class="headerlink" href="#guidelines" title="Permanent link">&para;</a></h2>
 <p><strong>Platform:</strong></p>
 <ul>
@@ -3020,13 +3097,13 @@ rotation:</p>
 </ul>
 <p><strong>Business:</strong></p>
 <ul>
-<li><strong>MUST</strong> sign all webhook payloads using a key from their <code>signing_keys</code>
-  array (published in <code>/.well-known/ucp</code>). The signature <strong>MUST</strong> be included
-  in the <code>Request-Signature</code> header as a detached JWT (RFC 7797).</li>
+<li><strong>MUST</strong> include <code>UCP-Agent</code> header with profile URL for signer identification</li>
+<li><strong>MUST</strong> sign all webhook payloads per the
+  <a href="../signatures/">Message Signatures</a> specification using RFC 9421 headers
+  (<code>Signature</code>, <code>Signature-Input</code>, <code>Content-Digest</code>).</li>
 <li><strong>MUST</strong> send "Order created" event with fully populated order entity</li>
 <li><strong>MUST</strong> send full order entity on updates (not incremental deltas)</li>
 <li><strong>MUST</strong> retry failed webhook deliveries</li>
-<li><strong>MUST</strong> include business identifier in webhook path or headers</li>
 </ul>
 <h2 id="entities">Entities<a class="headerlink" href="#entities" title="Permanent link">&para;</a></h2>
 <h3 id="item-response">Item Response<a class="headerlink" href="#item-response" title="Permanent link">&para;</a></h3>

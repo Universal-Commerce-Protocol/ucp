@@ -450,6 +450,8 @@
       
         
       
+        
+      
     
     
     
@@ -929,6 +931,45 @@
         
       </ul>
     </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#message-signing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Message Signing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Message Signing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#request-signing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Request Signing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#response-signing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Response Signing
+      
+    </span>
+  </a>
   
 </li>
         
@@ -1684,42 +1725,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../documentation/schema-authoring/" class="md-nav__link">
+      <a href="../signatures/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Schema Authoring
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../reference/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Reference
+    Signatures
   
 
     
@@ -1748,6 +1761,62 @@
     
   
     Versioning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../documentation/schema-authoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Authoring
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
   
 
     
@@ -2096,6 +2165,45 @@
         
       </ul>
     </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#message-signing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Message Signing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Message Signing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#request-signing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Request Signing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#response-signing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Response Signing
+      
+    </span>
+  </a>
   
 </li>
         
@@ -3455,9 +3563,19 @@ operations unless otherwise noted.</p>
 <td style="text-align: left;">Authenticates the platform with a reusable api key allocated to the platform by the business.</td>
 </tr>
 <tr>
-<td style="text-align: left;"><code>Request-Signature</code></td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Ensure the authenticity and integrity of an HTTP message.</td>
+<td style="text-align: left;"><code>Signature</code></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">RFC 9421 HTTP Message Signature. Required when using HTTP Message Signatures for authentication. Format: <code>sig1=:&lt;base64-signature&gt;:</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>Signature-Input</code></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">RFC 9421 Signature-Input header. Required when using HTTP Message Signatures for authentication. Format: <code>sig1=("@method" "@path" ...);created=&lt;timestamp&gt;;keyid="&lt;key-id&gt;"</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>Content-Digest</code></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Body digest per RFC 9530. Required for requests/responses with a body. Format: <code>sha-256=:&lt;base64-digest&gt;:</code>.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>Idempotency-Key</code></td>
@@ -3477,7 +3595,7 @@ operations unless otherwise noted.</p>
 <tr>
 <td style="text-align: left;"><code>UCP-Agent</code></td>
 <td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Identifies the UCP agent making the call. All requests MUST include the UCP-Agent header containing the platform profile URI using Dictionary Structured Field syntax (RFC 8941). Format: profile="https://platform.example/profile".</td>
+<td style="text-align: left;">Identifies the UCP agent making the call. All requests MUST include the UCP-Agent header containing the signer's profile URI using RFC 8941 Dictionary syntax. The URL MUST point to /.well-known/ucp. Format: profile="https://example.com/.well-known/ucp".</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>Content-Type</code></td>
@@ -3611,6 +3729,76 @@ with HTTP 200 and the UCP envelope containing <code>messages</code>:</p>
 </span><span id="__span-14-25"><a id="__codelineno-14-25" name="__codelineno-14-25" href="#__codelineno-14-25"></a><span class="w">  </span><span class="nt">&quot;continue_url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://merchant.com/checkout/checkout_abc123&quot;</span>
 </span><span id="__span-14-26"><a id="__codelineno-14-26" name="__codelineno-14-26" href="#__codelineno-14-26"></a><span class="p">}</span>
 </span></code></pre></div>
+<h2 id="message-signing">Message Signing<a class="headerlink" href="#message-signing" title="Permanent link">&para;</a></h2>
+<p>Platforms <strong>MAY</strong> choose among authentication mechanisms (API keys, OAuth,
+mTLS, HTTP Message Signatures). When using
+HTTP Message Signatures, checkout operations follow the
+<a href="../signatures/">Message Signatures</a> specification.</p>
+<h3 id="request-signing">Request Signing<a class="headerlink" href="#request-signing" title="Permanent link">&para;</a></h3>
+<p>When HTTP Message Signatures are used, requests <strong>MUST</strong> include valid
+<code>Signature-Input</code> and <code>Signature</code> headers (and <code>Content-Digest</code> when a body
+is present) per RFC 9421:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Header</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>Signature-Input</code></td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">Describes signed components</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>Signature</code></td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">Contains the signature value</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>Content-Digest</code></td>
+<td style="text-align: left;">Cond.*</td>
+<td style="text-align: left;">SHA-256 hash of request body</td>
+</tr>
+</tbody>
+</table>
+<p>* Required for requests with a body (POST, PUT)</p>
+<p><strong>Example Signed Request:</strong></p>
+<div class="language-http highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="nf">POST</span> <span class="nn">/checkout-sessions</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="na">Host</span><span class="o">:</span> <span class="l">merchant.example.com</span>
+</span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
+</span><span id="__span-15-4"><a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="na">UCP-Agent</span><span class="o">:</span> <span class="l">profile=&quot;https://platform.example/.well-known/ucp&quot;</span>
+</span><span id="__span-15-5"><a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a><span class="na">Idempotency-Key</span><span class="o">:</span> <span class="l">550e8400-e29b-41d4-a716-446655440000</span>
+</span><span id="__span-15-6"><a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a><span class="na">Content-Digest</span><span class="o">:</span> <span class="l">sha-256=:X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=:</span>
+</span><span id="__span-15-7"><a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a><span class="na">Signature-Input</span><span class="o">:</span> <span class="l">sig1=(&quot;@method&quot; &quot;@authority&quot; &quot;@path&quot; &quot;idempotency-key&quot; &quot;content-digest&quot; &quot;content-type&quot;);keyid=&quot;platform-2025&quot;</span>
+</span><span id="__span-15-8"><a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a><span class="na">Signature</span><span class="o">:</span> <span class="l">sig1=:MEUCIQDTxNq8h7LGHpvVZQp1iHkFp9+3N8Mxk2zH1wK4YuVN8w...:</span>
+</span><span id="__span-15-9"><a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a>
+</span><span id="__span-15-10"><a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a><span class="p">{</span><span class="nt">&quot;line_items&quot;</span><span class="p">:[{</span><span class="nt">&quot;item&quot;</span><span class="p">:{</span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="s2">&quot;item_123&quot;</span><span class="p">},</span><span class="nt">&quot;quantity&quot;</span><span class="p">:</span><span class="mi">2</span><span class="p">}]}</span>
+</span></code></pre></div>
+<p>See <a href="../signatures/#rest-request-signing">Message Signatures - REST Request Signing</a>
+for the complete signing algorithm.</p>
+<h3 id="response-signing">Response Signing<a class="headerlink" href="#response-signing" title="Permanent link">&para;</a></h3>
+<p>Response signatures are <strong>RECOMMENDED</strong> for:</p>
+<ul>
+<li><code>complete_checkout</code> responses (order confirmation)</li>
+</ul>
+<p>Response signatures are <strong>OPTIONAL</strong> for:</p>
+<ul>
+<li><code>create_checkout</code>, <code>get_checkout</code>, <code>update_checkout</code>, <code>cancel_checkout</code></li>
+</ul>
+<p><strong>Example Signed Response:</strong></p>
+<div class="language-http highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
+</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
+</span><span id="__span-16-3"><a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="na">Content-Digest</span><span class="o">:</span> <span class="l">sha-256=:Y5fK8nLmPqRsT3vWxYzAbCdEfGhIjKlMnO...:</span>
+</span><span id="__span-16-4"><a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="na">Signature-Input</span><span class="o">:</span> <span class="l">sig1=(&quot;@status&quot; &quot;content-digest&quot; &quot;content-type&quot;);keyid=&quot;merchant-2025&quot;</span>
+</span><span id="__span-16-5"><a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a><span class="na">Signature</span><span class="o">:</span> <span class="l">sig1=:MFQCIH7kL9nM2oP5qR8sT1uV4wX6yZaB3cD...:</span>
+</span><span id="__span-16-6"><a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a>
+</span><span id="__span-16-7"><a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a><span class="p">{</span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="s2">&quot;chk_123&quot;</span><span class="p">,</span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="s2">&quot;completed&quot;</span><span class="p">,</span><span class="nt">&quot;order&quot;</span><span class="p">:{</span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="s2">&quot;ord_456&quot;</span><span class="p">}}</span>
+</span></code></pre></div>
+<p>See <a href="../signatures/#rest-response-signing">Message Signatures - REST Response Signing</a>
+for the complete signing algorithm.</p>
 <h2 id="security-considerations">Security Considerations<a class="headerlink" href="#security-considerations" title="Permanent link">&para;</a></h2>
 <h3 id="authentication">Authentication<a class="headerlink" href="#authentication" title="Permanent link">&para;</a></h3>
 <p>Authentication is optional and depends on business requirements. When
@@ -3621,6 +3809,8 @@ authentication is required, the REST transport <strong>MAY</strong> use:</p>
 <li><strong>OAuth 2.0</strong>: Via <code>Authorization: Bearer {token}</code> header, following
     <a href="https://tools.ietf.org/html/rfc6749" target="_blank">RFC 6749</a>.</li>
 <li><strong>Mutual TLS</strong>: For high-security environments.</li>
+<li><strong>HTTP Message Signatures</strong>: Per <a href="https://www.rfc-editor.org/rfc/rfc9421">RFC 9421</a>
+    (see <a href="#message-signing">Message Signing</a> above).</li>
 </ol>
 <p>Businesses <strong>MAY</strong> require authentication for some operations while leaving
 others open (e.g., public checkout without authentication).</p>

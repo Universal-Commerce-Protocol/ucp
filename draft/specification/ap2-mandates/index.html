@@ -450,6 +450,8 @@
       
         
       
+        
+      
     
     
     
@@ -893,17 +895,6 @@
   
     <nav class="md-nav" aria-label="Cryptographic Requirements">
       <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#signature-algorithm" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Signature Algorithm
-      
-    </span>
-  </a>
-  
-</li>
         
           <li class="md-nav__item">
   <a href="#business-authorization" class="md-nav__link">
@@ -1739,42 +1730,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../documentation/schema-authoring/" class="md-nav__link">
+      <a href="../signatures/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Schema Authoring
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../reference/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Reference
+    Signatures
   
 
     
@@ -1803,6 +1766,62 @@
     
   
     Versioning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../documentation/schema-authoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Authoring
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
   
 
     
@@ -2003,17 +2022,6 @@
   
     <nav class="md-nav" aria-label="Cryptographic Requirements">
       <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#signature-algorithm" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Signature Algorithm
-      
-    </span>
-  </a>
-  
-</li>
         
           <li class="md-nav__item">
   <a href="#business-authorization" class="md-nav__link">
@@ -2437,30 +2445,17 @@ business to verify the mandate's signature.</p>
 <p>If a public key cannot be resolved, or if the signature is invalid, the business
 <strong>MUST</strong> return an error.</p>
 <h2 id="cryptographic-requirements">Cryptographic Requirements<a class="headerlink" href="#cryptographic-requirements" title="Permanent link">&para;</a></h2>
-<h3 id="signature-algorithm">Signature Algorithm<a class="headerlink" href="#signature-algorithm" title="Permanent link">&para;</a></h3>
-<p>All signatures <strong>MUST</strong> use one of the following algorithms:</p>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Algorithm</th>
-<th style="text-align: left;">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;"><code>ES256</code></td>
-<td style="text-align: left;">ECDSA using P-256 curve and SHA-256 (<strong>RECOMMENDED</strong>)</td>
-</tr>
-<tr>
-<td style="text-align: left;"><code>ES384</code></td>
-<td style="text-align: left;">ECDSA using P-384 curve and SHA-384</td>
-</tr>
-<tr>
-<td style="text-align: left;"><code>ES512</code></td>
-<td style="text-align: left;">ECDSA using P-521 curve and SHA-512</td>
-</tr>
-</tbody>
-</table>
+<p>This extension uses the cryptographic primitives defined in the
+<a href="../signatures/">Message Signatures</a> specification:</p>
+<ul>
+<li><strong>Algorithms:</strong> ES256 (required), ES384, ES512</li>
+<li><strong>Canonicalization:</strong> JCS (<a href="https://datatracker.ietf.org/doc/html/rfc8785">RFC 8785</a>)</li>
+<li><strong>Key Format:</strong> JWK (<a href="https://datatracker.ietf.org/doc/html/rfc7517">RFC 7517</a>)</li>
+<li><strong>Key Discovery:</strong> <code>signing_keys[]</code> in <code>/.well-known/ucp</code> (see
+  <a href="../overview/#key-discovery">Key Discovery</a>)</li>
+</ul>
+<p>See <a href="../signatures/">Message Signatures</a> for complete details on algorithms,
+key format, and key rotation.</p>
 <h3 id="business-authorization">Business Authorization<a class="headerlink" href="#business-authorization" title="Permanent link">&para;</a></h3>
 <p>Businesses <strong>MUST</strong> embed their signature in the checkout response body under
 <code>ap2.merchant_authorization</code> using <strong>JWS Detached Content</strong> format
@@ -2560,15 +2555,24 @@ in UCP requests and responses. The mandate credential structure (claims,
 selective disclosure, key binding) is defined by the
 <a href="https://ap2-protocol.org/specification">AP2 Protocol Specification</a>.</p>
 <h3 id="canonicalization">Canonicalization<a class="headerlink" href="#canonicalization" title="Permanent link">&para;</a></h3>
-<p>For signature computation over JSON payloads, implementations <strong>MUST</strong> use
-<strong>JSON Canonicalization Scheme (JCS)</strong> as defined in
-<a href="https://datatracker.ietf.org/doc/html/rfc8785">RFC 8785</a>.</p>
-<p>JCS produces a deterministic, byte-for-byte identical representation of
-JSON data, ensuring signatures can be verified regardless of whitespace,
-key ordering, or Unicode normalization differences.</p>
-<p><strong>Canonicalization Rule:</strong> When computing the business's signature, exclude
-the <code>ap2</code> field entirely. This ensures future AP2 fields are automatically
-handled.</p>
+<p>All JSON payloads <strong>MUST</strong> be canonicalized using <strong>JSON Canonicalization
+Scheme (JCS)</strong> per <a href="https://datatracker.ietf.org/doc/html/rfc8785">RFC 8785</a>.</p>
+<p><strong>Why JCS for Mandates?</strong> UCP request signatures use <code>Content-Digest</code> (raw
+bytes) without canonicalization — the request is signed and verified
+immediately over the same HTTP connection. Mandates are different:</p>
+<ul>
+<li><strong>Durability</strong> — Mandates are stored as evidence of user consent. They may
+    be retrieved and verified days or months later.</li>
+<li><strong>Cross-system transmission</strong> — Mandates pass through multiple systems
+    (platform → business → PSP → card network) that may re-serialize JSON.</li>
+<li><strong>Reproducibility</strong> — Any party must reconstruct the exact signed bytes
+    from the logical JSON content, regardless of serialization differences.</li>
+</ul>
+<p>JCS ensures that semantically identical JSON produces byte-identical output,
+making signatures reproducible across implementations and time.</p>
+<p><strong>AP2-Specific Rule:</strong> When computing the business's <code>merchant_authorization</code>
+signature, exclude the <code>ap2</code> field entirely. This ensures future AP2 fields
+are automatically handled.</p>
 <h2 id="the-mandate-flow">The Mandate Flow<a class="headerlink" href="#the-mandate-flow" title="Permanent link">&para;</a></h2>
 <p>Once the <code>dev.ucp.shopping.ap2_mandate</code> capability is negotiated, the session
 is locked into the following flow. Both parties <strong>MUST</strong> follow these steps to
