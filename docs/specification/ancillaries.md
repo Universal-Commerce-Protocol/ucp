@@ -27,7 +27,8 @@ setup).
 
 - Suggest ancillaries related to specific line items or the overall checkout
 - Support for different categories: products, services, insurance
-- Handle ancillaries that require buyer input (e.g., time slot selection, personalization)
+- Handle ancillaries that require buyer input (e.g., time slot selection,
+  personalization)
 - Group mutually exclusive alternatives (e.g., warranty tiers)
 - Automatic ancillaries for legally required or promotional additions
 
@@ -41,19 +42,19 @@ Businesses advertise ancillaries support in their profile:
 
 ```json
 {
-  "ucp": {
-    "version": "2026-02-09",
-    "capabilities": {
-      "dev.ucp.shopping.ancillaries": [
-        {
-          "version": "2026-02-09",
-          "extends": "dev.ucp.shopping.checkout",
-          "spec": "https://ucp.dev/specification/ancillaries",
-          "schema": "https://ucp.dev/schemas/shopping/ancillaries.json"
+    "ucp": {
+        "version": "2026-02-17",
+        "capabilities": {
+            "dev.ucp.shopping.ancillaries": [
+                {
+                    "version": "2026-02-17",
+                    "extends": "dev.ucp.shopping.checkout",
+                    "spec": "https://ucp.dev/specification/ancillaries",
+                    "schema": "https://ucp.dev/schemas/shopping/ancillaries.json"
+                }
+            ]
         }
-      ]
     }
-  }
 }
 ```
 
@@ -85,10 +86,10 @@ object.
 Ancillaries are categorized to help platforms render appropriate UI and set
 buyer expectations:
 
-| Category    | Description                   | Examples                           |
-| ----------- | ----------------------------- | ---------------------------------- |
-| `product`   | Physical or digital goods     | Cables, cases, accessories         |
-| `service`   | One-time services             | Installation, setup, gift wrapping |
+| Category    | Description                   | Examples                            |
+| ----------- | ----------------------------- | ----------------------------------- |
+| `product`   | Physical or digital goods     | Cables, cases, accessories          |
+| `service`   | One-time services             | Installation, setup, gift wrapping  |
 | `insurance` | Protection and warranty plans | Extended warranty, theft protection |
 
 ## Suggestion Types
@@ -96,11 +97,11 @@ buyer expectations:
 The `type` field indicates the relationship between the ancillary and the
 checkout:
 
-| Type            | Description                                           | Use Case                                    |
-| --------------- | ----------------------------------------------------- | ------------------------------------------- |
-| `complementary` | Directly related to a specific line item              | Charging cable for a phone                  |
-| `suggested`     | General recommendation for the checkout               | "Customers also bought" items               |
-| `required`      | Legally or functionally required for a line item      | Recycling fee, mandatory insurance          |
+| Type            | Description                                      | Use Case                           |
+| --------------- | ------------------------------------------------ | ---------------------------------- |
+| `complementary` | Directly related to a specific line item         | Charging cable for a phone         |
+| `suggested`     | General recommendation for the checkout          | "Customers also bought" items      |
+| `required`      | Legally or functionally required for a line item | Recycling fee, mandatory insurance |
 
 ## Input Handling
 
@@ -109,14 +110,14 @@ Some ancillaries require buyer input before they can be added. The
 
 ### Input Types
 
-| Type        | Description                    | Example                                        |
-| ----------- | ------------------------------ | ---------------------------------------------- |
-| `text`      | Free-form text input           | Engraving text, gift message                   |
-| `selection` | Choice from predefined options | Time slots, service tiers, color preferences   |
+| Type        | Description                    | Example                                      |
+| ----------- | ------------------------------ | -------------------------------------------- |
+| `text`      | Free-form text input           | Engraving text, gift message                 |
+| `selection` | Choice from predefined options | Time slots, service tiers, color preferences |
 
-The `selection` type uses the `options` array. Platforms can render appropriately
-based on the option content (e.g., calendar-style UI for time slots, dropdowns
-for service tiers).
+The `selection` type uses the `options` array. Platforms can render
+appropriately based on the option content (e.g., calendar-style UI for time
+slots, dropdowns for service tiers).
 
 ### Input Flow
 
@@ -166,8 +167,8 @@ Ancillaries are submitted via standard checkout create/update operations.
 - **Input required**: Include `input` field when adding ancillaries with
   `requires_input: true`
 
-**Invariant:** For relational ancillaries, `ancillaries.items[x].quantity`
-where `ancillaries.items[x].for == line_item_id` **MUST** equal
+**Invariant:** For relational ancillaries, `ancillaries.items[x].quantity` where
+`ancillaries.items[x].for == line_item_id` **MUST** equal
 `line_items[y].quantity` where `line_items[y].id == line_item_id`.
 
 **Response behavior:**
@@ -179,19 +180,19 @@ where `ancillaries.items[x].for == line_item_id` **MUST** equal
 
 ## Rejected Ancillaries
 
-When a submitted ancillary cannot be added, businesses communicate this via
-the `messages[]` array:
+When a submitted ancillary cannot be added, businesses communicate this via the
+`messages[]` array:
 
 ```json
 {
-  "messages": [
-    {
-      "type": "warning",
-      "code": "ancillary_invalid_input",
-      "path": "$.ancillaries.items[0].input",
-      "content": "Selected installation date is not available. Please choose another date."
-    }
-  ]
+    "messages": [
+        {
+            "type": "warning",
+            "code": "ancillary_invalid_input",
+            "path": "$.ancillaries.items[0].input",
+            "content": "Selected installation date is not available. Please choose another date."
+        }
+    ]
 }
 ```
 
@@ -201,14 +202,14 @@ the `messages[]` array:
 
 **Error codes for rejected ancillaries:**
 
-| Code                               | Description                                      |
-| ---------------------------------- | ------------------------------------------------ |
-| `ancillary_invalid`                | Ancillary not found or malformed                 |
-| `ancillary_already_applied`        | Ancillary is already applied                     |
-| `ancillary_combination_disallowed` | Cannot combine with another active ancillary     |
-| `ancillary_invalid_input`          | Required input is missing or invalid             |
-| `ancillary_unavailable`            | Ancillary not available for this line item       |
-| `ancillary_quantity_mismatch`      | Quantity doesn't match related line item         |
+| Code                               | Description                                  |
+| ---------------------------------- | -------------------------------------------- |
+| `ancillary_invalid`                | Ancillary not found or malformed             |
+| `ancillary_already_applied`        | Ancillary is already applied                 |
+| `ancillary_combination_disallowed` | Cannot combine with another active ancillary |
+| `ancillary_invalid_input`          | Required input is missing or invalid         |
+| `ancillary_unavailable`            | Ancillary not available for this line item   |
+| `ancillary_quantity_mismatch`      | Quantity doesn't match related line item     |
 
 ## Automatic Ancillaries
 
@@ -240,13 +241,14 @@ Applied ancillaries are reflected in the core checkout fields:
   is for which line item)
 - Totals are updated to include ancillary costs
 
-Applied ancillaries include key metadata from the original suggestion (`type`, 
+Applied ancillaries include key metadata from the original suggestion (`type`,
 `group_id`, `terms_url`) enabling platforms to:
 
-- Show the applied ancillary alongside its alternatives (matching `group_id` 
+- Show the applied ancillary alongside its alternatives (matching `group_id`
   between `applied` and `suggested`)
 - Display relevant terms links without re-querying suggestions
-- Provide context about the relationship type (complementary, suggested, required)
+- Provide context about the relationship type (complementary, suggested,
+  required)
 
 ## Examples
 
@@ -259,55 +261,55 @@ Insurance plans protect specific products. Multiple tiers can be offered using
 
 ```json
 {
-  "line_items": [
-    {
-      "id": "li_1",
-      "item": {
-        "id": "sku_smartphone_256",
-        "title": "Smartphone 256GB",
-        "price": 99900,
-        "image_url": "https://example.com/images/smartphone.jpg"
-      },
-      "quantity": 1,
-      "totals": [
-        { "type": "subtotal", "amount": 99900 },
-        { "type": "total", "amount": 99900 }
-      ]
+    "line_items": [
+        {
+            "id": "li_1",
+            "item": {
+                "id": "sku_smartphone_256",
+                "title": "Smartphone 256GB",
+                "price": 99900,
+                "image_url": "https://example.com/images/smartphone.jpg"
+            },
+            "quantity": 1,
+            "totals": [
+                { "type": "subtotal", "amount": 99900 },
+                { "type": "total", "amount": 99900 }
+            ]
+        }
+    ],
+    "ancillaries": {
+        "title": "Protect your new device",
+        "suggested": [
+            {
+                "item": {
+                    "id": "sku_protection_2yr",
+                    "title": "2-Year Protection Plan",
+                    "price": 19900,
+                    "image_url": "https://example.com/images/protection.jpg"
+                },
+                "type": "complementary",
+                "category": "insurance",
+                "for": "li_1",
+                "group_id": "insurance_phone",
+                "description": "Covers accidental damage, battery service, and 24/7 support",
+                "terms_url": "https://example.com/protection-plan/terms"
+            },
+            {
+                "item": {
+                    "id": "sku_protection_theft",
+                    "title": "2-Year Protection Plan with Theft Coverage",
+                    "price": 26900,
+                    "image_url": "https://example.com/images/protection-theft.jpg"
+                },
+                "type": "complementary",
+                "category": "insurance",
+                "for": "li_1",
+                "group_id": "insurance_phone",
+                "description": "Full protection plus theft and loss coverage",
+                "terms_url": "https://example.com/protection-plan-theft/terms"
+            }
+        ]
     }
-  ],
-  "ancillaries": {
-    "title": "Protect your new device",
-    "suggested": [
-      {
-        "item": {
-          "id": "sku_protection_2yr",
-          "title": "2-Year Protection Plan",
-          "price": 19900,
-          "image_url": "https://example.com/images/protection.jpg"
-        },
-        "type": "complementary",
-        "category": "insurance",
-        "for": "li_1",
-        "group_id": "insurance_phone",
-        "description": "Covers accidental damage, battery service, and 24/7 support",
-        "terms_url": "https://example.com/protection-plan/terms"
-      },
-      {
-        "item": {
-          "id": "sku_protection_theft",
-          "title": "2-Year Protection Plan with Theft Coverage",
-          "price": 26900,
-          "image_url": "https://example.com/images/protection-theft.jpg"
-        },
-        "type": "complementary",
-        "category": "insurance",
-        "for": "li_1",
-        "group_id": "insurance_phone",
-        "description": "Full protection plus theft and loss coverage",
-        "terms_url": "https://example.com/protection-plan-theft/terms"
-      }
-    ]
-  }
 }
 ```
 
@@ -315,15 +317,15 @@ Insurance plans protect specific products. Multiple tiers can be offered using
 
 ```json
 {
-  "ancillaries": {
-    "items": [
-      {
-        "item": { "id": "sku_protection_2yr" },
-        "for": "li_1",
-        "quantity": 1
-      }
-    ]
-  }
+    "ancillaries": {
+        "items": [
+            {
+                "item": { "id": "sku_protection_2yr" },
+                "for": "li_1",
+                "quantity": 1
+            }
+        ]
+    }
 }
 ```
 
@@ -331,51 +333,51 @@ Insurance plans protect specific products. Multiple tiers can be offered using
 
 ```json
 {
-  "line_items": [
-    {
-      "id": "li_1",
-      "item": {
-        "id": "sku_smartphone_256",
-        "title": "Smartphone 256GB",
-        "price": 99900
-      },
-      "quantity": 1,
-      "totals": [
-        { "type": "subtotal", "amount": 99900 },
-        { "type": "total", "amount": 99900 }
-      ]
+    "line_items": [
+        {
+            "id": "li_1",
+            "item": {
+                "id": "sku_smartphone_256",
+                "title": "Smartphone 256GB",
+                "price": 99900
+            },
+            "quantity": 1,
+            "totals": [
+                { "type": "subtotal", "amount": 99900 },
+                { "type": "total", "amount": 99900 }
+            ]
+        },
+        {
+            "id": "li_2",
+            "item": {
+                "id": "sku_protection_2yr",
+                "title": "2-Year Protection Plan",
+                "price": 19900
+            },
+            "quantity": 1,
+            "totals": [
+                { "type": "subtotal", "amount": 19900 },
+                { "type": "total", "amount": 19900 }
+            ]
+        }
+    ],
+    "ancillaries": {
+        "applied": [
+            {
+                "id": "li_2",
+                "for": "li_1",
+                "type": "complementary",
+                "category": "insurance",
+                "group_id": "insurance_phone",
+                "description": "2-Year Protection Plan for Smartphone 256GB",
+                "terms_url": "https://example.com/protection-plan/terms"
+            }
+        ]
     },
-    {
-      "id": "li_2",
-      "item": {
-        "id": "sku_protection_2yr",
-        "title": "2-Year Protection Plan",
-        "price": 19900
-      },
-      "quantity": 1,
-      "totals": [
-        { "type": "subtotal", "amount": 19900 },
-        { "type": "total", "amount": 19900 }
-      ]
-    }
-  ],
-  "ancillaries": {
-    "applied": [
-      {
-        "id": "li_2",
-        "for": "li_1",
-        "type": "complementary",
-        "category": "insurance",
-        "group_id": "insurance_phone",
-        "description": "2-Year Protection Plan for Smartphone 256GB",
-        "terms_url": "https://example.com/protection-plan/terms"
-      }
+    "totals": [
+        { "type": "subtotal", "amount": 119800 },
+        { "type": "total", "amount": 119800 }
     ]
-  },
-  "totals": [
-    { "type": "subtotal", "amount": 119800 },
-    { "type": "total", "amount": 119800 }
-  ]
 }
 ```
 
@@ -387,62 +389,62 @@ Accessories and peripherals related to purchased items.
 
 ```json
 {
-  "line_items": [
-    {
-      "id": "li_1",
-      "item": {
-        "id": "sku_smartphone_256",
-        "title": "Smartphone 256GB",
-        "price": 99900
-      },
-      "quantity": 1,
-      "totals": [
-        { "type": "subtotal", "amount": 99900 },
-        { "type": "total", "amount": 99900 }
-      ]
+    "line_items": [
+        {
+            "id": "li_1",
+            "item": {
+                "id": "sku_smartphone_256",
+                "title": "Smartphone 256GB",
+                "price": 99900
+            },
+            "quantity": 1,
+            "totals": [
+                { "type": "subtotal", "amount": 99900 },
+                { "type": "total", "amount": 99900 }
+            ]
+        }
+    ],
+    "ancillaries": {
+        "title": "Complete your setup",
+        "suggested": [
+            {
+                "item": {
+                    "id": "sku_usbc_cable",
+                    "title": "USB-C Charging Cable (2m)",
+                    "price": 1900,
+                    "image_url": "https://example.com/images/usbc-cable.jpg"
+                },
+                "type": "complementary",
+                "category": "product",
+                "for": "li_1",
+                "description": "Fast charging cable for your new phone"
+            },
+            {
+                "item": {
+                    "id": "sku_wireless_charger",
+                    "title": "Wireless Charging Pad",
+                    "price": 3900,
+                    "image_url": "https://example.com/images/wireless-charger.jpg"
+                },
+                "type": "complementary",
+                "category": "product",
+                "for": "li_1",
+                "description": "Convenient wireless charging"
+            },
+            {
+                "item": {
+                    "id": "sku_phone_case",
+                    "title": "Protective Phone Case",
+                    "price": 4900,
+                    "image_url": "https://example.com/images/case.jpg"
+                },
+                "type": "complementary",
+                "category": "product",
+                "for": "li_1",
+                "description": "Protect your phone with a slim, durable case"
+            }
+        ]
     }
-  ],
-  "ancillaries": {
-    "title": "Complete your setup",
-    "suggested": [
-      {
-        "item": {
-          "id": "sku_usbc_cable",
-          "title": "USB-C Charging Cable (2m)",
-          "price": 1900,
-          "image_url": "https://example.com/images/usbc-cable.jpg"
-        },
-        "type": "complementary",
-        "category": "product",
-        "for": "li_1",
-        "description": "Fast charging cable for your new phone"
-      },
-      {
-        "item": {
-          "id": "sku_wireless_charger",
-          "title": "Wireless Charging Pad",
-          "price": 3900,
-          "image_url": "https://example.com/images/wireless-charger.jpg"
-        },
-        "type": "complementary",
-        "category": "product",
-        "for": "li_1",
-        "description": "Convenient wireless charging"
-      },
-      {
-        "item": {
-          "id": "sku_phone_case",
-          "title": "Protective Phone Case",
-          "price": 4900,
-          "image_url": "https://example.com/images/case.jpg"
-        },
-        "type": "complementary",
-        "category": "product",
-        "for": "li_1",
-        "description": "Protect your phone with a slim, durable case"
-      }
-    ]
-  }
 }
 ```
 
@@ -454,71 +456,86 @@ Services that require time slot selection or other buyer input.
 
 ```json
 {
-  "line_items": [
-    {
-      "id": "li_1",
-      "item": {
-        "id": "sku_oled_tv_65",
-        "title": "65\" OLED Smart TV",
-        "price": 199900
-      },
-      "quantity": 1,
-      "totals": [
-        { "type": "subtotal", "amount": 199900 },
-        { "type": "total", "amount": 199900 }
-      ]
+    "line_items": [
+        {
+            "id": "li_1",
+            "item": {
+                "id": "sku_oled_tv_65",
+                "title": "65\" OLED Smart TV",
+                "price": 199900
+            },
+            "quantity": 1,
+            "totals": [
+                { "type": "subtotal", "amount": 199900 },
+                { "type": "total", "amount": 199900 }
+            ]
+        }
+    ],
+    "ancillaries": {
+        "suggested": [
+            {
+                "item": {
+                    "id": "sku_tv_install",
+                    "title": "Professional TV Installation",
+                    "price": 14900,
+                    "image_url": "https://example.com/images/installation.jpg"
+                },
+                "type": "complementary",
+                "category": "service",
+                "for": "li_1",
+                "description": "Expert wall mounting and setup included",
+                "requires_input": true,
+                "input_schema": {
+                    "type": "selection",
+                    "label": "Select installation date and time",
+                    "description": "A technician will arrive within a 2-hour window",
+                    "required": true,
+                    "options": [
+                        {
+                            "id": "slot_1",
+                            "label": "Tuesday, Feb 18 - 9:00 AM to 11:00 AM"
+                        },
+                        {
+                            "id": "slot_2",
+                            "label": "Tuesday, Feb 18 - 2:00 PM to 4:00 PM"
+                        },
+                        {
+                            "id": "slot_3",
+                            "label": "Wednesday, Feb 19 - 9:00 AM to 11:00 AM"
+                        },
+                        {
+                            "id": "slot_4",
+                            "label": "Wednesday, Feb 19 - 2:00 PM to 4:00 PM"
+                        }
+                    ]
+                }
+            },
+            {
+                "item": {
+                    "id": "sku_tv_calibration",
+                    "title": "Professional Calibration",
+                    "price": 9900
+                },
+                "type": "complementary",
+                "category": "service",
+                "for": "li_1",
+                "description": "Optimize picture quality for your room",
+                "requires_input": true,
+                "input_schema": {
+                    "type": "selection",
+                    "label": "Select calibration appointment",
+                    "required": true,
+                    "options": [
+                        {
+                            "id": "cal_1",
+                            "label": "Thursday, Feb 20 - 10:00 AM"
+                        },
+                        { "id": "cal_2", "label": "Friday, Feb 21 - 2:00 PM" }
+                    ]
+                }
+            }
+        ]
     }
-  ],
-  "ancillaries": {
-    "suggested": [
-      {
-        "item": {
-          "id": "sku_tv_install",
-          "title": "Professional TV Installation",
-          "price": 14900,
-          "image_url": "https://example.com/images/installation.jpg"
-        },
-        "type": "complementary",
-        "category": "service",
-        "for": "li_1",
-        "description": "Expert wall mounting and setup included",
-        "requires_input": true,
-        "input_schema": {
-          "type": "selection",
-          "label": "Select installation date and time",
-          "description": "A technician will arrive within a 2-hour window",
-          "required": true,
-          "options": [
-            { "id": "slot_1", "label": "Tuesday, Feb 18 - 9:00 AM to 11:00 AM" },
-            { "id": "slot_2", "label": "Tuesday, Feb 18 - 2:00 PM to 4:00 PM" },
-            { "id": "slot_3", "label": "Wednesday, Feb 19 - 9:00 AM to 11:00 AM" },
-            { "id": "slot_4", "label": "Wednesday, Feb 19 - 2:00 PM to 4:00 PM" }
-          ]
-        }
-      },
-      {
-        "item": {
-          "id": "sku_tv_calibration",
-          "title": "Professional Calibration",
-          "price": 9900
-        },
-        "type": "complementary",
-        "category": "service",
-        "for": "li_1",
-        "description": "Optimize picture quality for your room",
-        "requires_input": true,
-        "input_schema": {
-          "type": "selection",
-          "label": "Select calibration appointment",
-          "required": true,
-          "options": [
-            { "id": "cal_1", "label": "Thursday, Feb 20 - 10:00 AM" },
-            { "id": "cal_2", "label": "Friday, Feb 21 - 2:00 PM" }
-          ]
-        }
-      }
-    ]
-  }
 }
 ```
 
@@ -526,19 +543,19 @@ Services that require time slot selection or other buyer input.
 
 ```json
 {
-  "ancillaries": {
-    "items": [
-      {
-        "item": { "id": "sku_tv_install" },
-        "for": "li_1",
-        "quantity": 1,
-        "input": {
-          "type": "selection",
-          "value": "slot_2"
-        }
-      }
-    ]
-  }
+    "ancillaries": {
+        "items": [
+            {
+                "item": { "id": "sku_tv_install" },
+                "for": "li_1",
+                "quantity": 1,
+                "input": {
+                    "type": "selection",
+                    "value": "slot_2"
+                }
+            }
+        ]
+    }
 }
 ```
 
@@ -546,53 +563,53 @@ Services that require time slot selection or other buyer input.
 
 ```json
 {
-  "line_items": [
-    {
-      "id": "li_1",
-      "item": {
-        "id": "sku_oled_tv_65",
-        "title": "65\" OLED Smart TV",
-        "price": 199900
-      },
-      "quantity": 1,
-      "totals": [
-        { "type": "subtotal", "amount": 199900 },
-        { "type": "total", "amount": 199900 }
-      ]
-    },
-    {
-      "id": "li_2",
-      "item": {
-        "id": "sku_tv_install",
-        "title": "Professional TV Installation",
-        "price": 14900
-      },
-      "quantity": 1,
-      "totals": [
-        { "type": "subtotal", "amount": 14900 },
-        { "type": "total", "amount": 14900 }
-      ]
-    }
-  ],
-  "ancillaries": {
-    "applied": [
-      {
-        "id": "li_2",
-        "for": "li_1",
-        "type": "complementary",
-        "category": "service",
-        "description": "Professional TV Installation - Tuesday, Feb 18, 2:00 PM to 4:00 PM",
-        "input": {
-          "type": "selection",
-          "value": "slot_2"
+    "line_items": [
+        {
+            "id": "li_1",
+            "item": {
+                "id": "sku_oled_tv_65",
+                "title": "65\" OLED Smart TV",
+                "price": 199900
+            },
+            "quantity": 1,
+            "totals": [
+                { "type": "subtotal", "amount": 199900 },
+                { "type": "total", "amount": 199900 }
+            ]
+        },
+        {
+            "id": "li_2",
+            "item": {
+                "id": "sku_tv_install",
+                "title": "Professional TV Installation",
+                "price": 14900
+            },
+            "quantity": 1,
+            "totals": [
+                { "type": "subtotal", "amount": 14900 },
+                { "type": "total", "amount": 14900 }
+            ]
         }
-      }
+    ],
+    "ancillaries": {
+        "applied": [
+            {
+                "id": "li_2",
+                "for": "li_1",
+                "type": "complementary",
+                "category": "service",
+                "description": "Professional TV Installation - Tuesday, Feb 18, 2:00 PM to 4:00 PM",
+                "input": {
+                    "type": "selection",
+                    "value": "slot_2"
+                }
+            }
+        ]
+    },
+    "totals": [
+        { "type": "subtotal", "amount": 214800 },
+        { "type": "total", "amount": 214800 }
     ]
-  },
-  "totals": [
-    { "type": "subtotal", "amount": 214800 },
-    { "type": "total", "amount": 214800 }
-  ]
 }
 ```
 
@@ -604,12 +621,12 @@ Ancillaries automatically added by the business.
 
 ```json
 {
-  "line_items": [
-    {
-      "item": { "id": "sku_laptop" },
-      "quantity": 1
-    }
-  ]
+    "line_items": [
+        {
+            "item": { "id": "sku_laptop" },
+            "quantity": 1
+        }
+    ]
 }
 ```
 
@@ -617,51 +634,51 @@ Ancillaries automatically added by the business.
 
 ```json
 {
-  "line_items": [
-    {
-      "id": "li_1",
-      "item": {
-        "id": "sku_laptop",
-        "title": "Laptop 16\"",
-        "price": 249900
-      },
-      "quantity": 1,
-      "totals": [
-        { "type": "subtotal", "amount": 249900 },
-        { "type": "total", "amount": 249900 }
-      ]
+    "line_items": [
+        {
+            "id": "li_1",
+            "item": {
+                "id": "sku_laptop",
+                "title": "Laptop 16\"",
+                "price": 249900
+            },
+            "quantity": 1,
+            "totals": [
+                { "type": "subtotal", "amount": 249900 },
+                { "type": "total", "amount": 249900 }
+            ]
+        },
+        {
+            "id": "li_2",
+            "item": {
+                "id": "sku_recycling_fee",
+                "title": "Electronics Recycling Fee",
+                "price": 500
+            },
+            "quantity": 1,
+            "totals": [
+                { "type": "subtotal", "amount": 500 },
+                { "type": "total", "amount": 500 }
+            ]
+        }
+    ],
+    "ancillaries": {
+        "applied": [
+            {
+                "id": "li_2",
+                "for": "li_1",
+                "type": "required",
+                "category": "service",
+                "description": "Electronics Recycling Fee (required by state law)",
+                "automatic": true,
+                "reason_code": "legal_requirement"
+            }
+        ]
     },
-    {
-      "id": "li_2",
-      "item": {
-        "id": "sku_recycling_fee",
-        "title": "Electronics Recycling Fee",
-        "price": 500
-      },
-      "quantity": 1,
-      "totals": [
-        { "type": "subtotal", "amount": 500 },
-        { "type": "total", "amount": 500 }
-      ]
-    }
-  ],
-  "ancillaries": {
-    "applied": [
-      {
-        "id": "li_2",
-        "for": "li_1",
-        "type": "required",
-        "category": "service",
-        "description": "Electronics Recycling Fee (required by state law)",
-        "automatic": true,
-        "reason_code": "legal_requirement"
-      }
+    "totals": [
+        { "type": "subtotal", "amount": 250400 },
+        { "type": "total", "amount": 250400 }
     ]
-  },
-  "totals": [
-    { "type": "subtotal", "amount": 250400 },
-    { "type": "total", "amount": 250400 }
-  ]
 }
 ```
 
@@ -673,51 +690,51 @@ Free items added automatically as part of a promotion.
 
 ```json
 {
-  "line_items": [
-    {
-      "id": "li_1",
-      "item": {
-        "id": "sku_phone",
-        "title": "Smartphone Pro",
-        "price": 119900
-      },
-      "quantity": 1,
-      "totals": [
+    "line_items": [
+        {
+            "id": "li_1",
+            "item": {
+                "id": "sku_phone",
+                "title": "Smartphone Pro",
+                "price": 119900
+            },
+            "quantity": 1,
+            "totals": [
+                { "type": "subtotal", "amount": 119900 },
+                { "type": "total", "amount": 119900 }
+            ]
+        },
+        {
+            "id": "li_2",
+            "item": {
+                "id": "sku_earbuds",
+                "title": "Wireless Earbuds",
+                "price": 0
+            },
+            "quantity": 1,
+            "totals": [
+                { "type": "subtotal", "amount": 0 },
+                { "type": "total", "amount": 0 }
+            ]
+        }
+    ],
+    "ancillaries": {
+        "applied": [
+            {
+                "id": "li_2",
+                "for": "li_1",
+                "type": "complementary",
+                "category": "product",
+                "description": "Free Wireless Earbuds with your new phone!",
+                "automatic": true,
+                "reason_code": "promotional_gift"
+            }
+        ]
+    },
+    "totals": [
         { "type": "subtotal", "amount": 119900 },
         { "type": "total", "amount": 119900 }
-      ]
-    },
-    {
-      "id": "li_2",
-      "item": {
-        "id": "sku_earbuds",
-        "title": "Wireless Earbuds",
-        "price": 0
-      },
-      "quantity": 1,
-      "totals": [
-        { "type": "subtotal", "amount": 0 },
-        { "type": "total", "amount": 0 }
-      ]
-    }
-  ],
-  "ancillaries": {
-    "applied": [
-      {
-        "id": "li_2",
-        "for": "li_1",
-        "type": "complementary",
-        "category": "product",
-        "description": "Free Wireless Earbuds with your new phone!",
-        "automatic": true,
-        "reason_code": "promotional_gift"
-      }
     ]
-  },
-  "totals": [
-    { "type": "subtotal", "amount": 119900 },
-    { "type": "total", "amount": 119900 }
-  ]
 }
 ```
 
