@@ -117,7 +117,6 @@ theme:
       accent: indigo
   features:
     - navigation.tabs
-    - navigation.sections
     - navigation.tabs.sticky
     - announce.dismiss
     - content.code.annotate
