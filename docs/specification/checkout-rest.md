@@ -96,6 +96,9 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
             {
               "id": "shop_pay_1234",
               "version": "2026-01-11",
+              "available_instruments": [
+                {"type": "shop_pay"}
+              ],
               "config": {
                 "merchant_id": "shop_merchant_123"
               }
@@ -221,6 +224,9 @@ so clients must include all previously set fields they wish to retain.
             {
               "id": "shop_pay_1234",
               "version": "2026-01-11",
+              "available_instruments": [
+                {"type": "shop_pay"}
+              ],
               "config": {
                 "merchant_id": "shop_merchant_123"
               }
@@ -577,6 +583,9 @@ Follow-up calls after initial `fulfillment` data to update selection.
             {
               "id": "shop_pay_1234",
               "version": "2026-01-11",
+              "available_instruments": [
+                {"type": "shop_pay"}
+              ],
               "config": {
                 "merchant_id": "shop_merchant_123"
               }
@@ -921,6 +930,9 @@ place to set these expectations via `messages`.
             {
               "id": "shop_pay_1234",
               "version": "2026-01-11",
+              "available_instruments": [
+                {"type": "shop_pay"}
+              ],
               "config": {
                 "merchant_id": "shop_merchant_123"
               }
