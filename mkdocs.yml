@@ -38,6 +38,7 @@ nav:
       - EP Binding: specification/embedded-checkout.md
       - AP2 Mandates Extension: specification/ap2-mandates.md
       - Buyer Consent Extension: specification/buyer-consent.md
+      - Ancillaries Extension: specification/ancillaries.md
       - Discounts Extension: specification/discount.md
       - Fulfillment Extension: specification/fulfillment.md
     - Cart Capability:
@@ -180,8 +181,7 @@ hooks:
 # Plugins
 plugins:
   - search
-  - macros:
-      on_error_fail: true
+  - macros
   - site-urls
   - social
   - llmstxt:
@@ -204,6 +204,7 @@ plugins:
           - specification/checkout-mcp.md
           - specification/checkout-a2a.md
         Checkout Extensions:
+          - specification/ancillaries.md
           - specification/ap2-mandates.md
           - specification/buyer-consent.md
           - specification/discount.md
