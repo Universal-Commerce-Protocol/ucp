@@ -409,7 +409,7 @@ Accessories and peripherals related to purchased items.
         "suggested": [
             {
                 "item": {
-                    "id": "sku_usbc_cable",
+                    "id": "sku_usb_cable",
                     "title": "USB-C Charging Cable (2m)",
                     "price": 1900,
                     "image_url": "https://example.com/images/usbc-cable.jpg"
@@ -460,8 +460,8 @@ Services that require time slot selection or other buyer input.
         {
             "id": "li_1",
             "item": {
-                "id": "sku_oled_tv_65",
-                "title": "65\" OLED Smart TV",
+                "id": "sku_tv_65",
+                "title": "65\" Smart TV",
                 "price": 199900
             },
             "quantity": 1,
@@ -567,8 +567,8 @@ Services that require time slot selection or other buyer input.
         {
             "id": "li_1",
             "item": {
-                "id": "sku_oled_tv_65",
-                "title": "65\" OLED Smart TV",
+                "id": "sku_tv_65",
+                "title": "65\" Smart TV",
                 "price": 199900
             },
             "quantity": 1,
