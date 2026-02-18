@@ -587,7 +587,9 @@
         "parameters": [
           { "$ref": "#/components/parameters/authorization" },
           { "$ref": "#/components/parameters/x_api_key" },
-          { "$ref": "#/components/parameters/request_signature" },
+          { "$ref": "#/components/parameters/signature" },
+          { "$ref": "#/components/parameters/signature_input" },
+          { "$ref": "#/components/parameters/content_digest" },
           { "$ref": "#/components/parameters/request_id" },
           { "$ref": "#/components/parameters/user_agent" },
           { "$ref": "#/components/parameters/ucp_agent" },
@@ -607,6 +609,11 @@
         "responses": {
           "200": {
             "description": "Search results",
+            "headers": {
+              "Signature": { "$ref": "#/components/headers/signature" },
+              "Signature-Input": { "$ref": "#/components/headers/signature_input" },
+              "Content-Digest": { "$ref": "#/components/headers/content_digest" }
+            },
             "content": {
               "application/json": {
                 "schema": { "$ref": "#/components/schemas/catalog_search_response" }
@@ -624,7 +631,9 @@
         "parameters": [
           { "$ref": "#/components/parameters/authorization" },
           { "$ref": "#/components/parameters/x_api_key" },
-          { "$ref": "#/components/parameters/request_signature" },
+          { "$ref": "#/components/parameters/signature" },
+          { "$ref": "#/components/parameters/signature_input" },
+          { "$ref": "#/components/parameters/content_digest" },
           { "$ref": "#/components/parameters/request_id" },
           { "$ref": "#/components/parameters/user_agent" },
           { "$ref": "#/components/parameters/ucp_agent" },
@@ -644,6 +653,11 @@
         "responses": {
           "200": {
             "description": "Lookup result",
+            "headers": {
+              "Signature": { "$ref": "#/components/headers/signature" },
+              "Signature-Input": { "$ref": "#/components/headers/signature_input" },
+              "Content-Digest": { "$ref": "#/components/headers/content_digest" }
+            },
             "content": {
               "application/json": {
                 "schema": { "$ref": "#/components/schemas/catalog_lookup_response" }
