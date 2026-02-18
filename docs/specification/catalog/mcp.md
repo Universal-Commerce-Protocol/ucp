@@ -102,7 +102,13 @@ version compatibility checking and capability negotiation.
 
 Maps to the [Catalog Search](search.md) capability.
 
-{{ method_fields('search_catalog', 'mcp.openrpc.json', 'catalog-mcp') }}
+#### Request
+
+{{ extension_schema_fields('catalog_search.json#/$defs/search_request', 'catalog-mcp') }}
+
+#### Response
+
+{{ extension_schema_fields('catalog_search.json#/$defs/search_response', 'catalog-mcp') }}
 
 #### Example
 
@@ -241,7 +247,13 @@ for supported identifiers, resolution behavior, and client correlation requireme
 
 The `catalog.ids` parameter accepts an array of identifiers and optional context.
 
-{{ method_fields('lookup_catalog', 'mcp.openrpc.json', 'catalog-mcp') }}
+#### Request
+
+{{ extension_schema_fields('catalog_lookup.json#/$defs/lookup_request', 'catalog-mcp') }}
+
+#### Response
+
+{{ extension_schema_fields('catalog_lookup.json#/$defs/lookup_response', 'catalog-mcp') }}
 
 #### Example
 
