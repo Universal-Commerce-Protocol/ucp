@@ -94,6 +94,13 @@
       "type": "object",
       "description": "Business-defined custom data extending the standard variant model."
     },
+    "input": {
+      "type": "array",
+      "items": {
+        "$ref": "input_correlation.json"
+      },
+      "description": "Lookup correlation: which request identifiers resolved to this variant, and how. Present in lookup responses; absent in search and get_product responses."
+    },
     "seller": {
       "type": "object",
       "description": "Optional seller context for this variant.",

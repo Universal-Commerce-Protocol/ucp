@@ -35,16 +35,22 @@ secondary identifiers such as SKU or handle, provided these are also fields on
 the returned product object.
 
 Duplicate identifiers in the request MUST be deduplicated. When an identifier
-matches multiple products (e.g., a SKU shared across variants), all matching
-products MUST be returned. When multiple identifiers resolve to the same product,
-it MUST be returned once. The `products` array may contain fewer or more items
-than requested identifiers.
+matches multiple products (e.g., a SKU shared across variants), implementations
+return matching products and MAY limit the result set. When multiple identifiers
+resolve to the same product, it MUST be returned once.
 
 ### Client Correlation
 
-The response does not guarantee order or provide explicit identifier-to-product
-mapping. Clients correlate results by matching fields in the returned products
-(e.g., `id`, `sku`, `handle`) against the requested identifiers.
+The response does not guarantee order. Each variant carries an `input`
+array identifying which request identifiers resolved to it, and how.
+
+{{ schema_fields('types/input_correlation', 'catalog') }}
+
+Multiple request identifiers may resolve to the same variant (e.g., a
+product ID and one of its variant IDs). When this occurs, the variant's
+`input` array contains one entry per resolved identifier, each with its
+own match type. Variants without an `input` entry MUST NOT appear in
+lookup responses.
 
 ### Batch Size
 
@@ -55,15 +61,12 @@ with an appropriate error (HTTP 400 `request_too_large` for REST, JSON-RPC
 
 ### Resolution Behavior
 
-For each identifier, the response returns the parent product with full context
-(title, description, media, options):
+`match` reflects the resolution level of the identifier, not its type:
 
-* **Product ID lookup**: `variants` MAY contain a representative set.
-* **Variant ID lookup**: `variants` MUST contain only the requested variant.
-
-When the variant set is large, a representative set MAY be returned based on
-buyer context or other criteria. This ensures agents always have product context
-for display while getting exactly what they requested.
+* **`exact`**: Identifier resolved directly to this variant
+  (e.g., variant ID, SKU, barcode).
+* **`featured`**: Identifier resolved to the parent product; server
+  selected this variant as representative (e.g., product ID, handle).
 
 ### Request
 

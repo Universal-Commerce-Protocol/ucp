@@ -306,6 +306,9 @@ The `catalog.ids` parameter accepts an array of identifiers and optional context
                   "description": { "plain": "Size 10 variant" },
                   "price": { "amount": 12000, "currency": "USD" },
                   "availability": { "available": true },
+                  "input": [
+                    { "id": "prod_abc123", "match": "featured" }
+                  ],
                   "tags": ["running", "road", "neutral"],
                   "seller": {
                     "name": "Example Store",
@@ -341,6 +344,9 @@ The `catalog.ids` parameter accepts an array of identifiers and optional context
                   "description": { "plain": "Size 11 Green variant" },
                   "price": { "amount": 15000, "currency": "USD" },
                   "availability": { "available": true },
+                  "input": [
+                    { "id": "var_xyz789", "match": "exact" }
+                  ],
                   "tags": ["trail", "waterproof"],
                   "seller": {
                     "name": "Example Store"

@@ -82,6 +82,11 @@ and context for search. Platforms SHOULD treat the first element as featured.
 
 A purchasable item with specific option selections, price, and availability.
 
+In lookup responses, each variant carries an `input` array for correlation:
+which request identifiers resolved to this variant, and whether the match
+was `exact` or `featured` (server-selected). See
+[Client Correlation](lookup.md#client-correlation) for details.
+
 `media` is an ordered array. Businesses SHOULD return the featured variant image
 as the first element. Platforms SHOULD treat the first element as featured.
 
@@ -221,8 +226,8 @@ identifiers were not found.
 }
 ```
 
-Agents correlate results by matching fields in returned products against
-requested identifiers.
+Agents correlate results using the `input` array on each variant. See
+[Client Correlation](lookup.md#client-correlation).
 
 ## Transport Bindings
 

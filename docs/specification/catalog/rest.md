@@ -240,7 +240,10 @@ applies to all lookups in the batch.
               "title": "Talla 10",
               "description": { "plain": "Variante talla 10" },
               "price": { "amount": 12000, "currency": "USD" },
-              "availability": { "available": true }
+              "availability": { "available": true },
+              "input": [
+                { "id": "prod_abc123", "match": "featured" }
+              ]
             }
           ]
         },
@@ -260,7 +263,10 @@ applies to all lookups in the batch.
               "sku": "TBX-GRN-10",
               "title": "Talla 10",
               "price": { "amount": 15000, "currency": "USD" },
-              "availability": { "available": true }
+              "availability": { "available": true },
+              "input": [
+                { "id": "prod_def456", "match": "featured" }
+              ]
             }
           ]
         }
