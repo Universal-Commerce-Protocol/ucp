@@ -86,7 +86,7 @@ SHOULD be linked for the duration of the checkout.
 
 * **After checkout completion** — Business MAY clear the cart based on TTL,
     completion of the checkout, or other business logic. Subsequent operations
-    on a cleared cart ID return `NOT_FOUND`; the platform can start a new
+    on a cleared cart ID return `not_found`; the platform can start a new
     session with `create_cart`.
 
 ## Guidelines
@@ -96,7 +96,7 @@ SHOULD be linked for the duration of the checkout.
 * **MAY** use carts for pre-purchase exploration and session persistence.
 * **SHOULD** convert cart to checkout when user expresses purchase intent.
 * **MAY** display `continue_url` for handoff to business UI.
-* **SHOULD** handle `NOT_FOUND` gracefully when cart expires or is canceled.
+* **SHOULD** handle `not_found` gracefully when cart expires or is canceled.
 
 ### Business
 
@@ -134,7 +134,7 @@ information for localized pricing estimates.
 
 ### Get Cart
 
-Retrieves the latest state of a cart session. Returns `NOT_FOUND` if the cart
+Retrieves the latest state of a cart session. Returns `not_found` if the cart
 does not exist, has expired, or was canceled.
 
 * [REST Binding](cart-rest.md#get-cart)
@@ -152,7 +152,7 @@ state on the business side.
 ### Cancel Cart
 
 Cancels a cart session. Business MUST return the cart state before deletion.
-Subsequent operations for this cart ID SHOULD return `NOT_FOUND`.
+Subsequent operations for this cart ID SHOULD return `not_found`.
 
 * [REST Binding](cart-rest.md#cancel-cart)
 * [MCP Binding](cart-mcp.md#cancel_cart)
