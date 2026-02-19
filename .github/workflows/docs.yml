@@ -15,16 +15,12 @@
 name: Docs Build and Deploy
 
 on:
+  workflow_dispatch:
+
   push:
     branches:
       - main
-    paths:
-      - ".github/workflows/docs.yml"
-      - "requirements-docs.txt"
-      - "mkdocs.yml"
-      - "main.py"
-      - "docs/**"
-      - "spec/**"
+      - 'release/**'
   pull_request:
     branches:
       - main
@@ -33,8 +29,9 @@ on:
       - "requirements-docs.txt"
       - "mkdocs.yml"
       - "main.py"
+      - "hooks.py"
       - "docs/**"
-      - "spec/**"
+      - "source/**"
 
 jobs:
   build_and_deploy:
@@ -60,43 +57,31 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libcairo2-dev libfreetype6-dev libffi-dev libjpeg-dev libpng-dev libz-dev
 
-      - name: Setup Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: 3.13
-
-      - name: Restore pip cache
-        uses: actions/cache@v4
-        with:
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements-docs.txt') }}
-          path: ~/.cache/pip
-          restore-keys: |
-            ${{ runner.os }}-pip-
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@v7
 
       - name: Install documentation dependencies
-        run: pip install -r requirements-docs.txt
+        run: uv sync
 
       - name: Lint YAML files
-        run: yamllint -c .github/linters/.yamllint.yml .
+        run: uv run yamllint -c .github/linters/.yamllint.yml .
 
-      - name: Install uv
-        run: |
-          curl -LsSf https://astral.sh/uv/install.sh | sh
-          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-
-      - name: Check for changed files in spec
-        id: spec_files_changed
+      - name: Check for changed files in source
+        id: source_files_changed
         uses: tj-actions/changed-files@v46
         with:
-          files: spec/**
+          files: source/**
 
-      - name: Check Python SDK Models Consistency
-        if: steps.spec_files_changed.outputs.any_changed == 'true'
+      - name: Install ucp-schema for runtime resolution
         run: |
-          chmod +x scripts/ci_check_models.sh
-          scripts/ci_check_models.sh
+          cargo install ucp-schema
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
 
-      - name: Create specs folders for JSON publishing
+      - name: Lint source schemas
+        if: steps.source_files_changed.outputs.any_changed == 'true'
+        run: ucp-schema lint source/
+
+      - name: Create folders for JSON publishing
         run: |
           mkdir -p site/schemas
           mkdir -p site/services
@@ -105,9 +90,36 @@ jobs:
 
       - name: Build Documentation (PR Check)
         if: github.event_name == 'pull_request'
-        run: mkdocs build --strict
+        run: uv run mkdocs build --strict
 
       - name: Deploy development version from main branch
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
-          mkdocs gh-deploy
+          uv run mike deploy --push draft
+
+      - name: Deploy release version
+        if: startsWith(github.ref, 'refs/heads/release/')
+        run: |
+          # Extract the date (e.g., release/2026-01-11 -> 2026-01-11)
+          VERSION_NAME=${GITHUB_REF#refs/heads/release/}
+
+          # Deploy this version, tag it as 'latest', and set it as the default site root
+          uv run mike deploy --push --update-aliases $VERSION_NAME latest
+          uv run mike set-default --push latest
+
+      - name: Create GitHub Release and Tag
+        if: startsWith(github.ref, 'refs/heads/release/')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION_DATE=${GITHUB_REF#refs/heads/release/}
+          TAG_NAME="v$VERSION_DATE"
+
+          # Create Release (This implicitly creates the git tag)
+          # The '|| true' ensures the workflow doesn't fail if you
+          # push updates to this branch later (re-running the build).
+          gh release create "$TAG_NAME" \
+            --title "Release $TAG_NAME" \
+            --generate-notes \
+            --target "$GITHUB_REF_NAME" \
+            || echo "Release $TAG_NAME already exists, skipping creation."

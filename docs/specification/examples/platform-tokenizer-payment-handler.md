@@ -17,7 +17,6 @@
 # Platform Tokenizer Payment Handler
 
 * **Handler Name:** `com.example.platform_tokenizer`
-* **Version:** `2026-01-11`
 * **Type:** Payment Handler Example
 
 ## Introduction
@@ -35,103 +34,108 @@ processing.
 This pattern is ideal for platforms that operate as wallet providers with
 compliant credential storage.
 
+**Note:** While this example uses card credentials, the pattern applies to
+**any credential type**. Compliance requirements vary by credential type
+(e.g., PCI DSS for cards).
+
 ### Key Benefits
 
-- **Zero early transmission:** Platforms never expose sensitive data until a payment request is being finalized.
-- **Platform-controlled security:** Platform defines token lifecycle and binding policies.
-- **PSP flexibility:** Businesses can delegate detokenization to their PSP, keeping sensitive data out of business systems entirely.
+* **Zero early transmission:** Platforms never expose sensitive data until a payment request is being finalized.
+* **Platform-controlled security:** Platform defines token lifecycle and binding policies.
+* **PSP flexibility:** Businesses can delegate detokenization to their PSP, keeping sensitive data out of business systems entirely.
 
 ### QuickStart
 
-| If you are a... | Start here |
-|:----------------|:-----------|
-| **Business** accepting this handler | [Business Integration](#business-integration) |
+| If you are a...                        | Start here                                    |
+| :------------------------------------- | :-------------------------------------------- |
+| **Business** accepting this handler    | [Business Integration](#business-integration) |
 | **Platform** implementing this handler | [Platform Integration](#platform-integration) |
-| **PSP** processing for businesses | [PSP Integration](#psp-integration) |
+| **PSP** processing for businesses      | [PSP Integration](#psp-integration)           |
 
 ---
 
 ## Participants
 
-| Participant | Role | Prerequisites |
-|:------------|:-----|:--------------|
-| **Business** | Advertises handler, receives tokens, optionally delegates to PSP | Yes — onboards with platform |
+| Participant  | Role                                                                                            | Prerequisites                         |
+| :----------- | :---------------------------------------------------------------------------------------------- | :------------------------------------ |
+| **Business** | Advertises handler, receives tokens, optionally delegates to PSP                                | Yes — onboards with platform          |
 | **Platform** | Operates a payment credential provider that generates tokens and exposes `/detokenize` endpoint | Yes — implements tokenization service |
-| **PSP** | Optionally detokenizes on business's behalf, processes payments | Yes — onboards with platform |
+| **PSP**      | Optionally detokenizes on business's behalf, processes payments                                 | Yes — onboards with platform          |
 
 ### Pattern Flow: Business Detokenizes
 
-```
-┌─────────────────┐                              ┌────────────┐
-│    Platform     │                              │  Business  │
-│  (Tokenizer)    │                              │            │
-└────────┬────────┘                              └──────┬─────┘
-         │                                              │
-         │  1. Business registers with Platform (out-of-band)
-         │<─────────────────────────────────────────────│
-         │                                              │
-         │  2. API credentials                          │
-         │─────────────────────────────────────────────>│
-         │                                              │
-         │  3. GET payment.handlers                     │
-         │─────────────────────────────────────────────>│
-         │                                              │
-         │  4. Handler with business identity           │
-         │<─────────────────────────────────────────────│
-         │                                              │
-         │5. Platforms's Credential Provider generates token│
-         │                                              │
-         │  6. POST checkout with TokenCredential       │
-         │─────────────────────────────────────────────>│
-         │                                              │
-         │  7. POST /detokenize (to Credential Provider)│
-         │<─────────────────────────────────────────────│
-         │                                              │
-         │  8. Sensitive Data                           │
-         │─────────────────────────────────────────────>│
-         │                                              │
-         │  9. Checkout complete                        │
-         │<─────────────────────────────────────────────│
+```text
++-----------------+                              +------------+
+|    Platform     |                              |  Business  |
+|  (Tokenizer)    |                              |            |
++--------+--------+                              +------+-----+
+         |                                              |
+         |  1. Business registers with Platform (out-of-band)
+         |<---------------------------------------------|
+         |                                              |
+         |  2. API credentials                          |
+         |--------------------------------------------->|
+         |                                              |
+         |  3. GET ucp.payment_handlers                 |
+         |--------------------------------------------->|
+         |                                              |
+         |  4. Handler with business identity           |
+         |<---------------------------------------------|
+         |                                              |
+         |5. Platforms's Credential Provider generates token
+         |                                              |
+         |  6. POST checkout with TokenCredential       |
+         |--------------------------------------------->|
+         |                                              |
+         |  7. POST /detokenize (to Credential Provider)|
+         |<---------------------------------------------|
+         |                                              |
+         |  8. Sensitive Data                           |
+         |--------------------------------------------->|
+         |                                              |
+         |  9. Checkout complete                        |
+         |<---------------------------------------------|
 ```
 
 ### Pattern Flow: PSP Detokenizes
 
-```
-┌─────────────────┐     ┌────────────┐      ┌─────────┐
-│    Platform     │     │  Business  │      │   PSP   │
-│  (Tokenizer)    │     │            │      │         │
-└────────┬────────┘     └──────┬─────┘      └────┬────┘
-         │                     │                 │
-         │  1. Business + PSP register with Platform (out-of-band)
-         │<────────────────────│                 │
-         │<──────────────────────────────────────│
-         │                     │                 │
-         │  2. API credentials │                 │
-         │────────────────────>│                 │
-         │──────────────────────────────────────>│
-         │                     │                 │
-         │  3. Payment Credential Provider       │
-         │     generates token                   │
-         │                     │                 │
-         │  4. POST checkout with TokenCredential│
-         │────────────────────>│                 │
-         │                     │                 │
-         │                     │  5. Forward     │
-         │                     │  token to PSP   │
-         │                     │────────────────>│
-         │                     │                 │
-         │  6. POST /detokenize (to Credential Provider, with business identity)
-         │<──────────────────────────────────────│
-         │                     │                 │
-         │  7. Sensitive Data  │                 │
-         │──────────────────────────────────────>│
-         │                     │                 │
-         │                     │  8. Payment     │
-         │                     │  result         │
-         │                     │<────────────────│
-         │                     │                 │
-         │  9. Checkout complete                 │
-         │<────────────────────│                 │
+```text
++-----------------+     +------------+      +---------+
+|    Platform     |     |  Business  |      |   PSP   |
+|  (Tokenizer)    |     |            |      |         |
++--------+--------+     +------+-----+      +----+----+
+         |                     |                 |
+         |  1. Business + PSP register with Platform (out-of-band)
+         |<--------------------|                 |
+         |<--------------------------------------|
+         |                     |                 |
+         |  2. API credentials |                 |
+         |-------------------->|                 |
+         |-------------------------------------->|
+         |                     |                 |
+         |  3. Payment Credential Provider       |
+         |     generates token                   |
+         |                     |                 |
+         |  4. POST checkout with TokenCredential|
+         |-------------------->|                 |
+         |                     |                 |
+         |                     |  5. Forward     |
+         |                     |  token to PSP   |
+         |                     |---------------->|
+         |                     |                 |
+         |  6. POST /detokenize (to Credential Provider, with business identity)
+         |<--------------------------------------|
+         |                     |                 |
+         |  7. Sensitive Data  |                 |
+         |-------------------------------------->|
+         |                     |                 |
+         |                     |  8. Payment     |
+         |                     |  result         |
+         |                     |                  |
+         |                     |<----------------|
+         |                     |                 |
+         |  9. Checkout complete                 |
+         |<--------------------|                 |
 ```
 
 ---
@@ -140,27 +144,28 @@ compliant credential storage.
 
 ### Prerequisites
 
-**CRITICAL: Security & Compliance Required**
+#### CRITICAL: Security & Compliance Required
 
 Before accepting this handler, businesses must register with the platform to
 obtain authentication credentials for calling `/detokenize`.
 
-As the party receiving sensitive instrument details (e.g., PANs) via the
-`/detokenize` endpoint, businesses **MUST** be compliant with relevant data
-security standards (e.g., PCI DSS). This includes:
+As the party receiving sensitive instrument details via the `/detokenize`
+endpoint, businesses **MUST** be compliant with relevant data security
+standards for the credential type being handled (e.g., PCI DSS for cards).
+This includes:
 
-- Secure transmission (HTTPS/TLS with strong cipher suites)
-- Secure handling of sensitive data during payment processing
-- Compliance with all regulations regarding the storage and processing of financial instruments
+* Secure transmission (HTTPS/TLS with strong cipher suites)
+* Secure handling of sensitive data during payment processing
+* Compliance with all regulations regarding the storage and processing of financial instruments
 
 Optionally, businesses may configure their PSP to detokenize on their behalf
 (PSP must also be compliant).
 
 **Prerequisites Output:**
 
-| Field | Description |
-|:------|:------------|
-| `identity.access_token` | Business identifier assigned by platform during onboarding |
+| Field                      | Description                                                   |
+| :------------------------- | :------------------------------------------------------------ |
+| `identity.access_token`    | Business identifier assigned by platform during onboarding    |
 | Authentication credentials | API key or OAuth token for authenticating `/detokenize` calls |
 
 ### Handler Configuration
@@ -175,29 +180,58 @@ The handler accepts [CardCredential](https://ucp.dev/schemas/shopping/types/card
 
 **Note:** The result of `/detokenize` contains **sensitive payment data**.
 Both the sender (platform's credential provider) and receiver
-(business or PSP) **MUST** be PCI DSS compliant.
+(business or PSP) **MUST** be compliant with relevant standards for the
+credential type (e.g., PCI DSS for cards).
 
-#### Example Handler Declaration
+#### Business Config (Discovery)
+
+| Field         | Type   | Required | Description                                 |
+| :------------ | :----- | :------- | :------------------------------------------ |
+| `environment` | string | Yes      | API environment (`sandbox` or `production`) |
+| `business_id` | string | Yes      | Business identifier assigned by platform    |
+
+#### Example Business Handler Declaration
 
 ```json
 {
-  "payment": {
-    "handlers": [
-      {
-        "id": "platform_wallet",
-        "name": "com.example.platform_tokenizer",
-        "version": "2026-01-12",
-        "spec": "https://platform.example.com/ucp/handler.json",
-        "config_schema": "https://platform.example.com/ucp/handler/config.json",
-        "instrument_schemas": [
-          "https://ucp.dev/schemas/shopping/types/card_payment_instrument.json"
-        ],
-        "config": {
-          "business_id": "business_abc123",
-          "environment": "production"
+  "ucp": {
+    "version": "2026-01-11",
+    "payment_handlers": {
+      "com.example.platform_tokenizer": [
+        {
+          "id": "platform_wallet",
+          "version": "2026-01-11",
+          "spec": "https://platform.example.com/ucp/handler.json",
+          "schema": "https://platform.example.com/ucp/handler/schema.json",
+          "config": {
+            "environment": "production",
+            "business_id": "business_abc123"
+          }
         }
-      }
-    ]
+      ]
+    }
+  }
+}
+```
+
+#### Response Config (Checkout)
+
+The response config includes runtime token lifecycle information.
+
+| Field               | Type    | Required | Description                   |
+| :------------------ | :------ | :------- | :---------------------------- |
+| `environment`       | string  | Yes      | API environment               |
+| `business_id`       | string  | Yes      | Business identifier           |
+| `token_ttl_seconds` | integer | No       | Token time-to-live in seconds |
+
+#### Example Response Config
+
+```json
+{
+  "config": {
+    "environment": "production",
+    "business_id": "business_abc123",
+    "token_ttl_seconds": 900,
   }
 }
 ```
@@ -208,8 +242,8 @@ Upon receiving a checkout with a token credential:
 
 1. **Validate Handler:** Confirm `instrument.handler_id` matches the expected handler ID.
 2. **Detokenize or Delegate:**
-   - **Option A (Direct):** Call the platform's **credential provider** `/detokenize` endpoint directly, then process payments.
-   - **Option B (Delegated):** Forward the token to a PSP for detokenization and payment processing.
+   * **Option A (Direct):** Call the platform's **credential provider** `/detokenize` endpoint directly, then process payments.
+   * **Option B (Delegated):** Forward the token to a PSP for detokenization and payment processing.
 3. **Return Response:** Respond with the finalized checkout state.
 
 For option B, see section [PSP Integration](#psp-integration).
@@ -249,12 +283,50 @@ data and exposes the `/detokenize` endpoint. To implement, platforms must:
 
 **Implementation Requirements:**
 
-| Requirement | Description |
-|:------------|:------------|
-| `/detokenize` endpoint | Exposed by the compliant payment credential provider (not the platform application) |
-| Token storage | Map tokens to credentials with binding metadata in the credential provider |
-| Participant allowlist | Only onboarded businesses/PSPs can call the credential provider's `/detokenize` |
-| Binding verification | payment credential provider verifies `checkout_id` and caller identity on detokenization |
+| Requirement            | Description                                                                              |
+| :--------------------- | :--------------------------------------------------------------------------------------- |
+| `/detokenize` endpoint | Exposed by the compliant payment credential provider (not the platform application)      |
+| Token storage          | Map tokens to credentials with binding metadata in the credential provider               |
+| Participant allowlist  | Only onboarded businesses/PSPs can call the credential provider's `/detokenize`          |
+| Binding verification   | payment credential provider verifies `checkout_id` and caller identity on detokenization |
+
+### Handler Configuration (Platform)
+
+Platforms advertise this handler in their UCP profile's `payment_handlers`
+registry using `platform_config`.
+
+#### Platform Config (Discovery)
+
+| Field                       | Type    | Required | Description                                 |
+| :-------------------------- | :------ | :------- | :------------------------------------------ |
+| `environment`               | string  | Yes      | API environment (`sandbox` or `production`) |
+| `platform_id`               | string  | Yes      | Platform identifier                         |
+| `default_token_ttl_seconds` | integer | No       | Default token TTL offered to businesses     |
+
+#### Example Platform Handler Declaration
+
+```json
+{
+  "ucp": {
+    "version": "2026-01-11",
+    "payment_handlers": {
+      "com.example.platform_tokenizer": [
+        {
+          "id": "platform_wallet",
+          "version": "2026-01-11",
+          "spec": "https://platform.example.com/ucp/handler.json",
+          "schema": "https://platform.example.com/ucp/handler/schema.json",
+          "config": {
+            "environment": "production",
+            "platform_id": "platform_abc123",
+            "default_token_ttl_seconds": 900
+          }
+        }
+      ]
+    }
+  }
+}
+```
 
 ### Token Generation
 
@@ -280,18 +352,25 @@ POST /checkout-sessions/{checkout_id}/complete
 Content-Type: application/json
 
 {
-  "payment_data": {
-    "id": "instr_1",
-    "handler_id": "platform_wallet",
-    "type": "card",
-    "brand": "visa",
-    "last_digits": "4242",
-    "credential": {
-      "type": "token",
-      "token": "ptok_x9y8z7w6v5u4"
-    }
+  "payment": {
+    "instruments": [
+      {
+        "id": "instr_1",
+        "handler_id": "platform_wallet",
+        "type": "card",
+        "selected": true,
+        "display": {
+          "brand": "visa",
+          "last_digits": "4242"
+        },
+        "credential": {
+          "type": "token",
+          "token": "ptok_x9y8z7w6v5u4"
+        }
+      }
+    ]
   },
-  "risk_signal": {
+  "risk_signals": {
     // ... the key value pair for potential risk signal data
   }
 }
@@ -303,26 +382,26 @@ Content-Type: application/json
 
 ### Prerequisites
 
-**CRITICAL: Security & Compliance Required**
+#### CRITICAL: Security & Compliance Required
 
 Before detokenizing on behalf of businesses, PSPs must register with the
 platform, providing the list of businesses they process for.
 
 As the party receiving sensitive instrument details via the `/detokenize`
 endpoint, PSPs **MUST** be **compliant** with relevant security standards
-This includes:
+for the credential type being handled (e.g., PCI DSS for cards). This includes:
 
-- Secure transmission (HTTPS/TLS with strong cipher suites)
-- Secure handling of sensitive data during payment processing
-- Compliance with all regulations regarding the storage and processing of
+* Secure transmission (HTTPS/TLS with strong cipher suites)
+* Secure handling of sensitive data during payment processing
+* Compliance with all regulations regarding the storage and processing of
   financial instruments
 
 **Prerequisites Output:**
 
-| Field | Description |
-|:------|:------------|
+| Field                      | Description                                                   |
+| :------------------------- | :------------------------------------------------------------ |
 | Authentication credentials | API key or OAuth token for authenticating `/detokenize` calls |
-| Business associations | List of business identities this PSP can detokenize for |
+| Business associations      | List of business identities this PSP can detokenize for       |
 
 ### Detokenization Flow
 
@@ -356,18 +435,18 @@ business, so they must specify which businesses' token they are retrieving.
 
 The platform's payment credential provider verifies that:
 
-- The PSP is authorized to detokenize for this business.
-- The `checkout_id` matches the original tokenization.
-- The token has not expired or been used.
+* The PSP is authorized to detokenize for this business.
+* The `checkout_id` matches the original tokenization.
+* The token has not expired or been used.
 
 ---
 
 ## Security Considerations
 
 | Requirement | Description |
-|:------------|:------------|
-| **Compliance (credential provider)** | Platform's credential provider **MUST** be compliant (e.g., PCI DSS) when handling and storing sensitive instrument details. |
-| **Compliance (Receivers)** | Businesses/PSPs calling `/detokenize` **MUST** be compliant when receiving sensitive data payloads. |
+| :---------- | :---------- |
+| **Compliance (credential provider)** | Platform's credential provider **MUST** be compliant with relevant standards for the credential type (e.g., PCI DSS for cards) when handling and storing sensitive instrument details. |
+| **Compliance (Receivers)** | Businesses/PSPs calling `/detokenize` **MUST** be compliant with relevant standards for the credential type when receiving sensitive data payloads. |
 | **Secure transmission** | Data transmission via `/detokenize` **MUST** use HTTPS/TLS with strong cipher suites. |
 | **No Platform App access** | Platform applications **MUST NOT** handle sensitive data—only the compliant payment credential provider does. |
 | **Endpoint isolation** | `/detokenize` endpoint **MUST** be exposed by the payment credential provider, not the platform application. |
@@ -383,6 +462,6 @@ The platform's payment credential provider verifies that:
 
 ## References
 
-- **Pattern:** [Tokenization Payment Handler](https://ucp.dev/specification/payment-handler-guide)
-- **API Pattern:** `https://ucp.dev/handlers/tokenization/openapi.json`
-- **Identity Schema:** `https://ucp.dev/schemas/shopping/types/payment_identity.json`
+* **Pattern:** [Tokenization Payment Handler](https://ucp.dev/specification/payment-handler-guide)
+* **API Pattern:** `https://ucp.dev/handlers/tokenization/openapi.json`
+* **Identity Schema:** `https://ucp.dev/schemas/shopping/types/payment_identity.json`
