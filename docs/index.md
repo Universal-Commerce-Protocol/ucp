@@ -508,6 +508,10 @@ image: assets/banner.png
         <span>Carrefour</span>
       </div>
       <div class="partner-logo">
+        <img src="assets/partner/endorsed/CheckoutCom.svg" alt="Checkout.com" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+        <span>Chewy</span>
+      </div>
+      <div class="partner-logo">
         <img src="assets/partner/endorsed/Chewy.svg" alt="Chewy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
         <span>Chewy</span>
       </div>
@@ -619,6 +623,10 @@ image: assets/banner.png
       <div class="partner-logo">
         <img src="assets/partner/endorsed/Carrefour.svg" alt="Carrefour" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
         <span>Carrefour</span>
+      </div>
+      <div class="partner-logo">
+        <img src="assets/partner/endorsed/CheckoutCom.svg" alt="Checkout.com" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+        <span>Chewy</span>
       </div>
       <div class="partner-logo">
         <img src="assets/partner/endorsed/Chewy.svg" alt="Chewy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
