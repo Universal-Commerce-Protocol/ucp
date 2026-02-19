@@ -224,8 +224,7 @@ When a user is ready to make a payment, `payment` must be submitted to the
 business agent to complete the checkout process. `payment` is a structured data
 type specified as part of UCP. When processing a payment to complete the
 checkout, `payment` must be submitted to the business agent as a `DataPart` with
-attribute name `a2a.ucp.checkout.payment`. Any associated risk signals should be
-sent with attribute name `a2a.ucp.checkout.risk_signals`.
+attribute name `a2a.ucp.checkout.payment`.
 
 Upon completion of the checkout process, the business agent must return the
 checkout object containing an `order` attribute with `id` and `permalink_url`.
@@ -246,8 +245,7 @@ checkout object containing an `order` attribute with `id` and `permalink_url`.
         "data": {
           "a2a.ucp.checkout.payment": {
             ...paymentObject
-          },
-          "a2a.ucp.checkout.risk_signals":{...content}
+          }
         }
       }
     ],

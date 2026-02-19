@@ -395,9 +395,6 @@ Content-Type: application/json
         }
       }
     ]
-  },
-  "risk_signals": {
-    // ... the key value pair for potential risk signal data
   }
 }
 ```

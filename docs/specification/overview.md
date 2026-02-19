@@ -1191,27 +1191,6 @@ and cart context, then returns the resolved result. Platforms **MUST** treat the
 `available_instruments` in the response as authoritative for that checkout. See
 the [Payment Handler Guide](payment-handler-guide.md#resolving-available_instruments)
 for the full resolution semantics.
-
-### Risk Signals
-
-To aid in fraud assessment, the Platform **MAY** include additional risk signals
-in the `complete` call, providing the Business with more context about the
-transaction's legitimacy. The structure and content of these risk signals are
-not strictly defined by this specification, allowing flexibility based on the
-agreement between the Platform and Business or specific payment handler
-requirements.
-
-**Example (Flexible Structure):**
-
-```json
-{
-  "risk_signals": {
-    "session_id": "abc_123_xyz",
-    "score": 0.95,
-  }
-}
-```
-
 ### Implementation Scenarios
 
 The following scenarios illustrate how different payment handlers and
@@ -1320,9 +1299,6 @@ POST /checkout-sessions/{id}/complete
         }
       }
     ]
-  },
-  "risk_signals": {
-      // ...
   }
 }
 ```
@@ -1385,9 +1361,6 @@ POST /checkout-sessions/{id}/complete
         "credential": { "token": "tok_visa_123" }
       }
     ]
-  },
-  "risk_signals": {
-    // ... host could send risk_signals here
   }
 }
 ```
@@ -1463,10 +1436,6 @@ POST /checkout-sessions/{id}/complete
         }
       }
     ]
-  },
-  "risk_signals": {
-    "session_id": "abc_123_xyz",
-    "score": 0.95
   },
   "ap2": {
     "checkout_mandate": "eyJhbGciOiJ...", // Signed proof of checkout terms
