@@ -48,7 +48,16 @@ merchants MAY support additional custom filters via `additionalProperties`.
 
 ## Pagination
 
-Cursor-based pagination for list operations.
+Cursor-based pagination for list operations. Cursors are opaque strings
+that implementations MAY encode as stateless keyset tokens.
+
+### Page Size
+
+The `limit` parameter is a requested page size, not a guaranteed count.
+Implementations SHOULD accept a page size of at least 10. When the
+requested limit exceeds the implementation's maximum, implementations
+MAY clamp to their maximum silently — returning fewer results without
+error. Clients MUST NOT assume the response size equals the requested limit.
 
 ### Pagination Request
 
