@@ -56,11 +56,12 @@ Location and market context for catalog operations. All fields are optional
 hints for relevance and localization. Platforms MAY geo-detect context from
 request headers.
 
-Context signals are provisional—not authorization. Businesses SHOULD use these
-values when authoritative data (e.g., shipping address) is absent, and MAY
-ignore or down-rank them if inconsistent with stronger signals (authenticated
-account, fraud rules, export controls). Eligibility and policy enforcement
-MUST occur at checkout/order time with authoritative data.
+Context signals are provisional—not authoritative data. Businesses SHOULD use
+these values when verified inputs (e.g., shipping address) are absent, and MAY
+ignore or down-rank them if inconsistent with higher-confidence signals
+(authenticated account, risk detection) or regulatory constraints (export
+controls). Eligibility and policy enforcement MUST occur at checkout time using
+binding transaction data.
 
 Businesses determine market assignment—including currency—based on context
 signals. Price filter values are interpreted in the business's assigned

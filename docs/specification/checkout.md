@@ -383,11 +383,12 @@ defined below:
 
 ### Context
 
-Context signals are provisional—not authorization. Businesses SHOULD use these
-values when authoritative data (e.g., shipping address) is absent, and MAY
-ignore or down-rank them if inconsistent with stronger signals (authenticated
-account, fraud rules, export controls). Eligibility and policy enforcement
-MUST occur at checkout/order time with authoritative data.
+Context signals are provisional—not authoritative data. Businesses SHOULD use
+these values when verified inputs (e.g., shipping address) are absent, and MAY
+ignore or down-rank them if inconsistent with higher-confidence signals
+(authenticated account, risk detection) or regulatory constraints (export
+controls). Eligibility and policy enforcement MUST occur at checkout time using
+binding transaction data.
 
 {{ schema_fields('context', 'checkout') }}
 
