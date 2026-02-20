@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/category.json",
+  "title": "Category",
+  "description": "A product category with optional taxonomy identifier.",
+  "type": "object",
+  "required": ["value"],
+  "properties": {
+    "value": {
+      "type": "string",
+      "description": "Category value or path (e.g., 'Apparel > Shirts', '1604')."
+    },
+    "taxonomy": {
+      "type": "string",
+      "description": "Source taxonomy. Well-known values: `google_product_category`, `shopify`, `merchant`."
+    }
+  }
+}

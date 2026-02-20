@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/catalog_search.json",
+  "name": "dev.ucp.shopping.catalog.search",
+  "version": "2026-01-11",
+  "title": "Catalog Search",
+  "description": "Product catalog search capability.",
+  "type": "object",
+  "$defs": {
+    "search_request": {
+      "type": "object",
+      "required": ["query"],
+      "properties": {
+        "query": {
+          "type": "string",
+          "description": "Free-text search query."
+        },
+        "context": {
+          "$ref": "types/context.json"
+        },
+        "filters": {
+          "$ref": "types/search_filters.json"
+        },
+        "pagination": {
+          "$ref": "types/pagination.json#/$defs/request"
+        }
+      }
+    },
+    "search_response": {
+      "type": "object",
+      "required": [
+        "ucp",
+        "products"
+      ],
+      "properties": {
+        "ucp": {
+          "$ref": "../ucp.json#/$defs/response_catalog_schema"
+        },
+        "products": {
+          "type": "array",
+          "items": {
+            "$ref": "types/product.json"
+          },
+          "description": "Products matching the search criteria."
+        },
+        "pagination": {
+          "$ref": "types/pagination.json#/$defs/response"
+        },
+        "messages": {
+          "type": "array",
+          "items": {
+            "$ref": "types/message.json"
+          },
+          "description": "Errors, warnings, or informational messages about the search results."
+        }
+      }
+    }
+  }
+}

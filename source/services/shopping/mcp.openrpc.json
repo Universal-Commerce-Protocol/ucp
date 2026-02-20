@@ -263,6 +263,48 @@
         "name": "cart",
         "schema": {"$ref": "../../schemas/shopping/cart.json"}
       }
+    },
+    {
+      "name": "search_catalog",
+      "summary": "Search for products in the catalog",
+      "description": "Search for products using query text, filters, and pagination.",
+      "params": [
+        {
+          "name": "meta",
+          "required": true,
+          "schema": {"$ref": "#/components/schemas/meta"}
+        },
+        {
+          "name": "catalog",
+          "required": true,
+          "schema": {"$ref": "../../schemas/shopping/catalog_search.json#/$defs/search_request"}
+        }
+      ],
+      "result": {
+        "name": "response",
+        "schema": {"$ref": "../../schemas/shopping/catalog_search.json#/$defs/search_response"}
+      }
+    },
+    {
+      "name": "lookup_catalog",
+      "summary": "Batch lookup products or variants by identifier",
+      "description": "Batch lookup of products or variants by identifier. See Catalog Lookup capability for supported identifier types and resolution behavior.",
+      "params": [
+        {
+          "name": "meta",
+          "required": true,
+          "schema": {"$ref": "#/components/schemas/meta"}
+        },
+        {
+          "name": "catalog",
+          "required": true,
+          "schema": {"$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/lookup_request"}
+        }
+      ],
+      "result": {
+        "name": "response",
+        "schema": {"$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/lookup_response"}
+      }
     }
   ]
 }

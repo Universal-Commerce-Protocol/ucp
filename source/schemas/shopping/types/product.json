@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/product.json",
+  "title": "Product",
+  "description": "A product in the catalog with variants and options.",
+  "type": "object",
+  "required": [
+    "id",
+    "title",
+    "description",
+    "price_range",
+    "variants"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Global ID (GID) uniquely identifying this product."
+    },
+    "handle": {
+      "type": "string",
+      "description": "URL-safe slug for SEO-friendly URLs (e.g., 'blue-runner-pro'). Use id for stable API references."
+    },
+    "title": {
+      "type": "string",
+      "description": "Product title."
+    },
+    "description": {
+      "$ref": "description.json",
+      "description": "Product description in one or more formats."
+    },
+    "url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Canonical product page URL."
+    },
+    "category": {
+      "type": "array",
+      "items": {
+        "$ref": "category.json"
+      },
+      "description": "Product categories with optional taxonomy identifiers."
+    },
+    "price_range": {
+      "$ref": "price_range.json",
+      "description": "Price range across all variants."
+    },
+    "list_price_range": {
+      "$ref": "price_range.json",
+      "description": "List price range before discounts (for strikethrough display)."
+    },
+    "media": {
+      "type": "array",
+      "items": {
+        "$ref": "media.json"
+      },
+      "description": "Product media (images, videos, 3D models). First item is the featured media for listings."
+    },
+    "options": {
+      "type": "array",
+      "items": {
+        "$ref": "product_option.json"
+      },
+      "description": "Product options (Size, Color, etc.)."
+    },
+    "variants": {
+      "type": "array",
+      "items": {
+        "$ref": "variant.json"
+      },
+      "minItems": 1,
+      "description": "Purchasable variants of this product. First item is the featured variant for listings."
+    },
+    "rating": {
+      "$ref": "rating.json",
+      "description": "Aggregate product rating."
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Product tags for categorization and search."
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Business-defined custom data extending the standard product model."
+    }
+  }
+}

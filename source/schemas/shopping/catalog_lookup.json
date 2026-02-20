@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/catalog_lookup.json",
+  "name": "dev.ucp.shopping.catalog.lookup",
+  "version": "2026-01-11",
+  "title": "Catalog Lookup",
+  "description": "Product/variant lookup by identifier capability.",
+  "type": "object",
+  "$defs": {
+    "lookup_request": {
+      "type": "object",
+      "description": "Request body for catalog lookup.",
+      "required": ["ids"],
+      "properties": {
+        "ids": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1,
+          "description": "Identifiers to lookup. Implementations MUST support product ID and variant ID; MAY support secondary identifiers (SKU, handle, etc.)."
+        },
+        "context": {
+          "$ref": "types/context.json"
+        }
+      }
+    },
+    "lookup_response": {
+      "type": "object",
+      "required": [
+        "ucp",
+        "products"
+      ],
+      "properties": {
+        "ucp": {
+          "$ref": "../ucp.json#/$defs/response_catalog_schema"
+        },
+        "products": {
+          "type": "array",
+          "items": {
+            "$ref": "types/product.json"
+          },
+          "description": "Products matching the requested identifiers. May contain fewer items if some identifiers not found, or more if identifiers match multiple products."
+        },
+        "messages": {
+          "type": "array",
+          "items": {
+            "$ref": "types/message.json"
+          },
+          "description": "Errors, warnings, or informational messages about the requested items."
+        }
+      }
+    }
+  }
+}

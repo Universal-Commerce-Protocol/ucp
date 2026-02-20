@@ -383,10 +383,12 @@ defined below:
 
 ### Context
 
-Context signals are provisional hints. Businesses SHOULD use these values when
-authoritative data (e.g. address) is absent, and MAY ignore unsupported values
-without returning errors. This differs from authoritative selections which
-require explicit validation and error feedback.
+Context signals are provisional—not authoritative data. Businesses SHOULD use
+these values when verified inputs (e.g., shipping address) are absent, and MAY
+ignore or down-rank them if inconsistent with higher-confidence signals
+(authenticated account, risk detection) or regulatory constraints (export
+controls). Eligibility and policy enforcement MUST occur at checkout time using
+binding transaction data.
 
 {{ schema_fields('context', 'checkout') }}
 

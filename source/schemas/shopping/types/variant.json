@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/variant.json",
+  "title": "Variant",
+  "description": "A purchasable variant of a product with specific option selections.",
+  "type": "object",
+  "required": [
+    "id",
+    "title",
+    "description",
+    "price"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Global ID (GID) uniquely identifying this variant. Used as item.id in checkout."
+    },
+    "sku": {
+      "type": "string",
+      "description": "Business-assigned identifier for inventory and fulfillment."
+    },
+    "barcode": {
+      "type": "string",
+      "description": "Industry-standard identifier (UPC, EAN, ISBN) for the variant."
+    },
+    "handle": {
+      "type": "string",
+      "description": "URL-safe variant handle/slug."
+    },
+    "title": {
+      "type": "string",
+      "description": "Variant display title (e.g., 'Blue / Large')."
+    },
+    "description": {
+      "$ref": "description.json",
+      "description": "Variant description in one or more formats."
+    },
+    "url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Canonical variant page URL."
+    },
+    "category": {
+      "type": "array",
+      "items": {
+        "$ref": "category.json"
+      },
+      "description": "Variant categories with optional taxonomy identifiers."
+    },
+    "price": {
+      "$ref": "price.json",
+      "description": "Current selling price."
+    },
+    "list_price": {
+      "$ref": "price.json",
+      "description": "List price before discounts (for strikethrough display)."
+    },
+    "availability": {
+      "type": "object",
+      "description": "Variant availability for purchase.",
+      "properties": {
+        "available": {
+          "type": "boolean",
+          "description": "Whether this variant can be purchased."
+        }
+      }
+    },
+    "selected_options": {
+      "type": "array",
+      "items": {
+        "$ref": "selected_option.json"
+      },
+      "description": "Option selections that define this variant."
+    },
+    "media": {
+      "type": "array",
+      "items": {
+        "$ref": "media.json"
+      },
+      "description": "Variant media (images, videos, 3D models). First item is the featured media for listings."
+    },
+    "rating": {
+      "$ref": "rating.json",
+      "description": "Variant rating."
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Variant tags for categorization and search."
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Business-defined custom data extending the standard variant model."
+    },
+    "input": {
+      "type": "array",
+      "items": {
+        "$ref": "input_correlation.json"
+      },
+      "description": "Lookup correlation: which request identifiers resolved to this variant, and how. Present in lookup responses; absent in search and get_product responses."
+    },
+    "seller": {
+      "type": "object",
+      "description": "Optional seller context for this variant.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Seller display name."
+        },
+        "links": {
+          "type": "array",
+          "items": {
+            "$ref": "link.json"
+          },
+          "description": "Seller policy and information links."
+        }
+      }
+    }
+  }
+}
