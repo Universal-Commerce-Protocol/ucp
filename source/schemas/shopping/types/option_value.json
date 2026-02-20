@@ -11,6 +11,14 @@
     "label": {
       "type": "string",
       "description": "Display text for this option value (e.g., 'Small', 'Blue')."
+    },
+    "available": {
+      "type": "boolean",
+      "description": "Whether a variant matching this value and the current option selections is purchasable."
+    },
+    "exists": {
+      "type": "boolean",
+      "description": "Whether a variant matching this value and the current option selections exists in the catalog."
     }
   }
 }

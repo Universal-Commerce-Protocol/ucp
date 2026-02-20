@@ -46,6 +46,23 @@ merchants MAY support additional custom filters via `additionalProperties`.
 
 {{ schema_fields('types/price_filter', 'catalog') }}
 
+## Variant Cardinality
+
+Businesses SHOULD return **one featured variant per product** in search results.
+The featured variant is the most relevant match for the query and context (e.g.,
+the variant whose title or options best match the search terms). Platforms SHOULD
+treat the first variant as featured for display.
+
+This keeps search fast and efficient for discovery. Use
+[`get_product`](lookup.md#get-product-get_product) for variant selection, option
+availability, and detailed product context.
+
+## Result Limits
+
+Implementations SHOULD accept a page size of at least 10 results per request.
+Implementations MAY enforce a maximum page size and MUST reject requests exceeding
+their limit with an appropriate error.
+
 ## Pagination
 
 Cursor-based pagination for list operations. Cursors are opaque strings
