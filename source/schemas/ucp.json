@@ -122,6 +122,12 @@
         {
           "required": ["services", "payment_handlers"],
           "properties": {
+            "supported_versions": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/version" },
+              "uniqueItems": true,
+              "description": "Protocol versions this business supports. Implicitly defaults to [version] when omitted. When present, MUST include the value of version."
+            },
             "services": {
               "additionalProperties": {
                 "items": { "$ref": "service.json#/$defs/business_schema" }

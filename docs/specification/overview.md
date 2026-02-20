@@ -33,11 +33,16 @@ Schema notes:
 
 ## Discovery, Governance, and Negotiation
 
-UCP employs a server-selects architecture where the business (server) chooses
-the protocol version and capabilities from the intersection of both parties'
-capabilities. Both business and platform profiles can be cached by both parties,
-allowing efficient capability negotiation within the normal request/response
-flow between platform and business.
+UCP separates protocol version compatibility from capability negotiation.
+The business's protocol version is canonical — platforms **MUST** support
+the business's declared version to initiate a request. Businesses
+**MAY** advertise support for multiple protocol versions via the
+`supported_versions` field in their profile. Capability negotiation
+follows a server-selects architecture where the business (server)
+determines the active capabilities from the intersection of both
+parties' declared capabilities. Both business and platform profiles can
+be cached by both parties, allowing efficient capability negotiation
+within the normal request/response flow between platform and business.
 
 ### Namespace Governance
 
@@ -584,8 +589,8 @@ UCP negotiation can fail in two ways:
 
 These failure types require different handling:
 
-- **Discovery failure** → transport error with optional `continue_url`
-- **Negotiation failure** → UCP response with optional `continue_url`
+- **Discovery or version failure** → transport error with optional `continue_url`
+- **Capability negotiation failure** → UCP response with optional `continue_url`
 
 ##### Error Codes
 
@@ -596,8 +601,8 @@ These failure types require different handling:
 | `invalid_profile_url`       | Profile URL is malformed, missing, or unresolvable   | 400  | -32001 |
 | `profile_unreachable`       | Resolved URL but fetch failed (timeout, non-2xx)     | 424  | -32001 |
 | `profile_malformed`         | Fetched content is not valid JSON or violates schema | 422  | -32001 |
+| `version_unsupported`       | Platform's protocol version not supported            | 422  | -32001 |
 | `capabilities_incompatible` | No compatible capabilities in intersection           | 200  | result |
-| `version_unsupported`       | Platform's UCP version is not supported              | 200  | result |
 
 **Signature Errors:**
 
@@ -656,7 +661,20 @@ task through the standard web interface.
     }
     ```
 
-    **Negotiation Failure (200):**
+    **Version Unsupported (422):**
+
+    ```http
+    HTTP/1.1 422 Unprocessable Content
+    Content-Type: application/json
+
+    {
+      "code": "version_unsupported",
+      "content": "Protocol version 2026-01-12 is not supported. This business supports versions 2026-01-11 and 2026-01-23.",
+      "continue_url": "https://merchant.com/cart"
+    }
+    ```
+
+    **Capabilities Incompatible (200):**
 
     ```http
     HTTP/1.1 200 OK
@@ -670,9 +688,9 @@ task through the standard web interface.
       "messages": [
         {
           "type": "error",
-          "code": "version_unsupported",
-          "content": "UCP version 2024-01-01 is not supported",
-          "severity": "requires_buyer_input"
+          "code": "capabilities_incompatible",
+          "content": "No compatible capabilities found",
+          "severity": "recoverable"
         }
       ],
       "continue_url": "https://merchant.com"
@@ -716,7 +734,25 @@ task through the standard web interface.
     }
     ```
 
-    **Negotiation Failure (JSON-RPC result):**
+    **Version Unsupported (JSON-RPC error):**
+
+    ```json
+    {
+      "jsonrpc": "2.0",
+      "id": 1,
+      "error": {
+        "code": -32001,
+        "message": "Protocol version not supported",
+        "data": {
+          "code": "version_unsupported",
+          "content": "Protocol version 2026-01-12 is not supported. This business supports versions 2026-01-11 and 2026-01-23.",
+          "continue_url": "https://merchant.com/cart"
+        }
+      }
+    }
+    ```
+
+    **Capabilities Incompatible (JSON-RPC result):**
 
     ```json
     {
@@ -731,9 +767,9 @@ task through the standard web interface.
           "messages": [
             {
               "type": "error",
-              "code": "version_unsupported",
-              "content": "UCP version 2024-01-01 is not supported",
-              "severity": "requires_buyer_input"
+              "code": "capabilities_incompatible",
+              "content": "No compatible capabilities found",
+              "severity": "recoverable"
             }
           ],
           "continue_url": "https://merchant.com"
@@ -1603,16 +1639,46 @@ Both businesses and platforms declare a single version in their profiles:
 
 ![High-level resolution flow sequence diagram](site:specification/images/ucp-discovery-negotiation.png)
 
-Businesses **MUST** validate the platform's version and determine compatibility:
+Version compatibility operates at two levels: the **protocol version**
+and **capability versions**. The protocol version (`ucp.version`)
+governs core protocol mechanisms — discovery, negotiation flow,
+transport bindings, and signature requirements. Capability versions
+govern the semantics of each feature independently, as defined in
+[Independent Component Versioning](#independent-component-versioning).
 
-1. Platform declares version via profile referenced in request
-2. Business validates:
-    - If platform version ≤ business version: Business **MUST**
-        process the request
-    - If platform version > business version: Business **MUST** return
-        `version_unsupported` error
-3. Businesses **MUST** include the version used for processing in every
-    response.
+#### Protocol Version
+
+The `version` field declares the implementation's current protocol
+version. Businesses **MAY** declare a `supported_versions` array
+listing the protocol versions they accept. When present,
+`supported_versions` **MUST** include the `version` value. When
+`supported_versions` is omitted, it implicitly signals that only
+the declared `version` is supported.
+
+```json
+{
+  "ucp": {
+    "version": "2026-01-11",
+    "supported_versions": ["2026-01-11", "2026-01-23"]
+  }
+}
+```
+
+Businesses **MUST** validate the platform's protocol version on
+every request:
+
+1. Platform **MAY** fetch the business's `/.well-known/ucp` profile
+    to discover supported versions.
+2. Platform declares the protocol version it wants to use via the
+    `version` field in the profile referenced in the request.
+3. Business validates:
+    - If the platform's `version` appears in the business's
+        `supported_versions`: the request **MAY** proceed to
+        capability negotiation.
+    - Otherwise: Business **MUST** return a `version_unsupported`
+        error.
+4. Businesses **MUST** include the negotiated protocol version in
+    every response.
 
 Response with version confirmation:
 
@@ -1629,19 +1695,33 @@ Response with version confirmation:
 }
 ```
 
-Version unsupported error:
+Version unsupported error (protocol-level, returned before capability
+negotiation):
 
-```json
+```http
+HTTP/1.1 422 Unprocessable Content
+Content-Type: application/json
+
 {
-  "status": "requires_escalation",
-  "messages": [{
-    "type": "error",
-    "code": "version_unsupported",
-    "content": "Version 2026-01-12 is not supported. This business implements version 2026-01-11.",
-    "severity": "requires_buyer_input"
-  }]
+  "code": "version_unsupported",
+  "content": "Protocol version 2026-01-12 is not supported. This business supports versions 2026-01-11 and 2026-01-23.",
+  "continue_url": "https://merchant.com/cart"
 }
 ```
+
+#### Capability Versions
+
+Capability versions are negotiated independently of the protocol
+version. Each capability in the profile is an array. Multiple entries
+for the same capability, each with a different `version`, advertise
+support for multiple versions of that capability. The capability
+intersection algorithm considers only capability versions supported
+by both parties.
+
+Businesses **MUST** include only capabilities compatible with the
+negotiated protocol version in their response. A capability that
+depends on features introduced in a newer protocol version **MUST
+NOT** be included when processing at an older protocol version.
 
 ### Backwards Compatibility
 
