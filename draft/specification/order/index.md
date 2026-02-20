@@ -253,7 +253,7 @@ Examples: `refund`, `return`, `credit`, `price_adjustment`, `dispute`, `cancella
   ],
   "totals": [
     { "type": "subtotal", "amount": 13000 },
-    { "type": "shipping", "amount": 1200 },
+    { "type": "fulfillment", "amount": 1200 },
     { "type": "tax", "amount": 1142 },
     { "type": "total", "amount": 15342 }
   ]
