@@ -13,7 +13,8 @@
     "constraints": {
       "type": "object",
       "additionalProperties": true,
-      "description": "Constraints on this instrument type. Structure depends on instrument type and active capabilities."
+      "description": "Constraints on this instrument type. Structure depends on instrument type and active capabilities.",
+      "minProperties": 1
     }
   }
 }

@@ -21,6 +21,8 @@
                 "brands": {
                   "type": "array",
                   "items": { "type": "string" },
+                  "minItems": 1,
+                  "uniqueItems": true,
                   "description": "Limit to specific card brands (e.g., ['visa', 'mastercard', 'amex'])."
                 }
               }
