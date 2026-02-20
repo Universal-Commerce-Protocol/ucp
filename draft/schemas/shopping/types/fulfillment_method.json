@@ -16,7 +16,7 @@
       "description": "Unique fulfillment method identifier.",
       "ucp_request": {
         "create": "omit",
-        "update": "required"
+        "update": "optional"
       }
     },
     "type": {
@@ -28,7 +28,7 @@
       "description": "Fulfillment method type.",
       "ucp_request": {
         "create": "required",
-        "update": "omit"
+        "update": "optional"
       }
     },
     "line_item_ids": {
