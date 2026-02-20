@@ -56,6 +56,7 @@ for branch in $RELEASE_BRANCHES; do
 	# Deploy
 	# mike will now use the mkdocs in PATH (which is the root venv)
 	export DOCS_MODE=spec
+	export UCP_BUILD_VERSION="$version"
 	mike deploy "$version"
 
 	popd >/dev/null
@@ -64,6 +65,7 @@ done
 
 echo ">>> Building Current Version (Draft & Latest)"
 export DOCS_MODE=spec
+export UCP_BUILD_VERSION="draft"
 mike deploy draft
 
 LATEST_VERSION=$(echo "$RELEASE_BRANCHES" | sed 's/release\///' | sort -r | head -n 1)

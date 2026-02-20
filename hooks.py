@@ -42,7 +42,7 @@ UCP_SCHEMA_PREFIX = "https://ucp.dev/schemas/"
 DATE_VERSION_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 
-def _process_refs(data, current_file_dir):
+def _process_refs(data, current_file_dir, url_version=None):
   """Recursively resolve relative $ref paths to absolute URLs.
 
   Reads referenced file's $id to construct the absolute URL.
@@ -69,7 +69,11 @@ def _process_refs(data, current_file_dir):
             ref_data = json.load(f)
 
           if "$id" in ref_data:
-            data[key] = ref_data["$id"] + fragment
+            ref_id = ref_data["$id"]
+            if url_version and ref_id.startswith(UCP_SCHEMA_PREFIX):
+              versioned_prefix = f"https://ucp.dev/{url_version}/schemas/"
+              ref_id = ref_id.replace(UCP_SCHEMA_PREFIX, versioned_prefix, 1)
+            data[key] = ref_id + fragment
           else:
             log.warning(
               f"No '$id' found in {ref_file_path}. "
@@ -86,10 +90,10 @@ def _process_refs(data, current_file_dir):
             f"Keeping original '$ref': {value}"
           )
       else:
-        _process_refs(value, current_file_dir)
+        _process_refs(value, current_file_dir, url_version)
   elif isinstance(data, list):
     for item in data:
-      _process_refs(item, current_file_dir)
+      _process_refs(item, current_file_dir, url_version)
 
 
 def _rewrite_version_urls(data, url_version):
@@ -301,7 +305,9 @@ def on_post_build(config):
       )
 
   # --- Existing Logic ---
+  # --- Existing Logic ---
   ucp_version = config.get("extra", {}).get("ucp_version")
+
   if not ucp_version:
     log.warning("No ucp_version in mkdocs.yml extra config")
     url_version = None
@@ -318,6 +324,11 @@ def on_post_build(config):
         f"Non-date version '{ucp_version}': schema version set to "
         f"'{schema_version}'"
       )
+
+  # Skip copying source schemas for the root site.
+  # Root site pages should link to versioned schemas (e.g. /draft/schemas/...)
+  if mode == "root":
+    return
 
   base_src_path = Path.cwd() / "source"
   if not base_src_path.exists():
