@@ -81,9 +81,11 @@ repudiable
 schemas
 sdjwt
 shopify
+streamable
 superfences
 upsell
 upsells
 vulnz
 yaml
 yml
+keyid

@@ -54,9 +54,10 @@ nav:
         - Processor Tokenizer: specification/examples/processor-tokenizer-payment-handler.md
         - Platform Tokenizer: specification/examples/platform-tokenizer-payment-handler.md
         - Encrypted Credential: specification/examples/encrypted-credential-handler.md
-    - Schema Authoring: documentation/schema-authoring.md
-    - Reference: specification/reference.md
+    - Signatures: specification/signatures.md
     - Versioning: specification/versioning.md
+    - Authoring: documentation/schema-authoring.md
+    - Reference: specification/reference.md
   - UCP and AP2: documentation/ucp-and-ap2.md
   - Roadmap: documentation/roadmap.md
 
@@ -198,6 +199,8 @@ plugins:
           - documentation/roadmap.md
         Specification Overview:
           - specification/overview.md
+        Message Signatures:
+          - specification/signatures.md
         Checkout Capability:
           - specification/checkout.md
           - specification/checkout-rest.md

@@ -391,7 +391,8 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
 The `ucp` object contains protocol metadata: version, services, capabilities,
 and payment handlers. The `signing_keys` array contains public keys (JWK format)
 used to verify signatures on webhooks and other authenticated messages from the
-business.
+business. See [Key Discovery](#key-discovery) for key lookup and resolution,
+and [Message Signatures](signatures.md) for signing mechanics.
 
 #### Platform Profile
 
@@ -597,6 +598,18 @@ These failure types require different handling:
 | `profile_malformed`         | Fetched content is not valid JSON or violates schema | 422  | -32001 |
 | `capabilities_incompatible` | No compatible capabilities in intersection           | 200  | result |
 | `version_unsupported`       | Platform's UCP version is not supported              | 200  | result |
+
+**Signature Errors:**
+
+| Code                   | Description                                            | REST | MCP    |
+| ---------------------- | ------------------------------------------------------ | ---- | ------ |
+| `signature_missing`    | Required signature header/field not present            | 401  | -32000 |
+| `signature_invalid`    | Signature verification failed                          | 401  | -32000 |
+| `key_not_found`        | Key ID not found in signer's `signing_keys`            | 401  | -32000 |
+| `digest_mismatch`      | Body digest doesn't match `Content-Digest` header      | 400  | -32600 |
+| `algorithm_unsupported`| Signature algorithm not supported                      | 400  | -32600 |
+
+See [Message Signatures](signatures.md) for signature verification details.
 
 **Protocol Errors:**
 
@@ -822,6 +835,144 @@ root capability.
 | Checkout      | checkout, discount, fulfillment | cart, order                  |
 | Cart          | cart, discount                  | checkout, fulfillment, order |
 | Order         | order                           | checkout, cart, discount     |
+
+## Identity & Authentication
+
+UCP profiles serve dual purpose: they declare a party's **capabilities**
+for negotiation (see [Profile Structure](#profile-structure)) and publish
+**signing keys** for identity verification — enabling both capability
+negotiation and cryptographic authentication from a single document.
+
+Businesses publish their profile at `/.well-known/ucp` as the discovery
+entry point — platforms fetch it to determine protocol support, locate
+endpoints, and negotiate capabilities. Platforms advertise their profile
+URL per-request via the `UCP-Agent` header, enabling businesses to
+negotiate capabilities and verify identity. This design enables
+**permissionless onboarding** — any platform with a discoverable profile
+can interact with any business without prior registration.
+
+### Authentication Mechanisms
+
+Businesses **SHOULD** authenticate platforms to prevent impersonation and ensure
+message integrity. UCP is compatible with multiple authentication mechanisms:
+
+- **API Keys** — Pre-shared secrets exchanged out-of-band
+- **OAuth 2.0** — Client credentials or other OAuth flows
+- **mTLS** — Mutual TLS with client certificates
+- **HTTP Message Signatures** — Cryptographic signatures per
+  [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421) (see
+  [Message Signatures](signatures.md) for full specification)
+
+HTTP Message Signatures enable permissionless onboarding — businesses can
+verify platforms by their advertised public keys without negotiating shared
+secrets. The other mechanisms require prior credential exchange and imply a
+pre-established relationship.
+
+Business-to-platform webhooks **MUST** be signed. See
+[Message Signatures — When Signatures Apply](signatures.md#when-signatures-apply).
+
+#### Identity Binding
+
+Regardless of authentication mechanism, verifiers **MUST** ensure the
+authenticated identity is consistent with the `UCP-Agent` header:
+
+- **HTTP Message Signatures** — The signer's profile (from `UCP-Agent`) is
+    verified by signature validation; no additional check needed.
+- **API keys / OAuth / mTLS** — Verifiers **MUST** confirm the authenticated
+    principal is authorized to act on behalf of the profile identified in
+    `UCP-Agent`. Reject requests where the authenticated identity and claimed
+    profile conflict.
+
+### Key Discovery
+
+Both parties publish public keys in the `signing_keys` array of their
+UCP profile. Platforms fetch the business profile at `/.well-known/ucp`;
+businesses fetch the platform profile from the `UCP-Agent` header. The
+same profile that provides capabilities also provides verification
+keys — this is UCP's key resolution mechanism for
+[RFC 9421](https://www.rfc-editor.org/rfc/rfc9421) HTTP Message
+Signatures.
+
+**Key Lookup:**
+
+1. Obtain the signer's profile URL
+2. Fetch profile (or serve from cache)
+3. Extract `keyid` from `Signature-Input` and match to `kid` in
+   `signing_keys[]`
+4. Verify signature using the corresponding public key
+
+For key format (JWK), supported algorithms, key rotation procedures, and
+complete signing/verification mechanics, see
+[Message Signatures](signatures.md).
+
+### Profile Requirements
+
+#### Hosting
+
+Both profiles must be reliably hosted. An unreliable or misconfigured
+profile endpoint may prevent the other party from processing requests.
+
+1. Profiles **MUST** be served over HTTPS.
+2. Profile endpoints **MUST NOT** use redirects (3xx).
+3. Profile responses **MUST** include a `Cache-Control` header with
+   `public` and `max-age` of at least 60 seconds. Profiles **MUST NOT**
+   be served with `private`, `no-store`, or `no-cache` directives.
+
+Profiles represent a party's stable identity and capabilities. Profile
+URLs are expected to remain consistent across requests and not contain
+per-transaction or per-session configuration — the caching policy above
+enforces this by requiring shared cache support with a minimum TTL.
+
+#### Fetching
+
+Businesses fetch platform profiles to perform capability negotiation and
+verify identity. UCP defines best practices that enable permissionless
+onboarding, but businesses retain full control over their access policies
+and **MAY** enforce additional rules based on established trust, observed
+behavior, or operational requirements.
+
+Businesses **SHOULD** maintain a registry of pre-approved platforms —
+platforms whose profiles have been validated and whose trust is
+established through out-of-band mechanisms (API key, OAuth credential,
+mTLS certificate, or prior vetting). Known platforms can be served
+efficiently based on cached identity and capabilities, and are not
+subject to discovery budget constraints.
+
+When a platform is *not recognized*, it triggers dynamic profile
+discovery. Businesses **SHOULD** establish a fixed
+discovery footprint so that resource consumption for resolving
+unrecognized platforms remains constant regardless of how many platforms
+request access. Strategies include:
+
+- **Fixed-size profile cache** (e.g., LRU) — bounds memory regardless of
+  the number of unique profile URLs encountered
+- **Global rate limit** on discovery fetches — bounds outbound network
+  without requiring per-origin state tracking
+- **Backoff on repeated failures** — reduces retries to persistently
+  unavailable or malicious profile endpoints
+- **Asynchronous discovery** — defer profile resolution by responding
+  with a `503` status code and `Retry-After` header, and resolve the
+  profile in the background; when the platform retries, the validated
+  profile is cached and capability negotiation proceeds synchronously
+
+When fetching profiles, the following apply:
+
+1. Implementations **MUST** reject profile URLs not served over HTTPS.
+2. Implementations **MUST NOT** follow redirects (3xx) on profile fetches.
+3. Implementations **SHOULD** enforce connect and response timeouts on
+   profile fetches.
+4. Implementations **SHOULD** cache profiles with a minimum TTL floor
+   of 60 seconds, regardless of the origin's `Cache-Control` headers.
+5. Implementations **MAY** refresh profiles asynchronously using
+   stale-while-revalidate semantics.
+6. On signature verification failure with an unknown `kid`,
+   implementations **MAY** force-refresh the cached profile — but
+   **MUST NOT** do so more than once per TTL floor per origin.
+
+If a profile cannot be fetched (timeout, DNS failure, 5xx) or fails
+validation (invalid schema, signing keys, signature mismatch),
+businesses **MUST** reject the request with an appropriate error and
+status code (see [Error Handling](#error-handling)).
 
 ## Payment Architecture
 
@@ -1378,18 +1529,11 @@ Detailed definitions for endpoints, schemas, and valid extensions for each
 capability are provided in their respective specification files. Extensions are
 typically versioned and defined alongside their parent capability.
 
-## Security & Authentication
+## Security
 
 ### Transport Security
 
 All UCP communication **MUST** occur over **HTTPS**.
-
-### Request Authentication
-
-- **Platform to Business:** Requests **SHOULD** be authenticated using
-    standard headers (e.g., `Authorization: Bearer <token>`).
-- **Business to Platform (Webhooks):** Webhooks **MUST** be signed using a
-    shared secret or asymmetric key to verify integrity and origin.
 
 ### Data Privacy
 

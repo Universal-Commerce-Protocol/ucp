@@ -42,6 +42,10 @@
             "type": "string",
             "format": "uuid",
             "description": "Unique key for retry safety. Maps to HTTP Idempotency-Key header."
+          },
+          "signature": {
+            "type": "string",
+            "description": "Detached JWS signature (RFC 7515 Appendix F) in format `<base64url-header>..<base64url-signature>`. See Message Signatures specification."
           }
         }
       }
@@ -175,6 +179,11 @@
       "description": "Create a new cart session.",
       "params": [
         {
+          "name": "meta",
+          "required": true,
+          "schema": {"$ref": "#/components/schemas/meta"}
+        },
+        {
           "name": "cart",
           "required": true,
           "schema": {"$ref": "../../schemas/shopping/cart.json"}
@@ -190,6 +199,11 @@
       "summary": "Get cart",
       "params": [
         {
+          "name": "meta",
+          "required": true,
+          "schema": {"$ref": "#/components/schemas/meta"}
+        },
+        {
           "name": "id",
           "required": true,
           "schema": {"type": "string"}
@@ -204,6 +218,11 @@
       "name": "update_cart",
       "summary": "Update cart",
       "params": [
+        {
+          "name": "meta",
+          "required": true,
+          "schema": {"$ref": "#/components/schemas/meta"}
+        },
         {
           "name": "id",
           "required": true,

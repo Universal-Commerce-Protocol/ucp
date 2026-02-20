@@ -1282,6 +1282,70 @@ with HTTP 200 and the UCP envelope containing `messages`:
 }
 ```
 
+## Message Signing
+
+Platforms **MAY** choose among authentication mechanisms (API keys, OAuth,
+mTLS, HTTP Message Signatures). When using
+HTTP Message Signatures, checkout operations follow the
+[Message Signatures](signatures.md) specification.
+
+### Request Signing
+
+When HTTP Message Signatures are used, requests **MUST** include valid
+`Signature-Input` and `Signature` headers (and `Content-Digest` when a body
+is present) per RFC 9421:
+
+| Header                   | Required | Description                              |
+| :----------------------- | :------- | :--------------------------------------- |
+| `Signature-Input`        | Yes      | Describes signed components              |
+| `Signature`              | Yes      | Contains the signature value             |
+| `Content-Digest`         | Cond.*   | SHA-256 hash of request body             |
+
+\* Required for requests with a body (POST, PUT)
+
+**Example Signed Request:**
+
+```http
+POST /checkout-sessions HTTP/1.1
+Host: merchant.example.com
+Content-Type: application/json
+UCP-Agent: profile="https://platform.example/.well-known/ucp"
+Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000
+Content-Digest: sha-256=:X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=:
+Signature-Input: sig1=("@method" "@authority" "@path" "idempotency-key" "content-digest" "content-type");keyid="platform-2025"
+Signature: sig1=:MEUCIQDTxNq8h7LGHpvVZQp1iHkFp9+3N8Mxk2zH1wK4YuVN8w...:
+
+{"line_items":[{"item":{"id":"item_123"},"quantity":2}]}
+```
+
+See [Message Signatures - REST Request Signing](signatures.md#rest-request-signing)
+for the complete signing algorithm.
+
+### Response Signing
+
+Response signatures are **RECOMMENDED** for:
+
+* `complete_checkout` responses (order confirmation)
+
+Response signatures are **OPTIONAL** for:
+
+* `create_checkout`, `get_checkout`, `update_checkout`, `cancel_checkout`
+
+**Example Signed Response:**
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Digest: sha-256=:Y5fK8nLmPqRsT3vWxYzAbCdEfGhIjKlMnO...:
+Signature-Input: sig1=("@status" "content-digest" "content-type");keyid="merchant-2025"
+Signature: sig1=:MFQCIH7kL9nM2oP5qR8sT1uV4wX6yZaB3cD...:
+
+{"id":"chk_123","status":"completed","order":{"id":"ord_456"}}
+```
+
+See [Message Signatures - REST Response Signing](signatures.md#rest-response-signing)
+for the complete signing algorithm.
+
 ## Security Considerations
 
 ### Authentication
@@ -1294,6 +1358,8 @@ authentication is required, the REST transport **MAY** use:
 3. **OAuth 2.0**: Via `Authorization: Bearer {token}` header, following
     [RFC 6749](https://tools.ietf.org/html/rfc6749){ target="_blank" }.
 4. **Mutual TLS**: For high-security environments.
+5. **HTTP Message Signatures**: Per [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421)
+    (see [Message Signing](#message-signing) above).
 
 Businesses **MAY** require authentication for some operations while leaving
 others open (e.g., public checkout without authentication).
