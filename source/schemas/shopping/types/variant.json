@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/shopping/types/variant.json",
   "title": "Variant",
-  "description": "A purchasable variant of a product with specific option selections.",
+  "description": "A purchasable variant of a product with specific option values.",
   "type": "object",
   "required": [
     "id",
@@ -65,12 +65,12 @@
         }
       }
     },
-    "selected_options": {
+    "options": {
       "type": "array",
       "items": {
         "$ref": "selected_option.json"
       },
-      "description": "Option selections that define this variant."
+      "description": "Option values that define this variant (e.g., Color: Blue, Size: Large)."
     },
     "media": {
       "type": "array",
@@ -93,13 +93,6 @@
     "metadata": {
       "type": "object",
       "description": "Business-defined custom data extending the standard variant model."
-    },
-    "input": {
-      "type": "array",
-      "items": {
-        "$ref": "input_correlation.json"
-      },
-      "description": "Lookup correlation: which request identifiers resolved to this variant, and how. Present in lookup responses; absent in search and get_product responses."
     },
     "seller": {
       "type": "object",

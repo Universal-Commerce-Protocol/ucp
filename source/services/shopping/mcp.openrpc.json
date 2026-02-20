@@ -305,6 +305,27 @@
         "name": "response",
         "schema": {"$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/lookup_response"}
       }
+    },
+    {
+      "name": "get_product",
+      "summary": "Get full details for a single product",
+      "description": "Retrieve complete product detail by identifier. Returns a singular product with a relevant set of variants, exact pricing, and real-time availability. Supports interactive option selection via `selected` and `preferences` parameters for variant narrowing and availability signals. Use for product detail page rendering and purchase decisions.",
+      "params": [
+        {
+          "name": "meta",
+          "required": true,
+          "schema": {"$ref": "#/components/schemas/meta"}
+        },
+        {
+          "name": "catalog",
+          "required": true,
+          "schema": {"$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/get_product_request"}
+        }
+      ],
+      "result": {
+        "name": "response",
+        "schema": {"$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/get_product_response"}
+      }
     }
   ]
 }

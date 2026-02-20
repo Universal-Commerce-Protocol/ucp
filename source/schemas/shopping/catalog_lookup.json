@@ -2,14 +2,14 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/shopping/catalog_lookup.json",
   "name": "dev.ucp.shopping.catalog.lookup",
-  "version": "2026-01-11",
+  "version": "2026-02-01",
   "title": "Catalog Lookup",
-  "description": "Product/variant lookup by identifier capability.",
+  "description": "Product/variant lookup by identifier. Supports batch retrieval (lookup_catalog) and single-product detail (get_product).",
   "type": "object",
   "$defs": {
     "lookup_request": {
       "type": "object",
-      "description": "Request body for catalog lookup.",
+      "description": "Request body for batch catalog lookup.",
       "required": ["ids"],
       "properties": {
         "ids": {
@@ -20,6 +20,33 @@
         },
         "context": {
           "$ref": "types/context.json"
+        }
+      }
+    },
+    "lookup_variant": {
+      "description": "A variant in a lookup response, extended with input correlation.",
+      "type": "object",
+      "allOf": [{ "$ref": "types/variant.json" }],
+      "required": ["input"],
+      "properties": {
+        "input": {
+          "type": "array",
+          "items": { "$ref": "types/input_correlation.json" },
+          "minItems": 1,
+          "description": "Which request identifiers resolved to this variant, and how."
+        }
+      }
+    },
+    "lookup_product": {
+      "description": "A product in a lookup response, with variants carrying input correlation.",
+      "type": "object",
+      "allOf": [{ "$ref": "types/product.json" }],
+      "properties": {
+        "variants": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/lookup_variant" },
+          "minItems": 1,
+          "description": "Purchasable variants with lookup input correlation. First item is the featured variant."
         }
       }
     },
@@ -36,7 +63,7 @@
         "products": {
           "type": "array",
           "items": {
-            "$ref": "types/product.json"
+            "$ref": "#/$defs/lookup_product"
           },
           "description": "Products matching the requested identifiers. May contain fewer items if some identifiers not found, or more if identifiers match multiple products."
         },
@@ -46,6 +73,69 @@
             "$ref": "types/message.json"
           },
           "description": "Errors, warnings, or informational messages about the requested items."
+        }
+      }
+    },
+    "get_product_request": {
+      "type": "object",
+      "description": "Request body for single-product retrieval with optional option selection.",
+      "required": ["id"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Product or variant identifier. Implementations MUST support product ID and variant ID."
+        },
+        "selected": {
+          "type": "array",
+          "items": {
+            "$ref": "types/selected_option.json"
+          },
+          "description": "Partial or full option selections for interactive variant narrowing. When provided, response option values include availability signals (available, exists) relative to these selections."
+        },
+        "preferences": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Option names in relaxation priority order. When no exact variant matches all selections, the server drops options from the end of this list first. E.g., ['Color', 'Size'] keeps Color and relaxes Size."
+        },
+        "context": {
+          "$ref": "types/context.json"
+        }
+      }
+    },
+    "detail_product": {
+      "description": "A product in a get_product response, extended with effective selections.",
+      "type": "object",
+      "allOf": [{ "$ref": "types/product.json" }],
+      "properties": {
+        "selected": {
+          "type": "array",
+          "items": { "$ref": "types/selected_option.json" },
+          "description": "Effective option selections after any relaxation. Present when the request includes selected options."
+        }
+      }
+    },
+    "get_product_response": {
+      "type": "object",
+      "required": [
+        "ucp",
+        "product"
+      ],
+      "properties": {
+        "ucp": {
+          "$ref": "../ucp.json#/$defs/response_catalog_schema"
+        },
+        "product": {
+          "$ref": "#/$defs/detail_product",
+          "description": "The requested product with full detail. Singular — this is a single-resource operation."
+        },
+        "messages": {
+          "type": "array",
+          "items": {
+            "$ref": "types/message.json"
+          },
+          "description": "Warnings or informational messages about the product (e.g., price recently changed, limited availability)."
         }
       }
     }
