@@ -16,7 +16,6 @@
 
 # Payment Handler Specification Guide
 
-**Version:** `2026-01-11`
 
 ## Introduction
 
