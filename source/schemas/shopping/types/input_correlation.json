@@ -12,8 +12,8 @@
     },
     "match": {
       "type": "string",
-      "enum": ["exact", "featured"],
-      "description": "`exact`: input directly identifies this variant (e.g., variant ID, barcode). `featured`: input identified the parent product; server selected this variant as representative."
+      "description": "How the request identifier resolved to this variant. Well-known values: `exact` (input directly identifies this variant, e.g., variant ID, SKU), `featured` (server selected this variant as representative, e.g., product ID resolved to best match). Businesses MAY implement and provide additional resolution strategies.",
+      "examples": ["exact", "featured"]
     }
   }
 }
