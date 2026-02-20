@@ -16,7 +16,6 @@
 
 # Universal Commerce Protocol (UCP) Official Specification
 
-**Version:** `2026-01-11`
 
 ## Overarching guidelines
 

@@ -17,7 +17,6 @@
 # Checkout Capability
 
 * **Capability Name:** `dev.ucp.shopping.checkout`
-* **Version:** `2026-01-11`
 
 ## Overview
 

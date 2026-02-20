@@ -16,7 +16,6 @@
 
 # Discount Extension
 
-**Version:** `2026-01-11`
 
 ## Overview
 
