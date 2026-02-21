@@ -1,3 +1,4 @@
+---
 #   Copyright 2026 UCP Authors
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,51 +17,52 @@
 site_name: Universal Commerce Protocol (UCP)
 site_url: https://ucp.dev/  # Required for the llmstxt plugin to work.
 site_description: >
-  The Universal Commerce Protocol (UCP) is a solution for enabling gen AI agents to make payments on
-  behalf of users, safely, securely, and in a decentralized and privacy protecting manner.
-  This protocol is a part of the broader ecosystem, which includes agentic protocols like A2A and
-  MCP, and encompasses the global nature of payments.
+  The Universal Commerce Protocol (UCP) is a solution for enabling gen AI agents
+  to make payments on behalf of users, safely, securely, and in a decentralized
+  and privacy protecting manner. This protocol is a part of the broader
+  ecosystem, which includes agentic protocols like A2A and MCP, and encompasses
+  the global nature of payments.
 site_dir: site
 edit_uri: edit/main/docs/
 
 # Navigation
 nav:
   - Overview:
-    - Home: index.md
-    - Core Concepts: documentation/core-concepts.md
-    - UCP and AP2: documentation/ucp-and-ap2.md
-    - Roadmap: documentation/roadmap.md
-    - Schema Authoring: documentation/schema-authoring.md
-    - Versioning: versioning.md
+      - Home: index.md
+      - Core Concepts: documentation/core-concepts.md
+      - UCP and AP2: documentation/ucp-and-ap2.md
+      - Roadmap: documentation/roadmap.md
+      - Schema Authoring: documentation/schema-authoring.md
+      - Versioning: versioning.md
   - Specification:
-    - Overview: specification/overview.md
-    - Checkout Capability:
-      - Overview: specification/checkout.md
-      - HTTP/REST Binding: specification/checkout-rest.md
-      - MCP Binding: specification/checkout-mcp.md
-      - A2A Binding: specification/checkout-a2a.md
-      - EP Binding: specification/embedded-checkout.md
-      - AP2 Mandates Extension: specification/ap2-mandates.md
-      - Buyer Consent Extension: specification/buyer-consent.md
-      - Discounts Extension: specification/discount.md
-      - Fulfillment Extension: specification/fulfillment.md
-    - Cart Capability:
-      - Overview: specification/cart.md
-      - HTTP/REST Binding: specification/cart-rest.md
-      - MCP Binding: specification/cart-mcp.md
-    - Order Capability: specification/order.md
-    - Identity Linking Capability: specification/identity-linking.md
-    - Payment Handlers:
-      - Guide: specification/payment-handler-guide.md
-      - Template: specification/payment-handler-template.md
-      - Tokenization Guide: specification/tokenization-guide.md
-      - Examples:
-        - Processor Tokenizer: specification/examples/processor-tokenizer-payment-handler.md
-        - Platform Tokenizer: specification/examples/platform-tokenizer-payment-handler.md
-        - Encrypted Credential: specification/examples/encrypted-credential-handler.md
-    - Signatures: specification/signatures.md
-    - Reference: specification/reference.md
-    - Playground: specification/playground.md
+      - Overview: specification/overview.md
+      - Checkout Capability:
+          - Overview: specification/checkout.md
+          - HTTP/REST Binding: specification/checkout-rest.md
+          - MCP Binding: specification/checkout-mcp.md
+          - A2A Binding: specification/checkout-a2a.md
+          - EP Binding: specification/embedded-checkout.md
+          - AP2 Mandates Extension: specification/ap2-mandates.md
+          - Buyer Consent Extension: specification/buyer-consent.md
+          - Discounts Extension: specification/discount.md
+          - Fulfillment Extension: specification/fulfillment.md
+      - Cart Capability:
+          - Overview: specification/cart.md
+          - HTTP/REST Binding: specification/cart-rest.md
+          - MCP Binding: specification/cart-mcp.md
+      - Order Capability: specification/order.md
+      - Identity Linking Capability: specification/identity-linking.md
+      - Payment Handlers:
+          - Guide: specification/payment-handler-guide.md
+          - Template: specification/payment-handler-template.md
+          - Tokenization Guide: specification/tokenization-guide.md
+          - Examples:
+              - Processor Tokenizer: specification/examples/processor-tokenizer-payment-handler.md
+              - Platform Tokenizer: specification/examples/platform-tokenizer-payment-handler.md
+              - Encrypted Credential: specification/examples/encrypted-credential-handler.md
+      - Signatures: specification/signatures.md
+      - Reference: specification/reference.md
+      - Playground: specification/playground.md
 
 repo_name: UCP on GitHub # Override repo name to be shorter on site header.
 repo_url: https://github.com/Universal-Commerce-Protocol/ucp

@@ -1,3 +1,4 @@
+---
 #   Copyright 2026 Google LLC
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,7 +21,9 @@ on:
 jobs:
   configure-release:
     # Only run when a branch starting with 'release/' is created
-    if: github.event.ref_type == 'branch' && startsWith(github.ref, 'refs/heads/release/')
+    if: >-
+      github.event.ref_type == 'branch' &&
+      startsWith(github.ref, 'refs/heads/release/')
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -37,10 +40,10 @@ jobs:
           # Extract version from branch name (release/2026-01-23 -> 2026-01-23)
           VERSION=${GITHUB_REF_NAME#release/}
           echo "Configuring release version: $VERSION"
-          
+
           # Replace 'ucp_version: "draft"' with the actual version
-          sed -i "s/ucp_version: "draft"/ucp_version: "$VERSION"/" mkdocs.yml
-          
+          sed -i "s/ucp_version: \"draft\"/ucp_version: \"$VERSION\"/" mkdocs.yml
+
           # Verify the change
           grep "ucp_version:" mkdocs.yml
 
@@ -48,9 +51,9 @@ jobs:
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          
+
           git add mkdocs.yml
-          
+
           # Only commit if there are changes
           if git diff --staged --quiet; then
             echo "No changes to commit (version might already be set)"

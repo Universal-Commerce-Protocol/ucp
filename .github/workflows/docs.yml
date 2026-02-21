@@ -1,3 +1,4 @@
+---
 #   Copyright 2026 Google LLC
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -95,17 +96,17 @@ jobs:
         run: |
           # Fetch the Pages URL. Fails safely if not enabled.
           PAGES_URL=$(gh api "repos/${{ github.repository }}/pages" --jq '.html_url' 2>/dev/null || true)
-          
+
           if [ -z "$PAGES_URL" ]; then
             echo "Pages URL not detected. Falling back to default structure."
             PAGES_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"
           fi
-          
+
           # Ensure trailing slash
           if [[ "$PAGES_URL" != */ ]]; then
             PAGES_URL="${PAGES_URL}/"
           fi
-          
+
           echo "Set SITE_URL to $PAGES_URL"
           echo "SITE_URL=$PAGES_URL" >> $GITHUB_ENV
 
@@ -128,11 +129,11 @@ jobs:
           # Fetch and checkout gh-pages
           git fetch origin gh-pages
           git checkout gh-pages
-          
+
           # Copy build artifacts to root
           cp -r site/* .
           rm -rf site
-          
+
           # Commit and push
           git add .
           git commit -m "Deploy root site from main" --allow-empty
