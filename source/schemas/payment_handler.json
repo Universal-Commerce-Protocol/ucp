@@ -10,7 +10,13 @@
         { "$ref": "ucp.json#/$defs/entity" },
         {
           "type": "object",
-          "required": ["id"]
+          "required": ["id"],
+          "properties": {
+            "display_order": {
+              "type": "integer",
+              "description": "Optional. Merchant-suggested display order (lower = higher preference). Suggestive only; platform/agent MAY reorder."
+            }
+          }
         }
       ]
     },
