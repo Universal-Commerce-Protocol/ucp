@@ -146,8 +146,22 @@ jobs:
           # Extract the date (e.g., release/2026-01-11 -> 2026-01-11)
           VERSION_NAME=${GITHUB_REF#refs/heads/release/}
 
-          # Deploy this version, tag it as 'latest', and set it as the default site root
-          uv run mike deploy --push --update-aliases $VERSION_NAME latest
+          # Fetch all release branches to determine if this is the latest
+          git fetch origin "+refs/heads/release/*:refs/remotes/origin/release/*"
+          
+          # Find the highest version number among all release branches
+          LATEST_VERSION=$(git branch -r --list "origin/release/*" | sed 's|origin/release/||' | sort -V | tail -n 1 | tr -d ' ')
+
+          echo "Deploying version: $VERSION_NAME"
+          echo "Latest detected version: $LATEST_VERSION"
+
+          if [ "$VERSION_NAME" = "$LATEST_VERSION" ]; then
+            echo "This is the latest version. Updating 'latest' alias."
+            uv run mike deploy --push --update-aliases "$VERSION_NAME" latest
+          else
+            echo "This is NOT the latest version. Deploying without updating 'latest' alias."
+            uv run mike deploy --push "$VERSION_NAME"
+          fi
 
       - name: Create GitHub Release and Tag
         if: startsWith(github.ref, 'refs/heads/release/')
