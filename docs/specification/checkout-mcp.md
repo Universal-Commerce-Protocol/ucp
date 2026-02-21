@@ -65,6 +65,9 @@ Businesses advertise MCP transport availability through their UCP profile at
           "version": "2026-01-11",
           "spec": "https://example.vendor.com/specs/delegate-payment",
           "schema": "https://example.vendor.com/schemas/delegate-payment-config.json",
+          "available_instruments": [
+            {"type": "card", "constraints": {"brands": ["visa", "mastercard"]}}
+          ],
           "config": {}
         }
       ]
@@ -220,7 +223,7 @@ Maps to the [Create Checkout](checkout.md#create-checkout) operation.
               },
               "payment_handlers": {
                 "com.example.vendor.delegate_payment": [
-                  {"id": "handler_1", "version": "2026-01-11", "config": {}}
+                  {"id": "handler_1", "version": "2026-01-11", "available_instruments": [{"type": "card"}], "config": {}}
                 ]
               }
             },
@@ -442,7 +445,7 @@ Maps to the [Update Checkout](checkout.md#update-checkout) operation.
               },
               "payment_handlers": {
                 "com.example.vendor.delegate_payment": [
-                  {"id": "handler_1", "version": "2026-01-11", "config": {}}
+                  {"id": "handler_1", "version": "2026-01-11", "available_instruments": [{"type": "card"}], "config": {}}
                 ]
               }
             },

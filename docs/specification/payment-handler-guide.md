@@ -178,8 +178,11 @@ and desired configuration.
           "version": "2026-01-11",
           "spec": "https://example.com/ucp/handler",
           "schema": "https://example.com/ucp/handler/schema.json",
+          "available_instruments": [
+            // Instrument types this handler supports
+          ],
           "config": {
-            // Handler-specific configuration (see 2.3.1)
+            // Handler-specific configuration (see Config Shapes)
           }
         }
       ]
@@ -187,6 +190,11 @@ and desired configuration.
   }
 }
 ```
+
+**`available_instruments`** is optional. When absent, it means **everything is
+available without constraints** (the handler supports all instrument types and
+constraints that it is capable of). When present, it restricts which instrument
+types and constraints the handler advertises for this declaration.
 
 ---
 
@@ -210,6 +218,14 @@ and typically includes different configuration:
   "version": "2026-01-11",
   "spec": "https://example.com/ucp/handler",
   "schema": "https://example.com/ucp/handler/schema.json",
+  "available_instruments": [
+    {
+      "type": "card",
+      "constraints": {
+        "brands": ["visa", "mastercard"]
+      }
+    }
+  ],
   "config": {
     "environment": "production",
     "business_id": "business_xyz_789"
@@ -225,6 +241,14 @@ and typically includes different configuration:
   "version": "2026-01-11",
   "spec": "https://example.com/ucp/handler",
   "schema": "https://example.com/ucp/handler/schema.json",
+  "available_instruments": [
+    {
+      "type": "card",
+      "constraints": {
+        "brands": ["visa", "mastercard", "amex", "discover"]
+      }
+    }
+  ],
   "config": {
     "environment": "production",
     "platform_id": "platform_abc_123"
@@ -238,18 +262,18 @@ and typically includes different configuration:
 {
   "id": "processor_tokenizer_1234",
   "version": "2026-01-11",
+  "available_instruments": [
+    {
+      "type": "card",
+      "constraints": {
+        "brands": ["visa", "mastercard"]
+      }
+    }
+  ],
   "config": {
     "api_version": 2,
     "environment": "production",
-    "business_id": "business_xyz_789",
-    "available_instruments": [
-      {
-        "type": "token_alt",
-        "tokenization_specification": {
-          "type": "merchant_gateway"
-        }
-      }
-    ]
+    "business_id": "business_xyz_789"
   }
 }
 ```
@@ -352,7 +376,7 @@ Each variant has its own config schema tailored to its context:
 | :------ | :---------- | :------ |
 | **business_schema** | `types/business_config.json` | Business identity and merchant-specific settings |
 | **platform_schema** | `types/platform_config.json` | Platform identity and platform-level settings |
-| **response_schema** | `types/response_config.json` | Full runtime state: identities, available methods, tokenization specs |
+| **response_schema** | `types/response_config.json` | Full runtime state: identities, tokenization specs |
 
 **Example `types/business_config.json`:**
 
@@ -416,15 +440,12 @@ Each variant has its own config schema tailored to its context:
       "type": "string",
       "description": "Business identifier for this handler."
     },
-    "available_instruments": {
-      "type": "array",
-      "description": "Available instrument types for this checkout.",
-      "items": {
-        "type": "object",
-        "properties": {
-          "type": { "type": "string" },
-          "tokenization_specification": { "type": "object" }
-        }
+    "tokenization_specification": {
+      "type": "object",
+      "description": "Handler-specific tokenization settings.",
+      "properties": {
+        "type": { "type": "string" },
+        "parameters": { "type": "object" }
       }
     }
   }
@@ -447,7 +468,23 @@ authors **MAY** extend any of the base instruments to add handler-specific
 display data or customize the credential reference. Handlers **MAY** define
 multiple instrument types for different payment flows.
 
-**Example `types/tokenizer_instrument.json`** (card-based):
+**Available Instrument Schemas:**
+
+Each instrument schema defines its own `available_*` variant in `$defs` that
+specifies what constraints are valid for that instrument type. For example,
+[`card_payment_instrument.json`](https://ucp.dev/schemas/shopping/types/card_payment_instrument.json)
+defines `available_card_payment_instrument` with a `brands` constraint.
+
+| Schema                                                                                                                   | Constraints                                                     |
+| :----------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------- |
+| [`available_payment_instrument.json`](https://ucp.dev/schemas/shopping/types/available_payment_instrument.json)          | Base: type, constraints (open object)                           |
+| `card_payment_instrument.json#/$defs/available_card_payment_instrument`                                                  | Extends base with `constraints.brands` for card networks        |
+
+Handlers reference these instrument-defined schemas when declaring
+`available_instruments`. The **instrument schema authors** define what
+constraints are meaningful (e.g., `brands` for cards), and **platforms/businesses** use this to advertise what they support (e.g., `["visa", "mastercard"]`).
+
+**Example `types/tokenizer_instrument.json`**:
 
 ```json
 {
@@ -455,6 +492,33 @@ multiple instrument types for different payment flows.
   "$id": "https://example.com/ucp/handlers/tokenizer/types/tokenizer_instrument.json",
   "title": "Tokenizer Card Instrument",
   "description": "Card-based payment instrument for com.example.tokenizer.",
+
+  "$defs": {
+    "available_tokenizer_card": {
+      "title": "Available Tokenizer Card",
+      "description": "Card instrument availability with tokenizer-specific constraints.",
+      "allOf": [
+        { "$ref": "https://ucp.dev/schemas/shopping/types/card_payment_instrument.json#/$defs/available_card_payment_instrument" },
+        {
+          "type": "object",
+          "properties": {
+            "type": { "const": "tokenizer_card" },
+            "constraints": {
+              "type": "object",
+              "properties": {
+                "tokenization_types": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "description": "Supported tokenization types (e.g., ['network_token', 'merchant_token'])."
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+
   "allOf": [
     { "$ref": "https://ucp.dev/schemas/shopping/types/card_payment_instrument.json" }
   ],
