@@ -1,3 +1,4 @@
+---
 #   Copyright 2026 UCP Authors
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,35 +28,33 @@ edit_uri: edit/main/docs/
 nav:
   - Home: index.md
   - Core Concepts: documentation/core-concepts.md
-  - Playground: playground.md
   - Specification:
-    - Overview: specification/overview.md
-    - Checkout Capability:
-      - Overview: specification/checkout.md
-      - HTTP/REST Binding: specification/checkout-rest.md
-      - MCP Binding: specification/checkout-mcp.md
-      - A2A Binding: specification/checkout-a2a.md
-      - EP Binding: specification/embedded-checkout.md
-      - AP2 Mandates Extension: specification/ap2-mandates.md
-      - Buyer Consent Extension: specification/buyer-consent.md
-      - Discounts Extension: specification/discount.md
-      - Fulfillment Extension: specification/fulfillment.md
-    - Order Capability: specification/order.md
-    - Identity Linking Capability: specification/identity-linking.md
-    - Payment Handlers:
-      - Guide: specification/payment-handler-guide.md
-      - Template: specification/payment-handler-template.md
-      - Tokenization Guide: specification/tokenization-guide.md
-      - Examples:
-        - Business Tokenizer: specification/examples/business-tokenizer-payment-handler.md
-        - Platform Tokenizer: specification/examples/platform-tokenizer-payment-handler.md
-        - Encrypted Credential: specification/examples/encrypted-credential-handler.md
-    - Schema Authoring: documentation/schema-authoring.md
-    - Reference: specification/reference.md
-    - Versioning: specification/versioning.md
+      - Overview: specification/overview.md
+      - Checkout Capability:
+          - Overview: specification/checkout.md
+          - HTTP/REST Binding: specification/checkout-rest.md
+          - MCP Binding: specification/checkout-mcp.md
+          - A2A Binding: specification/checkout-a2a.md
+          - EP Binding: specification/embedded-checkout.md
+          - AP2 Mandates Extension: specification/ap2-mandates.md
+          - Buyer Consent Extension: specification/buyer-consent.md
+          - Discounts Extension: specification/discount.md
+          - Fulfillment Extension: specification/fulfillment.md
+      - Order Capability: specification/order.md
+      - Identity Linking Capability: specification/identity-linking.md
+      - Payment Handlers:
+          - Guide: specification/payment-handler-guide.md
+          - Template: specification/payment-handler-template.md
+          - Tokenization Guide: specification/tokenization-guide.md
+          - Examples:
+              - Business Tokenizer: specification/examples/business-tokenizer-payment-handler.md
+              - Platform Tokenizer: specification/examples/platform-tokenizer-payment-handler.md
+              - Encrypted Credential: specification/examples/encrypted-credential-handler.md
+      - Reference: specification/reference.md
+      - Playground: specification/playground.md
   - UCP and AP2: documentation/ucp-and-ap2.md
   - Roadmap: documentation/roadmap.md
-
+  - Versioning: versioning.md
 repo_name: UCP on GitHub # Override repo name to be shorter on site header.
 repo_url: https://github.com/Universal-Commerce-Protocol/ucp
 
@@ -66,8 +65,10 @@ copyright: Copyright 2026 UCP Authors. Licensed under the <a href="https://githu
 extra_css:
   - stylesheets/custom.css
 
+
 #Global Constants
 extra:
+  ucp_version: "2026-01-11"
   ucp_url: https://ucp.dev
   analytics:
     provider: google
@@ -81,6 +82,7 @@ extra:
       as to measure the effectiveness of our documentation and whether users
       find what they're searching for. With your consent, you're helping us to
       make our documentation better.
+  scope: /
   version:
     provider: mike
 
@@ -116,6 +118,8 @@ theme:
       primary: black
       accent: indigo
   features:
+    - navigation.tabs
+    - navigation.tabs.sticky
     - announce.dismiss
     - content.code.annotate
     - content.code.copy
@@ -127,7 +131,6 @@ theme:
     - navigation.indexes
     - navigation.instant
     - navigation.instant.progress
-    - navigation.path
     - navigation.top
     - navigation.tracking
     - toc.follow
@@ -181,41 +184,30 @@ plugins:
   - llmstxt:
       full_output: llms-full.txt
       sections:
-        Introduction:
+        Overview:
           - index.md
           - documentation/core-concepts.md
-        UCP and AP2:
           - documentation/ucp-and-ap2.md
-        Playground:
-          - playground.md
-        Roadmap:
           - documentation/roadmap.md
-        Specification Overview:
+          - versioning.md
+        Specification:
           - specification/overview.md
-        Checkout Capability:
           - specification/checkout.md
           - specification/checkout-rest.md
           - specification/checkout-mcp.md
           - specification/checkout-a2a.md
-        Checkout Extensions:
+          - specification/embedded-checkout.md
           - specification/ap2-mandates.md
           - specification/buyer-consent.md
           - specification/discount.md
-          - specification/embedded-checkout.md
           - specification/fulfillment.md
-        Order Capability:
           - specification/order.md
-        Identity Linking Capability:
           - specification/identity-linking.md
-        Payment Handlers:
           - specification/payment-handler-guide.md
           - specification/payment-handler-template.md
           - specification/tokenization-guide.md
-        Payment Handler Examples:
           - specification/examples/business-tokenizer-payment-handler.md
           - specification/examples/platform-tokenizer-payment-handler.md
           - specification/examples/encrypted-credential-handler.md
-        Schema Authoring:
-          - documentation/schema-authoring.md
-        Reference:
           - specification/reference.md
+          - specification/playground.md
