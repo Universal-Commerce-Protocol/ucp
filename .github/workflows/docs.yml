@@ -1,3 +1,4 @@
+---
 #   Copyright 2026 Google LLC
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -39,6 +40,7 @@ jobs:
     permissions:
       contents: write
       actions: read
+      pages: read
 
     steps:
       - name: Checkout Code
@@ -88,6 +90,26 @@ jobs:
           mkdir -p site/handlers
           mkdir -p site/discovery
 
+      - name: Configure Site URL
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Fetch the Pages URL. Fails safely if not enabled.
+          PAGES_URL=$(gh api "repos/${{ github.repository }}/pages" --jq '.html_url' 2>/dev/null || true)
+
+          if [ -z "$PAGES_URL" ]; then
+            echo "Pages URL not detected. Falling back to default structure."
+            PAGES_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"
+          fi
+
+          # Ensure trailing slash
+          if [[ "$PAGES_URL" != */ ]]; then
+            PAGES_URL="${PAGES_URL}/"
+          fi
+
+          echo "Set SITE_URL to $PAGES_URL"
+          echo "SITE_URL=$PAGES_URL" >> $GITHUB_ENV
+
       - name: Build Documentation (PR Check)
         if: github.event_name == 'pull_request'
         run: uv run mkdocs build --strict
@@ -95,17 +117,37 @@ jobs:
       - name: Deploy development version from main branch
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
+          # 1. Deploy Specification Site using mike (DOCS_MODE=spec)
+          export DOCS_MODE=spec
           uv run mike deploy --push draft
+
+          # 2. Build Root Site (DOCS_MODE=root)
+          export DOCS_MODE=root
+          uv run mkdocs build
+
+          # 3. Deploy Root Site to gh-pages root
+          # Fetch and checkout gh-pages
+          git fetch origin gh-pages
+          git checkout gh-pages
+
+          # Copy build artifacts to root
+          cp -r site/* .
+          rm -rf site
+
+          # Commit and push
+          git add .
+          git commit -m "Deploy root site from main" --allow-empty
+          git push origin gh-pages
 
       - name: Deploy release version
         if: startsWith(github.ref, 'refs/heads/release/')
         run: |
+          export DOCS_MODE=spec
           # Extract the date (e.g., release/2026-01-11 -> 2026-01-11)
           VERSION_NAME=${GITHUB_REF#refs/heads/release/}
 
           # Deploy this version, tag it as 'latest', and set it as the default site root
           uv run mike deploy --push --update-aliases $VERSION_NAME latest
-          uv run mike set-default --push latest
 
       - name: Create GitHub Release and Tag
         if: startsWith(github.ref, 'refs/heads/release/')

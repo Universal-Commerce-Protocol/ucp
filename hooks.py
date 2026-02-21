@@ -28,8 +28,11 @@ import json
 import logging
 import re
 import shutil
+import os
 from datetime import date
 from pathlib import Path
+from urllib.parse import urlparse
+from mkdocs.structure.files import Files
 
 log = logging.getLogger("mkdocs")
 
@@ -39,7 +42,7 @@ UCP_SCHEMA_PREFIX = "https://ucp.dev/schemas/"
 DATE_VERSION_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 
-def _process_refs(data, current_file_dir):
+def _process_refs(data, current_file_dir, url_version=None):
   """Recursively resolve relative $ref paths to absolute URLs.
 
   Reads referenced file's $id to construct the absolute URL.
@@ -66,7 +69,11 @@ def _process_refs(data, current_file_dir):
             ref_data = json.load(f)
 
           if "$id" in ref_data:
-            data[key] = ref_data["$id"] + fragment
+            ref_id = ref_data["$id"]
+            if url_version and ref_id.startswith(UCP_SCHEMA_PREFIX):
+              versioned_prefix = f"https://ucp.dev/{url_version}/schemas/"
+              ref_id = ref_id.replace(UCP_SCHEMA_PREFIX, versioned_prefix, 1)
+            data[key] = ref_id + fragment
           else:
             log.warning(
               f"No '$id' found in {ref_file_path}. "
@@ -83,16 +90,17 @@ def _process_refs(data, current_file_dir):
             f"Keeping original '$ref': {value}"
           )
       else:
-        _process_refs(value, current_file_dir)
+        _process_refs(value, current_file_dir, url_version)
   elif isinstance(data, list):
     for item in data:
-      _process_refs(item, current_file_dir)
+      _process_refs(item, current_file_dir, url_version)
 
 
 def _rewrite_version_urls(data, url_version):
   """Recursively rewrite ucp.dev/schemas/ URLs to include version.
 
-  Transforms: https://ucp.dev/schemas/X -> https://ucp.dev/{url_version}/schemas/X
+  Transforms: https://ucp.dev/schemas/X
+  -> https://ucp.dev/{url_version}/schemas/X
 
   This ensures $id matches the deployed URL and $ref resolves correctly.
   Applied to both $id and $ref fields.
@@ -132,22 +140,188 @@ def _set_schema_version(data, version):
     data["info"]["version"] = version
 
 
+def on_config(config):
+  """Adjust configuration based on DOCS_MODE."""
+  mode = os.environ.get("DOCS_MODE", "root")
+
+  # Update site_url from environment if set (e.g. for forks/CI)
+  # This ensures plugins like mkdocs-site-urls use the correct base URL.
+  site_url_env = os.environ.get("SITE_URL")
+  if site_url_env:
+    current_site_url = config.get("site_url", "/")
+    # Replace default domain with the env var, preserving version suffix
+    if "https://ucp.dev/" in current_site_url:
+      config["site_url"] = current_site_url.replace(
+        "https://ucp.dev/", site_url_env
+      )
+      log.info(
+        f"Updated site_url to {config['site_url']} based on SITE_URL env var"
+      )
+
+  # Calculate base path for links (e.g. / or /ucp/)
+  site_url = os.environ.get("SITE_URL", config.get("site_url", "/"))
+  base_path = urlparse(site_url).path
+  if not base_path.endswith("/"):
+    base_path += "/"
+
+  # --- Adjust Nav (Config Phase) ---
+  # Modifying config['nav'] prevents validation errors for missing files.
+  if "nav" in config:
+    new_nav = []
+    for item in config["nav"]:
+      # Nav items are usually dicts {Title: path/content} or strings
+      if isinstance(item, dict):
+        title = list(item.keys())[0]
+
+        if mode == "root":
+          if title == "Specification":
+            # Replace Specification section with a Link to the latest spec
+            new_nav.append(
+              {"Specification": f"{base_path}latest/specification/overview/"}
+            )
+          else:
+            new_nav.append(item)
+        elif mode == "spec":
+          if title in ("Overview", "Home"):
+            # Replace Overview/Home with a Link to the root site
+            new_nav.append({"Overview": base_path})
+          elif title == "Specification":
+            new_nav.append(item)
+          # Skip other sections in spec mode
+      else:
+        # String item (e.g. "index.md")
+        if mode == "root":
+          new_nav.append(item)
+        # In spec mode, we skip root-level string items unless we want them
+
+    config["nav"] = new_nav
+
+  # --- Adjust llmstxt Plugin Config ---
+  if "plugins" in config and "llmstxt" in config["plugins"]:
+    # config['plugins'] is a PluginCollection (dict-like)
+    llms_plugin = config["plugins"]["llmstxt"]
+    llms_conf = llms_plugin.config
+    if "sections" in llms_conf:
+      if mode == "root":
+        # Remove any section containing specification/ files
+        sections_to_remove = []
+        for section_name, pages in llms_conf["sections"].items():
+          # pages is a list of strings (file paths)
+          if any(p.startswith("specification/") for p in pages):
+            sections_to_remove.append(section_name)
+
+        for section_name in sections_to_remove:
+          if section_name in llms_conf["sections"]:
+            del llms_conf["sections"][section_name]
+
+      elif mode == "spec" and "Overview" in llms_conf["sections"]:
+        # Remove Overview section from llmstxt
+        del llms_conf["sections"]["Overview"]
+
+  # Always force logo to link to root site
+  if "extra" not in config:
+    config["extra"] = {}
+  config["extra"]["homepage"] = base_path
+
+  if mode == "root" and "version" in config.get("extra", {}):
+    # Disable mike version selector for the root site
+    del config["extra"]["version"]
+  return config
+
+
+def on_files(files, config):
+  """Filter files based on DOCS_MODE (spec or root)."""
+  mode = os.environ.get("DOCS_MODE", "root")
+  new_files = []
+  for f in files:
+    if mode == "spec":
+      # Include only specification/, assets/, stylesheets/, and index.md
+      if (
+        f.src_path.startswith("specification/")
+        or f.src_path.startswith("assets/")
+        or f.src_path.startswith("stylesheets/")
+        or f.src_path == "index.md"
+      ):
+        new_files.append(f)
+    elif mode == "root" and not f.src_path.startswith("specification/"):
+      # Exclude specification/
+      new_files.append(f)
+  return Files(new_files)
+
+
+def on_page_markdown(markdown, page, config, files):
+  """Rewrite links to excluded pages (e.g. spec in root mode)."""
+  mode = os.environ.get("DOCS_MODE", "root")
+
+  if mode == "root":
+    # Rewrite relative links to specification/ to absolute URLs
+    # pointing to latest spec.
+    site_url = os.environ.get("SITE_URL", config.get("site_url", "/"))
+    base_path = urlparse(site_url).path
+    if not base_path.endswith("/"):
+      base_path += "/"
+
+    target_base = f"{base_path}latest/specification/"
+
+    def replace_link(match):
+      path = match.group(1)
+      return f"({target_base}{path})"
+
+    # Pattern matches: (  prefix  specification/  path  )
+    # We capture the path AFTER specification/
+    # Matches: (../specification/foo.md) or (specification/foo.md)
+    pattern = r"\((?:(?:\.\./)+|\./)?specification/([^)]+)\)"
+
+    markdown = re.sub(pattern, replace_link, markdown)
+
+  return markdown
+
+
 def on_post_build(config):
-  """Copy and process source files into the site directory.
+  """Copy and process source files into the site directory."""
+  # --- Redirects for excluded pages (Spec Mode) ---
+  mode = os.environ.get("DOCS_MODE", "root")
+  if mode == "spec":
+    site_url = os.environ.get("SITE_URL", config.get("site_url", "/"))
+    base_path = urlparse(site_url).path
+    if not base_path.endswith("/"):
+      base_path += "/"
 
-  For JSON files:
-  1. Resolve relative $ref to absolute URLs
-  2. Set schema version field
-  3. Rewrite URLs to include version (for proper resolution after deployment)
-  4. Output to path derived from original $id (mike adds version prefix)
+    docs_dir = Path(config["docs_dir"])
+    site_dir = Path(config["site_dir"])
 
-  Non-JSON files are copied as-is.
+    # Redirect documentation/* to root site
+    doc_folder = docs_dir / "documentation"
+    if doc_folder.exists():
+      for md_file in doc_folder.rglob("*.md"):
+        rel_path = md_file.relative_to(docs_dir).with_suffix(".html")
+        dest_file = site_dir / rel_path
 
-  Version handling:
-  - YYYY-MM-DD: use for both URL path and version field
-  - Non-date (e.g., 'draft'): URL uses literal, version = today's date
-  """
+        # Target URL: base_path + relative_path
+        # (e.g. /ucp/documentation/foo.html)
+        target = f"{base_path}{rel_path.as_posix()}"
+
+        dest_file.parent.mkdir(parents=True, exist_ok=True)
+        with Path.open(dest_file, "w") as f:
+          f.write(
+            "<!doctype html>"
+            f'<meta http-equiv="refresh" content="0; url={target}">'
+          )
+
+    # Redirect index.html to specification/overview/
+    index_file = site_dir / "index.html"
+    index_target = "specification/overview/"
+    index_file.parent.mkdir(parents=True, exist_ok=True)
+    with Path.open(index_file, "w") as f:
+      f.write(
+        "<!doctype html>"
+        f'<meta http-equiv="refresh" content="0; url={index_target}">'
+      )
+
+  # --- Existing Logic ---
+  # --- Existing Logic ---
   ucp_version = config.get("extra", {}).get("ucp_version")
+
   if not ucp_version:
     log.warning("No ucp_version in mkdocs.yml extra config")
     url_version = None
@@ -164,6 +338,11 @@ def on_post_build(config):
         f"Non-date version '{ucp_version}': schema version set to "
         f"'{schema_version}'"
       )
+
+  # Skip copying source schemas for the root site.
+  # Root site pages should link to versioned schemas (e.g. /draft/schemas/...)
+  if mode == "root":
+    return
 
   base_src_path = Path.cwd() / "source"
   if not base_src_path.exists():

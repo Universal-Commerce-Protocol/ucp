@@ -171,6 +171,10 @@ yarn-error.log
 .settings/
 *.sublime-workspace
 *.code-workspace
+.vscode/
+
+# Site output from scripts/build_local.sh
+/local_preview/
 
 # Miscellaneous
 **/.angular/*
