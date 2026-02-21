@@ -1,3 +1,4 @@
+---
 #   Copyright 2026 Google LLC
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -39,6 +40,7 @@ jobs:
     permissions:
       contents: write
       actions: read
+      pages: read
 
     steps:
       - name: Checkout Code
@@ -51,6 +53,11 @@ jobs:
         run: |
           git config --global user.name github-actions[bot]
           git config --global user.email 41898282+github-actions[bot]@users.noreply.github.com
+
+      - name: Fetch hooks.py from main
+        run: |
+          git fetch origin main
+          git checkout origin/main -- hooks.py
 
       - name: Install system dependencies
         run: |
@@ -100,6 +107,26 @@ jobs:
           mkdir -p site/handlers
           mkdir -p site/discovery
 
+      - name: Configure Site URL
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Fetch the Pages URL. Fails safely if not enabled.
+          PAGES_URL=$(gh api "repos/${{ github.repository }}/pages" --jq '.html_url' 2>/dev/null || true)
+          
+          if [ -z "$PAGES_URL" ]; then
+            echo "Pages URL not detected. Falling back to default structure."
+            PAGES_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"
+          fi
+          
+          # Ensure trailing slash
+          if [[ "$PAGES_URL" != */ ]]; then
+            PAGES_URL="${PAGES_URL}/"
+          fi
+          
+          echo "Set SITE_URL to $PAGES_URL"
+          echo "SITE_URL=$PAGES_URL" >> $GITHUB_ENV
+
       - name: Build Documentation (PR Check)
         if: github.event_name == 'pull_request'
         run: mkdocs build --strict
@@ -113,11 +140,11 @@ jobs:
         if: startsWith(github.ref, 'refs/heads/release/')
         run: |
           # Extract the date (e.g., release/2026-01-11 -> 2026-01-11)
+          export DOCS_MODE=spec
           VERSION_NAME=${GITHUB_REF#refs/heads/release/}
 
           # Deploy this version, tag it as 'latest', and set it as the default site root
           mike deploy --push --update-aliases $VERSION_NAME latest
-          mike set-default --push latest
 
       - name: Create GitHub Release and Tag
         if: startsWith(github.ref, 'refs/heads/release/')

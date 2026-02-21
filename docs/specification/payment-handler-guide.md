@@ -16,8 +16,6 @@
 
 # Payment Handler Specification Guide
 
-**Version:** `2026-01-11`
-
 ## Introduction
 
 This guide defines the standard structure and vocabulary for specifying UCP
