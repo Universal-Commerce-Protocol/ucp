@@ -1,3 +1,4 @@
+---
 #   Copyright 2026 UCP Authors
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,29 +29,29 @@ nav:
   - Home: index.md
   - Core Concepts: documentation/core-concepts.md
   - Specification:
-    - Overview: specification/overview.md
-    - Checkout Capability:
-      - Overview: specification/checkout.md
-      - HTTP/REST Binding: specification/checkout-rest.md
-      - MCP Binding: specification/checkout-mcp.md
-      - A2A Binding: specification/checkout-a2a.md
-      - EP Binding: specification/embedded-checkout.md
-      - AP2 Mandates Extension: specification/ap2-mandates.md
-      - Buyer Consent Extension: specification/buyer-consent.md
-      - Discounts Extension: specification/discount.md
-      - Fulfillment Extension: specification/fulfillment.md
-    - Order Capability: specification/order.md
-    - Identity Linking Capability: specification/identity-linking.md
-    - Payment Handlers:
-      - Guide: specification/payment-handler-guide.md
-      - Template: specification/payment-handler-template.md
-      - Tokenization Guide: specification/tokenization-guide.md
-      - Examples:
-        - Processor Tokenizer: specification/examples/processor-tokenizer-payment-handler.md
-        - Platform Tokenizer: specification/examples/platform-tokenizer-payment-handler.md
-        - Encrypted Credential: specification/examples/encrypted-credential-handler.md
-    - Reference: specification/reference.md
-    - Playground: specification/playground.md
+      - Overview: specification/overview.md
+      - Checkout Capability:
+          - Overview: specification/checkout.md
+          - HTTP/REST Binding: specification/checkout-rest.md
+          - MCP Binding: specification/checkout-mcp.md
+          - A2A Binding: specification/checkout-a2a.md
+          - EP Binding: specification/embedded-checkout.md
+          - AP2 Mandates Extension: specification/ap2-mandates.md
+          - Buyer Consent Extension: specification/buyer-consent.md
+          - Discounts Extension: specification/discount.md
+          - Fulfillment Extension: specification/fulfillment.md
+      - Order Capability: specification/order.md
+      - Identity Linking Capability: specification/identity-linking.md
+      - Payment Handlers:
+          - Guide: specification/payment-handler-guide.md
+          - Template: specification/payment-handler-template.md
+          - Tokenization Guide: specification/tokenization-guide.md
+          - Examples:
+              - Processor Tokenizer: specification/examples/processor-tokenizer-payment-handler.md
+              - Platform Tokenizer: specification/examples/platform-tokenizer-payment-handler.md
+              - Encrypted Credential: specification/examples/encrypted-credential-handler.md
+      - Reference: specification/reference.md
+      - Playground: specification/playground.md
   - UCP and AP2: documentation/ucp-and-ap2.md
   - Roadmap: documentation/roadmap.md
   - Versioning: versioning.md

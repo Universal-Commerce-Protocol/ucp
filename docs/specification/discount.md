@@ -16,7 +16,6 @@
 
 # Discount Extension
 
-
 ## Overview
 
 Discount extension allows businesses to indicate that they support discount

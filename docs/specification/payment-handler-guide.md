@@ -16,7 +16,6 @@
 
 # Payment Handler Specification Guide
 
-
 ## Introduction
 
 This guide defines the standard structure and vocabulary for specifying UCP

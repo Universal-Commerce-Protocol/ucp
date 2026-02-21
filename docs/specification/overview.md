@@ -16,7 +16,6 @@
 
 # Universal Commerce Protocol (UCP) Official Specification
 
-
 ## Overarching guidelines
 
 The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**,

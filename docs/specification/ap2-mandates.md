@@ -16,7 +16,6 @@
 
 # AP2 Mandates Extension
 
-
 ## Overview
 
 The AP2 Mandates extension enables the secure exchange of user intents and

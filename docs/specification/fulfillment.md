@@ -16,7 +16,6 @@
 
 # Fulfillment Extension
 
-
 ## Overview
 
 The fulfillment extension enables businesses to advertise support for physical
