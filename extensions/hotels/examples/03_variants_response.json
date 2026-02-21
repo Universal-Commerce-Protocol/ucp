@@ -1,0 +1,104 @@
+{
+  "correlation_id": "corr-9f4c2d3a-ucp-hotel-0001",
+  "property_id": "prop-0001",
+  "variants": [
+    {
+      "variant_id": "var-king-01",
+      "property_id": "prop-0001",
+      "room_name": "King Room",
+      "room_description": "Spacious king room with work desk and city view.",
+      "occupancy": {
+        "max_guests": 2,
+        "max_adults": 2,
+        "max_children": 1
+      },
+      "bed_configuration": {
+        "beds": [
+          {
+            "type": "KING",
+            "count": 1
+          }
+        ]
+      },
+      "view_type": "CITY",
+      "room_amenities": [
+        "wifi",
+        "ac",
+        "workspace"
+      ],
+      "variant_group_id": "grp-standard",
+      "variant_group_name": "Standard Rooms",
+      "display_order": 1,
+      "variant_family": "STANDARD",
+      "indicative_availability": "LIKELY_AVAILABLE",
+      "indicative_price": {
+        "type": "INDICATIVE",
+        "min": {
+          "amount": 14500,
+          "currency": "INR"
+        },
+        "valid_until": "2026-02-15T18:00:00Z",
+        "non_binding": true,
+        "basis": "PER_NIGHT",
+        "source": "MARKETPLACE_CACHE"
+      },
+      "pricing_reference": "pref-prop-0001-var-king-01-20260410-2ad",
+      "eligibility_signals": [
+        {
+          "type": "CORPORATE_RATE_AVAILABLE",
+          "program_id": "CORP-ACME",
+          "description": "Negotiated corporate rates may apply."
+        },
+        {
+          "type": "MEMBER_DISCOUNT_AVAILABLE",
+          "program_id": "LOYALTY-IHCL",
+          "description": "Member rates available for verified loyalty."
+        }
+      ]
+    },
+    {
+      "variant_id": "var-suite-02",
+      "property_id": "prop-0001",
+      "room_name": "Junior Suite",
+      "room_description": "Suite with separate seating area; ideal for longer stays.",
+      "occupancy": {
+        "max_guests": 3,
+        "max_adults": 2,
+        "max_children": 2
+      },
+      "bed_configuration": {
+        "beds": [
+          {
+            "type": "KING",
+            "count": 1
+          },
+          {
+            "type": "SOFA_BED",
+            "count": 1
+          }
+        ]
+      },
+      "view_type": "CITY",
+      "room_amenities": [
+        "wifi",
+        "ac",
+        "workspace",
+        "sofa"
+      ],
+      "variant_group_id": "grp-suites",
+      "variant_group_name": "Suites",
+      "display_order": 2,
+      "variant_family": "SUITE",
+      "indicative_availability": "LIMITED",
+      "pricing_reference": "pref-prop-0001-var-suite-02-20260410-8bf",
+      "eligibility_signals": [
+        {
+          "type": "LOYALTY_REQUIRED",
+          "program_id": "LOYALTY-IHCL",
+          "description": "Suite member upgrade rates require verified loyalty."
+        }
+      ]
+    }
+  ],
+  "messages": []
+}

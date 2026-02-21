@@ -1,0 +1,2163 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/extensions/travel/hotels/bundle/2026-02-15-v7",
+  "title": "UCP Hotels Extension Schema Bundle (V7 \u2013 Checkout + Order Lifecycle)",
+  "description": "Canonical JSON Schemas for UCP Hotels extension",
+  "type": "object",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/HotelProperty"
+    },
+    {
+      "$ref": "#/$defs/HotelVariant"
+    },
+    {
+      "$ref": "#/$defs/HotelOffer"
+    },
+    {
+      "$ref": "#/$defs/CartIntent"
+    },
+    {
+      "$ref": "#/$defs/LodgingItem"
+    },
+    {
+      "$ref": "#/$defs/SearchPropertiesRequest"
+    },
+    {
+      "$ref": "#/$defs/SearchPropertiesResponse"
+    },
+    {
+      "$ref": "#/$defs/ListVariantsResponse"
+    },
+    {
+      "$ref": "#/$defs/CreateOfferQuoteRequest"
+    },
+    {
+      "$ref": "#/$defs/CreateOfferQuoteResponse"
+    },
+    {
+      "$ref": "#/$defs/CreateCartIntentRequest"
+    },
+    {
+      "$ref": "#/$defs/CreateCartIntentResponse"
+    },
+    {
+      "$ref": "#/$defs/CreateCheckoutRequest"
+    },
+    {
+      "$ref": "#/$defs/CreateCheckoutResponse"
+    },
+    {
+      "$ref": "#/$defs/GetOrderResponse"
+    },
+    {
+      "$ref": "#/$defs/OrderEvent"
+    },
+    {
+      "$ref": "#/$defs/HotelOrder"
+    }
+  ],
+  "$defs": {
+    "UcpMeta": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Reverse-domain schema identifier (registry key)."
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "description": "Date-based version identifier YYYY-MM-DD."
+        }
+      },
+      "required": [
+        "name",
+        "version"
+      ],
+      "additionalProperties": true
+    },
+    "Money": {
+      "type": "object",
+      "properties": {
+        "currency": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 3
+        },
+        "amount": {
+          "type": "integer",
+          "description": "Minor units (e.g., cents)."
+        }
+      },
+      "required": [
+        "currency",
+        "amount"
+      ]
+    },
+    "Geo": {
+      "type": "object",
+      "properties": {
+        "lat": {
+          "type": "number"
+        },
+        "lon": {
+          "type": "number"
+        },
+        "city": {
+          "type": "string"
+        },
+        "country": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 2
+        }
+      },
+      "required": [
+        "lat",
+        "lon",
+        "country"
+      ]
+    },
+    "IndicativePrice": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "INDICATIVE"
+        },
+        "min": {
+          "$ref": "#/$defs/Money"
+        },
+        "max": {
+          "$ref": "#/$defs/Money"
+        },
+        "valid_until": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "non_binding": {
+          "const": true
+        },
+        "basis": {
+          "type": "string",
+          "description": "Interpretation of indicative price (e.g., PER_NIGHT, PER_STAY).",
+          "enum": [
+            "PER_NIGHT",
+            "PER_STAY",
+            "UNKNOWN"
+          ]
+        },
+        "source": {
+          "type": "string",
+          "description": "Where the indicative signal originated (e.g., MERCHANT, MARKETPLACE_CACHE)."
+        },
+        "conversion": {
+          "type": "object",
+          "properties": {
+            "converted": {
+              "type": "boolean"
+            },
+            "fx_rate": {
+              "type": "number"
+            },
+            "fx_timestamp": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "source_currency": {
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 3
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "type",
+        "min",
+        "valid_until",
+        "non_binding"
+      ]
+    },
+    "HotelProperty": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://ucp.dev/extensions/travel/hotels/components/property/2026-02-15?v3=true",
+      "title": "HotelProperty",
+      "description": "Canonical hotel property object for discovery.",
+      "type": "object",
+      "properties": {
+        "property_id": {
+          "type": "string"
+        },
+        "merchant_id": {
+          "type": "string",
+          "description": "Merchant identifier. Must match merchant_info.merchant_id when merchant_info is present."
+        },
+        "name": {
+          "type": "string"
+        },
+        "brand": {
+          "type": "string"
+        },
+        "chain": {
+          "type": "string"
+        },
+        "geo": {
+          "$ref": "#/$defs/Geo"
+        },
+        "star_rating": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 7
+        },
+        "review_summary": {
+          "type": "object",
+          "properties": {
+            "score": {
+              "type": "number"
+            },
+            "count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "source": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "score",
+            "count"
+          ]
+        },
+        "amenities": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "sustainability_flags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "images": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          },
+          "minItems": 1
+        },
+        "indicative_price": {
+          "$ref": "#/$defs/IndicativePrice"
+        },
+        "data_freshness": {
+          "type": "object",
+          "properties": {
+            "last_updated": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "ttl_seconds": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "last_updated",
+            "ttl_seconds"
+          ]
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 20,
+          "description": "Short, agent-friendly summary of the property suitable for list views and comparison."
+        },
+        "persona_tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "description": "Persona-oriented tags such as business, family, couples, long_stay, day_use."
+        },
+        "accessibility_flags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "High-level accessibility attributes available at property level (e.g., step_free_access, accessible_parking)."
+        },
+        "merchant_info": {
+          "$ref": "#/$defs/MerchantInfo"
+        },
+        "media_summary": {
+          "$ref": "#/$defs/MediaSummary"
+        }
+      },
+      "required": [
+        "amenities",
+        "data_freshness",
+        "geo",
+        "merchant_id",
+        "merchant_info",
+        "name",
+        "property_id",
+        "summary"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "oneOf": [
+            {
+              "required": [
+                "star_rating"
+              ]
+            },
+            {
+              "required": [
+                "review_summary"
+              ]
+            }
+          ]
+        },
+        {
+          "oneOf": [
+            {
+              "required": [
+                "images"
+              ]
+            },
+            {
+              "required": [
+                "media_summary"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "HotelVariant": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://ucp.dev/extensions/travel/hotels/components/variant/2026-02-15?v4=true",
+      "title": "HotelVariant",
+      "description": "Canonical room variant object (room identity), pricing-agnostic.",
+      "type": "object",
+      "properties": {
+        "variant_id": {
+          "type": "string"
+        },
+        "property_id": {
+          "type": "string"
+        },
+        "room_name": {
+          "type": "string"
+        },
+        "room_description": {
+          "type": "string"
+        },
+        "occupancy": {
+          "type": "object",
+          "properties": {
+            "max_adults": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "max_guests": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "required": [
+            "max_guests"
+          ]
+        },
+        "bed_configuration": {
+          "type": "object",
+          "properties": {
+            "beds": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string"
+                  },
+                  "count": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                },
+                "required": [
+                  "type",
+                  "count"
+                ]
+              }
+            }
+          }
+        },
+        "view_type": {
+          "type": "string"
+        },
+        "room_size_sqm": {
+          "type": "number",
+          "minimum": 0
+        },
+        "accessibility": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "smoking_allowed": {
+          "type": "boolean"
+        },
+        "room_amenities": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "indicative_availability": {
+          "type": "string",
+          "enum": [
+            "UNKNOWN",
+            "LIKELY_AVAILABLE",
+            "LIMITED",
+            "UNLIKELY",
+            "AVAILABLE",
+            "NOT_AVAILABLE"
+          ]
+        },
+        "indicative_price": {
+          "$ref": "#/$defs/IndicativePrice"
+        },
+        "pricing_reference": {
+          "type": "string",
+          "description": "Opaque pointer used for pricing requests; not a rate id."
+        },
+        "eligibility_signals": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/EligibilitySignal"
+          }
+        },
+        "variant_group_id": {
+          "type": "string",
+          "description": "Stable grouping identifier for related variants (e.g., same base room with different minor differences)."
+        },
+        "variant_group_name": {
+          "type": "string",
+          "description": "Human-friendly group name for UI/agent clustering (e.g., 'Premium Cabin')."
+        },
+        "display_order": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Optional display order hint for sorting variants."
+        },
+        "variant_family": {
+          "type": "string",
+          "description": "Optional merchant-defined family classification for clustering (e.g., STANDARD, DELUXE, SUITE)."
+        },
+        "stay_type": {
+          "$ref": "#/$defs/StayType"
+        },
+        "checkin_time_window": {
+          "type": "object",
+          "properties": {
+            "start": {
+              "type": "string",
+              "pattern": "^\\d{2}:\\d{2}$",
+              "description": "HH:MM local time"
+            },
+            "end": {
+              "type": "string",
+              "pattern": "^\\d{2}:\\d{2}$",
+              "description": "HH:MM local time"
+            }
+          },
+          "required": [
+            "start",
+            "end"
+          ],
+          "additionalProperties": false,
+          "description": "Optional check-in time window constraint for DAY_USE or flexible check-in products."
+        },
+        "checkout_time_window": {
+          "type": "object",
+          "properties": {
+            "start": {
+              "type": "string",
+              "pattern": "^\\d{2}:\\d{2}$",
+              "description": "HH:MM local time"
+            },
+            "end": {
+              "type": "string",
+              "pattern": "^\\d{2}:\\d{2}$",
+              "description": "HH:MM local time"
+            }
+          },
+          "required": [
+            "start",
+            "end"
+          ],
+          "additionalProperties": false,
+          "description": "Optional check-out time window constraint for DAY_USE or flexible check-out products."
+        }
+      },
+      "required": [
+        "variant_id",
+        "property_id",
+        "occupancy"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "required": [
+              "indicative_price"
+            ]
+          },
+          "then": {
+            "required": [
+              "pricing_reference"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "eligibility_signals": {
+                "type": "array",
+                "contains": {
+                  "properties": {
+                    "type": {
+                      "const": "IDENTITY_REQUIRED_FOR_ELIGIBILITY"
+                    }
+                  },
+                  "required": [
+                    "type"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "eligibility_signals"
+            ]
+          },
+          "then": {
+            "required": [
+              "pricing_reference"
+            ]
+          }
+        }
+      ]
+    },
+    "StayWindow": {
+      "type": "object",
+      "properties": {
+        "checkin": {
+          "type": "string",
+          "format": "date"
+        },
+        "checkout": {
+          "type": "string",
+          "format": "date"
+        }
+      },
+      "required": [
+        "checkin",
+        "checkout"
+      ]
+    },
+    "PriceBreakdown": {
+      "type": "object",
+      "properties": {
+        "base": {
+          "$ref": "#/$defs/Money"
+        },
+        "taxes": {
+          "$ref": "#/$defs/Money"
+        },
+        "fees": {
+          "$ref": "#/$defs/Money"
+        },
+        "total": {
+          "$ref": "#/$defs/Money"
+        },
+        "line_items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string"
+              },
+              "amount": {
+                "$ref": "#/$defs/Money"
+              }
+            },
+            "required": [
+              "type",
+              "amount"
+            ]
+          }
+        }
+      },
+      "required": [
+        "total"
+      ]
+    },
+    "CancellationPolicy": {
+      "type": "object",
+      "properties": {
+        "refundable": {
+          "type": "boolean"
+        },
+        "refundable_until": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "penalties": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "starts_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "type": {
+                "type": "string"
+              },
+              "amount": {
+                "$ref": "#/$defs/Money"
+              }
+            },
+            "required": [
+              "starts_at",
+              "type"
+            ]
+          }
+        }
+      },
+      "required": [
+        "refundable"
+      ]
+    },
+    "PaymentRequirements": {
+      "type": "object",
+      "properties": {
+        "guarantee_required": {
+          "type": "boolean"
+        },
+        "prepayment_required": {
+          "type": "boolean"
+        },
+        "payment_timing": {
+          "type": "string",
+          "enum": [
+            "AT_BOOKING",
+            "AT_PROPERTY",
+            "DEPOSIT_ONLY",
+            "UNKNOWN"
+          ]
+        },
+        "accepted_methods": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "guarantee_required"
+      ]
+    },
+    "HotelOffer": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://ucp.dev/extensions/travel/hotels/components/offer/2026-02-15?v2=true",
+      "title": "HotelOffer",
+      "description": "Confirmation-ready offer/quote for a selected stay.",
+      "type": "object",
+      "properties": {
+        "offer_id": {
+          "type": "string"
+        },
+        "property_id": {
+          "type": "string"
+        },
+        "variant_id": {
+          "type": "string"
+        },
+        "stay": {
+          "$ref": "#/$defs/StayWindow"
+        },
+        "occupancy": {
+          "type": "object",
+          "properties": {
+            "adults": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "children": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "adults"
+          ]
+        },
+        "pricing": {
+          "$ref": "#/$defs/PriceBreakdown"
+        },
+        "cancellation_policy": {
+          "$ref": "#/$defs/CancellationPolicy"
+        },
+        "payment_requirements": {
+          "$ref": "#/$defs/PaymentRequirements"
+        },
+        "offer_valid_until": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "requires_reprice_before_checkout": {
+          "type": "boolean"
+        },
+        "eligibility_tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "disclosures": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "quantity": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Number of rooms (or identical units) included in this offer. Defaults to 1."
+        },
+        "per_unit_pricing": {
+          "type": "boolean",
+          "description": "If true, pricing.total represents per-room total; otherwise total is aggregate across quantity."
+        }
+      },
+      "required": [
+        "offer_id",
+        "property_id",
+        "variant_id",
+        "stay",
+        "occupancy",
+        "pricing",
+        "cancellation_policy",
+        "payment_requirements",
+        "offer_valid_until",
+        "requires_reprice_before_checkout"
+      ],
+      "additionalProperties": false
+    },
+    "CartIntent": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://ucp.dev/extensions/travel/hotels/components/cart_intent/2026-02-15?v6=true",
+      "title": "CartIntent",
+      "description": "Intent stabilization object; not an inventory hold and not a booking commitment.",
+      "type": "object",
+      "properties": {
+        "cart_intent_id": {
+          "type": "string"
+        },
+        "selected": {
+          "$ref": "#/$defs/CartSelection"
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "DRAFT",
+            "READY_FOR_PRICING",
+            "READY_FOR_CHECKOUT",
+            "EXPIRED",
+            "CANCELED"
+          ]
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "identity_context_reference": {
+          "type": "string",
+          "description": "Optional opaque reference to identity context used to derive eligibility and pricing for this cart."
+        },
+        "identity_context": {
+          "$ref": "#/$defs/IdentityContext",
+          "description": "Optional embedded identity context (mutually exclusive with identity_context_reference)."
+        },
+        "requires_reprice_before_checkout": {
+          "type": "boolean",
+          "description": "If true, platform MUST reprice (CreateOfferQuote/Reprice) before creating or completing checkout.",
+          "default": false
+        },
+        "last_priced_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when pricing_snapshot/offer_id was last validated."
+        },
+        "correlation_id": {
+          "type": "string",
+          "description": "Optional end-to-end correlation identifier for traceability across transports (HTTP/MCP/A2A)."
+        }
+      },
+      "required": [
+        "cart_intent_id",
+        "selected",
+        "state"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "not": {
+            "allOf": [
+              {
+                "required": [
+                  "identity_context"
+                ]
+              },
+              {
+                "required": [
+                  "identity_context_reference"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "selected": {
+                "properties": {
+                  "offer_id": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "requires_reprice_before_checkout": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "LodgingItem": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://ucp.dev/extensions/travel/hotels/components/lodging_item/2026-02-15?v2=true",
+      "title": "LodgingItem",
+      "description": "Canonical hotel-stay item payload to be embedded in UCP Checkout Item/Line Item.",
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "lodging_stay"
+        },
+        "property_id": {
+          "type": "string"
+        },
+        "variant_id": {
+          "type": "string"
+        },
+        "offer_id": {
+          "type": "string"
+        },
+        "stay": {
+          "$ref": "#/$defs/StayWindow"
+        },
+        "occupancy": {
+          "type": "object",
+          "properties": {
+            "adults": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "children": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "adults"
+          ]
+        },
+        "pricing_snapshot": {
+          "$ref": "#/$defs/PriceBreakdown"
+        },
+        "cancellation_policy": {
+          "$ref": "#/$defs/CancellationPolicy"
+        },
+        "merchant_id": {
+          "type": "string"
+        },
+        "quantity": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Number of rooms purchased for this lodging stay."
+        }
+      },
+      "required": [
+        "type",
+        "property_id",
+        "variant_id",
+        "stay",
+        "occupancy",
+        "merchant_id"
+      ],
+      "additionalProperties": false
+    },
+    "SearchPropertiesRequest": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://ucp.dev/extensions/travel/hotels/ops/search_properties_request/2026-02-15?v5=true",
+      "title": "SearchPropertiesRequest",
+      "description": "Input for SearchProperties.",
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string"
+        },
+        "geo_bounds": {
+          "type": "object",
+          "properties": {
+            "north": {
+              "type": "number"
+            },
+            "south": {
+              "type": "number"
+            },
+            "east": {
+              "type": "number"
+            },
+            "west": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "north",
+            "south",
+            "east",
+            "west"
+          ]
+        },
+        "stay": {
+          "type": "object",
+          "properties": {
+            "checkin": {
+              "type": "string",
+              "format": "date"
+            },
+            "checkout": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          "required": [
+            "checkin",
+            "checkout"
+          ]
+        },
+        "occupancy": {
+          "type": "object",
+          "properties": {
+            "adults": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "children": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "adults"
+          ]
+        },
+        "filters": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "sort": {
+          "type": "string",
+          "enum": [
+            "RELEVANCE",
+            "PRICE",
+            "DISTANCE",
+            "RATING"
+          ]
+        },
+        "page": {
+          "type": "object",
+          "properties": {
+            "cursor": {
+              "type": "string"
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            }
+          },
+          "additionalProperties": false
+        },
+        "identity_context_reference": {
+          "type": "string",
+          "description": "Optional opaque reference to identity context (e.g., linked loyalty/corporate claims) used to influence ranking and eligibility hints without gating discovery."
+        },
+        "identity_context": {
+          "$ref": "#/$defs/IdentityContext",
+          "description": "Optional embedded identity context used for ranking and eligibility hints without gating discovery."
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "not": {
+            "allOf": [
+              {
+                "required": [
+                  "identity_context"
+                ]
+              },
+              {
+                "required": [
+                  "identity_context_reference"
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "SearchPropertiesResponse": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://ucp.dev/extensions/travel/hotels/ops/search_properties_response/2026-02-15?v5=true",
+      "title": "SearchPropertiesResponse",
+      "description": "Output for SearchProperties.",
+      "type": "object",
+      "properties": {
+        "properties": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/HotelProperty"
+          }
+        },
+        "next_cursor": {
+          "type": "string"
+        },
+        "messages": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/UcpMessage"
+          }
+        },
+        "correlation_id": {
+          "type": "string",
+          "description": "Optional end-to-end correlation identifier for traceability across transports (HTTP/MCP/A2A)."
+        },
+        "identity_applied": {
+          "type": "boolean",
+          "description": "If true, the business applied identity context to ranking/eligibility hints for this response."
+        }
+      },
+      "required": [
+        "properties"
+      ],
+      "additionalProperties": false
+    },
+    "ListVariantsResponse": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://ucp.dev/extensions/travel/hotels/ops/list_variants_response/2026-02-15?v4=true",
+      "title": "ListVariantsResponse",
+      "type": "object",
+      "properties": {
+        "property_id": {
+          "type": "string"
+        },
+        "variants": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/HotelVariant"
+          }
+        },
+        "messages": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/UcpMessage"
+          }
+        },
+        "correlation_id": {
+          "type": "string",
+          "description": "Optional end-to-end correlation identifier for traceability across transports (HTTP/MCP/A2A)."
+        }
+      },
+      "required": [
+        "property_id",
+        "variants"
+      ],
+      "additionalProperties": false
+    },
+    "CreateOfferQuoteRequest": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://ucp.dev/extensions/travel/hotels/ops/create_offer_quote_request/2026-02-15?v5=true",
+      "title": "CreateOfferQuoteRequest",
+      "type": "object",
+      "properties": {
+        "property_id": {
+          "type": "string"
+        },
+        "variant_id": {
+          "type": "string"
+        },
+        "pricing_reference": {
+          "type": "string"
+        },
+        "stay": {
+          "$ref": "#/$defs/StayWindow"
+        },
+        "occupancy": {
+          "type": "object",
+          "properties": {
+            "adults": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "children": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "adults"
+          ]
+        },
+        "idempotency_key": {
+          "type": "string"
+        },
+        "identity_context_reference": {
+          "type": "string",
+          "description": "Opaque reference to a previously linked identity context (preferred when tokens are stored externally)."
+        },
+        "identity_context": {
+          "$ref": "#/$defs/IdentityContext",
+          "description": "Optional embedded identity context to evaluate loyalty/corporate eligibility before pricing."
+        }
+      },
+      "required": [
+        "property_id",
+        "variant_id",
+        "stay",
+        "occupancy"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "not": {
+            "allOf": [
+              {
+                "required": [
+                  "identity_context"
+                ]
+              },
+              {
+                "required": [
+                  "identity_context_reference"
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "CreateOfferQuoteResponse": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://ucp.dev/extensions/travel/hotels/ops/create_offer_quote_response/2026-02-15?v5=true",
+      "title": "CreateOfferQuoteResponse",
+      "type": "object",
+      "properties": {
+        "offers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/HotelOffer"
+          }
+        },
+        "messages": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/UcpMessage"
+          }
+        },
+        "correlation_id": {
+          "type": "string",
+          "description": "Optional end-to-end correlation identifier for traceability across transports (HTTP/MCP/A2A)."
+        },
+        "identity_applied": {
+          "type": "boolean",
+          "description": "If true, the business applied identity context to compute returned offers."
+        }
+      },
+      "required": [
+        "offers"
+      ],
+      "additionalProperties": false
+    },
+    "EligibilitySignal": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "LOYALTY_REQUIRED",
+            "CORPORATE_RATE_AVAILABLE",
+            "MEMBER_DISCOUNT_AVAILABLE",
+            "IDENTITY_REQUIRED_FOR_ELIGIBILITY"
+          ]
+        },
+        "program_id": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "additionalProperties": false
+    },
+    "UcpMessage": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "error",
+            "warning",
+            "info"
+          ]
+        },
+        "code": {
+          "type": "string"
+        },
+        "severity": {
+          "type": "string",
+          "enum": [
+            "recoverable",
+            "requires_buyer_input",
+            "requires_buyer_review",
+            "fatal"
+          ]
+        },
+        "content": {
+          "type": "string"
+        },
+        "retryable": {
+          "type": "boolean"
+        },
+        "requires_user_action": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "type",
+        "code",
+        "severity",
+        "content"
+      ],
+      "additionalProperties": false
+    },
+    "MerchantInfo": {
+      "type": "object",
+      "properties": {
+        "merchant_id": {
+          "type": "string"
+        },
+        "display_name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "PROPERTY",
+            "CHAIN",
+            "AGGREGATOR",
+            "UNKNOWN"
+          ]
+        },
+        "branding": {
+          "type": "object",
+          "properties": {
+            "logo_url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "website_url": {
+              "type": "string",
+              "format": "uri"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "merchant_id",
+        "display_name"
+      ],
+      "additionalProperties": false
+    },
+    "MediaSummary": {
+      "type": "object",
+      "properties": {
+        "image_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "image_retrieval_url": {
+          "type": "string",
+          "format": "uri",
+          "description": "Endpoint or signed URL template to retrieve images for the property."
+        }
+      },
+      "required": [
+        "image_count",
+        "image_retrieval_url"
+      ],
+      "additionalProperties": false
+    },
+    "StayType": {
+      "type": "string",
+      "enum": [
+        "OVERNIGHT",
+        "DAY_USE",
+        "UNKNOWN"
+      ],
+      "description": "Stay type classification. DAY_USE indicates intra-day use windows; OVERNIGHT indicates standard overnight stays."
+    },
+    "PointOfSale": {
+      "type": "object",
+      "properties": {
+        "country": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 2,
+          "description": "ISO 3166-1 alpha-2 country code."
+        },
+        "currency": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 3
+        },
+        "locale": {
+          "type": "string",
+          "description": "BCP-47 locale tag (e.g., en-US)."
+        },
+        "channel": {
+          "type": "string",
+          "description": "Marketplace channel identifier (e.g., web, mobile, agent)."
+        },
+        "market": {
+          "type": "string",
+          "description": "Optional market identifier (merchant-defined)."
+        },
+        "source": {
+          "type": "string",
+          "description": "Optional POS source identifier (merchant-defined)."
+        }
+      },
+      "required": [
+        "country"
+      ],
+      "additionalProperties": false
+    },
+    "IdentityConfidenceLevel": {
+      "type": "string",
+      "enum": [
+        "VERIFIED",
+        "PARTIAL",
+        "UNVERIFIED",
+        "UNKNOWN"
+      ],
+      "description": "Confidence level of identity claims. VERIFIED indicates explicit verification by issuer; PARTIAL indicates limited validation; UNVERIFIED indicates self-asserted; UNKNOWN indicates unspecified."
+    },
+    "LoyaltyClaim": {
+      "type": "object",
+      "properties": {
+        "program_id": {
+          "type": "string",
+          "description": "Loyalty program identifier (merchant/issuer-defined)."
+        },
+        "member_id": {
+          "type": "string",
+          "description": "Loyalty membership number or opaque identifier."
+        },
+        "tier": {
+          "type": "string",
+          "description": "Tier name or code (issuer-defined)."
+        },
+        "verification_status": {
+          "type": "string",
+          "enum": [
+            "VERIFIED",
+            "UNVERIFIED",
+            "PENDING"
+          ],
+          "description": "Verification state for the loyalty membership."
+        },
+        "benefit_eligibility": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Optional list of eligible benefit tags (issuer-defined)."
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "program_id",
+        "verification_status"
+      ],
+      "additionalProperties": false
+    },
+    "CorporateClaim": {
+      "type": "object",
+      "properties": {
+        "corporate_id": {
+          "type": "string",
+          "description": "Corporate identifier (issuer-defined)."
+        },
+        "contract_id": {
+          "type": "string",
+          "description": "Optional contract identifier (issuer-defined)."
+        },
+        "rate_access_codes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Optional list of negotiated/discount access codes."
+        },
+        "eligibility_status": {
+          "type": "string",
+          "enum": [
+            "ELIGIBLE",
+            "NOT_ELIGIBLE",
+            "PENDING",
+            "UNKNOWN"
+          ]
+        },
+        "verification_status": {
+          "type": "string",
+          "enum": [
+            "VERIFIED",
+            "UNVERIFIED",
+            "PENDING"
+          ]
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "corporate_id",
+        "eligibility_status"
+      ],
+      "additionalProperties": false
+    },
+    "ApplicablePolicies": {
+      "type": "object",
+      "properties": {
+        "policy_tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Policy tags applicable for the buyer context (issuer-defined)."
+        },
+        "policy_urls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          },
+          "description": "Optional URLs to policy documents."
+        }
+      },
+      "additionalProperties": false
+    },
+    "IdentityContext": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://ucp.dev/extensions/travel/hotels/components/identity_context/2026-02-15?v5=true",
+      "title": "IdentityContext",
+      "description": "Structured identity and eligibility context used to influence discovery ranking and offer eligibility without gating anonymous exploration.",
+      "type": "object",
+      "properties": {
+        "identity_context_id": {
+          "type": "string",
+          "description": "Opaque stable reference for the identity context (may be minted by platform or issuer)."
+        },
+        "traveler_id": {
+          "type": "string",
+          "description": "Optional traveler identifier in the issuer domain."
+        },
+        "loyalty": {
+          "$ref": "#/$defs/LoyaltyClaim"
+        },
+        "corporate": {
+          "$ref": "#/$defs/CorporateClaim"
+        },
+        "point_of_sale": {
+          "$ref": "#/$defs/PointOfSale"
+        },
+        "market_pos": {
+          "type": "string",
+          "description": "Optional market/POS composite string (legacy compatibility)."
+        },
+        "identity_confidence_level": {
+          "$ref": "#/$defs/IdentityConfidenceLevel"
+        },
+        "applicable_policies": {
+          "$ref": "#/$defs/ApplicablePolicies"
+        },
+        "issued_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "source": {
+          "type": "string",
+          "description": "Issuer/source of the identity context (e.g., merchant, platform, corporate IdP)."
+        },
+        "consent_scopes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Scopes consented by the buyer for using the identity context."
+        }
+      },
+      "required": [
+        "identity_confidence_level",
+        "issued_at"
+      ],
+      "additionalProperties": false
+    },
+    "AddOnSelection": {
+      "type": "object",
+      "properties": {
+        "addon_id": {
+          "type": "string",
+          "description": "Stable add-on identifier in merchant domain."
+        },
+        "name": {
+          "type": "string"
+        },
+        "quantity": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1
+        },
+        "pricing_reference": {
+          "type": "string",
+          "description": "Opaque pointer for repricing the add-on (not a rate id)."
+        },
+        "eligibility_tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "disclosures": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "addon_id"
+      ],
+      "additionalProperties": false
+    },
+    "CartSelection": {
+      "type": "object",
+      "properties": {
+        "property_id": {
+          "type": "string"
+        },
+        "variant_id": {
+          "type": "string"
+        },
+        "stay": {
+          "$ref": "#/$defs/StayWindow"
+        },
+        "occupancy": {
+          "type": "object",
+          "properties": {
+            "adults": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "children": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "adults"
+          ]
+        },
+        "offer_id": {
+          "type": "string",
+          "description": "Optional offer identifier if the cart is offer-backed."
+        },
+        "quantity": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1,
+          "description": "Number of rooms (or identical units) requested."
+        },
+        "selected_addons": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AddOnSelection"
+          }
+        },
+        "special_requests": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Optional special requests captured in cart; may be non-guaranteed."
+        },
+        "pricing_snapshot": {
+          "$ref": "#/$defs/PriceBreakdown",
+          "description": "Optional price snapshot associated with an offer at time of cart update."
+        },
+        "cancellation_policy_snapshot": {
+          "$ref": "#/$defs/CancellationPolicy",
+          "description": "Optional snapshot for UI display; authoritative policy remains in offer/checkout."
+        }
+      },
+      "required": [
+        "property_id",
+        "variant_id",
+        "stay",
+        "occupancy"
+      ],
+      "additionalProperties": false
+    },
+    "CreateCartIntentRequest": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://ucp.dev/extensions/travel/hotels/ops/create_cart_intent_request/2026-02-15?v6=true",
+      "title": "CreateCartIntentRequest",
+      "type": "object",
+      "properties": {
+        "selected": {
+          "$ref": "#/$defs/CartSelection"
+        },
+        "identity_context_reference": {
+          "type": "string"
+        },
+        "identity_context": {
+          "$ref": "#/$defs/IdentityContext"
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "idempotency_key": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "selected"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "not": {
+            "allOf": [
+              {
+                "required": [
+                  "identity_context"
+                ]
+              },
+              {
+                "required": [
+                  "identity_context_reference"
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "CreateCartIntentResponse": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://ucp.dev/extensions/travel/hotels/ops/create_cart_intent_response/2026-02-15?v6=true",
+      "title": "CreateCartIntentResponse",
+      "type": "object",
+      "properties": {
+        "cart_intent": {
+          "$ref": "#/$defs/CartIntent"
+        },
+        "messages": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/UcpMessage"
+          }
+        }
+      },
+      "required": [
+        "cart_intent"
+      ],
+      "additionalProperties": false
+    },
+    "PaymentMethodReference": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "TOKEN",
+            "WALLET",
+            "CARD_ON_FILE",
+            "REDIRECT",
+            "UNKNOWN"
+          ]
+        },
+        "reference": {
+          "type": "string",
+          "description": "Opaque token/reference managed by the payment handler."
+        },
+        "provider": {
+          "type": "string",
+          "description": "Payment provider identifier (e.g., PSP name)."
+        },
+        "requires_3ds": {
+          "type": "boolean"
+        },
+        "billing_address_required": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "type",
+        "reference"
+      ],
+      "additionalProperties": false
+    },
+    "GuestDetails": {
+      "type": "object",
+      "properties": {
+        "primary_guest": {
+          "type": "object",
+          "properties": {
+            "first_name": {
+              "type": "string"
+            },
+            "last_name": {
+              "type": "string"
+            },
+            "email": {
+              "type": "string",
+              "format": "email"
+            },
+            "phone": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "first_name",
+            "last_name"
+          ],
+          "additionalProperties": false
+        },
+        "guest_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "tokenized_reference": {
+          "type": "string",
+          "description": "Optional token/reference to guest data stored elsewhere."
+        }
+      },
+      "additionalProperties": false
+    },
+    "BookingStatus": {
+      "type": "string",
+      "enum": [
+        "PENDING",
+        "CONFIRMED",
+        "FAILED",
+        "CANCELED",
+        "UNKNOWN"
+      ],
+      "description": "Order/booking status. PENDING indicates async confirmation in progress."
+    },
+    "OrderState": {
+      "type": "string",
+      "enum": [
+        "CREATED",
+        "PENDING_CONFIRMATION",
+        "CONFIRMED",
+        "FAILED",
+        "CANCELED",
+        "FULFILLED"
+      ],
+      "description": "Order lifecycle state."
+    },
+    "HotelConfirmation": {
+      "type": "object",
+      "properties": {
+        "confirmation_number": {
+          "type": "string"
+        },
+        "supplier_reference": {
+          "type": "string"
+        },
+        "issued_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "issued_at"
+      ],
+      "additionalProperties": false
+    },
+    "HotelOrder": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://ucp.dev/extensions/travel/hotels/components/hotel_order/2026-02-15?v7=true",
+      "title": "HotelOrder",
+      "type": "object",
+      "properties": {
+        "order_id": {
+          "type": "string",
+          "description": "Platform order identifier."
+        },
+        "merchant_id": {
+          "type": "string"
+        },
+        "state": {
+          "$ref": "#/$defs/OrderState"
+        },
+        "booking_status": {
+          "$ref": "#/$defs/BookingStatus"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "lodging_item": {
+          "$ref": "#/$defs/LodgingItem"
+        },
+        "identity_context_reference": {
+          "type": "string"
+        },
+        "payment_status": {
+          "type": "string",
+          "enum": [
+            "NOT_CHARGED",
+            "AUTHORIZED",
+            "CAPTURED",
+            "FAILED",
+            "REFUNDED",
+            "UNKNOWN"
+          ]
+        },
+        "confirmation": {
+          "$ref": "#/$defs/HotelConfirmation"
+        },
+        "cancellation": {
+          "type": "object",
+          "properties": {
+            "canceled_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "reason": {
+              "type": "string"
+            },
+            "refund_amount": {
+              "$ref": "#/$defs/Money"
+            }
+          },
+          "additionalProperties": false
+        },
+        "messages": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/UcpMessage"
+          }
+        }
+      },
+      "required": [
+        "order_id",
+        "merchant_id",
+        "state",
+        "booking_status",
+        "created_at",
+        "lodging_item"
+      ],
+      "additionalProperties": false
+    },
+    "CreateCheckoutRequest": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://ucp.dev/extensions/travel/hotels/ops/create_checkout_request/2026-02-15?v7=true",
+      "title": "CreateCheckoutRequest",
+      "type": "object",
+      "properties": {
+        "idempotency_key": {
+          "type": "string"
+        },
+        "correlation_id": {
+          "type": "string"
+        },
+        "cart_intent_id": {
+          "type": "string",
+          "description": "Optional cart intent identifier if checkout is cart-backed."
+        },
+        "offer_id": {
+          "type": "string",
+          "description": "Offer identifier for checkout (required if not cart-backed)."
+        },
+        "lodging_item": {
+          "$ref": "#/$defs/LodgingItem",
+          "description": "Optional explicit lodging item (preferred when cart is not used)."
+        },
+        "identity_context_reference": {
+          "type": "string"
+        },
+        "identity_context": {
+          "$ref": "#/$defs/IdentityContext"
+        },
+        "guest_details": {
+          "$ref": "#/$defs/GuestDetails"
+        },
+        "payment_method": {
+          "$ref": "#/$defs/PaymentMethodReference"
+        },
+        "acceptance": {
+          "type": "object",
+          "properties": {
+            "accepted_total": {
+              "$ref": "#/$defs/Money"
+            },
+            "accepted_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "accepted_cancellation_policy_version": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "accepted_at"
+          ],
+          "additionalProperties": false
+        },
+        "client_context": {
+          "type": "object",
+          "properties": {
+            "user_agent": {
+              "type": "string"
+            },
+            "ip_address": {
+              "type": "string"
+            },
+            "device_id": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "oneOf": [
+            {
+              "required": [
+                "offer_id"
+              ]
+            },
+            {
+              "required": [
+                "cart_intent_id"
+              ]
+            },
+            {
+              "required": [
+                "lodging_item"
+              ]
+            }
+          ]
+        },
+        {
+          "not": {
+            "allOf": [
+              {
+                "required": [
+                  "identity_context"
+                ]
+              },
+              {
+                "required": [
+                  "identity_context_reference"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "offer_id"
+            ]
+          },
+          "then": {
+            "required": [
+              "guest_details",
+              "payment_method"
+            ]
+          }
+        }
+      ]
+    },
+    "CreateCheckoutResponse": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://ucp.dev/extensions/travel/hotels/ops/create_checkout_response/2026-02-15?v7=true",
+      "title": "CreateCheckoutResponse",
+      "type": "object",
+      "properties": {
+        "order": {
+          "$ref": "#/$defs/HotelOrder"
+        },
+        "status": {
+          "$ref": "#/$defs/BookingStatus"
+        },
+        "async": {
+          "type": "boolean",
+          "description": "If true, booking confirmation is pending and order status will update asynchronously."
+        },
+        "estimated_confirmation_by": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "poll_url": {
+          "type": "string",
+          "format": "uri",
+          "description": "Optional URL to poll order status."
+        },
+        "messages": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/UcpMessage"
+          }
+        }
+      },
+      "required": [
+        "order",
+        "status"
+      ],
+      "additionalProperties": false
+    },
+    "GetOrderResponse": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://ucp.dev/extensions/travel/hotels/ops/get_order_response/2026-02-15?v7=true",
+      "title": "GetOrderResponse",
+      "type": "object",
+      "properties": {
+        "order": {
+          "$ref": "#/$defs/HotelOrder"
+        },
+        "messages": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/UcpMessage"
+          }
+        }
+      },
+      "required": [
+        "order"
+      ],
+      "additionalProperties": false
+    },
+    "OrderEvent": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://ucp.dev/extensions/travel/hotels/events/order_event/2026-02-15?v7=true",
+      "title": "OrderEvent",
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string"
+        },
+        "event_type": {
+          "type": "string",
+          "enum": [
+            "ORDER_CREATED",
+            "ORDER_PENDING",
+            "ORDER_CONFIRMED",
+            "ORDER_FAILED",
+            "ORDER_CANCELED",
+            "ORDER_UPDATED"
+          ]
+        },
+        "occurred_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "correlation_id": {
+          "type": "string"
+        },
+        "order_id": {
+          "type": "string"
+        },
+        "order": {
+          "$ref": "#/$defs/HotelOrder"
+        }
+      },
+      "required": [
+        "event_id",
+        "event_type",
+        "occurred_at",
+        "order_id"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

@@ -1,0 +1,128 @@
+{
+  "correlation_id": "corr-9f4c2d3a-ucp-hotel-0001",
+  "identity_applied": true,
+  "properties": [
+    {
+      "property_id": "prop-0001",
+      "merchant_id": "m-ihcl",
+      "merchant_info": {
+        "merchant_id": "m-ihcl",
+        "display_name": "IHCL",
+        "type": "CHAIN"
+      },
+      "name": "Hotel 1",
+      "summary": "Upscale city-center hotel with pool, modern rooms, and quick access to major business districts.",
+      "geo": {
+        "lat": 12.975,
+        "lon": 77.603,
+        "city": "Bengaluru",
+        "country": "IN"
+      },
+      "star_rating": 5,
+      "review_summary": {
+        "score": 4.6,
+        "count": 1823
+      },
+      "amenities": [
+        "wifi",
+        "breakfast",
+        "pool",
+        "gym"
+      ],
+      "tags": [
+        "business",
+        "family"
+      ],
+      "persona_tags": [
+        "business",
+        "couples"
+      ],
+      "images": [
+        {
+          "url": "https://example.com/hotel1/hero.jpg",
+          "type": "HERO"
+        }
+      ],
+      "indicative_price": {
+        "type": "INDICATIVE",
+        "min": {
+          "amount": 14500,
+          "currency": "INR"
+        },
+        "max": {
+          "amount": 21000,
+          "currency": "INR"
+        },
+        "valid_until": "2026-02-15T18:00:00Z",
+        "non_binding": true,
+        "basis": "PER_NIGHT",
+        "source": "MARKETPLACE_CACHE"
+      },
+      "data_freshness": {
+        "last_updated": "2026-02-15T04:00:00Z",
+        "ttl_seconds": 172800
+      }
+    },
+    {
+      "property_id": "prop-0002",
+      "merchant_id": "m-agg-01",
+      "merchant_info": {
+        "merchant_id": "m-agg-01",
+        "display_name": "AggregatorCo",
+        "type": "AGGREGATOR"
+      },
+      "name": "Hotel 2",
+      "summary": "Contemporary hotel near tech parks with breakfast options and easy airport connectivity.",
+      "geo": {
+        "lat": 12.965,
+        "lon": 77.585,
+        "city": "Bengaluru",
+        "country": "IN"
+      },
+      "star_rating": 4,
+      "amenities": [
+        "wifi",
+        "breakfast"
+      ],
+      "tags": [
+        "business"
+      ],
+      "persona_tags": [
+        "business"
+      ],
+      "media_summary": {
+        "image_count": 18,
+        "image_retrieval_url": "https://example.com/hotel2/images"
+      },
+      "indicative_price": {
+        "type": "INDICATIVE",
+        "min": {
+          "amount": 9800,
+          "currency": "INR"
+        },
+        "max": {
+          "amount": 15500,
+          "currency": "INR"
+        },
+        "valid_until": "2026-02-15T18:00:00Z",
+        "non_binding": true,
+        "basis": "PER_NIGHT",
+        "source": "MARKETPLACE_CACHE"
+      },
+      "data_freshness": {
+        "last_updated": "2026-02-15T01:00:00Z",
+        "ttl_seconds": 172800
+      }
+    }
+  ],
+  "messages": [
+    {
+      "type": "info",
+      "code": "identity_applied",
+      "severity": "recoverable",
+      "content": "Identity context applied to ranking and eligibility hints.",
+      "retryable": false,
+      "requires_user_action": false
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "event_id": "evt-0f2a1b",
+  "event_type": "ORDER_CONFIRMED",
+  "occurred_at": "2026-02-15T06:10:00Z",
+  "correlation_id": "corr-9f4c2d3a-ucp-hotel-0001",
+  "order_id": "ord-55aa10",
+  "order": {
+    "order_id": "ord-55aa10",
+    "merchant_id": "m-ihcl",
+    "state": "CONFIRMED",
+    "booking_status": "CONFIRMED",
+    "created_at": "2026-02-15T06:00:00Z",
+    "updated_at": "2026-02-15T06:10:00Z",
+    "lodging_item": {
+      "merchant_id": "m-ihcl",
+      "property_id": "prop-0001",
+      "variant_id": "var-king-01",
+      "offer_id": "offer-7f21c9",
+      "stay": {
+        "checkin": "2026-04-10",
+        "checkout": "2026-04-12"
+      },
+      "occupancy": {
+        "adults": 2,
+        "children": 0
+      },
+      "quantity": 1
+    },
+    "identity_context_reference": "icx-8b5a1c",
+    "payment_status": "CAPTURED",
+    "messages": [],
+    "confirmation": {
+      "confirmation_number": "CNF-8899-0011",
+      "supplier_reference": "SUP-REF-112233",
+      "issued_at": "2026-02-15T06:10:00Z"
+    }
+  }
+}

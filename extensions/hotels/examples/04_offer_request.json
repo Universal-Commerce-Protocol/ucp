@@ -1,0 +1,15 @@
+{
+  "correlation_id": "corr-9f4c2d3a-ucp-hotel-0001",
+  "property_id": "prop-0001",
+  "variant_id": "var-king-01",
+  "stay": {
+    "checkin": "2026-04-10",
+    "checkout": "2026-04-12"
+  },
+  "occupancy": {
+    "adults": 2,
+    "children": 0
+  },
+  "pricing_reference": "pref-prop-0001-var-king-01-20260410-2ad",
+  "identity_context_reference": "icx-8b5a1c"
+}

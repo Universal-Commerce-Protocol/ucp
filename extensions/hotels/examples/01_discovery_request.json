@@ -1,0 +1,28 @@
+{
+  "correlation_id": "corr-9f4c2d3a-ucp-hotel-0001",
+  "stay": {
+    "checkin": "2026-04-10",
+    "checkout": "2026-04-12"
+  },
+  "occupancy": {
+    "adults": 2,
+    "children": 0
+  },
+  "location": {
+    "lat": 12.9716,
+    "lon": 77.5946,
+    "radius_km": 8
+  },
+  "filters": {
+    "star_rating_min": 4,
+    "amenities_any": [
+      "wifi",
+      "breakfast",
+      "pool"
+    ]
+  },
+  "sort": {
+    "by": "RELEVANCE"
+  },
+  "identity_context_reference": "icx-8b5a1c"
+}

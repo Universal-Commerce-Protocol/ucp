@@ -1,0 +1,84 @@
+{
+  "correlation_id": "corr-9f4c2d3a-ucp-hotel-0001",
+  "identity_applied": true,
+  "offers": [
+    {
+      "offer_id": "offer-7f21c9",
+      "property_id": "prop-0001",
+      "variant_id": "var-king-01",
+      "stay": {
+        "checkin": "2026-04-10",
+        "checkout": "2026-04-12"
+      },
+      "occupancy": {
+        "adults": 2,
+        "children": 0
+      },
+      "quantity": 1,
+      "pricing": {
+        "currency": "INR",
+        "base": {
+          "amount": 27000,
+          "currency": "INR"
+        },
+        "taxes": [
+          {
+            "name": "GST",
+            "amount": {
+              "amount": 4860,
+              "currency": "INR"
+            }
+          }
+        ],
+        "fees": [
+          {
+            "name": "Service Fee",
+            "amount": {
+              "amount": 500,
+              "currency": "INR"
+            }
+          }
+        ],
+        "total": {
+          "amount": 32360,
+          "currency": "INR"
+        }
+      },
+      "cancellation_policy": {
+        "type": "PARTIALLY_REFUNDABLE",
+        "rules": [
+          {
+            "deadline": "2026-04-08T18:30:00Z",
+            "penalty": {
+              "amount": 0,
+              "currency": "INR"
+            }
+          },
+          {
+            "deadline": "2026-04-10T00:00:00Z",
+            "penalty": {
+              "amount": 14500,
+              "currency": "INR"
+            }
+          }
+        ]
+      },
+      "payment_requirements": {
+        "type": "CARD_REQUIRED",
+        "prepay_required": false
+      },
+      "offer_valid_until": "2026-02-15T06:15:00Z",
+      "requires_reprice_before_checkout": true
+    }
+  ],
+  "messages": [
+    {
+      "type": "warning",
+      "code": "requires_reprice",
+      "severity": "requires_buyer_review",
+      "content": "Offer must be revalidated at checkout due to dynamic pricing.",
+      "retryable": false,
+      "requires_user_action": true
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "idempotency_key": "idem-0001-2f7a6c",
+  "correlation_id": "corr-9f4c2d3a-ucp-hotel-0001",
+  "cart_intent_id": "cart-19b7d2",
+  "offer_id": "offer-7f21c9",
+  "identity_context_reference": "icx-8b5a1c",
+  "guest_details": {
+    "primary_guest": {
+      "first_name": "Sushant",
+      "last_name": "Mathur",
+      "email": "sushant@example.com",
+      "phone": "+91-9000000000"
+    },
+    "guest_count": 2
+  },
+  "payment_method": {
+    "type": "TOKEN",
+    "reference": "pm_tok_abc123",
+    "provider": "psp-example",
+    "requires_3ds": true
+  },
+  "acceptance": {
+    "accepted_total": {
+      "amount": 32360,
+      "currency": "INR"
+    },
+    "accepted_at": "2026-02-15T06:00:00Z"
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "selected": {
+    "property_id": "prop-0001",
+    "variant_id": "var-king-01",
+    "stay": {
+      "checkin": "2026-04-10",
+      "checkout": "2026-04-12"
+    },
+    "occupancy": {
+      "adults": 2,
+      "children": 0
+    },
+    "offer_id": "offer-7f21c9",
+    "quantity": 1,
+    "selected_addons": [
+      {
+        "addon_id": "addon-breakfast",
+        "name": "Breakfast",
+        "quantity": 2,
+        "pricing_reference": "pref-addon-breakfast-20260410"
+      },
+      {
+        "addon_id": "addon-airport-pickup",
+        "name": "Airport Pickup",
+        "quantity": 1,
+        "pricing_reference": "pref-addon-pickup-20260410"
+      }
+    ],
+    "special_requests": [
+      "High floor",
+      "Late check-in"
+    ]
+  },
+  "identity_context_reference": "icx-8b5a1c",
+  "expires_at": "2026-02-15T06:30:00Z",
+  "idempotency_key": "idem-cart-0001"
+}

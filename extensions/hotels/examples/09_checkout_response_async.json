@@ -1,0 +1,42 @@
+{
+  "order": {
+    "order_id": "ord-55aa10",
+    "merchant_id": "m-ihcl",
+    "state": "PENDING_CONFIRMATION",
+    "booking_status": "PENDING",
+    "created_at": "2026-02-15T06:00:00Z",
+    "updated_at": "2026-02-15T06:00:00Z",
+    "lodging_item": {
+      "merchant_id": "m-ihcl",
+      "property_id": "prop-0001",
+      "variant_id": "var-king-01",
+      "offer_id": "offer-7f21c9",
+      "stay": {
+        "checkin": "2026-04-10",
+        "checkout": "2026-04-12"
+      },
+      "occupancy": {
+        "adults": 2,
+        "children": 0
+      },
+      "quantity": 1
+    },
+    "identity_context_reference": "icx-8b5a1c",
+    "payment_status": "AUTHORIZED",
+    "messages": []
+  },
+  "status": "PENDING",
+  "async": true,
+  "estimated_confirmation_by": "2026-02-15T06:10:00Z",
+  "poll_url": "https://example.com/ucp/hotels/orders/ord-55aa10",
+  "messages": [
+    {
+      "type": "info",
+      "code": "async_confirmation",
+      "severity": "recoverable",
+      "content": "Booking confirmation is pending; order status will update via OrderEvent.",
+      "retryable": true,
+      "requires_user_action": false
+    }
+  ]
+}

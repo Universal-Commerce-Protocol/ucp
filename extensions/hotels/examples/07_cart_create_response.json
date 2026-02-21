@@ -1,0 +1,92 @@
+{
+  "cart_intent": {
+    "cart_intent_id": "cart-19b7d2",
+    "selected": {
+      "property_id": "prop-0001",
+      "variant_id": "var-king-01",
+      "stay": {
+        "checkin": "2026-04-10",
+        "checkout": "2026-04-12"
+      },
+      "occupancy": {
+        "adults": 2,
+        "children": 0
+      },
+      "offer_id": "offer-7f21c9",
+      "quantity": 1,
+      "selected_addons": [
+        {
+          "addon_id": "addon-breakfast",
+          "name": "Breakfast",
+          "quantity": 2,
+          "pricing_reference": "pref-addon-breakfast-20260410"
+        },
+        {
+          "addon_id": "addon-airport-pickup",
+          "name": "Airport Pickup",
+          "quantity": 1,
+          "pricing_reference": "pref-addon-pickup-20260410"
+        }
+      ],
+      "special_requests": [
+        "High floor",
+        "Late check-in"
+      ],
+      "pricing_snapshot": {
+        "currency": "INR",
+        "base": {
+          "amount": 27000,
+          "currency": "INR"
+        },
+        "taxes": [
+          {
+            "name": "GST",
+            "amount": {
+              "amount": 4860,
+              "currency": "INR"
+            }
+          }
+        ],
+        "fees": [
+          {
+            "name": "Service Fee",
+            "amount": {
+              "amount": 500,
+              "currency": "INR"
+            }
+          }
+        ],
+        "total": {
+          "amount": 32360,
+          "currency": "INR"
+        }
+      },
+      "cancellation_policy_snapshot": {
+        "type": "PARTIALLY_REFUNDABLE",
+        "rules": [
+          {
+            "deadline": "2026-04-08T18:30:00Z",
+            "penalty": {
+              "amount": 0,
+              "currency": "INR"
+            }
+          },
+          {
+            "deadline": "2026-04-10T00:00:00Z",
+            "penalty": {
+              "amount": 14500,
+              "currency": "INR"
+            }
+          }
+        ]
+      }
+    },
+    "identity_context_reference": "icx-8b5a1c",
+    "state": "READY_FOR_CHECKOUT",
+    "expires_at": "2026-02-15T06:30:00Z",
+    "requires_reprice_before_checkout": true,
+    "last_priced_at": "2026-02-15T06:00:00Z",
+    "correlation_id": "corr-9f4c2d3a-ucp-hotel-0001"
+  },
+  "messages": []
+}
