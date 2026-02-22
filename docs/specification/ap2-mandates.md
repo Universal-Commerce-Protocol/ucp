@@ -123,15 +123,17 @@ If a public key cannot be resolved, or if the signature is invalid, the business
 
 ## Cryptographic Requirements
 
-### Signature Algorithm
+This extension uses the cryptographic primitives defined in the
+[Message Signatures](signatures.md) specification:
 
-All signatures **MUST** use one of the following algorithms:
+* **Algorithms:** ES256 (required), ES384, ES512
+* **Canonicalization:** JCS ([RFC 8785](https://datatracker.ietf.org/doc/html/rfc8785))
+* **Key Format:** JWK ([RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517))
+* **Key Discovery:** `signing_keys[]` in `/.well-known/ucp` (see
+  [Key Discovery](overview.md#key-discovery))
 
-| Algorithm | Description                                           |
-| :-------- | :---------------------------------------------------- |
-| `ES256`   | ECDSA using P-256 curve and SHA-256 (**RECOMMENDED**) |
-| `ES384`   | ECDSA using P-384 curve and SHA-384                   |
-| `ES512`   | ECDSA using P-521 curve and SHA-512                   |
+See [Message Signatures](signatures.md) for complete details on algorithms,
+key format, and key rotation.
 
 ### Business Authorization
 
@@ -213,17 +215,26 @@ selective disclosure, key binding) is defined by the
 
 ### Canonicalization
 
-For signature computation over JSON payloads, implementations **MUST** use
-**JSON Canonicalization Scheme (JCS)** as defined in
-[RFC 8785](https://datatracker.ietf.org/doc/html/rfc8785).
+All JSON payloads **MUST** be canonicalized using **JSON Canonicalization
+Scheme (JCS)** per [RFC 8785](https://datatracker.ietf.org/doc/html/rfc8785).
 
-JCS produces a deterministic, byte-for-byte identical representation of
-JSON data, ensuring signatures can be verified regardless of whitespace,
-key ordering, or Unicode normalization differences.
+**Why JCS for Mandates?** UCP request signatures use `Content-Digest` (raw
+bytes) without canonicalization — the request is signed and verified
+immediately over the same HTTP connection. Mandates are different:
 
-**Canonicalization Rule:** When computing the business's signature, exclude
-the `ap2` field entirely. This ensures future AP2 fields are automatically
-handled.
+* **Durability** — Mandates are stored as evidence of user consent. They may
+    be retrieved and verified days or months later.
+* **Cross-system transmission** — Mandates pass through multiple systems
+    (platform → business → PSP → card network) that may re-serialize JSON.
+* **Reproducibility** — Any party must reconstruct the exact signed bytes
+    from the logical JSON content, regardless of serialization differences.
+
+JCS ensures that semantically identical JSON produces byte-identical output,
+making signatures reproducible across implementations and time.
+
+**AP2-Specific Rule:** When computing the business's `merchant_authorization`
+signature, exclude the `ap2` field entirely. This ensures future AP2 fields
+are automatically handled.
 
 ## The Mandate Flow
 
