@@ -748,7 +748,7 @@ image: assets/banner.png
         <div class="get-started-container-step-icon-wrapper">
           <img src="assets/Icon=Contribute.svg" alt="Contribute" class="get-started-container-step-icon">
         </div>
-        <h3><a href="https://github.com/Universal-Commerce-Protocol/ucp/blob/main/CONTRIBUTING.md" target="_blank">Contribute</a></h3>
+        <h3><a href="https://github.com/Universal-Commerce-Protocol/.github/blob/main/CONTRIBUTING.md" target="_blank">Contribute</a></h3>
         <p>Contribute your feedback and code to the public repository</p>
       </div>
     </div>
