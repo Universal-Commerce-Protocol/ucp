@@ -259,7 +259,6 @@ checkout object containing an `order` attribute with `id` and `permalink_url`.
   }
 }
 
-
 ```
 
 **Response format:**

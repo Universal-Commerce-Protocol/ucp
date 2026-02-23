@@ -16,8 +16,6 @@
 
 # Buyer Consent Extension
 
-**Version:** `2026-01-11`
-
 ## Overview
 
 The Buyer Consent extension enables platforms to transmit buyer consent choices
