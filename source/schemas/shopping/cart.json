@@ -69,6 +69,15 @@
         "update": "optional"
       }
     },
+    "signals": {
+      "$ref": "types/signals.json",
+      "description": "Transaction environment data attested by the platform to support authorization decisions and abuse prevention.",
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional"
+      },
+      "ucp_response": "omit"
+    },
     "buyer": {
       "$ref": "types/buyer.json",
       "description": "Optional buyer information for personalized estimates.",

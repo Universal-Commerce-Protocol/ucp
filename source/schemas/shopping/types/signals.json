@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/signals.json",
+  "title": "Signals",
+  "description": "Transaction environment data attested by the platform to support authorization decisions and abuse prevention. Values MUST reflect direct platform observations, not buyer-asserted data. Well-known signals are defined as typed properties; proprietary signals MUST use reverse-domain naming (e.g., com.example.score).",
+  "type": "object",
+  "properties": {
+    "buyer_ip": {
+      "type": "string",
+      "description": "Client's IP address (IPv4 or IPv6)."
+    },
+    "user_agent": {
+      "type": "string",
+      "description": "Client's HTTP User-Agent header or equivalent."
+    }
+  },
+  "additionalProperties": true
+}
