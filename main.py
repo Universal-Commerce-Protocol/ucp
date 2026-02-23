@@ -512,14 +512,14 @@ def define_env(env):
     Render a table.
     """
     if ".json#/" not in entity_name:
-      return f"**Error:** Invalid entity name format for def: {entity_name}"
+      raise ValueError(f"Invalid entity name format for def: {entity_name}")
 
     try:
       core_entity_name, def_path = entity_name.split(".json#", 1)
       core_entity_name += ".json"
       def_path = "#" + def_path
-    except ValueError:
-      return f"**Error:** Malformed entity name: {entity_name}"
+    except ValueError as e:
+      raise ValueError(f"Malformed entity name: {entity_name}") from e
 
     for schemas_dir in schemas_dirs:
       full_path = Path(schemas_dir) / core_entity_name
@@ -539,14 +539,13 @@ def define_env(env):
             parent_required_list,
           )
         else:
-          return (
-            f"**Error:** Definition '{def_path}' not found in '{full_path}'"
+          raise RuntimeError(
+            f"Definition '{def_path}' not found in '{full_path}'"
           )
       # Try next directory if load_json returned None
 
-    return (
-      f"**Error:** Schema file '{core_entity_name}' not found in any schema"
-      " directory."
+    raise FileNotFoundError(
+      f"Schema file '{core_entity_name}' not found in any schema directory."
     )
 
   # --- MACRO 1: For Standalone JSON Schemas ---
@@ -575,14 +574,14 @@ def define_env(env):
       except FileNotFoundError:
         continue
       except json.JSONDecodeError as e:
-        return f"**Error parsing schema '{full_path}':** {e}"
+        raise RuntimeError(f"Error parsing schema '{full_path}': {e}") from e
 
     if data and loaded_path:
       file_loader = _create_file_loader(loaded_path)
       resolved_schema = schema_utils.resolve_schema(data, data, file_loader)
       return _render_table_from_schema(resolved_schema, spec_file_name)
-    return (
-      f"**Error:** Schema '{entity_name}' not found in any schema directory."
+    raise FileNotFoundError(
+      f"Schema '{entity_name}' not found in any schema directory."
     )
 
   @env.macro
@@ -753,11 +752,11 @@ def define_env(env):
           if "properties" in item:
             return _render_table_from_schema(item, spec_file_name)
 
-      return (
-        f"**Error:** Could not find extension properties in '{entity_name}'"
+      raise RuntimeError(
+        f"Could not find extension properties in '{entity_name}'"
       )
     except (FileNotFoundError, json.JSONDecodeError) as e:
-      return f"**Error loading extension '{entity_name}':** {e}"
+      raise RuntimeError(f"Error loading extension '{entity_name}': {e}") from e
 
   # --- MACRO 3: For Transport Operations ---
   @env.macro
@@ -811,7 +810,7 @@ def define_env(env):
             break
 
       if not operation:
-        return f"**Error:** Operation ID `{operation_id}` not found."
+        raise ValueError(f"Operation ID `{operation_id}` not found.")
 
       # 2. Extract Request Schema
       req_content = operation.get("requestBody", {}).get("content", {})
@@ -946,7 +945,7 @@ def define_env(env):
       return output
 
     except (FileNotFoundError, json.JSONDecodeError) as e:
-      return f"**Error processing OpenAPI:** {e}"
+      raise RuntimeError(f"Error processing OpenAPI: {e}") from e
 
   # --- MACRO 4: For HTTP Headers ---
   @env.macro
@@ -983,7 +982,7 @@ def define_env(env):
           break
 
       if not operation:
-        return f"**Error:** Operation ID `{operation_id}` not found."
+        raise ValueError(f"Operation ID `{operation_id}` not found.")
 
       # 2. Extract Request Parameters (Path + Operation)
       op_parameters = operation.get("parameters", [])
@@ -1052,4 +1051,4 @@ def define_env(env):
       return "\n\n".join(output_parts)
 
     except (FileNotFoundError, json.JSONDecodeError) as e:
-      return f"**Error processing OpenAPI:** {e}"
+      raise RuntimeError(f"Error processing OpenAPI: {e}") from e
