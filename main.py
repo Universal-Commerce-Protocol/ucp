@@ -44,12 +44,12 @@ def define_env(env):
 
   """
   # --- CONFIGURATION ---
-  openapi_dir = "spec/services/shopping/"
+  openapi_dir = "source/services/shopping/"
   schemas_dirs = [
-    "spec/handlers/google_pay/",
-    "spec/schemas/",
-    "spec/schemas/shopping/",
-    "spec/schemas/shopping/types/",
+    "source/handlers/google_pay/",
+    "source/schemas/",
+    "source/schemas/shopping/",
+    "source/schemas/shopping/types/",
   ]
 
   def _load_json_file(entity_name):
@@ -421,7 +421,7 @@ def define_env(env):
         version_data = None
         if ref and ref.endswith("#/$defs/version"):
           try:
-            with Path("spec/schemas/ucp.json").open(encoding="utf-8") as f:
+            with Path("source/schemas/ucp.json").open(encoding="utf-8") as f:
               data = json.load(f)
               version_data = data.get("$defs", {}).get("version", {})
           except json.JSONDecodeError as e:
@@ -562,10 +562,26 @@ def define_env(env):
         should be rendered (e.g., "checkout", "fulfillment").
 
     """
+    base_name = entity_name
+
+    if entity_name.endswith("_resp"):
+      base_name = entity_name[:-5]
+    elif entity_name.endswith("_req"):
+      parts = entity_name[:-4].rsplit("_", 1)
+      if len(parts) == 2 and parts[1] in (
+        "create",
+        "update",
+        "complete",
+        "read",
+      ):
+        base_name = parts[0]
+      else:
+        base_name = entity_name[:-4]
+
     data = None
     loaded_path = None
     for schemas_dir in schemas_dirs:
-      full_path = Path(schemas_dir) / (entity_name + ".json")
+      full_path = Path(schemas_dir) / (base_name + ".json")
       try:
         with full_path.open() as f:
           data = json.load(f)
@@ -621,7 +637,7 @@ def define_env(env):
         title.
 
     """
-    schema_base_path = Path("spec/schemas/shopping")
+    schema_base_path = Path("source/schemas/shopping")
     scan_path = (
       schema_base_path / sub_dir if sub_dir != "." else schema_base_path
     )
@@ -736,7 +752,7 @@ def define_env(env):
 
     """
     # Construct full path based on new structure
-    full_path = Path("spec/schemas/shopping") / (entity_name + ".json")
+    full_path = Path("source/schemas/shopping") / (entity_name + ".json")
     try:
       with full_path.open(encoding="utf-8") as f:
         data = json.load(f)

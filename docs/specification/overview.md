@@ -134,7 +134,7 @@ appended to this endpoint to form the complete URL.
 {
   "version": "2026-01-23",
   "transport": "rest",
-  "schema": "https://ucp.dev/2026-01-23/services/shopping/rest.openapi.json",
+  "schema": "https://ucp.dev/2026-01-23/services/shopping/openapi.json",
   "endpoint": "https://business.example.com/api/v2"
 }
 ```
@@ -160,7 +160,7 @@ functionality is supported and where to find documentation and schemas.
 
 #### Capability Definition
 
-{{ extension_schema_fields('capability.json#/$defs/discovery', 'capability-schema') }}
+{{ extension_schema_fields('capability.json#/$defs/platform_schema', 'capability-schema') }}
 
 #### Extensions
 
@@ -255,7 +255,7 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
           "spec": "https://ucp.dev/specification/overview",
           "transport": "rest",
           "endpoint": "https://business.example.com/ucp/v1",
-          "schema": "https://ucp.dev/2026-01-23/services/shopping/rest.openapi.json"
+          "schema": "https://ucp.dev/2026-01-23/services/shopping/openapi.json"
         },
         {
           "version": "2026-01-23",
@@ -359,7 +359,7 @@ example:
           "version": "2026-01-23",
           "spec": "https://ucp.dev/specification/overview",
           "transport": "rest",
-          "schema": "https://ucp.dev/2026-01-23/services/shopping/rest.openapi.json"
+          "schema": "https://ucp.dev/2026-01-23/services/shopping/openapi.json"
         }
       ]
     },
