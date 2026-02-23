@@ -1299,6 +1299,10 @@ POST /checkout-sessions/{id}/complete
         }
       }
     ]
+  },
+  "signals": {
+    "buyer_ip": "203.0.113.42",
+    "user_agent": "Mozilla/5.0 ..."
   }
 }
 ```
@@ -1361,6 +1365,10 @@ POST /checkout-sessions/{id}/complete
         "credential": { "token": "tok_visa_123" }
       }
     ]
+  },
+  "signals": {
+    "buyer_ip": "203.0.113.42",
+    "user_agent": "Mozilla/5.0 ..."
   }
 }
 ```
@@ -1436,6 +1444,10 @@ POST /checkout-sessions/{id}/complete
         }
       }
     ]
+  },
+  "signals": {
+    "buyer_ip": "203.0.113.42",
+    "com.example.risk_score": 0.95
   },
   "ap2": {
     "checkout_mandate": "eyJhbGciOiJ...", // Signed proof of checkout terms
@@ -1517,19 +1529,17 @@ certified and handle:
 
 ### Fraud Prevention Integration
 
-While UCP does not define fraud prevention APIs, the payment architecture
-supports fraud signal integration:
+UCP supports fraud prevention through [Signals](#authorization--abuse-signals) and the
+payment architecture:
 
+- Platforms provide transaction environment [signals](#authorization--abuse-signals) (IP, user
+    agent) on cart and checkout requests
 - Businesses can require additional fields in handler configurations (e.g.,
     3DS requirements)
-- Platforms can submit device fingerprints and session data alongside credentials
 - Payment credential providers can perform risk assessment during credential
     acquisition
 - Businesses can reject high-risk transactions and request additional
-    verification
-
-Future extensions **MAY** standardize fraud signal schemas, but the current
-architecture allows flexible integration with existing fraud prevention systems.
+    verification via signal feedback
 
 ### Payment Architecture Extensions
 
@@ -1660,6 +1670,62 @@ All UCP communication **MUST** occur over **HTTPS**.
 Sensitive data (such as Payment Credentials or PII) **MUST** be handled
 according to PCI-DSS and GDPR guidelines. UCP encourages the use of tokenized
 payment data to minimize business and platform liability.
+
+### Authorization & Abuse Signals
+
+Businesses require transaction environment data for authorization, rate
+limiting, and abuse prevention. Because the platform mediates every buyer
+interaction, it is the sole party able to observe the buyer's environment.
+Platforms provide signals as factual attestations about the transaction
+environment — values **MUST** reflect direct platform observations, not relayed
+buyer claims.
+
+Well-known signals include `buyer_ip` and `user_agent`. Proprietary signals
+**MUST** use reverse-domain naming (e.g., `com.example.score`).
+
+```json
+{
+  "signals": {
+    "buyer_ip": "203.0.113.42",
+    "user_agent": "Mozilla/5.0 ..."
+  }
+}
+```
+
+Signal fields may contain personally identifiable information
+(PII). Platforms **SHOULD** include only signals relevant to the current
+transaction. Businesses **SHOULD NOT** persist signal data beyond the
+operational needs of the transaction (e.g., order finalization, fraud review).
+
+Businesses **MAY** return info messages to provide non-blocking advisory
+context to support authorization and abuse prevention. Info messages do not
+affect resource status or block progression. Platforms **SHOULD** surface
+actionable information to the buyer.
+
+Well-known info codes for signal feedback:
+
+| Code    | Description                                            |
+| :------ | :----------------------------------------------------- |
+| `risk`  | Fraud assessment and authorization confidence advisory |
+| `abuse` | Rate limiting and bot detection advisory               |
+
+```json
+{
+  "messages": [
+    {
+      "type": "info",
+      "code": "risk",
+      "path": "$.signals.buyer_ip",
+      "content": "IP geolocation does not match shipping country; additional verification may apply"
+    },
+    {
+      "type": "info",
+      "code": "abuse",
+      "content": "Elevated transaction failure rate; validate client and buyer intent"
+    }
+  ]
+}
+```
 
 ### Transaction Integrity and Non-Repudiation
 

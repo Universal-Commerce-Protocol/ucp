@@ -211,6 +211,14 @@ consistent data structures when converting a cart to a checkout session.
 
 {{ schema_fields('context', 'checkout') }}
 
+### Signals
+
+Transaction environment data attested by the platform to support authorization
+and abuse prevention. See [Signals](overview.md#authorization--abuse-signals) for well-known fields,
+privacy requirements, and signal feedback codes.
+
+{{ schema_fields('types/signals', 'checkout') }}
+
 ### Total
 
 {{ schema_fields('types/total_resp', 'checkout') }}

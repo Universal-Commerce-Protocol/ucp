@@ -428,6 +428,16 @@ binding transaction data.
 
 {{ schema_fields('context', 'checkout') }}
 
+### Signals
+
+Transaction environment data attested by the platform to support authorization
+and abuse prevention. Unlike `context` (buyer-asserted preferences) and `buyer`
+(self-reported identity), signal values MUST reflect direct platform
+observations. See [Signals](overview.md#authorization--abuse-signals) for well-known fields and
+privacy requirements.
+
+{{ schema_fields('types/signals', 'checkout') }}
+
 ### Fulfillment Option
 
 {{ extension_schema_fields('fulfillment.json#/$defs/fulfillment_option', 'checkout') }}

@@ -59,6 +59,16 @@
       },
       "ucp_response": "omit"
     },
+    "signals": {
+      "$ref": "types/signals.json",
+      "description": "Transaction environment data attested by the platform to support authorization decisions and abuse prevention.",
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional",
+        "complete": "optional"
+      },
+      "ucp_response": "omit"
+    },
     "status": {
       "type": "string",
       "enum": [

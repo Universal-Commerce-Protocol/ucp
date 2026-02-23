@@ -327,6 +327,10 @@ Content-Type: application/json
         }
       }
     ]
+  },
+  "signals": {
+    "buyer_ip": "203.0.113.42",
+    "user_agent": "Mozilla/5.0 ..."
   }
 }
 ```

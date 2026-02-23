@@ -302,6 +302,9 @@ Content-Type: application/json
         // Additional instrument fields
       }
     ]
+  },
+  "signals": {
+    // Platform-observed signals (buyer connection and device)
   }
 }
 ```
