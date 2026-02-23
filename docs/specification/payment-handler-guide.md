@@ -191,10 +191,11 @@ and desired configuration.
 }
 ```
 
-**`available_instruments`** is optional. When absent, it means **everything is
-available without constraints** (the handler supports all instrument types and
-constraints that it is capable of). When present, it restricts which instrument
-types and constraints the handler advertises for this declaration.
+**`available_instruments`** is optional. When absent, the handler places no
+restrictions on instrument types or constraints — it supports the full set of
+instrument types defined by its handler schema. When present, it narrows the
+advertised types and/or applies additional constraints (e.g., limiting card
+brands to `["visa", "mastercard"]`).
 
 ---
 
@@ -208,7 +209,7 @@ and typically includes different configuration:
 | :------ | :------ | :------ |
 | **business_schema** | Business discovery (`/.well-known/ucp`) | Declares the business identity and how they're configured for this handler. Contains merchant-specific settings. |
 | **platform_schema** | Platform profile (advertised URI) | Declares the platform identity and how it supports this handler. Includes `spec` and `schema` URLs for implementers. |
-| **response_schema** | Checkout/Order API responses | **Runtime configuration** with merged context: merchant identity, available payment methods, tokenization specs, and other state needed to process the transaction. Often the richest of the three. |
+| **response_schema** | Checkout/Order API responses | **Runtime configuration** with resolved context: merchant identity, resolved `available_instruments` for this checkout, tokenization specs, and other state needed to process the transaction. Platforms **MUST** treat this as authoritative. |
 
 **Business Schema Example** (business declares handler configuration):
 
@@ -277,6 +278,41 @@ and typically includes different configuration:
   }
 }
 ```
+
+#### Resolving `available_instruments`
+
+Both the platform and the business independently advertise `available_instruments`
+in their profiles. The business is responsible for resolving these into the
+authoritative value returned in the `response_schema`.
+
+**Resolution flow:**
+
+1. **Platform declares capabilities** — the platform's profile includes
+   `available_instruments` on each handler declaration. This tells the business
+   what the platform can handle (e.g., it only supports
+   `["visa", "mastercard", "amex", "discover"]`).
+
+2. **Business resolves** — upon receiving a request, the business computes the
+   resolved `available_instruments` for the checkout by intersecting:
+   - The platform's advertised `available_instruments` (its capabilities)
+   - Its own `business_schema` declaration (what the merchant is actually set up to accept)
+   - Cart/checkout context (e.g., certain item types may restrict eligible methods)
+
+3. **Response is authoritative** — the `available_instruments` in the
+   `response_schema` reflects the business's resolved selection for this specific
+   checkout. Platforms **MUST** treat it as authoritative and **MUST NOT** attempt
+   to use instrument types or apply constraints that contradict it.
+
+**Example:**
+
+| Source | `available_instruments` |
+| :----- | :---------------------- |
+| Platform profile | `[{type: "card", constraints: {brands: ["visa", "mastercard", "amex", "discover"]}}]` |
+| Business profile | `[{type: "card", constraints: {brands: ["visa", "mastercard", "amex"]}}]` |
+| **Response (resolved)** | `[{type: "card", constraints: {brands: ["visa", "mastercard", "amex"]}}]` |
+
+In this example, the business's PSP is not configured for Discover, so Discover
+is excluded from the response even though the platform supports it.
 
 ---
 

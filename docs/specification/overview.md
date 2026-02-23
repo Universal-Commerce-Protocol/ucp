@@ -1070,6 +1070,17 @@ governing body.
 the context of the cart (e.g., removing "Buy Now Pay Later" for subscription
 items, or filtering regional methods based on shipping address).
 
+**Available Instrument Resolution:** Within each active handler, both the
+platform and the business independently advertise `available_instruments` — the
+set of instrument types and constraints each party supports. The business is
+responsible for resolving these into an authoritative value in the checkout
+response. The platform's declaration (from its profile) signals what it can
+handle; the business intersects that with its own `business_schema` declaration
+and cart context, then returns the resolved result. Platforms **MUST** treat the
+`available_instruments` in the response as authoritative for that checkout. See
+the [Payment Handler Guide](payment-handler-guide.md#resolving-available_instruments)
+for the full resolution semantics.
+
 ### Risk Signals
 
 To aid in fraud assessment, the Platform **MAY** include additional risk signals

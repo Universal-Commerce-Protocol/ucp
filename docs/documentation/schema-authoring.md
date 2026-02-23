@@ -113,7 +113,7 @@ Define payment handler configurations in `ucp.payment_handlers{}` registries.
 - **Top-level fields**: `$schema`, `$id`, `title`, `description`, `name`, `version`, `available_instruments`
 - **Variants**: `platform_schema`, `business_schema`, `response_schema`
 - **Instance `id`**: Required to distinguish multiple configurations of the same handler
-- **`available_instruments`**: Optional. Array of supported instrument types with type-specific constraints (e.g., brands for credit cards). When absent, everything is available without constraints.
+- **`available_instruments`**: Optional. Array of supported instrument types with type-specific constraints (e.g., brands for credit cards). When absent, the handler places no restrictions — it supports the full set of instrument types defined by its handler schema.
 
 Examples: `com.google.pay`, `dev.shopify.shop_pay`, `dev.ucp.processor_tokenizer`
 
