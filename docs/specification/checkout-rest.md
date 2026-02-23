@@ -185,7 +185,7 @@ so clients must include all previously set fields they wish to retain.
     Content-Type: application/json
 
     {
-      "id": "chk_123456789", // deprecated: id is redundant with URL path
+      "id": "chk_123456789", // deprecated: id is provided in URL path
       "buyer": {
         "email": "jane@example.com",
         "first_name": "Jane",
@@ -316,7 +316,7 @@ type & addresses.
     Content-Type: application/json
 
     {
-      "id": "chk_123456789", // deprecated: id is redundant with URL path
+      "id": "chk_123456789", // deprecated: id is provided in URL path
       "buyer": {
         "email": "jane@example.com",
         "first_name": "Jane",
@@ -518,7 +518,7 @@ Follow-up calls after initial `fulfillment` data to update selection.
     Content-Type: application/json
 
     {
-      "id": "chk_123456789", // deprecated: id is redundant with URL path
+      "id": "chk_123456789", // deprecated: id is provided in URL path
       "buyer": {
         "email": "jane@example.com",
         "first_name": "Jane",
