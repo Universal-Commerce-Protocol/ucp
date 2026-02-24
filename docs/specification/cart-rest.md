@@ -173,6 +173,27 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
     }
     ```
 
+=== "Error Response"
+
+    All items out of stock — no cart resource is created:
+
+    ```json
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+
+    {
+      "ucp": { "version": "2026-01-15" },
+      "messages": [
+        {
+          "type": "error",
+          "code": "out_of_stock",
+          "content": "All requested items are currently out of stock."
+        }
+      ],
+      "continue_url": "https://merchant.com/"
+    }
+    ```
+
 ### Get Cart
 
 #### Input Schema
@@ -253,12 +274,9 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
     {
       "ucp": {
         "version": "2026-01-15",
-        "capabilities": [
-          {
-            "name": "dev.ucp.shopping.cart",
-            "version": "2026-01-15"
-          }
-        ]
+        "capabilities": {
+          "dev.ucp.shopping.cart": [{ "version": "2026-01-15" }]
+        }
       },
       "messages": [
         {

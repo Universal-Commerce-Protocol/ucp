@@ -194,6 +194,31 @@ ELSE IF requires_buyer_review is not empty
   handoff_context = "ready for final review by the buyer"
 ```
 
+### Create Operation Error Responses
+
+When **all** requested items fail—out of stock or unavailable—the business MAY return an error response instead of creating a
+checkout resource. The absence of the `id` field distinguishes this from a
+partial-success response:
+
+* **`id` present** → checkout resource created; inspect `messages` for item-level errors
+* **`id` absent** → no resource created; inspect `messages` for the reason
+
+```json
+{
+  "ucp": { "version": "2026-01-11" },
+  "messages": [
+    {
+      "type": "error",
+      "code": "out_of_stock",
+      "content": "All requested items are currently out of stock."
+    }
+  ],
+  "continue_url": "https://merchant.com/"
+}
+```
+
+See [REST](checkout-rest.md#create-checkout) and [MCP](checkout-mcp.md#create_checkout) binding examples.
+
 #### Standard Errors
 
 Standard errors are standardized error codes that platforms are expected to
