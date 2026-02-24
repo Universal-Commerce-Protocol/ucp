@@ -1044,11 +1044,12 @@ Payment instruments **MAY** include a `qualifiers` array: opaque, namespaced str
 
 Qualifiers are hints, not proofs:
 
-- Businesses **SHOULD** treat unknown qualifiers as no-ops.
+- Qualifier strings **SHOULD** use reverse-domain naming to avoid collisions and make authority explicit.
+- Qualifiers strings **MUST NOT** contain sensitive payment attributes such as PAN, BIN, PII, or user-unique identifiers.
+- Qualifiers strings **SHOULD** be coarse-grained program identifiers.
 - When the Platform provides qualifiers and the Business applies benefits based on them, the Business **SHOULD** fail checkout if the selected payment instrument presented during checkout completion does not meet the hinted qualifications.
+- Businesses **SHOULD** treat unknown qualifiers as no-ops.
 - Businesses **SHOULD NOT** fail checkout solely because a qualifier is unrecognized.
-
-Qualifier strings **SHOULD** use reverse-domain naming to avoid collisions and make authority explicit.
 
 ### Payment Handlers
 
