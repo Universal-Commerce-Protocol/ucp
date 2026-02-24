@@ -30,6 +30,7 @@ nav:
   - Overview:
       - Home: index.md
       - Core Concepts: documentation/core-concepts.md
+      - Specification: /latest/specification/overview
       - UCP and AP2: documentation/ucp-and-ap2.md
       - Roadmap: documentation/roadmap.md
       - Schema Authoring: documentation/schema-authoring.md
