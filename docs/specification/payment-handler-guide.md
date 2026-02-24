@@ -213,9 +213,15 @@ and typically includes different configuration:
   "config": {
     "environment": "production",
     "business_id": "business_xyz_789"
-  }
+  },
+  "display_order": 0
 }
 ```
+
+Optional **`display_order`** (integer): Merchant-suggested order for presenting
+handlers to the user (lower value = higher preference). The ordering is
+**suggestive only**; platforms and agents MAY reorder (e.g. for user preference
+or localization). Omission means no suggestion.
 
 **Platform Schema Example** (platform declares handler support):
 
