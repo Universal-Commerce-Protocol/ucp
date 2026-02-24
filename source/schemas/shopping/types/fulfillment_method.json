@@ -10,13 +10,13 @@
     "id": {
       "type": "string",
       "description": "Unique fulfillment method identifier.",
-      "ucp_request": {"create": "omit", "update": "required"}
+      "ucp_request": {"create": "omit", "update": "optional"}
     },
     "type": {
       "type": "string",
       "enum": ["shipping", "pickup"],
       "description": "Fulfillment method type.",
-      "ucp_request": {"create": "required", "update": "omit"}
+      "ucp_request": {"create": "required", "update": "optional"}
     },
     "line_item_ids": {
       "type": "array",

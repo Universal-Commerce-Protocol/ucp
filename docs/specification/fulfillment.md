@@ -52,7 +52,7 @@ method.
 
 ### Properties
 
-{{ extension_fields('fulfillment_resp', 'fulfillment') }}
+{{ extension_fields('fulfillment', 'fulfillment') }}
 
 ### Entities
 

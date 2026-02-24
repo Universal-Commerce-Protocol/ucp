@@ -245,7 +245,7 @@ Examples: `refund`, `return`, `credit`, `price_adjustment`, `dispute`,
   ],
   "totals": [
     { "type": "subtotal", "amount": 13000 },
-    { "type": "shipping", "amount": 1200 },
+    { "type": "fulfillment", "amount": 1200 },
     { "type": "tax", "amount": 1142 },
     { "type": "total", "amount": 15342 }
   ]
@@ -293,34 +293,72 @@ platform's profile and uses it to send order lifecycle events.
 ### Webhook Signature Verification
 
 Webhook payloads **MUST** be signed by the business and verified by the platform
-to ensure authenticity and integrity.
+to ensure authenticity and integrity. Signatures follow the
+[Message Signatures](signatures.md) specification using the REST binding
+(RFC 9421).
+
+**Required Headers:**
+
+| Header           | Description                                |
+| :--------------- | :----------------------------------------- |
+| `UCP-Agent`      | Business profile URL (RFC 8941 Dictionary) |
+| `Signature-Input`| Describes signed components                |
+| `Signature`      | Contains the signature value               |
+| `Content-Digest` | Body digest (RFC 9530)                     |
+
+**Example Webhook Request:**
+
+```http
+POST /webhooks/ucp/orders HTTP/1.1
+Host: platform.example.com
+Content-Type: application/json
+UCP-Agent: profile="https://merchant.example/.well-known/ucp"
+Content-Digest: sha-256=:X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=:
+Signature-Input: sig1=("@method" "@authority" "@path" "content-digest" "content-type");keyid="merchant-2026"
+Signature: sig1=:MEUCIQDTxNq8h7LGHpvVZQp1iHkFp9+3N8Mxk2zH1wK4YuVN8w...:
+
+{"id":"order_abc123","event_id":"evt_123","created_time":"2026-01-15T12:00:00Z",...}
+```
 
 #### Signing (Business)
 
-1. Select a key from the `signing_keys` array in UCP profile.
-2. Create a detached JWT (RFC 7797) over the request body using the selected key.
-3. Include the JWT in the `Request-Signature` header.
-4. Include the key ID in the JWT header's `kid` claim to allow the receiver to
-    identify which key to use for verification.
+1. Compute SHA-256 digest of the raw request body and set `Content-Digest` header
+2. Build signature base per [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421)
+3. Sign using a key from `signing_keys` in the business's UCP profile
+4. Set `Signature-Input` and `Signature` headers
+
+See [Message Signatures - REST Request Signing](signatures.md#rest-request-signing)
+for complete algorithm.
 
 #### Verification (Platform)
 
-1. Extract the `Request-Signature` header from the incoming webhook request.
-2. Parse the JWT header to retrieve the `kid` (key ID).
-3. Fetch the business's UCP profile from `/.well-known/ucp` (cache as appropriate).
-4. Locate the key in `signing_keys` with the matching `kid`.
-5. Verify the JWT signature against the request body using the public key.
-6. If verification fails, reject the webhook with an appropriate error response.
+**Authentication** (signature verification):
+
+1. Parse `Signature-Input` to extract `keyid` and signed components
+2. Fetch business's UCP profile from `/.well-known/ucp` (cache as appropriate)
+3. Locate key in `signing_keys` with matching `kid`
+4. Verify `Content-Digest` matches SHA-256 of raw body
+5. Reconstruct signature base and verify signature
+
+See [Message Signatures - REST Request Verification](signatures.md#rest-request-verification)
+for complete algorithm.
+
+**Authorization** (order ownership):
+
+After verifying the signature, the platform **MUST** confirm the signer is
+authorized to send events for the referenced order:
+
+1. Extract the order ID from the webhook payload
+2. Verify the order was created with this business (profile URL matches)
+3. Reject webhooks where the signer's profile doesn't match the order's business
+
+This prevents a malicious business from sending fake events for another
+business's orders, even with a valid signature.
 
 #### Key Rotation
 
-The `signing_keys` array supports multiple keys to enable zero-downtime
-rotation:
-
-* **Adding a new key:** Add the new key to `signing_keys`, then start signing
-    with it. Verifiers will find it by `kid`.
-* **Removing an old key:** After sufficient time for all in-flight webhooks to
-    be delivered, remove the old key from `signing_keys`.
+See [Message Signatures - Key Rotation](signatures.md#key-rotation) for
+zero-downtime key rotation procedures.
 
 ## Guidelines
 
@@ -331,13 +369,13 @@ rotation:
 
 **Business:**
 
-* **MUST** sign all webhook payloads using a key from their `signing_keys`
-  array (published in `/.well-known/ucp`). The signature **MUST** be included
-  in the `Request-Signature` header as a detached JWT (RFC 7797).
+* **MUST** include `UCP-Agent` header with profile URL for signer identification
+* **MUST** sign all webhook payloads per the
+  [Message Signatures](signatures.md) specification using RFC 9421 headers
+  (`Signature`, `Signature-Input`, `Content-Digest`).
 * **MUST** send "Order created" event with fully populated order entity
 * **MUST** send full order entity on updates (not incremental deltas)
 * **MUST** retry failed webhook deliveries
-* **MUST** include business identifier in webhook path or headers
 
 ## Entities
 
