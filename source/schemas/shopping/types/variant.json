@@ -96,7 +96,11 @@
       "properties": {
         "available": {
           "type": "boolean",
-          "description": "Whether this variant can be purchased."
+          "description": "Whether this variant can be purchased. See status for fulfillment details."
+        },
+        "status": {
+          "type": "string",
+          "description": "Qualifies available with fulfillment state. Well-known values: `in_stock`, `backorder`, `preorder`, `out_of_stock`, `discontinued`."
         }
       }
     },
