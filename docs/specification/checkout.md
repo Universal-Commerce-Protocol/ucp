@@ -120,11 +120,12 @@ The `messages` array contains errors, warnings, and informational messages
 about the checkout state. Error messages include a `severity` field that
 declares **who resolves the error**:
 
-| Severity                | Meaning                                       | Platform Action               |
-| :---------------------- | :-------------------------------------------- | :---------------------------- |
-| `recoverable`           | Platform can fix via API                      | Resolve using Update Checkout |
-| `requires_buyer_input`  | Business requires input not available via API | Hand off via `continue_url`   |
-| `requires_buyer_review` | Buyer review and authorization is required    | Hand off via `continue_url`   |
+| Severity                | Meaning                                                          | Platform Action                     |
+| :---------------------- | :--------------------------------------------------------------- | :---------------------------------- |
+| `recoverable`           | Platform can resolve by modifying inputs and retrying via API    | Modify inputs and retry calling API |
+| `requires_buyer_input`  | Business requires input not available via API                    | Hand off via `continue_url`         |
+| `requires_buyer_review` | Buyer review and authorization is required                       | Hand off via `continue_url`         |
+| `unrecoverable`         | Terminal failure — cannot be recovered via API                   | Redirect via `continue_url`         |
 
 Errors with `requires_*` severity contribute to `status: requires_escalation`.
 Both result in buyer handoff, but represent different checkout states.
@@ -193,6 +194,30 @@ IF requires_buyer_input is not empty
 ELSE IF requires_buyer_review is not empty
   handoff_context = "ready for final review by the buyer"
 ```
+
+### Create Operation Error Responses
+
+When **all** requested items fail—out of stock or unavailable—the business MAY return an error response instead of creating a checkout resource. The `ucp.status: "error"` value is the primary discriminator; the absence of `id` is a consistent secondary indicator:
+
+* **`ucp.status: "error"`** → no resource created; inspect `messages` for the reason
+* **`ucp.status: "success"`** → checkout resource created
+
+```json
+{
+  "ucp": { "version": "2026-01-11", "status": "error" },
+  "messages": [
+    {
+      "type": "error",
+      "code": "out_of_stock",
+      "content": "All requested items are currently out of stock.",
+      "severity": "unrecoverable"
+    }
+  ],
+  "continue_url": "https://merchant.com/"
+}
+```
+
+See [REST](checkout-rest.md#create-checkout) and [MCP](checkout-mcp.md#create_checkout) binding examples.
 
 #### Standard Errors
 
@@ -284,8 +309,9 @@ platform can prefill checkout state when initiating a buy-now flow.
 * Logic handling the checkout sessions **MUST** be deterministic.
 * **MUST** provide `continue_url` when returning `status` =
     `requires_escalation`.
-* **MUST** include at least one message with `severity: escalation` when
-    returning `status` = `requires_escalation`.
+* **MUST** include at least one message with `severity` of
+    `requires_buyer_input` or `requires_buyer_review` when returning
+    `status` = `requires_escalation`.
 * **SHOULD** provide `continue_url` in all non-terminal checkout responses.
 * After a checkout session reaches the state "completed", it is considered
     immutable.

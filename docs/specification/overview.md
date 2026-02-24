@@ -677,16 +677,13 @@ task through the standard web interface.
     Content-Type: application/json
 
     {
-      "ucp": {
-        "version": "2026-01-11",
-        "capabilities": {}
-      },
+      "ucp": { "version": "2026-01-11", "status": "error" },
       "messages": [
         {
           "type": "error",
           "code": "version_unsupported",
           "content": "UCP version 2024-01-01 is not supported",
-          "severity": "requires_buyer_input"
+          "severity": "unrecoverable"
         }
       ],
       "continue_url": "https://merchant.com"
@@ -738,16 +735,13 @@ task through the standard web interface.
       "id": 1,
       "result": {
         "structuredContent": {
-          "ucp": {
-            "version": "2026-01-11",
-            "capabilities": {}
-          },
+          "ucp": { "version": "2026-01-11", "status": "error" },
           "messages": [
             {
               "type": "error",
               "code": "version_unsupported",
               "content": "UCP version 2024-01-01 is not supported",
-              "severity": "requires_buyer_input"
+              "severity": "unrecoverable"
             }
           ],
           "continue_url": "https://merchant.com"
@@ -1668,17 +1662,18 @@ Response with version confirmation:
 }
 ```
 
-Version unsupported error:
+Version unsupported error — no resource is created:
 
 ```json
 {
-  "status": "requires_escalation",
+  "ucp": { "version": "2026-01-11", "status": "error" },
   "messages": [{
     "type": "error",
     "code": "version_unsupported",
     "content": "Version 2026-01-12 is not supported. This business implements version 2026-01-11.",
-    "severity": "requires_buyer_input"
-  }]
+    "severity": "unrecoverable"
+  }],
+  "continue_url": "https://merchant.com/"
 }
 ```
 
