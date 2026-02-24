@@ -8,7 +8,7 @@ UCP defines building blocks for agentic commerce—from discovering and buying t
 
 Protocol overview, core concepts, and design principles
 
-[Read the docs](https://ucp.dev/specification/overview/index.md)
+[Read the docs](https://ucp.dev/latest/specification/overview/index.md)
 
 ### Implement
 
@@ -68,7 +68,7 @@ SEE IT IN ACTION
 
 Support complex cart logic, dynamic pricing, tax calculations, and more across millions of businesses through unified checkout sessions.
 
-[Learn more](https://ucp.dev/specification/checkout-rest/index.md)
+[Learn more](https://ucp.dev/latest/specification/checkout-rest/index.md)
 
 ```json
 {
@@ -141,7 +141,7 @@ SEE IT IN ACTION
 
 OAuth 2.0 standard enables agents to maintain secure, authorized relationships without sharing credentials.
 
-[Learn more](https://ucp.dev/specification/identity-linking/index.md)
+[Learn more](https://ucp.dev/latest/specification/identity-linking/index.md)
 
 ```json
 Sample of /.well-known/oauth-authorization-server
@@ -174,7 +174,7 @@ SEE IT IN ACTION
 
 From purchase confirmation to delivery. Real-time webhooks power status updates, shipment tracking, and return processing across every channel.
 
-[Learn more](https://ucp.dev/specification/order/index.md)
+[Learn more](https://ucp.dev/latest/specification/order/index.md)
 
 ```json
 {
@@ -234,13 +234,13 @@ From purchase confirmation to delivery. Real-time webhooks power status updates,
 
 Integrate and negotiate directly with a seller's checkout API to power native UI and workflows for your platform.
 
-[See how it works](https://ucp.dev/specification/checkout-rest/index.md)
+[See how it works](https://ucp.dev/latest/specification/checkout-rest/index.md)
 
 ### Embed business checkout
 
 Embed and render business checkout UI to support complex checkout flows, with advanced capabilities like bidirectional communication, and payment and shipping address delegation.
 
-[Learn more](https://ucp.dev/specification/embedded-checkout/index.md)
+[Learn more](https://ucp.dev/latest/specification/embedded-checkout/index.md)
 
 ## Designed for the entire commerce ecosystem
 
@@ -248,7 +248,7 @@ Embed and render business checkout UI to support complex checkout flows, with ad
 
 Build the future of commerce on an open foundation. Join our community in evolving an open-source standard designed for the next generation of digital commerce.
 
-[View the technical spec](https://ucp.dev/specification/overview/index.md)
+[View the technical spec](https://ucp.dev/latest/specification/overview/index.md)
 
 ### For Businesses
 
@@ -396,11 +396,11 @@ The complete technical specification, documentation, and reference implementatio
 
 Download and run our code samples
 
-### [Experiment](https://ucp.dev/playground/)
+### [Experiment](https://ucp.dev/latest/specification/playground/index.md)
 
 Experiment with the protocol and its different agent roles
 
-### [Contribute](https://github.com/Universal-Commerce-Protocol/ucp/blob/main/CONTRIBUTING.md)
+### [Contribute](https://github.com/Universal-Commerce-Protocol/.github/blob/main/CONTRIBUTING.md)
 
 Contribute your feedback and code to the public repository
 

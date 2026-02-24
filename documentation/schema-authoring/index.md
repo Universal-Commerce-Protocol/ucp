@@ -78,7 +78,7 @@ Define payment handler configurations in `ucp.payment_handlers{}` registries.
 
 Examples: `com.google.pay`, `dev.shopify.shop_pay`, `dev.ucp.processor_tokenizer`
 
-**→ See [Payment Handler Guide](/latest/specification/payment-handler-guide.md)** for detailed guidance on handler structure, config/instrument/credential schemas, and the full specification template.
+**→ See [Payment Handler Guide](/latest/specification/payment-handler-guide/)** for detailed guidance on handler structure, config/instrument/credential schemas, and the full specification template.
 
 ### Component Schemas
 
