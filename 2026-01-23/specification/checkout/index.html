@@ -2570,7 +2570,7 @@ redirect to the checkout UI or renders the checkout page directly.</p>
 </tr>
 <tr>
 <td style="text-align: left;">line_items</td>
-<td style="text-align: left;">Array[<a href="/2026-01-23/specification/checkout/#line-item-response">Line Item Response</a>]</td>
+<td style="text-align: left;">Array[<a href="/2026-01-23/specification/checkout/#line-item">Line Item</a>]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">List of line items being checked out.</td>
 </tr>
@@ -2579,6 +2579,12 @@ redirect to the checkout UI or renders the checkout page directly.</p>
 <td style="text-align: left;"><a href="/2026-01-23/specification/checkout/#buyer">Buyer</a></td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Representation of the buyer.</td>
+</tr>
+<tr>
+<td style="text-align: left;">context</td>
+<td style="text-align: left;"><a href="/2026-01-23/specification/checkout/#context">Context</a></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Provisional buyer signals for relevance and localization: product availability, pricing, currency, tax, shipping, payment methods, and eligibility (e.g., student or affiliation discounts). Businesses SHOULD use these values when authoritative data (e.g., address) is absent, and MAY ignore unsupported values without returning errors. Context can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. Platforms SHOULD progressively enhance context throughout the buyer journey.</td>
 </tr>
 <tr>
 <td style="text-align: left;">status</td>
@@ -2594,7 +2600,7 @@ redirect to the checkout UI or renders the checkout page directly.</p>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[<a href="/2026-01-23/specification/checkout/#total-response">Total Response</a>]</td>
+<td style="text-align: left;">Array[<a href="/2026-01-23/specification/checkout/#total">Total</a>]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Different cart totals.</td>
 </tr>
@@ -2686,8 +2692,20 @@ product data (price/title etc.) provided by the business through the feeds
 </thead>
 <tbody>
 <tr>
+<td style="text-align: left;">ucp</td>
+<td style="text-align: left;"><a href="/2026-01-23/specification/checkout/#ucp-response-checkout-schema">UCP Response Checkout Schema</a></td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.</td>
+</tr>
+<tr>
+<td style="text-align: left;">id</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Unique identifier of the checkout session.</td>
+</tr>
+<tr>
 <td style="text-align: left;">line_items</td>
-<td style="text-align: left;">Array[<a href="/2026-01-23/specification/checkout/#line-item-create-request">Line Item Create Request</a>]</td>
+<td style="text-align: left;">Array[<a href="/2026-01-23/specification/checkout/#line-item">Line Item</a>]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">List of line items being checked out.</td>
 </tr>
@@ -2704,10 +2722,58 @@ product data (price/title etc.) provided by the business through the feeds
 <td style="text-align: left;">Provisional buyer signals for relevance and localization: product availability, pricing, currency, tax, shipping, payment methods, and eligibility (e.g., student or affiliation discounts). Businesses SHOULD use these values when authoritative data (e.g., address) is absent, and MAY ignore unsupported values without returning errors. Context can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. Platforms SHOULD progressively enhance context throughout the buyer journey.</td>
 </tr>
 <tr>
+<td style="text-align: left;">status</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details.<br><strong>Enum:</strong> <code>incomplete</code>, <code>requires_escalation</code>, <code>ready_for_complete</code>, <code>complete_in_progress</code>, <code>completed</code>, <code>canceled</code></td>
+</tr>
+<tr>
+<td style="text-align: left;">currency</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.</td>
+</tr>
+<tr>
+<td style="text-align: left;">totals</td>
+<td style="text-align: left;">Array[<a href="/2026-01-23/specification/checkout/#total">Total</a>]</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Different cart totals.</td>
+</tr>
+<tr>
+<td style="text-align: left;">messages</td>
+<td style="text-align: left;">Array[<a href="/2026-01-23/specification/checkout/#message">Message</a>]</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">List of messages with error and info about the checkout session state.</td>
+</tr>
+<tr>
+<td style="text-align: left;">links</td>
+<td style="text-align: left;">Array[<a href="/2026-01-23/specification/checkout/#link">Link</a>]</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.</td>
+</tr>
+<tr>
+<td style="text-align: left;">expires_at</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.</td>
+</tr>
+<tr>
+<td style="text-align: left;">continue_url</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">URL for checkout handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements.</td>
+</tr>
+<tr>
 <td style="text-align: left;">payment</td>
 <td style="text-align: left;"><a href="/2026-01-23/specification/checkout/#payment">Payment</a></td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Payment configuration containing handlers.</td>
+</tr>
+<tr>
+<td style="text-align: left;">order</td>
+<td style="text-align: left;"><a href="/2026-01-23/specification/checkout/#order-confirmation">Order Confirmation</a></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Details about an order created for this checkout session.</td>
 </tr>
 </tbody>
 </table>
@@ -2736,7 +2802,7 @@ product data (price/title etc.) provided by the business through the feeds
 </tr>
 <tr>
 <td style="text-align: left;">line_items</td>
-<td style="text-align: left;">Array[<a href="/2026-01-23/specification/checkout/#line-item-response">Line Item Response</a>]</td>
+<td style="text-align: left;">Array[<a href="/2026-01-23/specification/checkout/#line-item">Line Item</a>]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">List of line items being checked out.</td>
 </tr>
@@ -2745,6 +2811,12 @@ product data (price/title etc.) provided by the business through the feeds
 <td style="text-align: left;"><a href="/2026-01-23/specification/checkout/#buyer">Buyer</a></td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Representation of the buyer.</td>
+</tr>
+<tr>
+<td style="text-align: left;">context</td>
+<td style="text-align: left;"><a href="/2026-01-23/specification/checkout/#context">Context</a></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Provisional buyer signals for relevance and localization: product availability, pricing, currency, tax, shipping, payment methods, and eligibility (e.g., student or affiliation discounts). Businesses SHOULD use these values when authoritative data (e.g., address) is absent, and MAY ignore unsupported values without returning errors. Context can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. Platforms SHOULD progressively enhance context throughout the buyer journey.</td>
 </tr>
 <tr>
 <td style="text-align: left;">status</td>
@@ -2760,7 +2832,7 @@ product data (price/title etc.) provided by the business through the feeds
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[<a href="/2026-01-23/specification/checkout/#total-response">Total Response</a>]</td>
+<td style="text-align: left;">Array[<a href="/2026-01-23/specification/checkout/#total">Total</a>]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Different cart totals.</td>
 </tr>
@@ -2854,7 +2926,7 @@ time of checkout session creation.</p>
 </tr>
 <tr>
 <td style="text-align: left;">line_items</td>
-<td style="text-align: left;">Array[<a href="/2026-01-23/specification/checkout/#line-item-response">Line Item Response</a>]</td>
+<td style="text-align: left;">Array[<a href="/2026-01-23/specification/checkout/#line-item">Line Item</a>]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">List of line items being checked out.</td>
 </tr>
@@ -2863,6 +2935,12 @@ time of checkout session creation.</p>
 <td style="text-align: left;"><a href="/2026-01-23/specification/checkout/#buyer">Buyer</a></td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Representation of the buyer.</td>
+</tr>
+<tr>
+<td style="text-align: left;">context</td>
+<td style="text-align: left;"><a href="/2026-01-23/specification/checkout/#context">Context</a></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Provisional buyer signals for relevance and localization: product availability, pricing, currency, tax, shipping, payment methods, and eligibility (e.g., student or affiliation discounts). Businesses SHOULD use these values when authoritative data (e.g., address) is absent, and MAY ignore unsupported values without returning errors. Context can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. Platforms SHOULD progressively enhance context throughout the buyer journey.</td>
 </tr>
 <tr>
 <td style="text-align: left;">status</td>
@@ -2878,7 +2956,7 @@ time of checkout session creation.</p>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[<a href="/2026-01-23/specification/checkout/#total-response">Total Response</a>]</td>
+<td style="text-align: left;">Array[<a href="/2026-01-23/specification/checkout/#total">Total</a>]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Different cart totals.</td>
 </tr>
@@ -2943,6 +3021,12 @@ will replace the existing checkout session state on the business side.</p>
 <td style="text-align: left;">The unique identifier of the checkout session.Defined in path.</td>
 </tr>
 <tr>
+<td style="text-align: left;">ucp</td>
+<td style="text-align: left;"><a href="/2026-01-23/specification/checkout/#ucp-response-checkout-schema">UCP Response Checkout Schema</a></td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.</td>
+</tr>
+<tr>
 <td style="text-align: left;">id</td>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
@@ -2950,7 +3034,7 @@ will replace the existing checkout session state on the business side.</p>
 </tr>
 <tr>
 <td style="text-align: left;">line_items</td>
-<td style="text-align: left;">Array[<a href="/2026-01-23/specification/checkout/#line-item-update-request">Line Item Update Request</a>]</td>
+<td style="text-align: left;">Array[<a href="/2026-01-23/specification/checkout/#line-item">Line Item</a>]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">List of line items being checked out.</td>
 </tr>
@@ -2967,10 +3051,58 @@ will replace the existing checkout session state on the business side.</p>
 <td style="text-align: left;">Provisional buyer signals for relevance and localization: product availability, pricing, currency, tax, shipping, payment methods, and eligibility (e.g., student or affiliation discounts). Businesses SHOULD use these values when authoritative data (e.g., address) is absent, and MAY ignore unsupported values without returning errors. Context can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. Platforms SHOULD progressively enhance context throughout the buyer journey.</td>
 </tr>
 <tr>
+<td style="text-align: left;">status</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details.<br><strong>Enum:</strong> <code>incomplete</code>, <code>requires_escalation</code>, <code>ready_for_complete</code>, <code>complete_in_progress</code>, <code>completed</code>, <code>canceled</code></td>
+</tr>
+<tr>
+<td style="text-align: left;">currency</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.</td>
+</tr>
+<tr>
+<td style="text-align: left;">totals</td>
+<td style="text-align: left;">Array[<a href="/2026-01-23/specification/checkout/#total">Total</a>]</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Different cart totals.</td>
+</tr>
+<tr>
+<td style="text-align: left;">messages</td>
+<td style="text-align: left;">Array[<a href="/2026-01-23/specification/checkout/#message">Message</a>]</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">List of messages with error and info about the checkout session state.</td>
+</tr>
+<tr>
+<td style="text-align: left;">links</td>
+<td style="text-align: left;">Array[<a href="/2026-01-23/specification/checkout/#link">Link</a>]</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.</td>
+</tr>
+<tr>
+<td style="text-align: left;">expires_at</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.</td>
+</tr>
+<tr>
+<td style="text-align: left;">continue_url</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">URL for checkout handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements.</td>
+</tr>
+<tr>
 <td style="text-align: left;">payment</td>
 <td style="text-align: left;"><a href="/2026-01-23/specification/checkout/#payment">Payment</a></td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Payment configuration containing handlers.</td>
+</tr>
+<tr>
+<td style="text-align: left;">order</td>
+<td style="text-align: left;"><a href="/2026-01-23/specification/checkout/#order-confirmation">Order Confirmation</a></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Details about an order created for this checkout session.</td>
 </tr>
 </tbody>
 </table>
@@ -2999,7 +3131,7 @@ will replace the existing checkout session state on the business side.</p>
 </tr>
 <tr>
 <td style="text-align: left;">line_items</td>
-<td style="text-align: left;">Array[<a href="/2026-01-23/specification/checkout/#line-item-response">Line Item Response</a>]</td>
+<td style="text-align: left;">Array[<a href="/2026-01-23/specification/checkout/#line-item">Line Item</a>]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">List of line items being checked out.</td>
 </tr>
@@ -3008,6 +3140,12 @@ will replace the existing checkout session state on the business side.</p>
 <td style="text-align: left;"><a href="/2026-01-23/specification/checkout/#buyer">Buyer</a></td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Representation of the buyer.</td>
+</tr>
+<tr>
+<td style="text-align: left;">context</td>
+<td style="text-align: left;"><a href="/2026-01-23/specification/checkout/#context">Context</a></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Provisional buyer signals for relevance and localization: product availability, pricing, currency, tax, shipping, payment methods, and eligibility (e.g., student or affiliation discounts). Businesses SHOULD use these values when authoritative data (e.g., address) is absent, and MAY ignore unsupported values without returning errors. Context can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. Platforms SHOULD progressively enhance context throughout the buyer journey.</td>
 </tr>
 <tr>
 <td style="text-align: left;">status</td>
@@ -3023,7 +3161,7 @@ will replace the existing checkout session state on the business side.</p>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[<a href="/2026-01-23/specification/checkout/#total-response">Total Response</a>]</td>
+<td style="text-align: left;">Array[<a href="/2026-01-23/specification/checkout/#total">Total</a>]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Different cart totals.</td>
 </tr>
@@ -3094,10 +3232,88 @@ as the order, and its associated items, moves through the supply chain.</p>
 <td style="text-align: left;">The unique identifier of the checkout session.Defined in path.</td>
 </tr>
 <tr>
+<td style="text-align: left;">ucp</td>
+<td style="text-align: left;"><a href="/2026-01-23/specification/checkout/#ucp-response-checkout-schema">UCP Response Checkout Schema</a></td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.</td>
+</tr>
+<tr>
+<td style="text-align: left;">id</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Unique identifier of the checkout session.</td>
+</tr>
+<tr>
+<td style="text-align: left;">line_items</td>
+<td style="text-align: left;">Array[<a href="/2026-01-23/specification/checkout/#line-item">Line Item</a>]</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">List of line items being checked out.</td>
+</tr>
+<tr>
+<td style="text-align: left;">buyer</td>
+<td style="text-align: left;"><a href="/2026-01-23/specification/checkout/#buyer">Buyer</a></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Representation of the buyer.</td>
+</tr>
+<tr>
+<td style="text-align: left;">context</td>
+<td style="text-align: left;"><a href="/2026-01-23/specification/checkout/#context">Context</a></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Provisional buyer signals for relevance and localization: product availability, pricing, currency, tax, shipping, payment methods, and eligibility (e.g., student or affiliation discounts). Businesses SHOULD use these values when authoritative data (e.g., address) is absent, and MAY ignore unsupported values without returning errors. Context can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. Platforms SHOULD progressively enhance context throughout the buyer journey.</td>
+</tr>
+<tr>
+<td style="text-align: left;">status</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details.<br><strong>Enum:</strong> <code>incomplete</code>, <code>requires_escalation</code>, <code>ready_for_complete</code>, <code>complete_in_progress</code>, <code>completed</code>, <code>canceled</code></td>
+</tr>
+<tr>
+<td style="text-align: left;">currency</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.</td>
+</tr>
+<tr>
+<td style="text-align: left;">totals</td>
+<td style="text-align: left;">Array[<a href="/2026-01-23/specification/checkout/#total">Total</a>]</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Different cart totals.</td>
+</tr>
+<tr>
+<td style="text-align: left;">messages</td>
+<td style="text-align: left;">Array[<a href="/2026-01-23/specification/checkout/#message">Message</a>]</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">List of messages with error and info about the checkout session state.</td>
+</tr>
+<tr>
+<td style="text-align: left;">links</td>
+<td style="text-align: left;">Array[<a href="/2026-01-23/specification/checkout/#link">Link</a>]</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.</td>
+</tr>
+<tr>
+<td style="text-align: left;">expires_at</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.</td>
+</tr>
+<tr>
+<td style="text-align: left;">continue_url</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">URL for checkout handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements.</td>
+</tr>
+<tr>
 <td style="text-align: left;">payment</td>
 <td style="text-align: left;"><a href="/2026-01-23/specification/checkout/#payment">Payment</a></td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">No</td>
 <td style="text-align: left;">Payment configuration containing handlers.</td>
+</tr>
+<tr>
+<td style="text-align: left;">order</td>
+<td style="text-align: left;"><a href="/2026-01-23/specification/checkout/#order-confirmation">Order Confirmation</a></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Details about an order created for this checkout session.</td>
 </tr>
 <tr>
 <td style="text-align: left;">risk_signals</td>
@@ -3132,7 +3348,7 @@ as the order, and its associated items, moves through the supply chain.</p>
 </tr>
 <tr>
 <td style="text-align: left;">line_items</td>
-<td style="text-align: left;">Array[<a href="/2026-01-23/specification/checkout/#line-item-response">Line Item Response</a>]</td>
+<td style="text-align: left;">Array[<a href="/2026-01-23/specification/checkout/#line-item">Line Item</a>]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">List of line items being checked out.</td>
 </tr>
@@ -3141,6 +3357,12 @@ as the order, and its associated items, moves through the supply chain.</p>
 <td style="text-align: left;"><a href="/2026-01-23/specification/checkout/#buyer">Buyer</a></td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Representation of the buyer.</td>
+</tr>
+<tr>
+<td style="text-align: left;">context</td>
+<td style="text-align: left;"><a href="/2026-01-23/specification/checkout/#context">Context</a></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Provisional buyer signals for relevance and localization: product availability, pricing, currency, tax, shipping, payment methods, and eligibility (e.g., student or affiliation discounts). Businesses SHOULD use these values when authoritative data (e.g., address) is absent, and MAY ignore unsupported values without returning errors. Context can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. Platforms SHOULD progressively enhance context throughout the buyer journey.</td>
 </tr>
 <tr>
 <td style="text-align: left;">status</td>
@@ -3156,7 +3378,7 @@ as the order, and its associated items, moves through the supply chain.</p>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[<a href="/2026-01-23/specification/checkout/#total-response">Total Response</a>]</td>
+<td style="text-align: left;">Array[<a href="/2026-01-23/specification/checkout/#total">Total</a>]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Different cart totals.</td>
 </tr>
@@ -3248,7 +3470,7 @@ that is not equal to <code>completed</code> or <code>canceled</code> <strong>SHO
 </tr>
 <tr>
 <td style="text-align: left;">line_items</td>
-<td style="text-align: left;">Array[<a href="/2026-01-23/specification/checkout/#line-item-response">Line Item Response</a>]</td>
+<td style="text-align: left;">Array[<a href="/2026-01-23/specification/checkout/#line-item">Line Item</a>]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">List of line items being checked out.</td>
 </tr>
@@ -3257,6 +3479,12 @@ that is not equal to <code>completed</code> or <code>canceled</code> <strong>SHO
 <td style="text-align: left;"><a href="/2026-01-23/specification/checkout/#buyer">Buyer</a></td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Representation of the buyer.</td>
+</tr>
+<tr>
+<td style="text-align: left;">context</td>
+<td style="text-align: left;"><a href="/2026-01-23/specification/checkout/#context">Context</a></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Provisional buyer signals for relevance and localization: product availability, pricing, currency, tax, shipping, payment methods, and eligibility (e.g., student or affiliation discounts). Businesses SHOULD use these values when authoritative data (e.g., address) is absent, and MAY ignore unsupported values without returning errors. Context can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. Platforms SHOULD progressively enhance context throughout the buyer journey.</td>
 </tr>
 <tr>
 <td style="text-align: left;">status</td>
@@ -3272,7 +3500,7 @@ that is not equal to <code>completed</code> or <code>canceled</code> <strong>SHO
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[<a href="/2026-01-23/specification/checkout/#total-response">Total Response</a>]</td>
+<td style="text-align: left;">Array[<a href="/2026-01-23/specification/checkout/#total">Total</a>]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Different cart totals.</td>
 </tr>
@@ -3445,7 +3673,7 @@ require explicit validation and error feedback.</p>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[<a href="/2026-01-23/specification/checkout/#total-response">Total Response</a>]</td>
+<td style="text-align: left;">Array[<a href="/2026-01-23/specification/checkout/#total">Total</a>]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Fulfillment option totals breakdown.</td>
 </tr>
@@ -3469,6 +3697,24 @@ require explicit validation and error feedback.</p>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Should be recognized by both the Platform, and the Business. For Google it should match the id provided in the "id" field in the product feed.</td>
 </tr>
+<tr>
+<td style="text-align: left;">title</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Product title.</td>
+</tr>
+<tr>
+<td style="text-align: left;">price</td>
+<td style="text-align: left;">integer</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Unit price in minor (cents) currency units.</td>
+</tr>
+<tr>
+<td style="text-align: left;">image_url</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Product image URI.</td>
+</tr>
 </tbody>
 </table>
 <h4 id="item-update-request">Item Update Request<a class="headerlink" href="#item-update-request" title="Permanent link">&para;</a></h4>
@@ -3487,6 +3733,24 @@ require explicit validation and error feedback.</p>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Should be recognized by both the Platform, and the Business. For Google it should match the id provided in the "id" field in the product feed.</td>
+</tr>
+<tr>
+<td style="text-align: left;">title</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Product title.</td>
+</tr>
+<tr>
+<td style="text-align: left;">price</td>
+<td style="text-align: left;">integer</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Unit price in minor (cents) currency units.</td>
+</tr>
+<tr>
+<td style="text-align: left;">image_url</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Product image URI.</td>
 </tr>
 </tbody>
 </table>
@@ -3540,8 +3804,14 @@ require explicit validation and error feedback.</p>
 </thead>
 <tbody>
 <tr>
+<td style="text-align: left;">id</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
 <td style="text-align: left;">item</td>
-<td style="text-align: left;"><a href="/2026-01-23/specification/checkout/#item-create-request">Item Create Request</a></td>
+<td style="text-align: left;"><a href="/2026-01-23/specification/checkout/#item">Item</a></td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;"></td>
 </tr>
@@ -3550,6 +3820,18 @@ require explicit validation and error feedback.</p>
 <td style="text-align: left;">integer</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Quantity of the item being purchased.</td>
+</tr>
+<tr>
+<td style="text-align: left;">totals</td>
+<td style="text-align: left;">Array[<a href="/2026-01-23/specification/checkout/#total">Total</a>]</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Line item totals breakdown.</td>
+</tr>
+<tr>
+<td style="text-align: left;">parent_id</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Parent line item identifier for any nested structures.</td>
 </tr>
 </tbody>
 </table>
@@ -3567,12 +3849,12 @@ require explicit validation and error feedback.</p>
 <tr>
 <td style="text-align: left;">id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
 <td style="text-align: left;">item</td>
-<td style="text-align: left;"><a href="/2026-01-23/specification/checkout/#item-update-request">Item Update Request</a></td>
+<td style="text-align: left;"><a href="/2026-01-23/specification/checkout/#item">Item</a></td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;"></td>
 </tr>
@@ -3581,6 +3863,12 @@ require explicit validation and error feedback.</p>
 <td style="text-align: left;">integer</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Quantity of the item being purchased.</td>
+</tr>
+<tr>
+<td style="text-align: left;">totals</td>
+<td style="text-align: left;">Array[<a href="/2026-01-23/specification/checkout/#total">Total</a>]</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Line item totals breakdown.</td>
 </tr>
 <tr>
 <td style="text-align: left;">parent_id</td>
@@ -3609,7 +3897,7 @@ require explicit validation and error feedback.</p>
 </tr>
 <tr>
 <td style="text-align: left;">item</td>
-<td style="text-align: left;"><a href="/2026-01-23/specification/checkout/#item-response">Item Response</a></td>
+<td style="text-align: left;"><a href="/2026-01-23/specification/checkout/#item">Item</a></td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;"></td>
 </tr>
@@ -3621,7 +3909,7 @@ require explicit validation and error feedback.</p>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[<a href="/2026-01-23/specification/checkout/#total-response">Total Response</a>]</td>
+<td style="text-align: left;">Array[<a href="/2026-01-23/specification/checkout/#total">Total</a>]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Line item totals breakdown.</td>
 </tr>
