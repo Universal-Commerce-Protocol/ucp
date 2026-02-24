@@ -84,7 +84,7 @@
     },
     "currency": {
       "type": "string",
-      "description": "ISO 4217 currency code reflecting the merchant's market determination.",
+      "description": "ISO 4217 currency code reflecting the merchant's market determination."
     },
     "totals": {
       "type": "array",
