@@ -115,8 +115,8 @@ We welcome community contributions to enhance and evolve UCP.
     Discussions](https://github.com/Universal-Commerce-Protocol/ucp/discussions).
 * **Issues & Feedback:** Report issues or suggest improvements via GitHub
     Issues.
-* **Contribution Guide:** See our [CONTRIBUTING.md](CONTRIBUTING.md) for
-    details on how to contribute.
+* **Contribution Guide:** See our [CONTRIBUTING.md](https://github.com/Universal-Commerce-Protocol/.github/blob/main/CONTRIBUTING.md)
+    for details on how to contribute.
 
 ## What's Next
 

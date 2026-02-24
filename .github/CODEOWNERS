@@ -6,6 +6,10 @@
 # Infrastructure, Tooling & Configuration
 /.github/                 @Universal-Commerce-Protocol/devops-maintainers
 /scripts/                 @Universal-Commerce-Protocol/devops-maintainers
+/generated/               @Universal-Commerce-Protocol/devops-maintainers
+/hooks.py                 @Universal-Commerce-Protocol/devops-maintainers
+/main.py                  @Universal-Commerce-Protocol/devops-maintainers
+/generate_ts_schema_types.js @Universal-Commerce-Protocol/devops-maintainers
 /.cspell/                 @Universal-Commerce-Protocol/devops-maintainers
 /.cspell.json             @Universal-Commerce-Protocol/devops-maintainers
 /.pre-commit-config.yaml  @Universal-Commerce-Protocol/devops-maintainers
@@ -21,7 +25,8 @@
 /package-lock.json        @Universal-Commerce-Protocol/devops-maintainers
 
 # Documentation
-/docs/                    @Universal-Commerce-Protocol/maintainers
+/docs/                    @Universal-Commerce-Protocol/devops-maintainers
+/docs/specification/      @Universal-Commerce-Protocol/maintainers
 
 # Core Protocol
 /source/                  @Universal-Commerce-Protocol/tech-council
