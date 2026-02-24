@@ -696,7 +696,7 @@ Follow-up calls after initial `fulfillment` data to update selection.
 
 #### Update Payment
 
-Prior to completing checkout, the Platform may provide the Business with selected payment instrument hints. These hints allow the Business to apply to the checkout session the expected benefits the selected payment instruction qualifies the Buyer for.
+Prior to completing checkout, the Platform may provide the Business with selected payment instrument hints. These hints allow the Business to apply to the checkout session the expected benefits the selected payment instrument qualifies the Buyer for.
 
 === "Request"
 
@@ -720,7 +720,7 @@ Prior to completing checkout, the Platform may provide the Business with selecte
             "price": 2500
           },
           "id": "li_1",
-          "quantity": 2,
+          "quantity": 2
         }
       ],
       "fulfillment": {

@@ -38,7 +38,7 @@
       "items": {
         "type": "string"
       },
-      "description": "Opaque, namespaced qualifier strings from the Platform that hint to the Business the benefits to apply at checkout time, based on the selected payment instruments."
+      "description": "Opaque, namespaced qualifier strings from the Platform that hint to the Business the benefits to apply at checkout time, based on the selected payment instrument."
     }
   },
   "additionalProperties": true,
