@@ -694,6 +694,223 @@ Follow-up calls after initial `fulfillment` data to update selection.
     }
     ```
 
+#### Update Payment
+
+Prior to completing checkout, the Platform may provide the Business with selected payment instrument hints. These hints allow the Business to apply to the checkout session the expected benefits the selected payment instruction qualifies the Buyer for.
+
+=== "Request"
+
+    ```json
+    PUT /checkout-sessions/{id} HTTP/1.1
+    UCP-Agent: profile="https://platform.example/profile"
+    Content-Type: application/json
+
+    {
+      "id": "chk_123456789",
+      "buyer": {
+        "email": "jane@example.com",
+        "first_name": "Jane",
+        "last_name": "Doe"
+      },
+      "line_items": [
+        {
+          "item": {
+            "id": "item_123",
+            "title": "Red T-Shirt",
+            "price": 2500
+          },
+          "id": "li_1",
+          "quantity": 2,
+        }
+      ],
+      "fulfillment": {
+        "methods": [
+          {
+            "id": "shipping_1",
+            "type": "shipping",
+            "line_item_ids": ["item_123"],
+            "selected_destination_id": "dest_home",
+            "destinations": [
+              {
+                "id": "dest_home",
+                "street_address": "123 Main St",
+                "address_locality": "Springfield",
+                "address_region": "IL",
+                "postal_code": "62701",
+                "address_country": "US"
+              }
+            ],
+            "groups": [
+              {
+                "id": "package_1",
+                "selected_option_id": "express"
+              }
+            ]
+          }
+        ]
+      },
+      "payment": {
+        "instruments": [
+          {
+            "id": "pi_gpay_5678",
+            "handler_id": "gpay_1234",
+            "type": "card",
+            "selected": true,
+            "display": {
+              "brand": "mastercard",
+              "last_digits": "5678",
+              "rich_text_description": "Google Pay •••• 5678"
+            },
+            "qualifiers": [
+              "com.example.tender_a"
+            ]
+          }
+        ]
+      }
+    }
+    ```
+
+=== "Response"
+
+    ```json
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+
+    {
+      "ucp": {
+        "version": "2026-01-11",
+        "capabilities": {
+          "dev.ucp.shopping.checkout": [
+            {"version": "2026-01-11"}
+          ]
+        },
+        "payment_handlers": {
+          "com.shopify.shop_pay": [
+            {
+              "id": "shop_pay_1234",
+              "version": "2026-01-11",
+              "config": {
+                "merchant_id": "shop_merchant_123"
+              }
+            }
+          ]
+        }
+      },
+      "id": "chk_1234567890",
+      "status": "ready_for_complete",
+      "currency": "USD",
+      "line_items": [
+        {
+          "id": "li_1",
+          "item": {
+            "id": "item_123",
+            "title": "Red T-Shirt",
+            "price": 2500
+          },
+          "quantity": 2,
+          "totals": [
+            {"type": "subtotal", "amount": 5000},
+            {"type": "total", "amount": 5000}
+          ]
+        }
+      ],
+      "buyer": {
+        "email": "jane@example.com",
+        "first_name": "Jane",
+        "last_name": "Doe"
+      },
+      "totals": [
+        {
+          "type": "subtotal",
+          "amount": 5000
+        },
+        {
+          "type": "tax",
+          "amount": 400
+        },
+        {
+          "type": "total",
+          "amount": 5400
+        }
+      ],
+      "links": [
+        {
+          "type": "terms_of_service",
+          "url": "https://merchant.com/terms"
+        }
+      ],
+      "fulfillment": {
+        "methods": [
+          {
+            "id": "shipping_1",
+            "type": "shipping",
+            "line_item_ids": ["item_123"],
+            "selected_destination_id": "dest_home",
+            "destinations": [
+              {
+                "id": "dest_home",
+                "street_address": "123 Main St",
+                "address_locality": "Springfield",
+                "address_region": "IL",
+                "postal_code": "62701",
+                "address_country": "US"
+              }
+            ],
+            "groups": [
+              {
+                "id": "package_1",
+                "line_item_ids": ["item_123"],
+                "selected_option_id": "express",
+                "options": [
+                  {
+                    "id": "standard",
+                    "title": "Standard Shipping",
+                    "description": "Arrives in 5-7 business days",
+                    "totals": [
+                      {
+                        "type": "total",
+                        "amount": 500
+                      }
+                    ]
+                  },
+                  {
+                    "id": "express",
+                    "title": "Express Shipping",
+                    "description": "Arrives in 2-3 business days",
+                    "totals": [
+                      {
+                        "type": "total",
+                        "amount": 1000
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "payment": {
+        "instruments": [
+          {
+            "id": "pi_gpay_5678",
+            "handler_id": "gpay_1234",
+            "type": "card",
+            "selected": true,
+            "display": {
+              "brand": "mastercard",
+              "last_digits": "5678",
+              "rich_text_description": "Google Pay •••• 5678"
+            },
+            "qualifiers": [
+              "com.example.tender_a"
+            ]
+          }
+        ]
+      }
+    }
+    ```
+
 ### Complete Checkout
 
 If businesses have specific logic to enforce field existence in `buyer` and
@@ -721,6 +938,9 @@ place to set these expectations via `messages`.
               "card_art": "https://cart-art-1.html",
               "description": "Google Pay •••• 5678"
             },
+            "qualifiers": [
+              "com.example.tender_a"
+            ],
             "billing_address": {
               "street_address": "123 Main St",
               "address_locality": "Anytown",
@@ -883,7 +1103,10 @@ place to set these expectations via `messages`.
               "brand": "mastercard",
               "last_digits": "5678",
               "rich_text_description": "Google Pay •••• 5678"
-            }
+            },
+            "qualifiers": [
+              "com.example.tender_a"
+            ]
           }
         ]
       }
