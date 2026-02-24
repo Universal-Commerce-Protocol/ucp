@@ -55,6 +55,41 @@
       "$ref": "price.json",
       "description": "List price before discounts (for strikethrough display)."
     },
+    "unit_price": {
+      "type": "object",
+      "description": "Price per standard unit of measurement. MAY be omitted when unit pricing does not apply.",
+      "required": ["amount", "currency", "measure", "reference"],
+      "properties": {
+        "amount": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Unit price in minor currency units. Business MUST return precomputed unit price value: (variant.price / measure.value) * reference.value."
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$",
+          "description": "ISO 4217 currency code."
+        },
+        "measure": {
+          "type": "object",
+          "description": "Product quantity in packaging (e.g., 750ml bottle).",
+          "required": ["value", "unit"],
+          "properties": {
+            "value": { "type": "number", "description": "Package quantity." },
+            "unit": { "type": "string", "description": "Unit of measurement." }
+          }
+        },
+        "reference": {
+          "type": "object",
+          "description": "Denominator for unit price display (e.g., per 100ml, per 1kg).",
+          "required": ["value", "unit"],
+          "properties": {
+            "value": { "type": "integer", "description": "Reference quantity." },
+            "unit": { "type": "string", "description": "Unit of measurement." }
+          }
+        }
+      }
+    },
     "availability": {
       "type": "object",
       "description": "Variant availability for purchase.",
