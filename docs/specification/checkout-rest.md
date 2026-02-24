@@ -169,6 +169,27 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
     }
     ```
 
+=== "Error Response"
+
+    All items out of stock — no checkout resource is created:
+
+    ```json
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+
+    {
+      "ucp": { "version": "2026-01-11" },
+      "messages": [
+        {
+          "type": "error",
+          "code": "out_of_stock",
+          "content": "All requested items are currently out of stock."
+        }
+      ],
+      "continue_url": "https://merchant.com/"
+    }
+    ```
+
 ### Update Checkout
 
 #### Update Buyer Info
@@ -1291,6 +1312,23 @@ with HTTP 200 and the UCP envelope containing `messages`:
     }
   ],
   "continue_url": "https://merchant.com/checkout/checkout_abc123"
+}
+```
+
+For `create_checkout`, when all items unavailable and no checkout can be created, returns
+HTTP 200 and the UCP envelope containing `messages`
+
+```json
+{
+  "ucp": { "version": "2026-01-11" },
+  "messages": [
+    {
+      "type": "error",
+      "code": "item_unavailable",
+      "content": "All items are not available for purchase."
+    }
+  ],
+  "continue_url": "https://merchant.com/"
 }
 ```
 

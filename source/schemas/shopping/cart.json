@@ -4,30 +4,6 @@
   "name": "dev.ucp.shopping.cart",
   "title": "Cart",
   "description": "Shopping cart with estimated pricing before checkout. Lightweight pre-purchase exploration with no payment info or complex status states. Cart exists (200) or doesn't (404).",
-  "$defs": {
-    "checkout": {
-      "title": "Checkout with Cart",
-      "description": "Checkout extended with cart capability. Adds cart_id to create_checkout for cart-to-checkout conversion.",
-      "allOf": [
-        {
-          "$ref": "checkout.json"
-        },
-        {
-          "type": "object",
-          "properties": {
-            "cart_id": {
-              "type": "string",
-              "description": "Cart ID to convert to checkout. Business MUST use cart contents (line_items, context, buyer) and MUST ignore overlapping fields in checkout payload.",
-              "ucp_request": {
-                "create": "optional",
-                "update": "omit"
-              }
-            }
-          }
-        }
-      ]
-    }
-  },
   "type": "object",
   "required": [
     "ucp",
@@ -117,6 +93,30 @@
       "format": "date-time",
       "description": "Cart expiry timestamp (RFC 3339). Optional.",
       "ucp_request": "omit"
+    }
+  },
+  "$defs": {
+    "checkout": {
+      "title": "Checkout with Cart",
+      "description": "Checkout extended with cart capability. Adds cart_id to create_checkout for cart-to-checkout conversion.",
+      "allOf": [
+        {
+          "$ref": "checkout.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "cart_id": {
+              "type": "string",
+              "description": "Cart ID to convert to checkout. Business MUST use cart contents (line_items, context, buyer) and MUST ignore overlapping fields in checkout payload.",
+              "ucp_request": {
+                "create": "optional",
+                "update": "omit"
+              }
+            }
+          }
+        }
+      ]
     }
   }
 }
