@@ -159,7 +159,8 @@ def on_config(config):
       )
 
   # Calculate base path for links (e.g. / or /ucp/)
-  site_url = os.environ.get("SITE_URL", config.get("site_url", "/"))
+  # Do not use config.get("site_url") as mike appends the version directory
+  site_url = os.environ.get("SITE_URL", "https://ucp.dev/")
   base_path = urlparse(site_url).path
   if not base_path.endswith("/"):
     base_path += "/"
@@ -256,7 +257,7 @@ def on_page_markdown(markdown, page, config, files):
   if mode == "root":
     # Rewrite relative links to specification/ to absolute URLs
     # pointing to latest spec.
-    site_url = os.environ.get("SITE_URL", config.get("site_url", "/"))
+    site_url = os.environ.get("SITE_URL", "https://ucp.dev/")
     base_path = urlparse(site_url).path
     if not base_path.endswith("/"):
       base_path += "/"
@@ -265,6 +266,10 @@ def on_page_markdown(markdown, page, config, files):
 
     def replace_link(match):
       path = match.group(1)
+      if path.endswith("index.md"):
+        path = path[:-8]
+      elif path.endswith(".md"):
+        path = path[:-3] + "/"
       return f"({target_base}{path})"
 
     # Pattern matches: (  prefix  specification/  path  )
@@ -274,6 +279,23 @@ def on_page_markdown(markdown, page, config, files):
 
     markdown = re.sub(pattern, replace_link, markdown)
 
+    # Rewrite relative links to assets/ to absolute URLs
+    # pointing to served assets folder.
+    target_base = f"{base_path}assets/"
+
+    def replace_asset_link(match):
+      path = match.group(1)
+      output = f"{target_base}{path}"
+      log.info(f"on_page_markdown::replace_asset_link: {path} -> {output}")
+      return output
+
+    # Pattern matches: (  prefix  assets/  path  )
+    # We capture the path AFTER assets/
+    # Matches: (../assets/foo.img) or (assets/foo.img)
+    pattern = r"\"(?:(?:\.\./)+|\./)?assets/([^)\"]+)\""
+
+    markdown = re.sub(pattern, replace_asset_link, markdown)
+
   return markdown
 
 
@@ -282,7 +304,7 @@ def on_post_build(config):
   # --- Redirects for excluded pages (Spec Mode) ---
   mode = os.environ.get("DOCS_MODE", "root")
   if mode == "spec":
-    site_url = os.environ.get("SITE_URL", config.get("site_url", "/"))
+    site_url = os.environ.get("SITE_URL", "https://ucp.dev/")
     base_path = urlparse(site_url).path
     if not base_path.endswith("/"):
       base_path += "/"
