@@ -785,18 +785,25 @@ Prior to completing checkout, the Platform may provide the Business with selecte
           ]
         },
         "payment_handlers": {
-          "com.shopify.shop_pay": [
+          "com.google.pay": [
             {
-              "id": "shop_pay_1234",
+              "id": "gpay_1234",
               "version": "2026-01-11",
               "config": {
-                "merchant_id": "shop_merchant_123"
+                "allowed_payment_methods": [
+                  {
+                    "type": "CARD",
+                    "parameters": {
+                      "allowed_card_networks": ["VISA", "MASTERCARD", "AMEX"]
+                    }
+                  }
+                ]
               }
             }
           ]
         }
       },
-      "id": "chk_1234567890",
+      "id": "chk_123456789",
       "status": "ready_for_complete",
       "currency": "USD",
       "line_items": [
