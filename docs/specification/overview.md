@@ -34,14 +34,16 @@ Schema notes:
 ## Discovery, Governance, and Negotiation
 
 UCP separates protocol version compatibility from capability negotiation.
-The business's protocol version is canonical — platforms **MUST** support
-the business's declared version to initiate a request. Businesses
-**MAY** advertise support for multiple protocol versions via the
-`supported_versions` field in their profile. Capability negotiation
-follows a server-selects architecture where the business (server)
-determines the active capabilities from the intersection of both
-parties' declared capabilities. Both business and platform profiles can
-be cached by both parties, allowing efficient capability negotiation
+The business's profile at `/.well-known/ucp` describes capabilities for
+its current protocol version. Businesses that support older protocol
+versions **SHOULD** publish version-specific profiles and advertise them
+via the `supported_versions` field — a map from protocol version to
+profile URI, enabling platforms to discover the exact capabilities
+for a specific protocol version. Capability negotiation follows a
+server-selects architecture where the business (server) determines
+the active capabilities from the intersection of both parties'
+declared capabilities. Both business and platform profiles can be
+cached by both parties, allowing efficient capability negotiation
 within the normal request/response flow between platform and business.
 
 ### Namespace Governance
@@ -406,6 +408,11 @@ and payment handlers. The `signing_keys` array contains public keys (JWK format)
 used to verify signatures on webhooks and other authenticated messages from the
 business. See [Key Discovery](#key-discovery) for key lookup and resolution,
 and [Message Signatures](signatures.md) for signing mechanics.
+
+Businesses that support older protocol versions **SHOULD** include a
+`supported_versions` object mapping each older version to a
+version-specific profile URI. See [Protocol Version](#protocol-version)
+for details.
 
 #### Platform Profile
 
@@ -1693,36 +1700,64 @@ govern the semantics of each feature independently, as defined in
 
 #### Protocol Version
 
-The `version` field declares the implementation's current protocol
-version. Businesses **MAY** declare a `supported_versions` array
-listing the protocol versions they accept. When present,
-`supported_versions` **MUST** include the `version` value. When
-`supported_versions` is omitted, it implicitly signals that only
-the declared `version` is supported.
+The `version` field declares the business's current protocol version.
+The profile at `/.well-known/ucp` describes the capabilities, services,
+and payment handlers available at that version.
+
+Businesses that support older protocol versions **SHOULD** declare a
+`supported_versions` object mapping each older version to a profile
+URI. Each URI points to a complete, self-contained profile for that
+version — including its own capabilities, services, payment handlers,
+and signing keys. When `supported_versions` is omitted, only
+`version` is supported.
 
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
-    "supported_versions": ["2026-01-11", "2026-01-23"]
+    "version": "2026-01-23",
+    "supported_versions": {
+      "2026-01-11": "/.well-known/ucp/2026-01-11"
+    }
   }
 }
 ```
 
+##### Initial Service and Capability Discovery
+
+Platforms discover a business's capabilities through the following flow:
+
+1. Platform fetches `/.well-known/ucp` — this is the current version
+    profile.
+2. If the platform's protocol version matches `version`: use this
+    profile directly. Proceed to capability negotiation.
+3. If the platform's protocol version is a key in
+    `supported_versions`: fetch the profile at the mapped URI. This
+    profile describes the capabilities available at that protocol
+    version. Proceed to capability negotiation.
+4. Otherwise: the business does not support the platform's protocol
+    version. Platforms **SHOULD NOT** send requests with an incompatible
+    version; businesses **MUST** respond with a `version_unsupported`
+    error.
+
+Version-specific profiles are leaf documents — they describe exactly
+one protocol version and **MUST NOT** contain a `supported_versions`
+field.
+
+##### Request-Time Validation
+
 Businesses **MUST** validate the platform's protocol version on
 every request:
 
-1. Platform **MAY** fetch the business's `/.well-known/ucp` profile
-    to discover supported versions.
-2. Platform declares the protocol version it wants to use via the
+1. Platform declares the protocol version it uses via the
     `version` field in the profile referenced in the request.
-3. Business validates:
-    - If the platform's `version` appears in the business's
-        `supported_versions`: the request **MAY** proceed to
-        capability negotiation.
+2. Business validates:
+    - If the platform's `version` matches the business's `version`
+        or is a key in `supported_versions`: the request **MAY**
+        proceed to capability negotiation using the matching
+        version of the business profile.
     - Otherwise: Business **MUST** return a `version_unsupported`
         error.
-4. Businesses **MUST** include the negotiated protocol version in
+3. Businesses **MUST** include the negotiated protocol version in
     every response.
 
 Response with version confirmation:

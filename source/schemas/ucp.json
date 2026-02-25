@@ -53,7 +53,10 @@
       "type": "object",
       "required": ["version"],
       "properties": {
-        "version": { "$ref": "#/$defs/version" },
+        "version": {
+          "$ref": "#/$defs/version",
+          "description": "Protocol version this profile describes. The profile's capabilities, services, and payment handlers are defined for this version."
+        },
         "services": {
           "type": "object",
           "description": "Service registry keyed by reverse-domain name.",
@@ -123,10 +126,13 @@
           "required": ["services", "payment_handlers"],
           "properties": {
             "supported_versions": {
-              "type": "array",
-              "items": { "$ref": "#/$defs/version" },
-              "uniqueItems": true,
-              "description": "Protocol versions this business supports. Implicitly defaults to [version] when omitted. When present, MUST include the value of version."
+              "type": "object",
+              "description": "Previous protocol versions this business supports, mapped to profile URIs. Businesses that support older protocol versions SHOULD advertise each version and link to its profile. Each URI points to a complete, self-contained profile for that version. When omitted, only `version` is supported.",
+              "propertyNames": { "$ref": "#/$defs/version" },
+              "additionalProperties": {
+                "type": "string",
+                "format": "uri-reference"
+              }
             },
             "services": {
               "additionalProperties": {
