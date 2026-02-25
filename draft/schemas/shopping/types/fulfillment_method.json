@@ -16,7 +16,13 @@
       "description": "Unique fulfillment method identifier.",
       "ucp_request": {
         "create": "omit",
-        "update": "optional"
+        "update": {
+          "transition": {
+            "from": "required",
+            "to": "optional",
+            "description": "Id is becoming optional to support platforms signalling a change of fulfillment method type without knowing the specific id ahead of the transition."
+          }
+        }
       }
     },
     "type": {
