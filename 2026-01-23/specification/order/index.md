@@ -84,7 +84,7 @@ Expectations can be split, merged, or adjusted post-order. For example:
 | line_items    | Array\[[Order Line Item](/2026-01-23/specification/order/#order-line-item)\]            | **Yes**  | Immutable line items — source of truth for what was ordered.                                                                                 |
 | fulfillment   | object                                                                                  | **Yes**  | Fulfillment data: buyer expectations and what actually happened.                                                                             |
 | adjustments   | Array\[[Adjustment](/2026-01-23/specification/order/#adjustment)\]                      | No       | Append-only event log of money movements (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment. |
-| totals        | Array\[[Total](/2026-01-23/specification/order/#total)\]                                | **Yes**  | Different totals for the order.                                                                                                              |
+| totals        | Array\[[Total Response](/2026-01-23/specification/order/#total-response)\]              | **Yes**  | Different totals for the order.                                                                                                              |
 
 ### Order Line Item
 
@@ -387,7 +387,7 @@ The `signing_keys` array supports multiple keys to enable zero-downtime rotation
 
 | Name    | Type   | Required | Description                                                                                     |
 | ------- | ------ | -------- | ----------------------------------------------------------------------------------------------- |
-| version | string | **Yes**  | UCP version in YYYY-MM-DD format.Entity version in YYYY-MM-DD format.                           |
+| version | string | **Yes**  | Entity version in YYYY-MM-DD format.                                                            |
 | spec    | string | No       | URL to human-readable specification document.                                                   |
 | schema  | string | No       | URL to JSON Schema defining this entity's structure and payloads.                               |
 | id      | string | No       | Unique identifier for this entity instance. Used to disambiguate when multiple instances exist. |
@@ -408,5 +408,6 @@ The `signing_keys` array supports multiple keys to enable zero-downtime rotation
 | ---------------- | ------ | -------- | ------------------------------------------------------ |
 | version          | string | **Yes**  | UCP version in YYYY-MM-DD format.                      |
 | services         | object | No       | Service registry keyed by reverse-domain name.         |
-| capabilities     | any    | No       |                                                        |
+| capabilities     | object | No       | Capability registry keyed by reverse-domain name.      |
 | payment_handlers | object | No       | Payment handler registry keyed by reverse-domain name. |
+| capabilities     | any    | No       |                                                        |

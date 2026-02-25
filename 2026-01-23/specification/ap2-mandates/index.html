@@ -2061,9 +2061,9 @@ with <code>ap2.merchant_authorization</code> embedded in the response body.</p>
 <tbody>
 <tr>
 <td style="text-align: left;">ucp</td>
-<td style="text-align: left;"><a href="/2026-01-23/specification/checkout/#ucp-response-checkout-schema">UCP Response Checkout Schema</a></td>
+<td style="text-align: left;">any</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.</td>
+<td style="text-align: left;">UCP metadata for checkout responses.</td>
 </tr>
 <tr>
 <td style="text-align: left;">id</td>
@@ -2073,21 +2073,15 @@ with <code>ap2.merchant_authorization</code> embedded in the response body.</p>
 </tr>
 <tr>
 <td style="text-align: left;">line_items</td>
-<td style="text-align: left;">Array[<a href="/2026-01-23/specification/checkout/#line-item">Line Item</a>]</td>
+<td style="text-align: left;">Array[object]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">List of line items being checked out.</td>
 </tr>
 <tr>
 <td style="text-align: left;">buyer</td>
-<td style="text-align: left;"><a href="/2026-01-23/specification/checkout/#buyer">Buyer</a></td>
+<td style="text-align: left;">object</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Representation of the buyer.</td>
-</tr>
-<tr>
-<td style="text-align: left;">context</td>
-<td style="text-align: left;"><a href="/2026-01-23/specification/checkout/#context">Context</a></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Provisional buyer signals for relevance and localization: product availability, pricing, currency, tax, shipping, payment methods, and eligibility (e.g., student or affiliation discounts). Businesses SHOULD use these values when authoritative data (e.g., address) is absent, and MAY ignore unsupported values without returning errors. Context can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. Platforms SHOULD progressively enhance context throughout the buyer journey.</td>
 </tr>
 <tr>
 <td style="text-align: left;">status</td>
@@ -2103,19 +2097,19 @@ with <code>ap2.merchant_authorization</code> embedded in the response body.</p>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[<a href="/2026-01-23/specification/checkout/#total">Total</a>]</td>
+<td style="text-align: left;">Array[object]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Different cart totals.</td>
 </tr>
 <tr>
 <td style="text-align: left;">messages</td>
-<td style="text-align: left;">Array[<a href="/2026-01-23/specification/checkout/#message">Message</a>]</td>
+<td style="text-align: left;">Array[object]</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">List of messages with error and info about the checkout session state.</td>
 </tr>
 <tr>
 <td style="text-align: left;">links</td>
-<td style="text-align: left;">Array[<a href="/2026-01-23/specification/checkout/#link">Link</a>]</td>
+<td style="text-align: left;">Array[object]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.</td>
 </tr>
@@ -2133,13 +2127,13 @@ with <code>ap2.merchant_authorization</code> embedded in the response body.</p>
 </tr>
 <tr>
 <td style="text-align: left;">payment</td>
-<td style="text-align: left;"><a href="/2026-01-23/specification/checkout/#payment">Payment</a></td>
+<td style="text-align: left;">object</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Payment configuration containing handlers.</td>
 </tr>
 <tr>
 <td style="text-align: left;">order</td>
-<td style="text-align: left;"><a href="/2026-01-23/specification/checkout/#order-confirmation">Order Confirmation</a></td>
+<td style="text-align: left;">object</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Details about an order created for this checkout session.</td>
 </tr>
@@ -2231,7 +2225,7 @@ request:</p>
 <tbody>
 <tr>
 <td style="text-align: left;">checkout_mandate</td>
-<td style="text-align: left;"><a href="/2026-01-23/specification/ap2-mandates/#checkout-mandate">Checkout Mandate</a></td>
+<td style="text-align: left;">string</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">SD-JWT+kb proving user authorized this checkout.</td>
 </tr>
@@ -2332,7 +2326,7 @@ checkout.</p>
 <tbody>
 <tr>
 <td style="text-align: left;">merchant_authorization</td>
-<td style="text-align: left;"><a href="/2026-01-23/specification/ap2-mandates/#merchant-authorization">Merchant Authorization</a></td>
+<td style="text-align: left;">string</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Merchant's signature proving checkout terms are authentic.</td>
 </tr>
@@ -2355,7 +2349,7 @@ checkout.</p>
 <tbody>
 <tr>
 <td style="text-align: left;">checkout_mandate</td>
-<td style="text-align: left;"><a href="/2026-01-23/specification/ap2-mandates/#checkout-mandate">Checkout Mandate</a></td>
+<td style="text-align: left;">string</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">SD-JWT+kb proving user authorized this checkout.</td>
 </tr>

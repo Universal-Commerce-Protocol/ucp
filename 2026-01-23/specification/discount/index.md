@@ -43,22 +43,22 @@ When this capability is active, checkout is extended with a `discounts` object.
 
 ### Discounts Object
 
-| Name    | Type                                                                              | Required | Description                                                                                                |
-| ------- | --------------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------- |
-| codes   | Array[string]                                                                     | No       | Discount codes to apply. Case-insensitive. Replaces previously submitted codes. Send empty array to clear. |
-| applied | Array\[[Applied Discount](/2026-01-23/specification/discount/#applied-discount)\] | No       | Discounts successfully applied (code-based and automatic).                                                 |
+| Name    | Type          | Required | Description                                                                                                |
+| ------- | ------------- | -------- | ---------------------------------------------------------------------------------------------------------- |
+| codes   | Array[string] | No       | Discount codes to apply. Case-insensitive. Replaces previously submitted codes. Send empty array to clear. |
+| applied | Array[object] | No       | Discounts successfully applied (code-based and automatic).                                                 |
 
 ### Applied Discount
 
-| Name        | Type                                                                  | Required | Description                                                                                                                      |
-| ----------- | --------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| code        | string                                                                | No       | The discount code. Omitted for automatic discounts.                                                                              |
-| title       | string                                                                | **Yes**  | Human-readable discount name (e.g., 'Summer Sale 20% Off').                                                                      |
-| amount      | integer                                                               | **Yes**  | Total discount amount in minor (cents) currency units.                                                                           |
-| automatic   | boolean                                                               | No       | True if applied automatically by merchant rules (no code required).                                                              |
-| method      | string                                                                | No       | Allocation method. 'each' = applied independently per item. 'across' = split proportionally by value. **Enum:** `each`, `across` |
-| priority    | integer                                                               | No       | Stacking order for discount calculation. Lower numbers applied first (1 = first).                                                |
-| allocations | Array\[[Allocation](/2026-01-23/specification/discount/#allocation)\] | No       | Breakdown of where this discount was allocated. Sum of allocation amounts equals total amount.                                   |
+| Name        | Type          | Required | Description                                                                                                                      |
+| ----------- | ------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| code        | string        | No       | The discount code. Omitted for automatic discounts.                                                                              |
+| title       | string        | **Yes**  | Human-readable discount name (e.g., 'Summer Sale 20% Off').                                                                      |
+| amount      | integer       | **Yes**  | Total discount amount in minor (cents) currency units.                                                                           |
+| automatic   | boolean       | No       | True if applied automatically by merchant rules (no code required).                                                              |
+| method      | string        | No       | Allocation method. 'each' = applied independently per item. 'across' = split proportionally by value. **Enum:** `each`, `across` |
+| priority    | integer       | No       | Stacking order for discount calculation. Lower numbers applied first (1 = first).                                                |
+| allocations | Array[object] | No       | Breakdown of where this discount was allocated. Sum of allocation amounts equals total amount.                                   |
 
 ### Allocation
 

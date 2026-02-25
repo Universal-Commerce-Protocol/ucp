@@ -3992,7 +3992,7 @@ line items, totals, and buyer information.</p>
 </tr>
 <tr>
 <td style="text-align: left;">line_items</td>
-<td style="text-align: left;">Array[<a href="/2026-01-23/specification/checkout/#line-item">Line Item</a>]</td>
+<td style="text-align: left;">Array[<a href="/2026-01-23/specification/checkout/#line-item-response">Line Item Response</a>]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">List of line items being checked out.</td>
 </tr>
@@ -4001,12 +4001,6 @@ line items, totals, and buyer information.</p>
 <td style="text-align: left;"><a href="/2026-01-23/specification/checkout/#buyer">Buyer</a></td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Representation of the buyer.</td>
-</tr>
-<tr>
-<td style="text-align: left;">context</td>
-<td style="text-align: left;"><a href="/2026-01-23/specification/checkout/#context">Context</a></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Provisional buyer signals for relevance and localization: product availability, pricing, currency, tax, shipping, payment methods, and eligibility (e.g., student or affiliation discounts). Businesses SHOULD use these values when authoritative data (e.g., address) is absent, and MAY ignore unsupported values without returning errors. Context can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. Platforms SHOULD progressively enhance context throughout the buyer journey.</td>
 </tr>
 <tr>
 <td style="text-align: left;">status</td>
@@ -4022,7 +4016,7 @@ line items, totals, and buyer information.</p>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[<a href="/2026-01-23/specification/checkout/#total">Total</a>]</td>
+<td style="text-align: left;">Array[<a href="/2026-01-23/specification/checkout/#total-response">Total Response</a>]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Different cart totals.</td>
 </tr>
@@ -4121,7 +4115,7 @@ confirmation details.</p>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[<a href="/2026-01-23/specification/order/#total">Total</a>]</td>
+<td style="text-align: left;">Array[<a href="/2026-01-23/specification/order/#total-response">Total Response</a>]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Different totals for the order.</td>
 </tr>

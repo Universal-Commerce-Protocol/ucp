@@ -4234,7 +4234,7 @@ within the UCP.</p>
 <tbody>
 <tr>
 <td style="text-align: left;">merchant_authorization</td>
-<td style="text-align: left;"><a href="/2026-01-23/specification/reference/#merchant-authorization">Merchant Authorization</a></td>
+<td style="text-align: left;">string</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Merchant's signature proving checkout terms are authentic.</td>
 </tr>
@@ -4253,7 +4253,7 @@ within the UCP.</p>
 <tbody>
 <tr>
 <td style="text-align: left;">checkout_mandate</td>
-<td style="text-align: left;"><a href="/2026-01-23/specification/reference/#checkout-mandate">Checkout Mandate</a></td>
+<td style="text-align: left;">string</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">SD-JWT+kb proving user authorized this checkout.</td>
 </tr>
@@ -4272,9 +4272,9 @@ within the UCP.</p>
 <tbody>
 <tr>
 <td style="text-align: left;">ucp</td>
-<td style="text-align: left;"><a href="/2026-01-23/specification/reference/#ucp-response-checkout-schema">UCP Response Checkout Schema</a></td>
+<td style="text-align: left;">any</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.</td>
+<td style="text-align: left;">UCP metadata for checkout responses.</td>
 </tr>
 <tr>
 <td style="text-align: left;">id</td>
@@ -4284,21 +4284,15 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">line_items</td>
-<td style="text-align: left;">Array[<a href="/2026-01-23/specification/reference/#line-item">Line Item</a>]</td>
+<td style="text-align: left;">Array[object]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">List of line items being checked out.</td>
 </tr>
 <tr>
 <td style="text-align: left;">buyer</td>
-<td style="text-align: left;"><a href="/2026-01-23/specification/reference/#buyer">Buyer</a></td>
+<td style="text-align: left;">object</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Representation of the buyer.</td>
-</tr>
-<tr>
-<td style="text-align: left;">context</td>
-<td style="text-align: left;"><a href="/2026-01-23/specification/reference/#context">Context</a></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Provisional buyer signals for relevance and localization: product availability, pricing, currency, tax, shipping, payment methods, and eligibility (e.g., student or affiliation discounts). Businesses SHOULD use these values when authoritative data (e.g., address) is absent, and MAY ignore unsupported values without returning errors. Context can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. Platforms SHOULD progressively enhance context throughout the buyer journey.</td>
 </tr>
 <tr>
 <td style="text-align: left;">status</td>
@@ -4314,19 +4308,19 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[<a href="/2026-01-23/specification/reference/#total">Total</a>]</td>
+<td style="text-align: left;">Array[object]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Different cart totals.</td>
 </tr>
 <tr>
 <td style="text-align: left;">messages</td>
-<td style="text-align: left;">Array[<a href="/2026-01-23/specification/reference/#message">Message</a>]</td>
+<td style="text-align: left;">Array[object]</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">List of messages with error and info about the checkout session state.</td>
 </tr>
 <tr>
 <td style="text-align: left;">links</td>
-<td style="text-align: left;">Array[<a href="/2026-01-23/specification/reference/#link">Link</a>]</td>
+<td style="text-align: left;">Array[object]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.</td>
 </tr>
@@ -4344,13 +4338,13 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">payment</td>
-<td style="text-align: left;"><a href="/2026-01-23/specification/reference/#payment">Payment</a></td>
+<td style="text-align: left;">object</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Payment configuration containing handlers.</td>
 </tr>
 <tr>
 <td style="text-align: left;">order</td>
-<td style="text-align: left;"><a href="/2026-01-23/specification/reference/#order-confirmation">Order Confirmation</a></td>
+<td style="text-align: left;">object</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Details about an order created for this checkout session.</td>
 </tr>
@@ -4441,7 +4435,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">consent</td>
-<td style="text-align: left;"><a href="/2026-01-23/specification/reference/#consent">Consent</a></td>
+<td style="text-align: left;">object</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Consent tracking fields.</td>
 </tr>
@@ -4460,9 +4454,9 @@ within the UCP.</p>
 <tbody>
 <tr>
 <td style="text-align: left;">ucp</td>
-<td style="text-align: left;"><a href="/2026-01-23/specification/reference/#ucp-response-checkout-schema">UCP Response Checkout Schema</a></td>
+<td style="text-align: left;">any</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.</td>
+<td style="text-align: left;">UCP metadata for checkout responses.</td>
 </tr>
 <tr>
 <td style="text-align: left;">id</td>
@@ -4472,21 +4466,15 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">line_items</td>
-<td style="text-align: left;">Array[<a href="/2026-01-23/specification/reference/#line-item">Line Item</a>]</td>
+<td style="text-align: left;">Array[object]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">List of line items being checked out.</td>
 </tr>
 <tr>
 <td style="text-align: left;">buyer</td>
-<td style="text-align: left;"><a href="/2026-01-23/specification/reference/#buyer">Buyer</a></td>
+<td style="text-align: left;">object</td>
 <td style="text-align: left;">No</td>
-<td style="text-align: left;">Buyer with consent tracking.</td>
-</tr>
-<tr>
-<td style="text-align: left;">context</td>
-<td style="text-align: left;"><a href="/2026-01-23/specification/reference/#context">Context</a></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Provisional buyer signals for relevance and localization: product availability, pricing, currency, tax, shipping, payment methods, and eligibility (e.g., student or affiliation discounts). Businesses SHOULD use these values when authoritative data (e.g., address) is absent, and MAY ignore unsupported values without returning errors. Context can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. Platforms SHOULD progressively enhance context throughout the buyer journey.</td>
+<td style="text-align: left;">Representation of the buyer.</td>
 </tr>
 <tr>
 <td style="text-align: left;">status</td>
@@ -4502,19 +4490,19 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[<a href="/2026-01-23/specification/reference/#total">Total</a>]</td>
+<td style="text-align: left;">Array[object]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Different cart totals.</td>
 </tr>
 <tr>
 <td style="text-align: left;">messages</td>
-<td style="text-align: left;">Array[<a href="/2026-01-23/specification/reference/#message">Message</a>]</td>
+<td style="text-align: left;">Array[object]</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">List of messages with error and info about the checkout session state.</td>
 </tr>
 <tr>
 <td style="text-align: left;">links</td>
-<td style="text-align: left;">Array[<a href="/2026-01-23/specification/reference/#link">Link</a>]</td>
+<td style="text-align: left;">Array[object]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.</td>
 </tr>
@@ -4532,15 +4520,21 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">payment</td>
-<td style="text-align: left;"><a href="/2026-01-23/specification/reference/#payment">Payment</a></td>
+<td style="text-align: left;">object</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Payment configuration containing handlers.</td>
 </tr>
 <tr>
 <td style="text-align: left;">order</td>
-<td style="text-align: left;"><a href="/2026-01-23/specification/reference/#order-confirmation">Order Confirmation</a></td>
+<td style="text-align: left;">object</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Details about an order created for this checkout session.</td>
+</tr>
+<tr>
+<td style="text-align: left;">buyer</td>
+<td style="text-align: left;">any</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Buyer with consent tracking.</td>
 </tr>
 </tbody>
 </table>
@@ -4620,7 +4614,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">allocations</td>
-<td style="text-align: left;">Array[<a href="/2026-01-23/specification/reference/#allocation">Allocation</a>]</td>
+<td style="text-align: left;">Array[object]</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Breakdown of where this discount was allocated. Sum of allocation amounts equals total amount.</td>
 </tr>
@@ -4645,7 +4639,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">applied</td>
-<td style="text-align: left;">Array[<a href="/2026-01-23/specification/reference/#applied-discount">Applied Discount</a>]</td>
+<td style="text-align: left;">Array[object]</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Discounts successfully applied (code-based and automatic).</td>
 </tr>
@@ -4664,9 +4658,9 @@ within the UCP.</p>
 <tbody>
 <tr>
 <td style="text-align: left;">ucp</td>
-<td style="text-align: left;"><a href="/2026-01-23/specification/reference/#ucp-response-checkout-schema">UCP Response Checkout Schema</a></td>
+<td style="text-align: left;">any</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.</td>
+<td style="text-align: left;">UCP metadata for checkout responses.</td>
 </tr>
 <tr>
 <td style="text-align: left;">id</td>
@@ -4676,21 +4670,15 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">line_items</td>
-<td style="text-align: left;">Array[<a href="/2026-01-23/specification/reference/#line-item">Line Item</a>]</td>
+<td style="text-align: left;">Array[object]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">List of line items being checked out.</td>
 </tr>
 <tr>
 <td style="text-align: left;">buyer</td>
-<td style="text-align: left;"><a href="/2026-01-23/specification/reference/#buyer">Buyer</a></td>
+<td style="text-align: left;">object</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Representation of the buyer.</td>
-</tr>
-<tr>
-<td style="text-align: left;">context</td>
-<td style="text-align: left;"><a href="/2026-01-23/specification/reference/#context">Context</a></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Provisional buyer signals for relevance and localization: product availability, pricing, currency, tax, shipping, payment methods, and eligibility (e.g., student or affiliation discounts). Businesses SHOULD use these values when authoritative data (e.g., address) is absent, and MAY ignore unsupported values without returning errors. Context can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. Platforms SHOULD progressively enhance context throughout the buyer journey.</td>
 </tr>
 <tr>
 <td style="text-align: left;">status</td>
@@ -4706,19 +4694,19 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[<a href="/2026-01-23/specification/reference/#total">Total</a>]</td>
+<td style="text-align: left;">Array[object]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Different cart totals.</td>
 </tr>
 <tr>
 <td style="text-align: left;">messages</td>
-<td style="text-align: left;">Array[<a href="/2026-01-23/specification/reference/#message">Message</a>]</td>
+<td style="text-align: left;">Array[object]</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">List of messages with error and info about the checkout session state.</td>
 </tr>
 <tr>
 <td style="text-align: left;">links</td>
-<td style="text-align: left;">Array[<a href="/2026-01-23/specification/reference/#link">Link</a>]</td>
+<td style="text-align: left;">Array[object]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.</td>
 </tr>
@@ -4736,21 +4724,21 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">payment</td>
-<td style="text-align: left;"><a href="/2026-01-23/specification/reference/#payment">Payment</a></td>
+<td style="text-align: left;">object</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Payment configuration containing handlers.</td>
 </tr>
 <tr>
 <td style="text-align: left;">order</td>
-<td style="text-align: left;"><a href="/2026-01-23/specification/reference/#order-confirmation">Order Confirmation</a></td>
+<td style="text-align: left;">object</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Details about an order created for this checkout session.</td>
 </tr>
 <tr>
 <td style="text-align: left;">discounts</td>
-<td style="text-align: left;"><a href="/2026-01-23/specification/reference/#discounts-object">Discounts Object</a></td>
+<td style="text-align: left;">object</td>
 <td style="text-align: left;">No</td>
-<td style="text-align: left;"></td>
+<td style="text-align: left;">Discount codes input and applied discounts output.</td>
 </tr>
 </tbody>
 </table>
@@ -4805,7 +4793,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[<a href="/2026-01-23/specification/reference/#total">Total</a>]</td>
+<td style="text-align: left;">Array[object]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Fulfillment option totals breakdown.</td>
 </tr>
@@ -4836,7 +4824,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">options</td>
-<td style="text-align: left;">Array[<a href="/2026-01-23/specification/reference/#fulfillment-option">Fulfillment Option</a>]</td>
+<td style="text-align: left;">Array[object]</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Available fulfillment options for this group.</td>
 </tr>
@@ -4879,7 +4867,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">destinations</td>
-<td style="text-align: left;">Array[<a href="/2026-01-23/specification/reference/#fulfillment-destination">Fulfillment Destination</a>]</td>
+<td style="text-align: left;">Array[object]</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Available destinations. For shipping: addresses. For pickup: retail locations.</td>
 </tr>
@@ -4891,7 +4879,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">groups</td>
-<td style="text-align: left;">Array[<a href="/2026-01-23/specification/reference/#fulfillment-group">Fulfillment Group</a>]</td>
+<td style="text-align: left;">Array[object]</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Fulfillment groups for selecting options. Agent sets selected_option_id on groups to choose shipping method.</td>
 </tr>
@@ -4947,13 +4935,13 @@ within the UCP.</p>
 <tbody>
 <tr>
 <td style="text-align: left;">methods</td>
-<td style="text-align: left;">Array[<a href="/2026-01-23/specification/reference/#fulfillment-method">Fulfillment Method</a>]</td>
+<td style="text-align: left;">Array[object]</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Fulfillment methods for cart items.</td>
 </tr>
 <tr>
 <td style="text-align: left;">available_methods</td>
-<td style="text-align: left;">Array[<a href="/2026-01-23/specification/reference/#fulfillment-available-method">Fulfillment Available Method</a>]</td>
+<td style="text-align: left;">Array[object]</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Inventory availability hints.</td>
 </tr>
@@ -4972,9 +4960,9 @@ within the UCP.</p>
 <tbody>
 <tr>
 <td style="text-align: left;">ucp</td>
-<td style="text-align: left;"><a href="/2026-01-23/specification/reference/#ucp-response-checkout-schema">UCP Response Checkout Schema</a></td>
+<td style="text-align: left;">any</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.</td>
+<td style="text-align: left;">UCP metadata for checkout responses.</td>
 </tr>
 <tr>
 <td style="text-align: left;">id</td>
@@ -4984,21 +4972,15 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">line_items</td>
-<td style="text-align: left;">Array[<a href="/2026-01-23/specification/reference/#line-item">Line Item</a>]</td>
+<td style="text-align: left;">Array[object]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">List of line items being checked out.</td>
 </tr>
 <tr>
 <td style="text-align: left;">buyer</td>
-<td style="text-align: left;"><a href="/2026-01-23/specification/reference/#buyer">Buyer</a></td>
+<td style="text-align: left;">object</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Representation of the buyer.</td>
-</tr>
-<tr>
-<td style="text-align: left;">context</td>
-<td style="text-align: left;"><a href="/2026-01-23/specification/reference/#context">Context</a></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Provisional buyer signals for relevance and localization: product availability, pricing, currency, tax, shipping, payment methods, and eligibility (e.g., student or affiliation discounts). Businesses SHOULD use these values when authoritative data (e.g., address) is absent, and MAY ignore unsupported values without returning errors. Context can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. Platforms SHOULD progressively enhance context throughout the buyer journey.</td>
 </tr>
 <tr>
 <td style="text-align: left;">status</td>
@@ -5014,19 +4996,19 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[<a href="/2026-01-23/specification/reference/#total">Total</a>]</td>
+<td style="text-align: left;">Array[object]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Different cart totals.</td>
 </tr>
 <tr>
 <td style="text-align: left;">messages</td>
-<td style="text-align: left;">Array[<a href="/2026-01-23/specification/reference/#message">Message</a>]</td>
+<td style="text-align: left;">Array[object]</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">List of messages with error and info about the checkout session state.</td>
 </tr>
 <tr>
 <td style="text-align: left;">links</td>
-<td style="text-align: left;">Array[<a href="/2026-01-23/specification/reference/#link">Link</a>]</td>
+<td style="text-align: left;">Array[object]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.</td>
 </tr>
@@ -5044,19 +5026,19 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">payment</td>
-<td style="text-align: left;"><a href="/2026-01-23/specification/reference/#payment">Payment</a></td>
+<td style="text-align: left;">object</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Payment configuration containing handlers.</td>
 </tr>
 <tr>
 <td style="text-align: left;">order</td>
-<td style="text-align: left;"><a href="/2026-01-23/specification/reference/#order-confirmation">Order Confirmation</a></td>
+<td style="text-align: left;">object</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Details about an order created for this checkout session.</td>
 </tr>
 <tr>
 <td style="text-align: left;">fulfillment</td>
-<td style="text-align: left;"><a href="/2026-01-23/specification/reference/#fulfillment">Fulfillment</a></td>
+<td style="text-align: left;">object</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Fulfillment details.</td>
 </tr>
@@ -5085,6 +5067,24 @@ and responses.</p>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">UCP version in YYYY-MM-DD format.</td>
+</tr>
+<tr>
+<td style="text-align: left;">services</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Service registry keyed by reverse-domain name.</td>
+</tr>
+<tr>
+<td style="text-align: left;">capabilities</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Capability registry keyed by reverse-domain name.</td>
+</tr>
+<tr>
+<td style="text-align: left;">payment_handlers</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Payment handler registry keyed by reverse-domain name.</td>
 </tr>
 <tr>
 <td style="text-align: left;">services</td>
@@ -5126,6 +5126,24 @@ and responses.</p>
 </tr>
 <tr>
 <td style="text-align: left;">services</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Service registry keyed by reverse-domain name.</td>
+</tr>
+<tr>
+<td style="text-align: left;">capabilities</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Capability registry keyed by reverse-domain name.</td>
+</tr>
+<tr>
+<td style="text-align: left;">payment_handlers</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Payment handler registry keyed by reverse-domain name.</td>
+</tr>
+<tr>
+<td style="text-align: left;">services</td>
 <td style="text-align: left;">any</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;"></td>
@@ -5161,6 +5179,24 @@ and responses.</p>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">UCP version in YYYY-MM-DD format.</td>
+</tr>
+<tr>
+<td style="text-align: left;">services</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Service registry keyed by reverse-domain name.</td>
+</tr>
+<tr>
+<td style="text-align: left;">capabilities</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Capability registry keyed by reverse-domain name.</td>
+</tr>
+<tr>
+<td style="text-align: left;">payment_handlers</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Payment handler registry keyed by reverse-domain name.</td>
 </tr>
 <tr>
 <td style="text-align: left;">services</td>
@@ -5208,15 +5244,21 @@ and responses.</p>
 </tr>
 <tr>
 <td style="text-align: left;">capabilities</td>
-<td style="text-align: left;">any</td>
+<td style="text-align: left;">object</td>
 <td style="text-align: left;">No</td>
-<td style="text-align: left;"></td>
+<td style="text-align: left;">Capability registry keyed by reverse-domain name.</td>
 </tr>
 <tr>
 <td style="text-align: left;">payment_handlers</td>
 <td style="text-align: left;">object</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Payment handler registry keyed by reverse-domain name.</td>
+</tr>
+<tr>
+<td style="text-align: left;">capabilities</td>
+<td style="text-align: left;">any</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;"></td>
 </tr>
 </tbody>
 </table>
@@ -5239,8 +5281,8 @@ different required fields in each context.</p>
 <tr>
 <td style="text-align: left;">version</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">UCP version in YYYY-MM-DD format.Entity version in YYYY-MM-DD format.</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Entity version in YYYY-MM-DD format.</td>
 </tr>
 <tr>
 <td style="text-align: left;">spec</td>
@@ -5290,7 +5332,7 @@ different required fields in each context.</p>
 <td style="text-align: left;">version</td>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">UCP version in YYYY-MM-DD format.Entity version in YYYY-MM-DD format.</td>
+<td style="text-align: left;">Entity version in YYYY-MM-DD format.</td>
 </tr>
 <tr>
 <td style="text-align: left;">spec</td>

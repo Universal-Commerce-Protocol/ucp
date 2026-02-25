@@ -126,7 +126,7 @@ A **capability** is a feature within a service. It declares what functionality i
 
 | Name    | Type   | Required | Description                                                                                     |
 | ------- | ------ | -------- | ----------------------------------------------------------------------------------------------- |
-| version | string | **Yes**  | UCP version in YYYY-MM-DD format.Entity version in YYYY-MM-DD format.                           |
+| version | string | No       | Entity version in YYYY-MM-DD format.                                                            |
 | spec    | string | **Yes**  | URL to human-readable specification document.                                                   |
 | schema  | string | **Yes**  | URL to JSON Schema defining this entity's structure and payloads.                               |
 | id      | string | No       | Unique identifier for this entity instance. Used to disambiguate when multiple instances exist. |
