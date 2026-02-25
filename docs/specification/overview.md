@@ -1038,18 +1038,22 @@ within UCP: **Negotiation**, **Acquisition**, and **Completion**.
 
 ### Payment Qualifiers
 
-Prior to completing checkout, the Platform **MAY** provide the Business with selected payment instrument hints. These hints allow the Business to apply to the checkout session the expected benefits the selected payment instrument qualifies the Buyer for.
+Prior to completing checkout, the Platform **MAY** provide the Business with selected payment instrument *hints*. These hints allow the Business to apply to the checkout session the expected benefits the selected payment instrument qualifies the Buyer for. This gives the user a more accurate preview of the final order total before they commit to the purchase.
 
-Payment instruments **MAY** include a `qualifiers` array: opaque, namespaced strings that indicate benefit eligibility associated with the selected instrument.  The meaning of qualifier values (and how they are derived) is communicated between the Business and Platform out of band (for example, via offline agreement on BIN ranges or program identifiers).
+Payment instruments **MAY** include a `qualifiers` array: opaque, namespaced strings that hint benefit eligibility associated with the selected instrument.  The meaning of qualifier values, and how they are derived, is communicated between the Business and Platform out of band (for example, via offline agreement on BIN ranges or program identifiers).
 
-Qualifiers are hints, not proofs:
+**Qualifier Strings:**
 
-- Qualifier strings **SHOULD** use reverse-domain naming to avoid collisions and make authority explicit.
+- Qualifier strings **SHOULD** use reverse-domain naming to avoid collisions.
 - Qualifiers strings **MUST NOT** contain sensitive payment attributes such as PAN, BIN, PII, or user-unique identifiers.
 - Qualifiers strings **SHOULD** be coarse-grained program identifiers.
-- When the Platform provides qualifiers and the Business applies benefits based on them, the Business **SHOULD** fail checkout if the selected payment instrument presented during checkout completion does not meet the hinted qualifications.
-- Businesses **SHOULD** treat unknown qualifiers as no-ops.
-- Businesses **SHOULD NOT** fail checkout solely because a qualifier is unrecognized.
+
+**Qualifier Semantics:**
+
+- Qualifiers are hints and **MUST NOT** be treated as proof of eligibility.
+- The Business **MUST NOT** grant final or irreversible benefits solely due to qualifiers.
+- The Business **MUST** determine benefit eligibility from the completion payment instrument and credential, not from qualifiers.
+- The Business **SHOULD** return an error during checkout completion if the provided qualifiers did not match the final payment instrument's eligibility.
 
 ### Payment Handlers
 
