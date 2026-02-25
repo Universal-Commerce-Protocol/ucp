@@ -361,6 +361,14 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
           "version": "2026-01-11",
           "spec": "https://example.com/specs/payments/processor_tokenizer",
           "schema": "https://example.com/specs/payments/merchant_tokenizer.json",
+          "available_instruments": [
+            {
+              "type": "card",
+              "constraints": {
+                "brands": ["visa", "mastercard", "amex"]
+              }
+            }
+          ],
           "config": {
             "type": "CARD",
             "tokenization_specification": {
@@ -456,7 +464,10 @@ example:
           "id": "shop_pay_1234",
           "version": "2026-01-11",
           "spec": "https://shopify.dev/ucp/shop-pay-handler",
-          "schema": "https://shopify.dev/ucp/schemas/shop-pay-config.json"
+          "schema": "https://shopify.dev/ucp/schemas/shop-pay-config.json",
+          "available_instruments": [
+            {"type": "shop_pay"}
+          ]
         }
       ],
       "dev.ucp.processor_tokenizer": [
@@ -464,7 +475,10 @@ example:
           "id": "processor_tokenizer",
           "version": "2026-01-11",
           "spec": "https://example.com/specs/payments/processor_tokenizer-payment",
-          "schema": "https://ucp.dev/schemas/payments/delegate-payment.json"
+          "schema": "https://ucp.dev/schemas/payments/delegate-payment.json",
+          "available_instruments": [
+            {"type": "card", "constraints": {"brands": ["visa", "mastercard"]}}
+          ]
         }
       ]
     }
@@ -797,7 +811,7 @@ The `capabilities` registry in responses indicates active capabilities:
     },
     "payment_handlers": {
       "com.example.processor_tokenizer": [
-        {"id": "processor_tokenizer", "version": "2026-01-11"}
+        {"id": "processor_tokenizer", "version": "2026-01-11", "available_instruments": [{"type": "card"}]}
       ]
     }
   },
@@ -1056,6 +1070,17 @@ governing body.
 the context of the cart (e.g., removing "Buy Now Pay Later" for subscription
 items, or filtering regional methods based on shipping address).
 
+**Available Instrument Resolution:** Within each active handler, both the
+platform and the business independently advertise `available_instruments` — the
+set of instrument types and constraints each party supports. The business is
+responsible for resolving these into an authoritative value in the checkout
+response. The platform's declaration (from its profile) signals what it can
+handle; the business intersects that with its own `business_schema` declaration
+and cart context, then returns the resolved result. Platforms **MUST** treat the
+`available_instruments` in the response as authoritative for that checkout. See
+the [Payment Handler Guide](payment-handler-guide.md#resolving-available_instruments)
+for the full resolution semantics.
+
 ### Risk Signals
 
 To aid in fraud assessment, the Platform **MAY** include additional risk signals
@@ -1130,6 +1155,9 @@ an encrypted payment token.
         {
           "id": "shop_pay_1234",
           "version": "2026-01-11",
+          "available_instruments": [
+            {"type": "shop_pay"}
+          ],
           "config": {
             "shop_id": "shopify-559128571",
             "environment": "production"
@@ -1207,6 +1235,14 @@ request a challenge.
           "version": "2026-01-11",
           "spec": "https://example.com/specs/tokenizer",
           "schema": "https://example.com/schemas/tokenizer.json",
+          "available_instruments": [
+            {
+              "type": "card",
+              "constraints": {
+                "brands": ["visa", "mastercard"]
+              }
+            }
+          ],
           "config": {
             "token_url": "https://api.psp.com/tokens",
             "public_key": "pk_123"
@@ -1283,7 +1319,10 @@ session token, the agent generates cryptographic mandates.
           "id": "ap2_234352",
           "version": "2026-01-11",
           "spec": "https://ucp.dev/specs/ap2-handler",
-          "schema": "https://ucp.dev/schemas/ap2-handler.json"
+          "schema": "https://ucp.dev/schemas/ap2-handler.json",
+          "available_instruments": [
+            {"type": "ap2_mandate"}
+          ]
         }
       ]
     }

@@ -203,6 +203,14 @@ credential type (e.g., PCI DSS for cards).
           "version": "2026-01-11",
           "spec": "https://platform.example.com/ucp/handler.json",
           "schema": "https://platform.example.com/ucp/handler/schema.json",
+          "available_instruments": [
+            {
+              "type": "card",
+              "constraints": {
+                "brands": ["visa", "mastercard"]
+              }
+            }
+          ],
           "config": {
             "environment": "production",
             "business_id": "business_abc123"
@@ -228,10 +236,20 @@ The response config includes runtime token lifecycle information.
 
 ```json
 {
+  "id": "platform_wallet",
+  "version": "2026-01-11",
+  "available_instruments": [
+    {
+      "type": "card",
+      "constraints": {
+        "brands": ["visa", "mastercard"]
+      }
+    }
+  ],
   "config": {
     "environment": "production",
     "business_id": "business_abc123",
-    "token_ttl_seconds": 900,
+    "token_ttl_seconds": 900
   }
 }
 ```
@@ -316,6 +334,14 @@ registry using `platform_config`.
           "version": "2026-01-11",
           "spec": "https://platform.example.com/ucp/handler.json",
           "schema": "https://platform.example.com/ucp/handler/schema.json",
+          "available_instruments": [
+            {
+              "type": "card",
+              "constraints": {
+                "brands": ["visa", "mastercard", "amex", "discover"]
+              }
+            }
+          ],
           "config": {
             "environment": "production",
             "platform_id": "platform_abc123",
