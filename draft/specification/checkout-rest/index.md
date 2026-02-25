@@ -70,6 +70,9 @@ Content-Type: application/json
         {
           "id": "shop_pay_1234",
           "version": "2026-01-11",
+          "available_instruments": [
+            {"type": "shop_pay"}
+          ],
           "config": {
             "merchant_id": "shop_merchant_123"
           }
@@ -189,6 +192,9 @@ Content-Type: application/json
         {
           "id": "shop_pay_1234",
           "version": "2026-01-11",
+          "available_instruments": [
+            {"type": "shop_pay"}
+          ],
           "config": {
             "merchant_id": "shop_merchant_123"
           }
@@ -535,6 +541,9 @@ Content-Type: application/json
         {
           "id": "shop_pay_1234",
           "version": "2026-01-11",
+          "available_instruments": [
+            {"type": "shop_pay"}
+          ],
           "config": {
             "merchant_id": "shop_merchant_123"
           }
@@ -869,6 +878,9 @@ Content-Type: application/json
         {
           "id": "shop_pay_1234",
           "version": "2026-01-11",
+          "available_instruments": [
+            {"type": "shop_pay"}
+          ],
           "config": {
             "merchant_id": "shop_merchant_123"
           }

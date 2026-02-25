@@ -91,6 +91,14 @@ The business advertises their tokenization endpoint and identity during discover
           "version": "2026-01-11",
           "spec": "https://example.com/ucp/processor-tokenizer.json",
           "schema": "https://example.com/ucp/processor-tokenizer/schema.json",
+          "available_instruments": [
+            {
+              "type": "card",
+              "constraints": {
+                "brands": ["visa", "mastercard", "amex"]
+              }
+            }
+          ],
           "config": {
             "environment": "production",
             "business_id": "merchant_xyz789"
@@ -106,20 +114,28 @@ The business advertises their tokenization endpoint and identity during discover
 
 The response config includes runtime information about what's available for this checkout.
 
-| Field                | Type   | Required | Description                                  |
-| -------------------- | ------ | -------- | -------------------------------------------- |
-| `environment`        | string | Yes      | API environment used for this checkout       |
-| `business_id`        | string | Yes      | Business identifier                          |
-| `supported_networks` | array  | No       | Card networks supported for this transaction |
+| Field         | Type   | Required | Description                            |
+| ------------- | ------ | -------- | -------------------------------------- |
+| `environment` | string | Yes      | API environment used for this checkout |
+| `business_id` | string | Yes      | Business identifier                    |
 
 #### Example Response Config
 
 ```json
 {
+  "id": "processor_tokenizer",
+  "version": "2026-01-11",
+  "available_instruments": [
+    {
+      "type": "card",
+      "constraints": {
+        "brands": ["visa", "mastercard", "amex"]
+      }
+    }
+  ],
   "config": {
     "environment": "production",
-    "business_id": "merchant_xyz789",
-    "supported_networks": ["visa", "mastercard", "amex"]
+    "business_id": "merchant_xyz789"
   }
 }
 ```
@@ -154,6 +170,9 @@ Platform identifies the processor tokenizer handler and retrieves the business's
         {
           "id": "processor_tokenizer",
           "version": "2026-01-11",
+          "available_instruments": [
+            {"type": "card", "constraints": {"brands": ["visa", "mastercard", "amex"]}}
+          ],
           "config": {
             "environment": "production",
             "business_id": "merchant_xyz789"

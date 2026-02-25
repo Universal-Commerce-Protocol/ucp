@@ -1484,6 +1484,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#available-payment-instrument" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Available Payment Instrument
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#binding" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2415,6 +2426,17 @@
     <span class="md-ellipsis">
       
         Adjustment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#available-payment-instrument" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Available Payment Instrument
       
     </span>
   </a>
@@ -3567,6 +3589,32 @@ within the UCP.</p>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Human-readable reason or description (e.g., 'Defective item', 'Customer requested').</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="available-payment-instrument">Available Payment Instrument<a class="headerlink" href="#available-payment-instrument" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">type</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">The instrument type identifier (e.g., 'card', 'gift_card'). References an instrument schema's type constant.</td>
+</tr>
+<tr>
+<td style="text-align: left;">constraints</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Constraints on this instrument type. Structure depends on instrument type and active capabilities.</td>
 </tr>
 </tbody>
 </table>

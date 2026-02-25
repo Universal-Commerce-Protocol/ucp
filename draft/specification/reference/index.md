@@ -90,6 +90,15 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
+### Available Payment Instrument
+
+| Name        | Type   | Required | Description                                                                                                  |
+| ----------- | ------ | -------- | ------------------------------------------------------------------------------------------------------------ |
+| type        | string | **Yes**  | The instrument type identifier (e.g., 'card', 'gift_card'). References an instrument schema's type constant. |
+| constraints | object | No       | Constraints on this instrument type. Structure depends on instrument type and active capabilities.           |
+
+______________________________________________________________________
+
 ### Binding
 
 | Name        | Type                                                                 | Required | Description                                                                                                                                                                                    |
