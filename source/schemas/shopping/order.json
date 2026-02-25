@@ -84,7 +84,7 @@
     },
     "currency": {
       "type": "string",
-      "description": "ISO 4217 currency code reflecting the merchant's market determination. This needs to match the currency value used in during checkout."
+      "description": "ISO 4217 currency code. MUST match the currency from the originating checkout session."
     },
     "totals": {
       "type": "array",
