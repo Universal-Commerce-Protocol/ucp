@@ -1053,7 +1053,8 @@ Payment instruments **MAY** include a `qualifiers` array: opaque, namespaced str
 - Qualifiers are hints and **MUST NOT** be treated as proof of eligibility.
 - The Business **MUST NOT** grant final or irreversible benefits solely due to qualifiers.
 - The Business **MUST** determine benefit eligibility from the completion payment instrument and credential, not from qualifiers.
-- The Business **SHOULD** return an error during checkout completion if the provided qualifiers did not match the final payment instrument's eligibility.
+- The Business **SHOULD** return an error, using the [`invalid_qualifier`](checkout.md#standard-errors), during checkout completion if the provided qualifiers did not match the final payment instrument's eligibility.
+- When receiving `invalid_qualifier`, the Platform **SHOULD** update qualifiers, and **MUST** present the user with an opportunity to review benefits changes (e.g. discounts, totals, etc.).
 
 ### Payment Handlers
 
