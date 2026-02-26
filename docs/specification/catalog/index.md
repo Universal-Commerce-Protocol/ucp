@@ -24,6 +24,7 @@ This enables product discovery before checkout, supporting use cases like:
 * Free-text product search
 * Category and filter-based browsing
 * Batch product/variant retrieval by identifier
+* Single-product detail for purchase decisions
 * Price comparison across variants
 
 ## Capabilities
@@ -31,13 +32,13 @@ This enables product discovery before checkout, supporting use cases like:
 | Capability | Description |
 | :--- | :--- |
 | [`dev.ucp.shopping.catalog.search`](search.md) | Search for products using query text and filters. |
-| [`dev.ucp.shopping.catalog.lookup`](lookup.md) | Retrieve products or variants by identifier. |
+| [`dev.ucp.shopping.catalog.lookup`](lookup.md) | Retrieve products or variants by identifier. Supports batch lookup and single-product detail. |
 
 ## Key Concepts
 
 * **Product**: A catalog item with title, description, media, and one or more
   variants.
-* **Variant**: A purchasable item with specific option selections (e.g., "Blue /
+* **Variant**: A purchasable item with specific option values (e.g., "Blue /
   Large"), price, and availability.
 * **Price**: Price values include both amount (in minor currency units) and
   currency code, enabling multi-currency catalogs.
@@ -74,19 +75,31 @@ currency; response prices include explicit currency codes.
 A catalog item representing a sellable item with one or more purchasable variants.
 
 `media` and `variants` are ordered arrays. Businesses SHOULD return the most
-relevant variant and image first—default for lookups, best match based on query
-and context for search. Platforms SHOULD treat the first element as featured.
+relevant variant and image first. Platforms SHOULD treat the first element as
+featured.
+
+Variant cardinality varies by operation:
+
+* **Search**: Multiple products with one featured variant each.
+* **Batch Lookup**: Multiple products with variants matched by input
+  identifiers — see [Client Correlation](lookup.md#client-correlation).
+* **Get Product**: Single product with featured variant and a relevant
+  subset, filtered by option selections when provided.
 
 {{ schema_fields('types/product', 'catalog') }}
 
+Operation-specific extensions to the base product are defined in the
+[Lookup capability schema](lookup.md): `get_product` responses add
+`selected` (effective option selections after relaxation); `lookup_catalog`
+responses extend variants with `input` correlation.
+
 ### Variant
 
-A purchasable item with specific option selections, price, and availability.
+A purchasable item with specific option values, price, and availability.
 
-In lookup responses, each variant carries an `input` array for correlation:
-which request identifiers resolved to this variant, and whether the match
-was `exact` or `featured` (server-selected). See
-[Client Correlation](lookup.md#client-correlation) for details.
+Each variant carries an `options` array describing the option values that define
+it (e.g., Color: Blue, Size: Large). These are intrinsic to the variant—they
+describe what the variant IS, independent of user selections.
 
 `media` is an ordered array. Businesses SHOULD return the featured variant image
 as the first element. Platforms SHOULD treat the first element as featured.

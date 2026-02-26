@@ -49,7 +49,7 @@ Businesses advertise MCP transport availability through their UCP profile at
       },
       {
         "name": "dev.ucp.shopping.catalog.lookup",
-        "version": "2026-01-11",
+        "version": "2026-02-01",
         "spec": "https://ucp.dev/specification/catalog/lookup",
         "schema": "https://ucp.dev/schemas/shopping/catalog_lookup.json"
       }
@@ -96,7 +96,8 @@ version compatibility checking and capability negotiation.
 | Tool | Capability | Description |
 | :--- | :--- | :--- |
 | `search_catalog` | [Search](search.md) | Search for products. |
-| `lookup_catalog` | [Lookup](lookup.md) | Lookup one or more products or variants by identifier. |
+| `lookup_catalog` | [Lookup](lookup.md) | Batch lookup products or variants by identifier. |
+| `get_product` | [Lookup](lookup.md#get-product-get_product) | Get full details for a single product. |
 
 ### `search_catalog`
 
@@ -204,7 +205,7 @@ Maps to the [Catalog Search](search.md) capability.
                   "description": { "plain": "Size 10 variant" },
                   "price": { "amount": 12000, "currency": "USD" },
                   "availability": { "available": true },
-                  "selected_options": [
+                  "options": [
                     { "name": "Size", "label": "10" }
                   ],
                   "tags": ["running", "road", "neutral"],
@@ -295,7 +296,7 @@ The `catalog.ids` parameter accepts an array of identifiers and optional context
             "version": "2026-01-11",
             "capabilities": {
               "dev.ucp.shopping.catalog.lookup": [
-                {"version": "2026-01-11"}
+                {"version": "2026-02-01"}
               ]
             }
           },
@@ -384,10 +385,10 @@ response MAY include informational messages indicating which identifiers were no
   "result": {
     "structuredContent": {
       "ucp": {
-        "version": "2026-01-11",
+        "version": "2026-02-01",
         "capabilities": {
           "dev.ucp.shopping.catalog.lookup": [
-            {"version": "2026-01-11"}
+            {"version": "2026-02-01"}
           ]
         }
       },
@@ -418,6 +419,200 @@ response MAY include informational messages indicating which identifiers were no
   }
 }
 ```
+
+### `get_product`
+
+Maps to the [Catalog Lookup](lookup.md#get-product-get_product) capability. Returns a singular
+`product` object (not an array) for full product detail page rendering.
+
+#### Request
+
+{{ extension_schema_fields('catalog_lookup.json#/$defs/get_product_request', 'catalog-mcp') }}
+
+#### Response
+
+{{ extension_schema_fields('catalog_lookup.json#/$defs/get_product_response', 'catalog-mcp') }}
+
+#### Example: With Option Selection
+
+The user selected Color=Blue on a product with Color and Size options.
+The response includes availability signals on option values showing what's
+available given that selection.
+
+=== "Request"
+
+    ```json
+    {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "method": "tools/call",
+      "params": {
+        "name": "get_product",
+        "arguments": {
+          "meta": {
+            "ucp-agent": {
+              "profile": "https://platform.example/profiles/v2026-01/shopping-agent.json"
+            }
+          },
+          "catalog": {
+            "id": "prod_abc123",
+            "selected": [
+              { "name": "Color", "label": "Blue" }
+            ],
+            "preferences": ["Color", "Size"],
+            "context": {
+              "country": "US"
+            }
+          }
+        }
+      }
+    }
+    ```
+
+=== "Response"
+
+    ```json
+    {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "structuredContent": {
+          "ucp": {
+            "version": "2026-02-01",
+            "capabilities": {
+              "dev.ucp.shopping.catalog.lookup": [
+                {"version": "2026-02-01"}
+              ]
+            }
+          },
+          "product": {
+            "id": "prod_abc123",
+            "handle": "runner-pro",
+            "title": "Runner Pro",
+            "description": {
+              "plain": "Lightweight running shoes with responsive cushioning."
+            },
+            "url": "https://business.example.com/products/runner-pro",
+            "price_range": {
+              "min": { "amount": 12000, "currency": "USD" },
+              "max": { "amount": 15000, "currency": "USD" }
+            },
+            "media": [
+              {
+                "type": "image",
+                "url": "https://cdn.example.com/products/runner-pro-blue.jpg",
+                "alt_text": "Runner Pro in Blue"
+              }
+            ],
+            "options": [
+              {
+                "name": "Color",
+                "values": [
+                  {"label": "Blue", "available": true, "exists": true},
+                  {"label": "Red", "available": true, "exists": true},
+                  {"label": "Green", "available": false, "exists": true}
+                ]
+              },
+              {
+                "name": "Size",
+                "values": [
+                  {"label": "8", "available": true, "exists": true},
+                  {"label": "9", "available": true, "exists": true},
+                  {"label": "10", "available": true, "exists": true},
+                  {"label": "11", "available": false, "exists": false},
+                  {"label": "12", "available": true, "exists": true}
+                ]
+              }
+            ],
+            "selected": [
+              { "name": "Color", "label": "Blue" }
+            ],
+            "variants": [
+              {
+                "id": "var_abc123_blue_8",
+                "sku": "RP-BLU-08",
+                "title": "Blue / Size 8",
+                "description": { "plain": "Blue, Size 8" },
+                "price": { "amount": 12000, "currency": "USD" },
+                "availability": { "available": true },
+                "options": [
+                  { "name": "Color", "label": "Blue" },
+                  { "name": "Size", "label": "8" }
+                ]
+              },
+              {
+                "id": "var_abc123_blue_9",
+                "sku": "RP-BLU-09",
+                "title": "Blue / Size 9",
+                "description": { "plain": "Blue, Size 9" },
+                "price": { "amount": 12000, "currency": "USD" },
+                "availability": { "available": true },
+                "options": [
+                  { "name": "Color", "label": "Blue" },
+                  { "name": "Size", "label": "9" }
+                ]
+              },
+              {
+                "id": "var_abc123_blue_10",
+                "sku": "RP-BLU-10",
+                "title": "Blue / Size 10",
+                "description": { "plain": "Blue, Size 10" },
+                "price": { "amount": 12000, "currency": "USD" },
+                "availability": { "available": true },
+                "options": [
+                  { "name": "Color", "label": "Blue" },
+                  { "name": "Size", "label": "10" }
+                ]
+              },
+              {
+                "id": "var_abc123_blue_12",
+                "sku": "RP-BLU-12",
+                "title": "Blue / Size 12",
+                "description": { "plain": "Blue, Size 12" },
+                "price": { "amount": 15000, "currency": "USD" },
+                "availability": { "available": true },
+                "options": [
+                  { "name": "Color", "label": "Blue" },
+                  { "name": "Size", "label": "12" }
+                ]
+              }
+            ],
+            "rating": {
+              "value": 4.5,
+              "scale_max": 5,
+              "count": 128
+            }
+          }
+        }
+      }
+    }
+    ```
+
+In this response: Green is out of stock (`available: false, exists: true`),
+Size 11 doesn't exist in Blue (`exists: false`), and four Blue variants are
+returned matching the selection.
+
+#### Product Not Found
+
+When the identifier does not resolve to a product, return a JSON-RPC error:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "error": {
+    "code": -32602,
+    "message": "Product not found",
+    "data": {
+      "id": "prod_invalid"
+    }
+  }
+}
+```
+
+Unlike `lookup_catalog` (which returns partial results for batch requests),
+`get_product` is a single-resource operation. A missing product is an error,
+not a partial success.
 
 ## Error Handling
 
@@ -453,10 +648,10 @@ not found.
   "result": {
     "structuredContent": {
       "ucp": {
-        "version": "2026-01-11",
+        "version": "2026-02-01",
         "capabilities": {
           "dev.ucp.shopping.catalog.lookup": [
-            {"version": "2026-01-11"}
+            {"version": "2026-02-01"}
           ]
         }
       },
@@ -482,12 +677,16 @@ results.
 A conforming MCP transport implementation **MUST**:
 
 1. Implement JSON-RPC 2.0 protocol correctly.
-2. Provide both `search_catalog` and `lookup_catalog` tools.
+2. Provide `search_catalog`, `lookup_catalog`, and `get_product` tools.
 3. Require `catalog.query` parameter for `search_catalog`.
 4. Implement `lookup_catalog` per [Catalog Lookup](lookup.md) capability requirements.
-5. Use JSON-RPC errors for transport issues; use `messages` array for business outcomes.
-6. Return successful result for lookup requests; unknown identifiers result in fewer products returned (MAY include informational `not_found` messages).
-7. Validate tool inputs against UCP schemas.
-8. Return products with valid `Price` objects (amount + currency).
-9. Support cursor-based pagination with default limit of 10.
-10. Return `-32602` (Invalid params) for requests exceeding batch size limits.
+5. Implement `get_product` per [Catalog Lookup](lookup.md#get-product-get_product) capability requirements.
+6. Use JSON-RPC errors for transport issues; use `messages` array for business outcomes.
+7. Return successful result for lookup requests; unknown identifiers result in fewer products returned (MAY include informational `not_found` messages).
+8. Return JSON-RPC `-32602` error for `get_product` when the identifier is not found.
+9. Validate tool inputs against UCP schemas.
+10. Return products with valid `Price` objects (amount + currency).
+11. Support cursor-based pagination with default limit of 10.
+12. Return `-32602` (Invalid params) for requests exceeding batch size limits.
+13. Return one featured variant per product for `search_catalog` and `lookup_catalog` when looking up by product ID. When looking up by variant ID, return only the requested variant.
+14. When `get_product` includes `selected` options, return `available` and `exists` signals on option values.
