@@ -1,7 +1,8 @@
 #!/bin/bash
 set -e
 
-echo "$(date)"
+# When did we run this build?
+date
 
 # Ensure we are running from the project root (parent of scripts/)
 cd "$(dirname "$0")/.."
@@ -21,14 +22,14 @@ export PATH="$PROJECT_ROOT/.venv/bin:$PROJECT_ROOT/../ucp-schema/target/release:
 PURPLE='\033[1;35m'
 NC='\033[0m' # No Color
 echo "Using ucp-schema CLI: $(which ucp-schema)"
-UCPCLIVER=$(ucp-schema --version | sed 's/ucp-schema //')
-echo "Local ucp-schema version:  '$UCPCLIVER'"
-UCPCRATESVER=$(cargo search ucp-schema -q | sed 's/ucp-schema = "//' | sed 's/".*$//' )
-echo "Crates ucp-schema version: '$UCPCRATESVER'"
-if [[ $UCPCLIVER != $UCPCRATESVER ]]; then
+UCP_CLI_VERSION=$(ucp-schema --version | sed 's/ucp-schema //')
+echo "Local ucp-schema version:  '$UCP_CLI_VERSION'"
+UCP_CRATES_VERSION=$(cargo search ucp-schema -q | sed 's/ucp-schema = "//' | sed 's/".*$//' )
+echo "Crates ucp-schema version: '$UCP_CRATES_VERSION'"
+if [[ $UCP_CLI_VERSION != "$UCP_CRATES_VERSION" ]]; then
   while true; do
     echo -e "${PURPLE}*ucp-schema version mismatch*${NC}"
-    read -p " Continue? (y/n) " yn
+    read -r -p " Continue? (y/n) " yn
     case $yn in
       [Yy]* ) echo "proceed..."; break;;
       [Nn]* ) echo "exiting..."; exit;;
