@@ -1265,6 +1265,8 @@ rather than attempting to merge the new data with existing state.
 The address object uses the UCP
 [PostalAddress](site:specification/checkout/#postal-address) format:
 
+### Postal Address
+
 {{ schema_fields('postal_address', 'embedded-checkout') }}
 
 ## Security & Error Handling
@@ -1382,7 +1384,27 @@ account, or wallet credential) available to the buyer.
 
 {{ schema_fields('payment_instrument', 'embedded-checkout') }}
 
-### Payment Handler Response
+#### Selected Payment Instrument
+
+{{ extension_schema_fields('types/payment_instrument.json#/$defs/selected_payment_instrument', 'embedded-checkout') }}
+
+### Card Payment Instrument
+
+{{ schema_fields('types/card_payment_instrument', 'embedded-checkout') }}
+
+### Payment Credential
+
+{{ schema_fields('types/payment_credential', 'embedded-checkout') }}
+
+### Token Credential
+
+{{ schema_fields('types/token_credential_resp', 'embedded-checkout') }}
+
+### Card Credential
+
+{{ schema_fields('types/card_credential', 'embedded-checkout') }}
+
+### Payment Handler
 
 Represents the processor or wallet provider responsible for authenticating and
 processing a specific payment instrument (e.g., Google Pay, Stripe, or a Bank
