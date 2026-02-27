@@ -134,6 +134,7 @@ def _resolve_schema(
   else:
     raise RuntimeError(f"ucp-schema execution error: result = {result}")
 
+
 # Backward compatibility alias
 def _resolve_schema_bundled(
   schema_path: str | Path,
