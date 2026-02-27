@@ -24,18 +24,24 @@ NC='\033[0m' # No Color
 echo "Using ucp-schema CLI: $(which ucp-schema)"
 UCP_CLI_VERSION=$(ucp-schema --version | sed 's/ucp-schema //')
 echo "Local ucp-schema version:  '$UCP_CLI_VERSION'"
-UCP_CRATES_VERSION=$(cargo search ucp-schema -q | sed 's/ucp-schema = "//' | sed 's/".*$//' )
+UCP_CRATES_VERSION=$(cargo search ucp-schema -q | sed 's/ucp-schema = "//' | sed 's/".*$//')
 echo "Crates ucp-schema version: '$UCP_CRATES_VERSION'"
 if [[ $UCP_CLI_VERSION != "$UCP_CRATES_VERSION" ]]; then
-  while true; do
-    echo -e "${PURPLE}*ucp-schema version mismatch*${NC}"
-    read -r -p " Continue? (y/n) " yn
-    case $yn in
-      [Yy]* ) echo "proceed..."; break;;
-      [Nn]* ) echo "exiting..."; exit;;
-      * ) echo "invalid response";;
-    esac
-  done
+	while true; do
+		echo -e "${PURPLE}*ucp-schema version mismatch*${NC}"
+		read -r -p " Continue? (y/n) " yn
+		case $yn in
+		[Yy]*)
+			echo "proceed..."
+			break
+			;;
+		[Nn]*)
+			echo "exiting..."
+			exit
+			;;
+		*) echo "invalid response" ;;
+		esac
+	done
 fi
 
 if ! command -v mike >/dev/null 2>&1; then
