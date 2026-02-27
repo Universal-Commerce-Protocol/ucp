@@ -1054,6 +1054,14 @@ within UCP: **Negotiation**, **Acquisition**, and **Completion**.
 
 Prior to completing checkout, the Platform **MAY** provide the Business with selected payment instrument *hints*. These hints allow the Business to apply to the checkout session the expected benefits the selected payment instrument qualifies the Buyer for. This gives the user a more accurate preview of the final order total before they commit to the purchase.
 
+**Example Benefits:**
+
+- Co-branded Card Perks (e.g., instant discounts for using a specific brand's card).
+- Issuer-Funded Promotions (e.g., statement credits).
+- FX Fee Waivers for international transactions.
+- Promotional APRs or specialized financing terms.
+- Logistical Upgrades (e.g., expedited shipping for premium cardholders).
+
 Payment instruments **MAY** include a `qualifiers` array: opaque, namespaced strings that hint benefit eligibility associated with the selected instrument.  The meaning of qualifier values, and how they are derived, is communicated between the Business and Platform out of band (for example, via offline agreement on BIN ranges or program identifiers).
 
 **Qualifier Strings:**
