@@ -159,9 +159,9 @@ Examples: `refund`, `return`, `credit`, `price_adjustment`, `dispute`,
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "{{ ucp_version }}",
     "capabilities": {
-      "dev.ucp.shopping.order": [{"version": "2026-01-11"}]
+      "dev.ucp.shopping.order": [{"version": "{{ ucp_version }}"}]
     }
   },
   "id": "order_abc123",
@@ -281,7 +281,7 @@ platform's profile and uses it to send order lifecycle events.
 {
   "dev.ucp.shopping.order": [
     {
-      "version": "2026-01-11",
+      "version": "{{ ucp_version }}",
       "config": {
         "webhook_url": "https://platform.example.com/webhooks/ucp/orders"
       }

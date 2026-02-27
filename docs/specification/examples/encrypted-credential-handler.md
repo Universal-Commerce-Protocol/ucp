@@ -144,12 +144,12 @@ have their own compliance requirements.
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "{{ ucp_version }}",
     "payment_handlers": {
       "com.example.platform_encrypted": [
         {
           "id": "platform_encrypted",
-          "version": "2026-01-11",
+          "version": "{{ ucp_version }}",
           "spec": "https://platform.example.com/ucp/encrypted-handler.json",
           "schema": "https://platform.example.com/ucp/encrypted-handler/schema.json",
           "available_instruments": [
@@ -188,7 +188,7 @@ The response config includes information about the encryption used.
 ```json
 {
   "id": "platform_encrypted",
-  "version": "2026-01-11",
+  "version": "{{ ucp_version }}",
   "available_instruments": [
     {
       "type": "card",
@@ -254,12 +254,12 @@ registry using `platform_config`.
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "{{ ucp_version }}",
     "payment_handlers": {
       "com.example.platform_encrypted": [
         {
           "id": "platform_encrypted",
-          "version": "2026-01-11",
+          "version": "{{ ucp_version }}",
           "spec": "https://platform.example.com/ucp/encrypted-handler.json",
           "schema": "https://platform.example.com/ucp/encrypted-handler/schema.json",
           "available_instruments": [
