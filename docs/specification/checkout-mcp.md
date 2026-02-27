@@ -350,12 +350,13 @@ Maps to the [Create Checkout](checkout.md#create-checkout) operation.
       "id": 1,
       "result": {
         "structuredContent": {
-          "ucp": { "version": "2026-01-11" },
+          "ucp": { "version": "2026-01-11", "status": "error" },
           "messages": [
             {
               "type": "error",
               "code": "out_of_stock",
-              "content": "All requested items are currently out of stock."
+              "content": "All requested items are currently out of stock.",
+              "severity": "unrecoverable"
             }
           ],
           "continue_url": "https://merchant.com/"
@@ -689,13 +690,13 @@ JSON-RPC `result` with `structuredContent` containing the UCP envelope and `mess
   "id": 1,
   "result": {
     "structuredContent": {
-      "ucp": { "version": "2026-01-11" },
+      "ucp": { "version": "2026-01-11", "status": "error" },
       "messages": [
         {
           "type": "error",
           "code": "item_unavailable",
           "content": "Items are not available for purchase in your region.",
-          "severity": "requires_buyer_input",
+          "severity": "unrecoverable",
           "path": "$.line_items"
         }
       ],

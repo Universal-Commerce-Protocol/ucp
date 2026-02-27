@@ -230,12 +230,13 @@ Maps to the [Create Cart](cart.md#create-cart) operation.
       "id": 1,
       "result": {
         "structuredContent": {
-          "ucp": { "version": "2026-01-15" },
+          "ucp": { "version": "2026-01-15", "status": "error" },
           "messages": [
             {
               "type": "error",
               "code": "out_of_stock",
-              "content": "All requested items are currently out of stock."
+              "content": "All requested items are currently out of stock.",
+              "severity": "unrecoverable"
             }
           ],
           "continue_url": "https://merchant.com/"
@@ -353,17 +354,13 @@ Maps to the [Get Cart](cart.md#get-cart) operation.
       "id": 1,
       "result": {
         "structuredContent": {
-          "ucp": {
-            "version": "2026-01-15",
-            "capabilities": {
-              "dev.ucp.shopping.cart": [{ "version": "2026-01-15" }]
-            }
-          },
+          "ucp": { "version": "2026-01-15", "status": "error" },
           "messages": [
             {
               "type": "error",
               "code": "not_found",
-              "content": "Cart not found or has expired"
+              "content": "Cart not found or has expired.",
+              "severity": "unrecoverable"
             }
           ],
           "continue_url": "https://merchant.com/"
@@ -634,17 +631,13 @@ JSON-RPC `result` with `structuredContent` containing the UCP envelope and
   "id": 1,
   "result": {
     "structuredContent": {
-      "ucp": {
-        "version": "2026-01-11",
-        "capabilities": {
-          "dev.ucp.shopping.cart": [{"version": "2026-01-11"}]
-        }
-      },
+      "ucp": { "version": "2026-01-15", "status": "error" },
       "messages": [
         {
           "type": "error",
           "code": "not_found",
-          "content": "Cart not found or has expired"
+          "content": "Cart not found or has expired.",
+          "severity": "unrecoverable"
         }
       ],
       "continue_url": "https://merchant.com/"

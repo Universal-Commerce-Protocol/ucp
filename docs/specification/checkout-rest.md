@@ -178,12 +178,13 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
     Content-Type: application/json
 
     {
-      "ucp": { "version": "2026-01-11" },
+      "ucp": { "version": "2026-01-11", "status": "error" },
       "messages": [
         {
           "type": "error",
           "code": "out_of_stock",
-          "content": "All requested items are currently out of stock."
+          "content": "All requested items are currently out of stock.",
+          "severity": "unrecoverable"
         }
       ],
       "continue_url": "https://merchant.com/"
@@ -1320,12 +1321,13 @@ HTTP 200 and the UCP envelope containing `messages`
 
 ```json
 {
-  "ucp": { "version": "2026-01-11" },
+  "ucp": { "version": "2026-01-11", "status": "error" },
   "messages": [
     {
       "type": "error",
       "code": "item_unavailable",
-      "content": "All items are not available for purchase."
+      "content": "All items are not available for purchase.",
+      "severity": "unrecoverable"
     }
   ],
   "continue_url": "https://merchant.com/"

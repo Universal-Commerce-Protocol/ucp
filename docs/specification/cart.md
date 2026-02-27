@@ -134,12 +134,13 @@ no resource was created:
 
 ```json
 {
-  "ucp": { "version": "2026-01-15" },
+  "ucp": { "version": "2026-01-15", "status": "error" },
   "messages": [
     {
       "type": "error",
       "code": "out_of_stock",
-      "content": "All requested items are currently out of stock."
+      "content": "All requested items are currently out of stock.",
+      "severity": "unrecoverable"
     }
   ],
   "continue_url": "https://merchant.com/"

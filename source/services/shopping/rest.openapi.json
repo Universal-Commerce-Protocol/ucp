@@ -489,9 +489,6 @@
                 "schema": { "$ref": "#/components/schemas/cart_response" }
               }
             }
-          },
-          "404": {
-            "description": "Cart not found (cancelled, expired, or never existed)"
           }
         }
       },
