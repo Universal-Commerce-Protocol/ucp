@@ -33,9 +33,9 @@
       "type": "object",
       "description": "Display information for this payment instrument. Each payment instrument schema defines its specific display properties, as outlined by the payment handler."
     },
-    "qualifiers": {
+    "eligibility_hints": {
       "type": "array",
-      "description": "Opaque, namespaced qualifier strings from the Platform that hint to the Business the benefits to apply at checkout time, based on the selected payment instrument.",
+      "description": "Opaque, namespaced eligibility hint strings from the Platform that hint to the Business the benefits to apply at checkout time, based on the selected payment instrument.",
       "uniqueItems": true,
       "maxItems": 99,
       "items": {

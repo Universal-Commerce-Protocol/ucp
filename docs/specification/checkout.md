@@ -199,13 +199,13 @@ ELSE IF requires_buyer_review is not empty
 Standard errors are standardized error codes that platforms are expected to
 handle with specific, appropriate UX rather than generic error treatment.
 
-| Code                    | Description                                                                |
-| :---------------------- | :------------------------------------------------------------------------- |
-| `out_of_stock`          | Specific item or variant is unavailable                                    |
-| `item_unavailable`      | Item cannot be purchased (e.g. delisted)                                   |
-| `address_undeliverable` | Cannot deliver to the provided address                                     |
-| `payment_failed`        | Payment processing failed                                                  |
-| `invalid_qualifier`     | Submitted payment did not qualify for hinted qualifiers                    |
+| Code                       | Description                                           |
+|:---------------------------|:------------------------------------------------------|
+| `out_of_stock`             | Specific item or variant is unavailable               |
+| `item_unavailable`         | Item cannot be purchased \(e\.g\. delisted\)          |
+| `address_undeliverable`    | Cannot deliver to the provided address                |
+| `payment_failed`           | Payment processing failed                             |
+| `invalid_eligibility_hint` | Submitted payment is not eligible for hinted benefits |
 
 Businesses **SHOULD** mark standard errors with `severity: recoverable` to
 signal that platforms should provide appropriate UX (out-of-stock messaging,

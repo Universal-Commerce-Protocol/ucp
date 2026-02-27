@@ -770,7 +770,7 @@ Prior to completing checkout, the Platform may provide the Business with selecte
               "last_digits": "5678",
               "rich_text_description": "Google Pay •••• 5678"
             },
-            "qualifiers": [
+            "eligibility_hints": [
               "com.example.tender_a"
             ]
           }
@@ -918,7 +918,7 @@ Prior to completing checkout, the Platform may provide the Business with selecte
               "last_digits": "5678",
               "rich_text_description": "Google Pay •••• 5678"
             },
-            "qualifiers": [
+            "eligibility_hints": [
               "com.example.tender_a"
             ]
           }
@@ -954,7 +954,7 @@ place to set these expectations via `messages`.
               "card_art": "https://cart-art-1.html",
               "description": "Google Pay •••• 5678"
             },
-            "qualifiers": [
+            "eligibility_hints": [
               "com.example.tender_a"
             ],
             "billing_address": {
@@ -1120,7 +1120,7 @@ place to set these expectations via `messages`.
               "last_digits": "5678",
               "rich_text_description": "Google Pay •••• 5678"
             },
-            "qualifiers": [
+            "eligibility_hints": [
               "com.example.tender_a"
             ]
           }
