@@ -221,7 +221,7 @@ def check_links():
           continue
 
       # Check Anchor
-      if anchor_part:
+      if anchor_part and not target_file.name.endswith(".json"):
         ids = get_file_ids(target_file)
         if ids is None:
           continue

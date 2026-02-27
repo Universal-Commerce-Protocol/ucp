@@ -134,7 +134,7 @@ appended to this endpoint to form the complete URL.
 {
   "version": "2026-01-11",
   "transport": "rest",
-  "schema": "https://ucp.dev/services/shopping/openapi.json",
+  "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/rest.openapi.json",
   "endpoint": "https://business.example.com/api/v2"
 }
 ```
@@ -303,29 +303,29 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
       "dev.ucp.shopping": [
         {
           "version": "2026-01-11",
-          "spec": "https://ucp.dev/specification/overview",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview",
           "transport": "rest",
           "endpoint": "https://business.example.com/ucp/v1",
-          "schema": "https://ucp.dev/services/shopping/openapi.json"
+          "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/rest.openapi.json"
         },
         {
           "version": "2026-01-11",
-          "spec": "https://ucp.dev/specification/overview",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview",
           "transport": "mcp",
           "endpoint": "https://business.example.com/ucp/mcp",
-          "schema": "https://ucp.dev/services/shopping/mcp.openrpc.json"
+          "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/mcp.openrpc.json"
         },
         {
           "version": "2026-01-11",
-          "spec": "https://ucp.dev/specification/overview",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview",
           "transport": "a2a",
           "endpoint": "https://business.example.com/.well-known/agent-card.json"
         },
         {
           "version": "2026-01-11",
-          "spec": "https://ucp.dev/specification/overview",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview",
           "transport": "embedded",
-          "schema": "https://ucp.dev/services/shopping/embedded.openrpc.json"
+          "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/embedded.openrpc.json"
         }
       ]
     },
@@ -333,23 +333,23 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
       "dev.ucp.shopping.checkout": [
         {
           "version": "2026-01-11",
-          "spec": "https://ucp.dev/specification/checkout",
-          "schema": "https://ucp.dev/schemas/shopping/checkout.json"
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/checkout",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/checkout.json"
         }
       ],
       "dev.ucp.shopping.fulfillment": [
         {
           "version": "2026-01-11",
-          "spec": "https://ucp.dev/specification/fulfillment",
-          "schema": "https://ucp.dev/schemas/shopping/fulfillment.json",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/fulfillment",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json",
           "extends": "dev.ucp.shopping.checkout"
         }
       ],
       "dev.ucp.shopping.discount": [
         {
           "version": "2026-01-11",
-          "spec": "https://ucp.dev/specification/discount",
-          "schema": "https://ucp.dev/schemas/shopping/discount.json",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/discount",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/discount.json",
           "extends": "dev.ucp.shopping.checkout"
         }
       ]
@@ -417,9 +417,9 @@ example:
       "dev.ucp.shopping": [
         {
           "version": "2026-01-11",
-          "spec": "https://ucp.dev/specification/overview",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview",
           "transport": "rest",
-          "schema": "https://ucp.dev/services/shopping/openapi.json"
+          "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/rest.openapi.json"
         }
       ]
     },
@@ -427,23 +427,23 @@ example:
       "dev.ucp.shopping.checkout": [
         {
           "version": "2026-01-11",
-          "spec": "https://ucp.dev/specification/checkout",
-          "schema": "https://ucp.dev/schemas/shopping/checkout.json"
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/checkout",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/checkout.json"
         }
       ],
       "dev.ucp.shopping.fulfillment": [
         {
           "version": "2026-01-11",
-          "spec": "https://ucp.dev/specification/fulfillment",
-          "schema": "https://ucp.dev/schemas/shopping/fulfillment.json",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/fulfillment",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json",
           "extends": "dev.ucp.shopping.checkout"
         }
       ],
       "dev.ucp.shopping.order": [
         {
           "version": "2026-01-11",
-          "spec": "https://ucp.dev/specification/order",
-          "schema": "https://ucp.dev/schemas/shopping/order.json",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/order",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/order.json",
           "config": {
             "webhook_url": "https://platform.example.com/webhooks/ucp/orders"
           }
@@ -475,7 +475,7 @@ example:
           "id": "processor_tokenizer",
           "version": "2026-01-11",
           "spec": "https://example.com/specs/payments/processor_tokenizer-payment",
-          "schema": "https://ucp.dev/schemas/payments/delegate-payment.json",
+          "schema": "https://example.com/schemas/payments/delegate-payment.json",
           "available_instruments": [
             {"type": "card", "constraints": {"brands": ["visa", "mastercard"]}}
           ]
@@ -1315,8 +1315,8 @@ session token, the agent generates cryptographic mandates.
         {
           "id": "ap2_234352",
           "version": "2026-01-11",
-          "spec": "https://ucp.dev/specs/ap2-handler",
-          "schema": "https://ucp.dev/schemas/ap2-handler.json",
+          "spec": "https://example.com/specs/ap2-handler",
+          "schema": "https://example.com/schemas/ap2-handler.json",
           "available_instruments": [
             {"type": "ap2_mandate"}
           ]
@@ -1555,9 +1555,9 @@ UCP defines a set of standard capabilities:
 
 | Capability Name      | ID (URI)                                       | Description                                                                                                  |
 | :------------------- | :--------------------------------------------- | :----------------------------------------------------------------------------------------------------------- |
-| **Checkout**         | `{{ ucp_url }}/schemas/shopping/checkout.json` | Facilitates the creation and management of checkout sessions, including cart management and tax calculation. |
+| **Checkout**         | `{{ ucp_url }}/{{ ucp_version }}/schemas/shopping/checkout.json` | Facilitates the creation and management of checkout sessions, including cart management and tax calculation. |
 | **Identity Linking** | -                                              | Enables platforms to obtain authorization via OAuth 2.0 to perform actions on a user's behalf.               |
-| **Order**            | `{{ ucp_url }}/schemas/shopping/order.json`    | Allows businesses to push asynchronous updates about an order's lifecycle (shipping, delivery, returns).     |
+| **Order**            | `{{ ucp_url }}/{{ ucp_version }}/schemas/shopping/order.json`    | Allows businesses to push asynchronous updates about an order's lifecycle (shipping, delivery, returns).     |
 
 ### Definition & Extensions
 
