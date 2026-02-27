@@ -95,19 +95,19 @@ profile, they declare support for the Embedded Checkout Protocol.
     "services": {
         "dev.ucp.shopping": [
             {
-                "version": "2026-01-11",
+                "version": "{{ ucp_version }}",
                 "transport": "rest",
                 "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/rest.openapi.json",
                 "endpoint": "https://merchant.example.com/ucp/v1"
             },
             {
-                "version": "2026-01-11",
+                "version": "{{ ucp_version }}",
                 "transport": "mcp",
                 "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/mcp.openrpc.json",
                 "endpoint": "https://merchant.example.com/ucp/mcp"
             },
             {
-                "version": "2026-01-11",
+                "version": "{{ ucp_version }}",
                 "transport": "embedded",
                 "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/embedded.openrpc.json"
             }
@@ -134,11 +134,11 @@ indicate ECP availability and allowed delegations for a specific session.
     "status": "open",
     "continue_url": "https://merchant.example.com/checkout/abc123",
     "ucp": {
-        "version": "2026-01-11",
+        "version": "{{ ucp_version }}",
         "services": {
             "dev.ucp.shopping": [
                 {
-                    "version": "2026-01-11",
+                    "version": "{{ ucp_version }}",
                     "transport": "embedded",
                     "config": {
                         "delegate": ["payment.credential", "fulfillment.address_change"]

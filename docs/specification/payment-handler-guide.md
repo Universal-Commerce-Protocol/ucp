@@ -175,7 +175,7 @@ and desired configuration.
       "com.example.handler": [
         {
           "id": "processor_tokenizer_1234",
-          "version": "2026-01-11",
+          "version": "{{ ucp_version }}",
           "spec": "https://example.com/ucp/handler",
           "schema": "https://example.com/ucp/handler/schema.json",
           "available_instruments": [
@@ -216,7 +216,7 @@ and typically includes different configuration:
 ```json
 {
   "id": "processor_tokenizer_1234",
-  "version": "2026-01-11",
+  "version": "{{ ucp_version }}",
   "spec": "https://example.com/ucp/handler",
   "schema": "https://example.com/ucp/handler/schema.json",
   "available_instruments": [
@@ -239,7 +239,7 @@ and typically includes different configuration:
 ```json
 {
   "id": "platform_tokenizer_2345", // note: ids are for disambiguation, they may differ between business and platform
-  "version": "2026-01-11",
+  "version": "{{ ucp_version }}",
   "spec": "https://example.com/ucp/handler",
   "schema": "https://example.com/ucp/handler/schema.json",
   "available_instruments": [
@@ -262,7 +262,7 @@ and typically includes different configuration:
 ```json
 {
   "id": "processor_tokenizer_1234",
-  "version": "2026-01-11",
+  "version": "{{ ucp_version }}",
   "available_instruments": [
     {
       "type": "card",
@@ -334,7 +334,7 @@ Authors typically define each shape in its own file and reference them:
   "title": "Tokenizer Handler Schema",
   "description": "Schema for the com.example.tokenizer payment handler.",
   "name": "com.example.tokenizer",
-  "version": "2026-01-11",
+  "version": "{{ ucp_version }}",
 
   "$defs": {
     "tokenizer_token": { "$ref": "types/tokenizer_token.json" },
@@ -494,8 +494,8 @@ Each variant has its own config schema tailored to its context:
 
 **Base Instrument Schemas:**
 
-| Schema                                                                                                | Description                                                      |
-| :---------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------- |
+| Schema                                                                                     | Description                                                      |
+| :----------------------------------------------------------------------------------------- | :--------------------------------------------------------------- |
 | [`payment_instrument.json`](site:schemas/shopping/types/payment_instrument.json)           | Base: id, handler_id, type, billing_address, credential, display |
 | [`card_payment_instrument.json`](site:schemas/shopping/types/card_payment_instrument.json) | Extends base with display: brand, last_digits, expiry, card art  |
 
@@ -511,10 +511,10 @@ specifies what constraints are valid for that instrument type. For example,
 [`card_payment_instrument.json`](site:schemas/shopping/types/card_payment_instrument.json)
 defines `available_card_payment_instrument` with a `brands` constraint.
 
-| Schema                                                                                                                   | Constraints                                                     |
-| :----------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------- |
-| [`available_payment_instrument.json`](site:schemas/shopping/types/available_payment_instrument.json)          | Base: type, constraints (open object)                           |
-| `card_payment_instrument.json#/$defs/available_card_payment_instrument`                                                  | Extends base with `constraints.brands` for card networks        |
+| Schema                                                                                                 | Constraints                                                     |
+| :----------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------- |
+| [`available_payment_instrument.json`](site:schemas/shopping/types/available_payment_instrument.json)   | Base: type, constraints (open object)                           |
+| `card_payment_instrument.json#/$defs/available_card_payment_instrument`                                | Extends base with `constraints.brands` for card networks        |
 
 Handlers reference these instrument-defined schemas when declaring
 `available_instruments`. The **instrument schema authors** define what

@@ -40,11 +40,11 @@ Businesses advertise discount support in their profile:
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "{{ ucp_version }}",
     "capabilities": {
       "dev.ucp.shopping.discount": [
         {
-          "version": "2026-01-11",
+          "version": "{{ ucp_version }}",
           "extends": "dev.ucp.shopping.checkout",
           "spec": "https://ucp.dev/{{ ucp_version }}/specification/discount",
           "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/discount.json"

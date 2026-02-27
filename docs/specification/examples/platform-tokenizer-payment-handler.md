@@ -195,12 +195,12 @@ credential type (e.g., PCI DSS for cards).
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "{{ ucp_version }}",
     "payment_handlers": {
       "com.example.platform_tokenizer": [
         {
           "id": "platform_wallet",
-          "version": "2026-01-11",
+          "version": "{{ ucp_version }}",
           "spec": "https://platform.example.com/ucp/handler.json",
           "schema": "https://platform.example.com/ucp/handler/schema.json",
           "available_instruments": [
@@ -237,7 +237,7 @@ The response config includes runtime token lifecycle information.
 ```json
 {
   "id": "platform_wallet",
-  "version": "2026-01-11",
+  "version": "{{ ucp_version }}",
   "available_instruments": [
     {
       "type": "card",
@@ -326,12 +326,12 @@ registry using `platform_config`.
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "{{ ucp_version }}",
     "payment_handlers": {
       "com.example.platform_tokenizer": [
         {
           "id": "platform_wallet",
-          "version": "2026-01-11",
+          "version": "{{ ucp_version }}",
           "spec": "https://platform.example.com/ucp/handler.json",
           "schema": "https://platform.example.com/ucp/handler/schema.json",
           "available_instruments": [

@@ -136,7 +136,7 @@ for the full pattern.
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "{{ ucp_version }}",
     "payment_handlers": {
       "{handler_name}": [
         {
@@ -210,7 +210,7 @@ Platforms advertise support for this handler in their UCP profile's
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "{{ ucp_version }}",
     "payment_handlers": {
       "{handler_name}": [
         {
