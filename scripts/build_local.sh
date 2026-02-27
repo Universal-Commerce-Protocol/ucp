@@ -60,8 +60,8 @@ git fetch origin
 # Sync local gh-pages with remote to avoid divergence errors
 git branch -f gh-pages origin/gh-pages 2>/dev/null || true
 
-# Find all release branches (format: release/YYYY-MM-DD)
-RELEASE_BRANCHES=$(git branch -r | grep "origin/release/[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}" | sed 's/ *origin\///')
+# Find all release branches (both local and remote, format: release/YYYY-MM-DD)
+RELEASE_BRANCHES=$(git branch -a | grep -E "(remotes/origin/)?release/[0-9]{4}-[0-9]{2}-[0-9]{2}" | sed -E 's|.*(release/[0-9]{4}-[0-9]{2}-[0-9]{2}).*|\1|' | sort -u)
 
 echo "Found branches: $RELEASE_BRANCHES"
 
@@ -70,12 +70,20 @@ EXTRACT_LIST="draft latest versions.json"
 
 for branch in $RELEASE_BRANCHES; do
 	version=$(echo "$branch" | sed 's/release\///')
-	echo ">>> Rebuilding Version: $version (from $branch)"
+
+	if git show-ref --verify --quiet "refs/heads/$branch"; then
+		TREE_REF="$branch"
+		echo ">>> Rebuilding Version: $version (from local $branch)"
+	else
+		TREE_REF="origin/$branch"
+		echo ">>> Rebuilding Version: $version (from origin/$branch)"
+	fi
+
 	EXTRACT_LIST="$EXTRACT_LIST $version"
 
 	rm -rf "$WORKTREE_DIR"
 	git worktree prune
-	git worktree add -f "$WORKTREE_DIR" "origin/$branch"
+	git worktree add -f "$WORKTREE_DIR" "$TREE_REF"
 
 	pushd "$WORKTREE_DIR" >/dev/null
 

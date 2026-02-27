@@ -308,6 +308,18 @@ def define_env(env):
     if "#/$defs/" in ref_string:
       ref_path, fragment = ref_string.split("#/$defs/", 1)
 
+    # Redirect all types/ references to the reference specification
+    if ref_string.startswith("types/"):
+      spec_file_name = "reference"
+
+    # Redirect sibling refs that are types (e.g. "item.json" in
+    # types/order_line_item.json)
+    elif "/" not in ref_string and ref_string.endswith(".json"):
+      type_path = Path("source/schemas/shopping/types") / ref_string
+      shopping_path = Path("source/schemas/shopping") / ref_string
+      if type_path.exists() and not shopping_path.exists():
+        spec_file_name = "reference"
+
     filename = Path(ref_path).name
 
     # Check if this reference comes from the core UCP schema
@@ -346,8 +358,6 @@ def define_env(env):
     # 3. Generate Anchor (Target)
     # We want "types/line_item.create_req.json" -> "#line-item-create_request"
     # This matches the pattern: "Line Item" H3 -> "Create Request" H4
-
-    # 3. Generate Anchor (Target)
     parts = raw_name.split(".")
     base_entity = parts[0]
 
@@ -374,13 +384,6 @@ def define_env(env):
       anchor_name = raw_name.replace("_", "-").replace("-resp", "-response")
     elif raw_name.endswith("_req"):
       anchor_name = raw_name.replace("_", "-").replace("-req", "-request")
-    elif context and context.get("io_type") == "response":
-      # For polymorphic types in response mode, append -response to match
-      # markdown headings like "Line Item Response" (h4 under "Line Item" h3)
-      if _is_polymorphic_type(ref_string):
-        anchor_name = f"{anchor_name}-response"
-        if not link_text.endswith("Response"):
-          link_text = f"{link_text} Response"
 
     # FIX: Ensure anchor starts with ucp- for UCP definitions
     if is_ucp and not anchor_name.startswith("ucp-"):
