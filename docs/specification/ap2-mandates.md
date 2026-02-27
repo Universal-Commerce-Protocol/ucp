@@ -420,7 +420,7 @@ checkout.
 
 ## Schema
 
-### Business Authorization
+### Business Authorization {: #merchant-authorization }
 
 {{ extension_schema_fields('ap2_mandate.json#/$defs/merchant_authorization', 'ap2-mandates') }}
 
