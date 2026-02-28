@@ -442,7 +442,7 @@ type & addresses.
           {
             "id": "shipping_1",
             "type": "shipping",
-            "line_item_ids": ["item_123"],
+            "line_item_ids": ["li_1"],
             "selected_destination_id": "dest_home",
             "destinations": [
               {
@@ -457,7 +457,7 @@ type & addresses.
             "groups": [
               {
                 "id": "package_1",
-                "line_item_ids": ["item_123"],
+                "line_item_ids": ["li_1"],
                 "selected_option_id": "standard",
                 "options": [
                   {
@@ -540,7 +540,7 @@ Follow-up calls after initial `fulfillment` data to update selection.
           {
             "id": "shipping_1",
             "type": "shipping",
-            "line_item_ids": ["item_123"],
+            "line_item_ids": ["li_1"],
             "selected_destination_id": "dest_home",
             "destinations": [
               {
@@ -641,7 +641,7 @@ Follow-up calls after initial `fulfillment` data to update selection.
           {
             "id": "shipping_1",
             "type": "shipping",
-            "line_item_ids": ["item_123"],
+            "line_item_ids": ["li_1"],
             "selected_destination_id": "dest_home",
             "destinations": [
               {
@@ -656,7 +656,7 @@ Follow-up calls after initial `fulfillment` data to update selection.
             "groups": [
               {
                 "id": "package_1",
-                "line_item_ids": ["item_123"],
+                "line_item_ids": ["li_1"],
                 "selected_option_id": "express",
                 "options": [
                   {
@@ -835,7 +835,7 @@ place to set these expectations via `messages`.
           {
             "id": "shipping_1",
             "type": "shipping",
-            "line_item_ids": ["item_123"],
+            "line_item_ids": ["li_1"],
             "selected_destination_id": "dest_home",
             "destinations": [
               {
@@ -850,7 +850,7 @@ place to set these expectations via `messages`.
             "groups": [
               {
                 "id": "package_1",
-                "line_item_ids": ["item_123"],
+                "line_item_ids": ["li_1"],
                 "selected_option_id": "express",
                 "options": [
                   {
@@ -992,7 +992,7 @@ place to set these expectations via `messages`.
           {
             "id": "shipping_1",
             "type": "shipping",
-            "line_item_ids": ["item_123"],
+            "line_item_ids": ["li_1"],
             "selected_destination_id": "dest_home",
             "destinations": [
               {
@@ -1007,7 +1007,7 @@ place to set these expectations via `messages`.
             "groups": [
               {
                 "id": "package_1",
-                "line_item_ids": ["item_123"],
+                "line_item_ids": ["li_1"],
                 "selected_option_id": "express",
                 "options": [
                   {
@@ -1147,7 +1147,7 @@ place to set these expectations via `messages`.
           {
             "id": "shipping_1",
             "type": "shipping",
-            "line_item_ids": ["item_123"],
+            "line_item_ids": ["li_1"],
             "selected_destination_id": "dest_home",
             "destinations": [
               {
@@ -1162,7 +1162,7 @@ place to set these expectations via `messages`.
             "groups": [
               {
                 "id": "package_1",
-                "line_item_ids": ["item_123"],
+                "line_item_ids": ["li_1"],
                 "selected_option_id": "express",
                 "options": [
                   {
