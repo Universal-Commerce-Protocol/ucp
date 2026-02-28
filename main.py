@@ -101,7 +101,7 @@ def _resolve_schema(
       hyperlink generation in documentation.
 
   Returns:
-    Resolved schema as dict, or None if resolution fails.
+    Resolved schema as dict, or raises RuntimeError if ucp-schema fails.
 
   """
   bundle_suffix = ":bundled" if bundle else ""
@@ -121,20 +121,18 @@ def _resolve_schema(
   if bundle:
     cmd.append("--bundle")
 
-  try:
-    result = subprocess.run(
-      cmd,
-      capture_output=True,
-      text=True,
-      check=False,
-    )
-    if result.returncode == 0:
-      data = json.loads(result.stdout)
-      _resolved_schema_cache[cache_key] = data
-      return data
-  except subprocess.SubprocessError:
-    pass
-  return None
+  result = subprocess.run(
+    cmd,
+    capture_output=True,
+    text=True,
+    check=False,
+  )
+  if result.returncode == 0:
+    data = json.loads(result.stdout)
+    _resolved_schema_cache[cache_key] = data
+    return data
+  else:
+    raise RuntimeError(f"ucp-schema execution error: result = {result}")
 
 
 # Backward compatibility alias

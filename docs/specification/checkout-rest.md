@@ -96,6 +96,9 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
             {
               "id": "shop_pay_1234",
               "version": "2026-01-11",
+              "available_instruments": [
+                {"type": "shop_pay"}
+              ],
               "config": {
                 "merchant_id": "shop_merchant_123"
               }
@@ -182,7 +185,7 @@ so clients must include all previously set fields they wish to retain.
     Content-Type: application/json
 
     {
-      "id": "chk_123456789",
+      "id": "chk_123456789", // deprecated: id is provided in URL path
       "buyer": {
         "email": "jane@example.com",
         "first_name": "Jane",
@@ -221,6 +224,9 @@ so clients must include all previously set fields they wish to retain.
             {
               "id": "shop_pay_1234",
               "version": "2026-01-11",
+              "available_instruments": [
+                {"type": "shop_pay"}
+              ],
               "config": {
                 "merchant_id": "shop_merchant_123"
               }
@@ -310,7 +316,7 @@ type & addresses.
     Content-Type: application/json
 
     {
-      "id": "chk_123456789",
+      "id": "chk_123456789", // deprecated: id is provided in URL path
       "buyer": {
         "email": "jane@example.com",
         "first_name": "Jane",
@@ -512,7 +518,7 @@ Follow-up calls after initial `fulfillment` data to update selection.
     Content-Type: application/json
 
     {
-      "id": "chk_123456789",
+      "id": "chk_123456789", // deprecated: id is provided in URL path
       "buyer": {
         "email": "jane@example.com",
         "first_name": "Jane",
@@ -577,6 +583,9 @@ Follow-up calls after initial `fulfillment` data to update selection.
             {
               "id": "shop_pay_1234",
               "version": "2026-01-11",
+              "available_instruments": [
+                {"type": "shop_pay"}
+              ],
               "config": {
                 "merchant_id": "shop_merchant_123"
               }
@@ -921,6 +930,9 @@ place to set these expectations via `messages`.
             {
               "id": "shop_pay_1234",
               "version": "2026-01-11",
+              "available_instruments": [
+                {"type": "shop_pay"}
+              ],
               "config": {
                 "merchant_id": "shop_merchant_123"
               }
