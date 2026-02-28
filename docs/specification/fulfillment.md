@@ -581,3 +581,37 @@ same type, each with its own destination.
     }
 }
 ```
+
+## Dictionary
+
+### Fulfillment Method <span id="fulfillment-method"></span>
+
+{{ schema_fields('types/fulfillment_method', 'fulfillment') }}
+
+### Fulfillment Available Method <span id="fulfillment-available-method"></span>
+
+{{ schema_fields('types/fulfillment_available_method', 'fulfillment') }}
+
+### Fulfillment Destination <span id="fulfillment-destination"></span>
+
+{{ schema_fields('types/fulfillment_destination', 'fulfillment') }}
+
+### Fulfillment Group <span id="fulfillment-group"></span>
+
+{{ schema_fields('types/fulfillment_group', 'fulfillment') }}
+
+### Shipping Destination <span id="shipping-destination"></span>
+
+{{ schema_fields('types/shipping_destination', 'fulfillment') }}
+
+### Retail Location <span id="retail-location"></span>
+
+{{ schema_fields('types/retail_location', 'fulfillment') }}
+
+### Fulfillment Option <span id="fulfillment-option"></span>
+
+{{ schema_fields('types/fulfillment_option', 'fulfillment') }}
+
+### Total <span id="total"></span>
+
+{{ schema_fields('types/total_resp', 'fulfillment') }}
