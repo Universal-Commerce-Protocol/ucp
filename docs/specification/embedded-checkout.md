@@ -1285,10 +1285,18 @@ account, or wallet credential) available to the buyer.
 
 {{ schema_fields('types/card_credential', 'embedded-checkout') }}
 
-### Payment Handler Response
+### Payment Handler Response <span id="payment-handler"></span>
 
 Represents the processor or wallet provider responsible for authenticating and
 processing a specific payment instrument (e.g., Google Pay, Stripe, or a Bank
 App).
 
-{{ schema_fields('payment_handler_resp', 'embedded-checkout') }}
+{{ schema_fields('types/payment_handler_resp', 'embedded-checkout') }}
+
+### Total <span id="total"></span>
+
+{{ schema_fields('types/total_resp', 'embedded-checkout') }}
+
+### Token Credential <span id="token-credential"></span>
+
+{{ schema_fields('types/token_credential', 'embedded-checkout') }}

@@ -444,9 +444,9 @@ field or omitting them.
 
 {{ schema_fields('payment_resp', 'checkout') }}
 
-### Payment Handler Response
+### Payment Handler <span id="payment-handler"></span>
 
-{{ schema_fields('types/payment_handler_resp', 'checkout') }}
+{{ schema_fields('types/payment_handler', 'checkout') }}
 
 ### Payment Instrument
 
@@ -460,7 +460,11 @@ field or omitting them.
 
 {{ schema_fields('payment_credential', 'checkout') }}
 
-### Token Credential Response
+### Token Credential <span id="token-credential"></span>
+
+{{ schema_fields('types/token_credential', 'checkout') }}
+
+### Token Credential Create Request
 
 {{ schema_fields('token_credential_create_req', 'checkout') }}
 

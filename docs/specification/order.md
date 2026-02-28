@@ -351,7 +351,7 @@ rotation:
 
 ## Entities
 
-### Item Response
+### Item Response <span id="item"></span>
 
 {{ schema_fields('types/item_resp', 'order') }}
 
@@ -363,7 +363,7 @@ rotation:
 
 {{ extension_schema_fields('capability.json#/$defs/response', 'order') }}
 
-### Total Response
+### Total Response <span id="total"></span>
 
 {{ schema_fields('types/total_resp', 'order') }}
 
