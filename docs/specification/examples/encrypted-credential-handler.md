@@ -353,5 +353,5 @@ Content-Type: application/json
 
 ## References
 
-* **Identity Schema:** `https://ucp.dev/{{ ucp_version }}/schemas/shopping/types/payment_identity.json`
-* **Instrument Schema:** `https://ucp.dev/{{ ucp_version }}/schemas/shopping/types/card_payment_instrument.json`
+* **Identity Schema:** [schemas/shopping/types/payment_identity.json](site:schemas/shopping/types/payment_identity.json)
+* **Instrument Schema:** [schemas/shopping/types/card_payment_instrument.json](site:schemas/shopping/types/card_payment_instrument.json)
