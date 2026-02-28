@@ -489,5 +489,5 @@ The platform's payment credential provider verifies that:
 ## References
 
 * **Pattern:** [Tokenization Payment Handler](../payment-handler-guide.md)
-* **API Pattern:** `https://ucp.dev/{{ ucp_version }}/handlers/tokenization/openapi.json`
-* **Identity Schema:** `https://ucp.dev/{{ ucp_version }}/schemas/shopping/types/payment_identity.json`
+* **API Pattern:** [handlers/tokenization/openapi.json](site:handlers/tokenization/openapi.json)
+* **Identity Schema:** [schemas/shopping/types/payment_identity.json](site:schemas/shopping/types/payment_identity.json)
