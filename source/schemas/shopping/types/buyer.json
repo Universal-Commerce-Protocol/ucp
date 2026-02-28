@@ -13,10 +13,6 @@
       "type": "string",
       "description": "Last name of the buyer."
     },
-    "full_name": {
-      "type": "string",
-      "description": "Optional, buyer's full name (if first_name or last_name fields are present they take precedence)."
-    },
     "email": {
       "type": "string",
       "description": "Email of the buyer."

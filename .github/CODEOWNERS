@@ -1,0 +1,35 @@
+# Universal Commerce Protocol (UCP) Codeowners
+
+# Default for all files.
+* @Universal-Commerce-Protocol/maintainers
+
+# Infrastructure, Tooling & Configuration
+/.github/                 @Universal-Commerce-Protocol/devops-maintainers
+/scripts/                 @Universal-Commerce-Protocol/devops-maintainers
+/generated/               @Universal-Commerce-Protocol/devops-maintainers
+/hooks.py                 @Universal-Commerce-Protocol/devops-maintainers
+/main.py                  @Universal-Commerce-Protocol/devops-maintainers
+/generate_ts_schema_types.js @Universal-Commerce-Protocol/devops-maintainers
+/.cspell/                 @Universal-Commerce-Protocol/devops-maintainers
+/.cspell.json             @Universal-Commerce-Protocol/devops-maintainers
+/.pre-commit-config.yaml  @Universal-Commerce-Protocol/devops-maintainers
+/.prettierignore          @Universal-Commerce-Protocol/devops-maintainers
+/.prettierrc              @Universal-Commerce-Protocol/devops-maintainers
+/.stylelintrc.json        @Universal-Commerce-Protocol/devops-maintainers
+/biome.json               @Universal-Commerce-Protocol/devops-maintainers
+/mkdocs.yml               @Universal-Commerce-Protocol/devops-maintainers
+/.gitignore               @Universal-Commerce-Protocol/devops-maintainers
+/pyproject.toml           @Universal-Commerce-Protocol/devops-maintainers
+/uv.lock                  @Universal-Commerce-Protocol/devops-maintainers
+/package.json             @Universal-Commerce-Protocol/devops-maintainers
+/package-lock.json        @Universal-Commerce-Protocol/devops-maintainers
+
+# Documentation
+/docs/                    @Universal-Commerce-Protocol/devops-maintainers
+/docs/specification/      @Universal-Commerce-Protocol/maintainers
+
+# Core Protocol
+/source/                  @Universal-Commerce-Protocol/tech-council
+
+# Governance
+/.github/CODEOWNERS      @Universal-Commerce-Protocol/governance-council

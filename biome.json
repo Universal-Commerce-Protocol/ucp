@@ -1,4 +1,9 @@
 {
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
   "linter": {
     "enabled": true,
     "rules": {

@@ -1,3 +1,5 @@
+exclude: '^(\.github/|\.vscode/).*|CODE_OF_CONDUCT\.md|CHANGELOG\.md'
+
 repos:
   - repo: https://github.com/streetsidesoftware/cspell-cli
     rev: v9.3.3
@@ -16,7 +18,42 @@ repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
-    -   id: trailing-whitespace
-    -   id: end-of-file-fixer
-    -   id: check-yaml
-    -   id: check-added-large-files
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+        args: [--unsafe]
+      - id: check-added-large-files
+      - id: check-shebang-scripts-are-executable
+      - id: check-executables-have-shebangs
+  # Python: Ruff
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.13
+    hooks:
+      # Run the linter
+      - id: ruff
+        args: [--fix]
+      # Run the formatter
+      - id: ruff-format
+  # Markdown: Markdownlint
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.47.0
+    hooks:
+      - id: markdownlint
+        args: [--config, .github/linters/.markdownlint.json]
+  # CSS: Stylelint
+  - repo: https://github.com/thibaudcolas/pre-commit-stylelint
+    rev: v14.4.0
+    hooks:
+      - id: stylelint
+        args: ["--fix", "**/*.css"]
+        additional_dependencies:
+          - stylelint
+          - stylelint-config-standard
+  # CSS: Prettier (Formatting)
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v3.1.0
+    hooks:
+      - id: prettier
+        name: prettier-css
+        types: [css]  # Only run on CSS files
+        # If you want it to run on EVERYTHING (JS, JSON, MD), remove the 'types' line.

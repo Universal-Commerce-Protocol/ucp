@@ -1,5 +1,6 @@
 # cspell-specific custom words related to UCP
 Adyen
+Affirm
 Alam
 Amex
 Ant
@@ -14,11 +15,13 @@ Credentialless
 Depot
 EWALLET
 Etsy
+Fiserv
 Flipkart
 Gap
 GitHub
 Google
 Gpay
+Klarna
 Kroger
 Lowe's
 Macy's
@@ -30,12 +33,15 @@ Queensway
 Sephora
 Shopify
 Shopee
+Splitit
+Streamable
 Stripe
 Target
 UCP
 Ulta
 Visa
 Wayfair
+WORKTREE
 Worldpay
 Zalando
 adyen
@@ -46,6 +52,7 @@ checkout
 credentialless
 credentialization
 datamodel
+delisted
 dpan
 ewallet
 fontawesome
@@ -54,7 +61,9 @@ fulfillable
 gpay
 ingestions
 inlinehilite
+lifecycles
 linenums
+llms
 llmstxt
 mastercard
 mkdocs
@@ -63,6 +72,7 @@ openapi
 openrpc
 paypal
 permissionless
+podman
 preorders
 proto
 protobuf
@@ -72,7 +82,12 @@ repudiable
 schemas
 sdjwt
 shopify
+streamable
 superfences
+upsell
+upsells
 vulnz
+worktree
 yaml
 yml
+keyid

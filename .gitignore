@@ -1,3 +1,7 @@
+# Generated schema variants (legacy, no longer used)
+# Published schemas come from source/ with annotations intact
+/spec/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -167,6 +171,10 @@ yarn-error.log
 .settings/
 *.sublime-workspace
 *.code-workspace
+.vscode/
+
+# Site output from scripts/build_local.sh
+/local_preview/
 
 # Miscellaneous
 **/.angular/*
@@ -194,7 +202,7 @@ gradle-app.setting
 # Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
 !gradle-wrapper.jar
 
-# Avoid ignore Gradle wrappper properties
+# Avoid ignore Gradle wrapper properties
 !gradle-wrapper.properties
 
 # Cache of project

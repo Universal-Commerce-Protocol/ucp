@@ -16,8 +16,6 @@
 
 # Payment Handler Specification Guide
 
-**Version:** `2026-01-11`
-
 ## Introduction
 
 This guide defines the standard structure and vocabulary for specifying UCP
@@ -57,29 +55,29 @@ function calls. Spec authors must map these logical flows to the actual
 transport protocol used by their implementation.
 
 ```text
-┌──────────────────────────────────────────────────────────────────────────────┐
-│                        Payment Handler Framework                             │
-├──────────────────────────────────────────────────────────────────────────────┤
-│                                                                              │
-│   ┌──────────────┐                                                           │
-│   │ PARTICIPANTS │  Who participates in this handler?                        │
-│   └──────┬───────┘                                                           │
-│          │                                                                   │
-│          ▼                                                                   │
-│   ┌──────────────┐                                                           │
-│   │PREREQUISITES │  How does each participant obtain identity & configs?     │
-│   └──────┬───────┘                                                           │
-│          │                                                                   │
-│          ├────────────────────┬──────────────────────┐                       │
-│          ▼                    ▼                      ▼                       │
-│   ┌──────────────┐    ┌──────────────┐      ┌──────────────┐                 │
-│   │   HANDLER    │    │  INSTRUMENT  │      │  PROCESSING  │                 │
-│   │ DECLARATION  │    │  ACQUISITION │      │              │                 │
-│   └──────────────┘    └──────────────┘      └──────────────┘                 │
-│   Business advertises  platform acquires     Participant                     │
-│   handler config       checkout instrument   processes instrument            │
-│                                                                              │
-└──────────────────────────────────────────────────────────────────────────────┘
++------------------------------------------------------------------------------+
+|                        Payment Handler Framework                             |
++------------------------------------------------------------------------------+
+|                                                                              |
+|   +--------------+                                                           |
+|   | PARTICIPANTS |  Who participates in this handler?                        |
+|   +------+-------+                                                           |
+|          |                                                                   |
+|          v                                                                   |
+|   +--------------+                                                           |
+|   |PREREQUISITES |  How does each participant obtain identity & configs?     |
+|   +------+-------+                                                           |
+|          |                                                                   |
+|          +--------------------+----------------------+                       |
+|          v                    v                      v                       |
+|   +--------------+    +--------------+      +--------------+                 |
+|   |   HANDLER    |    |  INSTRUMENT  |      |  PROCESSING  |                 |
+|   | DECLARATION  |    |  ACQUISITION |      |              |                 |
+|   +--------------+    +--------------+      +--------------+                 |
+|   Business advertises  platform acquires     Participant                     |
+|   handler config       checkout instrument   processes instrument            |
+|                                                                              |
++------------------------------------------------------------------------------+
 ```
 
 ### Participants
@@ -95,16 +93,16 @@ Specifications **MUST** explicitly document these field mappings.
 
 **Standard Participants:**
 
-| Participant  | Role                                                            |
-| :----------- | :-------------------------------------------------------------- |
-| **Business** | Advertises handler configuration, processes payment instruments |
+| Participant  | Role                                                               |
+| :----------- | :----------------------------------------------------------------- |
+| **Business** | Advertises handler configuration, processes payment instruments    |
 | **Platform** | Discovers handlers, acquires payment instruments, submits checkout |
 
 **Extended Participants** (example handler-specific participants):
 
-| Participant   | Example Role                                        |
-| :------------ | :-------------------------------------------------- |
-| **Tokenizer** | Stores raw credentials and issues token credentials |
+| Participant   | Example Role                                                           |
+| :------------ | :--------------------------------------------------------------------- |
+| **Tokenizer** | Stores raw credentials and issues token credentials                    |
 | **PSP**       | Processes payments on behalf of business using the checkout instrument |
 
 ### Prerequisites
@@ -118,11 +116,11 @@ complete before participating in the handler's flows.
 PREREQUISITES(participant, onboarding_input) → prerequisites_output
 ```
 
-| Field                  | Description                                            |
-| :--------------------- | :----------------------------------------------------- |
+| Field                  | Description                                                |
+| :--------------------- | :--------------------------------------------------------- |
 | `participant`          | The participant being onboarded (business, platform, etc.) |
-| `onboarding_input`     | What the participant provides during setup             |
-| `prerequisites_output` | The identity and any additional configuration received |
+| `onboarding_input`     | What the participant provides during setup                 |
+| `prerequisites_output` | The identity and any additional configuration received     |
 
 **Prerequisites Output:**
 
@@ -161,57 +159,244 @@ HANDLER_DECLARATION(prerequisites_output) → handler_declaration
 | Field                  | Description                                                    |
 | :--------------------- | :------------------------------------------------------------- |
 | `prerequisites_output` | The identity and configuration from business prerequisites     |
-| `handler_declaration`  | The complete handler object advertised in `payment.handlers[]` |
+| `handler_declaration`  | The handler object advertised in `ucp.payment_handlers`        |
 
 **Output Structure:**
 
-The handler declaration conforms to the [`PaymentHandler`](https://ucp.dev/schemas/shopping/types/payment_handler.json)
+The handler declaration conforms to the [`PaymentHandler`](https://ucp.dev/schemas/payment_handler.json)
 schema. The specification **SHOULD** define the available config and instrument
 schemas, and how to construct each based on the business's prerequisites output
 and desired configuration.
 
 ```json
 {
-  "id": "handler_instance_id",
-  "name": "com.example.handler",
-  "version": "2026-01-11",
-  "spec": "https://example.com/ucp/handler",
-  "config_schema": "https://example.com/ucp/handler/config.json",
-  "instrument_schemas": [
-    "https://example.com/ucp/handler/instruments/card.json"
-  ],
-  "config": {
-    // Handler-specific configuration (see 2.3.1)
+  "ucp": {
+    "payment_handlers": {
+      "com.example.handler": [
+        {
+          "id": "processor_tokenizer_1234",
+          "version": "2026-01-11",
+          "spec": "https://example.com/ucp/handler",
+          "schema": "https://example.com/ucp/handler/schema.json",
+          "available_instruments": [
+            // Instrument types this handler supports
+          ],
+          "config": {
+            // Handler-specific configuration (see Config Shapes)
+          }
+        }
+      ]
+    }
   }
 }
 ```
 
+**`available_instruments`** is optional. When absent, the handler places no
+restrictions on instrument types or constraints — it supports the full set of
+instrument types defined by its handler schema. When present, it narrows the
+advertised types and/or applies additional constraints (e.g., limiting card
+brands to `["visa", "mastercard"]`).
+
 ---
 
-#### Defining the Config Schema
+#### Handler Declaration Variants
 
-The `config_schema` field points to a JSON schema that validates the `config`
-object businesses provide. Both are optional.
+The `PaymentHandler` schema defines three variants for different contexts. While only
+`id` and `version` are technically required, each variant serves a distinct purpose
+and typically includes different configuration:
 
-**Recommendation:** Most handlers require an environment setting (e.g., Sandbox
-vs. Production). It is recommended to include this in the config schema to
-**standardize** testing flows.
+| Variant | Context | Purpose |
+| :------ | :------ | :------ |
+| **business_schema** | Business discovery (`/.well-known/ucp`) | Declares the business identity and how they're configured for this handler. Contains merchant-specific settings. |
+| **platform_schema** | Platform profile (advertised URI) | Declares the platform identity and how it supports this handler. Includes `spec` and `schema` URLs for implementers. |
+| **response_schema** | Checkout/Order API responses | **Runtime configuration** with resolved context: merchant identity, resolved `available_instruments` for this checkout, tokenization specs, and other state needed to process the transaction. Platforms **MUST** treat this as authoritative. |
 
-**Example Config Schema:**
+**Business Schema Example** (business declares handler configuration):
+
+```json
+{
+  "id": "processor_tokenizer_1234",
+  "version": "2026-01-11",
+  "spec": "https://example.com/ucp/handler",
+  "schema": "https://example.com/ucp/handler/schema.json",
+  "available_instruments": [
+    {
+      "type": "card",
+      "constraints": {
+        "brands": ["visa", "mastercard"]
+      }
+    }
+  ],
+  "config": {
+    "environment": "production",
+    "business_id": "business_xyz_789"
+  }
+}
+```
+
+**Platform Schema Example** (platform declares handler support):
+
+```json
+{
+  "id": "platform_tokenizer_2345", // note: ids are for disambiguation, they may differ between business and platform
+  "version": "2026-01-11",
+  "spec": "https://example.com/ucp/handler",
+  "schema": "https://example.com/ucp/handler/schema.json",
+  "available_instruments": [
+    {
+      "type": "card",
+      "constraints": {
+        "brands": ["visa", "mastercard", "amex", "discover"]
+      }
+    }
+  ],
+  "config": {
+    "environment": "production",
+    "platform_id": "platform_abc_123"
+  }
+}
+```
+
+**Response Schema Example** (runtime context for checkout):
+
+```json
+{
+  "id": "processor_tokenizer_1234",
+  "version": "2026-01-11",
+  "available_instruments": [
+    {
+      "type": "card",
+      "constraints": {
+        "brands": ["visa", "mastercard"]
+      }
+    }
+  ],
+  "config": {
+    "api_version": 2,
+    "environment": "production",
+    "business_id": "business_xyz_789"
+  }
+}
+```
+
+#### Resolving `available_instruments`
+
+Both the platform and the business independently advertise `available_instruments`
+in their profiles. The business is responsible for resolving these into the
+authoritative value returned in the `response_schema`.
+
+**Resolution flow:**
+
+1. **Platform declares capabilities** — the platform's profile includes
+   `available_instruments` on each handler declaration. This tells the business
+   what the platform can handle (e.g., it only supports
+   `["visa", "mastercard", "amex", "discover"]`).
+
+2. **Business resolves** — upon receiving a request, the business computes the
+   resolved `available_instruments` for the checkout by intersecting:
+   - The platform's advertised `available_instruments` (its capabilities)
+   - Its own `business_schema` declaration (what the merchant is actually set up to accept)
+   - Cart/checkout context (e.g., certain item types may restrict eligible methods)
+
+3. **Response is authoritative** — the `available_instruments` in the
+   `response_schema` reflects the business's resolved selection for this specific
+   checkout. Platforms **MUST** treat it as authoritative and **MUST NOT** attempt
+   to use instrument types or apply constraints that contradict it.
+
+**Example:**
+
+| Source | `available_instruments` |
+| :----- | :---------------------- |
+| Platform profile | `[{type: "card", constraints: {brands: ["visa", "mastercard", "amex", "discover"]}}]` |
+| Business profile | `[{type: "card", constraints: {brands: ["visa", "mastercard", "amex"]}}]` |
+| **Response (resolved)** | `[{type: "card", constraints: {brands: ["visa", "mastercard", "amex"]}}]` |
+
+In this example, the business's PSP is not configured for Discover, so Discover
+is excluded from the response even though the platform supports it.
+
+---
+
+#### Defining the Schema
+
+The `schema` field points to a JSON schema that defines handler-specific shapes.
+Authors typically define each shape in its own file and reference them:
+
+- **Config** — Configuration for platform/business declarations and runtime responses
+- **Instrument** — The payment instrument structure returned to platforms
+- **Credential** — The credential structure within instruments
+
+**Example Handler Schema:**
 
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://example.com/ucp/handlers/my_handler/config.json",
-  "title": "MyHandlerConfig",
-  "description": "Configuration for the com.example.my_handler payment handler.",
-  "type": "object",
-  "properties": {
-    "environment": {
-      "type": "string",
-      "enum": ["sandbox", "production"],
-      "description": "The API environment this business supports for the example handler.",
-      "default": "production"
+  "$id": "https://example.com/ucp/handlers/tokenizer/schema.json",
+  "title": "Tokenizer Handler Schema",
+  "description": "Schema for the com.example.tokenizer payment handler.",
+  "name": "com.example.tokenizer",
+  "version": "2026-01-11",
+
+  "$defs": {
+    "tokenizer_token": { "$ref": "types/tokenizer_token.json" },
+    "tokenizer_alt_token": { "$ref": "types/tokenizer_alt_token.json" },
+
+    "tokenizer_instrument": { "$ref": "types/tokenizer_instrument.json" },
+    "tokenizer_alt_instrument": { "$ref": "types/tokenizer_alt_instrument.json" },
+
+    "com.example.tokenizer": {
+      "payment_instrument": {
+        "title": "Tokenizer Payment Instrument",
+        "description": "Any instrument type supported by this handler.",
+        "oneOf": [
+          { "$ref": "#/$defs/tokenizer_instrument" },
+          { "$ref": "#/$defs/tokenizer_alt_instrument" }
+        ]
+      },
+      "platform_schema": {
+        "title": "Tokenizer (Platform)",
+        "description": "Platform-level handler configuration for discovery.",
+        "allOf": [
+          { "$ref": "https://ucp.dev/schemas/payment_handler.json#/$defs/platform_schema" },
+          {
+            "properties": {
+              "config": {
+                "$ref": "types/platform_config.json",
+                "description": "Platform configuration for this handler."
+              }
+            }
+          }
+        ]
+      },
+      "business_schema": {
+        "title": "Tokenizer (Business)",
+        "description": "Business-level handler configuration for discovery.",
+        "allOf": [
+          { "$ref": "https://ucp.dev/schemas/payment_handler.json#/$defs/business_schema" },
+          {
+            "properties": {
+              "config": {
+                "$ref": "types/business_config.json",
+                "description": "Business configuration for this handler."
+              }
+            }
+          }
+        ]
+      },
+      "response_schema": {
+        "title": "Tokenizer (Response)",
+        "description": "Runtime handler configuration in checkout responses.",
+        "allOf": [
+          { "$ref": "https://ucp.dev/schemas/payment_handler.json#/$defs/response_schema" },
+          {
+            "properties": {
+              "config": {
+                "$ref": "types/response_config.json",
+                "description": "Runtime configuration for this handler."
+              }
+            }
+          }
+        ]
+      }
     }
   }
 }
@@ -219,65 +404,283 @@ vs. Production). It is recommended to include this in the config schema to
 
 ---
 
-#### Defining Instrument Schemas
+#### Config Shapes
 
-**Base Instrument Schemas:**
+Each variant has its own config schema tailored to its context:
 
-| Schema                                                                                        | Description                                         |
-| :-------------------------------------------------------------------------------------------- | :-------------------------------------------------- |
-| [`payment_instrument.json`](https://ucp.dev/schemas/shopping/types/payment_instrument.json)   | Base: id, handler_id, type, credential, billing_address |
-| [`card_payment_instrument.json`](https://ucp.dev/schemas/shopping/types/card_payment_instrument.json) | Card display: brand, last_digits, expiry |
+| Variant | Config File | Purpose |
+| :------ | :---------- | :------ |
+| **business_schema** | `types/business_config.json` | Business identity and merchant-specific settings |
+| **platform_schema** | `types/platform_config.json` | Platform identity and platform-level settings |
+| **response_schema** | `types/response_config.json` | Full runtime state: identities, tokenization specs |
 
-UCP provides base schemas for universal payment instruments like `card`. Spec
-authors **MAY** extend any of the basic payment instruments to add additional
-handler-specific display data.
+**Example `types/business_config.json`:**
 
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://example.com/ucp/handlers/my_wallet/instrument.json",
-  "title": "MyWalletInstrument",
-  "allOf": [
-    { "$ref": "https://ucp.dev/schemas/shopping/types/payment_instrument.json" }
-  ],
+  "$id": "https://example.com/ucp/handlers/tokenizer/types/business_config.json",
+  "title": "Tokenizer Business Config",
   "type": "object",
-  "required": ["type", "account_type"],
   "properties": {
-    "type": { "const": "my_wallet" },
-    // base payment instrument or specific payment instrument defined by handler
+    "environment": {
+      "type": "string",
+      "enum": ["sandbox", "production"],
+      "default": "production"
+    },
+    "business_id": {
+      "type": "string",
+      "description": "Business identifier for this handler."
+    }
   }
 }
 ```
 
-#### Defining Credential Schemas
-
-**Base Credential Schemas:**
-
-| Schema                                                                                    | Description                |
-| :---------------------------------------------------------------------------------------- | :------------------------- |
-| [`payment_credential.json`](https://ucp.dev/schemas/shopping/types/payment_credential.json) | Base: type discriminator only |
-| [`token_credential.json`](https://ucp.dev/schemas/shopping/types/token_credential.json)     | Token: type + token string |
-
-UCP provides base schemas for universal payment credentials like `card` and
-`token`. Authors **MAY** extend these schemas to include handler-specific
-credential context.
-
-The specification **MUST** define which credential types are accepted by the
-handler.
-
-**Important:** If using token credentials, the schema MUST include an
-expiration field (`expiry`, `ttl`, or similar) to ensure platforms know when to
-refresh credentials.
+**Example `types/platform_config.json`:**
 
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://example.com/ucp/handlers/my_wallet/credential.json",
-  "title": "MyWalletCredential",
+  "$id": "https://example.com/ucp/handlers/tokenizer/types/platform_config.json",
+  "title": "Tokenizer Platform Config",
   "type": "object",
-  "required": ["type", "token"],
   "properties": {
-    // base credential object or credential context defined by handler
+    "environment": {
+      "type": "string",
+      "enum": ["sandbox", "production"],
+      "default": "production"
+    },
+    "platform_id": {
+      "type": "string",
+      "description": "Platform identifier for this handler."
+    }
+  }
+}
+```
+
+**Example `types/response_config.json`:**
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/ucp/handlers/tokenizer/types/response_config.json",
+  "title": "Tokenizer Response Config",
+  "type": "object",
+  "properties": {
+    "api_version": { "type": "integer" },
+    "environment": {
+      "type": "string",
+      "enum": ["sandbox", "production"]
+    },
+    "business_id": {
+      "type": "string",
+      "description": "Business identifier for this handler."
+    },
+    "tokenization_specification": {
+      "type": "object",
+      "description": "Handler-specific tokenization settings.",
+      "properties": {
+        "type": { "type": "string" },
+        "parameters": { "type": "object" }
+      }
+    }
+  }
+}
+```
+
+---
+
+#### Instrument Shapes
+
+**Base Instrument Schemas:**
+
+| Schema                                                                                                | Description                                                      |
+| :---------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------- |
+| [`payment_instrument.json`](https://ucp.dev/schemas/shopping/types/payment_instrument.json)           | Base: id, handler_id, type, billing_address, credential, display |
+| [`card_payment_instrument.json`](https://ucp.dev/schemas/shopping/types/card_payment_instrument.json) | Extends base with display: brand, last_digits, expiry, card art  |
+
+UCP provides base schemas for universal payment instruments like `card`. Spec
+authors **MAY** extend any of the base instruments to add handler-specific
+display data or customize the credential reference. Handlers **MAY** define
+multiple instrument types for different payment flows.
+
+**Available Instrument Schemas:**
+
+Each instrument schema defines its own `available_*` variant in `$defs` that
+specifies what constraints are valid for that instrument type. For example,
+[`card_payment_instrument.json`](https://ucp.dev/schemas/shopping/types/card_payment_instrument.json)
+defines `available_card_payment_instrument` with a `brands` constraint.
+
+| Schema                                                                                                                   | Constraints                                                     |
+| :----------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------- |
+| [`available_payment_instrument.json`](https://ucp.dev/schemas/shopping/types/available_payment_instrument.json)          | Base: type, constraints (open object)                           |
+| `card_payment_instrument.json#/$defs/available_card_payment_instrument`                                                  | Extends base with `constraints.brands` for card networks        |
+
+Handlers reference these instrument-defined schemas when declaring
+`available_instruments`. The **instrument schema authors** define what
+constraints are meaningful (e.g., `brands` for cards), and **platforms/businesses** use this to advertise what they support (e.g., `["visa", "mastercard"]`).
+
+**Example `types/tokenizer_instrument.json`**:
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/ucp/handlers/tokenizer/types/tokenizer_instrument.json",
+  "title": "Tokenizer Card Instrument",
+  "description": "Card-based payment instrument for com.example.tokenizer.",
+
+  "$defs": {
+    "available_tokenizer_card": {
+      "title": "Available Tokenizer Card",
+      "description": "Card instrument availability with tokenizer-specific constraints.",
+      "allOf": [
+        { "$ref": "https://ucp.dev/schemas/shopping/types/card_payment_instrument.json#/$defs/available_card_payment_instrument" },
+        {
+          "type": "object",
+          "properties": {
+            "type": { "const": "tokenizer_card" },
+            "constraints": {
+              "type": "object",
+              "properties": {
+                "tokenization_types": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "description": "Supported tokenization types (e.g., ['network_token', 'merchant_token'])."
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+
+  "allOf": [
+    { "$ref": "https://ucp.dev/schemas/shopping/types/card_payment_instrument.json" }
+  ],
+  "type": "object",
+  "required": ["type"],
+  "properties": {
+    "type": { "const": "tokenizer_card" },
+    "credential": {
+      "oneOf": [
+        { "$ref": "tokenizer_token.json" },
+        { "$ref": "tokenizer_alt_token.json" }
+      ]
+    },
+    "special_tokenizer_context": {
+      "type": "object",
+      "description": "Handler-specific context for tokenizer instruments."
+    }
+  }
+}
+```
+
+**Example `types/tokenizer_alt_instrument.json`:**
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/ucp/handlers/tokenizer/types/tokenizer_alt_instrument.json",
+  "title": "Tokenizer Alt Instrument",
+  "description": "Alternative payment instrument for com.example.tokenizer.",
+  "allOf": [
+    { "$ref": "https://ucp.dev/schemas/shopping/types/payment_instrument.json" }
+  ],
+  "type": "object",
+  "required": ["type"],
+  "properties": {
+    "type": { "const": "tokenizer_alt" },
+    "credential": {
+      "oneOf": [
+        { "$ref": "tokenizer_token.json" },
+        { "$ref": "tokenizer_alt_token.json" }
+      ]
+    },
+    "special_tokenizer_context": {
+      "type": "object",
+      "description": "Handler-specific context for tokenizer instruments."
+    }
+  }
+}
+```
+
+---
+
+#### Credential Shapes
+
+**Base Credential Schemas:**
+
+| Schema                                                                                      | Description                   |
+| :------------------------------------------------------------------------------------------ | :---------------------------- |
+| [`payment_credential.json`](https://ucp.dev/schemas/shopping/types/payment_credential.json) | Base: type discriminator only |
+| [`token_credential.json`](https://ucp.dev/schemas/shopping/types/token_credential.json)     | Token: type + token string    |
+
+UCP provides base schemas for universal payment credentials. Authors **MAY**
+extend these schemas to include handler-specific credential context. Handlers
+**MAY** define multiple credential types for different instrument flows.
+
+The specification **MUST** define which credential types are accepted by the
+handler.
+
+**Important:** If using token credentials, the schema **MUST** include an
+expiration field (`expiry`, `ttl`, or similar) to ensure platforms know when to
+refresh credentials.
+
+**Example `types/tokenizer_token.json`** (expiring token):
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/ucp/handlers/tokenizer/types/tokenizer_token.json",
+  "title": "Tokenizer Card Token",
+  "description": "Card token credential for com.example.tokenizer.",
+  "allOf": [
+    { "$ref": "https://ucp.dev/schemas/shopping/types/token_credential.json" }
+  ],
+  "type": "object",
+  "required": ["type", "token", "expiry"],
+  "properties": {
+    "type": {
+      "const": "tokenizer_card_token",
+      "description": "Credential type discriminator."
+    },
+    "expiry": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Token expiration. Platforms must refresh before this time."
+    }
+  }
+}
+```
+
+**Example `types/tokenizer_alt_token.json`** (alt token):
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/ucp/handlers/tokenizer/types/tokenizer_alt_token.json",
+  "title": "Tokenizer Alt Token",
+  "description": "Alt token credential for com.example.tokenizer, adding routing hints",
+  "allOf": [
+    { "$ref": "https://ucp.dev/schemas/shopping/types/token_credential.json" }
+  ],
+  "type": "object",
+  "required": ["type", "token", "expiry"],
+  "properties": {
+    "type": {
+      "const": "tokenizer_alt_token",
+      "description": "Credential type discriminator."
+    },
+    "expiry": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Token expiration. Platforms must refresh before this time."
+    },
+    "routing_hint": {
+      "type": "string",
+      "description": "Optional routing number hint."
+    }
   }
 }
 ```
@@ -298,13 +701,13 @@ INSTRUMENT_ACQUISITION(
 ) → checkout_instrument
 ```
 
-| Field                           | Description                                            |
-| :------------------------------ | :----------------------------------------------------- |
+| Field                           | Description                                                              |
+| :------------------------------ | :----------------------------------------------------------------------- |
 | `platform_prerequisites_output` | platform's prerequisites output (config), if prerequisites were required |
-| `handler_declaration.config`    | Handler-specific configuration from the business       |
-| `binding`                       | **(See 2.6)** Context for binding the credential to a specific checkout |
-| `buyer_input`                   | Buyer's payment selection or credentials               |
-| `checkout_instrument`           | The payment instrument to submit at checkout           |
+| `handler_declaration.config`    | Handler-specific configuration from the business                         |
+| `binding`                       | **(See 2.6)** Context for binding the credential to a specific checkout  |
+| `buyer_input`                   | Buyer's payment selection or credentials                                 |
+| `checkout_instrument`           | The payment instrument to submit at checkout                             |
 
 Payment handler specifications do NOT need to define a formal process for
 instrument acquisition. Instead, the specification **SHOULD** clearly document:
@@ -330,13 +733,13 @@ PROCESSING(
 ) → processing_result
 ```
 
-| Field                 | Description                               |
-| :-------------------- | :---------------------------------------- |
+| Field                 | Description                                    |
+| :-------------------- | :--------------------------------------------- |
 | `identity`            | The processing participant's `PaymentIdentity` |
-| `checkout_instrument` | The instrument received from the platform |
-| `binding`             | The binding context for verification      |
-| `transaction_context` | Checkout totals, line items, etc.         |
-| `processing_result`   | Success/failure with payment details      |
+| `checkout_instrument` | The instrument received from the platform      |
+| `binding`             | The binding context for verification           |
+| `transaction_context` | Checkout totals, line items, etc.              |
+| `processing_result`   | Success/failure with payment details           |
 
 #### Error Handling
 
@@ -347,8 +750,8 @@ error messages to the buyer regardless of the underlying processor.
 
 ### Key Definitions
 
-| Term        | Definition                                                                                                                                                                                                                            |
-| :---------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Term        | Definition                                                                                                                                                                                                                                    |
+| :---------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Binding** | A cryptographic or logical association of a payment instrument to a specific checkout transaction and business identity. This prevents replay attacks where a valid credential intended for Business A is intercepted and used at Business B. |
 
 ---
@@ -427,35 +830,35 @@ specifications:
 
 ### Schema Design
 
-| Practice                         | Description                                                                          |
-| :------------------------------- | :----------------------------------------------------------------------------------- |
-| **Extend, don't reinvent**       | Use `allOf` to compose base schemas. Don't redefine `brand`, `last_digits`, etc.     |
-| **Use const for discriminators** | Define `credential.type` as a `const` to identify credential types unambiguously.    |
+| Practice                         | Description                                                                             |
+| :------------------------------- | :-------------------------------------------------------------------------------------- |
+| **Extend, don't reinvent**       | Use `allOf` to compose base schemas. Don't redefine `brand`, `last_digits`, etc.        |
+| **Use const for discriminators** | Define `credential.type` as a `const` to identify credential types unambiguously.       |
 | **Validate early**               | Publish schemas at stable URLs before finalizing the spec so implementers can validate. |
-| **Include Expiry**               | When designing token credentials, always include `expiry` or `ttl`.                  |
+| **Include Expiry**               | When designing token credentials, always include `expiry` or `ttl`.                     |
 
 ### Documentation
 
-| Practice                  | Description                                                           |
-| :------------------------ | :-------------------------------------------------------------------- |
-| **Show, don't just tell** | Include complete JSON examples for every schema and protocol step.    |
+| Practice                  | Description                                                            |
+| :------------------------ | :--------------------------------------------------------------------- |
+| **Show, don't just tell** | Include complete JSON examples for every schema and protocol step.     |
 | **Document error cases**  | Specify what errors can occur and how participants should handle them. |
-| **Version independently** | The handler version evolves independently of UCP core versions.       |
+| **Version independently** | The handler version evolves independently of UCP core versions.        |
 
 ### Security
 
-| Practice                       | Description                                                                  |
-| :----------------------------- | :--------------------------------------------------------------------------- |
-| **Require binding**            | Always tie credentials to a specific checkout via `binding`.                 |
+| Practice                         | Description                                                                    |
+| :------------------------------- | :----------------------------------------------------------------------------- |
+| **Require binding**              | Always tie credentials to a specific checkout via `binding`.                   |
 | **Minimize credential exposure** | Design flows so raw credentials (PANs, etc.) touch as few systems as possible. |
-| **Specify token lifetimes**    | Document whether tokens are single-use, time-limited, or session-scoped.     |
+| **Specify token lifetimes**      | Document whether tokens are single-use, time-limited, or session-scoped.       |
 
 ### Maintainability
 
-| Practice                        | Description                                                                                          |
-| :------------------------------ | :--------------------------------------------------------------------------------------------------- |
-| **Host schemas at stable URLs** | Schema URLs should not change; use versioned paths if needed.                                        |
-| **Fail gracefully**             | Define clear error responses for common failure scenarios.                                           |
+| Practice                        | Description                                                                                            |
+| :------------------------------ | :----------------------------------------------------------------------------------------------------- |
+| **Host schemas at stable URLs** | Schema URLs should not change; use versioned paths if needed.                                          |
+| **Fail gracefully**             | Define clear error responses for common failure scenarios.                                             |
 | **Link to examples**            | Reference existing handler specs and the [Tokenization Guide](tokenization-guide.md) for common flows. |
 
 ---

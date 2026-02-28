@@ -31,6 +31,7 @@ Please delete options that are not relevant.
 - [ ] Documentation update
 
 ---
+
 ### Is this a Breaking Change or Removal?
 
 If you checked "Breaking change" above, or if you are removing **any** schema
@@ -39,15 +40,16 @@ files or fields:
 - [ ] **I have added `!` to my PR title** (e.g., `feat!: remove field`).
 - [ ] **I have added justification below.**
 
-```
+```text
 ## Breaking Changes / Removal Justification
 
 (Please provide a detailed technical and strategic rationale here for why this
 breaking change or removal is necessary.)
 ```
+
 ---
 
-## Checklist:
+## Checklist
 
 - [ ] My code follows the style guidelines of this project
 - [ ] I have performed a self-review of my own code
