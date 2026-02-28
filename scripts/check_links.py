@@ -15,6 +15,9 @@ SITE_URL = os.environ.get("SITE_URL", "https://ucp.dev/")
 # Ensure trailing slash for site url to match correctly
 if not SITE_URL.endswith("/"):
   SITE_URL += "/"
+SITE_BASE_PATH = urlparse(SITE_URL).path
+if SITE_BASE_PATH == "":
+  SITE_BASE_PATH = "/"
 
 
 class LinkParser(HTMLParser):
@@ -166,6 +169,11 @@ def check_links():
       path_part = parsed.path
       anchor_part = parsed.fragment
       path_part = unquote(path_part)
+      
+      # If the path starts with the SITE_BASE_PATH (e.g. /ucp/), strip it
+      # so it resolves correctly against the local ROOT_DIR.
+      if SITE_BASE_PATH != "/" and path_part.startswith(SITE_BASE_PATH):
+          path_part = "/" + path_part[len(SITE_BASE_PATH):]
 
       target_file = None
 
