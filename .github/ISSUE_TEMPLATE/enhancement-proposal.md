@@ -85,7 +85,7 @@ to be moved to the "Provisional" stage.
 
 <!--
 Define the specific, objective criteria required to move this capability through
-the maturity levels. See CONTRIBUTING.md for full definitions of each level.
+the maturity levels. See [CONTRIBUTING.md](https://github.com/Universal-Commerce-Protocol/.github/blob/main/CONTRIBUTING.md) for full definitions.of each level.
 
 **Working Draft → Candidate:**
 * [ ] Schema merged and documented (with Working Draft disclaimer).
