@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+# When did we run this build?
+date
+
 # Ensure we are running from the project root (parent of scripts/)
 cd "$(dirname "$0")/.."
 PROJECT_ROOT=$(pwd)
@@ -14,6 +17,32 @@ GH_PAGES_BRANCH="gh-pages"
 # Prepend the project's venv bin to PATH so mike finds mkdocs properly
 # Also add ucp-schema binary from sibling directory
 export PATH="$PROJECT_ROOT/.venv/bin:$PROJECT_ROOT/../ucp-schema/target/release:$PATH:$HOME/.cargo/bin"
+
+# Check UCP-Schema CLI version vs current Crates.io version and prompt
+PURPLE='\033[1;35m'
+NC='\033[0m' # No Color
+echo "Using ucp-schema CLI: $(which ucp-schema)"
+UCP_CLI_VERSION=$(ucp-schema --version | sed 's/ucp-schema //')
+echo "Local ucp-schema version:  '$UCP_CLI_VERSION'"
+UCP_CRATES_VERSION=$(cargo search ucp-schema -q | sed 's/ucp-schema = "//' | sed 's/".*$//')
+echo "Crates ucp-schema version: '$UCP_CRATES_VERSION'"
+if [[ $UCP_CLI_VERSION != "$UCP_CRATES_VERSION" ]]; then
+	while true; do
+		echo -e "${PURPLE}*ucp-schema version mismatch*${NC}"
+		read -r -p " Continue? (y/n) " yn
+		case $yn in
+		[Yy]*)
+			echo "proceed..."
+			break
+			;;
+		[Nn]*)
+			echo "exiting..."
+			exit
+			;;
+		*) echo "invalid response" ;;
+		esac
+	done
+fi
 
 if ! command -v mike >/dev/null 2>&1; then
 	echo "Error: mike executable not found in PATH."
