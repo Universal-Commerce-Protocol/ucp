@@ -9,6 +9,14 @@
       "type": "array",
       "items": { "type": "string" },
       "description": "Delegations the business allows. At service-level, declares available delegations. In checkout responses, confirms accepted delegations for this session."
+    },
+    "color_scheme": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["light", "dark"]
+      },
+      "description": "Color schemes the business supports. Hosts use ec_color_scheme query parameter to request a scheme from this list."
     }
   }
 }

@@ -61,15 +61,15 @@ When this capability is active, checkout is extended with a `discounts` object.
 
 ### Discounts Object
 
-{{ extension_schema_fields('discount_resp.json#/$defs/discounts_object', 'discount') }}
+{{ extension_schema_fields('discount.json#/$defs/discounts_object', 'discount') }}
 
 ### Applied Discount
 
-{{ extension_schema_fields('discount_resp.json#/$defs/applied_discount', 'discount') }}
+{{ extension_schema_fields('discount.json#/$defs/applied_discount', 'discount') }}
 
 ### Allocation
 
-{{ extension_schema_fields('discount_resp.json#/$defs/allocation', 'discount') }}
+{{ extension_schema_fields('discount.json#/$defs/allocation', 'discount') }}
 
 ## Allocation Details
 

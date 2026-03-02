@@ -114,7 +114,7 @@ Maps to the [Create Cart](cart.md#create-cart) operation.
 
 #### Input Schema
 
-{{ schema_fields('cart.create_req', 'cart') }}
+{{ schema_fields('cart_create_req', 'cart') }}
 
 #### Output Schema
 
@@ -364,7 +364,7 @@ Maps to the [Update Cart](cart.md#update-cart) operation.
 
 * `id` (String, required): The ID of the cart session to update.
 
-{{ schema_fields('cart.update_req', 'cart') }}
+{{ schema_fields('cart_update_req', 'cart') }}
 
 #### Output Schema
 

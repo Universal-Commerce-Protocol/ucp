@@ -57,18 +57,18 @@ supports.}
 {Optional: ASCII diagram showing participant relationships}
 
 ```text
-┌─────────┐     ┌───────────────┐     ┌────────────┐
-│Platform │     │   {Provider}  │     │  Business  │
-└────┬────┘     └───────┬───────┘     └──────┬─────┘
-     │                  │                    │
-     │  {step 1}        │                    │
-     │─────────────────>│                    │
-     │                  │                    │
-     │  {step 2}        │                    │
-     │<─────────────────│                    │
-     │                  │                    │
-     │  {step 3}                             │
-     │──────────────────────────────────────>│
++---------+     +---------------+     +------------+
+|Platform |     |   {Provider}  |     |  Business  |
++----+----+     +-------+-------+     +------+-----+
+     |                  |                    |
+     |  {step 1}        |                    |
+     |----------------->|                    |
+     |                  |                    |
+     |  {step 2}        |                    |
+     |<-----------------|                    |
+     |                  |                    |
+     |  {step 3}                             |
+     |-------------------------------------->|
 ```
 
 ---
@@ -127,9 +127,9 @@ for the full pattern.
 
 #### Response Config Fields
 
-| Field   | Type   | Required | Description                                                       |
-| :------ | :----- | :------- | :---------------------------------------------------------------- |
-| {field} | {type} | {Yes/No} | {description — include runtime fields like available instruments} |
+| Field   | Type   | Required | Description   |
+| :------ | :----- | :------- | :------------ |
+| {field} | {type} | {Yes/No} | {description} |
 
 #### Example Handler Declaration
 
@@ -144,6 +144,14 @@ for the full pattern.
           "version": "{version}",
           "spec": "{spec_url}",
           "schema": "{schema_url}",
+          "available_instruments": [
+            {
+              "type": "{instrument_type}",
+              "constraints": {
+                // Type-specific constraints
+              }
+            }
+          ],
           "config": {
             // Handler-specific configuration
           }
@@ -210,6 +218,14 @@ Platforms advertise support for this handler in their UCP profile's
           "version": "{version}",
           "spec": "{spec_url}",
           "schema": "{schema_url}",
+          "available_instruments": [
+            {
+              "type": "{instrument_type}",
+              "constraints": {
+                // Type-specific constraints the platform supports
+              }
+            }
+          ],
           "config": {
             // Platform-specific configuration
           }
@@ -237,6 +253,9 @@ The Platform identifies `{handler_name}` in the business's UCP profile
         {
           "id": "{handler_id}",
           "version": "{version}",
+          "available_instruments": [
+            {"type": "{instrument_type}"}
+          ],
           "config": {
             // Business's configuration
           }

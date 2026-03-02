@@ -1,5 +1,6 @@
 # cspell-specific custom words related to UCP
 Adyen
+Affirm
 Alam
 Amex
 Ant
@@ -40,6 +41,7 @@ UCP
 Ulta
 Visa
 Wayfair
+WORKTREE
 Worldpay
 Zalando
 adyen
@@ -50,6 +52,7 @@ checkout
 credentialless
 credentialization
 datamodel
+delisted
 dpan
 ewallet
 fontawesome
@@ -79,9 +82,12 @@ repudiable
 schemas
 sdjwt
 shopify
+streamable
 superfences
 upsell
 upsells
 vulnz
+worktree
 yaml
 yml
+keyid

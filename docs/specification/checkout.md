@@ -58,38 +58,36 @@ determines what action is required next. The business sets the status; the
 platform receives messages indicating what's needed to progress.
 
 ```text
-┌────────────┐    ┌─────────────────────┐
-│ incomplete │◀──▶│ requires_escalation │
-└─────┬──────┘    │                     │
-      │           │  (buyer handoff     │
-      │           │   via continue_url) │
-      │           └──────────┬──────────┘
-      │                      │
-      │ all info collected   │ continue_url
-      ▼                      │
-┌──────────────────┐         │
-│ready_for_complete│         │
-│                  │         │
-│ (platform can    │         │
-│ call Complete    │         │
-│   Checkout).     │         │
-└────────┬─────────┘         │
-         │                   │
-         │ Complete Checkout │
-         ▼                   │
-┌────────────────────┐       │
-│complete_in_progress│       │
-└─────────┬──────────┘       │
-          │                  │
-          └────────┬─────────┘
-                   ▼
-            ┌─────────────┐
-            │  completed  │
-            └─────────────┘
+       +------------+                         +---------------------+
+       | incomplete |<----------------------->| requires_escalation |
+       +-----+------+                         |   (buyer handoff    |
+             |                                |  via continue_url)  |
+             | all info collected             +----------+----------+
+             v                                           |
+    +------------------+                                 |
+    |ready_for_complete|                                 |
+    |                  |                                 |
+    | (platform can    |                                 | continue_url
+    | call Complete    |                                 |
+    |   Checkout)      |                                 |
+    +--------+---------+                                 |
+             |                                           |
+             | Complete Checkout                         |
+             v                                           |
+   +--------------------+                                |
+   |complete_in_progress|                                |
+   +---------+----------+                                |
+             |                                           |
+             +-----------------------+-------------------+
+                                     v
+                               +-------------+
+                               |  completed  |
+                               +-------------+
 
-            ┌─────────────┐
-            │  canceled   │  (session invalid/expired - can occur from any state)
-            └─────────────┘
+                               +-------------+
+                               |  canceled   |
+                               +-------------+
+          (session invalid/expired - can occur from any state)
 ```
 
 ### Status Values
@@ -195,6 +193,26 @@ IF requires_buyer_input is not empty
 ELSE IF requires_buyer_review is not empty
   handoff_context = "ready for final review by the buyer"
 ```
+
+#### Standard Errors
+
+Standard errors are standardized error codes that platforms are expected to
+handle with specific, appropriate UX rather than generic error treatment.
+
+| Code                     | Description                                                                |
+| :----------------------- | :------------------------------------------------------------------------- |
+| `out_of_stock`           | Specific item or variant is unavailable                                    |
+| `item_unavailable`       | Item cannot be purchased (e.g. delisted)                                   |
+| `address_undeliverable`  | Cannot deliver to the provided address                                     |
+| `payment_failed`         | Payment processing failed                                                  |
+
+Businesses **SHOULD** mark standard errors with `severity: recoverable` to
+signal that platforms should provide appropriate UX (out-of-stock messaging,
+address validation prompts, payment method changes) rather than generic error
+messages or deferring to checkout completion.
+
+Example: `out_of_stock` requires specific upfront UX, whereas
+`payment_required` can be handled generically at submission.
 
 ## Continue URL
 
@@ -374,17 +392,17 @@ require explicit validation and error feedback.
 
 ### Fulfillment Option
 
-{{ extension_schema_fields('fulfillment_resp.json#/$defs/fulfillment_option', 'checkout') }}
+{{ extension_schema_fields('fulfillment.json#/$defs/fulfillment_option', 'checkout') }}
 
 ### Item
 
 #### Item Create Request
 
-{{ schema_fields('types/item.create_req', 'checkout') }}
+{{ schema_fields('types/item_create_req', 'checkout') }}
 
 #### Item Update Request
 
-{{ schema_fields('types/item.update_req', 'checkout') }}
+{{ schema_fields('types/item_update_req', 'checkout') }}
 
 #### Item Response
 
@@ -394,11 +412,11 @@ require explicit validation and error feedback.
 
 #### Line Item Create Request
 
-{{ schema_fields('types/line_item.create_req', 'checkout') }}
+{{ schema_fields('types/line_item_create_req', 'checkout') }}
 
 #### Line Item Update Request
 
-{{ schema_fields('types/line_item.update_req', 'checkout') }}
+{{ schema_fields('types/line_item_update_req', 'checkout') }}
 
 #### Line Item Response
 
