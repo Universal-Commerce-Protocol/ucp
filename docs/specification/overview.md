@@ -1583,8 +1583,8 @@ extension signals use their own namespace (e.g., `com.example.device_id`).
     "com.example.attestation": {
       "provider_jwks": "https://example.com/.well-known/jwks.json",
       "kid": "example-key-2026-01",
-      "payload": { "id": "ATST-A1B2C", "pass": true, "...": "..." },
-      "sig": "MEYCIQD..."
+      "payload": { "id": "att-7c3e9f", "pass": true, "...": "..." },
+      "sig": "base64url..."
     }
   }
 }
