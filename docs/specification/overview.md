@@ -1674,11 +1674,12 @@ payment data to minimize business and platform liability.
 ### Authorization & Abuse Signals
 
 Businesses require transaction environment data for authorization, rate
-limiting, and abuse prevention. Because the platform mediates every buyer
-interaction, it is the sole party able to observe the buyer's environment.
-Platforms provide signals as factual attestations about the transaction
-environment — values **MUST** reflect direct platform observations, not relayed
-buyer claims.
+limiting, and abuse prevention. Signal values **MUST NOT** be buyer-asserted
+claims — platforms provide signals based on direct observation (e.g.,
+connection IP, user agent) or by relaying independently verifiable
+third-party attestations, such as cryptographically signed results from an
+external verifier that the business can validate against the provider's
+published key set.
 
 All signal keys **MUST** use reverse-domain naming to ensure provenance and
 prevent collisions when multiple extensions contribute to the shared namespace.
@@ -1689,7 +1690,13 @@ extension signals use their own namespace (e.g., `com.example.device_id`).
 {
   "signals": {
     "dev.ucp.buyer_ip": "203.0.113.42",
-    "dev.ucp.user_agent": "Mozilla/5.0 ..."
+    "dev.ucp.user_agent": "Mozilla/5.0 ...",
+    "com.example.attestation": {
+      "provider_jwks": "https://verifier.example/.well-known/jwks.json",
+      "pass": true,
+      "attested_at": "2026-02-27T12:00:00Z",
+      "signature": "base64url..."
+    }
   }
 }
 ```
