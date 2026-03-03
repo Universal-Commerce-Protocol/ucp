@@ -35,7 +35,7 @@ Schema notes:
 
 UCP separates protocol version compatibility from capability negotiation.
 The business's profile at `/.well-known/ucp` describes capabilities for
-its current protocol version. Businesses that support older protocol
+the protocol version it declares. Businesses that support older protocol
 versions **SHOULD** publish version-specific profiles and advertise them
 via the `supported_versions` field — a map from protocol version to
 profile URI, enabling platforms to discover the exact capabilities
@@ -293,7 +293,7 @@ protocol version requirement. The profile publisher selects and
 advertises compatible versions in their profile.
 
 If `min_protocol_version` is present, platforms and businesses
-**SHOULD** verify the negotiated protocol version is >=
+**MUST** verify the negotiated protocol version is >=
 `min_protocol_version` during schema resolution. Incompatible
 extensions are excluded from the active capability set (see
 [Resolution Flow](#resolution-flow)). If absent, the extension is
@@ -1791,7 +1791,11 @@ every request:
         version of the business profile.
     - Otherwise: Business **MUST** return a `version_unsupported`
         error.
-3. Businesses **MUST** include the negotiated protocol version in
+3. If capability negotiation yields no mutually supported version
+    for a capability required by the requested operation, the
+    business **MUST** return a `capabilities_incompatible` error
+    (see [Error Handling](#error-handling)).
+4. Businesses **MUST** include the negotiated protocol version in
     every response.
 
 Response with version confirmation:
