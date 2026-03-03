@@ -1581,10 +1581,10 @@ extension signals use their own namespace (e.g., `com.example.device_id`).
     "dev.ucp.buyer_ip": "203.0.113.42",
     "dev.ucp.user_agent": "Mozilla/5.0 ...",
     "com.example.attestation": {
-      "provider_jwks": "https://verifier.example/.well-known/jwks.json",
-      "pass": true,
-      "attested_at": "2026-02-27T12:00:00Z",
-      "signature": "base64url..."
+      "provider_jwks": "https://example.com/.well-known/jwks.json",
+      "kid": "example-key-2026-01",
+      "payload": { "id": "ATST-A1B2C", "pass": true, "...": "..." },
+      "sig": "MEYCIQD..."
     }
   }
 }
