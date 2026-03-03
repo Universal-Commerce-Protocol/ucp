@@ -122,7 +122,7 @@ declares **who resolves the error**:
 
 | Severity                | Meaning                                                          | Platform Action               |
 | :---------------------- | :--------------------------------------------------------------- | :---------------------------- |
-| `recoverable`           | Platform can resolve by modifying inputs and retrying via API    | Resolve using Update Checkout |
+| `recoverable`           | Platform can resolve by modifying inputs and retrying via API    | Modify inputs and retry calling API |
 | `requires_buyer_input`  | Business requires input not available via API                    | Hand off via `continue_url`   |
 | `requires_buyer_review` | Buyer review and authorization is required                       | Hand off via `continue_url`   |
 | `unrecoverable`         | Terminal failure — cannot be recovered via API                   | Redirect via `continue_url`   |
