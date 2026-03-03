@@ -82,6 +82,10 @@
       },
       "description": "Append-only event log of money movements (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment."
     },
+    "currency": {
+      "type": "string",
+      "description": "ISO 4217 currency code. MUST match the currency from the originating checkout session."
+    },
     "totals": {
       "type": "array",
       "items": {
@@ -90,5 +94,5 @@
       "description": "Different totals for the order."
     }
   },
-  "version": "2026-03-02"
+  "version": "2026-03-03"
 }
