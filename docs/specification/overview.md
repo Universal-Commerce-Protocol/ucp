@@ -1301,8 +1301,8 @@ POST /checkout-sessions/{id}/complete
     ]
   },
   "signals": {
-    "buyer_ip": "203.0.113.42",
-    "user_agent": "Mozilla/5.0 ..."
+    "dev.ucp.buyer_ip": "203.0.113.42",
+    "dev.ucp.user_agent": "Mozilla/5.0 ..."
   }
 }
 ```
@@ -1367,8 +1367,8 @@ POST /checkout-sessions/{id}/complete
     ]
   },
   "signals": {
-    "buyer_ip": "203.0.113.42",
-    "user_agent": "Mozilla/5.0 ..."
+    "dev.ucp.buyer_ip": "203.0.113.42",
+    "dev.ucp.user_agent": "Mozilla/5.0 ..."
   }
 }
 ```
@@ -1446,7 +1446,7 @@ POST /checkout-sessions/{id}/complete
     ]
   },
   "signals": {
-    "buyer_ip": "203.0.113.42",
+    "dev.ucp.buyer_ip": "203.0.113.42",
     "com.example.risk_score": 0.95
   },
   "ap2": {
@@ -1680,14 +1680,16 @@ Platforms provide signals as factual attestations about the transaction
 environment — values **MUST** reflect direct platform observations, not relayed
 buyer claims.
 
-Well-known signals include `buyer_ip` and `user_agent`. Proprietary signals
-**MUST** use reverse-domain naming (e.g., `com.example.score`).
+All signal keys **MUST** use reverse-domain naming to ensure provenance and
+prevent collisions when multiple extensions contribute to the shared namespace.
+Well-known signals use the `dev.ucp` namespace (e.g., `dev.ucp.buyer_ip`);
+extension signals use their own namespace (e.g., `com.example.device_id`).
 
 ```json
 {
   "signals": {
-    "buyer_ip": "203.0.113.42",
-    "user_agent": "Mozilla/5.0 ..."
+    "dev.ucp.buyer_ip": "203.0.113.42",
+    "dev.ucp.user_agent": "Mozilla/5.0 ..."
   }
 }
 ```
@@ -1715,7 +1717,7 @@ Well-known info codes for signal feedback:
     {
       "type": "info",
       "code": "risk",
-      "path": "$.signals.buyer_ip",
+      "path": "$.signals['dev.ucp.buyer_ip']",
       "content": "IP geolocation does not match shipping country; additional verification may apply"
     },
     {
