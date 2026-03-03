@@ -1080,6 +1080,7 @@ and cart context, then returns the resolved result. Platforms **MUST** treat the
 `available_instruments` in the response as authoritative for that checkout. See
 the [Payment Handler Guide](payment-handler-guide.md#resolving-available_instruments)
 for the full resolution semantics.
+
 ### Implementation Scenarios
 
 The following scenarios illustrate how different payment handlers and
