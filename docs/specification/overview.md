@@ -38,13 +38,16 @@ The business's profile at `/.well-known/ucp` describes capabilities for
 the protocol version it declares. Businesses that support older protocol
 versions **SHOULD** publish version-specific profiles and advertise them
 via the `supported_versions` field — a map from protocol version to
-profile URI, enabling platforms to discover the exact capabilities
-for a specific protocol version. Capability negotiation follows a
-server-selects architecture where the business (server) determines
-the active capabilities from the intersection of both parties'
-declared capabilities. Both business and platform profiles can be
-cached by both parties, allowing efficient capability negotiation
-within the normal request/response flow between platform and business.
+profile URI, enabling platforms to discover the exact capabilities for a
+specific protocol version. Version lifecycle, including when to deprecate
+or remove older versions from `supported_versions`, is a business policy
+decision. The protocol does not prescribe a deprecation schedule.
+Capability negotiation follows a server-selects architecture where the
+business (server) determines the active capabilities from the
+intersection of both parties' declared capabilities. Both business and
+platform profiles can be cached by both parties, allowing efficient
+capability negotiation within the normal request/response flow between
+platform and business.
 
 ### Namespace Governance
 
