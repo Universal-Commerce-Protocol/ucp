@@ -15,7 +15,7 @@
           "required": ["status"]
         }
       ],
-      "description": "UCP protocol metadata. Status MUST be 'error' for error responses."
+      "description": "UCP protocol metadata. Status MUST be 'error' for error response."
     },
     "messages": {
       "type": "array",
