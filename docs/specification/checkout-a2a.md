@@ -252,8 +252,8 @@ checkout object containing an `order` attribute with `id` and `permalink_url`.
             ...paymentObject
           },
           "a2a.ucp.checkout.signals": {
-            "buyer_ip": "203.0.113.42",
-            "user_agent": "Mozilla/5.0 ..."
+            "dev.ucp.buyer_ip": "203.0.113.42",
+            "dev.ucp.user_agent": "Mozilla/5.0 ..."
           }
         }
       }
