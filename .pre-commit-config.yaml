@@ -1,6 +1,15 @@
 exclude: '^(\.github/|\.vscode/).*|CODE_OF_CONDUCT\.md|CHANGELOG\.md'
 
 repos:
+  - repo: local
+    hooks:
+      - id: validate-generated-schema-types
+        name: validate generated schema types
+        entry: >-
+          bash -c 'node generate_ts_schema_types.js && git diff --exit-code
+          -- generated/schema-types.ts'
+        language: system
+        pass_filenames: false
   - repo: https://github.com/streetsidesoftware/cspell-cli
     rev: v9.3.3
     hooks:
@@ -55,5 +64,6 @@ repos:
     hooks:
       - id: prettier
         name: prettier-css
-        types: [css]  # Only run on CSS files
-        # If you want it to run on EVERYTHING (JS, JSON, MD), remove the 'types' line.
+        # Only run on CSS files
+        types: [css]
+        # To run on everything (JS, JSON, MD), remove the 'types' line.

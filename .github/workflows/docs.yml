@@ -27,7 +27,8 @@ on:
       - main
     paths:
       - ".github/workflows/docs.yml"
-      - "requirements-docs.txt"
+      - "pyproject.toml"
+      - "uv.lock"
       - "mkdocs.yml"
       - "main.py"
       - "hooks.py"
@@ -52,18 +53,20 @@ jobs:
       - name: Configure Git Credentials
         run: |
           git config --global user.name github-actions[bot]
-          git config --global user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git config --global user.email \
+            41898282+github-actions[bot]@users.noreply.github.com
 
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libcairo2-dev libfreetype6-dev libffi-dev libjpeg-dev libpng-dev libz-dev
+          sudo apt-get install -y libcairo2-dev libfreetype6-dev libffi-dev \
+            libjpeg-dev libpng-dev libz-dev
 
       - name: Install the latest version of uv
         uses: astral-sh/setup-uv@v7
 
       - name: Install documentation dependencies
-        run: uv sync
+        run: uv sync --all-groups
 
       - name: Lint YAML files
         run: uv run yamllint -c .github/linters/.yamllint.yml .
@@ -73,6 +76,14 @@ jobs:
         uses: tj-actions/changed-files@v46
         with:
           files: source/**
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          cache-on-failure: true
 
       - name: Install ucp-schema for runtime resolution
         run: |
@@ -95,11 +106,14 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Fetch the Pages URL. Fails safely if not enabled.
-          PAGES_URL=$(gh api "repos/${{ github.repository }}/pages" --jq '.html_url' 2>/dev/null || true)
+          PAGES_URL=$(gh api "repos/${{ github.repository }}/pages" \
+            --jq '.html_url' 2>/dev/null || true)
 
           if [ -z "$PAGES_URL" ]; then
             echo "Pages URL not detected. Falling back to default structure."
-            PAGES_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"
+            OWNER="${{ github.repository_owner }}"
+            REPO="${{ github.event.repository.name }}"
+            PAGES_URL="https://${OWNER}.github.io/${REPO}"
           fi
 
           # Ensure trailing slash
@@ -146,8 +160,9 @@ jobs:
           # Extract the date (e.g., release/2026-01-11 -> 2026-01-11)
           VERSION_NAME=${GITHUB_REF#refs/heads/release/}
 
-          # Deploy this version, tag it as 'latest', and set it as the default site root
-          uv run mike deploy --push --update-aliases $VERSION_NAME latest
+          # Deploy this version, tag as 'latest', set as default site root
+          uv run mike deploy --push --update-aliases \
+            $VERSION_NAME latest
 
       - name: Create GitHub Release and Tag
         if: startsWith(github.ref, 'refs/heads/release/')
