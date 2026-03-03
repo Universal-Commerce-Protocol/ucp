@@ -30,14 +30,15 @@ Businesses advertise REST transport availability through their UCP profile at
   "ucp": {
     "version": "2026-01-15",
     "services": {
-      "dev.ucp.shopping": {
-        "version": "2026-01-15",
-        "spec": "https://ucp.dev/specification/overview",
-        "rest": {
-          "schema": "https://ucp.dev/services/shopping/openapi.json",
-          "endpoint": "https://business.example.com/ucp/v1"
+      "dev.ucp.shopping": [
+        {
+          "version": "2026-01-15",
+          "spec": "https://ucp.dev/specification/overview",
+          "transport": "rest",
+          "endpoint": "https://business.example.com/ucp/v1",
+          "schema": "https://ucp.dev/services/shopping/openapi.json"
         }
-      }
+      ]
     },
     "capabilities": [
       {
@@ -61,7 +62,8 @@ Businesses advertise REST transport availability through their UCP profile at
 
 All UCP REST endpoints are relative to the business's base URL, which is
 discovered through the UCP profile at `/.well-known/ucp`. The endpoint for the
-cart capability is defined in the `rest.endpoint` field of the business profile.
+cart capability is taken from the service binding whose `transport` is `rest`
+in the business profile.
 
 ### Content Types
 
