@@ -90,4 +90,5 @@ vulnz
 worktree
 yaml
 yml
+EDITMSG
 keyid

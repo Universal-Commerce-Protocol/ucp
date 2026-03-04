@@ -27,7 +27,8 @@ on:
       - main
     paths:
       - ".github/workflows/docs.yml"
-      - "requirements-docs.txt"
+      - "pyproject.toml"
+      - "uv.lock"
       - "mkdocs.yml"
       - "main.py"
       - "hooks.py"
@@ -63,7 +64,7 @@ jobs:
         uses: astral-sh/setup-uv@v7
 
       - name: Install documentation dependencies
-        run: uv sync
+        run: uv sync --all-groups
 
       - name: Lint YAML files
         run: uv run yamllint -c .github/linters/.yamllint.yml .
@@ -73,6 +74,14 @@ jobs:
         uses: tj-actions/changed-files@v46
         with:
           files: source/**
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          cache-on-failure: true
 
       - name: Install ucp-schema for runtime resolution
         run: |

@@ -19,6 +19,19 @@ on:
     branches:
       - main
       - 'release/**'
+    paths:
+      - ".github/workflows/linter.yaml"
+      - ".github/workflows/schema-validation.yml"
+      - ".github/linters/**"
+      - ".pre-commit-config.yaml"
+      - "pyproject.toml"
+      - "package.json"
+      - "package-lock.json"
+      - "biome.json"
+      - "scripts/**"
+      - "source/**"
+      - "docs/**"
+      - "*.py"
 
 permissions:
   contents: read      # Required to checkout the code
@@ -49,7 +62,8 @@ jobs:
           LOG_LEVEL: INFO
           SHELLCHECK_OPTS: -e SC1091 -e 2086
           VALIDATE_ALL_CODEBASE: false
-          FILTER_REGEX_EXCLUDE: "^(\\.github/|\\.vscode/).*|CODE_OF_CONDUCT.md|CHANGELOG.md"
+          FILTER_REGEX_EXCLUDE: >-
+            ^(\\.github/|\\.vscode/).*|CODE_OF_CONDUCT.md|CHANGELOG.md
           VALIDATE_BIOME_FORMAT: false
           VALIDATE_PYTHON_BLACK: false
           VALIDATE_PYTHON_FLAKE8: false
