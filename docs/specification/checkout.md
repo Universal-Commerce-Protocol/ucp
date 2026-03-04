@@ -435,7 +435,7 @@ and abuse prevention. Unlike `context` (buyer-asserted preferences) and `buyer`
 (self-reported identity), signal values MUST NOT be buyer-asserted claims —
 platforms provide signals based on direct observation or by relaying
 independently verifiable third-party attestations. See
-[Signals](overview.md#authorization--abuse-signals) for details and privacy
+[Signals](overview.md#signals) for details and privacy
 requirements.
 
 {{ schema_fields('types/signals', 'checkout') }}
