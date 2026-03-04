@@ -355,7 +355,7 @@ Maps to the [Create Checkout](checkout.md#create-checkout) operation.
             {
               "type": "error",
               "code": "out_of_stock",
-              "content": "All requested items are currently out of stock.",
+              "content": "All requested items are currently out of stock",
               "severity": "unrecoverable"
             }
           ],
@@ -695,7 +695,7 @@ JSON-RPC `result` with `structuredContent` containing the UCP envelope and `mess
         {
           "type": "error",
           "code": "item_unavailable",
-          "content": "Items are not available for purchase in your region.",
+          "content": "Items are not available for purchase in your region",
           "severity": "unrecoverable",
           "path": "$.line_items"
         }

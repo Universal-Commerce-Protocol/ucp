@@ -128,9 +128,10 @@ The Cart capability defines the following logical operations.
 Creates a new cart session with line items and optional buyer/context
 information for localized pricing estimates.
 
-When **all** requested items unavailable, the business MAY return an error response
-instead of creating a cart resource. The `ucp.status: "error"` value is the
-primary discriminator; the absence of `id` is a consistent secondary indicator:
+When **all** requested items are unavailable, the business MAY return an
+error response instead of creating a cart resource. `ucp.status` is the
+primary discriminator; the absence of `id` is a consistent secondary
+indicator:
 
 ```json
 {
@@ -139,7 +140,7 @@ primary discriminator; the absence of `id` is a consistent secondary indicator:
     {
       "type": "error",
       "code": "out_of_stock",
-      "content": "All requested items are currently out of stock.",
+      "content": "All requested items are currently out of stock",
       "severity": "unrecoverable"
     }
   ],

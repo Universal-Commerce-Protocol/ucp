@@ -197,9 +197,13 @@ ELSE IF requires_buyer_review is not empty
 
 ### Create Operation Error Responses
 
-When **all** requested items fail—out of stock or unavailable—the business MAY return an error response instead of creating a checkout resource. The `ucp.status: "error"` value is the primary discriminator; the absence of `id` is a consistent secondary indicator:
+When **all** requested items fail—out of stock or unavailable—the business
+MAY return an error response instead of creating a checkout resource.
+`ucp.status` is the primary discriminator; the absence of `id` is a
+consistent secondary indicator:
 
-* **`ucp.status: "error"`** → no resource created; inspect `messages` for the reason
+* **`ucp.status: "error"`** → no resource created; inspect `messages`
+  for the reason
 * **`ucp.status: "success"`** → checkout resource created
 
 ```json
@@ -209,13 +213,19 @@ When **all** requested items fail—out of stock or unavailable—the business M
     {
       "type": "error",
       "code": "out_of_stock",
-      "content": "All requested items are currently out of stock.",
+      "content": "All requested items are currently out of stock",
       "severity": "unrecoverable"
     }
   ],
   "continue_url": "https://merchant.com/"
 }
 ```
+
+When no resource is created (`ucp.status: "error"`), error messages SHOULD
+use `recoverable` (platform can retry with modified inputs) or
+`unrecoverable` (terminal failure). The `requires_buyer_input` and
+`requires_buyer_review` severities assume an existing resource and are not
+meaningful in error responses.
 
 See [REST](checkout-rest.md#create-checkout) and [MCP](checkout-mcp.md#create_checkout) binding examples.
 

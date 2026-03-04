@@ -187,7 +187,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
         {
           "type": "error",
           "code": "out_of_stock",
-          "content": "All requested items are currently out of stock.",
+          "content": "All requested items are currently out of stock",
           "severity": "unrecoverable"
         }
       ],
@@ -278,7 +278,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
         {
           "type": "error",
           "code": "not_found",
-          "content": "Cart not found or has expired.",
+          "content": "Cart not found or has expired",
           "severity": "unrecoverable"
         }
       ],
@@ -529,7 +529,7 @@ HTTP 200 and the UCP envelope containing `messages`:
     {
       "type": "error",
       "code": "not_found",
-      "content": "Cart not found or has expired.",
+      "content": "Cart not found or has expired",
       "severity": "unrecoverable"
     }
   ],

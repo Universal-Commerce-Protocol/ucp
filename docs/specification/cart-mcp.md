@@ -235,7 +235,7 @@ Maps to the [Create Cart](cart.md#create-cart) operation.
             {
               "type": "error",
               "code": "out_of_stock",
-              "content": "All requested items are currently out of stock.",
+              "content": "All requested items are currently out of stock",
               "severity": "unrecoverable"
             }
           ],
@@ -359,7 +359,7 @@ Maps to the [Get Cart](cart.md#get-cart) operation.
             {
               "type": "error",
               "code": "not_found",
-              "content": "Cart not found or has expired.",
+              "content": "Cart not found or has expired",
               "severity": "unrecoverable"
             }
           ],
@@ -636,7 +636,7 @@ JSON-RPC `result` with `structuredContent` containing the UCP envelope and
         {
           "type": "error",
           "code": "not_found",
-          "content": "Cart not found or has expired.",
+          "content": "Cart not found or has expired",
           "severity": "unrecoverable"
         }
       ],

@@ -23,7 +23,7 @@
         "$ref": "message.json"
       },
       "minItems": 1,
-      "description": "Array of error messages describing why the operation failed."
+      "description": "Array of messages describing why the operation failed."
     },
     "continue_url": {
       "type": "string",
