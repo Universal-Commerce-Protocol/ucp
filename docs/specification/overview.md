@@ -1629,15 +1629,13 @@ MCP servers:
   "id": 1,
   "result": {
     "structuredContent": {
-      "checkout": {
-        "ucp": {"version": "2026-01-11", "capabilities": {...}},
-        "id": "checkout_abc123",
-        "status": "incomplete",
-        ...
-      }
+      "ucp": {"version": "2026-01-11", "capabilities": {...}},
+      "id": "checkout_abc123",
+      "status": "incomplete",
+      ...
     },
     "content": [
-      {"type": "text", "text": "{\"checkout\":{\"ucp\":{...},\"id\":\"checkout_abc123\",...}}"}
+      {"type": "text", "text": "{\"ucp\":{...},\"id\":\"checkout_abc123\",...}"}
     ]
   }
 }
