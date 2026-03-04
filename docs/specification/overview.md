@@ -1419,10 +1419,10 @@ certified and handle:
 
 ### Fraud Prevention Integration
 
-UCP supports fraud prevention through [Signals](#authorization--abuse-signals) and the
+UCP supports fraud prevention through [Signals](#signals) and the
 payment architecture:
 
-- Platforms provide transaction environment [signals](#authorization--abuse-signals) (IP, user
+- Platforms provide transaction environment [signals](#signals) (IP, user
     agent) on cart and checkout requests
 - Businesses can require additional fields in handler configurations (e.g.,
     3DS requirements)
@@ -1560,7 +1560,7 @@ Sensitive data (such as Payment Credentials or PII) **MUST** be handled
 according to PCI-DSS and GDPR guidelines. UCP encourages the use of tokenized
 payment data to minimize business and platform liability.
 
-### Authorization & Abuse Signals
+### Signals
 
 Businesses require transaction environment data for authorization, rate
 limiting, and abuse prevention. Signal values **MUST NOT** be buyer-asserted
@@ -1595,31 +1595,25 @@ Signal fields may contain personally identifiable information
 transaction. Businesses **SHOULD NOT** persist signal data beyond the
 operational needs of the transaction (e.g., order finalization, fraud review).
 
-Businesses **MAY** return info messages to provide non-blocking advisory
-context to support authorization and abuse prevention. Info messages do not
-affect resource status or block progression. Platforms **SHOULD** surface
-actionable information to the buyer.
-
-Well-known info codes for signal feedback:
-
-| Code    | Description                                            |
-| :------ | :----------------------------------------------------- |
-| `risk`  | Fraud assessment and authorization confidence advisory |
-| `abuse` | Rate limiting and bot detection advisory               |
+Businesses **MAY** use messages with code `signal` to request additional
+data. The `path` field identifies the requested signal; the message `type`
+determines enforcement. An `error` blocks status progression until the
+signal is provided; an `info` is advisory and non-blocking.
 
 ```json
 {
   "messages": [
     {
-      "type": "info",
-      "code": "risk",
+      "type": "error",
+      "code": "signal",
       "path": "$.signals['dev.ucp.buyer_ip']",
-      "content": "IP geolocation does not match shipping country; additional verification may apply"
+      "content": "Buyer IP is required to proceed."
     },
     {
       "type": "info",
-      "code": "abuse",
-      "content": "Elevated transaction failure rate; validate client and buyer intent"
+      "code": "signal",
+      "path": "$.signals['dev.ucp.user_agent']",
+      "content": "Providing user agent may improve checkout outcomes."
     }
   ]
 }

@@ -187,7 +187,7 @@ consistent data structures when converting a cart to a checkout session.
 
 Transaction environment data provided by the platform to support authorization
 and abuse prevention. Signal values MUST NOT be buyer-asserted claims. See
-[Signals](overview.md#authorization--abuse-signals) for details and privacy
+[Signals](overview.md#signals) for details and privacy
 requirements.
 
 {{ schema_fields('types/signals', 'checkout') }}
