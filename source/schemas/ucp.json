@@ -17,6 +17,41 @@
       "description": "Reverse-domain identifier (e.g., com.google.pay, dev.ucp.shopping.checkout)"
     },
 
+    "version_constraint": {
+      "type": "object",
+      "description": "Version range requirement with minimum and optional maximum.",
+      "properties": {
+        "min": {
+          "$ref": "#/$defs/version",
+          "description": "Minimum required version (inclusive)."
+        },
+        "max": {
+          "$ref": "#/$defs/version",
+          "description": "Maximum compatible version (inclusive). When absent, no upper bound."
+        }
+      },
+      "required": ["min"],
+      "additionalProperties": true
+    },
+
+    "requires": {
+      "type": "object",
+      "description": "Version requirements for extension schemas. Declares minimum (and optionally maximum) protocol and capability versions needed for correct operation.",
+      "properties": {
+        "protocol": {
+          "$ref": "#/$defs/version_constraint",
+          "description": "Required protocol version."
+        },
+        "capabilities": {
+          "type": "object",
+          "description": "Required capability versions, keyed by capability name. Keys must be a subset of the extension's $defs keys.",
+          "propertyNames": { "$ref": "#/$defs/reverse_domain_name" },
+          "additionalProperties": { "$ref": "#/$defs/version_constraint" }
+        }
+      },
+      "additionalProperties": true
+    },
+
     "entity": {
       "type": "object",
       "description": "Shared foundation for all UCP entities.",
