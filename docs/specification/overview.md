@@ -596,7 +596,10 @@ UCP negotiation can fail in two ways:
 2. **Negotiation failure**: The provided profile is valid but capability
    intersection is empty or versions are incompatible.
 
-These failure types require different handling:
+Discovery failures are transport errors — the required inputs could
+not be retrieved or were malformed. Negotiation failures are business
+outcomes — the handler executed on the provided inputs and reported
+the result in the UCP response:
 
 - **Discovery failure** → transport error with optional `continue_url`
 - **Negotiation failure** → UCP response with optional `continue_url`

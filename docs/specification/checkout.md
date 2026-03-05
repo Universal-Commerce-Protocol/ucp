@@ -118,14 +118,17 @@ platform receives messages indicating what's needed to progress.
 
 The `messages` array contains errors, warnings, and informational messages
 about the checkout state. Error messages include a `severity` field that
-declares **who resolves the error**:
+reflects the resource state and recommended action. When `ucp.status`
+is `"success"`, a resource is returned and severity indicates the
+recommended action. When `ucp.status` is `"error"`, no valid resource
+exists — severity is `unrecoverable`:
 
-| Severity                | Meaning                                                          | Platform Action                     |
-| :---------------------- | :--------------------------------------------------------------- | :---------------------------------- |
-| `recoverable`           | Platform can resolve by modifying inputs and retrying via API    | Modify inputs and retry calling API |
-| `requires_buyer_input`  | Business requires input not available via API                    | Hand off via `continue_url`         |
-| `requires_buyer_review` | Buyer review and authorization is required                       | Hand off via `continue_url`         |
-| `unrecoverable`         | Terminal failure — cannot be recovered via API                   | Redirect via `continue_url`         |
+| Severity                | Meaning                                          | Platform Action                   |
+| :---------------------- | :----------------------------------------------- | :-------------------------------- |
+| `recoverable`           | Platform can resolve by modifying inputs via API | Update resource and retry         |
+| `requires_buyer_input`  | Business requires input not available via API    | Hand off via `continue_url`       |
+| `requires_buyer_review` | Buyer review and authorization is required       | Hand off via `continue_url`       |
+| `unrecoverable`         | No resource exists to act on                     | Retry with new resource or inputs |
 
 Errors with `requires_*` severity contribute to `status: requires_escalation`.
 Both result in buyer handoff, but represent different checkout states.
@@ -135,6 +138,31 @@ requires information their API doesn't support collecting programmatically.
 * `requires_buyer_review` means the checkout is **complete** — but policy,
 regulatory, or entitlement rules require buyer authorization before order
 placement (e.g., high-value order approval, first-purchase policy).
+
+When the business cannot create a new resource or the requested resource
+no longer exists, the response contains `ucp.status: "error"` with
+`messages` describing the failure — no resource is included in the
+response body. Error responses MUST use `severity: "unrecoverable"`.
+For example, a business may reject a create checkout request where all
+items are unavailable:
+
+```json
+{
+  "ucp": { "version": "2026-01-11", "status": "error" },
+  "messages": [
+    {
+      "type": "error",
+      "code": "out_of_stock",
+      "content": "All requested items are currently out of stock",
+      "severity": "unrecoverable"
+    }
+  ],
+  "continue_url": "https://merchant.com/"
+}
+```
+
+See [REST](checkout-rest.md#create-checkout) and
+[MCP](checkout-mcp.md#create_checkout) binding examples.
 
 #### Error Processing Algorithm
 
@@ -175,7 +203,13 @@ Businesses **SHOULD** surface such messages as early as possible, and platforms
 Example error processing algorithm:
 
 ```text
-GIVEN checkout with messages array
+GIVEN response with messages array
+
+IF ucp.status = "error"
+  -- No resource exists; severity is unrecoverable
+  RETRY with new resource or inputs, or hand off via continue_url
+  RETURN
+
 FILTER errors FROM messages WHERE type = "error"
 
 PARTITION errors INTO
@@ -194,40 +228,6 @@ IF requires_buyer_input is not empty
 ELSE IF requires_buyer_review is not empty
   handoff_context = "ready for final review by the buyer"
 ```
-
-### Create Operation Error Responses
-
-When **all** requested items fail—out of stock or unavailable—the business
-MAY return an error response instead of creating a checkout resource.
-`ucp.status` is the primary discriminator; the absence of `id` is a
-consistent secondary indicator:
-
-* **`ucp.status: "error"`** → no resource created; inspect `messages`
-  for the reason
-* **`ucp.status: "success"`** → checkout resource created
-
-```json
-{
-  "ucp": { "version": "2026-01-11", "status": "error" },
-  "messages": [
-    {
-      "type": "error",
-      "code": "out_of_stock",
-      "content": "All requested items are currently out of stock",
-      "severity": "unrecoverable"
-    }
-  ],
-  "continue_url": "https://merchant.com/"
-}
-```
-
-When no resource is created (`ucp.status: "error"`), error messages SHOULD
-use `recoverable` (platform can retry with modified inputs) or
-`unrecoverable` (terminal failure). The `requires_buyer_input` and
-`requires_buyer_review` severities assume an existing resource and are not
-meaningful in error responses.
-
-See [REST](checkout-rest.md#create-checkout) and [MCP](checkout-mcp.md#create_checkout) binding examples.
 
 #### Standard Errors
 
