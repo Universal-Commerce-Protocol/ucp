@@ -7,6 +7,23 @@
   "description": "Product/variant lookup by identifier capability.",
   "type": "object",
   "$defs": {
+    "lookup_variant": {
+      "description": "Variant with required correlation metadata for lookup responses.",
+      "allOf": [
+        { "$ref": "types/variant.json" },
+        {
+          "required": ["inputs"],
+          "properties": {
+            "inputs": {
+              "type": "array",
+              "items": { "$ref": "types/input_correlation.json" },
+              "minItems": 1,
+              "description": "Which request identifiers resolved to this variant, and how. Each entry maps a request ID to its match type."
+            }
+          }
+        }
+      ]
+    },
     "lookup_request": {
       "type": "object",
       "description": "Request body for catalog lookup.",
@@ -36,7 +53,16 @@
         "products": {
           "type": "array",
           "items": {
-            "$ref": "types/product.json"
+            "allOf": [
+              { "$ref": "types/product.json" },
+              {
+                "properties": {
+                  "variants": {
+                    "items": { "$ref": "#/$defs/lookup_variant" }
+                  }
+                }
+              }
+            ]
           },
           "description": "Products matching the requested identifiers. May contain fewer items if some identifiers not found, or more if identifiers match multiple products."
         },
