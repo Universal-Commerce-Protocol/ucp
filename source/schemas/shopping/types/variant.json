@@ -19,9 +19,23 @@
       "type": "string",
       "description": "Business-assigned identifier for inventory and fulfillment."
     },
-    "barcode": {
-      "type": "string",
-      "description": "Industry-standard identifier (UPC, EAN, ISBN) for the variant."
+    "barcodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["type", "value"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Barcode standard. Well-known values: UPC, EAN, ISBN, GTIN, JAN."
+          },
+          "value": {
+            "type": "string",
+            "description": "Barcode value."
+          }
+        }
+      },
+      "description": "Industry-standard product identifiers for cross-reference and correlation."
     },
     "handle": {
       "type": "string",

@@ -51,6 +51,7 @@ agentic
 amortiguación
 atok
 backorder
+barcodes
 checkout
 credentialless
 credentialization
@@ -62,6 +63,7 @@ fontawesome
 fpan
 fulfillable
 gpay
+gtin
 ingestions
 inlinehilite
 lifecycles
