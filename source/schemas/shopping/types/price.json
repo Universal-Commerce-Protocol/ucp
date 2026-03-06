@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/shopping/types/price.json",
   "title": "Price",
-  "description": "Price with explicit currency. Amount is always in minor units (e.g., cents for USD).",
+  "description": "Price with explicit currency.",
   "type": "object",
   "required": [
     "amount",
@@ -10,9 +10,8 @@
   ],
   "properties": {
     "amount": {
-      "type": "integer",
-      "description": "Amount in minor currency units (e.g., 1000 = $10.00 USD). Use 0 for free items.",
-      "minimum": 0
+      "$ref": "amount.json",
+      "description": "Amount in ISO 4217 minor units. Use 0 for free items."
     },
     "currency": {
       "type": "string",

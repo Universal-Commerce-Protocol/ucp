@@ -2,18 +2,16 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/shopping/types/price_filter.json",
   "title": "Price Filter",
-  "description": "Price range filter in minor currency units. Merchant determines currency from context (e.g., country=US → USD). Response prices include explicit currency.",
+  "description": "Price range filter. Merchant determines currency from context (e.g., country=US → USD). Response prices include explicit currency.",
   "type": "object",
   "properties": {
     "min": {
-      "type": "integer",
-      "minimum": 0,
-      "description": "Minimum price in minor units."
+      "$ref": "amount.json",
+      "description": "Minimum price in ISO 4217 minor units."
     },
     "max": {
-      "type": "integer",
-      "minimum": 0,
-      "description": "Maximum price in minor units."
+      "$ref": "amount.json",
+      "description": "Maximum price in ISO 4217 minor units."
     }
   }
 }
