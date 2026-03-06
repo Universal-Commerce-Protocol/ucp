@@ -27,7 +27,7 @@
       "properties": {
         "cursor": {
           "type": "string",
-          "description": "Cursor to fetch the next page of results."
+          "description": "Cursor to fetch the next page of results. MUST be present when has_next_page is true."
         },
         "has_next_page": {
           "type": "boolean",
@@ -36,8 +36,16 @@
         "total_count": {
           "type": "integer",
           "minimum": 0,
-          "description": "Total number of matching items (if available)."
+          "description": "Total number of matching items, if available."
         }
+      },
+      "required": ["has_next_page"],
+      "if": {
+        "properties": { "has_next_page": { "const": true } },
+        "required": ["has_next_page"]
+      },
+      "then": {
+        "required": ["cursor"]
       }
     }
   }
