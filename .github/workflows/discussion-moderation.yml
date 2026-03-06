@@ -23,6 +23,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
+      - name: Generate Token
+        uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -32,7 +40,7 @@ jobs:
           repository: ${{ github.repository_owner }}/.github
           path: .github_org
           ref: main
-          token: ${{ secrets.CROSS_REPO_READ_PAT }}
+          token: ${{ steps.app-token.outputs.token }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -46,7 +54,7 @@ jobs:
 
       - name: Run Moderation Script
         env:
-          GITHUB_TOKEN: ${{ secrets.CROSS_REPO_READ_PAT }}
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
           OWNER: ${{ github.repository_owner }}
           REPO: ${{ github.event.repository.name }}
