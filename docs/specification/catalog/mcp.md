@@ -135,7 +135,7 @@ Maps to the [Catalog Search](search.md) capability.
               "intent": "looking for comfortable everyday shoes"
             },
             "filters": {
-              "category": ["Footwear"],
+              "categories": ["Footwear"],
               "price": {
                 "max": 15000
               }
@@ -174,7 +174,7 @@ Maps to the [Catalog Search](search.md) capability.
                 "plain": "Lightweight running shoes with responsive cushioning."
               },
               "url": "https://business.example.com/products/blue-runner-pro",
-              "category": [
+              "categories": [
                 { "value": "187", "taxonomy": "google_product_category" },
                 { "value": "aa-8-1", "taxonomy": "shopify" },
                 { "value": "Footwear > Running", "taxonomy": "merchant" }
@@ -318,7 +318,7 @@ The `catalog.ids` parameter accepts an array of identifiers and optional context
                   "description": { "plain": "Size 10 variant" },
                   "price": { "amount": 12000, "currency": "USD" },
                   "availability": { "available": true },
-                  "input": [
+                  "inputs": [
                     { "id": "prod_abc123", "match": "featured" }
                   ],
                   "tags": ["running", "road", "neutral"],
@@ -356,7 +356,7 @@ The `catalog.ids` parameter accepts an array of identifiers and optional context
                   "description": { "plain": "Size 11 Green variant" },
                   "price": { "amount": 15000, "currency": "USD" },
                   "availability": { "available": true },
-                  "input": [
+                  "inputs": [
                     { "id": "var_xyz789", "match": "exact" }
                   ],
                   "tags": ["trail", "waterproof"],

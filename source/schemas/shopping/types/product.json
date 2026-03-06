@@ -33,7 +33,7 @@
       "format": "uri",
       "description": "Canonical product page URL."
     },
-    "category": {
+    "categories": {
       "type": "array",
       "items": {
         "$ref": "category.json"

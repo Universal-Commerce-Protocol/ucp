@@ -84,7 +84,7 @@ Maps to the [Catalog Search](search.md) capability.
         "intent": "looking for comfortable everyday shoes"
       },
       "filters": {
-        "category": ["Footwear"],
+        "categories": ["Footwear"],
         "price": {
           "max": 15000
         }
@@ -117,7 +117,7 @@ Maps to the [Catalog Search](search.md) capability.
             "plain": "Lightweight running shoes with responsive cushioning."
           },
           "url": "https://business.example.com/products/blue-runner-pro",
-          "category": [
+          "categories": [
             { "value": "187", "taxonomy": "google_product_category" },
             { "value": "aa-8-1", "taxonomy": "shopify" },
             { "value": "Footwear > Running", "taxonomy": "merchant" }
@@ -241,7 +241,7 @@ applies to all lookups in the batch.
               "description": { "plain": "Variante talla 10" },
               "price": { "amount": 12000, "currency": "USD" },
               "availability": { "available": true },
-              "input": [
+              "inputs": [
                 { "id": "prod_abc123", "match": "featured" }
               ]
             }
@@ -264,7 +264,7 @@ applies to all lookups in the batch.
               "title": "Talla 10",
               "price": { "amount": 15000, "currency": "USD" },
               "availability": { "available": true },
-              "input": [
+              "inputs": [
                 { "id": "prod_def456", "match": "featured" }
               ]
             }

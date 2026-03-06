@@ -41,15 +41,15 @@ resolve to the same product, it MUST be returned once.
 
 ### Client Correlation
 
-The response does not guarantee order. Each variant carries an `input`
+The response does not guarantee order. Each variant carries an `inputs`
 array identifying which request identifiers resolved to it, and how.
 
 {{ schema_fields('types/input_correlation', 'catalog') }}
 
 Multiple request identifiers may resolve to the same variant (e.g., a
 product ID and one of its variant IDs). When this occurs, the variant's
-`input` array contains one entry per resolved identifier, each with its
-own match type. Variants without an `input` entry MUST NOT appear in
+`inputs` array contains one entry per resolved identifier, each with its
+own match type. Variants without an `inputs` entry MUST NOT appear in
 lookup responses.
 
 ### Batch Size

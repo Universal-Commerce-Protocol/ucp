@@ -54,7 +54,7 @@
       "format": "uri",
       "description": "Canonical variant page URL."
     },
-    "category": {
+    "categories": {
       "type": "array",
       "items": {
         "$ref": "category.json"
@@ -146,7 +146,7 @@
       "type": "object",
       "description": "Business-defined custom data extending the standard variant model."
     },
-    "input": {
+    "inputs": {
       "type": "array",
       "items": {
         "$ref": "input_correlation.json"

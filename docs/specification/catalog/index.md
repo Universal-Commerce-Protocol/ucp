@@ -83,7 +83,7 @@ and context for search. Platforms SHOULD treat the first element as featured.
 
 A purchasable item with specific option selections, price, and availability.
 
-In lookup responses, each variant carries an `input` array for correlation:
+In lookup responses, each variant carries an `inputs` array for correlation:
 which request identifiers resolved to this variant, and whether the match
 was `exact` or `featured` (server-selected). See
 [Client Correlation](lookup.md#client-correlation) for details.
@@ -227,7 +227,7 @@ identifiers were not found.
 }
 ```
 
-Agents correlate results using the `input` array on each variant. See
+Agents correlate results using the `inputs` array on each variant. See
 [Client Correlation](lookup.md#client-correlation).
 
 ## Transport Bindings
