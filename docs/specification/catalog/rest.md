@@ -382,9 +382,8 @@ Business outcomes use the standard HTTP 200 status with messages in the response
 
 A conforming REST transport implementation **MUST**:
 
-1. Implement the `POST /catalog/search` endpoint per [Catalog Search](search.md) capability requirements.
-2. Implement the `POST /catalog/lookup` endpoint per [Catalog Lookup](lookup.md) capability requirements.
-3. Return products with valid `Price` objects (amount + currency).
-4. Support cursor-based pagination with default limit of 10.
-5. Return HTTP 200 for lookup requests; unknown identifiers result in fewer products returned (MAY include informational `not_found` messages).
-6. Return HTTP 400 with `request_too_large` error for requests exceeding batch size limits.
+1. Implement endpoints for each catalog capability advertised in the business's UCP profile, per their respective capability requirements ([Search](search.md), [Lookup](lookup.md)). Each capability may be adopted independently.
+2. Return products with valid `Price` objects (amount + currency).
+3. Support cursor-based pagination with default limit of 10.
+4. Return HTTP 200 for lookup requests; unknown identifiers result in fewer products returned (MAY include informational `not_found` messages).
+5. Return HTTP 400 with `request_too_large` error for requests exceeding batch size limits.

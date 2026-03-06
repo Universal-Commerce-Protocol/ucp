@@ -480,12 +480,10 @@ results.
 A conforming MCP transport implementation **MUST**:
 
 1. Implement JSON-RPC 2.0 protocol correctly.
-2. Provide both `search_catalog` and `lookup_catalog` tools.
-3. Require `catalog.query` parameter for `search_catalog`.
-4. Implement `lookup_catalog` per [Catalog Lookup](lookup.md) capability requirements.
-5. Use JSON-RPC errors for transport issues; use `messages` array for business outcomes.
-6. Return successful result for lookup requests; unknown identifiers result in fewer products returned (MAY include informational `not_found` messages).
-7. Validate tool inputs against UCP schemas.
-8. Return products with valid `Price` objects (amount + currency).
-9. Support cursor-based pagination with default limit of 10.
-10. Return `-32602` (Invalid params) for requests exceeding batch size limits.
+2. Implement tools for each catalog capability advertised in the business's UCP profile, per their respective capability requirements ([Search](search.md), [Lookup](lookup.md)). Each capability may be adopted independently.
+3. Use JSON-RPC errors for transport issues; use `messages` array for business outcomes.
+4. Return successful result for lookup requests; unknown identifiers result in fewer products returned (MAY include informational `not_found` messages).
+5. Validate tool inputs against UCP schemas.
+6. Return products with valid `Price` objects (amount + currency).
+7. Support cursor-based pagination with default limit of 10.
+8. Return `-32602` (Invalid params) for requests exceeding batch size limits.
