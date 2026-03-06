@@ -961,7 +961,7 @@ class UcpApp {
   }
 
   prepareUpdatePayload(checkoutResponse) {
-    const patch = { id: checkoutResponse.id };
+    const patch = { id: checkoutResponse.id }; // deprecated: id is provided in URL path
     const errors = checkoutResponse.messages || [];
 
     if (errors.some(e => e.path === "$.buyer.email")) {

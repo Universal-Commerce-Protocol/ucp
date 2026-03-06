@@ -38,7 +38,7 @@ jobs:
           fetch-depth: 0
 
       - name: Lint Code Base
-        uses: super-linter/super-linter/slim@v8
+        uses: super-linter/super-linter/slim@v8.5.0
         env:
           DEFAULT_BRANCH: ${{ github.base_ref }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

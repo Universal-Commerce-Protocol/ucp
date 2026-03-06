@@ -43,6 +43,7 @@ Ulta
 Visa
 Variante
 Wayfair
+WORKTREE
 Worldpay
 Zapatillas
 Zalando
@@ -99,6 +100,7 @@ upsell
 upsells
 variante
 vulnz
+worktree
 yaml
 zapatillas
 yml

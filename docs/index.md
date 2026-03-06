@@ -43,7 +43,7 @@ image: assets/banner.png
     <div class="promo-card">
       <h3>Learn</h3>
       <p>Protocol overview, core concepts, and design principles</p>
-      <a href="specification/overview/" class="promo-button">
+      <a href="latest/specification/overview/" class="promo-button">
         Read the docs
       </a>
     </div>
@@ -186,7 +186,7 @@ image: assets/banner.png
           <div class="pane-eyebrow">SEE IT IN ACTION</div>
           <h3>Checkout</h3>
           <p>Support complex cart logic, dynamic pricing, tax calculations, and more across millions of businesses through unified checkout sessions.</p>
-          <a href="specification/checkout-rest/" class="learn-more-btn">Learn more</a>
+          <a href="latest/specification/checkout-rest/" class="learn-more-btn">Learn more</a>
         </div>
         <div class="pane-visuals">
           <div class="image-container">
@@ -270,7 +270,7 @@ image: assets/banner.png
           <div class="pane-eyebrow">SEE IT IN ACTION</div>
           <h3>Identity Linking</h3>
           <p>OAuth 2.0 standard enables agents to maintain secure, authorized relationships without sharing credentials.</p>
-          <a href="specification/identity-linking/" class="learn-more-btn">Learn more</a>
+          <a href="latest/specification/identity-linking/" class="learn-more-btn">Learn more</a>
         </div>
         <div class="pane-visuals">
           <div class="image-container">
@@ -314,7 +314,7 @@ image: assets/banner.png
           <div class="pane-eyebrow">SEE IT IN ACTION</div>
           <h3>Order</h3>
           <p>From purchase confirmation to delivery. Real-time webhooks power status updates, shipment tracking, and return processing across every channel.</p>
-          <a href="specification/order/" class="learn-more-btn">Learn more</a>
+          <a href="latest/specification/order/" class="learn-more-btn">Learn more</a>
         </div>
         <div class="pane-visuals">
           <div class="image-container">
@@ -408,7 +408,7 @@ image: assets/banner.png
       <p>
         Integrate and negotiate directly with a seller's checkout API to power native UI and workflows for your platform.
       </p>
-      <a href="specification/checkout-rest/" class="promo-button">See how it works</a>
+      <a href="latest/specification/checkout-rest/" class="promo-button">See how it works</a>
     </div>
 
     <div class="two-column-promo-item">
@@ -419,7 +419,7 @@ image: assets/banner.png
       <p>
         Embed and render business checkout UI to support complex checkout flows, with advanced capabilities like bidirectional communication, and payment and shipping address delegation.
       </p>
-      <a href="specification/embedded-checkout/" class="promo-button">Learn more</a>
+      <a href="latest/specification/embedded-checkout/" class="promo-button">Learn more</a>
     </div>
 
   </div>
@@ -437,7 +437,7 @@ image: assets/banner.png
         <p>
           Build the future of commerce on an open foundation. Join our community in evolving an open-source standard designed for the next generation of digital commerce.
         </p>
-        <a href="specification/overview/" class="lifecycle-container-item-link">View the technical spec</a>
+        <a href="latest/specification/overview/" class="lifecycle-container-item-link">View the technical spec</a>
       </div>
       <div class="lifecycle-container-item">
         <div class="lifecycle-container-item-img-wrapper">
@@ -506,6 +506,10 @@ image: assets/banner.png
       <div class="partner-logo">
         <img src="assets/partner/endorsed/Carrefour.svg" alt="Carrefour" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
         <span>Carrefour</span>
+      </div>
+      <div class="partner-logo">
+        <img src="assets/partner/endorsed/CheckoutCom.svg" alt="Checkout.com" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+        <span>Chewy</span>
       </div>
       <div class="partner-logo">
         <img src="assets/partner/endorsed/Chewy.svg" alt="Chewy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
@@ -621,6 +625,10 @@ image: assets/banner.png
         <span>Carrefour</span>
       </div>
       <div class="partner-logo">
+        <img src="assets/partner/endorsed/CheckoutCom.svg" alt="Checkout.com" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+        <span>Chewy</span>
+      </div>
+      <div class="partner-logo">
         <img src="assets/partner/endorsed/Chewy.svg" alt="Chewy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
         <span>Chewy</span>
       </div>
@@ -733,14 +741,14 @@ image: assets/banner.png
         <div class="get-started-container-step-icon-wrapper">
           <img src="assets/Icon=Experiment.svg" alt="Experiment" class="get-started-container-step-icon">
         </div>
-        <h3><a href="https://ucp.dev/playground/" target="_blank">Experiment</a></h3>
+        <h3><a href="latest/specification/playground/" target="_blank">Experiment</a></h3>
         <p>Experiment with the protocol and its different agent roles</p>
       </div>
       <div class="get-started-container-step">
         <div class="get-started-container-step-icon-wrapper">
           <img src="assets/Icon=Contribute.svg" alt="Contribute" class="get-started-container-step-icon">
         </div>
-        <h3><a href="https://github.com/Universal-Commerce-Protocol/ucp/blob/main/CONTRIBUTING.md" target="_blank">Contribute</a></h3>
+        <h3><a href="https://github.com/Universal-Commerce-Protocol/.github/blob/main/CONTRIBUTING.md" target="_blank">Contribute</a></h3>
         <p>Contribute your feedback and code to the public repository</p>
       </div>
     </div>
