@@ -326,7 +326,7 @@ platform can prefill checkout state when initiating a buy-now flow.
 * After a checkout session reaches the state "completed", it is considered
     immutable.
 
-## Capability Schema Definition
+## Capability Schema Definition <span id="checkout"></span>
 
 {{ schema_fields('checkout_resp', 'checkout') }}
 
@@ -505,10 +505,6 @@ field or omitting them.
 
 {{ schema_fields('payment', 'checkout') }}
 
-### Payment Instrument
-
-{{ schema_fields('payment_instrument', 'checkout') }}
-
 #### Selected Payment Instrument
 
 {{ extension_schema_fields('types/payment_instrument.json#/$defs/selected_payment_instrument', 'checkout') }}
@@ -538,3 +534,7 @@ field or omitting them.
 ### Order Confirmation
 
 {{ schema_fields('order_confirmation', 'checkout') }}
+
+### Error Response <span id="error-response"></span>
+
+{{ schema_fields('types/error_response', 'checkout') }}
