@@ -40,20 +40,18 @@ Businesses advertise MCP transport availability through their UCP profile at
         }
       }
     },
-    "capabilities": [
-      {
-        "name": "dev.ucp.shopping.catalog.search",
+    "capabilities": {
+      "dev.ucp.shopping.catalog.search": [{
         "version": "2026-01-11",
         "spec": "https://ucp.dev/specification/catalog/search",
         "schema": "https://ucp.dev/schemas/shopping/catalog_search.json"
-      },
-      {
-        "name": "dev.ucp.shopping.catalog.lookup",
+      }],
+      "dev.ucp.shopping.catalog.lookup": [{
         "version": "2026-01-11",
         "spec": "https://ucp.dev/specification/catalog/lookup",
         "schema": "https://ucp.dev/schemas/shopping/catalog_lookup.json"
-      }
-    ]
+      }]
+    }
   }
 }
 ```
@@ -79,7 +77,7 @@ protocol metadata:
       "catalog": {
         "query": "blue running shoes",
         "context": {
-          "country": "US",
+          "address_country": "US",
           "intent": "looking for comfortable everyday shoes"
         }
       }
@@ -130,8 +128,8 @@ Maps to the [Catalog Search](search.md) capability.
           "catalog": {
             "query": "blue running shoes",
             "context": {
-              "country": "US",
-              "region": "CA",
+              "address_country": "US",
+              "address_region": "CA",
               "intent": "looking for comfortable everyday shoes"
             },
             "filters": {
@@ -275,7 +273,7 @@ The `catalog.ids` parameter accepts an array of identifiers and optional context
           "catalog": {
             "ids": ["prod_abc123", "var_xyz789"],
             "context": {
-              "country": "US"
+              "address_country": "US"
             }
           }
         }

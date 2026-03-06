@@ -40,20 +40,18 @@ Businesses advertise REST transport availability through their UCP profile at
         }
       }
     },
-    "capabilities": [
-      {
-        "name": "dev.ucp.shopping.catalog.search",
+    "capabilities": {
+      "dev.ucp.shopping.catalog.search": [{
         "version": "2026-01-11",
         "spec": "https://ucp.dev/specification/catalog/search",
         "schema": "https://ucp.dev/schemas/shopping/catalog_search.json"
-      },
-      {
-        "name": "dev.ucp.shopping.catalog.lookup",
+      }],
+      "dev.ucp.shopping.catalog.lookup": [{
         "version": "2026-01-11",
         "spec": "https://ucp.dev/specification/catalog/lookup",
         "schema": "https://ucp.dev/schemas/shopping/catalog_lookup.json"
-      }
-    ]
+      }]
+    }
   }
 }
 ```
@@ -79,8 +77,8 @@ Maps to the [Catalog Search](search.md) capability.
     {
       "query": "blue running shoes",
       "context": {
-        "country": "US",
-        "region": "CA",
+        "address_country": "US",
+        "address_region": "CA",
         "intent": "looking for comfortable everyday shoes"
       },
       "filters": {
@@ -101,12 +99,11 @@ Maps to the [Catalog Search](search.md) capability.
     {
       "ucp": {
         "version": "2026-01-11",
-        "capabilities": [
-          {
-            "name": "dev.ucp.shopping.catalog.search",
-            "version": "2026-01-11"
-          }
-        ]
+        "capabilities": {
+          "dev.ucp.shopping.catalog.search": [
+            {"version": "2026-01-11"}
+          ]
+        }
       },
       "products": [
         {
@@ -203,7 +200,7 @@ applies to all lookups in the batch.
     {
       "ids": ["prod_abc123", "prod_def456"],
       "context": {
-        "country": "US",
+        "address_country": "US",
         "language": "es"
       }
     }
@@ -215,12 +212,11 @@ applies to all lookups in the batch.
     {
       "ucp": {
         "version": "2026-01-11",
-        "capabilities": [
-          {
-            "name": "dev.ucp.shopping.catalog.lookup",
-            "version": "2026-01-11"
-          }
-        ]
+        "capabilities": {
+          "dev.ucp.shopping.catalog.lookup": [
+            {"version": "2026-01-11"}
+          ]
+        }
       },
       "products": [
         {
@@ -294,12 +290,11 @@ messages indicating which identifiers were not found.
     {
       "ucp": {
         "version": "2026-01-11",
-        "capabilities": [
-          {
-            "name": "dev.ucp.shopping.catalog.lookup",
-            "version": "2026-01-11"
-          }
-        ]
+        "capabilities": {
+          "dev.ucp.shopping.catalog.lookup": [
+            {"version": "2026-01-11"}
+          ]
+        }
       },
       "products": [
         {
@@ -359,12 +354,11 @@ MAY include informational messages indicating which identifiers were not found.
 {
   "ucp": {
     "version": "2026-01-11",
-    "capabilities": [
-      {
-        "name": "dev.ucp.shopping.catalog.lookup",
-        "version": "2026-01-11"
-      }
-    ]
+    "capabilities": {
+      "dev.ucp.shopping.catalog.lookup": [
+        {"version": "2026-01-11"}
+      ]
+    }
   },
   "products": [],
   "messages": [
