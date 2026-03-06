@@ -36,17 +36,17 @@ tackle key user journeys such as multi-item checkout, loyalty, and lifecycle
 management, while ensuring the business's brand and logic remain central to all
 shopping experiences. Key upcoming initiatives include:
 
-*   **Product discovery and post-order management:** By facilitating the entire
-    journey, we help businesses maximize lifetime and average order value rather
-    than just processing a single item for checkout.
-*   **Cart and basket building:** Support for multi-item checkout from a
-    business, complex basket rules (e.g., promotions, tax, shipping), and varied
-    fulfillment logic that reflects how people actually shop.
-*   **Loyalty & Member benefits:** Capabilities to enable loyalty and member
-    benefits to help users find the best value and businesses achieve a deeper
-    connection with their consumers through account linking.
-*   **Native cross-sell and upsell modules:** Capabilities for businesses to
-    provide personalized recommendations and upsells based on user context.
+- **Product discovery and post-order management:** By facilitating the entire
+  journey, we help businesses maximize lifetime and average order value rather
+  than just processing a single item for checkout.
+- **Cart and basket building:** Support for multi-item checkout from a business,
+  complex basket rules (e.g., promotions, tax, shipping), and varied fulfillment
+  logic that reflects how people actually shop.
+- **Loyalty & Member benefits:** Capabilities to enable loyalty and member
+  benefits to help users find the best value and businesses achieve a deeper
+  connection with their consumers through account linking.
+- **Native cross-sell and upsell modules:** Capabilities for businesses to
+  provide personalized recommendations and upsells based on user context.
 
 ### Support for global markets
 
@@ -63,4 +63,5 @@ developers, and payment providers to join us in refining these specifications.
 Your feedback on our early builds helps us shape the standards that will power
 the next generation of global commerce.
 
-[Become a UCP contributor](https://github.com/Universal-Commerce-Protocol/ucp?tab=contributing-ov-file){ target="_blank" }
+[Become a UCP contributor](https://github.com/Universal-Commerce-Protocol/ucp?tab=contributing-ov-file){
+target="\_blank" }

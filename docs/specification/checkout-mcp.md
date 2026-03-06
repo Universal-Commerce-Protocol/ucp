@@ -22,60 +22,62 @@ This document specifies the Model Context Protocol (MCP) binding for the
 ## Protocol Fundamentals
 
 ### Discovery
+
 Businesses advertise MCP transport availability through their UCP profile at
 `/.well-known/ucp`.
 
 ```json
 {
-  "ucp": {
-    "version": "2026-01-11",
-    "services": {
-      "dev.ucp.shopping": {
+    "ucp": {
         "version": "2026-01-11",
-        "spec": "https://ucp.dev/specification/overview",
-        "mcp": {
-          "schema": "https://ucp.dev/services/shopping/mcp.openrpc.json",
-          "endpoint": "https://business.example.com/ucp/mcp"
-        }
-      }
-    },
-    "capabilities": [
-      {
-        "name": "dev.ucp.shopping.checkout",
-        "version": "2026-01-11",
-        "spec": "https://ucp.dev/specification/checkout",
-        "schema": "https://ucp.dev/schemas/shopping/checkout.json"
-      },
-      {
-        "name": "dev.ucp.shopping.fulfillment",
-        "version": "2026-01-11",
-        "spec": "https://ucp.dev/specification/fulfillment",
-        "schema": "https://ucp.dev/schemas/shopping/fulfillment.json",
-        "extends": "dev.ucp.shopping.checkout"
-      }
-    ]
-  }
+        "services": {
+            "dev.ucp.shopping": {
+                "version": "2026-01-11",
+                "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview",
+                "mcp": {
+                    "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/openrpc.json",
+                    "endpoint": "https://business.example.com/ucp/mcp"
+                }
+            }
+        },
+        "capabilities": [
+            {
+                "name": "dev.ucp.shopping.checkout",
+                "version": "2026-01-11",
+                "spec": "https://ucp.dev/{{ ucp_version }}/specification/checkout",
+                "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/checkout.json"
+            },
+            {
+                "name": "dev.ucp.shopping.fulfillment",
+                "version": "2026-01-11",
+                "spec": "https://ucp.dev/{{ ucp_version }}/specification/fulfillment",
+                "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json",
+                "extends": "dev.ucp.shopping.checkout"
+            }
+        ]
+    }
 }
 ```
 
 ### Platform Profile Advertisement
+
 MCP clients **MUST** include the UCP platform profile URI with every request.
 The platform profile is included in the `_meta.ucp` structure within the request
 parameters:
 
 ```json
 {
-  "jsonrpc": "2.0",
-  "id": 1,
-  "method": "create_checkout",
-  "params": {
-    "_meta": {
-      "ucp": {
-        "profile": "https://platform.example/profiles/v2026-01/shopping-agent.json"
-      }
-    },
-    "idempotency_key": "..."
-  }
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "create_checkout",
+    "params": {
+        "_meta": {
+            "ucp": {
+                "profile": "https://platform.example/profiles/v2026-01/shopping-agent.json"
+            }
+        },
+        "idempotency_key": "..."
+    }
 }
 ```
 
@@ -90,20 +92,22 @@ UCP Capabilities map 1:1 to MCP Tools.
 
 MCP tools separate resource identification from payload data:
 
-*   **Requests:** For operations on existing checkouts (`get`, `update`,
-    `complete`, `cancel`), a top-level `id` parameter identifies the target
-    resource. The `checkout` object in the request payload **MUST NOT** contain
-    an `id` field.
-*   **Responses:** All responses include `checkout.id` as part of the full resource state.
-*   **Create:** The `create_checkout` operation does not require an `id` in the request, and the response includes the newly assigned `checkout.id`.
+- **Requests:** For operations on existing checkouts (`get`, `update`,
+  `complete`, `cancel`), a top-level `id` parameter identifies the target
+  resource. The `checkout` object in the request payload **MUST NOT** contain an
+  `id` field.
+- **Responses:** All responses include `checkout.id` as part of the full
+  resource state.
+- **Create:** The `create_checkout` operation does not require an `id` in the
+  request, and the response includes the newly assigned `checkout.id`.
 
-| Tool | Operation | Description |
-| :---- | :---- | :---- |
-| `create_checkout` | [Create Checkout](checkout.md#create-checkout) | Create a checkout session. |
-| `get_checkout` | [Get Checkout](checkout.md#get-checkout) | Get a checkout session. |
-| `update_checkout` | [Update Checkout](checkout.md#update-checkout) | Update a checkout session. |
-| `complete_checkout` | [Complete Checkout](checkout.md#complete-checkout) | Place the order. |
-| `cancel_checkout` | [Cancel Checkout](checkout.md#cancel-checkout) | Cancel a checkout session. |
+| Tool                | Operation                                          | Description                |
+| :------------------ | :------------------------------------------------- | :------------------------- |
+| `create_checkout`   | [Create Checkout](checkout.md#create-checkout)     | Create a checkout session. |
+| `get_checkout`      | [Get Checkout](checkout.md#get-checkout)           | Get a checkout session.    |
+| `update_checkout`   | [Update Checkout](checkout.md#update-checkout)     | Update a checkout session. |
+| `complete_checkout` | [Complete Checkout](checkout.md#complete-checkout) | Place the order.           |
+| `cancel_checkout`   | [Cancel Checkout](checkout.md#cancel-checkout)     | Cancel a checkout session. |
 
 ### `create_checkout`
 
@@ -111,16 +115,16 @@ Maps to the [Create Checkout](checkout.md#create-checkout) operation.
 
 #### Input Schema
 
-*   [Checkout](checkout.md#create-checkout) object.
-    *   Extensions (Optional):
-        *   `dev.ucp.shopping.buyer_consent`: [Buyer Consent](buyer-consent.md)
-        *   `dev.ucp.shopping.fulfillment`: [Fulfillment](fulfillment.md)
-        *   `dev.ucp.shopping.discount`: [Discount](discount.md)
-        *   `dev.ucp.shopping.ap2_mandate`: [AP2 Mandates](ap2-mandates.md)
+- [Checkout](checkout.md#create-checkout) object.
+    - Extensions (Optional):
+        - `dev.ucp.shopping.buyer_consent`: [Buyer Consent](buyer-consent.md)
+        - `dev.ucp.shopping.fulfillment`: [Fulfillment](fulfillment.md)
+        - `dev.ucp.shopping.discount`: [Discount](discount.md)
+        - `dev.ucp.shopping.ap2_mandate`: [AP2 Mandates](ap2-mandates.md)
 
 #### Output Schema
 
-*   [Checkout](checkout.md#create-checkout) object.
+- [Checkout](checkout.md#create-checkout) object.
 
 #### Example
 
@@ -319,11 +323,11 @@ Maps to the [Get Checkout](checkout.md#get-checkout) operation.
 
 #### Input Schema
 
-*   `id` (String): The ID of the checkout session.
+- `id` (String): The ID of the checkout session.
 
 #### Output Schema
 
-*   [Checkout](checkout.md#get-checkout) object.
+- [Checkout](checkout.md#get-checkout) object.
 
 ### `update_checkout`
 
@@ -331,17 +335,17 @@ Maps to the [Update Checkout](checkout.md#update-checkout) operation.
 
 #### Input Schema
 
-*   `id` (String): The ID of the checkout session to update.
-*   [Checkout](checkout.md#update-checkout) object.
-    *   Extensions (Optional):
-        *   `dev.ucp.shopping.buyer_consent`: [Buyer Consent](buyer-consent.md)
-        *   `dev.ucp.shopping.fulfillment`: [Fulfillment](fulfillment.md)
-        *   `dev.ucp.shopping.discount`: [Discount](discount.md)
-        *   `dev.ucp.shopping.ap2_mandate`: [AP2 Mandates](ap2-mandates.md)
+- `id` (String): The ID of the checkout session to update.
+- [Checkout](checkout.md#update-checkout) object.
+    - Extensions (Optional):
+        - `dev.ucp.shopping.buyer_consent`: [Buyer Consent](buyer-consent.md)
+        - `dev.ucp.shopping.fulfillment`: [Fulfillment](fulfillment.md)
+        - `dev.ucp.shopping.discount`: [Discount](discount.md)
+        - `dev.ucp.shopping.ap2_mandate`: [AP2 Mandates](ap2-mandates.md)
 
 #### Output Schema
 
-*   [Checkout](checkout.md#update-checkout) object.
+- [Checkout](checkout.md#update-checkout) object.
 
 #### Example
 
@@ -538,16 +542,15 @@ Maps to the [Complete Checkout](checkout.md#complete-checkout) operation.
 
 #### Input Schema
 
-*   `id` (String): The ID of the checkout session.
-*   `payment` ([Payment](checkout.md#payment), Optional): Payment instrument instance submitted
-    by the buyer.
-*   `idempotency_key` (String, UUID): **Required**. Unique key for retry
-    safety.
+- `id` (String): The ID of the checkout session.
+- `payment` ([Payment](checkout.md#payment), Optional): Payment instrument
+  instance submitted by the buyer.
+- `idempotency_key` (String, UUID): **Required**. Unique key for retry safety.
 
 #### Output Schema
 
-*   [Checkout](checkout.md#complete-checkout) object, containing a partial
-   `order` that holds only `id` and `permalink_url`.
+- [Checkout](checkout.md#complete-checkout) object, containing a partial `order`
+  that holds only `id` and `permalink_url`.
 
 ### `cancel_checkout`
 
@@ -555,12 +558,12 @@ Maps to the [Cancel Checkout](checkout.md#cancel-checkout) operation.
 
 #### Input Schema
 
-*   `id` (String): The ID of the checkout session.
-*   `idempotency_key` (String, UUID): **Required**. Unique key for retry safety.
+- `id` (String): The ID of the checkout session.
+- `idempotency_key` (String, UUID): **Required**. Unique key for retry safety.
 
 #### Output Schema
 
-*   [Checkout](checkout.md#cancel-checkout) object with `status: canceled`.
+- [Checkout](checkout.md#cancel-checkout) object with `status: canceled`.
 
 ## Error Handling
 
@@ -570,25 +573,25 @@ embedded in the JSON-RPC error's `data` field:
 
 ```json
 {
-  "jsonrpc": "2.0",
-  "id": 1,
-  "error": {
-    "code": -32603,
-    "message": "Internal error",
-    "data": {
-      "status": "error",
-      "errors": [
-        {
-          "code": "MERCHANDISE_NOT_AVAILABLE",
-          "message": "One or more cart items are not available",
-          "severity": "requires_buyer_input",
-          "details": {
-            "invalid_items": ["sku_999"]
-          }
+    "jsonrpc": "2.0",
+    "id": 1,
+    "error": {
+        "code": -32603,
+        "message": "Internal error",
+        "data": {
+            "status": "error",
+            "errors": [
+                {
+                    "code": "MERCHANDISE_NOT_AVAILABLE",
+                    "message": "One or more cart items are not available",
+                    "severity": "requires_buyer_input",
+                    "details": {
+                        "invalid_items": ["sku_999"]
+                    }
+                }
+            ]
         }
-      ]
     }
-  }
 }
 ```
 
@@ -596,9 +599,9 @@ embedded in the JSON-RPC error's `data` field:
 
 A conforming MCP transport implementation **MUST**:
 
-1.  Implement JSON-RPC 2.0 protocol correctly.
-2.  Provide all core checkout tools defined in this specification.
-3.  Handle errors with UCP-specific error codes embedded in the JSON-RPC error
-    object.
-4.  Validate tool inputs against UCP schemas.
-5.  Support HTTP transport with streaming.
+1. Implement JSON-RPC 2.0 protocol correctly.
+2. Provide all core checkout tools defined in this specification.
+3. Handle errors with UCP-specific error codes embedded in the JSON-RPC error
+   object.
+4. Validate tool inputs against UCP schemas.
+5. Support HTTP transport with streaming.

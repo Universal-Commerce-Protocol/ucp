@@ -1,6 +1,6 @@
 ---
 hide:
-  - toc
+    - toc
 title: Universal Commerce Protocol
 description: The common language for platforms, agents and businesses.
 image: assets/banner.png
@@ -88,6 +88,7 @@ image: assets/banner.png
       <span class="partners-logo-fallback">Walmart</span>
 
     </div>
+
   </div>
 
   <div class="flexibility-section">
@@ -194,69 +195,69 @@ image: assets/banner.png
           </div>
           <div class="code-block-placeholder">
 
-  ```json {.yaml .no-copy}
-  {
-    "ucp": { ... },
-    "id": "chk_123456789",
-    "status": "ready_for_complete",
-    "currency": "USD",
-    "buyer": {
-      "email": "e.beckett@example.com",
-      "first_name": "Elisa",
-      "last_name": "Beckett"
-    },
-    "line_items": [
-      {
-        "id": "li_1",
-        "item": {
-          "id": "item_123",
-          "title": "Monos Carry-On Pro suitcase",
-          "price": 26550
-        },
-        "quantity": 1,
-        ...
-      }
-    ],
-    "totals": [ ... ],
-    "links": [ ... ],
-    "payment": { ... },
-    "fulfillment": {
-      "methods": [
-        {
-          "id": "method_1",
-          "type": "shipping",
-          "line_item_ids": ["li_1"],
-          "selected_destination_id": "dest_1",
-          "destinations": [
-            {
-              "id": "dest_1",
-              "full_name": "Elisa Beckett",
-              "street_address": "1600 Amphitheatre Pkwy",
-              "address_locality": "Mountain View",
-              "address_region": "CA",
-              "postal_code": "94043",
-              "address_country": "US"
-            }
-          ],
-          "groups": [
-            {
-              "id": "group_1",
-              "line_item_ids": ["li_1"],
-              "selected_option_id": "free-shipping",
-              "options": [
-                {
-                  "id": "free-shipping",
-                  "title": "Free Shipping",
-                  "totals": [ {"type": "total", "amount": 0} ]
-                }
-              ]
-            }
-          ]
-        }
-      ]
+````json {.yaml .no-copy}
+{
+  "ucp": { ... },
+  "id": "chk_123456789",
+  "status": "ready_for_complete",
+  "currency": "USD",
+  "buyer": {
+    "email": "e.beckett@example.com",
+    "first_name": "Elisa",
+    "last_name": "Beckett"
+  },
+  "line_items": [
+    {
+      "id": "li_1",
+      "item": {
+        "id": "item_123",
+        "title": "Monos Carry-On Pro suitcase",
+        "price": 26550
+      },
+      "quantity": 1,
+      ...
     }
+  ],
+  "totals": [ ... ],
+  "links": [ ... ],
+  "payment": { ... },
+  "fulfillment": {
+    "methods": [
+      {
+        "id": "method_1",
+        "type": "shipping",
+        "line_item_ids": ["li_1"],
+        "selected_destination_id": "dest_1",
+        "destinations": [
+          {
+            "id": "dest_1",
+            "full_name": "Elisa Beckett",
+            "street_address": "1600 Amphitheatre Pkwy",
+            "address_locality": "Mountain View",
+            "address_region": "CA",
+            "postal_code": "94043",
+            "address_country": "US"
+          }
+        ],
+        "groups": [
+          {
+            "id": "group_1",
+            "line_item_ids": ["li_1"],
+            "selected_option_id": "free-shipping",
+            "options": [
+              {
+                "id": "free-shipping",
+                "title": "Free Shipping",
+                "totals": [ {"type": "total", "amount": 0} ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
   }
-  ```
+}
+```html
 
           </div>
         </div>
@@ -277,30 +278,30 @@ image: assets/banner.png
           </div>
           <div class="code-block-placeholder">
 
-  ```json {.yaml .no-copy}
-  Sample of /.well-known/oauth-authorization-server
+```json {.yaml .no-copy}
+Sample of /.well-known/oauth-authorization-server
 
-  {
-    "issuer": "https://example.com",
-    "authorization_endpoint": "https://example.com/oauth2/authorize",
-    "token_endpoint": "https://example.com/oauth2/token",
-    "revocation_endpoint": "https://example.com/oauth2/revoke",
-    "scopes_supported": [
-      "ucp:scopes:checkout_session",
-    ],
-    "response_types_supported": [
-      "code"
-    ],
-    "grant_types_supported": [
-      "authorization_code",
-      "refresh_token"
-    ],
-    "token_endpoint_auth_methods_supported": [
-      "client_secret_basic"
-    ],
-    "service_documentation": "https://example.com/docs/oauth2"
-  }
-  ```
+{
+  "issuer": "https://example.com",
+  "authorization_endpoint": "https://example.com/oauth2/authorize",
+  "token_endpoint": "https://example.com/oauth2/token",
+  "revocation_endpoint": "https://example.com/oauth2/revoke",
+  "scopes_supported": [
+    "ucp:scopes:checkout_session",
+  ],
+  "response_types_supported": [
+    "code"
+  ],
+  "grant_types_supported": [
+    "authorization_code",
+    "refresh_token"
+  ],
+  "token_endpoint_auth_methods_supported": [
+    "client_secret_basic"
+  ],
+  "service_documentation": "https://example.com/docs/oauth2"
+}
+```html
 
           </div>
         </div>
@@ -321,63 +322,64 @@ image: assets/banner.png
           </div>
           <div class="code-block-placeholder">
 
-  ```json {.yaml .no-copy}
-  {
-    "ucp": { ... },
-    "id": "order_123456789",
-    "checkout_id": "chk_123456789",
-    "permalink_url": ...,
-    "line_items": [ ... ],
-    "fulfillment": {
-      "expectations": [
-        {
-          "id": "exp_1",
-          "line_items": [{ "id": "li_1", "quantity": 1 }],
-          "method_type": "shipping",
-          "destination": {
-            "full_name": "Elisa Beckett",
-            "street_address": "1600 Amphitheatre Pkwy",
-            "address_locality": "Mountain View",
-            "address_region": "CA",
-            "postal_code": "94043",
-            "address_country": "US"
-          },
-          "description": "Arrives in 2-3 business days",
-          "fulfillable_on": "now"
-        }
-        ...
-      ],
-      "events": [
-        {
-          "id": "evt_1",
-          "occurred_at": "2026-01-11T10:30:00Z",
-          "type": "delivered",
-          "line_items": [{ "id": "li_1", "quantity": 1 }],
-          "tracking_number": "123456789",
-          "tracking_url": "https://fedex.com/track/123456789",
-          "description": "Delivered to front door"
-        }
-      ]
-    },
-    "adjustments": [
+```json {.yaml .no-copy}
+{
+  "ucp": { ... },
+  "id": "order_123456789",
+  "checkout_id": "chk_123456789",
+  "permalink_url": ...,
+  "line_items": [ ... ],
+  "fulfillment": {
+    "expectations": [
       {
-        "id": "adj_1",
-        "type": "refund",
-        "occurred_at": "2026-01-12T14:30:00Z",
-        "status": "completed",
+        "id": "exp_1",
         "line_items": [{ "id": "li_1", "quantity": 1 }],
-        "amount": 26550,
-        "description": "Defective item"
+        "method_type": "shipping",
+        "destination": {
+          "full_name": "Elisa Beckett",
+          "street_address": "1600 Amphitheatre Pkwy",
+          "address_locality": "Mountain View",
+          "address_region": "CA",
+          "postal_code": "94043",
+          "address_country": "US"
+        },
+        "description": "Arrives in 2-3 business days",
+        "fulfillable_on": "now"
       }
+      ...
     ],
-    "totals": [ ... ]
-  }
-  ```
+    "events": [
+      {
+        "id": "evt_1",
+        "occurred_at": "2026-01-11T10:30:00Z",
+        "type": "delivered",
+        "line_items": [{ "id": "li_1", "quantity": 1 }],
+        "tracking_number": "123456789",
+        "tracking_url": "https://fedex.com/track/123456789",
+        "description": "Delivered to front door"
+      }
+    ]
+  },
+  "adjustments": [
+    {
+      "id": "adj_1",
+      "type": "refund",
+      "occurred_at": "2026-01-12T14:30:00Z",
+      "status": "completed",
+      "line_items": [{ "id": "li_1", "quantity": 1 }],
+      "amount": 26550,
+      "description": "Defective item"
+    }
+  ],
+  "totals": [ ... ]
+}
+```html
 
           </div>
         </div>
       </div>
     </div>
+
   </section>
 
   <script>
@@ -471,6 +473,7 @@ image: assets/banner.png
       </div>
 
     </div>
+
   </div>
 
   <div class="partner-carousel">
@@ -663,6 +666,7 @@ image: assets/banner.png
       </div>
 
     </div>
+
   </div>
 
   <div class="get-started-container">
@@ -712,3 +716,4 @@ image: assets/banner.png
 
   </div>
 </div>
+````

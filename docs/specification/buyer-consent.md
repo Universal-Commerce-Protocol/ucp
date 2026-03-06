@@ -36,13 +36,13 @@ Businesses advertise consent support in their profile:
 
 ```json
 {
-  "capabilities": [
-    {
-      "name": "dev.ucp.shopping.buyer_consent",
-      "version": "2026-01-11",
-      "extends": "dev.ucp.shopping.checkout"
-    }
-  ]
+    "capabilities": [
+        {
+            "name": "dev.ucp.shopping.buyer_consent",
+            "version": "2026-01-11",
+            "extends": "dev.ucp.shopping.checkout"
+        }
+    ]
 }
 ```
 
@@ -126,8 +126,10 @@ POST /checkouts
 
 ## Security & Privacy Considerations
 
-1. **Consent is declarative** - The protocol communicates consent, it does not enforce it
+1. **Consent is declarative** - The protocol communicates consent, it does not
+   enforce it
 2. **Legal compliance** remains the business's responsibility
 3. **Platforms should not** assume consent without explicit user action
 4. **Default behavior** when consent is not provided is business-specific
-5. **Consent states** should align with actual user choices, not platform defaults
+5. **Consent states** should align with actual user choices, not platform
+   defaults
