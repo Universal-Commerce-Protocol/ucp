@@ -1410,4 +1410,4 @@ Represents the processor or wallet provider responsible for authenticating and
 processing a specific payment instrument (e.g., Google Pay, Stripe, or a Bank
 App).
 
-{{ schema_fields('payment_handler_resp', 'embedded-checkout') }}
+{{ extension_schema_fields('payment_handler.json#/$defs/response_schema', 'embedded-checkout') }}

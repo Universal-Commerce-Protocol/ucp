@@ -220,12 +220,12 @@ implementing Checkout functionality:
 
 ### Checkout Completion
 
-When a user is ready to make a payment, `payment_data` must be submitted to the
-business agent to complete the checkout process. `payment_data` is a structured
-data type specified as part of UCP. When processing a payment to complete the
-checkout, `payment_data` must be submitted to the business agent as a `DataPart`
-with attribute name `a2a.ucp.checkout.payment_data`. Any associated risk signals
-should be sent with attribute name `a2a.ucp.checkout.risk_signals`.
+When a user is ready to make a payment, `payment` must be submitted to the
+business agent to complete the checkout process. `payment` is a structured data
+type specified as part of UCP. When processing a payment to complete the
+checkout, `payment` must be submitted to the business agent as a `DataPart` with
+attribute name `a2a.ucp.checkout.payment`. Any associated risk signals should be
+sent with attribute name `a2a.ucp.checkout.risk_signals`.
 
 Upon completion of the checkout process, the business agent must return the
 checkout object containing an `order` attribute with `id` and `permalink_url`.
@@ -244,7 +244,7 @@ checkout object containing an `order` attribute with `id` and `permalink_url`.
       {
         "kind": "data",
         "data": {
-          "a2a.ucp.checkout.payment_data": {
+          "a2a.ucp.checkout.payment": {
             ...paymentDataObject
           },
           "a2a.ucp.checkout.risk_signals":{...content}
@@ -351,7 +351,7 @@ verification and processing of the mandates to complete the checkout.
       {
         "kind": "data",
         "data": {
-          "a2a.ucp.checkout.payment_data": {
+          "a2a.ucp.checkout.payment": {
             "id": "instr_1",
             "handler_id": "gpay",
             "type": "card",

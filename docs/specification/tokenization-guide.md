@@ -261,13 +261,13 @@ A tokenizer handler conforms to this pattern if it:
 
 ## References
 
-| Resource                | URL                                                                                     |
-| :---------------------- | :-------------------------------------------------------------------------------------- |
-| Tokenization OpenAPI    | `https://ucp.dev/{{ ucp_version }}/handlers/tokenization/openapi.json`                  |
-| Identity Schema         | `https://ucp.dev/{{ ucp_version }}/schemas/shopping/types/payment_identity.json`        |
-| Binding Schema          | `https://ucp.dev/{{ ucp_version }}/schemas/shopping/types/binding.json`                 |
-| Token Credential Schema | `https://ucp.dev/{{ ucp_version }}/schemas/shopping/types/token_credential.json`        |
-| Card Instrument Schema  | `https://ucp.dev/{{ ucp_version }}/schemas/shopping/types/card_payment_instrument.json` |
+| Resource                | URL                                                                                                             |
+| :---------------------- | :-------------------------------------------------------------------------------------------------------------- |
+| Tokenization OpenAPI    | [handlers/tokenization/openapi.json](site:handlers/tokenization/openapi.json)                                   |
+| Identity Schema         | [schemas/shopping/types/payment_identity.json](site:schemas/shopping/types/payment_identity.json)               |
+| Binding Schema          | [schemas/shopping/types/binding.json](site:schemas/shopping/types/binding.json)                                 |
+| Token Credential Schema | [schemas/shopping/types/token_credential.json](site:schemas/shopping/types/token_credential.json)               |
+| Card Instrument Schema  | [schemas/shopping/types/card_payment_instrument.json](site:schemas/shopping/types/card_payment_instrument.json) |
 
 ---
 

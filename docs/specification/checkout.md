@@ -503,10 +503,6 @@ field or omitting them.
 
 {{ schema_fields('payment', 'checkout') }}
 
-### Payment Instrument
-
-{{ schema_fields('payment_instrument', 'checkout') }}
-
 #### Selected Payment Instrument
 
 {{ extension_schema_fields('types/payment_instrument.json#/$defs/selected_payment_instrument', 'checkout') }}

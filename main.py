@@ -300,18 +300,6 @@ def define_env(env):
     ):
       spec_file_name = "checkout"
 
-    # Redirect all types/ references to the reference specification
-    if ref_string.startswith("types/"):
-      spec_file_name = "reference"
-
-    # Redirect sibling refs that are types (e.g. "item.json" in
-    # types/order_line_item.json)
-    elif "/" not in ref_string and ref_string.endswith(".json"):
-      type_path = Path("source/schemas/shopping/types") / ref_string
-      shopping_path = Path("source/schemas/shopping") / ref_string
-      if type_path.exists() and not shopping_path.exists():
-        spec_file_name = "reference"
-
     filename = Path(ref_string).name
 
     # Check if this reference comes from the core UCP schema
