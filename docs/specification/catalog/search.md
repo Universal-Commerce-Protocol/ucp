@@ -37,15 +37,18 @@ queries, filtering by category and price, and pagination.
 
 ## Search Inputs
 
-A valid search request MUST include at least one search input. The base
-capability defines `query` as the standard input. Extensions MAY define
-additional inputs (e.g., visual similarity, product references).
+A valid search request MUST include at least one of: a `query` string,
+one or more `filters`, or an extension-defined input. When `query` is
+omitted, the request represents a browse operation — the business returns
+products matching the provided filters without text-relevance ranking.
+Extensions MAY define additional inputs (e.g., visual similarity,
+product references).
 
 Implementations MUST validate that incoming requests contain at least one
-recognized input and SHOULD reject empty or invalid requests with an appropriate error.
-Implementations define and enforce their own rules for input presence and
-content — for example, requiring `query`, rejecting empty `query` strings, or
-accepting extension-defined inputs as alternatives to `query`.
+recognized input and SHOULD reject empty or invalid requests with an
+appropriate error. Implementations define and enforce their own rules for
+input presence and content — for example, requiring `query`, rejecting
+empty `query` strings, or accepting filter-only requests for category browsing.
 
 ## Search Filters
 
