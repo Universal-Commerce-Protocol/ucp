@@ -386,7 +386,7 @@ require explicit validation and error feedback.
 
 {{ schema_fields('types/item_update_req', 'checkout') }}
 
-#### Item Response
+#### Item
 
 {{ schema_fields('types/item_resp', 'checkout') }}
 
@@ -400,7 +400,7 @@ require explicit validation and error feedback.
 
 {{ schema_fields('types/line_item_update_req', 'checkout') }}
 
-#### Line Item Response
+#### Line Item
 
 {{ schema_fields('types/line_item_resp', 'checkout') }}
 
@@ -449,6 +449,10 @@ field or omitting them.
 
 {{ schema_fields('payment_instrument', 'checkout') }}
 
+#### Selected Payment Instrument
+
+{{ extension_schema_fields('shopping/types/payment_instrument.json#/$defs/selected_payment_instrument', 'checkout') }}
+
 ### Payment Credential
 
 {{ schema_fields('payment_credential', 'checkout') }}
@@ -463,11 +467,11 @@ field or omitting them.
 
 ### Total
 
-#### Total Response
+#### Total
 
 {{ schema_fields('types/total_resp', 'checkout') }}
 
-### UCP Response Checkout
+### UCP Response Checkout {: #ucp-response-checkout-schema }
 
 {{ extension_schema_fields('ucp.json#/$defs/response_checkout_schema', 'checkout') }}
 

@@ -27,6 +27,10 @@ within the UCP.
 
 {{ auto_generate_schema_reference('types', 'reference', include_extensions=False) }}
 
+### Selected Payment Instrument
+
+{{ extension_schema_fields('shopping/types/payment_instrument.json#/$defs/selected_payment_instrument', 'reference') }}
+
 ## Extension Schemas
 
 {{ auto_generate_schema_reference('.', 'reference', include_capability=False) }}
@@ -48,13 +52,13 @@ The top-level structure of a business discovery document (`/.well-known/ucp`).
 
 {{ extension_schema_fields('ucp.json#/$defs/business_schema', 'reference') }}
 
-### Checkout Response Metadata
+### Checkout Response Metadata {: #ucp-response-checkout-schema }
 
 The `ucp` object included in checkout responses.
 
 {{ extension_schema_fields('ucp.json#/$defs/response_checkout_schema', 'reference') }}
 
-### Order Response Metadata
+### Order Response Metadata {: #ucp-response-order-schema }
 
 The `ucp` object included in order responses or events.
 

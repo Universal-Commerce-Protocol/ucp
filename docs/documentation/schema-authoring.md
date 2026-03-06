@@ -205,8 +205,8 @@ Each entity type defines **three variants** for different contexts:
 {
   "dev.ucp.shopping.fulfillment": [{
     "version": "2026-01-23",
-    "spec": "https://ucp.dev/specification/fulfillment",
-    "schema": "https://ucp.dev/2026-01-23/schemas/shopping/fulfillment.json",
+    "spec": "https://ucp.dev/{{ ucp_version }}/specification/fulfillment",
+    "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json",
     "config": {
       "supports_multi_group": true
     }
@@ -284,7 +284,7 @@ A capability schema defines both payload structure and declaration variants:
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/2026-01-23/schemas/shopping/checkout.json",
+  "$id": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/checkout.json",
   "name": "dev.ucp.shopping.checkout",
   "version": "2026-01-23",
   "title": "Checkout",

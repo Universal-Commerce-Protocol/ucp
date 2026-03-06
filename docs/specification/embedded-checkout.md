@@ -97,19 +97,19 @@ profile, they declare support for the Embedded Checkout Protocol.
             {
                 "version": "2026-01-23",
                 "transport": "rest",
-                "schema": "https://ucp.dev/2026-01-23/services/shopping/openapi.json",
+                "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/openapi.json",
                 "endpoint": "https://merchant.example.com/ucp/v1"
             },
             {
                 "version": "2026-01-23",
                 "transport": "mcp",
-                "schema": "https://ucp.dev/2026-01-23/services/shopping/mcp.openrpc.json",
+                "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/openrpc.json",
                 "endpoint": "https://merchant.example.com/ucp/mcp"
             },
             {
                 "version": "2026-01-23",
                 "transport": "embedded",
-                "schema": "https://ucp.dev/2026-01-23/services/shopping/embedded.openrpc.json"
+                "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/embedded.json"
             }
         ]
     }
@@ -1225,6 +1225,8 @@ rather than attempting to merge the new data with existing state.
 The address object uses the UCP
 [PostalAddress](site:specification/checkout/#postal-address) format:
 
+### Postal Address
+
 {{ schema_fields('postal_address', 'embedded-checkout') }}
 
 ## Security & Error Handling
@@ -1342,7 +1344,27 @@ account, or wallet credential) available to the buyer.
 
 {{ schema_fields('payment_instrument', 'embedded-checkout') }}
 
-### Payment Handler Response
+#### Selected Payment Instrument
+
+{{ extension_schema_fields('shopping/types/payment_instrument.json#/$defs/selected_payment_instrument', 'embedded-checkout') }}
+
+### Card Payment Instrument
+
+{{ schema_fields('types/card_payment_instrument', 'embedded-checkout') }}
+
+### Payment Credential
+
+{{ schema_fields('types/payment_credential', 'embedded-checkout') }}
+
+### Token Credential
+
+{{ schema_fields('types/token_credential_resp', 'embedded-checkout') }}
+
+### Card Credential
+
+{{ schema_fields('types/card_credential', 'embedded-checkout') }}
+
+### Payment Handler
 
 Represents the processor or wallet provider responsible for authenticating and
 processing a specific payment instrument (e.g., Google Pay, Stripe, or a Bank
