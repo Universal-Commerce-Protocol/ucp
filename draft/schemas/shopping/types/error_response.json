@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/draft/schemas/shopping/types/error_response.json",
+  "title": "Error Response",
+  "description": "Generic error response when business logic prevents resource creation or failed to retrieve resource. Used when no valid resource can be established.",
+  "type": "object",
+  "required": [
+    "ucp",
+    "messages"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "ucp": {
+      "allOf": [
+        {
+          "$ref": "https://ucp.dev/draft/schemas/ucp.json#/$defs/base"
+        },
+        {
+          "properties": {
+            "status": {
+              "const": "error"
+            }
+          },
+          "required": [
+            "status"
+          ]
+        }
+      ],
+      "description": "UCP protocol metadata. Status MUST be 'error' for error response."
+    },
+    "messages": {
+      "type": "array",
+      "items": {
+        "$ref": "https://ucp.dev/draft/schemas/shopping/types/message.json"
+      },
+      "minItems": 1,
+      "description": "Array of messages describing why the operation failed."
+    },
+    "continue_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL for buyer handoff or session recovery."
+    }
+  }
+}

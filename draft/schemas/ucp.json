@@ -56,6 +56,15 @@
         "version": {
           "$ref": "#/$defs/version"
         },
+        "status": {
+          "type": "string",
+          "enum": [
+            "success",
+            "error"
+          ],
+          "default": "success",
+          "description": "Application-level status of the UCP operation."
+        },
         "services": {
           "type": "object",
           "description": "Service registry keyed by reverse-domain name.",

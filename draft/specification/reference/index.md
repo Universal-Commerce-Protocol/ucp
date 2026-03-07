@@ -172,6 +172,16 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
+### Error Response
+
+| Name         | Type                                                        | Required | Description                                                       |
+| ------------ | ----------------------------------------------------------- | -------- | ----------------------------------------------------------------- |
+| ucp          | any                                                         | **Yes**  | UCP protocol metadata. Status MUST be 'error' for error response. |
+| messages     | Array\[[Message](/draft/specification/reference/#message)\] | **Yes**  | Array of messages describing why the operation failed.            |
+| continue_url | string                                                      | No       | URL for buyer handoff or session recovery.                        |
+
+______________________________________________________________________
+
 ### Expectation
 
 | Name           | Type                                                             | Required | Description                                                                                                 |
@@ -314,14 +324,14 @@ ______________________________________________________________________
 
 ### Message Error
 
-| Name         | Type                                                     | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| ------------ | -------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| type         | string                                                   | **Yes**  | **Constant = error**. Message type discriminator.                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| code         | [Error Code](/draft/specification/reference/#error-code) | **Yes**  | Error code identifying the type of error. Standard errors are defined in specification (see examples), and have standardized semantics; freeform codes are permitted.                                                                                                                                                                                                                                                                                                                                          |
-| path         | string                                                   | No       | RFC 9535 JSONPath to the component the message refers to (e.g., $.items[1]).                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| content_type | string                                                   | No       | Content format, default = plain. **Enum:** `plain`, `markdown`                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| content      | string                                                   | **Yes**  | Human-readable message.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| severity     | string                                                   | **Yes**  | Declares who resolves this error. 'recoverable': agent can fix via API. 'requires_buyer_input': merchant requires information their API doesn't support collecting programmatically (checkout incomplete). 'requires_buyer_review': buyer must authorize before order placement due to policy, regulatory, or entitlement rules (checkout complete). Errors with 'requires\_*' severity contribute to 'status: requires_escalation'.* *Enum:*\* `recoverable`, `requires_buyer_input`, `requires_buyer_review` |
+| Name         | Type                                                     | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| ------------ | -------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type         | string                                                   | **Yes**  | **Constant = error**. Message type discriminator.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| code         | [Error Code](/draft/specification/reference/#error-code) | **Yes**  | Error code identifying the type of error. Standard errors are defined in specification (see examples), and have standardized semantics; freeform codes are permitted.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| path         | string                                                   | No       | RFC 9535 JSONPath to the component the message refers to (e.g., $.items[1]).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| content_type | string                                                   | No       | Content format, default = plain. **Enum:** `plain`, `markdown`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| content      | string                                                   | **Yes**  | Human-readable message.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| severity     | string                                                   | **Yes**  | Reflects the resource state and recommended action. 'recoverable': platform can resolve by modifying inputs and retrying via API. 'requires_buyer_input': merchant requires information their API doesn't support collecting programmatically (checkout incomplete). 'requires_buyer_review': buyer must authorize before order placement due to policy, regulatory, or entitlement rules. 'unrecoverable': no valid resource exists to act on, retry with new resource or inputs. Errors with 'requires\_*' severity contribute to 'status: requires_escalation'.* *Enum:*\* `recoverable`, `requires_buyer_input`, `requires_buyer_review`, `unrecoverable` |
 
 ______________________________________________________________________
 
@@ -700,55 +710,59 @@ The following schemas define the structure of UCP metadata used in discovery and
 
 The top-level structure of a platform profile document (hosted at a URI advertised by the platform).
 
-| Name             | Type   | Required | Description                                            |
-| ---------------- | ------ | -------- | ------------------------------------------------------ |
-| version          | string | **Yes**  | UCP version in YYYY-MM-DD format.                      |
-| services         | object | No       | Service registry keyed by reverse-domain name.         |
-| capabilities     | object | No       | Capability registry keyed by reverse-domain name.      |
-| payment_handlers | object | No       | Payment handler registry keyed by reverse-domain name. |
-| services         | any    | **Yes**  |                                                        |
-| capabilities     | any    | No       |                                                        |
-| payment_handlers | any    | **Yes**  |                                                        |
+| Name             | Type   | Required | Description                                                                 |
+| ---------------- | ------ | -------- | --------------------------------------------------------------------------- |
+| version          | string | **Yes**  | UCP version in YYYY-MM-DD format.                                           |
+| status           | string | No       | Application-level status of the UCP operation. **Enum:** `success`, `error` |
+| services         | object | No       | Service registry keyed by reverse-domain name.                              |
+| capabilities     | object | No       | Capability registry keyed by reverse-domain name.                           |
+| payment_handlers | object | No       | Payment handler registry keyed by reverse-domain name.                      |
+| services         | any    | **Yes**  |                                                                             |
+| capabilities     | any    | No       |                                                                             |
+| payment_handlers | any    | **Yes**  |                                                                             |
 
 ### Business Discovery Profile
 
 The top-level structure of a business discovery document (`/.well-known/ucp`).
 
-| Name             | Type   | Required | Description                                            |
-| ---------------- | ------ | -------- | ------------------------------------------------------ |
-| version          | string | **Yes**  | UCP version in YYYY-MM-DD format.                      |
-| services         | object | No       | Service registry keyed by reverse-domain name.         |
-| capabilities     | object | No       | Capability registry keyed by reverse-domain name.      |
-| payment_handlers | object | No       | Payment handler registry keyed by reverse-domain name. |
-| services         | any    | **Yes**  |                                                        |
-| capabilities     | any    | No       |                                                        |
-| payment_handlers | any    | **Yes**  |                                                        |
+| Name             | Type   | Required | Description                                                                 |
+| ---------------- | ------ | -------- | --------------------------------------------------------------------------- |
+| version          | string | **Yes**  | UCP version in YYYY-MM-DD format.                                           |
+| status           | string | No       | Application-level status of the UCP operation. **Enum:** `success`, `error` |
+| services         | object | No       | Service registry keyed by reverse-domain name.                              |
+| capabilities     | object | No       | Capability registry keyed by reverse-domain name.                           |
+| payment_handlers | object | No       | Payment handler registry keyed by reverse-domain name.                      |
+| services         | any    | **Yes**  |                                                                             |
+| capabilities     | any    | No       |                                                                             |
+| payment_handlers | any    | **Yes**  |                                                                             |
 
 ### Checkout Response Metadata
 
 The `ucp` object included in checkout responses.
 
-| Name             | Type   | Required | Description                                            |
-| ---------------- | ------ | -------- | ------------------------------------------------------ |
-| version          | string | **Yes**  | UCP version in YYYY-MM-DD format.                      |
-| services         | object | No       | Service registry keyed by reverse-domain name.         |
-| capabilities     | object | No       | Capability registry keyed by reverse-domain name.      |
-| payment_handlers | object | No       | Payment handler registry keyed by reverse-domain name. |
-| services         | any    | No       |                                                        |
-| capabilities     | any    | No       |                                                        |
-| payment_handlers | any    | **Yes**  |                                                        |
+| Name             | Type   | Required | Description                                                                 |
+| ---------------- | ------ | -------- | --------------------------------------------------------------------------- |
+| version          | string | **Yes**  | UCP version in YYYY-MM-DD format.                                           |
+| status           | string | No       | Application-level status of the UCP operation. **Enum:** `success`, `error` |
+| services         | object | No       | Service registry keyed by reverse-domain name.                              |
+| capabilities     | object | No       | Capability registry keyed by reverse-domain name.                           |
+| payment_handlers | object | No       | Payment handler registry keyed by reverse-domain name.                      |
+| services         | any    | No       |                                                                             |
+| capabilities     | any    | No       |                                                                             |
+| payment_handlers | any    | **Yes**  |                                                                             |
 
 ### Order Response Metadata
 
 The `ucp` object included in order responses or events.
 
-| Name             | Type   | Required | Description                                            |
-| ---------------- | ------ | -------- | ------------------------------------------------------ |
-| version          | string | **Yes**  | UCP version in YYYY-MM-DD format.                      |
-| services         | object | No       | Service registry keyed by reverse-domain name.         |
-| capabilities     | object | No       | Capability registry keyed by reverse-domain name.      |
-| payment_handlers | object | No       | Payment handler registry keyed by reverse-domain name. |
-| capabilities     | any    | No       |                                                        |
+| Name             | Type   | Required | Description                                                                 |
+| ---------------- | ------ | -------- | --------------------------------------------------------------------------- |
+| version          | string | **Yes**  | UCP version in YYYY-MM-DD format.                                           |
+| status           | string | No       | Application-level status of the UCP operation. **Enum:** `success`, `error` |
+| services         | object | No       | Service registry keyed by reverse-domain name.                              |
+| capabilities     | object | No       | Capability registry keyed by reverse-domain name.                           |
+| payment_handlers | object | No       | Payment handler registry keyed by reverse-domain name.                      |
+| capabilities     | any    | No       |                                                                             |
 
 ### Capability
 

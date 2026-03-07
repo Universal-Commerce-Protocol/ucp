@@ -1561,6 +1561,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#error-response" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Error Response
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#expectation" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2503,6 +2514,17 @@
     <span class="md-ellipsis">
       
         Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#error-response" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Error Response
       
     </span>
   </a>
@@ -3889,6 +3911,38 @@ within the UCP.</p>
 </tbody>
 </table>
 <hr />
+<h3 id="error-response">Error Response<a class="headerlink" href="#error-response" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">ucp</td>
+<td style="text-align: left;">any</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">UCP protocol metadata. Status MUST be 'error' for error response.</td>
+</tr>
+<tr>
+<td style="text-align: left;">messages</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#message">Message</a>]</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Array of messages describing why the operation failed.</td>
+</tr>
+<tr>
+<td style="text-align: left;">continue_url</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">URL for buyer handoff or session recovery.</td>
+</tr>
+</tbody>
+</table>
+<hr />
 <h3 id="expectation">Expectation<a class="headerlink" href="#expectation" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -4400,7 +4454,7 @@ within the UCP.</p>
 <td style="text-align: left;">severity</td>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Declares who resolves this error. 'recoverable': agent can fix via API. 'requires_buyer_input': merchant requires information their API doesn't support collecting programmatically (checkout incomplete). 'requires_buyer_review': buyer must authorize before order placement due to policy, regulatory, or entitlement rules (checkout complete). Errors with 'requires_<em>' severity contribute to 'status: requires_escalation'.<br></em><em>Enum:</em>* <code>recoverable</code>, <code>requires_buyer_input</code>, <code>requires_buyer_review</code></td>
+<td style="text-align: left;">Reflects the resource state and recommended action. 'recoverable': platform can resolve by modifying inputs and retrying via API. 'requires_buyer_input': merchant requires information their API doesn't support collecting programmatically (checkout incomplete). 'requires_buyer_review': buyer must authorize before order placement due to policy, regulatory, or entitlement rules. 'unrecoverable': no valid resource exists to act on, retry with new resource or inputs. Errors with 'requires_<em>' severity contribute to 'status: requires_escalation'.<br></em><em>Enum:</em>* <code>recoverable</code>, <code>requires_buyer_input</code>, <code>requires_buyer_review</code>, <code>unrecoverable</code></td>
 </tr>
 </tbody>
 </table>
@@ -5773,6 +5827,12 @@ and responses.</p>
 <td style="text-align: left;">UCP version in YYYY-MM-DD format.</td>
 </tr>
 <tr>
+<td style="text-align: left;">status</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Application-level status of the UCP operation.<br><strong>Enum:</strong> <code>success</code>, <code>error</code></td>
+</tr>
+<tr>
 <td style="text-align: left;">services</td>
 <td style="text-align: left;">object</td>
 <td style="text-align: left;">No</td>
@@ -5827,6 +5887,12 @@ and responses.</p>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">UCP version in YYYY-MM-DD format.</td>
+</tr>
+<tr>
+<td style="text-align: left;">status</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Application-level status of the UCP operation.<br><strong>Enum:</strong> <code>success</code>, <code>error</code></td>
 </tr>
 <tr>
 <td style="text-align: left;">services</td>
@@ -5885,6 +5951,12 @@ and responses.</p>
 <td style="text-align: left;">UCP version in YYYY-MM-DD format.</td>
 </tr>
 <tr>
+<td style="text-align: left;">status</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Application-level status of the UCP operation.<br><strong>Enum:</strong> <code>success</code>, <code>error</code></td>
+</tr>
+<tr>
 <td style="text-align: left;">services</td>
 <td style="text-align: left;">object</td>
 <td style="text-align: left;">No</td>
@@ -5939,6 +6011,12 @@ and responses.</p>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">UCP version in YYYY-MM-DD format.</td>
+</tr>
+<tr>
+<td style="text-align: left;">status</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Application-level status of the UCP operation.<br><strong>Enum:</strong> <code>success</code>, <code>error</code></td>
 </tr>
 <tr>
 <td style="text-align: left;">services</td>

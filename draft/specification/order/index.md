@@ -441,10 +441,11 @@ See [Message Signatures - Key Rotation](https://ucp.dev/draft/specification/sign
 
 ### UCP Response Order
 
-| Name             | Type   | Required | Description                                            |
-| ---------------- | ------ | -------- | ------------------------------------------------------ |
-| version          | string | **Yes**  | UCP version in YYYY-MM-DD format.                      |
-| services         | object | No       | Service registry keyed by reverse-domain name.         |
-| capabilities     | object | No       | Capability registry keyed by reverse-domain name.      |
-| payment_handlers | object | No       | Payment handler registry keyed by reverse-domain name. |
-| capabilities     | any    | No       |                                                        |
+| Name             | Type   | Required | Description                                                                 |
+| ---------------- | ------ | -------- | --------------------------------------------------------------------------- |
+| version          | string | **Yes**  | UCP version in YYYY-MM-DD format.                                           |
+| status           | string | No       | Application-level status of the UCP operation. **Enum:** `success`, `error` |
+| services         | object | No       | Service registry keyed by reverse-domain name.                              |
+| capabilities     | object | No       | Capability registry keyed by reverse-domain name.                           |
+| payment_handlers | object | No       | Payment handler registry keyed by reverse-domain name.                      |
+| capabilities     | any    | No       |                                                                             |

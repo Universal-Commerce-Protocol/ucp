@@ -532,7 +532,7 @@ UCP negotiation can fail in two ways:
 1. **Discovery failure**: The business cannot fetch or parse the platform's profile.
 1. **Negotiation failure**: The provided profile is valid but capability intersection is empty or versions are incompatible.
 
-These failure types require different handling:
+Discovery failures are transport errors — the required inputs could not be retrieved or were malformed. Negotiation failures are business outcomes — the handler executed on the provided inputs and reported the result in the UCP response:
 
 - **Discovery failure** → transport error with optional `continue_url`
 - **Negotiation failure** → UCP response with optional `continue_url`
@@ -606,16 +606,13 @@ HTTP/1.1 200 OK
 Content-Type: application/json
 
 {
-  "ucp": {
-    "version": "2026-01-11",
-    "capabilities": {}
-  },
+  "ucp": { "version": "2026-01-11", "status": "error" },
   "messages": [
     {
       "type": "error",
       "code": "version_unsupported",
       "content": "UCP version 2024-01-01 is not supported",
-      "severity": "requires_buyer_input"
+      "severity": "unrecoverable"
     }
   ],
   "continue_url": "https://merchant.com"
@@ -664,16 +661,13 @@ Protocol errors use standard HTTP status codes and headers. Response bodies are 
   "id": 1,
   "result": {
     "structuredContent": {
-      "ucp": {
-        "version": "2026-01-11",
-        "capabilities": {}
-      },
+      "ucp": { "version": "2026-01-11", "status": "error" },
       "messages": [
         {
           "type": "error",
           "code": "version_unsupported",
           "content": "UCP version 2024-01-01 is not supported",
-          "severity": "requires_buyer_input"
+          "severity": "unrecoverable"
         }
       ],
       "continue_url": "https://merchant.com"
@@ -1419,17 +1413,18 @@ Response with version confirmation:
 }
 ```
 
-Version unsupported error:
+Version unsupported error — no resource is created:
 
 ```json
 {
-  "status": "requires_escalation",
+  "ucp": { "version": "2026-01-11", "status": "error" },
   "messages": [{
     "type": "error",
     "code": "version_unsupported",
     "content": "Version 2026-01-12 is not supported. This business implements version 2026-01-11.",
-    "severity": "requires_buyer_input"
-  }]
+    "severity": "unrecoverable"
+  }],
+  "continue_url": "https://merchant.com/"
 }
 ```
 
@@ -2101,18 +2096,38 @@ The checkout `status` field indicates the current phase of the session and deter
 
 ### Error Handling
 
-The `messages` array contains errors, warnings, and informational messages about the checkout state. Error messages include a `severity` field that declares **who resolves the error**:
+The `messages` array contains errors, warnings, and informational messages about the checkout state. Error messages include a `severity` field that reflects the resource state and recommended action. When `ucp.status` is `"success"`, a resource is returned and severity indicates the recommended action. When `ucp.status` is `"error"`, no valid resource exists — severity is `unrecoverable`:
 
-| Severity                | Meaning                                       | Platform Action               |
-| ----------------------- | --------------------------------------------- | ----------------------------- |
-| `recoverable`           | Platform can fix via API                      | Resolve using Update Checkout |
-| `requires_buyer_input`  | Business requires input not available via API | Hand off via `continue_url`   |
-| `requires_buyer_review` | Buyer review and authorization is required    | Hand off via `continue_url`   |
+| Severity                | Meaning                                          | Platform Action                                                   |
+| ----------------------- | ------------------------------------------------ | ----------------------------------------------------------------- |
+| `recoverable`           | Platform can resolve by modifying inputs via API | Update resource and retry                                         |
+| `requires_buyer_input`  | Business requires input not available via API    | Hand off via `continue_url`                                       |
+| `requires_buyer_review` | Buyer review and authorization is required       | Hand off via `continue_url`                                       |
+| `unrecoverable`         | No resource exists to act on                     | Retry with new resource or inputs, or hand off via `continue_url` |
 
 Errors with `requires_*` severity contribute to `status: requires_escalation`. Both result in buyer handoff, but represent different checkout states.
 
 - `requires_buyer_input` means the checkout is **incomplete** — the business requires information their API doesn't support collecting programmatically.
 - `requires_buyer_review` means the checkout is **complete** — but policy, regulatory, or entitlement rules require buyer authorization before order placement (e.g., high-value order approval, first-purchase policy).
+
+When the business cannot create a new resource or the requested resource no longer exists, the response contains `ucp.status: "error"` with `messages` describing the failure — no resource is included in the response body. Error responses MUST use `severity: "unrecoverable"`. For example, a business may reject a create checkout request where all items are unavailable:
+
+```json
+{
+  "ucp": { "version": "2026-01-11", "status": "error" },
+  "messages": [
+    {
+      "type": "error",
+      "code": "out_of_stock",
+      "content": "All requested items are currently out of stock",
+      "severity": "unrecoverable"
+    }
+  ],
+  "continue_url": "https://merchant.com/"
+}
+```
+
+See [REST](https://ucp.dev/draft/specification/checkout-rest/#create-checkout) and [MCP](https://ucp.dev/draft/specification/checkout-mcp/#create_checkout) binding examples.
 
 #### Error Processing Algorithm
 
@@ -2147,7 +2162,13 @@ When status is `incomplete` or `requires_escalation`, platforms should process e
 Example error processing algorithm:
 
 ```text
-GIVEN checkout with messages array
+GIVEN response with messages array
+
+IF ucp.status = "error"
+  -- No resource exists; severity is unrecoverable
+  RETRY with new resource or inputs, or hand off via continue_url
+  RETURN
+
 FILTER errors FROM messages WHERE type = "error"
 
 PARTITION errors INTO
@@ -2231,7 +2252,7 @@ A stateless URL that encodes checkout state directly, allowing reconstruction wi
 - **SHOULD** provide accurate error messages.
 - Logic handling the checkout sessions **MUST** be deterministic.
 - **MUST** provide `continue_url` when returning `status` = `requires_escalation`.
-- **MUST** include at least one message with `severity: escalation` when returning `status` = `requires_escalation`.
+- **MUST** include at least one message with `severity` of `requires_buyer_input` or `requires_buyer_review` when returning `status` = `requires_escalation`.
 - **SHOULD** provide `continue_url` in all non-terminal checkout responses.
 - After a checkout session reaches the state "completed", it is considered immutable.
 
@@ -2282,21 +2303,7 @@ To be invoked by the platform when the user has expressed purchase intent (e.g.,
 
 **Output**
 
-| Name         | Type                                                                                        | Required | Description                                                                                                                                                                                                                                                     |
-| ------------ | ------------------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ucp          | [UCP Response Checkout Schema](/draft/specification/checkout/#ucp-response-checkout-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                                                                                                                                         |
-| id           | string                                                                                      | **Yes**  | Unique identifier of the checkout session.                                                                                                                                                                                                                      |
-| line_items   | Array\[[Line Item Response](/draft/specification/checkout/#line-item-response)\]            | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                           |
-| buyer        | [Buyer](/draft/specification/checkout/#buyer)                                               | No       | Representation of the buyer.                                                                                                                                                                                                                                    |
-| status       | string                                                                                      | **Yes**  | Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details. **Enum:** `incomplete`, `requires_escalation`, `ready_for_complete`, `complete_in_progress`, `completed`, `canceled` |
-| currency     | string                                                                                      | **Yes**  | ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.                                                                                          |
-| totals       | Array\[[Total Response](/draft/specification/checkout/#total-response)\]                    | **Yes**  | Different cart totals.                                                                                                                                                                                                                                          |
-| messages     | Array\[[Message](/draft/specification/checkout/#message)\]                                  | No       | List of messages with error and info about the checkout session state.                                                                                                                                                                                          |
-| links        | Array\[[Link](/draft/specification/checkout/#link)\]                                        | **Yes**  | Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.                                                                                                                                                                    |
-| expires_at   | string                                                                                      | No       | RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.                                                                                                                                                                                    |
-| continue_url | string                                                                                      | No       | URL for checkout handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements.                                                                                                 |
-| payment      | [Payment](/draft/specification/checkout/#payment)                                           | No       | Payment configuration containing handlers.                                                                                                                                                                                                                      |
-| order        | [Order Confirmation](/draft/specification/checkout/#order-confirmation)                     | No       | Details about an order created for this checkout session.                                                                                                                                                                                                       |
+This object MUST be one of the following types: [Checkout](/draft/specification/checkout/#checkout), [Error Response](/draft/specification/checkout/#error-response).
 
 ### Get Checkout
 
@@ -2312,21 +2319,7 @@ The platform will honor the TTL provided by the business via `expires_at` at the
 
 **Output**
 
-| Name         | Type                                                                                        | Required | Description                                                                                                                                                                                                                                                     |
-| ------------ | ------------------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ucp          | [UCP Response Checkout Schema](/draft/specification/checkout/#ucp-response-checkout-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                                                                                                                                         |
-| id           | string                                                                                      | **Yes**  | Unique identifier of the checkout session.                                                                                                                                                                                                                      |
-| line_items   | Array\[[Line Item Response](/draft/specification/checkout/#line-item-response)\]            | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                           |
-| buyer        | [Buyer](/draft/specification/checkout/#buyer)                                               | No       | Representation of the buyer.                                                                                                                                                                                                                                    |
-| status       | string                                                                                      | **Yes**  | Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details. **Enum:** `incomplete`, `requires_escalation`, `ready_for_complete`, `complete_in_progress`, `completed`, `canceled` |
-| currency     | string                                                                                      | **Yes**  | ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.                                                                                          |
-| totals       | Array\[[Total Response](/draft/specification/checkout/#total-response)\]                    | **Yes**  | Different cart totals.                                                                                                                                                                                                                                          |
-| messages     | Array\[[Message](/draft/specification/checkout/#message)\]                                  | No       | List of messages with error and info about the checkout session state.                                                                                                                                                                                          |
-| links        | Array\[[Link](/draft/specification/checkout/#link)\]                                        | **Yes**  | Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.                                                                                                                                                                    |
-| expires_at   | string                                                                                      | No       | RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.                                                                                                                                                                                    |
-| continue_url | string                                                                                      | No       | URL for checkout handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements.                                                                                                 |
-| payment      | [Payment](/draft/specification/checkout/#payment)                                           | No       | Payment configuration containing handlers.                                                                                                                                                                                                                      |
-| order        | [Order Confirmation](/draft/specification/checkout/#order-confirmation)                     | No       | Details about an order created for this checkout session.                                                                                                                                                                                                       |
+This object MUST be one of the following types: [Checkout](/draft/specification/checkout/#checkout), [Error Response](/draft/specification/checkout/#error-response).
 
 ### Update Checkout
 
@@ -2345,21 +2338,7 @@ Performs a full replacement of the checkout resource. The platform is **REQUIRED
 
 **Output**
 
-| Name         | Type                                                                                        | Required | Description                                                                                                                                                                                                                                                     |
-| ------------ | ------------------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ucp          | [UCP Response Checkout Schema](/draft/specification/checkout/#ucp-response-checkout-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                                                                                                                                         |
-| id           | string                                                                                      | **Yes**  | Unique identifier of the checkout session.                                                                                                                                                                                                                      |
-| line_items   | Array\[[Line Item Response](/draft/specification/checkout/#line-item-response)\]            | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                           |
-| buyer        | [Buyer](/draft/specification/checkout/#buyer)                                               | No       | Representation of the buyer.                                                                                                                                                                                                                                    |
-| status       | string                                                                                      | **Yes**  | Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details. **Enum:** `incomplete`, `requires_escalation`, `ready_for_complete`, `complete_in_progress`, `completed`, `canceled` |
-| currency     | string                                                                                      | **Yes**  | ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.                                                                                          |
-| totals       | Array\[[Total Response](/draft/specification/checkout/#total-response)\]                    | **Yes**  | Different cart totals.                                                                                                                                                                                                                                          |
-| messages     | Array\[[Message](/draft/specification/checkout/#message)\]                                  | No       | List of messages with error and info about the checkout session state.                                                                                                                                                                                          |
-| links        | Array\[[Link](/draft/specification/checkout/#link)\]                                        | **Yes**  | Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.                                                                                                                                                                    |
-| expires_at   | string                                                                                      | No       | RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.                                                                                                                                                                                    |
-| continue_url | string                                                                                      | No       | URL for checkout handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements.                                                                                                 |
-| payment      | [Payment](/draft/specification/checkout/#payment)                                           | No       | Payment configuration containing handlers.                                                                                                                                                                                                                      |
-| order        | [Order Confirmation](/draft/specification/checkout/#order-confirmation)                     | No       | Details about an order created for this checkout session.                                                                                                                                                                                                       |
+This object MUST be one of the following types: [Checkout](/draft/specification/checkout/#checkout), [Error Response](/draft/specification/checkout/#error-response).
 
 ### Complete Checkout
 
@@ -2377,21 +2356,7 @@ After this call, other details will be updated through subsequent events as the 
 
 **Output**
 
-| Name         | Type                                                                                        | Required | Description                                                                                                                                                                                                                                                     |
-| ------------ | ------------------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ucp          | [UCP Response Checkout Schema](/draft/specification/checkout/#ucp-response-checkout-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                                                                                                                                         |
-| id           | string                                                                                      | **Yes**  | Unique identifier of the checkout session.                                                                                                                                                                                                                      |
-| line_items   | Array\[[Line Item Response](/draft/specification/checkout/#line-item-response)\]            | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                           |
-| buyer        | [Buyer](/draft/specification/checkout/#buyer)                                               | No       | Representation of the buyer.                                                                                                                                                                                                                                    |
-| status       | string                                                                                      | **Yes**  | Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details. **Enum:** `incomplete`, `requires_escalation`, `ready_for_complete`, `complete_in_progress`, `completed`, `canceled` |
-| currency     | string                                                                                      | **Yes**  | ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.                                                                                          |
-| totals       | Array\[[Total Response](/draft/specification/checkout/#total-response)\]                    | **Yes**  | Different cart totals.                                                                                                                                                                                                                                          |
-| messages     | Array\[[Message](/draft/specification/checkout/#message)\]                                  | No       | List of messages with error and info about the checkout session state.                                                                                                                                                                                          |
-| links        | Array\[[Link](/draft/specification/checkout/#link)\]                                        | **Yes**  | Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.                                                                                                                                                                    |
-| expires_at   | string                                                                                      | No       | RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.                                                                                                                                                                                    |
-| continue_url | string                                                                                      | No       | URL for checkout handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements.                                                                                                 |
-| payment      | [Payment](/draft/specification/checkout/#payment)                                           | No       | Payment configuration containing handlers.                                                                                                                                                                                                                      |
-| order        | [Order Confirmation](/draft/specification/checkout/#order-confirmation)                     | No       | Details about an order created for this checkout session.                                                                                                                                                                                                       |
+This object MUST be one of the following types: [Checkout](/draft/specification/checkout/#checkout), [Error Response](/draft/specification/checkout/#error-response).
 
 ### Cancel Checkout
 
@@ -2405,21 +2370,7 @@ This operation will be used to cancel a checkout session, if it can be canceled.
 
 **Output**
 
-| Name         | Type                                                                                        | Required | Description                                                                                                                                                                                                                                                     |
-| ------------ | ------------------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ucp          | [UCP Response Checkout Schema](/draft/specification/checkout/#ucp-response-checkout-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                                                                                                                                         |
-| id           | string                                                                                      | **Yes**  | Unique identifier of the checkout session.                                                                                                                                                                                                                      |
-| line_items   | Array\[[Line Item Response](/draft/specification/checkout/#line-item-response)\]            | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                           |
-| buyer        | [Buyer](/draft/specification/checkout/#buyer)                                               | No       | Representation of the buyer.                                                                                                                                                                                                                                    |
-| status       | string                                                                                      | **Yes**  | Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details. **Enum:** `incomplete`, `requires_escalation`, `ready_for_complete`, `complete_in_progress`, `completed`, `canceled` |
-| currency     | string                                                                                      | **Yes**  | ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.                                                                                          |
-| totals       | Array\[[Total Response](/draft/specification/checkout/#total-response)\]                    | **Yes**  | Different cart totals.                                                                                                                                                                                                                                          |
-| messages     | Array\[[Message](/draft/specification/checkout/#message)\]                                  | No       | List of messages with error and info about the checkout session state.                                                                                                                                                                                          |
-| links        | Array\[[Link](/draft/specification/checkout/#link)\]                                        | **Yes**  | Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.                                                                                                                                                                    |
-| expires_at   | string                                                                                      | No       | RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.                                                                                                                                                                                    |
-| continue_url | string                                                                                      | No       | URL for checkout handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements.                                                                                                 |
-| payment      | [Payment](/draft/specification/checkout/#payment)                                           | No       | Payment configuration containing handlers.                                                                                                                                                                                                                      |
-| order        | [Order Confirmation](/draft/specification/checkout/#order-confirmation)                     | No       | Details about an order created for this checkout session.                                                                                                                                                                                                       |
+This object MUST be one of the following types: [Checkout](/draft/specification/checkout/#checkout), [Error Response](/draft/specification/checkout/#error-response).
 
 ## Transport Bindings
 
@@ -2543,14 +2494,14 @@ This object MUST be one of the following types: [Message Error](/draft/specifica
 
 ### Message Error
 
-| Name         | Type                                                    | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| ------------ | ------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| type         | string                                                  | **Yes**  | **Constant = error**. Message type discriminator.                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| code         | [Error Code](/draft/specification/checkout/#error-code) | **Yes**  | Error code identifying the type of error. Standard errors are defined in specification (see examples), and have standardized semantics; freeform codes are permitted.                                                                                                                                                                                                                                                                                                                                          |
-| path         | string                                                  | No       | RFC 9535 JSONPath to the component the message refers to (e.g., $.items[1]).                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| content_type | string                                                  | No       | Content format, default = plain. **Enum:** `plain`, `markdown`                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| content      | string                                                  | **Yes**  | Human-readable message.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| severity     | string                                                  | **Yes**  | Declares who resolves this error. 'recoverable': agent can fix via API. 'requires_buyer_input': merchant requires information their API doesn't support collecting programmatically (checkout incomplete). 'requires_buyer_review': buyer must authorize before order placement due to policy, regulatory, or entitlement rules (checkout complete). Errors with 'requires\_*' severity contribute to 'status: requires_escalation'.* *Enum:*\* `recoverable`, `requires_buyer_input`, `requires_buyer_review` |
+| Name         | Type                                                    | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| ------------ | ------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type         | string                                                  | **Yes**  | **Constant = error**. Message type discriminator.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| code         | [Error Code](/draft/specification/checkout/#error-code) | **Yes**  | Error code identifying the type of error. Standard errors are defined in specification (see examples), and have standardized semantics; freeform codes are permitted.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| path         | string                                                  | No       | RFC 9535 JSONPath to the component the message refers to (e.g., $.items[1]).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| content_type | string                                                  | No       | Content format, default = plain. **Enum:** `plain`, `markdown`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| content      | string                                                  | **Yes**  | Human-readable message.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| severity     | string                                                  | **Yes**  | Reflects the resource state and recommended action. 'recoverable': platform can resolve by modifying inputs and retrying via API. 'requires_buyer_input': merchant requires information their API doesn't support collecting programmatically (checkout incomplete). 'requires_buyer_review': buyer must authorize before order placement due to policy, regulatory, or entitlement rules. 'unrecoverable': no valid resource exists to act on, retry with new resource or inputs. Errors with 'requires\_*' severity contribute to 'status: requires_escalation'.* *Enum:*\* `recoverable`, `requires_buyer_input`, `requires_buyer_review`, `unrecoverable` |
 
 ### Message Info
 
@@ -2632,15 +2583,16 @@ This object MUST be one of the following types: [Message Error](/draft/specifica
 
 ### UCP Response Checkout
 
-| Name             | Type   | Required | Description                                            |
-| ---------------- | ------ | -------- | ------------------------------------------------------ |
-| version          | string | **Yes**  | UCP version in YYYY-MM-DD format.                      |
-| services         | object | No       | Service registry keyed by reverse-domain name.         |
-| capabilities     | object | No       | Capability registry keyed by reverse-domain name.      |
-| payment_handlers | object | No       | Payment handler registry keyed by reverse-domain name. |
-| services         | any    | No       |                                                        |
-| capabilities     | any    | No       |                                                        |
-| payment_handlers | any    | **Yes**  |                                                        |
+| Name             | Type   | Required | Description                                                                 |
+| ---------------- | ------ | -------- | --------------------------------------------------------------------------- |
+| version          | string | **Yes**  | UCP version in YYYY-MM-DD format.                                           |
+| status           | string | No       | Application-level status of the UCP operation. **Enum:** `success`, `error` |
+| services         | object | No       | Service registry keyed by reverse-domain name.                              |
+| capabilities     | object | No       | Capability registry keyed by reverse-domain name.                           |
+| payment_handlers | object | No       | Payment handler registry keyed by reverse-domain name.                      |
+| services         | any    | No       |                                                                             |
+| capabilities     | any    | No       |                                                                             |
+| payment_handlers | any    | **Yes**  |                                                                             |
 
 ### Order Confirmation
 
@@ -2791,6 +2743,26 @@ Content-Type: application/json
       }
     ]
   }
+}
+```
+
+All items out of stock — no checkout resource is created:
+
+```json
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "ucp": { "version": "2026-01-11", "status": "error" },
+  "messages": [
+    {
+      "type": "error",
+      "code": "out_of_stock",
+      "content": "All requested items are currently out of stock",
+      "severity": "unrecoverable"
+    }
+  ],
+  "continue_url": "https://merchant.com/"
 }
 ```
 
@@ -3896,6 +3868,23 @@ Business outcomes (including errors like unavailable merchandise) are returned w
 }
 ```
 
+For `create_checkout`, when all items unavailable and no checkout can be created, returns HTTP 200 and the UCP envelope containing `messages`
+
+```json
+{
+  "ucp": { "version": "2026-01-11", "status": "error" },
+  "messages": [
+    {
+      "type": "error",
+      "code": "item_unavailable",
+      "content": "All items are not available for purchase",
+      "severity": "unrecoverable"
+    }
+  ],
+  "continue_url": "https://merchant.com/"
+}
+```
+
 ## Message Signing
 
 Platforms **MAY** choose among authentication mechanisms (API keys, OAuth, mTLS, HTTP Message Signatures). When using HTTP Message Signatures, checkout operations follow the [Message Signatures](https://ucp.dev/draft/specification/signatures/index.md) specification.
@@ -4278,6 +4267,32 @@ Maps to the [Create Checkout](https://ucp.dev/draft/specification/checkout/#crea
 }
 ```
 
+All items out of stock — no checkout resource is created:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "structuredContent": {
+      "ucp": { "version": "2026-01-11", "status": "error" },
+      "messages": [
+        {
+          "type": "error",
+          "code": "out_of_stock",
+          "content": "All requested items are currently out of stock",
+          "severity": "unrecoverable"
+        }
+      ],
+      "continue_url": "https://merchant.com/"
+    },
+    "content": [
+      {"type": "text", "text": "{\"ucp\":{...},\"messages\":[...]}"}
+    ]
+  }
+}
+```
+
 ### `get_checkout`
 
 Maps to the [Get Checkout](https://ucp.dev/draft/specification/checkout/#get-checkout) operation.
@@ -4572,6 +4587,33 @@ Business outcomes (including errors like unavailable merchandise) are returned a
     },
     "content": [
       {"type": "text", "text": "{\"checkout\":{\"ucp\":{...},\"id\":\"checkout_abc123\",...}}"}
+    ]
+  }
+}
+```
+
+For `create_checkout`, when all items unavailable and no checkout can be created, JSON-RPC `result` with `structuredContent` containing the UCP envelope and `messages`:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "structuredContent": {
+      "ucp": { "version": "2026-01-11", "status": "error" },
+      "messages": [
+        {
+          "type": "error",
+          "code": "item_unavailable",
+          "content": "Items are not available for purchase in your region",
+          "severity": "unrecoverable",
+          "path": "$.line_items"
+        }
+      ],
+      "continue_url": "https://merchant.com/"
+    },
+    "content": [
+      {"type": "text", "text": "{\"ucp\":{...},\"messages\":[...]}"}
     ]
   }
 }
@@ -7819,6 +7861,23 @@ The Cart capability defines the following logical operations.
 
 Creates a new cart session with line items and optional buyer/context information for localized pricing estimates.
 
+When **all** requested items are unavailable, the business MAY return an error response instead of creating a cart resource. `ucp.status` is the primary discriminator; the absence of `id` is a consistent secondary indicator:
+
+```json
+{
+  "ucp": { "version": "2026-01-15", "status": "error" },
+  "messages": [
+    {
+      "type": "error",
+      "code": "out_of_stock",
+      "content": "All requested items are currently out of stock",
+      "severity": "unrecoverable"
+    }
+  ],
+  "continue_url": "https://merchant.com/"
+}
+```
+
 - [REST Binding](https://ucp.dev/draft/specification/cart-rest/#create-cart)
 - [MCP Binding](https://ucp.dev/draft/specification/cart-mcp/#create_cart)
 
@@ -7909,14 +7968,14 @@ This object MUST be one of the following types: [Message Error](/draft/specifica
 
 #### Message Error
 
-| Name         | Type                                                    | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| ------------ | ------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| type         | string                                                  | **Yes**  | **Constant = error**. Message type discriminator.                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| code         | [Error Code](/draft/specification/checkout/#error-code) | **Yes**  | Error code identifying the type of error. Standard errors are defined in specification (see examples), and have standardized semantics; freeform codes are permitted.                                                                                                                                                                                                                                                                                                                                          |
-| path         | string                                                  | No       | RFC 9535 JSONPath to the component the message refers to (e.g., $.items[1]).                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| content_type | string                                                  | No       | Content format, default = plain. **Enum:** `plain`, `markdown`                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| content      | string                                                  | **Yes**  | Human-readable message.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| severity     | string                                                  | **Yes**  | Declares who resolves this error. 'recoverable': agent can fix via API. 'requires_buyer_input': merchant requires information their API doesn't support collecting programmatically (checkout incomplete). 'requires_buyer_review': buyer must authorize before order placement due to policy, regulatory, or entitlement rules (checkout complete). Errors with 'requires\_*' severity contribute to 'status: requires_escalation'.* *Enum:*\* `recoverable`, `requires_buyer_input`, `requires_buyer_review` |
+| Name         | Type                                                    | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| ------------ | ------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type         | string                                                  | **Yes**  | **Constant = error**. Message type discriminator.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| code         | [Error Code](/draft/specification/checkout/#error-code) | **Yes**  | Error code identifying the type of error. Standard errors are defined in specification (see examples), and have standardized semantics; freeform codes are permitted.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| path         | string                                                  | No       | RFC 9535 JSONPath to the component the message refers to (e.g., $.items[1]).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| content_type | string                                                  | No       | Content format, default = plain. **Enum:** `plain`, `markdown`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| content      | string                                                  | **Yes**  | Human-readable message.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| severity     | string                                                  | **Yes**  | Reflects the resource state and recommended action. 'recoverable': platform can resolve by modifying inputs and retrying via API. 'requires_buyer_input': merchant requires information their API doesn't support collecting programmatically (checkout incomplete). 'requires_buyer_review': buyer must authorize before order placement due to policy, regulatory, or entitlement rules. 'unrecoverable': no valid resource exists to act on, retry with new resource or inputs. Errors with 'requires\_*' severity contribute to 'status: requires_escalation'.* *Enum:*\* `recoverable`, `requires_buyer_input`, `requires_buyer_review`, `unrecoverable` |
 
 #### Message Info
 
@@ -8113,6 +8172,26 @@ Content-Type: application/json
 }
 ```
 
+All items out of stock — no cart resource is created:
+
+```json
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "ucp": { "version": "2026-01-15", "status": "error" },
+  "messages": [
+    {
+      "type": "error",
+      "code": "out_of_stock",
+      "content": "All requested items are currently out of stock",
+      "severity": "unrecoverable"
+    }
+  ],
+  "continue_url": "https://merchant.com/"
+}
+```
+
 ### Get Cart
 
 #### Input Schema
@@ -8197,20 +8276,13 @@ HTTP/1.1 200 OK
 Content-Type: application/json
 
 {
-  "ucp": {
-    "version": "2026-01-15",
-    "capabilities": [
-      {
-        "name": "dev.ucp.shopping.cart",
-        "version": "2026-01-15"
-      }
-    ]
-  },
+  "ucp": { "version": "2026-01-15", "status": "error" },
   "messages": [
     {
       "type": "error",
       "code": "not_found",
-      "content": "Cart not found or has expired"
+      "content": "Cart not found or has expired",
+      "severity": "unrecoverable"
     }
   ],
   "continue_url": "https://merchant.com/"
@@ -8483,17 +8555,13 @@ Business outcomes (including not found and validation errors) are returned with 
 
 ```json
 {
-  "ucp": {
-    "version": "2026-01-11",
-    "capabilities": {
-      "dev.ucp.shopping.cart": [{"version": "2026-01-11"}]
-    }
-  },
+  "ucp": { "version": "2026-01-15", "status": "error" },
   "messages": [
     {
       "type": "error",
       "code": "not_found",
-      "content": "Cart not found or has expired"
+      "content": "Cart not found or has expired",
+      "severity": "unrecoverable"
     }
   ],
   "continue_url": "https://merchant.com/"
@@ -8723,6 +8791,32 @@ Maps to the [Create Cart](https://ucp.dev/draft/specification/cart/#create-cart)
 }
 ```
 
+All items out of stock — no cart resource is created:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "structuredContent": {
+      "ucp": { "version": "2026-01-15", "status": "error" },
+      "messages": [
+        {
+          "type": "error",
+          "code": "out_of_stock",
+          "content": "All requested items are currently out of stock",
+          "severity": "unrecoverable"
+        }
+      ],
+      "continue_url": "https://merchant.com/"
+    },
+    "content": [
+      {"type": "text", "text": "{\"ucp\":{...},\"messages\":[...]}"}
+    ]
+  }
+}
+```
+
 ### `get_cart`
 
 Maps to the [Get Cart](https://ucp.dev/draft/specification/cart/#get-cart) operation.
@@ -8835,30 +8929,21 @@ Maps to the [Get Cart](https://ucp.dev/draft/specification/cart/#get-cart) opera
   "id": 1,
   "result": {
     "structuredContent": {
-      "cart": {
-        "ucp": {
-          "version": "2026-01-15",
-          "capabilities": [
-            {
-              "name": "dev.ucp.shopping.cart",
-              "version": "2026-01-15"
-            }
-          ]
-        },
-        "messages": [
-          {
-            "type": "error",
-            "code": "not_found",
-            "content": "Cart not found or has expired"
-          }
-        ],
-        "continue_url": "https://merchant.com/"
-      }
+      "ucp": { "version": "2026-01-15", "status": "error" },
+      "messages": [
+        {
+          "type": "error",
+          "code": "not_found",
+          "content": "Cart not found or has expired",
+          "severity": "unrecoverable"
+        }
+      ],
+      "continue_url": "https://merchant.com/"
     },
     "content": [
       {
         "type": "text",
-        "text": "{\"cart\":{\"ucp\":{...},\"messages\":[...],\"continue_url\":\"...\"}}"
+        "text": "{\"ucp\":{...},\"messages\":[...],\"continue_url\":\"...\"}"
       }
     ]
   }
@@ -9135,25 +9220,19 @@ Business outcomes (including not found and validation errors) are returned as JS
   "id": 1,
   "result": {
     "structuredContent": {
-      "cart": {
-        "ucp": {
-          "version": "2026-01-11",
-          "capabilities": {
-            "dev.ucp.shopping.cart": [{"version": "2026-01-11"}]
-          }
-        },
-        "messages": [
-          {
-            "type": "error",
-            "code": "not_found",
-            "content": "Cart not found or has expired"
-          }
-        ],
-        "continue_url": "https://merchant.com/"
-      }
+      "ucp": { "version": "2026-01-15", "status": "error" },
+      "messages": [
+        {
+          "type": "error",
+          "code": "not_found",
+          "content": "Cart not found or has expired",
+          "severity": "unrecoverable"
+        }
+      ],
+      "continue_url": "https://merchant.com/"
     },
     "content": [
-      {"type": "text", "text": "{\"cart\":{...}}"}
+      {"type": "text", "text": "{\"ucp\":{...},\"messages\":[...]}"}
     ]
   }
 }
@@ -9613,13 +9692,14 @@ See [Message Signatures - Key Rotation](https://ucp.dev/draft/specification/sign
 
 ### UCP Response Order
 
-| Name             | Type   | Required | Description                                            |
-| ---------------- | ------ | -------- | ------------------------------------------------------ |
-| version          | string | **Yes**  | UCP version in YYYY-MM-DD format.                      |
-| services         | object | No       | Service registry keyed by reverse-domain name.         |
-| capabilities     | object | No       | Capability registry keyed by reverse-domain name.      |
-| payment_handlers | object | No       | Payment handler registry keyed by reverse-domain name. |
-| capabilities     | any    | No       |                                                        |
+| Name             | Type   | Required | Description                                                                 |
+| ---------------- | ------ | -------- | --------------------------------------------------------------------------- |
+| version          | string | **Yes**  | UCP version in YYYY-MM-DD format.                                           |
+| status           | string | No       | Application-level status of the UCP operation. **Enum:** `success`, `error` |
+| services         | object | No       | Service registry keyed by reverse-domain name.                              |
+| capabilities     | object | No       | Capability registry keyed by reverse-domain name.                           |
+| payment_handlers | object | No       | Payment handler registry keyed by reverse-domain name.                      |
+| capabilities     | any    | No       |                                                                             |
 
 # Identity Linking Capability
 
@@ -12275,6 +12355,16 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
+### Error Response
+
+| Name         | Type                                                        | Required | Description                                                       |
+| ------------ | ----------------------------------------------------------- | -------- | ----------------------------------------------------------------- |
+| ucp          | any                                                         | **Yes**  | UCP protocol metadata. Status MUST be 'error' for error response. |
+| messages     | Array\[[Message](/draft/specification/reference/#message)\] | **Yes**  | Array of messages describing why the operation failed.            |
+| continue_url | string                                                      | No       | URL for buyer handoff or session recovery.                        |
+
+______________________________________________________________________
+
 ### Expectation
 
 | Name           | Type                                                             | Required | Description                                                                                                 |
@@ -12417,14 +12507,14 @@ ______________________________________________________________________
 
 ### Message Error
 
-| Name         | Type                                                     | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| ------------ | -------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| type         | string                                                   | **Yes**  | **Constant = error**. Message type discriminator.                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| code         | [Error Code](/draft/specification/reference/#error-code) | **Yes**  | Error code identifying the type of error. Standard errors are defined in specification (see examples), and have standardized semantics; freeform codes are permitted.                                                                                                                                                                                                                                                                                                                                          |
-| path         | string                                                   | No       | RFC 9535 JSONPath to the component the message refers to (e.g., $.items[1]).                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| content_type | string                                                   | No       | Content format, default = plain. **Enum:** `plain`, `markdown`                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| content      | string                                                   | **Yes**  | Human-readable message.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| severity     | string                                                   | **Yes**  | Declares who resolves this error. 'recoverable': agent can fix via API. 'requires_buyer_input': merchant requires information their API doesn't support collecting programmatically (checkout incomplete). 'requires_buyer_review': buyer must authorize before order placement due to policy, regulatory, or entitlement rules (checkout complete). Errors with 'requires\_*' severity contribute to 'status: requires_escalation'.* *Enum:*\* `recoverable`, `requires_buyer_input`, `requires_buyer_review` |
+| Name         | Type                                                     | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| ------------ | -------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type         | string                                                   | **Yes**  | **Constant = error**. Message type discriminator.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| code         | [Error Code](/draft/specification/reference/#error-code) | **Yes**  | Error code identifying the type of error. Standard errors are defined in specification (see examples), and have standardized semantics; freeform codes are permitted.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| path         | string                                                   | No       | RFC 9535 JSONPath to the component the message refers to (e.g., $.items[1]).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| content_type | string                                                   | No       | Content format, default = plain. **Enum:** `plain`, `markdown`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| content      | string                                                   | **Yes**  | Human-readable message.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| severity     | string                                                   | **Yes**  | Reflects the resource state and recommended action. 'recoverable': platform can resolve by modifying inputs and retrying via API. 'requires_buyer_input': merchant requires information their API doesn't support collecting programmatically (checkout incomplete). 'requires_buyer_review': buyer must authorize before order placement due to policy, regulatory, or entitlement rules. 'unrecoverable': no valid resource exists to act on, retry with new resource or inputs. Errors with 'requires\_*' severity contribute to 'status: requires_escalation'.* *Enum:*\* `recoverable`, `requires_buyer_input`, `requires_buyer_review`, `unrecoverable` |
 
 ______________________________________________________________________
 
@@ -12803,55 +12893,59 @@ The following schemas define the structure of UCP metadata used in discovery and
 
 The top-level structure of a platform profile document (hosted at a URI advertised by the platform).
 
-| Name             | Type   | Required | Description                                            |
-| ---------------- | ------ | -------- | ------------------------------------------------------ |
-| version          | string | **Yes**  | UCP version in YYYY-MM-DD format.                      |
-| services         | object | No       | Service registry keyed by reverse-domain name.         |
-| capabilities     | object | No       | Capability registry keyed by reverse-domain name.      |
-| payment_handlers | object | No       | Payment handler registry keyed by reverse-domain name. |
-| services         | any    | **Yes**  |                                                        |
-| capabilities     | any    | No       |                                                        |
-| payment_handlers | any    | **Yes**  |                                                        |
+| Name             | Type   | Required | Description                                                                 |
+| ---------------- | ------ | -------- | --------------------------------------------------------------------------- |
+| version          | string | **Yes**  | UCP version in YYYY-MM-DD format.                                           |
+| status           | string | No       | Application-level status of the UCP operation. **Enum:** `success`, `error` |
+| services         | object | No       | Service registry keyed by reverse-domain name.                              |
+| capabilities     | object | No       | Capability registry keyed by reverse-domain name.                           |
+| payment_handlers | object | No       | Payment handler registry keyed by reverse-domain name.                      |
+| services         | any    | **Yes**  |                                                                             |
+| capabilities     | any    | No       |                                                                             |
+| payment_handlers | any    | **Yes**  |                                                                             |
 
 ### Business Discovery Profile
 
 The top-level structure of a business discovery document (`/.well-known/ucp`).
 
-| Name             | Type   | Required | Description                                            |
-| ---------------- | ------ | -------- | ------------------------------------------------------ |
-| version          | string | **Yes**  | UCP version in YYYY-MM-DD format.                      |
-| services         | object | No       | Service registry keyed by reverse-domain name.         |
-| capabilities     | object | No       | Capability registry keyed by reverse-domain name.      |
-| payment_handlers | object | No       | Payment handler registry keyed by reverse-domain name. |
-| services         | any    | **Yes**  |                                                        |
-| capabilities     | any    | No       |                                                        |
-| payment_handlers | any    | **Yes**  |                                                        |
+| Name             | Type   | Required | Description                                                                 |
+| ---------------- | ------ | -------- | --------------------------------------------------------------------------- |
+| version          | string | **Yes**  | UCP version in YYYY-MM-DD format.                                           |
+| status           | string | No       | Application-level status of the UCP operation. **Enum:** `success`, `error` |
+| services         | object | No       | Service registry keyed by reverse-domain name.                              |
+| capabilities     | object | No       | Capability registry keyed by reverse-domain name.                           |
+| payment_handlers | object | No       | Payment handler registry keyed by reverse-domain name.                      |
+| services         | any    | **Yes**  |                                                                             |
+| capabilities     | any    | No       |                                                                             |
+| payment_handlers | any    | **Yes**  |                                                                             |
 
 ### Checkout Response Metadata
 
 The `ucp` object included in checkout responses.
 
-| Name             | Type   | Required | Description                                            |
-| ---------------- | ------ | -------- | ------------------------------------------------------ |
-| version          | string | **Yes**  | UCP version in YYYY-MM-DD format.                      |
-| services         | object | No       | Service registry keyed by reverse-domain name.         |
-| capabilities     | object | No       | Capability registry keyed by reverse-domain name.      |
-| payment_handlers | object | No       | Payment handler registry keyed by reverse-domain name. |
-| services         | any    | No       |                                                        |
-| capabilities     | any    | No       |                                                        |
-| payment_handlers | any    | **Yes**  |                                                        |
+| Name             | Type   | Required | Description                                                                 |
+| ---------------- | ------ | -------- | --------------------------------------------------------------------------- |
+| version          | string | **Yes**  | UCP version in YYYY-MM-DD format.                                           |
+| status           | string | No       | Application-level status of the UCP operation. **Enum:** `success`, `error` |
+| services         | object | No       | Service registry keyed by reverse-domain name.                              |
+| capabilities     | object | No       | Capability registry keyed by reverse-domain name.                           |
+| payment_handlers | object | No       | Payment handler registry keyed by reverse-domain name.                      |
+| services         | any    | No       |                                                                             |
+| capabilities     | any    | No       |                                                                             |
+| payment_handlers | any    | **Yes**  |                                                                             |
 
 ### Order Response Metadata
 
 The `ucp` object included in order responses or events.
 
-| Name             | Type   | Required | Description                                            |
-| ---------------- | ------ | -------- | ------------------------------------------------------ |
-| version          | string | **Yes**  | UCP version in YYYY-MM-DD format.                      |
-| services         | object | No       | Service registry keyed by reverse-domain name.         |
-| capabilities     | object | No       | Capability registry keyed by reverse-domain name.      |
-| payment_handlers | object | No       | Payment handler registry keyed by reverse-domain name. |
-| capabilities     | any    | No       |                                                        |
+| Name             | Type   | Required | Description                                                                 |
+| ---------------- | ------ | -------- | --------------------------------------------------------------------------- |
+| version          | string | **Yes**  | UCP version in YYYY-MM-DD format.                                           |
+| status           | string | No       | Application-level status of the UCP operation. **Enum:** `success`, `error` |
+| services         | object | No       | Service registry keyed by reverse-domain name.                              |
+| capabilities     | object | No       | Capability registry keyed by reverse-domain name.                           |
+| payment_handlers | object | No       | Payment handler registry keyed by reverse-domain name.                      |
+| capabilities     | any    | No       |                                                                             |
 
 ### Capability
 

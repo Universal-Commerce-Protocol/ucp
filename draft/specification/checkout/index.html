@@ -2867,7 +2867,10 @@ platform receives messages indicating what's needed to progress.</p>
 <h3 id="error-handling">Error Handling<a class="headerlink" href="#error-handling" title="Permanent link">&para;</a></h3>
 <p>The <code>messages</code> array contains errors, warnings, and informational messages
 about the checkout state. Error messages include a <code>severity</code> field that
-declares <strong>who resolves the error</strong>:</p>
+reflects the resource state and recommended action. When <code>ucp.status</code>
+is <code>"success"</code>, a resource is returned and severity indicates the
+recommended action. When <code>ucp.status</code> is <code>"error"</code>, no valid resource
+exists — severity is <code>unrecoverable</code>:</p>
 <table>
 <thead>
 <tr>
@@ -2879,8 +2882,8 @@ declares <strong>who resolves the error</strong>:</p>
 <tbody>
 <tr>
 <td style="text-align: left;"><code>recoverable</code></td>
-<td style="text-align: left;">Platform can fix via API</td>
-<td style="text-align: left;">Resolve using Update Checkout</td>
+<td style="text-align: left;">Platform can resolve by modifying inputs via API</td>
+<td style="text-align: left;">Update resource and retry</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>requires_buyer_input</code></td>
@@ -2891,6 +2894,11 @@ declares <strong>who resolves the error</strong>:</p>
 <td style="text-align: left;"><code>requires_buyer_review</code></td>
 <td style="text-align: left;">Buyer review and authorization is required</td>
 <td style="text-align: left;">Hand off via <code>continue_url</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>unrecoverable</code></td>
+<td style="text-align: left;">No resource exists to act on</td>
+<td style="text-align: left;">Retry with new resource or inputs, or hand off via <code>continue_url</code></td>
 </tr>
 </tbody>
 </table>
@@ -2903,6 +2911,27 @@ requires information their API doesn't support collecting programmatically.</li>
 regulatory, or entitlement rules require buyer authorization before order
 placement (e.g., high-value order approval, first-purchase policy).</li>
 </ul>
+<p>When the business cannot create a new resource or the requested resource
+no longer exists, the response contains <code>ucp.status: "error"</code> with
+<code>messages</code> describing the failure — no resource is included in the
+response body. Error responses MUST use <code>severity: "unrecoverable"</code>.
+For example, a business may reject a create checkout request where all
+items are unavailable:</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="p">{</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="nt">&quot;ucp&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-01-11&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;error&quot;</span><span class="w"> </span><span class="p">},</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span><span class="nt">&quot;messages&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">    </span><span class="p">{</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;error&quot;</span><span class="p">,</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">      </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;out_of_stock&quot;</span><span class="p">,</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">      </span><span class="nt">&quot;content&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;All requested items are currently out of stock&quot;</span><span class="p">,</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">      </span><span class="nt">&quot;severity&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;unrecoverable&quot;</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">  </span><span class="p">],</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">  </span><span class="nt">&quot;continue_url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://merchant.com/&quot;</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="p">}</span>
+</span></code></pre></div>
+<p>See <a href="../checkout-rest/#create-checkout">REST</a> and
+<a href="../checkout-mcp/#create_checkout">MCP</a> binding examples.</p>
 <h4 id="error-processing-algorithm">Error Processing Algorithm<a class="headerlink" href="#error-processing-algorithm" title="Permanent link">&para;</a></h4>
 <p>When status is <code>incomplete</code> or <code>requires_escalation</code>, platforms should process
 errors as a prioritized stack. The example below illustrates a checkout with
@@ -2911,49 +2940,55 @@ requirement (delivery scheduling), and a review requirement (high-value order).
 The latter two require handoff and serve as explicit signals to the platform.
 Businesses <strong>SHOULD</strong> surface such messages as early as possible, and platforms
 <strong>SHOULD</strong> prioritize resolving recoverable errors before initiating handoff.</p>
-<div class="language-json highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="p">{</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;requires_escalation&quot;</span><span class="p">,</span>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span><span class="nt">&quot;messages&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">    </span><span class="p">{</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;error&quot;</span><span class="p">,</span>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">      </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;invalid_phone&quot;</span><span class="p">,</span>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">      </span><span class="nt">&quot;severity&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;recoverable&quot;</span><span class="p">,</span>
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">      </span><span class="nt">&quot;content&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Phone number format is invalid&quot;</span>
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">    </span><span class="p">},</span>
-</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">    </span><span class="p">{</span>
-</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;error&quot;</span><span class="p">,</span>
-</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">      </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;schedule_delivery&quot;</span><span class="p">,</span>
-</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w">      </span><span class="nt">&quot;severity&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;requires_buyer_input&quot;</span><span class="p">,</span>
-</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="w">      </span><span class="nt">&quot;content&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Select delivery window for your purchase&quot;</span>
-</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="w">    </span><span class="p">},</span>
-</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="w">    </span><span class="p">{</span>
-</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;error&quot;</span><span class="p">,</span>
-</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="w">      </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;high_value_order&quot;</span><span class="p">,</span>
-</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="w">      </span><span class="nt">&quot;severity&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;requires_buyer_review&quot;</span><span class="p">,</span>
-</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a><span class="w">      </span><span class="nt">&quot;content&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Orders over $500 require additional verification&quot;</span>
-</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a><span class="w">    </span><span class="p">}</span>
-</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a><span class="w">  </span><span class="p">]</span>
-</span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a><span class="p">}</span>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="p">{</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;requires_escalation&quot;</span><span class="p">,</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span><span class="nt">&quot;messages&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="p">{</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;error&quot;</span><span class="p">,</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">      </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;invalid_phone&quot;</span><span class="p">,</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">      </span><span class="nt">&quot;severity&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;recoverable&quot;</span><span class="p">,</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">      </span><span class="nt">&quot;content&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Phone number format is invalid&quot;</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">    </span><span class="p">},</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">    </span><span class="p">{</span>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;error&quot;</span><span class="p">,</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">      </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;schedule_delivery&quot;</span><span class="p">,</span>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">      </span><span class="nt">&quot;severity&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;requires_buyer_input&quot;</span><span class="p">,</span>
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="w">      </span><span class="nt">&quot;content&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Select delivery window for your purchase&quot;</span>
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="w">    </span><span class="p">},</span>
+</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="w">    </span><span class="p">{</span>
+</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;error&quot;</span><span class="p">,</span>
+</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a><span class="w">      </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;high_value_order&quot;</span><span class="p">,</span>
+</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a><span class="w">      </span><span class="nt">&quot;severity&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;requires_buyer_review&quot;</span><span class="p">,</span>
+</span><span id="__span-2-20"><a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a><span class="w">      </span><span class="nt">&quot;content&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Orders over $500 require additional verification&quot;</span>
+</span><span id="__span-2-21"><a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-2-22"><a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a><span class="w">  </span><span class="p">]</span>
+</span><span id="__span-2-23"><a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>Example error processing algorithm:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>GIVEN checkout with messages array
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>FILTER errors FROM messages WHERE type = &quot;error&quot;
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>PARTITION errors INTO
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>  recoverable           WHERE severity = &quot;recoverable&quot;
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>  requires_buyer_input  WHERE severity = &quot;requires_buyer_input&quot;
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>  requires_buyer_review WHERE severity = &quot;requires_buyer_review&quot;
-</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>
-</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>IF recoverable is not empty
-</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>  FOR EACH error IN recoverable
-</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>    ATTEMPT to fix error (e.g., reformat phone number)
-</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>  CALL Update Checkout
-</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>  RETURN and re-evaluate response
-</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>
-</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>IF requires_buyer_input is not empty
-</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>  handoff_context = &quot;incomplete, additional input from buyer is required&quot;
-</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>ELSE IF requires_buyer_review is not empty
-</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>  handoff_context = &quot;ready for final review by the buyer&quot;
+<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>GIVEN response with messages array
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>IF ucp.status = &quot;error&quot;
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>  -- No resource exists; severity is unrecoverable
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>  RETRY with new resource or inputs, or hand off via continue_url
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>  RETURN
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>FILTER errors FROM messages WHERE type = &quot;error&quot;
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>PARTITION errors INTO
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>  recoverable           WHERE severity = &quot;recoverable&quot;
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>  requires_buyer_input  WHERE severity = &quot;requires_buyer_input&quot;
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>  requires_buyer_review WHERE severity = &quot;requires_buyer_review&quot;
+</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>
+</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a>IF recoverable is not empty
+</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a>  FOR EACH error IN recoverable
+</span><span id="__span-3-17"><a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a>    ATTEMPT to fix error (e.g., reformat phone number)
+</span><span id="__span-3-18"><a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a>  CALL Update Checkout
+</span><span id="__span-3-19"><a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a>  RETURN and re-evaluate response
+</span><span id="__span-3-20"><a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a>
+</span><span id="__span-3-21"><a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a>IF requires_buyer_input is not empty
+</span><span id="__span-3-22"><a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a>  handoff_context = &quot;incomplete, additional input from buyer is required&quot;
+</span><span id="__span-3-23"><a id="__codelineno-3-23" name="__codelineno-3-23" href="#__codelineno-3-23"></a>ELSE IF requires_buyer_review is not empty
+</span><span id="__span-3-24"><a id="__codelineno-3-24" name="__codelineno-3-24" href="#__codelineno-3-24"></a>  handoff_context = &quot;ready for final review by the buyer&quot;
 </span></code></pre></div>
 <h4 id="standard-errors">Standard Errors<a class="headerlink" href="#standard-errors" title="Permanent link">&para;</a></h4>
 <p>Standard errors are standardized error codes that platforms are expected to
@@ -3005,7 +3040,7 @@ checkout state for seamless handoff. Businesses <strong>MAY</strong> implement s
 preservation using either approach:</p>
 <h4 id="server-side-state-recommended">Server-Side State (Recommended)<a class="headerlink" href="#server-side-state-recommended" title="Permanent link">&para;</a></h4>
 <p>An opaque URL backed by server-side checkout state:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>https://business.example.com/checkout-sessions/{checkout_id}
+<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>https://business.example.com/checkout-sessions/{checkout_id}
 </span></code></pre></div>
 <ul>
 <li>Server maintains checkout state tied to <code>checkout_id</code></li>
@@ -3048,8 +3083,9 @@ redirect to the checkout UI or renders the checkout page directly.</p>
 <li>Logic handling the checkout sessions <strong>MUST</strong> be deterministic.</li>
 <li><strong>MUST</strong> provide <code>continue_url</code> when returning <code>status</code> =
     <code>requires_escalation</code>.</li>
-<li><strong>MUST</strong> include at least one message with <code>severity: escalation</code> when
-    returning <code>status</code> = <code>requires_escalation</code>.</li>
+<li><strong>MUST</strong> include at least one message with <code>severity</code> of
+    <code>requires_buyer_input</code> or <code>requires_buyer_review</code> when returning
+    <code>status</code> = <code>requires_escalation</code>.</li>
 <li><strong>SHOULD</strong> provide <code>continue_url</code> in all non-terminal checkout responses.</li>
 <li>After a checkout session reaches the state "completed", it is considered
     immutable.</li>
@@ -3221,96 +3257,7 @@ product data (price/title etc.) provided by the business through the feeds
 </tbody>
 </table>
 <p><strong>Output</strong></p>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Name</th>
-<th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
-<th style="text-align: left;">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;">ucp</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#ucp-response-checkout-schema">UCP Response Checkout Schema</a></td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.</td>
-</tr>
-<tr>
-<td style="text-align: left;">id</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Unique identifier of the checkout session.</td>
-</tr>
-<tr>
-<td style="text-align: left;">line_items</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/checkout/#line-item-response">Line Item Response</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">List of line items being checked out.</td>
-</tr>
-<tr>
-<td style="text-align: left;">buyer</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#buyer">Buyer</a></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Representation of the buyer.</td>
-</tr>
-<tr>
-<td style="text-align: left;">status</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details.<br><strong>Enum:</strong> <code>incomplete</code>, <code>requires_escalation</code>, <code>ready_for_complete</code>, <code>complete_in_progress</code>, <code>completed</code>, <code>canceled</code></td>
-</tr>
-<tr>
-<td style="text-align: left;">currency</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.</td>
-</tr>
-<tr>
-<td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/checkout/#total-response">Total Response</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Different cart totals.</td>
-</tr>
-<tr>
-<td style="text-align: left;">messages</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/checkout/#message">Message</a>]</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">List of messages with error and info about the checkout session state.</td>
-</tr>
-<tr>
-<td style="text-align: left;">links</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/checkout/#link">Link</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.</td>
-</tr>
-<tr>
-<td style="text-align: left;">expires_at</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.</td>
-</tr>
-<tr>
-<td style="text-align: left;">continue_url</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">URL for checkout handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements.</td>
-</tr>
-<tr>
-<td style="text-align: left;">payment</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#payment">Payment</a></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Payment configuration containing handlers.</td>
-</tr>
-<tr>
-<td style="text-align: left;">order</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#order-confirmation">Order Confirmation</a></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Details about an order created for this checkout session.</td>
-</tr>
-</tbody>
-</table>
+<p>This object MUST be one of the following types: <a href="/draft/specification/checkout/#checkout">Checkout</a>, <a href="/draft/specification/checkout/#error-response">Error Response</a>.</p>
 <h3 id="get-checkout">Get Checkout<a class="headerlink" href="#get-checkout" title="Permanent link">&para;</a></h3>
 <p>It provides the latest state of the checkout resource. After cancellation or
 completion it is up to the business on what to return (i.e this can be a long
@@ -3339,96 +3286,7 @@ time of checkout session creation.</p>
 </tbody>
 </table>
 <p><strong>Output</strong></p>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Name</th>
-<th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
-<th style="text-align: left;">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;">ucp</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#ucp-response-checkout-schema">UCP Response Checkout Schema</a></td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.</td>
-</tr>
-<tr>
-<td style="text-align: left;">id</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Unique identifier of the checkout session.</td>
-</tr>
-<tr>
-<td style="text-align: left;">line_items</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/checkout/#line-item-response">Line Item Response</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">List of line items being checked out.</td>
-</tr>
-<tr>
-<td style="text-align: left;">buyer</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#buyer">Buyer</a></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Representation of the buyer.</td>
-</tr>
-<tr>
-<td style="text-align: left;">status</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details.<br><strong>Enum:</strong> <code>incomplete</code>, <code>requires_escalation</code>, <code>ready_for_complete</code>, <code>complete_in_progress</code>, <code>completed</code>, <code>canceled</code></td>
-</tr>
-<tr>
-<td style="text-align: left;">currency</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.</td>
-</tr>
-<tr>
-<td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/checkout/#total-response">Total Response</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Different cart totals.</td>
-</tr>
-<tr>
-<td style="text-align: left;">messages</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/checkout/#message">Message</a>]</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">List of messages with error and info about the checkout session state.</td>
-</tr>
-<tr>
-<td style="text-align: left;">links</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/checkout/#link">Link</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.</td>
-</tr>
-<tr>
-<td style="text-align: left;">expires_at</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.</td>
-</tr>
-<tr>
-<td style="text-align: left;">continue_url</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">URL for checkout handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements.</td>
-</tr>
-<tr>
-<td style="text-align: left;">payment</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#payment">Payment</a></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Payment configuration containing handlers.</td>
-</tr>
-<tr>
-<td style="text-align: left;">order</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#order-confirmation">Order Confirmation</a></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Details about an order created for this checkout session.</td>
-</tr>
-</tbody>
-</table>
+<p>This object MUST be one of the following types: <a href="/draft/specification/checkout/#checkout">Checkout</a>, <a href="/draft/specification/checkout/#error-response">Error Response</a>.</p>
 <h3 id="update-checkout">Update Checkout<a class="headerlink" href="#update-checkout" title="Permanent link">&para;</a></h3>
 <p>Performs a full replacement of the checkout resource.
 The platform is <strong>REQUIRED</strong> to send the entire checkout resource containing any
@@ -3484,96 +3342,7 @@ will replace the existing checkout session state on the business side.</p>
 </tbody>
 </table>
 <p><strong>Output</strong></p>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Name</th>
-<th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
-<th style="text-align: left;">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;">ucp</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#ucp-response-checkout-schema">UCP Response Checkout Schema</a></td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.</td>
-</tr>
-<tr>
-<td style="text-align: left;">id</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Unique identifier of the checkout session.</td>
-</tr>
-<tr>
-<td style="text-align: left;">line_items</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/checkout/#line-item-response">Line Item Response</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">List of line items being checked out.</td>
-</tr>
-<tr>
-<td style="text-align: left;">buyer</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#buyer">Buyer</a></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Representation of the buyer.</td>
-</tr>
-<tr>
-<td style="text-align: left;">status</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details.<br><strong>Enum:</strong> <code>incomplete</code>, <code>requires_escalation</code>, <code>ready_for_complete</code>, <code>complete_in_progress</code>, <code>completed</code>, <code>canceled</code></td>
-</tr>
-<tr>
-<td style="text-align: left;">currency</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.</td>
-</tr>
-<tr>
-<td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/checkout/#total-response">Total Response</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Different cart totals.</td>
-</tr>
-<tr>
-<td style="text-align: left;">messages</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/checkout/#message">Message</a>]</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">List of messages with error and info about the checkout session state.</td>
-</tr>
-<tr>
-<td style="text-align: left;">links</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/checkout/#link">Link</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.</td>
-</tr>
-<tr>
-<td style="text-align: left;">expires_at</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.</td>
-</tr>
-<tr>
-<td style="text-align: left;">continue_url</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">URL for checkout handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements.</td>
-</tr>
-<tr>
-<td style="text-align: left;">payment</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#payment">Payment</a></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Payment configuration containing handlers.</td>
-</tr>
-<tr>
-<td style="text-align: left;">order</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#order-confirmation">Order Confirmation</a></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Details about an order created for this checkout session.</td>
-</tr>
-</tbody>
-</table>
+<p>This object MUST be one of the following types: <a href="/draft/specification/checkout/#checkout">Checkout</a>, <a href="/draft/specification/checkout/#error-response">Error Response</a>.</p>
 <h3 id="complete-checkout">Complete Checkout<a class="headerlink" href="#complete-checkout" title="Permanent link">&para;</a></h3>
 <p>This is the final checkout placement call. To be invoked when the user has
 committed to pay and place an order for the chosen items. The response of this
@@ -3617,96 +3386,7 @@ as the order, and its associated items, moves through the supply chain.</p>
 </tbody>
 </table>
 <p><strong>Output</strong></p>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Name</th>
-<th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
-<th style="text-align: left;">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;">ucp</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#ucp-response-checkout-schema">UCP Response Checkout Schema</a></td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.</td>
-</tr>
-<tr>
-<td style="text-align: left;">id</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Unique identifier of the checkout session.</td>
-</tr>
-<tr>
-<td style="text-align: left;">line_items</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/checkout/#line-item-response">Line Item Response</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">List of line items being checked out.</td>
-</tr>
-<tr>
-<td style="text-align: left;">buyer</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#buyer">Buyer</a></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Representation of the buyer.</td>
-</tr>
-<tr>
-<td style="text-align: left;">status</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details.<br><strong>Enum:</strong> <code>incomplete</code>, <code>requires_escalation</code>, <code>ready_for_complete</code>, <code>complete_in_progress</code>, <code>completed</code>, <code>canceled</code></td>
-</tr>
-<tr>
-<td style="text-align: left;">currency</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.</td>
-</tr>
-<tr>
-<td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/checkout/#total-response">Total Response</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Different cart totals.</td>
-</tr>
-<tr>
-<td style="text-align: left;">messages</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/checkout/#message">Message</a>]</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">List of messages with error and info about the checkout session state.</td>
-</tr>
-<tr>
-<td style="text-align: left;">links</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/checkout/#link">Link</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.</td>
-</tr>
-<tr>
-<td style="text-align: left;">expires_at</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.</td>
-</tr>
-<tr>
-<td style="text-align: left;">continue_url</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">URL for checkout handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements.</td>
-</tr>
-<tr>
-<td style="text-align: left;">payment</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#payment">Payment</a></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Payment configuration containing handlers.</td>
-</tr>
-<tr>
-<td style="text-align: left;">order</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#order-confirmation">Order Confirmation</a></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Details about an order created for this checkout session.</td>
-</tr>
-</tbody>
-</table>
+<p>This object MUST be one of the following types: <a href="/draft/specification/checkout/#checkout">Checkout</a>, <a href="/draft/specification/checkout/#error-response">Error Response</a>.</p>
 <h3 id="cancel-checkout">Cancel Checkout<a class="headerlink" href="#cancel-checkout" title="Permanent link">&para;</a></h3>
 <p>This operation will be used to cancel a checkout session, if it can be canceled.
 If the checkout session cannot be canceled (e.g. checkout session is
@@ -3733,96 +3413,7 @@ that is not equal to <code>completed</code> or <code>canceled</code> <strong>SHO
 </tbody>
 </table>
 <p><strong>Output</strong></p>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Name</th>
-<th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
-<th style="text-align: left;">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;">ucp</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#ucp-response-checkout-schema">UCP Response Checkout Schema</a></td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.</td>
-</tr>
-<tr>
-<td style="text-align: left;">id</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Unique identifier of the checkout session.</td>
-</tr>
-<tr>
-<td style="text-align: left;">line_items</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/checkout/#line-item-response">Line Item Response</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">List of line items being checked out.</td>
-</tr>
-<tr>
-<td style="text-align: left;">buyer</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#buyer">Buyer</a></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Representation of the buyer.</td>
-</tr>
-<tr>
-<td style="text-align: left;">status</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details.<br><strong>Enum:</strong> <code>incomplete</code>, <code>requires_escalation</code>, <code>ready_for_complete</code>, <code>complete_in_progress</code>, <code>completed</code>, <code>canceled</code></td>
-</tr>
-<tr>
-<td style="text-align: left;">currency</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.</td>
-</tr>
-<tr>
-<td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/checkout/#total-response">Total Response</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Different cart totals.</td>
-</tr>
-<tr>
-<td style="text-align: left;">messages</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/checkout/#message">Message</a>]</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">List of messages with error and info about the checkout session state.</td>
-</tr>
-<tr>
-<td style="text-align: left;">links</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/checkout/#link">Link</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.</td>
-</tr>
-<tr>
-<td style="text-align: left;">expires_at</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.</td>
-</tr>
-<tr>
-<td style="text-align: left;">continue_url</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">URL for checkout handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements.</td>
-</tr>
-<tr>
-<td style="text-align: left;">payment</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#payment">Payment</a></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Payment configuration containing handlers.</td>
-</tr>
-<tr>
-<td style="text-align: left;">order</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#order-confirmation">Order Confirmation</a></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Details about an order created for this checkout session.</td>
-</tr>
-</tbody>
-</table>
+<p>This object MUST be one of the following types: <a href="/draft/specification/checkout/#checkout">Checkout</a>, <a href="/draft/specification/checkout/#error-response">Error Response</a>.</p>
 <h2 id="transport-bindings">Transport Bindings<a class="headerlink" href="#transport-bindings" title="Permanent link">&para;</a></h2>
 <p>The abstract operations above are bound to specific transport protocols as
 defined below:</p>
@@ -4262,7 +3853,7 @@ field or omitting them.</p>
 <td style="text-align: left;">severity</td>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Declares who resolves this error. 'recoverable': agent can fix via API. 'requires_buyer_input': merchant requires information their API doesn't support collecting programmatically (checkout incomplete). 'requires_buyer_review': buyer must authorize before order placement due to policy, regulatory, or entitlement rules (checkout complete). Errors with 'requires_<em>' severity contribute to 'status: requires_escalation'.<br></em><em>Enum:</em>* <code>recoverable</code>, <code>requires_buyer_input</code>, <code>requires_buyer_review</code></td>
+<td style="text-align: left;">Reflects the resource state and recommended action. 'recoverable': platform can resolve by modifying inputs and retrying via API. 'requires_buyer_input': merchant requires information their API doesn't support collecting programmatically (checkout incomplete). 'requires_buyer_review': buyer must authorize before order placement due to policy, regulatory, or entitlement rules. 'unrecoverable': no valid resource exists to act on, retry with new resource or inputs. Errors with 'requires_<em>' severity contribute to 'status: requires_escalation'.<br></em><em>Enum:</em>* <code>recoverable</code>, <code>requires_buyer_input</code>, <code>requires_buyer_review</code>, <code>unrecoverable</code></td>
 </tr>
 </tbody>
 </table>
@@ -4603,6 +4194,12 @@ field or omitting them.</p>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">UCP version in YYYY-MM-DD format.</td>
+</tr>
+<tr>
+<td style="text-align: left;">status</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Application-level status of the UCP operation.<br><strong>Enum:</strong> <code>success</code>, <code>error</code></td>
 </tr>
 <tr>
 <td style="text-align: left;">services</td>
