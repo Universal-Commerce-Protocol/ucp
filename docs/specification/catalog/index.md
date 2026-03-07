@@ -64,8 +64,10 @@ controls). Eligibility and policy enforcement MUST occur at checkout time using
 binding transaction data.
 
 Businesses determine market assignment—including currency—based on context
-signals. Price filter values are interpreted in the business's assigned
-currency; response prices include explicit currency codes.
+signals. Price filter values are denominated in `context.currency`; when
+the presentment currency differs, businesses SHOULD convert before applying
+(see [Price Filter](search.md#price-filter)). Response prices include
+explicit currency codes confirming the resolution.
 
 {{ schema_fields('types/context', 'catalog') }}
 
