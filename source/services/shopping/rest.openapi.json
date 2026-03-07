@@ -89,7 +89,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/checkout"
+                  "$ref": "#/components/schemas/checkout_response"
                 }
               }
             }
@@ -157,7 +157,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/checkout"
+                  "$ref": "#/components/schemas/checkout_response"
                 }
               }
             }
@@ -234,7 +234,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/checkout"
+                  "$ref": "#/components/schemas/checkout_response"
                 }
               }
             }
@@ -330,7 +330,7 @@
             },
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/checkout" }
+                "schema": { "$ref": "#/components/schemas/checkout_response" }
               }
             }
           }
@@ -403,7 +403,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/checkout"
+                  "$ref": "#/components/schemas/checkout_response"
                 }
               }
             }
@@ -448,7 +448,7 @@
             },
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/cart" }
+                "schema": { "$ref": "#/components/schemas/cart_response" }
               }
             }
           }
@@ -486,12 +486,9 @@
             },
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/cart" }
+                "schema": { "$ref": "#/components/schemas/cart_response" }
               }
             }
-          },
-          "404": {
-            "description": "Cart not found (cancelled, expired, or never existed)"
           }
         }
       },
@@ -532,7 +529,7 @@
             },
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/cart" }
+                "schema": { "$ref": "#/components/schemas/cart_response" }
               }
             }
           }
@@ -572,7 +569,7 @@
             },
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/cart" }
+                "schema": { "$ref": "#/components/schemas/cart_response" }
               }
             }
           }
@@ -808,8 +805,20 @@
       "checkout": {
         "$ref": "../../schemas/shopping/checkout.json"
       },
+      "checkout_response": {
+        "oneOf": [
+          { "$ref": "../../schemas/shopping/checkout.json" },
+          { "$ref": "../../schemas/shopping/types/error_response.json" }
+        ]
+      },
       "cart": {
         "$ref": "../../schemas/shopping/cart.json"
+      },
+      "cart_response": {
+        "oneOf": [
+          { "$ref": "../../schemas/shopping/cart.json" },
+          { "$ref": "../../schemas/shopping/types/error_response.json" }
+        ]
       },
       "order": {
         "$ref": "../../schemas/shopping/order.json"

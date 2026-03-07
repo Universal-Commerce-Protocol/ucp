@@ -220,6 +220,34 @@ Maps to the [Create Cart](cart.md#create-cart) operation.
     }
     ```
 
+=== "Error Response"
+
+    All items out of stock — no cart resource is created:
+
+    ```json
+    {
+      "jsonrpc": "2.0",
+      "id": 1,
+      "result": {
+        "structuredContent": {
+          "ucp": { "version": "2026-01-15", "status": "error" },
+          "messages": [
+            {
+              "type": "error",
+              "code": "out_of_stock",
+              "content": "All requested items are currently out of stock",
+              "severity": "unrecoverable"
+            }
+          ],
+          "continue_url": "https://merchant.com/"
+        },
+        "content": [
+          {"type": "text", "text": "{\"ucp\":{...},\"messages\":[...]}"}
+        ]
+      }
+    }
+    ```
+
 ### `get_cart`
 
 Maps to the [Get Cart](cart.md#get-cart) operation.
@@ -326,30 +354,21 @@ Maps to the [Get Cart](cart.md#get-cart) operation.
       "id": 1,
       "result": {
         "structuredContent": {
-          "cart": {
-            "ucp": {
-              "version": "2026-01-15",
-              "capabilities": [
-                {
-                  "name": "dev.ucp.shopping.cart",
-                  "version": "2026-01-15"
-                }
-              ]
-            },
-            "messages": [
-              {
-                "type": "error",
-                "code": "not_found",
-                "content": "Cart not found or has expired"
-              }
-            ],
-            "continue_url": "https://merchant.com/"
-          }
+          "ucp": { "version": "2026-01-15", "status": "error" },
+          "messages": [
+            {
+              "type": "error",
+              "code": "not_found",
+              "content": "Cart not found or has expired",
+              "severity": "unrecoverable"
+            }
+          ],
+          "continue_url": "https://merchant.com/"
         },
         "content": [
           {
             "type": "text",
-            "text": "{\"cart\":{\"ucp\":{...},\"messages\":[...],\"continue_url\":\"...\"}}"
+            "text": "{\"ucp\":{...},\"messages\":[...],\"continue_url\":\"...\"}"
           }
         ]
       }
@@ -612,25 +631,19 @@ JSON-RPC `result` with `structuredContent` containing the UCP envelope and
   "id": 1,
   "result": {
     "structuredContent": {
-      "cart": {
-        "ucp": {
-          "version": "2026-01-11",
-          "capabilities": {
-            "dev.ucp.shopping.cart": [{"version": "2026-01-11"}]
-          }
-        },
-        "messages": [
-          {
-            "type": "error",
-            "code": "not_found",
-            "content": "Cart not found or has expired"
-          }
-        ],
-        "continue_url": "https://merchant.com/"
-      }
+      "ucp": { "version": "2026-01-15", "status": "error" },
+      "messages": [
+        {
+          "type": "error",
+          "code": "not_found",
+          "content": "Cart not found or has expired",
+          "severity": "unrecoverable"
+        }
+      ],
+      "continue_url": "https://merchant.com/"
     },
     "content": [
-      {"type": "text", "text": "{\"cart\":{...}}"}
+      {"type": "text", "text": "{\"ucp\":{...},\"messages\":[...]}"}
     ]
   }
 }

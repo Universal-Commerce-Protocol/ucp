@@ -281,20 +281,30 @@ def on_page_markdown(markdown, page, config, files):
 
     # Rewrite relative links to assets/ to absolute URLs
     # pointing to served assets folder.
-    target_base = f"{base_path}assets/"
+    markdown = _root_pages_asset_link_rewrite(markdown, base_path)
 
-    def replace_asset_link(match):
-      path = match.group(1)
-      output = f"{target_base}{path}"
-      log.info(f"on_page_markdown::replace_asset_link: {path} -> {output}")
-      return output
+  return markdown
 
-    # Pattern matches: (  prefix  assets/  path  )
-    # We capture the path AFTER assets/
-    # Matches: (../assets/foo.img) or (assets/foo.img)
-    pattern = r"\"(?:(?:\.\./)+|\./)?assets/([^)\"]+)\""
 
-    markdown = re.sub(pattern, replace_asset_link, markdown)
+def _root_pages_asset_link_rewrite(markdown, base_path):
+  """Rewrite asset references in the root/overview to absolute links.
+
+  Uses regex to find and replace asset links with root based links.
+  """
+  # Targeting the assets
+  target_base = f"{base_path}assets/"
+
+  def replace_link(match):
+    path = match.group(1)
+    # Including quotes back into the rendered new URL
+    output = f'"{target_base}{path}"'
+    return output
+
+  # Pattern matches: (  prefix  assets/  path  )
+  # We capture the path AFTER assets/
+  # Matches: (../assets/foo.img) or (assets/foo.img) excluding quotes
+  pattern = r"\"(?:(?:\.\./)+|\./)?assets/([^)\"]+)\""
+  markdown = re.sub(pattern, replace_link, markdown)
 
   return markdown
 
