@@ -128,6 +128,26 @@ The Cart capability defines the following logical operations.
 Creates a new cart session with line items and optional buyer/context
 information for localized pricing estimates.
 
+When **all** requested items are unavailable, the business MAY return an
+error response instead of creating a cart resource. `ucp.status` is the
+primary discriminator; the absence of `id` is a consistent secondary
+indicator:
+
+```json
+{
+  "ucp": { "version": "2026-01-15", "status": "error" },
+  "messages": [
+    {
+      "type": "error",
+      "code": "out_of_stock",
+      "content": "All requested items are currently out of stock",
+      "severity": "unrecoverable"
+    }
+  ],
+  "continue_url": "https://merchant.com/"
+}
+```
+
 * [REST Binding](cart-rest.md#create-cart)
 * [MCP Binding](cart-mcp.md#create_cart)
 
