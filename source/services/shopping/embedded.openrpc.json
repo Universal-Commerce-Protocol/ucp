@@ -363,7 +363,7 @@
           "name": "type",
           "description": "The type of authorization business is requesting from the host.",
           "type": "string",
-          "enum": ["api_key", "oauth"]
+          "enum": ["api_key", "oauth", "jwt"]
         }
       ],
       "result": {

@@ -20,9 +20,8 @@
 
 Embedded Cart Protocol (ECaP) is a cart-specific implementation of
 UCP's Embedded Protocol (EP) transport binding that enables a
-**host** to embed a **business's** cart interface, receive events as the
-buyer interacts with the cart, and offer a seamless transition into
-lower-funnel capabilities (i.e. checkout)'s EP binding (i.e. ECP).
+**host** to embed a **business's** cart interface and receive events as the
+buyer interacts with the cart.
 ECaP is a transport binding (like REST)—it defines **how**
 to communicate, not **what** data exists.
 
@@ -54,39 +53,93 @@ the `embedded` transport in their `/.well-known/ucp` profile, all cart
 ```json
 {
     "services": {
-        "dev.ucp.shopping": {
-            "version": "2026-01-23",
-            "rest": {
-                "schema": "https://ucp.dev/services/shopping/rest.openapi.json",
+        "dev.ucp.shopping": [
+            {
+                "version": "2026-01-23",
+                "transport": "rest",
+                "schema": "https://ucp.dev/services/shopping/openapi.json",
                 "endpoint": "https://merchant.example.com/ucp/v1"
             },
-            "mcp": {
+            {
+                "version": "2026-01-23",
+                "transport": "mcp",
                 "schema": "https://ucp.dev/services/shopping/mcp.openrpc.json",
                 "endpoint": "https://merchant.example.com/ucp/mcp"
             },
-            "embedded": {
-                "schema": "https://ucp.dev/services/shopping/embedded.openrpc.json"
+            {
+                "version": "2026-01-23",
+                "transport": "embedded",
+                "schema": "https://ucp.dev/services/shopping/embedded.openrpc.json",
+                "config": {
+                    "capabilities": {
+                        "dev.ucp.shopping.cart": [{"version": "2026-01-23"}],
+                        "dev.ucp.shopping.checkout":  [{"version": "2026-01-23"}]
+                    }
+                }
             }
-        }
+        ]
     }
 }
 ```
 
 When `embedded` is present in the service definition:
 
+- Cart capability **MUST** be present in its `config` object to denote ECaP's true availability
 - All `continue_url` values returned by that business support ECaP
 - ECaP version matches the service's UCP version
-- If business also supports Embedded Checkout Protocol (ECP) via their `embedded`
-  service definition, then transition from ECaP to ECP is supported
 
 When `embedded` is absent from the service definition, the business only
 supports redirect-based cart continuation via `continue_url`.
+
+#### Per-Cart Configuration
+
+Service-level discovery declares that a business supports ECaP, but does not
+guarantee that business will enable it for every cart session. Businesses **MUST** include
+an embedded service binding with `config.capabilities` in cart responses to
+indicate ECaP availability and allowed delegations for a specific session.
+
+**Cart Response Example:**
+
+```json
+{
+    "id": "cart_123",
+    "continue_url": "https://merchant.example.com/cart/cart123",
+    "ucp": {
+        "version": "2026-01-23",
+        "services": {
+            "dev.ucp.shopping": [
+                {
+                    "version": "2026-01-23",
+                    "transport": "embedded",
+                    "config": {
+                        "delegate": [],
+                        "capabilities": {
+                            "dev.ucp.shopping.cart": [{"version": "2026-01-23"}],
+                        }
+                    }
+                }
+            ]
+        },
+        "capabilities": {...},
+        "payment_handlers": {...}
+    }
+    // ...other cart fields...
+}
+```
 
 ### Loading an Embedded Checkout URL
 
 When a host receives a cart response with a `continue_url` from a business
 that advertises ECaP support, it **MAY** initiate an ECaP session by loading the
 URL in an embedded context.
+
+**Example:**
+
+```text
+https://example.com/cart/cart123?ect_version=2026-01-23...
+```
+
+Note: All query parameter values must be properly URL-encoded per RFC 3986.
 
 Before loading the embedded context, the host **SHOULD**:
 
@@ -103,6 +156,11 @@ parameters from business-specific query parameters:
 
 - `ect_version` (string, **REQUIRED**): The UCP version for this session
     (format: `YYYY-MM-DD`). Must match the version from service discovery.
+- `ect_auth` (string, **OPTIONAL**): Authentication token in business-defined
+    format.
+- `ect_delegate` (string, **OPTIONAL**): Comma-delimited list of delegations
+    the host wants to handle. **MAY** be empty if no delegations are needed.
+    **SHOULD** be a subset of `config.delegate` from the embedded service binding.
 
 ## Transport & Messaging
 
@@ -206,7 +264,7 @@ all implementations.
 | **Handshake**     | Embedded Cart -> Host   | Establish connection between host and Embedded Cart.                      | Request                | `ect.ready`                                                                               |
 | **Authentication**| Embedded Cart -> Host   | Communicate auth data exchanges between Embedded Cart and host.           | Request                | `ect.auth`                                                                                |
 | **Lifecycle**     | Embedded Cart -> Host   | Inform of cart state in Embedded Cart.                                    | Notification           | `ect.start`, `ect.complete`                                                               |
-| **State Change**  | Embedded Cart -> Host   | Inform of cart field changes.                                             | Notification           | `ect.line_items.change`, `ect.buyer.change`, `ect.context.change`, `ect.messages.change`  |
+| **State Change**  | Embedded Cart -> Host   | Inform of cart field changes.                                             | Notification           | `ect.line_items.change`, `ect.buyer.change`, `ect.messages.change`                        |
 
 ### Handshake Messages
 
@@ -222,11 +280,13 @@ UCP cart actions.
 - **Direction:** Embedded Cart → host
 - **Type:** Request
 - **Payload:**
-    - `require_auth` (boolean, **REQUIRED**): This boolean bit indicates
-    whether business requires additional auth exchanges with the host
-    prior to injecting the cart state.
+    - `delegate` (array of strings, **REQUIRED**): List of delegation
+        identifiers accepted by the Embedded Cart. **MUST** be a subset of
+        both `ect_delegate` (what host requested) and `config.delegate` from the
+        cart response (what business allows). An empty array means no
+        delegations were accepted.
 
-**Example Message:**
+**Example Message (no delegations accepted):**
 
 ```json
 {
@@ -234,7 +294,7 @@ UCP cart actions.
     "id": "ready_1",
     "method": "ect.ready",
     "params": {
-        "require_auth": true
+        "delegate": []
     }
 }
 ```
@@ -289,14 +349,19 @@ channel.
 
 #### `ect.auth`
 
-Exchange any required auth data from host per business
-requirements (i.e. when identity linking is a pre-requisite).
+Embedded cart **MAY** request authorization from the host in the following scenarios:
 
-- **Direction:** Host → Embedded Cart
+1. Initial handshake: When `ect_auth` URL param is neither sufficient nor applicable due
+to additional considerations, business can request for authorization to be exchanged
+through this mechanism before the session starts.
+2. Reauth: Certain authentication methods (i.e. OAuth token) have strict expiration timestamps.
+If a session lasted longer than the allowed duration, business can request for a refreshed
+authorization to be provided by the host before the session continues.
+
+- **Direction:** Embedded Cart → Host
 - **Type:** Request
 - **Payload:**
-    - `authorization` (string, **REQUIRED**): The required authorization data by
-    business, can be in the form of an OAuth token, JWT, API keys, etc.
+    - `type` (enum, **REQUIRED**): The requested authorization type.
 
 **Example Message:**
 
@@ -306,19 +371,20 @@ requirements (i.e. when identity linking is a pre-requisite).
     "id": "auth_1",
     "method": "ect.auth",
     "params": {
-        "authorization": "fake_token_from_identity_linking"
+        "type": "oauth"
     }
 }
 ```
 
-The `ect.auth` message is a request, which means that Embedded Cart
-**MUST** respond to acknowledge receiving the authorization.
+The `ect.auth` message is a request, which means that host
+**MUST** respond to exchange the authorization.
 
-- **Direction:** Embedded Cart → host
+- **Direction:** host → Embedded Cart
 - **Type:** Response
 - **Result Payload:**
-    - Empty payload means the exchange is successful (Embedded Cart
-    is able to ingest the authorization shared by the host).
+    - `authorization` (string, **REQUIRED**): The requested authorization data,
+    can be in the form of an OAuth token, JWT, API keys, etc.
+    - `cart` (object, **REQUIRED**): An optional cart holding the last known state to the host.
 
 **Example Message:**
 
@@ -326,55 +392,14 @@ The `ect.auth` message is a request, which means that Embedded Cart
 {
     "jsonrpc": "2.0",
     "id": "auth_1",
-    "result": {}
-}
-```
-
-Embedded Cart **MAY** respond with errors if the ingestion of
-the authorization is not successful.
-
-**Example Message (errors):**
-
-```json
-{
-    "jsonrpc": "2.0",
-    "id": "auth_1",
-    "error": {...}
-}
-```
-
-Embedded Cart **SHOULD** use error codes mapped to
-**[W3C DOMException](https://webidl.spec.whatwg.org/#idl-DOMException)** names
-where possible.
-
-#### `ect.auth.change`
-
-Informs host that auth state has changed on Embedded Cart side. A common
-example would be when OAuth access token has expired.
-
-- **Direction:** Embedded Cart → host
-- **Type:** Notification
-- **Payload:**
-    - `require_reauth` (boolean, **REQUIRED**): This boolean bit indicates
-    whether business requires another auth exchange via `ect.auth` with
-    host as a result of the auth state change.
-
-**Example Message:**
-
-```json
-{
-    "jsonrpc": "2.0",
-    "method": "ect.auth.change",
-    "params": {
-        "require_reauth": true
+    "result": {
+        "authorization": "fake_identity_linking_oauth_token"
     }
 }
 ```
 
-When a notification is received indicating reauth is required,
-host **MUST** reprepare relevant authorization per business
-requirements and initiate an `ect.auth`
-request back to Embedded Cart.
+If the ingestion of the authorization is not successful, Embedded Cart **MAY**
+re-initiate this request with the host again.
 
 ### Lifecycle Messages
 
@@ -401,28 +426,25 @@ Signals that cart is visible and ready for interaction.
             "totals": [/* ... */],
             "line_items": [/* ... */],
             "buyer": {/* ... */},
-            "context": {/* ... */}
         }
     }
 }
 ```
 
-### Transition Messages
+#### `ect.complete`
 
-#### `ect.transition.checkout`
+Indicates completion of cart building process and buyer now is ready to be transitioned to
+the next stage of their purchase journey.
 
-Indicates completion of cart building process and buyer now seamlessly transitions from
-ECaP to ECP. This marks the completion of Embedded Cart and host **MUST** listen for
-`ec.ready` handshake adhering to [ECP's specification](site:specification/embedded-checkout)
-over the same communication channel established during `ect.ready`.
+This marks the completion of Embedded Cart. If `dev.ucp.shopping.checkout` is part of the negotiated
+capabilities during discovery, host **MAY** proceed to initiate a checkout session based on the
+completed cart.
 
 - **Direction:** Embedded Cart → host
 - **Type:** Request
 - **Payload:**
     - `cart` (object, **REQUIRED**): The latest state of the cart, using the same structure
         as the `cart` object in UCP responses.
-    - `checkout` (object, **REQUIRED**): The initial state of the checkout session
-        based on the cart object above.
 
 **Example Message:**
 
@@ -430,7 +452,7 @@ over the same communication channel established during `ect.ready`.
 {
     "jsonrpc": "2.0",
     "id": "transition_1",
-    "method": "ect.transition.checkout",
+    "method": "ect.complete",
     "params": {
         "cart": {
             "id": "cart_123",
@@ -438,54 +460,10 @@ over the same communication channel established during `ect.ready`.
             "totals": [/* ... */],
             "line_items": [/* ... */],
             "buyer": {/* ... */},
-            "context": {/* ... */}
-        },
-        "checkout": {
-            "id": "checkout_123",
-            "cart_id": "cart_123",
-            // ... other checkout fields based on the cart
         }
     }
 }
 ```
-
-The `ect.transition.checkout` message is a request, which means that the
-host **MUST** respond to acknowledge the transition.
-
-- **Direction:** host → Embedded Cart
-- **Type:** Response
-- **Result Payload:**
-    - `delegation` (array, **OPTIONAL**): An array containing delegation
-    requests from host as part of Embedded Checkout Protocol.
-
-**Example Message:**
-
-```json
-{
-    "jsonrpc": "2.0",
-    "id": "transition_1",
-    "result": {}
-}
-```
-
-Hosts **MAY** respond with a `delegate` field to request for operations
-they would like to handle natively. See [ECP's
-documentation](site:specification/embedded-checkout/#delegation) for more details.
-
-**Example Message:**
-
-```json
-{
-    "jsonrpc": "2.0",
-    "id": "transition_1",
-    "result": {
-        "delegate": ["payment.credential"]
-    }
-}
-```
-
-When the host responds with a `delegate` array, the Embedded Cart **MUST**
-use it to instantiate the handshake on ECP.
 
 ### State Change Messages
 
@@ -545,34 +523,6 @@ Buyer information has been updated in the cart UI.
             "id": "cart_123",
             // The entire cart object is provided, including the updated buyer information
             "buyer": {
-                /* ... */
-            }
-            // ...
-        }
-    }
-}
-```
-
-#### `ect.context.change`
-
-Buyer context (i.e. localization signals) has been updated in the cart UI.
-
-- **Direction:** Embedded Cart → host
-- **Type:** Notification
-- **Payload:**
-    - `cart`: The latest state of the cart
-
-**Example Message:**
-
-```json
-{
-    "jsonrpc": "2.0",
-    "method": "ect.context.change",
-    "params": {
-        "cart": {
-            "id": "cart_123",
-            // The entire cart object is provided, including the updated buyer context information
-            "context": {
                 /* ... */
             }
             // ...
@@ -682,3 +632,71 @@ The core object representing the current state of the cart, including
 line items, totals, and buyer information.
 
 {{ schema_fields('cart_resp', 'embedded-cart') }}
+
+## Entities
+
+Cart reuses the same entity schemas as [Checkout](checkout.md). This ensures
+consistent data structures when converting a cart to a checkout session.
+
+### Line Item
+
+#### Line Item Create Request
+
+{{ schema_fields('types/line_item_create_req', 'embedded-cart') }}
+
+#### Line Item Update Request
+
+{{ schema_fields('types/line_item_update_req', 'embedded-cart') }}
+
+#### Line Item Response
+
+{{ schema_fields('types/line_item_resp', 'embedded-cart') }}
+
+### Buyer
+
+{{ schema_fields('buyer', 'embedded-cart') }}
+
+### Context
+
+{{ schema_fields('context', 'embedded-cart') }}
+
+### Total
+
+{{ schema_fields('types/total_resp', 'embedded-cart') }}
+
+Taxes **MAY** be included where calculable. Platforms **SHOULD** assume cart totals
+are estimates; accurate taxes are computed at checkout.
+
+### Message
+
+{{ schema_fields('message', 'embedded-cart') }}
+
+#### Message Error
+
+{{ schema_fields('types/message_error', 'embedded-cart') }}
+
+#### Message Info
+
+{{ schema_fields('types/message_info', 'embedded-cart') }}
+
+#### Message Warning
+
+{{ schema_fields('types/message_warning', 'embedded-cart') }}
+
+### Link
+
+{{ schema_fields('types/link', 'embedded-cart') }}
+
+### Item
+
+#### Item Create Request
+
+{{ schema_fields('types/item_create_req', 'embedded-cart') }}
+
+#### Item Update Request
+
+{{ schema_fields('types/item_update_req', 'embedded-cart') }}
+
+#### Item Response
+
+{{ schema_fields('types/item_resp', 'embedded-cart') }}
