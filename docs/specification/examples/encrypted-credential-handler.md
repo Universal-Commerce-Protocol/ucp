@@ -121,7 +121,7 @@ Businesses advertise the platform's handler. The `business_id` field identifies
 the business, which the platform uses to look up the correct public key for
 encryption.
 
-The only supported instrument schema is [CardPaymentInstrument](https://ucp.dev/schemas/shopping/types/card_payment_instrument.json), the only supported checkout credential schema is `EncryptedCredential`, and the only supported source credential schema is [CardCredential](https://ucp.dev/schemas/shopping/types/card_credential.json).
+The only supported instrument schema is [CardPaymentInstrument](site:schemas/shopping/types/card_payment_instrument.json), the only supported checkout credential schema is `EncryptedCredential`, and the only supported source credential schema is [CardCredential](site:schemas/shopping/types/card_credential.json).
 
 **Note:** The `EncryptedCredential` shape would be formally defined in the handler's schema (referenced via the `schema` field in the handler declaration).
 
@@ -144,12 +144,12 @@ have their own compliance requirements.
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "{{ ucp_version }}",
     "payment_handlers": {
       "com.example.platform_encrypted": [
         {
           "id": "platform_encrypted",
-          "version": "2026-01-11",
+          "version": "{{ ucp_version }}",
           "spec": "https://platform.example.com/ucp/encrypted-handler.json",
           "schema": "https://platform.example.com/ucp/encrypted-handler/schema.json",
           "available_instruments": [
@@ -188,7 +188,7 @@ The response config includes information about the encryption used.
 ```json
 {
   "id": "platform_encrypted",
-  "version": "2026-01-11",
+  "version": "{{ ucp_version }}",
   "available_instruments": [
     {
       "type": "card",
@@ -254,12 +254,12 @@ registry using `platform_config`.
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "{{ ucp_version }}",
     "payment_handlers": {
       "com.example.platform_encrypted": [
         {
           "id": "platform_encrypted",
-          "version": "2026-01-11",
+          "version": "{{ ucp_version }}",
           "spec": "https://platform.example.com/ucp/encrypted-handler.json",
           "schema": "https://platform.example.com/ucp/encrypted-handler/schema.json",
           "available_instruments": [
@@ -353,5 +353,5 @@ Content-Type: application/json
 
 ## References
 
-* **Identity Schema:** `https://ucp.dev/schemas/shopping/types/payment_identity.json`
-* **Instrument Schema:** `https://ucp.dev/schemas/shopping/types/card_payment_instrument.json`
+* **Identity Schema:** [schemas/shopping/types/payment_identity.json](site:schemas/shopping/types/payment_identity.json)
+* **Instrument Schema:** [schemas/shopping/types/card_payment_instrument.json](site:schemas/shopping/types/card_payment_instrument.json)

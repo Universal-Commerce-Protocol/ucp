@@ -181,6 +181,10 @@ Subsequent operations for this cart ID SHOULD return `not_found`.
 Cart reuses the same entity schemas as [Checkout](checkout.md). This ensures
 consistent data structures when converting a cart to a checkout session.
 
+### UCP Response Cart {: #ucp-response-cart-schema }
+
+{{ extension_schema_fields('ucp.json#/$defs/response_cart_schema', 'cart') }}
+
 ### Line Item
 
 #### Line Item Create Request
@@ -191,9 +195,13 @@ consistent data structures when converting a cart to a checkout session.
 
 {{ schema_fields('types/line_item_update_req', 'checkout') }}
 
-#### Line Item Response
+#### Line Item
 
-{{ schema_fields('types/line_item_resp', 'checkout') }}
+{{ schema_fields('types/line_item_resp', 'cart') }}
+
+#### Item
+
+{{ schema_fields('types/item_resp', 'cart') }}
 
 ### Buyer
 

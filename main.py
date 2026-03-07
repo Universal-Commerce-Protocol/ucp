@@ -327,8 +327,6 @@ def define_env(env):
     # 3. Generate Anchor (Target)
     # We want "types/line_item.create_req.json" -> "#line-item-create_request"
     # This matches the pattern: "Line Item" H3 -> "Create Request" H4
-
-    # 3. Generate Anchor (Target)
     parts = raw_name.split(".")
     base_entity = parts[0]
 
@@ -348,12 +346,12 @@ def define_env(env):
     elif raw_name.endswith("_req"):
       anchor_name = raw_name.replace("_", "-").replace("-req", "-request")
     elif context and context.get("io_type") == "response":
-      # For polymorphic types in response mode, append -response to match
-      # markdown headings like "Line Item Response" (h4 under "Line Item" h3)
-      if _is_polymorphic_type(ref_string):
-        anchor_name = f"{anchor_name}-response"
-        if not link_text.endswith("Response"):
-          link_text = f"{link_text} Response"
+      # For polymorphic types in response mode, keep the base anchor name to
+      # match markdown headings like "Line Item" instead of "Line Item Response"
+      if _is_polymorphic_type(ref_string) and not link_text.endswith(
+        "Response"
+      ):
+        link_text = f"{link_text} Response"
 
     # FIX: Ensure anchor starts with ucp- for UCP definitions
     if is_ucp and not anchor_name.startswith("ucp-"):
@@ -413,7 +411,8 @@ def define_env(env):
         return f"_See [{properties_ref}]({properties_ref})_"
       # ucp-schema failed or schema not found - fail loudly
       raise RuntimeError(
-        f"Failed to resolve '{ref_entity_name}'{get_error_context()}. "
+        f"Failed to resolve ref_entity_name='{ref_entity_name}' "
+        f"from properties_ref='{properties_ref}' {get_error_context()}. "
         f"Ensure ucp-schema is installed: `cargo install ucp-schema`"
       )
 
@@ -721,7 +720,7 @@ def define_env(env):
           if "allOf" in embedded_schema_data:
             new_all_of = []
             for item in embedded_schema_data["allOf"]:
-              if "$ref" in item and item["$ref"].startswith("#/"):
+              if "$ref" in item and item["$ref"].startswith("#"):
                 resolved = _resolve_json_pointer(item["$ref"], bundled)
                 new_all_of.append(resolved if resolved else item)
               else:

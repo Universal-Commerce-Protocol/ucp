@@ -39,7 +39,7 @@ Businesses advertise consent support in their profile:
   "capabilities": {
     "dev.ucp.shopping.buyer_consent": [
       {
-        "version": "2026-01-11",
+        "version": "{{ ucp_version }}",
         "extends": "dev.ucp.shopping.checkout"
       }
     ]
