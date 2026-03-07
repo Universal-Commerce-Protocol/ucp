@@ -3,7 +3,7 @@
   "$id": "https://ucp.dev/schemas/shopping/cart.json",
   "name": "dev.ucp.shopping.cart",
   "title": "Cart",
-  "description": "Shopping cart with estimated pricing before checkout. Lightweight pre-purchase exploration with no payment info or complex status states. Cart exists (200) or doesn't (404).",
+  "description": "Shopping cart with estimated pricing before checkout. Lightweight pre-purchase exploration with no payment info or complex status states.",
   "$defs": {
     "checkout": {
       "title": "Checkout with Cart",
