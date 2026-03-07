@@ -1836,6 +1836,7 @@ Response with version confirmation:
 
 Version unsupported error — no resource is created:
 
+```json
 {
   "ucp": { "version": "2026-01-11", "status": "error" },
   "messages": [{
