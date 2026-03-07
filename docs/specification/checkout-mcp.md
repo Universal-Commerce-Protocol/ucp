@@ -340,6 +340,34 @@ Maps to the [Create Checkout](checkout.md#create-checkout) operation.
     }
     ```
 
+=== "Error Response"
+
+    All items out of stock — no checkout resource is created:
+
+    ```json
+    {
+      "jsonrpc": "2.0",
+      "id": 1,
+      "result": {
+        "structuredContent": {
+          "ucp": { "version": "2026-01-11", "status": "error" },
+          "messages": [
+            {
+              "type": "error",
+              "code": "out_of_stock",
+              "content": "All requested items are currently out of stock",
+              "severity": "unrecoverable"
+            }
+          ],
+          "continue_url": "https://merchant.com/"
+        },
+        "content": [
+          {"type": "text", "text": "{\"ucp\":{...},\"messages\":[...]}"}
+        ]
+      }
+    }
+    ```
+
 ### `get_checkout`
 
 Maps to the [Get Checkout](checkout.md#get-checkout) operation.
@@ -648,6 +676,34 @@ as JSON-RPC `result` with `structuredContent` containing the UCP envelope and
     },
     "content": [
       {"type": "text", "text": "{\"checkout\":{\"ucp\":{...},\"id\":\"checkout_abc123\",...}}"}
+    ]
+  }
+}
+```
+
+For `create_checkout`, when all items unavailable and no checkout can be created,
+JSON-RPC `result` with `structuredContent` containing the UCP envelope and `messages`:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "structuredContent": {
+      "ucp": { "version": "2026-01-11", "status": "error" },
+      "messages": [
+        {
+          "type": "error",
+          "code": "item_unavailable",
+          "content": "Items are not available for purchase in your region",
+          "severity": "unrecoverable",
+          "path": "$.line_items"
+        }
+      ],
+      "continue_url": "https://merchant.com/"
+    },
+    "content": [
+      {"type": "text", "text": "{\"ucp\":{...},\"messages\":[...]}"}
     ]
   }
 }

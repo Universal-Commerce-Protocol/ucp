@@ -118,13 +118,17 @@ platform receives messages indicating what's needed to progress.
 
 The `messages` array contains errors, warnings, and informational messages
 about the checkout state. Error messages include a `severity` field that
-declares **who resolves the error**:
+reflects the resource state and recommended action. When `ucp.status`
+is `"success"`, a resource is returned and severity indicates the
+recommended action. When `ucp.status` is `"error"`, no valid resource
+exists — severity is `unrecoverable`:
 
-| Severity                | Meaning                                       | Platform Action               |
-| :---------------------- | :-------------------------------------------- | :---------------------------- |
-| `recoverable`           | Platform can fix via API                      | Resolve using Update Checkout |
-| `requires_buyer_input`  | Business requires input not available via API | Hand off via `continue_url`   |
-| `requires_buyer_review` | Buyer review and authorization is required    | Hand off via `continue_url`   |
+| Severity                | Meaning                                          | Platform Action                                                   |
+| :---------------------- | :----------------------------------------------- | :---------------------------------------------------------------- |
+| `recoverable`           | Platform can resolve by modifying inputs via API | Update resource and retry                                         |
+| `requires_buyer_input`  | Business requires input not available via API    | Hand off via `continue_url`                                       |
+| `requires_buyer_review` | Buyer review and authorization is required       | Hand off via `continue_url`                                       |
+| `unrecoverable`         | No resource exists to act on                     | Retry with new resource or inputs, or hand off via `continue_url` |
 
 Errors with `requires_*` severity contribute to `status: requires_escalation`.
 Both result in buyer handoff, but represent different checkout states.
@@ -134,6 +138,31 @@ requires information their API doesn't support collecting programmatically.
 * `requires_buyer_review` means the checkout is **complete** — but policy,
 regulatory, or entitlement rules require buyer authorization before order
 placement (e.g., high-value order approval, first-purchase policy).
+
+When the business cannot create a new resource or the requested resource
+no longer exists, the response contains `ucp.status: "error"` with
+`messages` describing the failure — no resource is included in the
+response body. Error responses MUST use `severity: "unrecoverable"`.
+For example, a business may reject a create checkout request where all
+items are unavailable:
+
+```json
+{
+  "ucp": { "version": "2026-01-11", "status": "error" },
+  "messages": [
+    {
+      "type": "error",
+      "code": "out_of_stock",
+      "content": "All requested items are currently out of stock",
+      "severity": "unrecoverable"
+    }
+  ],
+  "continue_url": "https://merchant.com/"
+}
+```
+
+See [REST](checkout-rest.md#create-checkout) and
+[MCP](checkout-mcp.md#create_checkout) binding examples.
 
 #### Error Processing Algorithm
 
@@ -174,7 +203,13 @@ Businesses **SHOULD** surface such messages as early as possible, and platforms
 Example error processing algorithm:
 
 ```text
-GIVEN checkout with messages array
+GIVEN response with messages array
+
+IF ucp.status = "error"
+  -- No resource exists; severity is unrecoverable
+  RETRY with new resource or inputs, or hand off via continue_url
+  RETURN
+
 FILTER errors FROM messages WHERE type = "error"
 
 PARTITION errors INTO
@@ -284,8 +319,9 @@ platform can prefill checkout state when initiating a buy-now flow.
 * Logic handling the checkout sessions **MUST** be deterministic.
 * **MUST** provide `continue_url` when returning `status` =
     `requires_escalation`.
-* **MUST** include at least one message with `severity: escalation` when
-    returning `status` = `requires_escalation`.
+* **MUST** include at least one message with `severity` of
+    `requires_buyer_input` or `requires_buyer_review` when returning
+    `status` = `requires_escalation`.
 * **SHOULD** provide `continue_url` in all non-terminal checkout responses.
 * After a checkout session reaches the state "completed", it is considered
     immutable.
