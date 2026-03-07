@@ -648,6 +648,62 @@ information:**
 }
 ```
 
+### Authentication
+
+#### `ec.auth`
+
+Embedded checkout **MAY** request authorization from the host in the following scenarios:
+
+1. Initial handshake: When `ec_auth` URL param is neither sufficient nor applicable due
+to additional considerations, business can request for authorization to be exchanged
+through this mechanism before the session starts.
+2. Reauth: Certain authentication methods (i.e. OAuth token) have strict expiration timestamps.
+If a session lasted longer than the allowed duration, business can request for a refreshed
+authorization to be provided by the host before the session continues.
+
+- **Direction:** Embedded Checkout → Host
+- **Type:** Request
+- **Payload:**
+    - `type` (enum, **REQUIRED**): The requested authorization type.
+
+**Example Message:**
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": "auth_1",
+    "method": "ec.auth",
+    "params": {
+        "type": "oauth"
+    }
+}
+```
+
+The `ec.auth` message is a request, which means that host
+**MUST** respond to exchange the authorization.
+
+- **Direction:** host → Embedded Checkout
+- **Type:** Response
+- **Result Payload:**
+    - `authorization` (string, **REQUIRED**): The requested authorization data,
+    can be in the form of an OAuth token, JWT, API keys, etc.
+    - `checkout` (object, **REQUIRED**): An optional checkout holding the last known state to the host.
+
+**Example Message:**
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": "auth_1",
+    "result": {
+        "authorization": "fake_identity_linking_oauth_token"
+    }
+}
+```
+
+If the ingestion of the authorization is not successful, Embedded Checkout **MAY**
+re-initiate this request with the host again.
+
 ### Lifecycle Messages
 
 #### `ec.start`
