@@ -123,12 +123,12 @@ is `"success"`, a resource is returned and severity indicates the
 recommended action. When `ucp.status` is `"error"`, no valid resource
 exists — severity is `unrecoverable`:
 
-| Severity                | Meaning                                          | Platform Action                   |
-| :---------------------- | :----------------------------------------------- | :-------------------------------- |
-| `recoverable`           | Platform can resolve by modifying inputs via API | Update resource and retry         |
-| `requires_buyer_input`  | Business requires input not available via API    | Hand off via `continue_url`       |
-| `requires_buyer_review` | Buyer review and authorization is required       | Hand off via `continue_url`       |
-| `unrecoverable`         | No resource exists to act on                     | Retry with new resource or inputs |
+| Severity                | Meaning                                          | Platform Action                                                   |
+| :---------------------- | :----------------------------------------------- | :---------------------------------------------------------------- |
+| `recoverable`           | Platform can resolve by modifying inputs via API | Update resource and retry                                         |
+| `requires_buyer_input`  | Business requires input not available via API    | Hand off via `continue_url`                                       |
+| `requires_buyer_review` | Buyer review and authorization is required       | Hand off via `continue_url`                                       |
+| `unrecoverable`         | No resource exists to act on                     | Retry with new resource or inputs, or hand off via `continue_url` |
 
 Errors with `requires_*` severity contribute to `status: requires_escalation`.
 Both result in buyer handoff, but represent different checkout states.
