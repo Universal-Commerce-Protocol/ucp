@@ -1,0 +1,310 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/ancillaries.json",
+  "name": "dev.ucp.shopping.ancillaries",
+  "title": "Ancillaries Extension",
+  "description": "Extends Checkout with ancillary support, enabling businesses to provide required and suggested goods/services for line items, as well as upsell suggestions.",
+  "$defs": {
+    "ancillary_input": {
+      "type": "object",
+      "description": "Input data for ancillaries that require buyer input (e.g., time slot selection, personalization).",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Well-known input type or custom identifier. Well-known types: 'text' (free-form text like engraving), 'selection' (choice from options, including time slots)."
+        },
+        "value": {
+          "description": "The input value. For 'selection': the id of the selected option from input_schema.options. For 'text': the entered string."
+        }
+      }
+    },
+    "ancillary_input_schema": {
+      "type": "object",
+      "description": "Schema describing what input is required for an ancillary.",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Input type identifier. Well-known types: 'text' (free-form input), 'selection' (choice from options, including time slots)."
+        },
+        "label": {
+          "type": "string",
+          "description": "Human-readable label for the input field (e.g., 'Select installation date')."
+        },
+        "description": {
+          "type": "string",
+          "description": "Additional instructions or context for the input."
+        },
+        "required": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether input is required to add this ancillary."
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "label"],
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Option identifier. This value is sent as input.value when the option is selected."
+              },
+              "label": {
+                "type": "string",
+                "description": "Human-readable option label for display to the buyer."
+              }
+            }
+          },
+          "description": "Available options for 'selection' type inputs. The buyer selects one option, and its id is sent back as input.value. Options can represent time slots, configuration choices, or other selectable values. For mutually exclusive products with different prices, use group_id on separate ancillary suggestions instead."
+        },
+        "constraints": {
+          "type": "object",
+          "properties": {
+            "max_length": {
+              "type": "integer",
+              "description": "Maximum character length for 'text' type."
+            }
+          },
+          "description": "Constraints for input validation."
+        }
+      }
+    },
+    "ancillary_request_item": {
+      "type": "object",
+      "description": "An ancillary item to add to the checkout, optionally related to an existing line item.",
+      "required": [
+        "item",
+        "quantity"
+      ],
+      "properties": {
+        "item": {
+          "type": "object",
+          "description": "Item reference for the ancillary.",
+          "required": [
+            "id"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The product identifier (SKU) of the ancillary to add."
+            }
+          }
+        },
+        "for": {
+          "type": "string",
+          "description": "Line item ID this ancillary relates to. Required for relational ancillaries (e.g., insurance for a specific product)."
+        },
+        "quantity": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Quantity of the ancillary. For relational ancillaries, MUST equal the quantity of the related line item."
+        },
+        "input": {
+          "$ref": "#/$defs/ancillary_input",
+          "description": "Input data for ancillaries that require buyer input. Required when the suggestion has requires_input: true."
+        }
+      }
+    },
+    "ancillary_suggestion": {
+      "type": "object",
+      "description": "A suggested ancillary item offered by the business.",
+      "required": [
+        "item",
+        "type",
+        "category"
+      ],
+      "properties": {
+        "item": {
+          "$ref": "types/item.json",
+          "description": "Full item details for the suggested ancillary."
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "complementary",
+            "suggested",
+            "required"
+          ],
+          "description": "Relationship type. 'complementary' = directly related to a line item (e.g., cables for phone). 'suggested' = general upsell recommendation. 'required' = legally or functionally required addition."
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "product",
+            "service",
+            "insurance"
+          ],
+          "description": "Category of ancillary. 'product' = physical/digital goods. 'service' = one-time services (installation, gift wrap). 'insurance' = protection/warranty plans."
+        },
+        "for": {
+          "type": "string",
+          "description": "Line item ID this suggestion relates to. Present for complementary, required, insurance, and service types tied to specific items."
+        },
+        "group_id": {
+          "type": "string",
+          "description": "Groups mutually exclusive product alternatives. Each grouped ancillary is a distinct SKU with its own price—only one can be selected. Use for warranty tiers, insurance levels, or service packages where each option is a separate product. Platform should present as radio-style selection."
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable description explaining why this ancillary is suggested (e.g., 'Protect your new phone with our 2-year warranty')."
+        },
+        "original_price": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Original price before promotional discount, in minor currency units. Present when item.price reflects a discounted price."
+        },
+        "requires_input": {
+          "type": "boolean",
+          "default": false,
+          "description": "True if this ancillary requires buyer input before it can be added (e.g., time slot selection, personalization text)."
+        },
+        "input_schema": {
+          "$ref": "#/$defs/ancillary_input_schema",
+          "description": "Schema describing what input is required. Present when requires_input is true."
+        },
+        "terms_url": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL to external page with full terms, conditions, or details for this ancillary (e.g., insurance coverage terms, service agreement, warranty details)."
+        }
+      }
+    },
+    "applied_ancillary": {
+      "type": "object",
+      "description": "An ancillary that was successfully applied to the checkout.",
+      "required": [
+        "id",
+        "description",
+        "type",
+        "category"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Line item ID of the applied ancillary in the checkout's line_items array."
+        },
+        "for": {
+          "type": "string",
+          "description": "Line item ID this ancillary relates to. Present for relational ancillaries."
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "complementary",
+            "suggested",
+            "required"
+          ],
+          "description": "Relationship type. Matches the type from the original suggestion."
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "product",
+            "service",
+            "insurance"
+          ],
+          "description": "Category of the applied ancillary."
+        },
+        "group_id": {
+          "type": "string",
+          "description": "Group identifier for mutually exclusive alternatives. Enables UI to show 'You selected X, other options were Y, Z' by matching with suggested ancillaries sharing the same group_id."
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable description of the applied ancillary (e.g., '2-Year Protection Plan for Smartphone 256GB')."
+        },
+        "terms_url": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL to external page with full terms, conditions, or details for this ancillary."
+        },
+        "automatic": {
+          "type": "boolean",
+          "default": false,
+          "description": "True if applied automatically by the business. Automatic ancillaries cannot be removed by the platform."
+        },
+        "reason_code": {
+          "type": "string",
+          "enum": [
+            "legal_requirement",
+            "promotional_gift",
+            "bundle_component",
+            "loyalty_benefit"
+          ],
+          "description": "Why the ancillary was automatically applied. Present when automatic is true."
+        },
+        "input": {
+          "$ref": "#/$defs/ancillary_input",
+          "description": "Input data provided for this ancillary. Present when the ancillary required input."
+        }
+      }
+    },
+    "ancillaries_object": {
+      "type": "object",
+      "description": "Ancillaries input and suggestions/applied output.",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ancillary_request_item"
+          },
+          "description": "Ancillaries to add. Replaces previously submitted ancillaries. Send empty array to clear all non-automatic ancillaries.",
+          "ucp_request": {
+            "create": "optional",
+            "update": "optional",
+            "complete": "omit"
+          },
+          "ucp_response": "omit"
+        },
+        "title": {
+          "type": "string",
+          "description": "Optional header text for ancillary suggestions (e.g., 'Protect your purchase' or 'Complete your setup').",
+          "ucp_request": "omit"
+        },
+        "suggested": {
+          "type": "array",
+          "readOnly": true,
+          "items": {
+            "$ref": "#/$defs/ancillary_suggestion"
+          },
+          "description": "Suggested ancillaries offered by the business. Grouped by category and relationship to line items.",
+          "ucp_request": "omit"
+        },
+        "applied": {
+          "type": "array",
+          "readOnly": true,
+          "items": {
+            "$ref": "#/$defs/applied_ancillary"
+          },
+          "description": "Ancillaries successfully applied to the checkout. Includes both user-submitted and automatic ancillaries.",
+          "ucp_request": "omit"
+        }
+      }
+    },
+    "dev.ucp.shopping.checkout": {
+      "title": "Checkout with Ancillaries",
+      "description": "Checkout extended with ancillaries capability.",
+      "allOf": [
+        {
+          "$ref": "checkout.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "ancillaries": {
+              "$ref": "#/$defs/ancillaries_object",
+              "ucp_request": {
+                "create": "optional",
+                "update": "optional",
+                "complete": "omit"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
