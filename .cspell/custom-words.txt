@@ -105,3 +105,5 @@ yaml
 zapatillas
 yml
 keyid
+reauth
+reprepare
