@@ -1154,6 +1154,34 @@ within UCP: **Negotiation**, **Acquisition**, and **Completion**.
 2. **Acquisition (Platform ↔ Payment Credential Provider):** The platform executes the handler's logic. This happens client-side or agent-side, directly with the payment credential provider (e.g., exchanging credentials for a network token). The business is not involved, ensuring raw data never touches the business's frontend API.
 3. **Completion (Platform → Business):** The platform submits the opaque credential (token) to the business. The business uses it to capture funds via their backend integration with the payment credential provider.
 
+### Payment Eligibility Hints
+
+Prior to completing checkout, the Platform **MAY** provide the Business with selected payment instrument *hints*. These hints allow the Business to apply to the checkout session the expected benefits the selected payment instrument qualifies the Buyer for. This gives the user a more accurate preview of the final order total before they commit to the purchase.
+
+**Example Benefits:**
+
+- Co-branded Card Perks (e.g., instant discounts for using a specific brand's card).
+- Issuer-Funded Promotions (e.g., statement credits).
+- FX Fee Waivers for international transactions.
+- Promotional APRs or specialized financing terms.
+- Logistical Upgrades (e.g., expedited shipping for premium cardholders).
+
+Payment instruments **MAY** include an `eligibility_hints` array: opaque, namespaced strings that hint benefit eligibility associated with the selected instrument.  The meaning of `eligibility_hints` values, and how they are derived, is communicated between the Business and Platform out of band (for example, via offline agreement on BIN ranges or program identifiers).
+
+**eligibility_hints Strings:**
+
+- `eligibility_hints` strings **SHOULD** use reverse-domain naming to avoid collisions.
+- `eligibility_hints` strings **MUST NOT** contain sensitive payment attributes such as PAN, BIN, PII, or user-unique identifiers.
+- `eligibility_hints` strings **SHOULD** be coarse-grained program identifiers.
+
+**eligibility_hints Semantics:**
+
+- `eligibility_hints` are hints and **MUST NOT** be treated as proof of eligibility.
+- The Business **MUST NOT** grant final or irreversible benefits solely due to `eligibility_hints`.
+- The Business **MUST** determine benefits eligibility from the completion payment instrument and credential, not from `eligibility_hints`.
+- The Business **SHOULD** return an error, using the [`invalid_eligibility_hint`](checkout.md#standard-errors), during checkout completion if the provided `eligibility_hints` do not match the final payment instrument's eligibility.
+- When receiving `invalid_eligibility_hint`, the Platform **SHOULD** update `eligibility_hints`, and **MUST** present the user with an opportunity to review benefits changes (e.g. discounts, totals, etc.).
+
 ### Payment Handlers
 
 Payment Handlers are **specifications** (not entities) that define how payment
