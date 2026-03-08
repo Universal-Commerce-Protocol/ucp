@@ -221,7 +221,7 @@ select, input {
   <!-- VIEW: Discovery -->
   <div id="view-discovery" class="section">
     <h2 class="title">2. Discovery</h2>
-    <p class="desc">The Platform fetches <code>/.well-known/ucp</code>. The response below is filtered to show the intersection of the Business's capabilities and the Platform's profile.</p>
+    <p class="desc">The Platform fetches <code>/.well-known/ucp</code> from the Business.</p>
     <div class="grid">
       <div class="json-panel">
         <div class="json-header"><span class="json-title">GET Request</span></div>
@@ -230,7 +230,7 @@ Host: business.example.com
 Accept: application/json</pre>
       </div>
       <div class="json-panel">
-        <div class="json-header"><span class="json-title">Response (Filtered)</span></div>
+        <div class="json-header"><span class="json-title">Response</span></div>
         <pre id="json-disc-res" class="json-body"></pre>
       </div>
     </div>
@@ -412,8 +412,8 @@ const UcpData = {
     "sku_mug": { title: "UCP Demo Mug", price: 1999, image_url: "https://example.com/images/mug.jpg" }
   },
 
-  payment_handlers: {
-    "com.shopify.shop_pay": [
+  business_payment_handlers: {
+    "dev.shopify.shop_pay": [
       {
         id: "shop_pay",
         version: "2026-01-11",
@@ -459,6 +459,29 @@ const UcpData = {
             }
           ]
         }
+      }
+    ]
+  },
+
+  platform_payment_handlers: {
+    "dev.shopify.shop_pay": [
+      {
+        id: "shop_pay",
+        version: "2026-01-11",
+        spec: "https://shopify.dev/docs/agents/checkout/shop-pay-handler",
+        config_schema: "https://shopify.dev/ucp/shop-pay-handler/2026-01-11/config.json",
+        instrument_schemas: ["https://shopify.dev/ucp/shop-pay-handler/2026-01-11/instrument.json"]
+      }
+    ],
+    "com.google.pay": [
+      {
+        id: "gpay",
+        version: "2026-01-11",
+        spec: "https://pay.google.com/gp/p/ucp/2026-01-11/",
+        config_schema: "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/config.json",
+        instrument_schemas: [
+          "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/card_payment_instrument.json"
+        ]
       }
     ]
   },
@@ -585,7 +608,7 @@ class UcpBackend {
       ucp: {
         version: UcpData.version,
         capabilities: UcpData.capabilities,
-        payment_handlers: UcpData.payment_handlers
+        payment_handlers: UcpData.business_payment_handlers
       }
     };
   }
@@ -632,7 +655,7 @@ class UcpBackend {
     }
 
     this.session = {
-      ucp: { version: UcpData.version, capabilities: activeCaps, payment_handlers: UcpData.payment_handlers },
+      ucp: { version: UcpData.version, capabilities: activeCaps, payment_handlers: UcpData.business_payment_handlers },
       id: this.genId('chk'),
       status: messages.length > 0 ? "incomplete" : "ready_for_complete",
       line_items: lineItems,
@@ -857,7 +880,13 @@ class UcpApp {
       }
     });
 
-    this.setJson('json-profiles', { ucp: { version: UcpData.version, capabilities, payment_handlers: UcpData.payment_handlers } });
+    this.setJson('json-profiles', {
+      ucp: {
+        version: UcpData.version,
+        capabilities,
+        payment_handlers: UcpData.platform_payment_handlers
+      }
+    });
   }
 
   runDiscovery() {
