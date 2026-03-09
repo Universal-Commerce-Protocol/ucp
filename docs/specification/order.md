@@ -94,7 +94,9 @@ fulfillment:
   `price_adjustment`, `dispute`, `cancellation`)
 * Can be any post-order change
 * Optionally link to line items (or order-level for things like shipping refunds)
-* Include amount when relevant
+* Quantities and amounts are signed—negative for reductions (returns, refunds),
+  positive for additions (exchanges)
+* Include net amount when relevant
 * Can happen at any time regardless of fulfillment status
 
 ## Schema
@@ -113,7 +115,8 @@ Line items reflect what was purchased at checkout and their current state.
 
 ```json
 {
-  "total": 3,      // Current total quantity
+  "original": 3,   // Quantity at checkout
+  "total": 3,      // Current total (may differ after edits/exchanges)
   "fulfilled": 2   // What has been fulfilled
 }
 ```
@@ -175,7 +178,7 @@ Examples: `refund`, `return`, `credit`, `price_adjustment`, `dispute`,
     {
       "id": "li_shoes",
       "item": { "id": "prod_shoes", "title": "Running Shoes", "price": 3000 },
-      "quantity": { "total": 3, "fulfilled": 3 },
+      "quantity": { "original": 3, "total": 3, "fulfilled": 3 },
       "totals": [
         {"type": "subtotal", "amount": 9000},
         {"type": "total", "amount": 9000}
@@ -185,7 +188,7 @@ Examples: `refund`, `return`, `credit`, `price_adjustment`, `dispute`,
     {
       "id": "li_shirts",
       "item": { "id": "prod_shirts", "title": "Cotton T-Shirt", "price": 2000 },
-      "quantity": { "total": 2, "fulfilled": 0 },
+      "quantity": { "original": 2, "total": 2, "fulfilled": 0 },
       "totals": [
         {"type": "subtotal", "amount": 4000},
         {"type": "total", "amount": 4000}
@@ -242,8 +245,8 @@ Examples: `refund`, `return`, `credit`, `price_adjustment`, `dispute`,
       "type": "refund",
       "occurred_at": "2025-01-10T14:30:00Z",
       "status": "completed",
-      "line_items": [{ "id": "li_shoes", "quantity": 1 }],
-      "amount": 3000,
+      "line_items": [{ "id": "li_shoes", "quantity": -1 }],
+      "amount": -3000,
       "description": "Defective item"
     }
   ],
