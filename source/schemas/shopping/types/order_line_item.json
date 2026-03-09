@@ -31,10 +31,10 @@
         "fulfilled": {
           "type": "integer",
           "minimum": 0,
-          "description": "Quantity fulfilled (sum from fulfillment events)."
+          "description": "Quantity fulfilled so far."
         }
       },
-      "description": "Quantity tracking. Both total and fulfilled are derived from events."
+      "description": "Quantity tracking for the line item."
     },
     "totals": {
       "type": "array",

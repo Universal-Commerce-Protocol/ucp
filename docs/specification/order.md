@@ -53,7 +53,7 @@ Orders have three main components:
 Line items reflect what was purchased at checkout and their current state:
 
 * Item details (product, price, quantity ordered)
-* Quantity counts and status are derived
+* Quantity counts and fulfillment status
 
 ### Fulfillment
 
@@ -106,7 +106,6 @@ fulfillment:
 ### Order Line Item
 
 Line items reflect what was purchased at checkout and their current state.
-Status and quantity counts should reflect the event logs.
 
 {{ schema_fields('order_line_item', 'order') }}
 
