@@ -141,7 +141,7 @@ indicate ECP availability and allowed delegations for a specific session.
                     "version": "2026-01-11",
                     "transport": "embedded",
                     "config": {
-                        "delegate": ["payment.credential", "fulfillment.address_change"]
+                        "delegate": ["payment.credential", "fulfillment.address_change", "link.open"]
                     }
                 }
             ]
@@ -250,12 +250,13 @@ message following a consistent pattern: `ec.{delegation}_request`
 | `payment.instruments_change` | `ec.payment.instruments_change_request` |
 | `payment.credential`         | `ec.payment.credential_request`         |
 | `fulfillment.address_change` | `ec.fulfillment.address_change_request` |
+| `link.open`                  | `ec.link.open_request`                  |
 
 Extensions define their own delegation identifiers; see each extension's
 specification for available options.
 
 ```text
-?ec_version=2026-01-11&ec_delegate=payment.instruments_change,payment.credential,fulfillment.address_change
+?ec_version=2026-01-11&ec_delegate=payment.instruments_change,payment.credential,fulfillment.address_change,link.open
 ```
 
 #### Color Scheme
@@ -362,8 +363,9 @@ capability using its own UI.
 4. **Update**: Embedded Checkout updates its state and may send subsequent
     change notifications
 
-See [Payment Extension](#payment-extension) and
-[Fulfillment Extension](#fulfillment-extension) for
+See [Payment Extension](#payment-extension),
+[Fulfillment Extension](#fulfillment-extension), and
+[Link Extension](#link-extension) for
 capability-specific delegation details.
 
 ### Navigation Constraints
@@ -554,7 +556,7 @@ actions.
     "id": "ready_1",
     "method": "ec.ready",
     "params": {
-        "delegate": ["payment.credential", "fulfillment.address_change"]
+        "delegate": ["payment.credential", "fulfillment.address_change", "link.open"]
     }
 }
 ```
@@ -1267,6 +1269,100 @@ The address object uses the UCP
 
 {{ schema_fields('postal_address', 'embedded-checkout') }}
 
+## Link Extension
+
+The link extension defines how the Embedded Checkout notifies the host when
+the buyer activates a link presented by the business. When a checkout URL
+includes `ec_delegate=link.open`, the host **MUST** handle every
+`ec.link.open_request` and acknowledge the request.
+
+This is distinct from
+[Navigation Constraints](#navigation-constraints), which the Embedded Checkout
+enforces unconditionally to prevent navigation to unrelated pages.
+
+### Link Overview & Host Choice
+
+Link delegation allows for two different patterns:
+
+**Option A: Host Delegates to Embedded Checkout** The host does NOT include
+`link.open` in `ec_delegate`. The Embedded Checkout handles link presentation
+using its own inline UI. This is the standard, non-delegated flow.
+
+**Option B: Host Takes Control** The host includes
+`ec_delegate=link.open` in the Checkout URL, informing the Embedded Checkout
+to send `ec.link.open_request` when the buyer activates a link. When delegated:
+
+**Embedded Checkout responsibilities**:
+
+- **MUST** send `ec.link.open_request` when the buyer activates a link
+    presented by the business
+
+**Host responsibilities**:
+
+- **MUST** present the buyer with visible feedback for every
+    `ec.link.open_request` — either the content itself (e.g., in a modal,
+    side panel, or new tab) or a notification that their link request was
+    rejected
+- **MUST** respond with a JSON-RPC success result when the link open
+    request was processed, or a `link_rejected` error if host policy
+    prevented the buyer's intent to open the link
+
+By accepting `link.open` delegation, the host assumes responsibility for
+handling the buyer's link interactions. The Embedded Checkout **MUST NOT**
+present its own UI for the link — the host has already provided the buyer
+with visible feedback (content or rejection notification).
+
+### Link Message API Reference
+
+#### `ec.link.open_request`
+
+Requests the host to handle a link activated by the buyer within the checkout.
+
+- **Direction:** Embedded Checkout → Host
+- **Type:** Request
+- **Payload:**
+    - `url` (string, uri, **REQUIRED**): The URL of the resource to present.
+
+**Example Message:**
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": "link_1",
+    "method": "ec.link.open_request",
+    "params": {
+        "url": "https://merchant.com/privacy-policy"
+    }
+}
+```
+
+- **Direction:** Host → Embedded Checkout
+- **Type:** Response
+- **Payload:** Empty object (`{}`).
+
+**Example Success Response:**
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": "link_1",
+    "result": {}
+}
+```
+
+**Example Error Response:**
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": "link_1",
+    "error": {
+        "code": "link_rejected",
+        "message": "Link rejected by host."
+    }
+}
+```
+
 ## Security & Error Handling
 
 ### Error Codes
@@ -1284,6 +1380,7 @@ where possible.
 | `not_supported_error` | The requested payment method is not supported by the host.                                                                                     |
 | `invalid_state_error` | Handshake was attempted out of order.                                                                                                          |
 | `not_allowed_error`   | The request was missing valid User Activation (see [Prevention of Unsolicited Payment Requests](#prevention-of-unsolicited-payment-requests)). |
+| `link_rejected`       | The host did not present the link content to the buyer. The host **MUST** notify the buyer that their link request was rejected.               |
 
 ### Security for Web-Based Hosts
 
