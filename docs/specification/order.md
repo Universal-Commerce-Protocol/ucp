@@ -31,17 +31,20 @@ Orders have three main components:
 **Line Items** — what was purchased at checkout:
 
 * Includes current quantity counts (total, fulfilled)
+* Can change post-order (e.g. order edits, exchanges)
 
 **Fulfillment** — how items get delivered:
 
 * **Expectations** — buyer-facing *promises* about when/how items will arrive
 * **Events** (append-only log) — what actually happened (e.g. 👕 was shipped)
 
-**Adjustments** (append-only log) — post-order events independent of fulfillment:
+**Adjustments** — post-order events independent of fulfillment:
 
 * Typically money movements (refunds, returns, credits, disputes, cancellations)
 * Can be any post-order change
 * Can happen before, during, or after fulfillment
+* Businesses may append new entries or update existing ones in place
+  (e.g. a single "return" adjustment can transition from started to completed)
 
 ## Data Model
 
@@ -83,7 +86,7 @@ Expectations can be split, merged, or adjusted post-order. For example:
 
 ### Adjustments
 
-**Adjustments** are an append-only log of events that exist independently of
+**Adjustments** are post-order events that exist independently of
 fulfillment:
 
 * Type is an open string field - businesses can use any values that make sense
