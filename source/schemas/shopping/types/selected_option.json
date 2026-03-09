@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/selected_option.json",
+  "title": "Selected Option",
+  "description": "A specific option selection on a variant (e.g., Size: Large).",
+  "type": "object",
+  "required": [
+    "name",
+    "label"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Option name (e.g., 'Size')."
+    },
+    "label": {
+      "type": "string",
+      "description": "Selected option label (e.g., 'Large')."
+    }
+  }
+}

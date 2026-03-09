@@ -18,9 +18,8 @@
           "description": "JSONPath to the allocation target (e.g., '$.line_items[0]', '$.totals.shipping')."
         },
         "amount": {
-          "type": "integer",
-          "minimum": 0,
-          "description": "Amount allocated to this target in minor (cents) currency units."
+          "$ref": "types/amount.json",
+          "description": "Amount allocated to this target in ISO 4217 minor units."
         }
       }
     },
@@ -41,9 +40,8 @@
           "description": "Human-readable discount name (e.g., 'Summer Sale 20% Off')."
         },
         "amount": {
-          "type": "integer",
-          "minimum": 0,
-          "description": "Total discount amount in minor (cents) currency units."
+          "$ref": "types/amount.json",
+          "description": "Total discount amount in ISO 4217 minor units."
         },
         "automatic": {
           "type": "boolean",
