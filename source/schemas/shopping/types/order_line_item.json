@@ -23,10 +23,15 @@
       "type": "object",
       "required": ["total", "fulfilled"],
       "properties": {
+        "original": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Quantity originally ordered at checkout. Convenience property—avoids requiring a separate Checkout lookup."
+        },
         "total": {
           "type": "integer",
           "minimum": 0,
-          "description": "Current total quantity."
+          "description": "Current total quantity. May differ from original due to order edits or exchanges."
         },
         "fulfilled": {
           "type": "integer",

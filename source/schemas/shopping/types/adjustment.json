@@ -45,8 +45,7 @@
           },
           "quantity": {
             "type": "integer",
-            "minimum": 1,
-            "description": "Quantity affected by this adjustment."
+            "description": "Signed quantity affected by this adjustment. Negative values represent reductions (e.g. returns); positive values represent additions (e.g. exchanges)."
           }
         }
       },
@@ -54,7 +53,7 @@
     },
     "amount": {
       "$ref": "amount.json",
-      "description": "Amount in ISO 4217 minor units for refunds, credits, or price adjustments."
+      "description": "Net amount in ISO 4217 minor units. Signed value—negative for money returned to buyer (refunds, credits), positive for additional charges (exchanges with higher-value items)."
     },
     "description": {
       "type": "string",
