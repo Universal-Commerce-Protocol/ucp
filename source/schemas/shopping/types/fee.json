@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/fee.json",
+  "title": "Fee",
+  "description": "An individual fee applied to a checkout or cart. Represents a surcharge, service fee, or other additional charge beyond the item subtotal.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "amount",
+    "fee_type"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique fee identifier. Unlike applied discounts, fees always require an id to enable stable referencing across updates."
+    },
+    "title": {
+      "type": "string",
+      "description": "Human-readable fee name (e.g., 'Service Fee', 'Recycling Fee')."
+    },
+    "description": {
+      "type": "string",
+      "description": "Optional explanation of why the fee is charged."
+    },
+    "amount": {
+      "$ref": "amount.json",
+      "exclusiveMinimum": 0,
+      "description": "Fee amount in ISO 4217 minor units. Must be a positive integer (zero-amount fees are not permitted)."
+    },
+    "fee_type": {
+      "type": "string",
+      "description": "Type of fee (open string). Well-known values: service, handling, recycling, processing, regulatory, convenience, restocking, environmental. Platforms SHOULD handle unknown values gracefully by displaying the fee title to the user."
+    },
+    "taxable": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this fee is subject to tax."
+    },
+    "waivable": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this fee can be waived (e.g., membership removes the fee)."
+    },
+    "allocations": {
+      "type": "array",
+      "items": {
+        "$ref": "allocation.json"
+      },
+      "description": "Breakdown of how this fee was allocated to specific targets. Sum of allocation amounts equals total fee amount."
+    }
+  }
+}

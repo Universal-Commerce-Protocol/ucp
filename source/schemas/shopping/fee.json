@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/fee.json",
+  "name": "dev.ucp.shopping.fee",
+  "title": "Fee Extension",
+  "description": "Extends Checkout and Cart with itemized fee support, enabling businesses to surface service fees, handling charges, regulatory fees, and other surcharges.",
+  "$defs": {
+    "fees_object": {
+      "type": "object",
+      "description": "Container for itemized fees applied to the order.",
+      "properties": {
+        "applied": {
+          "type": "array",
+          "readOnly": true,
+          "items": {
+            "$ref": "types/fee.json"
+          },
+          "description": "Fees applied to this checkout or cart. Business-determined; not settable by platforms."
+        }
+      }
+    },
+    "dev.ucp.shopping.checkout": {
+      "title": "Checkout with Fees",
+      "description": "Checkout extended with itemized fee support.",
+      "allOf": [
+        {
+          "$ref": "checkout.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "fees": {
+              "$ref": "#/$defs/fees_object",
+              "ucp_request": {
+                "create": "omit",
+                "update": "omit",
+                "complete": "omit"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.cart": {
+      "title": "Cart with Fees",
+      "description": "Cart extended with itemized fee support.",
+      "allOf": [
+        {
+          "$ref": "cart.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "fees": {
+              "$ref": "#/$defs/fees_object",
+              "ucp_request": {
+                "create": "omit",
+                "update": "omit"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
