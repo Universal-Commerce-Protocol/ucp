@@ -19,8 +19,8 @@
 ## Overview
 
 Discount extension allows businesses to indicate that they support discount
-codes on checkout sessions, and specifies how the discount codes are to be
-shared between the platform and the business.
+codes on cart and checkout sessions, and specifies how the discount codes are
+to be shared between the platform and the business.
 
 **Key features:**
 
@@ -31,11 +31,12 @@ shared between the platform and the business.
 
 **Dependencies:**
 
-- Checkout Capability
+- Cart Capability or Checkout Capability
 
 ## Discovery
 
-Businesses advertise discount support in their profile:
+Businesses advertise discount support in their profile. The capability can
+extend cart, checkout, or both:
 
 ```json
 {
@@ -43,6 +44,12 @@ Businesses advertise discount support in their profile:
     "version": "2026-01-11",
     "capabilities": {
       "dev.ucp.shopping.discount": [
+        {
+          "version": "2026-01-11",
+          "extends": "dev.ucp.shopping.cart",
+          "spec": "https://ucp.dev/specification/discount",
+          "schema": "https://ucp.dev/schemas/shopping/discount.json"
+        },
         {
           "version": "2026-01-11",
           "extends": "dev.ucp.shopping.checkout",
@@ -55,9 +62,14 @@ Businesses advertise discount support in their profile:
 }
 ```
 
+Businesses MAY advertise discount support for cart only, checkout only, or
+both. Platforms SHOULD check which resources are extended before submitting
+discount codes.
+
 ## Schema
 
-When this capability is active, checkout is extended with a `discounts` object.
+When this capability is active, cart and/or checkout are extended with a
+`discounts` object.
 
 ### Discounts Object
 
@@ -116,7 +128,8 @@ each line item, even when multiple discounts stack.
 
 ## Operations
 
-Discount codes are submitted via standard checkout create/update operations.
+Discount codes are submitted via standard cart or checkout create/update
+operations. The same semantics apply to both resources.
 
 **Request behavior:**
 
@@ -129,6 +142,10 @@ Discount codes are submitted via standard checkout create/update operations.
 - `discounts.applied` contains all active discounts (code-based + automatic)
 - Rejected codes communicated via `messages[]` (see below)
 - Discount amounts reflected in `totals[]` and `line_items[].discount`
+
+**Cart-to-checkout continuity:** When a cart is converted to a checkout via the
+cart capability's `cart_id` field, businesses MUST carry forward any discount
+codes that were applied to the cart.
 
 ## Rejected Codes
 
@@ -177,8 +194,8 @@ segment, or promotional rules:
 
 ## Impact on Line Items and Totals
 
-Applied discounts are reflected in the core checkout fields using two distinct
-total types:
+Applied discounts are reflected in the core cart or checkout fields using two
+distinct total types:
 
 | Total Type       | When to Use                                               |
 | ---------------- | --------------------------------------------------------- |
@@ -205,6 +222,76 @@ currency units. When presenting totals to users, display discount types as
 subtractive (e.g., "-$13.99").
 
 ## Examples
+
+### Cart with discount codes
+
+Discount codes applied during cart exploration. The cart response includes
+estimated discount amounts, giving the buyer visibility into savings before
+proceeding to checkout.
+
+**Request (create_cart):**
+
+```json
+{
+  "line_items": [
+    {
+      "item": {
+        "id": "prod_1",
+        "quantity": 2,
+        "title": "T-Shirt",
+        "price": 2000
+      }
+    }
+  ],
+  "discounts": {
+    "codes": ["SUMMER20"]
+  }
+}
+```
+
+**Response:**
+
+```json
+{
+  "id": "cart_abc123",
+  "line_items": [
+    {
+      "id": "li_1",
+      "item": {
+        "id": "prod_1",
+        "quantity": 2,
+        "title": "T-Shirt",
+        "price": 2000
+      },
+      "totals": [
+        {"type": "subtotal", "amount": 4000},
+        {"type": "items_discount", "amount": 800},
+        {"type": "total", "amount": 3200}
+      ]
+    }
+  ],
+  "discounts": {
+    "codes": ["SUMMER20"],
+    "applied": [
+      {
+        "code": "SUMMER20",
+        "title": "Summer Sale 20% Off",
+        "amount": 800,
+        "method": "each",
+        "allocations": [
+          {"path": "$.line_items[0]", "amount": 800}
+        ]
+      }
+    ]
+  },
+  "currency": "USD",
+  "totals": [
+    {"type": "subtotal", "display_text": "Subtotal", "amount": 4000},
+    {"type": "items_discount", "display_text": "Item Discounts", "amount": 800},
+    {"type": "total", "display_text": "Estimated Total", "amount": 3200}
+  ]
+}
+```
 
 ### Order-level discount
 
