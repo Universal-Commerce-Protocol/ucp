@@ -25,8 +25,8 @@ This document specifies the REST binding for the
 
 All UCP REST endpoints are relative to the business's base URL, which is
 discovered through the UCP profile at `/.well-known/ucp`. The endpoint for the
-checkout capability is defined in the `rest.endpoint` field of the
-business profile.
+checkout capability is taken from the service binding whose `transport` is
+`rest` in the business profile.
 
 ### Content Types
 
