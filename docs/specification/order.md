@@ -167,7 +167,9 @@ Examples: `refund`, `return`, `credit`, `price_adjustment`, `dispute`,
     }
   },
   "id": "order_abc123",
-  "checkout_id": "checkout_xyz789",
+  "checkouts": [
+    { "id": "checkout_xyz789", "created_at": "2025-01-05T09:00:00Z" }
+  ],
   "permalink_url": "https://business.com/orders/abc123",
   "line_items": [
     {
