@@ -69,6 +69,11 @@ the presentment currency differs, businesses SHOULD convert before applying
 (see [Price Filter](search.md#price-filter)). Response prices include
 explicit currency codes confirming the resolution.
 
+When `context.eligibility` claims are present, Businesses that accept them
+**MAY** adjust `price` / `list_price` directly for strikethrough display and
+**MAY** use `messages` with `code: "eligibility_benefit"` to attribute the
+adjustment to a specific claim.
+
 {{ schema_fields('types/context', 'catalog') }}
 
 ### Product

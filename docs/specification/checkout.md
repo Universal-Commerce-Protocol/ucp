@@ -240,6 +240,7 @@ handle with specific, appropriate UX rather than generic error treatment.
 | `item_unavailable`       | Item cannot be purchased (e.g. delisted)                                   |
 | `address_undeliverable`  | Cannot deliver to the provided address                                     |
 | `payment_failed`         | Payment processing failed                                                  |
+| `invalid_eligibility`    | Eligibility claim could not be verified at completion                      |
 
 Businesses **SHOULD** mark standard errors with `severity: recoverable` to
 signal that platforms should provide appropriate UX (out-of-stock messaging,
@@ -248,6 +249,71 @@ messages or deferring to checkout completion.
 
 Example: `out_of_stock` requires specific upfront UX, whereas
 `payment_required` can be handled generically at submission.
+
+#### Eligibility Verification at Completion
+
+Platforms provide `context.eligibility` — buyer claims about eligible benefits
+such as loyalty membership, payment instrument perks, and similar. These are
+claims, not verified facts. Businesses **MAY** act on recognized claims during
+the session (adjusting pricing, granting product access, applying provisional
+discounts), but all claims that influenced the checkout **MUST** be resolved
+before the transaction can complete.
+
+Unrecognized or inapplicable claims **MUST NOT** block the checkout.
+Businesses **SHOULD** notify the buyer via `messages` with `type: "warning"`
+when a claim is not applied. At completion, unverified claims **MUST**
+result in `type: "error"` with `code: "invalid_eligibility"` (see below).
+
+A claim is resolved when it is either **verified** or **rescinded**:
+
+* **Verified**: The Business confirms the claim against a proof provided at
+  completion time. UCP does not prescribe how verification occurs — proof
+  may come from the payment credential, an identity verification capability,
+  or any other mechanism negotiated between Platform and Business.
+* **Rescinded**: The Platform removes the claim from `context.eligibility`
+  before completion (e.g., buyer changes payment method, withdraws a
+  membership claim). Once removed, the Business recalculates without it.
+
+Businesses **MUST NOT** complete a transaction with unresolved eligibility
+claims. Unverified claims may result in incorrect pricing or unauthorized
+access to restricted products.
+
+**When verification fails:**
+
+The Business **MUST NOT** mutate the checkout and **MUST** return an error
+in `messages` with `code: "invalid_eligibility"` and
+`severity: "recoverable"`. Messages **SHOULD** use the `path` field to
+identify which specific claim(s) could not be verified. The
+Platform **MAY** then provide valid proof and resubmit, restructure the
+checkout (e.g., remove ineligible items, update claims), or abandon the
+attempt.
+
+For example, the Platform claims a store card benefit via
+`context.eligibility`. The Business applies member pricing during the session.
+At completion, the payment credential does not match the claimed instrument:
+
+```json
+{
+  "ucp": { "version": "2026-01-11", "status": "success" },
+  "id": "checkout_abc",
+  "status": "ready_for_complete",
+  "line_items": [ "..." ],
+  "totals": [ "..." ],
+  "messages": [
+    {
+      "type": "error",
+      "code": "invalid_eligibility",
+      "severity": "recoverable",
+      "content": "Payment credential does not match the claimed store card benefit."
+    }
+  ]
+}
+```
+
+The Platform can resolve this by having the buyer switch to the qualifying
+payment instrument, or by removing the claim from `context.eligibility` to
+renegotiate the checkout (obtaining updated pricing, availability, etc.)
+and then resubmitting for completion.
 
 ## Continue URL
 
