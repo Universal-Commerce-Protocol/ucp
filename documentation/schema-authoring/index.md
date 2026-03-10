@@ -214,6 +214,26 @@ Define all three in your schema's `$defs`:
 }
 ```
 
+## String Vocabularies vs Enums
+
+Prefer **open string vocabularies** with documented well-known values over closed `enum` arrays. Enums are a one-way door: adding a new value is a breaking change for strict validators, and removing one breaks existing producers.
+
+```json
+// PREFER: open vocabulary — extensible without schema changes
+"type": {
+  "type": "string",
+  "description": "Media type. Well-known values: `image`, `video`, `model_3d`."
+}
+
+// AVOID: closed enum — adding `audio` requires a schema version bump
+"type": {
+  "type": "string",
+  "enum": ["image", "video", "model_3d"]
+}
+```
+
+**Use `enum` only for provably closed sets** where new values would represent a fundamental protocol change (e.g., `checkout.status: open | completed | expired`). If the set might grow as new use cases emerge, use an open string with well-known values documented in the `description`.
+
 ## Versioning Strategy
 
 ### UCP Capabilities (`dev.ucp.*`)
