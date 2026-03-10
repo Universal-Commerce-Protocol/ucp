@@ -168,6 +168,24 @@ def on_config(config):
   # --- Adjust Nav (Config Phase) ---
   # Modifying config['nav'] prevents validation errors for missing files.
   if "nav" in config:
+    # Support subpath deployments for absolute nav links
+    def rewrite_nav(nav_list):
+      rewritten = []
+      for item in nav_list:
+        if isinstance(item, dict):
+          for k, v in item.items():
+            if isinstance(v, list):
+              item[k] = rewrite_nav(v)
+            elif isinstance(v, str) and v.startswith("/latest/"):
+              # Rewrite absolute /latest/... links to respect base_path
+              item[k] = f"{base_path}{v[1:]}"
+        elif isinstance(item, str) and item.startswith("/latest/"):
+          item = f"{base_path}{item[1:]}"
+        rewritten.append(item)
+      return rewritten
+
+    config["nav"] = rewrite_nav(config["nav"])
+
     new_nav = []
     for item in config["nav"]:
       # Nav items are usually dicts {Title: path/content} or strings

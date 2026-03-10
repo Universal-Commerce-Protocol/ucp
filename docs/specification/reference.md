@@ -27,11 +27,27 @@ within the UCP.
 
 {{ auto_generate_schema_reference('types', 'reference', include_extensions=False) }}
 
+### Selected Payment Instrument {: #payment-instrument-selected-payment-instrument }
+
+{{ extension_schema_fields('types/payment_instrument.json#/$defs/selected_payment_instrument', 'reference') }}
+
+### Pagination Request {: #pagination-request }
+
+{{ extension_schema_fields('types/pagination.json#/$defs/request', 'reference') }}
+
+### Pagination Response {: #pagination-response }
+
+{{ extension_schema_fields('types/pagination.json#/$defs/response', 'reference') }}
+
+### Error Code {: #error-code }
+
+{{ schema_fields('types/error_code', 'reference') }}
+
 ## Extension Schemas
 
 {{ auto_generate_schema_reference('.', 'reference', include_capability=False) }}
 
-## UCP Metadata
+## UCP Metadata <span id="services"></span> <span id="ap2-checkout-response"></span> <span id="ap2-complete-request"></span>
 
 The following schemas define the structure of UCP metadata used in discovery
 and responses.
@@ -48,13 +64,19 @@ The top-level structure of a business discovery document (`/.well-known/ucp`).
 
 {{ extension_schema_fields('ucp.json#/$defs/business_schema', 'reference') }}
 
-### Checkout Response Metadata
+### Checkout Response Metadata {: #ucp-response-checkout-schema }
 
 The `ucp` object included in checkout responses.
 
 {{ extension_schema_fields('ucp.json#/$defs/response_checkout_schema', 'reference') }}
 
-### Order Response Metadata
+### Cart Response Metadata {: #ucp-response-cart-schema }
+
+The `ucp` object included in cart responses.
+
+{{ extension_schema_fields('ucp.json#/$defs/response_cart_schema', 'reference') }}
+
+### Order Response Metadata {: #ucp-response-order-schema }
 
 The `ucp` object included in order responses or events.
 
@@ -66,13 +88,13 @@ This object describes a single capability or extension. It appears in the
 `capabilities` array in discovery profiles and responses, with slightly
 different required fields in each context.
 
-#### Capability (Discovery)
+#### Capability (Discovery) {: #discovery }
 
 As seen in discovery profiles.
 
 {{ extension_schema_fields('capability.json#/$defs/platform_schema', 'reference') }}
 
-#### Capability (Response)
+#### Capability (Response) {: #response }
 
 As seen in response messages.
 

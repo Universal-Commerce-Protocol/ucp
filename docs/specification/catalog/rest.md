@@ -29,27 +29,27 @@ Businesses advertise REST transport availability through their UCP profile at
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "{{ ucp_version }}",
     "services": {
       "dev.ucp.shopping": {
-        "version": "2026-01-11",
-        "spec": "https://ucp.dev/specification/overview",
+        "version": "{{ ucp_version }}",
+        "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview",
         "rest": {
-          "schema": "https://ucp.dev/services/shopping/rest.openapi.json",
+          "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/rest.openapi.json",
           "endpoint": "https://business.example.com/ucp"
         }
       }
     },
     "capabilities": {
       "dev.ucp.shopping.catalog.search": [{
-        "version": "2026-01-11",
-        "spec": "https://ucp.dev/specification/catalog/search",
-        "schema": "https://ucp.dev/schemas/shopping/catalog_search.json"
+        "version": "{{ ucp_version }}",
+        "spec": "https://ucp.dev/{{ ucp_version }}/specification/catalog/search",
+        "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/catalog_search.json"
       }],
       "dev.ucp.shopping.catalog.lookup": [{
-        "version": "2026-01-11",
-        "spec": "https://ucp.dev/specification/catalog/lookup",
-        "schema": "https://ucp.dev/schemas/shopping/catalog_lookup.json"
+        "version": "{{ ucp_version }}",
+        "spec": "https://ucp.dev/{{ ucp_version }}/specification/catalog/lookup",
+        "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/catalog_lookup.json"
       }]
     }
   }
@@ -67,7 +67,7 @@ Businesses advertise REST transport availability through their UCP profile at
 
 Maps to the [Catalog Search](search.md) capability.
 
-{{ method_fields('search_catalog', 'rest.openapi.json', 'catalog-rest') }}
+{{ method_fields('search_catalog', 'rest.openapi.json', 'catalog/rest') }}
 
 #### Example
 
@@ -98,10 +98,10 @@ Maps to the [Catalog Search](search.md) capability.
     ```json
     {
       "ucp": {
-        "version": "2026-01-11",
+        "version": "{{ ucp_version }}",
         "capabilities": {
           "dev.ucp.shopping.catalog.search": [
-            {"version": "2026-01-11"}
+            {"version": "{{ ucp_version }}"}
           ]
         }
       },
@@ -133,7 +133,13 @@ Maps to the [Catalog Search](search.md) capability.
           "options": [
             {
               "name": "Size",
-              "values": [{"label": "8"}, {"label": "9"}, {"label": "10"}, {"label": "11"}, {"label": "12"}]
+              "values": [
+                {"label": "8"},
+                {"label": "9"},
+                {"label": "10"},
+                {"label": "11"},
+                {"label": "12"}
+              ]
             }
           ],
           "variants": [
@@ -151,7 +157,10 @@ Maps to the [Catalog Search](search.md) capability.
               "seller": {
                 "name": "Example Store",
                 "links": [
-                  { "type": "refund_policy", "url": "https://business.example.com/policies/refunds" }
+                  {
+                    "type": "refund_policy",
+                    "url": "https://business.example.com/refunds"
+                  }
                 ]
               }
             }
@@ -186,7 +195,7 @@ for supported identifiers, resolution behavior, and client correlation requireme
 The request body contains an array of identifiers and optional context that
 applies to all lookups in the batch.
 
-{{ method_fields('lookup_catalog', 'rest.openapi.json', 'catalog-rest') }}
+{{ method_fields('lookup_catalog', 'rest.openapi.json', 'catalog/rest') }}
 
 #### Example: Batch Lookup with Context
 
@@ -211,10 +220,10 @@ applies to all lookups in the batch.
     ```json
     {
       "ucp": {
-        "version": "2026-01-11",
+        "version": "{{ ucp_version }}",
         "capabilities": {
           "dev.ucp.shopping.catalog.lookup": [
-            {"version": "2026-01-11"}
+            {"version": "{{ ucp_version }}"}
           ]
         }
       },
@@ -289,10 +298,10 @@ messages indicating which identifiers were not found.
     ```json
     {
       "ucp": {
-        "version": "2026-01-11",
+        "version": "{{ ucp_version }}",
         "capabilities": {
           "dev.ucp.shopping.catalog.lookup": [
-            {"version": "2026-01-11"}
+            {"version": "{{ ucp_version }}"}
           ]
         }
       },
@@ -353,10 +362,10 @@ MAY include informational messages indicating which identifiers were not found.
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "{{ ucp_version }}",
     "capabilities": {
       "dev.ucp.shopping.catalog.lookup": [
-        {"version": "2026-01-11"}
+        {"version": "{{ ucp_version }}"}
       ]
     }
   },
@@ -377,6 +386,12 @@ MAY include informational messages indicating which identifiers were not found.
 ```
 
 Business outcomes use the standard HTTP 200 status with messages in the response body.
+
+## Entities
+
+### UCP Response Catalog {: #ucp-response-catalog-schema }
+
+{{ extension_schema_fields('ucp.json#/$defs/response_catalog_schema', 'catalog/rest') }}
 
 ## Conformance
 

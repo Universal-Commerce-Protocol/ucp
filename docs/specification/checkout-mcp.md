@@ -29,14 +29,14 @@ Businesses advertise MCP transport availability through their UCP profile at
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "{{ ucp_version }}",
     "services": {
       "dev.ucp.shopping": [
         {
-          "version": "2026-01-11",
-          "spec": "https://ucp.dev/specification/overview",
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview",
           "transport": "mcp",
-          "schema": "https://ucp.dev/services/shopping/mcp.openrpc.json",
+          "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/mcp.openrpc.json",
           "endpoint": "https://business.example.com/ucp/mcp"
         }
       ]
@@ -44,16 +44,16 @@ Businesses advertise MCP transport availability through their UCP profile at
     "capabilities": {
       "dev.ucp.shopping.checkout": [
         {
-          "version": "2026-01-11",
-          "spec": "https://ucp.dev/specification/checkout",
-          "schema": "https://ucp.dev/schemas/shopping/checkout.json"
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/checkout",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/checkout.json"
         }
       ],
       "dev.ucp.shopping.fulfillment": [
         {
-          "version": "2026-01-11",
-          "spec": "https://ucp.dev/specification/fulfillment",
-          "schema": "https://ucp.dev/schemas/shopping/fulfillment.json",
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/fulfillment",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json",
           "extends": "dev.ucp.shopping.checkout"
         }
       ]
@@ -62,7 +62,7 @@ Businesses advertise MCP transport availability through their UCP profile at
       "com.example.vendor.delegate_payment": [
         {
           "id": "handler_1",
-          "version": "2026-01-11",
+          "version": "{{ ucp_version }}",
           "spec": "https://example.vendor.com/specs/delegate-payment",
           "schema": "https://example.vendor.com/schemas/delegate-payment-config.json",
           "available_instruments": [
@@ -212,18 +212,18 @@ Maps to the [Create Checkout](checkout.md#create-checkout) operation.
         "structuredContent": {
           "checkout": {
             "ucp": {
-              "version": "2026-01-11",
+              "version": "{{ ucp_version }}",
               "capabilities": {
                 "dev.ucp.shopping.checkout": [
-                  {"version": "2026-01-11"}
+                  {"version": "{{ ucp_version }}"}
                 ],
                 "dev.ucp.shopping.fulfillment": [
-                  {"version": "2026-01-11"}
+                  {"version": "{{ ucp_version }}"}
                 ]
               },
               "payment_handlers": {
                 "com.example.vendor.delegate_payment": [
-                  {"id": "handler_1", "version": "2026-01-11", "available_instruments": [{"type": "card"}], "config": {}}
+                  {"id": "handler_1", "version": "{{ ucp_version }}", "available_instruments": [{"type": "card"}], "config": {}}
                 ]
               }
             },
@@ -462,18 +462,18 @@ Maps to the [Update Checkout](checkout.md#update-checkout) operation.
         "structuredContent": {
           "checkout": {
             "ucp": {
-              "version": "2026-01-11",
+              "version": "{{ ucp_version }}",
               "capabilities": {
                 "dev.ucp.shopping.checkout": [
-                  {"version": "2026-01-11"}
+                  {"version": "{{ ucp_version }}"}
                 ],
                 "dev.ucp.shopping.fulfillment": [
-                  {"version": "2026-01-11"}
+                  {"version": "{{ ucp_version }}"}
                 ]
               },
               "payment_handlers": {
                 "com.example.vendor.delegate_payment": [
-                  {"id": "handler_1", "version": "2026-01-11", "available_instruments": [{"type": "card"}], "config": {}}
+                  {"id": "handler_1", "version": "{{ ucp_version }}", "available_instruments": [{"type": "card"}], "config": {}}
                 ]
               }
             },
@@ -649,9 +649,9 @@ as JSON-RPC `result` with `structuredContent` containing the UCP envelope and
     "structuredContent": {
       "checkout": {
         "ucp": {
-          "version": "2026-01-11",
+          "version": "{{ ucp_version }}",
           "capabilities": {
-            "dev.ucp.shopping.checkout": [{"version": "2026-01-11"}]
+            "dev.ucp.shopping.checkout": [{"version": "{{ ucp_version }}"}]
           }
         },
         "id": "checkout_abc123",

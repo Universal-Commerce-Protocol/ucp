@@ -70,16 +70,16 @@ Businesses declare support by adding `dev.ucp.shopping.ap2_mandate` to their
   "capabilities": {
     "dev.ucp.shopping.checkout": [
       {
-        "version": "2026-01-11",
-        "spec": "https://ucp.dev/specification/checkout",
-        "schema": "https://ucp.dev/schemas/shopping/checkout.json"
+        "version": "{{ ucp_version }}",
+        "spec": "https://ucp.dev/{{ ucp_version }}/specification/checkout",
+        "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/checkout.json"
       }
     ],
     "dev.ucp.shopping.ap2_mandate": [
       {
-        "version": "2026-01-11",
-        "spec": "https://ucp.dev/specification/ap2-mandates",
-        "schema": "https://ucp.dev/schemas/shopping/ap2_mandate.json",
+        "version": "{{ ucp_version }}",
+        "spec": "https://ucp.dev/{{ ucp_version }}/specification/ap2-mandates",
+        "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/ap2_mandate.json",
         "extends": "dev.ucp.shopping.checkout",
         "config": {
           "vp_formats_supported": {
@@ -420,7 +420,7 @@ checkout.
 
 ## Schema
 
-### Business Authorization
+### Business Authorization {: #merchant-authorization }
 
 {{ extension_schema_fields('ap2_mandate.json#/$defs/merchant_authorization', 'ap2-mandates') }}
 

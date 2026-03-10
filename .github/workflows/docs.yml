@@ -110,9 +110,19 @@ jobs:
           echo "Set SITE_URL to $PAGES_URL"
           echo "SITE_URL=$PAGES_URL" >> $GITHUB_ENV
 
-      - name: Build Documentation (PR Check)
-        if: github.event_name == 'pull_request'
-        run: uv run mkdocs build --strict
+      - name: Build and Verify Documentation Site (Main/PR)
+        if: github.ref == 'refs/heads/main' || github.event.pull_request.base.ref == 'main'
+        run: |
+          # Create a full local preview (including mike logic) for validation
+          bash scripts/build_local.sh --main-only
+          uv run python scripts/check_links.py local_preview
+
+      - name: Build and Verify Specification Docs (Release Branches)
+        if: startsWith(github.ref, 'refs/heads/release/') || startsWith(github.event.pull_request.base.ref, 'release/')
+        run: |
+          export DOCS_MODE=spec
+          uv run mkdocs build --strict
+          uv run python scripts/check_links.py site
 
       - name: Deploy development version from main branch
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -123,7 +133,7 @@ jobs:
 
           # 2. Build Root Site (DOCS_MODE=root)
           export DOCS_MODE=root
-          uv run mkdocs build
+          uv run mkdocs build --strict
 
           # 3. Deploy Root Site to gh-pages root
           # Fetch and checkout gh-pages
