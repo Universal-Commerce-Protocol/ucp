@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/draft/schemas/shopping/types/expectation.json",
+  "title": "Expectation",
+  "description": "Buyer-facing fulfillment expectation representing logical groupings of items (e.g., 'package'). Can be split, merged, or adjusted post-order to set buyer expectations for when/how items arrive.",
+  "type": "object",
+  "required": [
+    "id",
+    "line_items",
+    "method_type",
+    "destination"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Expectation identifier."
+    },
+    "line_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "quantity"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Line item ID reference."
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Quantity of this item in this expectation."
+          }
+        }
+      },
+      "description": "Which line items and quantities are in this expectation."
+    },
+    "method_type": {
+      "type": "string",
+      "enum": [
+        "shipping",
+        "pickup",
+        "digital"
+      ],
+      "description": "Delivery method type (shipping, pickup, digital)."
+    },
+    "destination": {
+      "$ref": "https://ucp.dev/draft/schemas/shopping/types/postal_address.json",
+      "description": "Delivery destination address."
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable delivery description (e.g., 'Arrives in 5-8 business days')."
+    },
+    "fulfillable_on": {
+      "type": "string",
+      "description": "When this expectation can be fulfilled: 'now' or ISO 8601 timestamp for future date (backorder, pre-order)."
+    }
+  }
+}

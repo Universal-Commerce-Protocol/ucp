@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/draft/schemas/shopping/types/payment_instrument.json",
+  "title": "Payment Instrument",
+  "description": "The base definition for any payment instrument. It links the instrument to a specific payment handler.",
+  "type": "object",
+  "required": [
+    "id",
+    "handler_id",
+    "type"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "A unique identifier for this instrument instance, assigned by the platform."
+    },
+    "handler_id": {
+      "type": "string",
+      "description": "The unique identifier for the handler instance that produced this instrument. This corresponds to the 'id' field in the Payment Handler definition."
+    },
+    "type": {
+      "type": "string",
+      "description": "The broad category of the instrument (e.g., 'card', 'tokenized_card'). Specific schemas will constrain this to a constant value."
+    },
+    "billing_address": {
+      "$ref": "https://ucp.dev/draft/schemas/shopping/types/postal_address.json",
+      "description": "The billing address associated with this payment method."
+    },
+    "credential": {
+      "$ref": "https://ucp.dev/draft/schemas/shopping/types/payment_credential.json"
+    },
+    "display": {
+      "type": "object",
+      "description": "Display information for this payment instrument. Each payment instrument schema defines its specific display properties, as outlined by the payment handler."
+    }
+  },
+  "additionalProperties": true,
+  "$defs": {
+    "selected_payment_instrument": {
+      "title": "Selected Payment Instrument",
+      "description": "A payment instrument with selection state.",
+      "allOf": [
+        {
+          "$ref": "#"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "selected": {
+              "type": "boolean",
+              "description": "Whether this instrument is selected by the user."
+            }
+          }
+        }
+      ]
+    }
+  }
+}

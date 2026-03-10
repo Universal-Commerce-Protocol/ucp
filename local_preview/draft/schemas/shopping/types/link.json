@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/draft/schemas/shopping/types/link.json",
+  "title": "Link",
+  "type": "object",
+  "required": [
+    "type",
+    "url"
+  ],
+  "properties": {
+    "type": {
+      "type": "string",
+      "description": "Type of link. Well-known values: `privacy_policy`, `terms_of_service`, `refund_policy`, `shipping_policy`, `faq`. Consumers SHOULD handle unknown values gracefully by displaying them using the `title` field or omitting the link."
+    },
+    "url": {
+      "type": "string",
+      "description": "The actual URL pointing to the content to be displayed.",
+      "format": "uri"
+    },
+    "title": {
+      "type": "string",
+      "description": "Optional display text for the link. When provided, use this instead of generating from type."
+    }
+  }
+}

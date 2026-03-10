@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/draft/schemas/shopping/types/binding.json",
+  "title": "Binding",
+  "description": "Binds a token to a specific checkout session and participant. Prevents token reuse across different checkouts or participants.",
+  "type": "object",
+  "required": [
+    "checkout_id"
+  ],
+  "properties": {
+    "checkout_id": {
+      "type": "string",
+      "description": "The checkout session identifier this token is bound to."
+    },
+    "identity": {
+      "$ref": "https://ucp.dev/draft/schemas/shopping/types/payment_identity.json",
+      "description": "The participant this token is bound to. Required when acting on behalf of another participant (e.g., agent tokenizing for merchant). Omit when the authenticated caller is the binding target."
+    }
+  }
+}

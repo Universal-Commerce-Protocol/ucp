@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/draft/schemas/shopping/types/postal_address.json",
+  "title": "Postal Address",
+  "type": "object",
+  "properties": {
+    "extended_address": {
+      "type": "string",
+      "description": "An address extension such as an apartment number, C/O or alternative name."
+    },
+    "street_address": {
+      "type": "string",
+      "description": "The street address."
+    },
+    "address_locality": {
+      "type": "string",
+      "description": "The locality in which the street address is, and which is in the region. For example, Mountain View."
+    },
+    "address_region": {
+      "type": "string",
+      "description": "The region in which the locality is, and which is in the country. Required for applicable countries (i.e. state in US, province in CA). For example, California or another appropriate first-level Administrative division."
+    },
+    "address_country": {
+      "type": "string",
+      "description": "The country. Recommended to be in 2-letter ISO 3166-1 alpha-2 format, for example \"US\". For backward compatibility, a 3-letter ISO 3166-1 alpha-3 country code such as \"SGP\" or a full country name such as \"Singapore\" can also be used."
+    },
+    "postal_code": {
+      "type": "string",
+      "description": "The postal code. For example, 94043."
+    },
+    "first_name": {
+      "type": "string",
+      "description": "Optional. First name of the contact associated with the address."
+    },
+    "last_name": {
+      "type": "string",
+      "description": "Optional. Last name of the contact associated with the address."
+    },
+    "phone_number": {
+      "type": "string",
+      "description": "Optional. Phone number of the contact associated with the address."
+    }
+  }
+}

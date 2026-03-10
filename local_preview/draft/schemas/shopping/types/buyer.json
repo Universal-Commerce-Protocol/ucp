@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/draft/schemas/shopping/types/buyer.json",
+  "title": "Buyer",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "first_name": {
+      "type": "string",
+      "description": "First name of the buyer."
+    },
+    "last_name": {
+      "type": "string",
+      "description": "Last name of the buyer."
+    },
+    "email": {
+      "type": "string",
+      "description": "Email of the buyer."
+    },
+    "phone_number": {
+      "type": "string",
+      "description": "E.164 standard."
+    }
+  }
+}

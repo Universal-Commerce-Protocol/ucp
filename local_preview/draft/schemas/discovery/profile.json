@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/draft/schemas/discovery/profile.json",
+  "title": "UCP Discovery Profile",
+  "description": "Schema for UCP discovery profiles. Business profiles are hosted at /.well-known/ucp; platform profiles are hosted at URIs advertised in request headers.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/platform_profile"
+    },
+    {
+      "$ref": "#/$defs/business_profile"
+    }
+  ],
+  "$defs": {
+    "signing_key": {
+      "type": "object",
+      "required": [
+        "kid",
+        "kty"
+      ],
+      "description": "Public key for signature verification in JWK format.",
+      "properties": {
+        "kid": {
+          "type": "string",
+          "description": "Key ID. Referenced in signature headers to identify which key to use for verification."
+        },
+        "kty": {
+          "type": "string",
+          "description": "Key type (e.g., 'EC', 'RSA')."
+        },
+        "crv": {
+          "type": "string",
+          "description": "Curve name for EC keys (e.g., 'P-256')."
+        },
+        "x": {
+          "type": "string",
+          "description": "X coordinate for EC public keys (base64url encoded)."
+        },
+        "y": {
+          "type": "string",
+          "description": "Y coordinate for EC public keys (base64url encoded)."
+        },
+        "n": {
+          "type": "string",
+          "description": "Modulus for RSA public keys (base64url encoded)."
+        },
+        "e": {
+          "type": "string",
+          "description": "Exponent for RSA public keys (base64url encoded)."
+        },
+        "use": {
+          "type": "string",
+          "enum": [
+            "sig",
+            "enc"
+          ],
+          "description": "Key usage. Should be 'sig' for signing keys."
+        },
+        "alg": {
+          "type": "string",
+          "description": "Algorithm (e.g., 'ES256', 'RS256')."
+        }
+      }
+    },
+    "base": {
+      "description": "Base discovery profile with shared properties for all profile types.",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "ucp"
+      ],
+      "properties": {
+        "ucp": {
+          "$ref": "https://ucp.dev/draft/schemas/ucp.json#/$defs/base"
+        },
+        "signing_keys": {
+          "type": "array",
+          "description": "Public keys for signature verification (JWK format). Used to verify signed responses, webhooks, and other authenticated messages from this party.",
+          "items": {
+            "$ref": "#/$defs/signing_key"
+          }
+        }
+      }
+    },
+    "platform_profile": {
+      "title": "UCP Platform Discovery Profile",
+      "description": "Full discovery profile for platforms. Exposes complete service, capability, and payment handler registries.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
+        },
+        {
+          "properties": {
+            "ucp": {
+              "$ref": "https://ucp.dev/draft/schemas/ucp.json#/$defs/platform_schema"
+            }
+          }
+        }
+      ]
+    },
+    "business_profile": {
+      "title": "UCP Business Discovery Profile",
+      "description": "Discovery profile for businesses/merchants. Subset of platform profile with business-specific configuration.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
+        },
+        {
+          "properties": {
+            "ucp": {
+              "$ref": "https://ucp.dev/draft/schemas/ucp.json#/$defs/business_schema"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

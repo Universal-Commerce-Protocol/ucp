@@ -1,0 +1,14 @@
+# Universal Commerce Protocol (UCP)
+
+> The Universal Commerce Protocol (UCP) is a solution for enabling gen AI agents to make payments on behalf of users, safely, securely, and in a decentralized and privacy protecting manner. This protocol is a part of the broader ecosystem, which includes agentic protocols like A2A and MCP, and encompasses the global nature of payments.
+
+
+## Overview
+
+- [Home](https://ucp.dev/index.md)
+- [Core Concepts](https://ucp.dev/documentation/core-concepts/index.md)
+- [UCP and AP2](https://ucp.dev/documentation/ucp-and-ap2/index.md)
+- [Roadmap](https://ucp.dev/documentation/roadmap/index.md)
+- [Schema Authoring](https://ucp.dev/documentation/schema-authoring/index.md)
+- [Versioning](https://ucp.dev/versioning/index.md)
+

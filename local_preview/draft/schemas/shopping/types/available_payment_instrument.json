@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/draft/schemas/shopping/types/available_payment_instrument.json",
+  "title": "Available Payment Instrument",
+  "description": "An instrument type available from a payment handler with optional constraints.",
+  "type": "object",
+  "required": [
+    "type"
+  ],
+  "properties": {
+    "type": {
+      "type": "string",
+      "description": "The instrument type identifier (e.g., 'card', 'gift_card'). References an instrument schema's type constant."
+    },
+    "constraints": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Constraints on this instrument type. Structure depends on instrument type and active capabilities.",
+      "minProperties": 1
+    }
+  }
+}

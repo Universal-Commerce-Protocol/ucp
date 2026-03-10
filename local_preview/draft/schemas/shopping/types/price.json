@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/draft/schemas/shopping/types/price.json",
+  "title": "Price",
+  "description": "Price with explicit currency.",
+  "type": "object",
+  "required": [
+    "amount",
+    "currency"
+  ],
+  "properties": {
+    "amount": {
+      "$ref": "https://ucp.dev/draft/schemas/shopping/types/amount.json",
+      "description": "Amount in ISO 4217 minor units. Use 0 for free items."
+    },
+    "currency": {
+      "type": "string",
+      "description": "ISO 4217 currency code (e.g., 'USD', 'EUR', 'GBP').",
+      "pattern": "^[A-Z]{3}$"
+    }
+  }
+}

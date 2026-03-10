@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/draft/schemas/shopping/types/fulfillment_destination.json",
+  "title": "Fulfillment Destination",
+  "description": "A destination for fulfillment.",
+  "type": "object",
+  "ucp_shared_request": true,
+  "oneOf": [
+    {
+      "$ref": "https://ucp.dev/draft/schemas/shopping/types/shipping_destination.json"
+    },
+    {
+      "$ref": "https://ucp.dev/draft/schemas/shopping/types/retail_location.json"
+    }
+  ]
+}

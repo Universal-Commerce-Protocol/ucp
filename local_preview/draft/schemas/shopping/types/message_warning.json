@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/draft/schemas/shopping/types/message_warning.json",
+  "title": "Message Warning",
+  "type": "object",
+  "required": [
+    "type",
+    "code",
+    "content"
+  ],
+  "properties": {
+    "type": {
+      "type": "string",
+      "const": "warning",
+      "description": "Message type discriminator."
+    },
+    "path": {
+      "type": "string",
+      "description": "JSONPath (RFC 9535) to related field (e.g., $.line_items[0])."
+    },
+    "code": {
+      "type": "string",
+      "description": "Warning code. Machine-readable identifier for the warning type (e.g., final_sale, prop65, fulfillment_changed, age_restricted, etc.)."
+    },
+    "content": {
+      "type": "string",
+      "description": "Human-readable warning message that MUST be displayed."
+    },
+    "content_type": {
+      "type": "string",
+      "enum": [
+        "plain",
+        "markdown"
+      ],
+      "default": "plain",
+      "description": "Content format, default = plain."
+    }
+  }
+}

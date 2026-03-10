@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/draft/schemas/shopping/types/fulfillment.json",
+  "title": "Fulfillment",
+  "description": "Container for fulfillment methods and availability.",
+  "type": "object",
+  "ucp_shared_request": true,
+  "properties": {
+    "methods": {
+      "type": "array",
+      "description": "Fulfillment methods for cart items.",
+      "items": {
+        "$ref": "https://ucp.dev/draft/schemas/shopping/types/fulfillment_method.json"
+      }
+    },
+    "available_methods": {
+      "type": "array",
+      "description": "Inventory availability hints.",
+      "items": {
+        "$ref": "https://ucp.dev/draft/schemas/shopping/types/fulfillment_available_method.json"
+      },
+      "ucp_request": "omit"
+    }
+  }
+}

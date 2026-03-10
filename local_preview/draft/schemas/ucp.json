@@ -1,0 +1,333 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/draft/schemas/ucp.json",
+  "title": "UCP Metadata",
+  "description": "Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.",
+  "$defs": {
+    "version": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+      "description": "UCP version in YYYY-MM-DD format."
+    },
+    "reverse_domain_name": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9_]*)+$",
+      "description": "Reverse-domain identifier (e.g., com.google.pay, dev.ucp.shopping.checkout)"
+    },
+    "version_constraint": {
+      "type": "object",
+      "description": "Version range requirement with minimum and optional maximum.",
+      "properties": {
+        "min": {
+          "$ref": "#/$defs/version",
+          "description": "Minimum required version (inclusive)."
+        },
+        "max": {
+          "$ref": "#/$defs/version",
+          "description": "Maximum compatible version (inclusive). When absent, no upper bound."
+        }
+      },
+      "required": [
+        "min"
+      ],
+      "additionalProperties": true
+    },
+    "requires": {
+      "type": "object",
+      "description": "Version requirements for extension schemas. Declares minimum (and optionally maximum) protocol and capability versions needed for correct operation.",
+      "properties": {
+        "protocol": {
+          "$ref": "#/$defs/version_constraint",
+          "description": "Required protocol version."
+        },
+        "capabilities": {
+          "type": "object",
+          "description": "Required capability versions, keyed by capability name. Keys must be a subset of the extension's $defs keys.",
+          "propertyNames": {
+            "$ref": "#/$defs/reverse_domain_name"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/version_constraint"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "entity": {
+      "type": "object",
+      "description": "Shared foundation for all UCP entities.",
+      "required": [
+        "version"
+      ],
+      "properties": {
+        "version": {
+          "$ref": "#/$defs/version",
+          "description": "Entity version in YYYY-MM-DD format."
+        },
+        "spec": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL to human-readable specification document."
+        },
+        "schema": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL to JSON Schema defining this entity's structure and payloads."
+        },
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for this entity instance. Used to disambiguate when multiple instances exist."
+        },
+        "config": {
+          "type": "object",
+          "description": "Entity-specific configuration. Structure defined by each entity's schema.",
+          "additionalProperties": true
+        }
+      }
+    },
+    "base": {
+      "description": "Base UCP metadata with shared properties for all schema types.",
+      "type": "object",
+      "required": [
+        "version"
+      ],
+      "properties": {
+        "version": {
+          "$ref": "#/$defs/version"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "success",
+            "error"
+          ],
+          "default": "success",
+          "description": "Application-level status of the UCP operation."
+        },
+        "services": {
+          "type": "object",
+          "description": "Service registry keyed by reverse-domain name.",
+          "propertyNames": {
+            "$ref": "#/$defs/reverse_domain_name"
+          },
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "$ref": "https://ucp.dev/draft/schemas/service.json#/$defs/base"
+            }
+          }
+        },
+        "capabilities": {
+          "type": "object",
+          "description": "Capability registry keyed by reverse-domain name.",
+          "propertyNames": {
+            "$ref": "#/$defs/reverse_domain_name"
+          },
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "$ref": "https://ucp.dev/draft/schemas/capability.json#/$defs/base"
+            }
+          }
+        },
+        "payment_handlers": {
+          "type": "object",
+          "description": "Payment handler registry keyed by reverse-domain name.",
+          "propertyNames": {
+            "$ref": "#/$defs/reverse_domain_name"
+          },
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "$ref": "https://ucp.dev/draft/schemas/payment_handler.json#/$defs/base"
+            }
+          }
+        }
+      }
+    },
+    "platform_schema": {
+      "title": "UCP Platform Schema",
+      "description": "Full UCP metadata for platform-level configuration. Hosted at a URI advertised by the platform in request headers.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
+        },
+        {
+          "required": [
+            "services",
+            "payment_handlers"
+          ],
+          "properties": {
+            "services": {
+              "additionalProperties": {
+                "items": {
+                  "$ref": "https://ucp.dev/draft/schemas/service.json#/$defs/platform_schema"
+                }
+              }
+            },
+            "capabilities": {
+              "additionalProperties": {
+                "items": {
+                  "$ref": "https://ucp.dev/draft/schemas/capability.json#/$defs/platform_schema"
+                }
+              }
+            },
+            "payment_handlers": {
+              "additionalProperties": {
+                "items": {
+                  "$ref": "https://ucp.dev/draft/schemas/payment_handler.json#/$defs/platform_schema"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "business_schema": {
+      "title": "UCP Business Schema",
+      "description": "UCP metadata for business/merchant-level configuration. Subset of platform schema with business-specific settings.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
+        },
+        {
+          "required": [
+            "services",
+            "payment_handlers"
+          ],
+          "properties": {
+            "supported_versions": {
+              "type": "object",
+              "description": "Previous protocol versions this business supports, mapped to profile URIs. Businesses that support older protocol versions SHOULD advertise each version and link to its profile. Each URI points to a complete, self-contained profile for that version. When omitted, only `version` is supported.",
+              "propertyNames": {
+                "$ref": "#/$defs/version"
+              },
+              "additionalProperties": {
+                "type": "string",
+                "format": "uri"
+              }
+            },
+            "services": {
+              "additionalProperties": {
+                "items": {
+                  "$ref": "https://ucp.dev/draft/schemas/service.json#/$defs/business_schema"
+                }
+              }
+            },
+            "capabilities": {
+              "additionalProperties": {
+                "items": {
+                  "$ref": "https://ucp.dev/draft/schemas/capability.json#/$defs/business_schema"
+                }
+              }
+            },
+            "payment_handlers": {
+              "additionalProperties": {
+                "items": {
+                  "$ref": "https://ucp.dev/draft/schemas/payment_handler.json#/$defs/business_schema"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "response_checkout_schema": {
+      "title": "UCP Checkout Response Schema",
+      "description": "UCP metadata for checkout responses.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
+        },
+        {
+          "required": [
+            "payment_handlers"
+          ],
+          "properties": {
+            "services": {
+              "additionalProperties": {
+                "items": {
+                  "$ref": "https://ucp.dev/draft/schemas/service.json#/$defs/response_schema"
+                }
+              }
+            },
+            "capabilities": {
+              "additionalProperties": {
+                "items": {
+                  "$ref": "https://ucp.dev/draft/schemas/capability.json#/$defs/response_schema"
+                }
+              }
+            },
+            "payment_handlers": {
+              "additionalProperties": {
+                "items": {
+                  "$ref": "https://ucp.dev/draft/schemas/payment_handler.json#/$defs/response_schema"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "response_order_schema": {
+      "title": "UCP Order Response Schema",
+      "description": "UCP metadata for order responses. No payment handlers needed post-purchase.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
+        },
+        {
+          "properties": {
+            "capabilities": {
+              "additionalProperties": {
+                "items": {
+                  "$ref": "https://ucp.dev/draft/schemas/capability.json#/$defs/response_schema"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "response_cart_schema": {
+      "title": "UCP Cart Response Schema",
+      "description": "UCP metadata for cart responses. No payment handlers needed pre-checkout.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
+        },
+        {
+          "properties": {
+            "capabilities": {
+              "additionalProperties": {
+                "items": {
+                  "$ref": "https://ucp.dev/draft/schemas/capability.json#/$defs/response_schema"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "response_catalog_schema": {
+      "title": "UCP Catalog Response Schema",
+      "description": "UCP metadata for catalog responses.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
+        },
+        {
+          "properties": {
+            "capabilities": {
+              "additionalProperties": {
+                "items": {
+                  "$ref": "https://ucp.dev/draft/schemas/capability.json#/$defs/response_schema"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
