@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/draft/schemas/shopping/types/search_filters.json",
+  "title": "Search Filters",
+  "description": "Filter criteria to narrow search results. All specified filters combine with AND logic.",
+  "type": "object",
+  "properties": {
+    "categories": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Filter by product categories (OR logic — matches products in any listed categories). Values match against the value field in product category entries. Valid values can be discovered from the categories field in search results, merchant documentation, or standard taxonomies that businesses may align with."
+    },
+    "price": {
+      "$ref": "https://ucp.dev/draft/schemas/shopping/types/price_filter.json"
+    }
+  },
+  "additionalProperties": true
+}

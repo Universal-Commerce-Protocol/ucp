@@ -8,7 +8,7 @@ This page provides a reference for all the capability data models and types used
 
 | Name         | Type                                                                                 | Required | Description                                                                                                                                        |
 | ------------ | ------------------------------------------------------------------------------------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ucp          | [UCP Response Cart Schema](/draft/specification/reference/#ucp-response-cart-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                            |
+| ucp          | [Ucp Response Cart Schema](/draft/specification/reference/#ucp-response-cart-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                            |
 | id           | string                                                                               | **Yes**  | Unique cart identifier.                                                                                                                            |
 | line_items   | Array\[[Line Item](/draft/specification/reference/#line-item)\]                      | **Yes**  | Cart line items. Same structure as checkout. Full replacement on update.                                                                           |
 | context      | [Context](/draft/specification/reference/#context)                                   | No       | Buyer signals for localization (country, region, postal_code). Merchant uses for pricing, availability, currency. Falls back to geo-IP if omitted. |
@@ -22,24 +22,36 @@ This page provides a reference for all the capability data models and types used
 
 ______________________________________________________________________
 
+### Catalog Lookup
+
+Product/variant lookup by identifier capability.
+
+______________________________________________________________________
+
+### Catalog Search
+
+Product catalog search capability.
+
+______________________________________________________________________
+
 ### Checkout
 
-| Name         | Type                                                                                         | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| ------------ | -------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ucp          | [UCP Response Checkout Schema](/draft/specification/reference/#ucp-response-checkout-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| id           | string                                                                                       | **Yes**  | Unique identifier of the checkout session.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| line_items   | Array\[[Line Item](/draft/specification/reference/#line-item)\]                              | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| buyer        | [Buyer](/draft/specification/reference/#buyer)                                               | No       | Representation of the buyer.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| context      | [Context](/draft/specification/reference/#context)                                           | No       | Provisional buyer signals for relevance and localization: product availability, pricing, currency, tax, shipping, payment methods, and eligibility (e.g., student or affiliation discounts). Businesses SHOULD use these values when authoritative data (e.g., address) is absent, and MAY ignore unsupported values without returning errors. Context SHOULD be non-identifying and can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. Platforms SHOULD progressively enhance context throughout the buyer journey. |
-| status       | string                                                                                       | **Yes**  | Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details. **Enum:** `incomplete`, `requires_escalation`, `ready_for_complete`, `complete_in_progress`, `completed`, `canceled`                                                                                                                                                                                                                                                                                                                                                                                   |
-| currency     | string                                                                                       | **Yes**  | ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| totals       | Array\[[Total](/draft/specification/reference/#total)\]                                      | **Yes**  | Different cart totals.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| messages     | Array\[[Message](/draft/specification/reference/#message)\]                                  | No       | List of messages with error and info about the checkout session state.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| links        | Array\[[Link](/draft/specification/reference/#link)\]                                        | **Yes**  | Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| expires_at   | string                                                                                       | No       | RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| continue_url | string                                                                                       | No       | URL for checkout handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| payment      | [Payment](/draft/specification/reference/#payment)                                           | No       | Payment configuration containing handlers.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| order        | [Order Confirmation](/draft/specification/reference/#order-confirmation)                     | No       | Details about an order created for this checkout session.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| Name         | Type                                                                                         | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| ------------ | -------------------------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ucp          | [Ucp Response Checkout Schema](/draft/specification/reference/#ucp-response-checkout-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| id           | string                                                                                       | **Yes**  | Unique identifier of the checkout session.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| line_items   | Array\[[Line Item](/draft/specification/reference/#line-item)\]                              | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| buyer        | [Buyer](/draft/specification/reference/#buyer)                                               | No       | Representation of the buyer.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| context      | [Context](/draft/specification/reference/#context)                                           | No       | Provisional buyer signals for relevance and localization—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data. Context SHOULD be non-identifying and can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. |
+| status       | string                                                                                       | **Yes**  | Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details. **Enum:** `incomplete`, `requires_escalation`, `ready_for_complete`, `complete_in_progress`, `completed`, `canceled`                                                                                                                                                                                                                                                                                                                                                                                                         |
+| currency     | string                                                                                       | **Yes**  | ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| totals       | Array\[[Total](/draft/specification/reference/#total)\]                                      | **Yes**  | Different cart totals.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| messages     | Array\[[Message](/draft/specification/reference/#message)\]                                  | No       | List of messages with error and info about the checkout session state.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| links        | Array\[[Link](/draft/specification/reference/#link)\]                                        | **Yes**  | Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| expires_at   | string                                                                                       | No       | RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| continue_url | string                                                                                       | No       | URL for checkout handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| payment      | [Payment](/draft/specification/reference/#payment)                                           | No       | Payment configuration containing handlers.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| order        | [Order Confirmation](/draft/specification/reference/#order-confirmation)                     | No       | Details about an order created for this checkout session.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 
 ______________________________________________________________________
 
@@ -47,7 +59,7 @@ ______________________________________________________________________
 
 | Name          | Type                                                                                   | Required | Description                                                                                                                                  |
 | ------------- | -------------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| ucp           | [UCP Response Order Schema](/draft/specification/reference/#ucp-response-order-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                      |
+| ucp           | [Ucp Response Order Schema](/draft/specification/reference/#ucp-response-order-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                      |
 | id            | string                                                                                 | **Yes**  | Unique order identifier.                                                                                                                     |
 | checkout_id   | string                                                                                 | **Yes**  | Associated checkout ID for reconciliation.                                                                                                   |
 | permalink_url | string                                                                                 | **Yes**  | Permalink to access the order on merchant site.                                                                                              |
@@ -61,9 +73,9 @@ ______________________________________________________________________
 
 ### Payment
 
-| Name        | Type                                                                                                | Required | Description                                                                                                                                                                                                                |
-| ----------- | --------------------------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| instruments | Array\[[Selected Payment Instrument](/draft/specification/reference/#selected-payment-instrument)\] | No       | The payment instruments available for this payment. Each instrument is associated with a specific handler via the handler_id field. Handlers can extend the base payment_instrument schema to add handler-specific fields. |
+| Name        | Type                                                                                                                                      | Required | Description                                                                                                                                                                                                                |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| instruments | Array\[[Payment Instrument Selected Payment Instrument](/draft/specification/reference/#payment-instrument-selected-payment-instrument)\] | No       | The payment instruments available for this payment. Each instrument is associated with a specific handler via the handler_id field. Handlers can extend the base payment_instrument schema to add handler-specific fields. |
 
 ______________________________________________________________________
 
@@ -79,15 +91,15 @@ ______________________________________________________________________
 
 ### Adjustment
 
-| Name        | Type          | Required | Description                                                                                                                                                                                     |
-| ----------- | ------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| id          | string        | **Yes**  | Adjustment event identifier.                                                                                                                                                                    |
-| type        | string        | **Yes**  | Type of adjustment (open string). Typically money-related like: refund, return, credit, price_adjustment, dispute, cancellation. Can be any value that makes sense for the merchant's business. |
-| occurred_at | string        | **Yes**  | RFC 3339 timestamp when this adjustment occurred.                                                                                                                                               |
-| status      | string        | **Yes**  | Adjustment status. **Enum:** `pending`, `completed`, `failed`                                                                                                                                   |
-| line_items  | Array[object] | No       | Which line items and quantities are affected (optional).                                                                                                                                        |
-| amount      | integer       | No       | Amount in minor units (cents) for refunds, credits, price adjustments (optional).                                                                                                               |
-| description | string        | No       | Human-readable reason or description (e.g., 'Defective item', 'Customer requested').                                                                                                            |
+| Name        | Type                                             | Required | Description                                                                                                                                                                                     |
+| ----------- | ------------------------------------------------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| id          | string                                           | **Yes**  | Adjustment event identifier.                                                                                                                                                                    |
+| type        | string                                           | **Yes**  | Type of adjustment (open string). Typically money-related like: refund, return, credit, price_adjustment, dispute, cancellation. Can be any value that makes sense for the merchant's business. |
+| occurred_at | string                                           | **Yes**  | RFC 3339 timestamp when this adjustment occurred.                                                                                                                                               |
+| status      | string                                           | **Yes**  | Adjustment status. **Enum:** `pending`, `completed`, `failed`                                                                                                                                   |
+| line_items  | Array[object]                                    | No       | Which line items and quantities are affected (optional).                                                                                                                                        |
+| amount      | [Amount](/draft/specification/reference/#amount) | No       | Amount in ISO 4217 minor units for refunds, credits, or price adjustments.                                                                                                                      |
+| description | string                                           | No       | Human-readable reason or description (e.g., 'Defective item', 'Customer requested').                                                                                                            |
 
 ______________________________________________________________________
 
@@ -161,14 +173,35 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
+### Category
+
+| Name     | Type   | Required | Description                                                                           |
+| -------- | ------ | -------- | ------------------------------------------------------------------------------------- |
+| value    | string | **Yes**  | Category value or path (e.g., 'Apparel > Shirts', '1604').                            |
+| taxonomy | string | No       | Source taxonomy. Well-known values: `google_product_category`, `shopify`, `merchant`. |
+
+______________________________________________________________________
+
 ### Context
 
-| Name            | Type   | Required | Description                                                                                                                                                                                                                                                                                                                                                                         |
-| --------------- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| address_country | string | No       | The country. Recommended to be in 2-letter ISO 3166-1 alpha-2 format, for example "US". For backward compatibility, a 3-letter ISO 3166-1 alpha-3 country code such as "SGP" or a full country name such as "Singapore" can also be used. Optional hint for market context (currency, availability, pricing)—higher-resolution data (e.g., shipping address) supersedes this value. |
-| address_region  | string | No       | The region in which the locality is, and which is in the country. For example, California or another appropriate first-level Administrative division. Optional hint for progressive localization—higher-resolution data (e.g., shipping address) supersedes this value.                                                                                                             |
-| postal_code     | string | No       | The postal code. For example, 94043. Optional hint for regional refinement—higher-resolution data (e.g., shipping address) supersedes this value.                                                                                                                                                                                                                                   |
-| intent          | string | No       | Background context describing buyer's intent (e.g., 'looking for a gift under $50', 'need something durable for outdoor use'). Informs relevance, recommendations, and personalization.                                                                                                                                                                                             |
+| Name            | Type   | Required | Description                                                                                                                                                                                                                                                                                                                                                                                   |
+| --------------- | ------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| address_country | string | No       | The country. Recommended to be in 2-letter ISO 3166-1 alpha-2 format, for example "US". For backward compatibility, a 3-letter ISO 3166-1 alpha-3 country code such as "SGP" or a full country name such as "Singapore" can also be used. Optional hint for market context (currency, availability, pricing)—higher-resolution data (e.g., shipping address) supersedes this value.           |
+| address_region  | string | No       | The region in which the locality is, and which is in the country. For example, California or another appropriate first-level Administrative division. Optional hint for progressive localization—higher-resolution data (e.g., shipping address) supersedes this value.                                                                                                                       |
+| postal_code     | string | No       | The postal code. For example, 94043. Optional hint for regional refinement—higher-resolution data (e.g., shipping address) supersedes this value.                                                                                                                                                                                                                                             |
+| intent          | string | No       | Background context describing buyer's intent (e.g., 'looking for a gift under $50', 'need something durable for outdoor use'). Informs relevance, recommendations, and personalization.                                                                                                                                                                                                       |
+| language        | string | No       | Preferred language for content. Use IETF BCP 47 language tags (e.g., 'en', 'fr-CA', 'zh-Hans'). For REST, equivalent to Accept-Language header—platforms SHOULD fall back to Accept-Language when this field is absent; when provided, overrides Accept-Language. Businesses MAY return content in a different language if unavailable.                                                       |
+| currency        | string | No       | Preferred currency (ISO 4217, e.g., 'EUR', 'USD'). Businesses determine presentment currency from context and authoritative signals; this hint MAY inform selection in multi-currency markets. Also serves as the denomination for price filter values — platforms SHOULD include this field when sending price filters. Response prices include explicit currency confirming the resolution. |
+
+______________________________________________________________________
+
+### Description
+
+| Name     | Type   | Required | Description                                                                                                                                                               |
+| -------- | ------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| plain    | string | No       | Plain text content.                                                                                                                                                       |
+| html     | string | No       | HTML-formatted content. Security: Platforms MUST sanitize before rendering—strip scripts, event handlers, and untrusted elements. Treat all rich text as untrusted input. |
+| markdown | string | No       | Markdown-formatted content.                                                                                                                                               |
 
 ______________________________________________________________________
 
@@ -274,14 +307,23 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
+### Input Correlation
+
+| Name  | Type   | Required | Description                                                                                                                                                                                                                                                                                                                   |
+| ----- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| id    | string | **Yes**  | The identifier from the lookup request that resolved to this variant.                                                                                                                                                                                                                                                         |
+| match | string | No       | How the request identifier resolved to this variant. Well-known values: `exact` (input directly identifies this variant, e.g., variant ID, SKU), `featured` (server selected this variant as representative, e.g., product ID resolved to best match). Businesses MAY implement and provide additional resolution strategies. |
+
+______________________________________________________________________
+
 ### Item
 
-| Name      | Type    | Required | Description                                                                                                                                                                 |
-| --------- | ------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| id        | string  | **Yes**  | The product identifier, often the SKU, required to resolve the product details associated with this line item. Should be recognized by both the Platform, and the Business. |
-| title     | string  | **Yes**  | Product title.                                                                                                                                                              |
-| price     | integer | **Yes**  | Unit price in minor (cents) currency units.                                                                                                                                 |
-| image_url | string  | No       | Product image URI.                                                                                                                                                          |
+| Name      | Type                                             | Required | Description                                                                                                                                                                 |
+| --------- | ------------------------------------------------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| id        | string                                           | **Yes**  | The product identifier, often the SKU, required to resolve the product details associated with this line item. Should be recognized by both the Platform, and the Business. |
+| title     | string                                           | **Yes**  | Product title.                                                                                                                                                              |
+| price     | [Amount](/draft/specification/reference/#amount) | **Yes**  | Unit price in ISO 4217 minor units.                                                                                                                                         |
+| image_url | string                                           | No       | Product image URI.                                                                                                                                                          |
 
 ______________________________________________________________________
 
@@ -304,6 +346,18 @@ ______________________________________________________________________
 | type  | string | **Yes**  | Type of link. Well-known values: `privacy_policy`, `terms_of_service`, `refund_policy`, `shipping_policy`, `faq`. Consumers SHOULD handle unknown values gracefully by displaying them using the `title` field or omitting the link. |
 | url   | string | **Yes**  | The actual URL pointing to the content to be displayed.                                                                                                                                                                              |
 | title | string | No       | Optional display text for the link. When provided, use this instead of generating from type.                                                                                                                                         |
+
+______________________________________________________________________
+
+### Media
+
+| Name     | Type    | Required | Description                                                  |
+| -------- | ------- | -------- | ------------------------------------------------------------ |
+| type     | string  | **Yes**  | Media type. Well-known values: `image`, `video`, `model_3d`. |
+| url      | string  | **Yes**  | URL to the media resource.                                   |
+| alt_text | string  | No       | Accessibility text describing the media.                     |
+| width    | integer | No       | Width in pixels (for images/video).                          |
+| height   | integer | No       | Height in pixels (for images/video).                         |
 
 ______________________________________________________________________
 
@@ -359,6 +413,14 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
+### Option Value
+
+| Name  | Type   | Required | Description                                                 |
+| ----- | ------ | -------- | ----------------------------------------------------------- |
+| label | string | **Yes**  | Display text for this option value (e.g., 'Small', 'Blue'). |
+
+______________________________________________________________________
+
 ### Order Confirmation
 
 | Name          | Type   | Required | Description                                     |
@@ -378,6 +440,12 @@ ______________________________________________________________________
 | totals    | Array\[[Total](/draft/specification/reference/#total)\] | **Yes**  | Line item totals breakdown.                                                                                                                                                |
 | status    | string                                                  | **Yes**  | Derived status: fulfilled if quantity.fulfilled == quantity.total, partial if quantity.fulfilled > 0, otherwise processing. **Enum:** `processing`, `partial`, `fulfilled` |
 | parent_id | string                                                  | No       | Parent line item identifier for any nested structures.                                                                                                                     |
+
+______________________________________________________________________
+
+### Pagination
+
+Cursor-based pagination for list operations.
 
 ______________________________________________________________________
 
@@ -434,6 +502,74 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
+### Price
+
+| Name     | Type                                             | Required | Description                                           |
+| -------- | ------------------------------------------------ | -------- | ----------------------------------------------------- |
+| amount   | [Amount](/draft/specification/reference/#amount) | **Yes**  | Amount in ISO 4217 minor units. Use 0 for free items. |
+| currency | string                                           | **Yes**  | ISO 4217 currency code (e.g., 'USD', 'EUR', 'GBP').   |
+
+______________________________________________________________________
+
+### Price Filter
+
+| Name | Type                                             | Required | Description                            |
+| ---- | ------------------------------------------------ | -------- | -------------------------------------- |
+| min  | [Amount](/draft/specification/reference/#amount) | No       | Minimum price in ISO 4217 minor units. |
+| max  | [Amount](/draft/specification/reference/#amount) | No       | Maximum price in ISO 4217 minor units. |
+
+______________________________________________________________________
+
+### Price Range
+
+| Name | Type                                           | Required | Description                 |
+| ---- | ---------------------------------------------- | -------- | --------------------------- |
+| min  | [Price](/draft/specification/reference/#price) | **Yes**  | Minimum price in the range. |
+| max  | [Price](/draft/specification/reference/#price) | **Yes**  | Maximum price in the range. |
+
+______________________________________________________________________
+
+### Product
+
+| Name             | Type                                                                      | Required | Description                                                                                      |
+| ---------------- | ------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------ |
+| id               | string                                                                    | **Yes**  | Global ID (GID) uniquely identifying this product.                                               |
+| handle           | string                                                                    | No       | URL-safe slug for SEO-friendly URLs (e.g., 'blue-runner-pro'). Use id for stable API references. |
+| title            | string                                                                    | **Yes**  | Product title.                                                                                   |
+| description      | [Description](/draft/specification/reference/#description)                | **Yes**  | Product description in one or more formats.                                                      |
+| url              | string                                                                    | No       | Canonical product page URL.                                                                      |
+| categories       | Array\[[Category](/draft/specification/reference/#category)\]             | No       | Product categories with optional taxonomy identifiers.                                           |
+| price_range      | [Price Range](/draft/specification/reference/#price-range)                | **Yes**  | Price range across all variants.                                                                 |
+| list_price_range | [Price Range](/draft/specification/reference/#price-range)                | No       | List price range before discounts (for strikethrough display).                                   |
+| media            | Array\[[Media](/draft/specification/reference/#media)\]                   | No       | Product media (images, videos, 3D models). First item is the featured media for listings.        |
+| options          | Array\[[Product Option](/draft/specification/reference/#product-option)\] | No       | Product options (Size, Color, etc.).                                                             |
+| variants         | Array\[[Variant](/draft/specification/reference/#variant)\]               | **Yes**  | Purchasable variants of this product. First item is the featured variant for listings.           |
+| rating           | [Rating](/draft/specification/reference/#rating)                          | No       | Aggregate product rating.                                                                        |
+| tags             | Array[string]                                                             | No       | Product tags for categorization and search.                                                      |
+| metadata         | object                                                                    | No       | Business-defined custom data extending the standard product model.                               |
+
+______________________________________________________________________
+
+### Product Option
+
+| Name   | Type                                                                  | Required | Description                          |
+| ------ | --------------------------------------------------------------------- | -------- | ------------------------------------ |
+| name   | string                                                                | **Yes**  | Option name (e.g., 'Size', 'Color'). |
+| values | Array\[[Option Value](/draft/specification/reference/#option-value)\] | **Yes**  | Available values for this option.    |
+
+______________________________________________________________________
+
+### Rating
+
+| Name      | Type    | Required | Description                                                |
+| --------- | ------- | -------- | ---------------------------------------------------------- |
+| value     | number  | **Yes**  | Average rating value.                                      |
+| scale_min | number  | No       | Minimum value on the rating scale (e.g., 1 for 1-5 stars). |
+| scale_max | number  | **Yes**  | Maximum value on the rating scale (e.g., 5 for 5-star).    |
+| count     | integer | No       | Number of reviews contributing to the rating.              |
+
+______________________________________________________________________
+
 ### Retail Location
 
 | Name    | Type                                                             | Required | Description                       |
@@ -441,6 +577,24 @@ ______________________________________________________________________
 | id      | string                                                           | **Yes**  | Unique location identifier.       |
 | name    | string                                                           | **Yes**  | Location name (e.g., store name). |
 | address | [Postal Address](/draft/specification/reference/#postal-address) | No       | Physical address of the location. |
+
+______________________________________________________________________
+
+### Search Filters
+
+| Name       | Type                                                         | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| ---------- | ------------------------------------------------------------ | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| categories | Array[string]                                                | No       | Filter by product categories (OR logic — matches products in any listed categories). Values match against the value field in product category entries. Valid values can be discovered from the categories field in search results, merchant documentation, or standard taxonomies that businesses may align with.                                                                                                                                                |
+| price      | [Price Filter](/draft/specification/reference/#price-filter) | No       | Price range filter denominated in context.currency. When context.currency matches the presentment currency, businesses apply the filter directly. When it differs, businesses SHOULD convert filter values to the presentment currency before applying; if conversion is not supported, businesses MAY ignore the filter and SHOULD indicate this via a message. When context.currency is absent, filter denomination is ambiguous and businesses MAY ignore it. |
+
+______________________________________________________________________
+
+### Selected Option
+
+| Name  | Type   | Required | Description                            |
+| ----- | ------ | -------- | -------------------------------------- |
+| name  | string | **Yes**  | Option name (e.g., 'Size').            |
+| label | string | **Yes**  | Selected option label (e.g., 'Large'). |
 
 ______________________________________________________________________
 
@@ -473,11 +627,36 @@ ______________________________________________________________________
 
 ### Total
 
-| Name         | Type    | Required | Description                                                                                                                   |
-| ------------ | ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| type         | string  | **Yes**  | Type of total categorization. **Enum:** `items_discount`, `subtotal`, `discount`, `fulfillment`, `tax`, `fee`, `total`        |
-| display_text | string  | No       | Text to display against the amount. Should reflect appropriate method (e.g., 'Shipping', 'Delivery').                         |
-| amount       | integer | **Yes**  | If type == total, sums subtotal - discount + fulfillment + tax + fee. Should be >= 0. Amount in minor (cents) currency units. |
+| Name         | Type                                             | Required | Description                                                                                                            |
+| ------------ | ------------------------------------------------ | -------- | ---------------------------------------------------------------------------------------------------------------------- |
+| type         | string                                           | **Yes**  | Type of total categorization. **Enum:** `items_discount`, `subtotal`, `discount`, `fulfillment`, `tax`, `fee`, `total` |
+| display_text | string                                           | No       | Text to display against the amount. Should reflect appropriate method (e.g., 'Shipping', 'Delivery').                  |
+| amount       | [Amount](/draft/specification/reference/#amount) | **Yes**  | If type == total, sums subtotal - discount + fulfillment + tax + fee. Should be >= 0. Amount in ISO 4217 minor units.  |
+
+______________________________________________________________________
+
+### Variant
+
+| Name             | Type                                                                        | Required | Description                                                                               |
+| ---------------- | --------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------- |
+| id               | string                                                                      | **Yes**  | Global ID (GID) uniquely identifying this variant. Used as item.id in checkout.           |
+| sku              | string                                                                      | No       | Business-assigned identifier for inventory and fulfillment.                               |
+| barcodes         | Array[object]                                                               | No       | Industry-standard product identifiers for cross-reference and correlation.                |
+| handle           | string                                                                      | No       | URL-safe variant handle/slug.                                                             |
+| title            | string                                                                      | **Yes**  | Variant display title (e.g., 'Blue / Large').                                             |
+| description      | [Description](/draft/specification/reference/#description)                  | **Yes**  | Variant description in one or more formats.                                               |
+| url              | string                                                                      | No       | Canonical variant page URL.                                                               |
+| categories       | Array\[[Category](/draft/specification/reference/#category)\]               | No       | Variant categories with optional taxonomy identifiers.                                    |
+| price            | [Price](/draft/specification/reference/#price)                              | **Yes**  | Current selling price.                                                                    |
+| list_price       | [Price](/draft/specification/reference/#price)                              | No       | List price before discounts (for strikethrough display).                                  |
+| unit_price       | object                                                                      | No       | Price per standard unit of measurement. MAY be omitted when unit pricing does not apply.  |
+| availability     | object                                                                      | No       | Variant availability for purchase.                                                        |
+| selected_options | Array\[[Selected Option](/draft/specification/reference/#selected-option)\] | No       | Option selections that define this variant.                                               |
+| media            | Array\[[Media](/draft/specification/reference/#media)\]                     | No       | Variant media (images, videos, 3D models). First item is the featured media for listings. |
+| rating           | [Rating](/draft/specification/reference/#rating)                            | No       | Variant rating.                                                                           |
+| tags             | Array[string]                                                               | No       | Variant tags for categorization and search.                                               |
+| metadata         | object                                                                      | No       | Business-defined custom data extending the standard variant model.                        |
+| seller           | object                                                                      | No       | Optional seller context for this variant.                                                 |
 
 ______________________________________________________________________
 
@@ -585,7 +764,7 @@ ______________________________________________________________________
 | Name   | Type    | Required | Description                                                                       |
 | ------ | ------- | -------- | --------------------------------------------------------------------------------- |
 | path   | string  | **Yes**  | JSONPath to the allocation target (e.g., '$.line_items[0]', '$.totals.shipping'). |
-| amount | integer | **Yes**  | Amount allocated to this target in minor (cents) currency units.                  |
+| amount | integer | **Yes**  | Amount allocated to this target in ISO 4217 minor units.                          |
 
 #### Applied Discount
 
@@ -593,7 +772,7 @@ ______________________________________________________________________
 | ----------- | ------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | code        | string        | No       | The discount code. Omitted for automatic discounts.                                                                              |
 | title       | string        | **Yes**  | Human-readable discount name (e.g., 'Summer Sale 20% Off').                                                                      |
-| amount      | integer       | **Yes**  | Total discount amount in minor (cents) currency units.                                                                           |
+| amount      | integer       | **Yes**  | Total discount amount in ISO 4217 minor units.                                                                                   |
 | automatic   | boolean       | No       | True if applied automatically by merchant rules (no code required).                                                              |
 | method      | string        | No       | Allocation method. 'each' = applied independently per item. 'across' = split proportionally by value. **Enum:** `each`, `across` |
 | priority    | integer       | No       | Stacking order for discount calculation. Lower numbers applied first (1 = first).                                                |
@@ -725,16 +904,17 @@ The top-level structure of a platform profile document (hosted at a URI advertis
 
 The top-level structure of a business discovery document (`/.well-known/ucp`).
 
-| Name             | Type   | Required | Description                                                                 |
-| ---------------- | ------ | -------- | --------------------------------------------------------------------------- |
-| version          | string | **Yes**  | UCP version in YYYY-MM-DD format.                                           |
-| status           | string | No       | Application-level status of the UCP operation. **Enum:** `success`, `error` |
-| services         | object | No       | Service registry keyed by reverse-domain name.                              |
-| capabilities     | object | No       | Capability registry keyed by reverse-domain name.                           |
-| payment_handlers | object | No       | Payment handler registry keyed by reverse-domain name.                      |
-| services         | any    | **Yes**  |                                                                             |
-| capabilities     | any    | No       |                                                                             |
-| payment_handlers | any    | **Yes**  |                                                                             |
+| Name               | Type   | Required | Description                                                                                                                                                                                                                                                                                          |
+| ------------------ | ------ | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| version            | string | **Yes**  | UCP version in YYYY-MM-DD format.                                                                                                                                                                                                                                                                    |
+| status             | string | No       | Application-level status of the UCP operation. **Enum:** `success`, `error`                                                                                                                                                                                                                          |
+| services           | object | No       | Service registry keyed by reverse-domain name.                                                                                                                                                                                                                                                       |
+| capabilities       | object | No       | Capability registry keyed by reverse-domain name.                                                                                                                                                                                                                                                    |
+| payment_handlers   | object | No       | Payment handler registry keyed by reverse-domain name.                                                                                                                                                                                                                                               |
+| supported_versions | object | No       | Previous protocol versions this business supports, mapped to profile URIs. Businesses that support older protocol versions SHOULD advertise each version and link to its profile. Each URI points to a complete, self-contained profile for that version. When omitted, only `version` is supported. |
+| services           | any    | **Yes**  |                                                                                                                                                                                                                                                                                                      |
+| capabilities       | any    | No       |                                                                                                                                                                                                                                                                                                      |
+| payment_handlers   | any    | **Yes**  |                                                                                                                                                                                                                                                                                                      |
 
 ### Checkout Response Metadata
 

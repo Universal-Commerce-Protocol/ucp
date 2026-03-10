@@ -56,8 +56,8 @@
       "description": "Which line items and quantities are affected (optional)."
     },
     "amount": {
-      "type": "integer",
-      "description": "Amount in minor units (cents) for refunds, credits, price adjustments (optional)."
+      "$ref": "https://ucp.dev/draft/schemas/shopping/types/amount.json",
+      "description": "Amount in ISO 4217 minor units for refunds, credits, or price adjustments."
     },
     "description": {
       "type": "string",

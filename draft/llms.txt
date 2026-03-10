@@ -25,6 +25,17 @@
 - [Overview](https://ucp.dev/draft/specification/cart/index.md)
 - [HTTP/REST Binding](https://ucp.dev/draft/specification/cart-rest/index.md)
 - [MCP Binding](https://ucp.dev/draft/specification/cart-mcp/index.md)
+
+## Catalog Capability
+
+- [Overview](https://ucp.dev/draft/specification/catalog/index.md)
+- [Search](https://ucp.dev/draft/specification/catalog/search/index.md)
+- [Lookup](https://ucp.dev/draft/specification/catalog/lookup/index.md)
+- [HTTP/REST Binding](https://ucp.dev/draft/specification/catalog/rest/index.md)
+- [MCP Binding](https://ucp.dev/draft/specification/catalog/mcp/index.md)
+
+## Other Capabilities
+
 - [Order Capability](https://ucp.dev/draft/specification/order/index.md)
 - [Identity Linking Capability](https://ucp.dev/draft/specification/identity-linking/index.md)
 - [Guide](https://ucp.dev/draft/specification/payment-handler-guide/index.md)

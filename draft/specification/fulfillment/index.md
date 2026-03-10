@@ -116,11 +116,11 @@ This object MUST be one of the following types: [Shipping Destination](/draft/sp
 
 #### Total Response
 
-| Name         | Type    | Required | Description                                                                                                                   |
-| ------------ | ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| type         | string  | **Yes**  | Type of total categorization. **Enum:** `items_discount`, `subtotal`, `discount`, `fulfillment`, `tax`, `fee`, `total`        |
-| display_text | string  | No       | Text to display against the amount. Should reflect appropriate method (e.g., 'Shipping', 'Delivery').                         |
-| amount       | integer | **Yes**  | If type == total, sums subtotal - discount + fulfillment + tax + fee. Should be >= 0. Amount in minor (cents) currency units. |
+| Name         | Type                                               | Required | Description                                                                                                            |
+| ------------ | -------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------- |
+| type         | string                                             | **Yes**  | Type of total categorization. **Enum:** `items_discount`, `subtotal`, `discount`, `fulfillment`, `tax`, `fee`, `total` |
+| display_text | string                                             | No       | Text to display against the amount. Should reflect appropriate method (e.g., 'Shipping', 'Delivery').                  |
+| amount       | [Amount](/draft/specification/fulfillment/#amount) | **Yes**  | If type == total, sums subtotal - discount + fulfillment + tax + fee. Should be >= 0. Amount in ISO 4217 minor units.  |
 
 #### Postal Address
 

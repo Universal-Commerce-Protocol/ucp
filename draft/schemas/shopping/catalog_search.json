@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/draft/schemas/shopping/catalog_search.json",
+  "name": "dev.ucp.shopping.catalog.search",
+  "version": "2026-03-10",
+  "title": "Catalog Search",
+  "description": "Product catalog search capability.",
+  "type": "object",
+  "$defs": {
+    "search_request": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "description": "Free-text search query."
+        },
+        "context": {
+          "$ref": "https://ucp.dev/draft/schemas/shopping/types/context.json"
+        },
+        "filters": {
+          "$ref": "https://ucp.dev/draft/schemas/shopping/types/search_filters.json"
+        },
+        "pagination": {
+          "$ref": "https://ucp.dev/draft/schemas/shopping/types/pagination.json#/$defs/request"
+        }
+      }
+    },
+    "search_response": {
+      "type": "object",
+      "required": [
+        "ucp",
+        "products"
+      ],
+      "properties": {
+        "ucp": {
+          "$ref": "https://ucp.dev/draft/schemas/ucp.json#/$defs/response_catalog_schema"
+        },
+        "products": {
+          "type": "array",
+          "items": {
+            "$ref": "https://ucp.dev/draft/schemas/shopping/types/product.json"
+          },
+          "description": "Products matching the search criteria."
+        },
+        "pagination": {
+          "$ref": "https://ucp.dev/draft/schemas/shopping/types/pagination.json#/$defs/response"
+        },
+        "messages": {
+          "type": "array",
+          "items": {
+            "$ref": "https://ucp.dev/draft/schemas/shopping/types/message.json"
+          },
+          "description": "Errors, warnings, or informational messages about the search results."
+        }
+      }
+    }
+  }
+}

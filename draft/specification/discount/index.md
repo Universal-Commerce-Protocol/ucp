@@ -54,7 +54,7 @@ When this capability is active, checkout is extended with a `discounts` object.
 | ----------- | ------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | code        | string        | No       | The discount code. Omitted for automatic discounts.                                                                              |
 | title       | string        | **Yes**  | Human-readable discount name (e.g., 'Summer Sale 20% Off').                                                                      |
-| amount      | integer       | **Yes**  | Total discount amount in minor (cents) currency units.                                                                           |
+| amount      | integer       | **Yes**  | Total discount amount in ISO 4217 minor units.                                                                                   |
 | automatic   | boolean       | No       | True if applied automatically by merchant rules (no code required).                                                              |
 | method      | string        | No       | Allocation method. 'each' = applied independently per item. 'across' = split proportionally by value. **Enum:** `each`, `across` |
 | priority    | integer       | No       | Stacking order for discount calculation. Lower numbers applied first (1 = first).                                                |
@@ -65,7 +65,7 @@ When this capability is active, checkout is extended with a `discounts` object.
 | Name   | Type    | Required | Description                                                                       |
 | ------ | ------- | -------- | --------------------------------------------------------------------------------- |
 | path   | string  | **Yes**  | JSONPath to the allocation target (e.g., '$.line_items[0]', '$.totals.shipping'). |
-| amount | integer | **Yes**  | Amount allocated to this target in minor (cents) currency units.                  |
+| amount | integer | **Yes**  | Amount allocated to this target in ISO 4217 minor units.                          |
 
 ## Allocation Details
 

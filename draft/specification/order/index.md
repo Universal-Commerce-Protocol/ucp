@@ -77,7 +77,7 @@ Expectations can be split, merged, or adjusted post-order. For example:
 
 | Name          | Type                                                                               | Required | Description                                                                                                                                  |
 | ------------- | ---------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| ucp           | [UCP Response Order Schema](/draft/specification/order/#ucp-response-order-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                      |
+| ucp           | [Ucp Response Order Schema](/draft/specification/order/#ucp-response-order-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                      |
 | id            | string                                                                             | **Yes**  | Unique order identifier.                                                                                                                     |
 | checkout_id   | string                                                                             | **Yes**  | Associated checkout ID for reconciliation.                                                                                                   |
 | permalink_url | string                                                                             | **Yes**  | Permalink to access the order on merchant site.                                                                                              |
@@ -151,15 +151,15 @@ Examples: `processing`, `shipped`, `in_transit`, `delivered`, `failed_attempt`, 
 
 Adjustments are polymorphic events that exist independently of fulfillment. The `type` field is an open string - businesses can use any values that make sense to them.
 
-| Name        | Type          | Required | Description                                                                                                                                                                                     |
-| ----------- | ------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| id          | string        | **Yes**  | Adjustment event identifier.                                                                                                                                                                    |
-| type        | string        | **Yes**  | Type of adjustment (open string). Typically money-related like: refund, return, credit, price_adjustment, dispute, cancellation. Can be any value that makes sense for the merchant's business. |
-| occurred_at | string        | **Yes**  | RFC 3339 timestamp when this adjustment occurred.                                                                                                                                               |
-| status      | string        | **Yes**  | Adjustment status. **Enum:** `pending`, `completed`, `failed`                                                                                                                                   |
-| line_items  | Array[object] | No       | Which line items and quantities are affected (optional).                                                                                                                                        |
-| amount      | integer       | No       | Amount in minor units (cents) for refunds, credits, price adjustments (optional).                                                                                                               |
-| description | string        | No       | Human-readable reason or description (e.g., 'Defective item', 'Customer requested').                                                                                                            |
+| Name        | Type                                         | Required | Description                                                                                                                                                                                     |
+| ----------- | -------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| id          | string                                       | **Yes**  | Adjustment event identifier.                                                                                                                                                                    |
+| type        | string                                       | **Yes**  | Type of adjustment (open string). Typically money-related like: refund, return, credit, price_adjustment, dispute, cancellation. Can be any value that makes sense for the merchant's business. |
+| occurred_at | string                                       | **Yes**  | RFC 3339 timestamp when this adjustment occurred.                                                                                                                                               |
+| status      | string                                       | **Yes**  | Adjustment status. **Enum:** `pending`, `completed`, `failed`                                                                                                                                   |
+| line_items  | Array[object]                                | No       | Which line items and quantities are affected (optional).                                                                                                                                        |
+| amount      | [Amount](/draft/specification/order/#amount) | No       | Amount in ISO 4217 minor units for refunds, credits, or price adjustments.                                                                                                                      |
+| description | string                                       | No       | Human-readable reason or description (e.g., 'Defective item', 'Customer requested').                                                                                                            |
 
 Examples: `refund`, `return`, `credit`, `price_adjustment`, `dispute`, `cancellation`, etc.
 
@@ -277,7 +277,7 @@ Businesses POST order events to a webhook URL provided by the platform during pa
 
 | Name          | Type                                                                               | Required | Description                                                                                                                                  |
 | ------------- | ---------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| ucp           | [UCP Response Order Schema](/draft/specification/order/#ucp-response-order-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                      |
+| ucp           | [Ucp Response Order Schema](/draft/specification/order/#ucp-response-order-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                      |
 | id            | string                                                                             | **Yes**  | Unique order identifier.                                                                                                                     |
 | checkout_id   | string                                                                             | **Yes**  | Associated checkout ID for reconciliation.                                                                                                   |
 | permalink_url | string                                                                             | **Yes**  | Permalink to access the order on merchant site.                                                                                              |
@@ -399,12 +399,12 @@ See [Message Signatures - Key Rotation](https://ucp.dev/draft/specification/sign
 
 ### Item Response
 
-| Name      | Type    | Required | Description                                                                                                                                                                 |
-| --------- | ------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| id        | string  | **Yes**  | The product identifier, often the SKU, required to resolve the product details associated with this line item. Should be recognized by both the Platform, and the Business. |
-| title     | string  | **Yes**  | Product title.                                                                                                                                                              |
-| price     | integer | **Yes**  | Unit price in minor (cents) currency units.                                                                                                                                 |
-| image_url | string  | No       | Product image URI.                                                                                                                                                          |
+| Name      | Type                                         | Required | Description                                                                                                                                                                 |
+| --------- | -------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| id        | string                                       | **Yes**  | The product identifier, often the SKU, required to resolve the product details associated with this line item. Should be recognized by both the Platform, and the Business. |
+| title     | string                                       | **Yes**  | Product title.                                                                                                                                                              |
+| price     | [Amount](/draft/specification/order/#amount) | **Yes**  | Unit price in ISO 4217 minor units.                                                                                                                                         |
+| image_url | string                                       | No       | Product image URI.                                                                                                                                                          |
 
 ### Postal Address
 
@@ -433,11 +433,11 @@ See [Message Signatures - Key Rotation](https://ucp.dev/draft/specification/sign
 
 ### Total Response
 
-| Name         | Type    | Required | Description                                                                                                                   |
-| ------------ | ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| type         | string  | **Yes**  | Type of total categorization. **Enum:** `items_discount`, `subtotal`, `discount`, `fulfillment`, `tax`, `fee`, `total`        |
-| display_text | string  | No       | Text to display against the amount. Should reflect appropriate method (e.g., 'Shipping', 'Delivery').                         |
-| amount       | integer | **Yes**  | If type == total, sums subtotal - discount + fulfillment + tax + fee. Should be >= 0. Amount in minor (cents) currency units. |
+| Name         | Type                                         | Required | Description                                                                                                            |
+| ------------ | -------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------- |
+| type         | string                                       | **Yes**  | Type of total categorization. **Enum:** `items_discount`, `subtotal`, `discount`, `fulfillment`, `tax`, `fee`, `total` |
+| display_text | string                                       | No       | Text to display against the amount. Should reflect appropriate method (e.g., 'Shipping', 'Delivery').                  |
+| amount       | [Amount](/draft/specification/order/#amount) | **Yes**  | If type == total, sums subtotal - discount + fulfillment + tax + fee. Should be >= 0. Amount in ISO 4217 minor units.  |
 
 ### UCP Response Order
 

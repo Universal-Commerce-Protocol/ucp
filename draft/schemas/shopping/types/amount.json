@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/draft/schemas/shopping/types/amount.json",
+  "title": "Amount",
+  "description": "Monetary amount in the currency's minor unit as defined by ISO 4217. Refer to the currency's exponent to determine minor-to-major ratio (e.g., 2 for USD, 0 for JPY, 3 for KWD).",
+  "type": "integer",
+  "minimum": 0
+}

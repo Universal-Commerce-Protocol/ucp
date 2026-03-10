@@ -19,9 +19,8 @@
       "ucp_request": "omit"
     },
     "price": {
-      "type": "integer",
-      "description": "Unit price in minor (cents) currency units.",
-      "minimum": 0,
+      "$ref": "https://ucp.dev/draft/schemas/shopping/types/amount.json",
+      "description": "Unit price in ISO 4217 minor units.",
       "ucp_request": "omit"
     },
     "image_url": {
