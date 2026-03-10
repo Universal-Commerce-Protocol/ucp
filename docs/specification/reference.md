@@ -27,9 +27,17 @@ within the UCP.
 
 {{ auto_generate_schema_reference('types', 'reference', include_extensions=False) }}
 
-### Selected Payment Instrument {: #selected-payment-instrument }
+### Selected Payment Instrument {: #payment-instrument-selected-payment-instrument }
 
 {{ extension_schema_fields('types/payment_instrument.json#/$defs/selected_payment_instrument', 'reference') }}
+
+### Pagination Request {: #pagination-request }
+
+{{ extension_schema_fields('types/pagination.json#/$defs/request', 'reference') }}
+
+### Pagination Response {: #pagination-response }
+
+{{ extension_schema_fields('types/pagination.json#/$defs/response', 'reference') }}
 
 ### Error Code {: #error-code }
 

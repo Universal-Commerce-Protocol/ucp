@@ -245,7 +245,7 @@ checkout object containing an `order` attribute with `id` and `permalink_url`.
         "kind": "data",
         "data": {
           "a2a.ucp.checkout.payment": {
-            ...paymentDataObject
+            ...paymentObject
           },
           "a2a.ucp.checkout.risk_signals":{...content}
         }
@@ -327,11 +327,11 @@ public keys.
 
 When the user confirms the payment on a platform, the user signed checkout and
 payment mandate objects must be sent as `DataPart`s to the business agent for
-completing checkout. The `payment_data` which includes the payment mandate must
+completing checkout. The `payment` which includes the payment mandate must
 be submitted as part of a `DataPart` with attribute name
-`a2a.ucp.checkout.payment_data`. Signed checkout mandate must be specified in
+`a2a.ucp.checkout.payment`. Signed checkout mandate must be specified in
 the `DataPart` as `ap2.checkout_mandate`. The `token` attribute of
-`payment_data` contains the payment mandate. Refer to
+`payment` contains the payment mandate. Refer to
 [AP2 Mandates Extension](ap2-mandates.md) documentation for more details about
 verification and processing of the mandates to complete the checkout.
 

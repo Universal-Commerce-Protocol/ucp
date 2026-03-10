@@ -924,16 +924,6 @@ def define_env(env):
         if not is_extension and not include_capability:
           continue
 
-        # If a schema has no structural elements worth documenting here,
-        # skip it.
-        if (
-          not schema_data.get("properties")
-          and not schema_data.get("allOf")
-          and not schema_data.get("oneOf")
-          and not schema_data.get("$ref")
-          and not schema_data.get("$defs")
-        ):
-          continue
         schema_title = schema_data.get(
           "title", entity_name_base.replace("_", " ").title()
         )
