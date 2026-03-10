@@ -46,13 +46,7 @@ extend cart, checkout, or both:
       "dev.ucp.shopping.discount": [
         {
           "version": "2026-01-11",
-          "extends": "dev.ucp.shopping.cart",
-          "spec": "https://ucp.dev/specification/discount",
-          "schema": "https://ucp.dev/schemas/shopping/discount.json"
-        },
-        {
-          "version": "2026-01-11",
-          "extends": "dev.ucp.shopping.checkout",
+          "extends": ["dev.ucp.shopping.cart", "dev.ucp.shopping.checkout"],
           "spec": "https://ucp.dev/specification/discount",
           "schema": "https://ucp.dev/schemas/shopping/discount.json"
         }
