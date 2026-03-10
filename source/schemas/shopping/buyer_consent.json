@@ -2,7 +2,6 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/shopping/buyer_consent.json",
   "name": "dev.ucp.shopping.buyer_consent",
-  "version": "2026-01-11",
   "title": "Buyer Consent Extension",
   "description": "Extends Checkout with buyer consent tracking for privacy compliance via the buyer object.",
   "$defs": {

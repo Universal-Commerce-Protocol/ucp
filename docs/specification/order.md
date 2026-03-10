@@ -341,7 +341,7 @@ rotation:
 
 ## Entities
 
-### Item Response
+### Item
 
 {{ schema_fields('types/item_resp', 'order') }}
 
@@ -353,10 +353,10 @@ rotation:
 
 {{ extension_schema_fields('capability.json#/$defs/response_schema', 'order') }}
 
-### Total Response
+### Total
 
 {{ schema_fields('types/total_resp', 'order') }}
 
-### UCP Response Order
+### UCP Response Order Schema <span id="ucp"></span> {: #ucp-response-order-schema }
 
 {{ extension_schema_fields('ucp.json#/$defs/response_order_schema', 'order') }}

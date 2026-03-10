@@ -121,7 +121,11 @@ Businesses advertise the platform's handler. The `business_id` field identifies
 the business, which the platform uses to look up the correct public key for
 encryption.
 
-The only supported instrument schema is [CardPaymentInstrument](https://ucp.dev/schemas/shopping/types/card_payment_instrument.json), the only supported checkout credential schema is `EncryptedCredential`, and the only supported source credential schema is [CardCredential](https://ucp.dev/schemas/shopping/types/card_credential.json).
+The only supported instrument schema is
+[CardPaymentInstrument](site:schemas/shopping/types/card_payment_instrument.json),
+the only supported checkout credential schema is `EncryptedCredential`, and the
+only supported source credential schema is
+[CardCredential](site:schemas/shopping/types/card_credential.json).
 
 **Note:** The `EncryptedCredential` shape would be formally defined in the handler's schema (referenced via the `schema` field in the handler declaration).
 
@@ -327,5 +331,7 @@ Content-Type: application/json
 
 ## References
 
-* **Identity Schema:** `https://ucp.dev/schemas/shopping/types/payment_identity.json`
-* **Instrument Schema:** `https://ucp.dev/schemas/shopping/types/card_payment_instrument.json`
+* **Identity Schema:**
+  `https://ucp.dev/{{ ucp_version }}/schemas/shopping/types/payment_identity.json`
+* **Instrument Schema:**
+  `https://ucp.dev/{{ ucp_version }}/schemas/shopping/types/card_payment_instrument.json`
