@@ -41,13 +41,14 @@
     },
     "checkouts": {
       "type": "array",
+      "minItems": 1,
       "items": {
         "type": "object",
         "required": ["id", "created_at"],
         "properties": {
           "id": {
             "type": "string",
-            "description": "Checkout session identifier."
+            "description": "Unique identifier of the checkout session."
           },
           "created_at": {
             "type": "string",

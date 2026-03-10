@@ -7,4 +7,1806 @@
  * and run json-schema-to-typescript to regenerate this file.
  */
 
-export declare interface SCHEMA_WRAPPER {}
+/**
+ * JWS Detached Content signature (RFC 7515 Appendix F) over the checkout response body (excluding ap2 field). Format: `<base64url-header>..<base64url-signature>`. The header MUST contain 'alg' (ES256/ES384/ES512) and 'kid' claims. The signature covers both the header and JCS-canonicalized checkout payload.
+ *
+ * This interface was referenced by `AP2MandateExtension`'s JSON-Schema
+ * via the `definition` "merchant_authorization".
+ */
+export type MerchantAuthorization = string;
+/**
+ * SD-JWT+kb credential in `ap2.checkout_mandate`. Proving user authorization for the checkout. Contains the full checkout including `ap2.merchant_authorization`.
+ *
+ * This interface was referenced by `AP2MandateExtension`'s JSON-Schema
+ * via the `definition` "checkout_mandate".
+ */
+export type CheckoutMandate = string;
+/**
+ * JWS Detached Content signature (RFC 7515 Appendix F) over the checkout response body (excluding ap2 field). Format: `<base64url-header>..<base64url-signature>`. The header MUST contain 'alg' (ES256/ES384/ES512) and 'kid' claims. The signature covers both the header and JCS-canonicalized checkout payload.
+ */
+export type MerchantAuthorization1 = string;
+/**
+ * SD-JWT+kb credential in `ap2.checkout_mandate`. Proving user authorization for the checkout. Contains the full checkout including `ap2.merchant_authorization`.
+ */
+export type CheckoutMandate1 = string;
+/**
+ * Checkout extended with AP2 mandate support.
+ *
+ * This interface was referenced by `AP2MandateExtension`'s JSON-Schema
+ * via the `definition` "dev.ucp.shopping.checkout".
+ */
+export type CheckoutWithAP2Mandate = Checkout & {
+  ap2?: Ap2WithMerchantAuthorization & Ap2WithCheckoutMandate;
+  [k: string]: unknown;
+};
+/**
+ * UCP metadata for checkout responses.
+ */
+export type UCPCheckoutResponseSchema = Base & {
+  services?: {
+    [k: string]: ServiceResponseSchema[];
+  };
+  capabilities?: {
+    [k: string]: CapabilityResponseSchema[];
+  };
+  payment_handlers: {
+    [k: string]: PaymentHandlerResponseSchema[];
+  };
+  [k: string]: unknown;
+};
+/**
+ * Service binding in API responses. Includes per-resource transport configuration via typed config.
+ */
+export type ServiceResponseSchema = (Entity & {
+  /**
+   * Transport protocol for this service binding.
+   */
+  transport: 'rest' | 'mcp' | 'a2a' | 'embedded';
+  /**
+   * Endpoint URL for this transport binding.
+   */
+  endpoint?: string;
+  [k: string]: unknown;
+}) &
+  (
+    | {
+        transport?: 'rest';
+        [k: string]: unknown;
+      }
+    | {
+        transport?: 'mcp';
+        [k: string]: unknown;
+      }
+    | {
+        transport?: 'a2a';
+        [k: string]: unknown;
+      }
+    | {
+        transport?: 'embedded';
+        config?: EmbeddedTransportConfig;
+        [k: string]: unknown;
+      }
+  );
+/**
+ * Capability reference in responses. Only name/version required to confirm active capabilities.
+ */
+export type CapabilityResponseSchema = Entity & {
+  /**
+   * Parent capability(s) this extends. Present for extensions, absent for root capabilities. Use array for multi-parent extensions.
+   */
+  extends?: string | [string, ...string[]];
+  [k: string]: unknown;
+};
+/**
+ * Handler reference in responses. May include full config state for runtime usage of the handler.
+ */
+export type PaymentHandlerResponseSchema = Entity & {
+  [k: string]: unknown;
+} & {
+  /**
+   * Instrument types this handler supports, with optional constraints. When absent, every instrument should be considered available.
+   *
+   * @minItems 1
+   */
+  available_instruments?: [AvailablePaymentInstrument, ...AvailablePaymentInstrument[]];
+  [k: string]: unknown;
+};
+/**
+ * Monetary amount in the currency's minor unit as defined by ISO 4217. Refer to the currency's exponent to determine minor-to-major ratio (e.g., 2 for USD, 0 for JPY, 3 for KWD).
+ */
+export type Amount = number;
+/**
+ * Monetary amount in the currency's minor unit as defined by ISO 4217. Refer to the currency's exponent to determine minor-to-major ratio (e.g., 2 for USD, 0 for JPY, 3 for KWD).
+ */
+export type Amount1 = number;
+/**
+ * Container for error, warning, or info messages.
+ */
+export type Message = MessageError | MessageWarning | MessageInfo;
+/**
+ * Error code identifying the type of error. Standard errors are defined in specification (see examples), and have standardized semantics; freeform codes are permitted.
+ */
+export type ErrorCode = string;
+/**
+ * A payment instrument with selection state.
+ */
+export type SelectedPaymentInstrument = PaymentInstrument & {
+  /**
+   * Whether this instrument is selected by the user.
+   */
+  selected?: boolean;
+  [k: string]: unknown;
+};
+/**
+ * Error codes specific to AP2 mandate verification.
+ *
+ * This interface was referenced by `AP2MandateExtension`'s JSON-Schema
+ * via the `definition` "error_code".
+ */
+export type AP2ErrorCode =
+  | 'mandate_required'
+  | 'agent_missing_key'
+  | 'mandate_invalid_signature'
+  | 'mandate_expired'
+  | 'mandate_scope_mismatch'
+  | 'merchant_authorization_invalid'
+  | 'merchant_authorization_missing';
+/**
+ * Buyer object extended with consent tracking.
+ *
+ * This interface was referenced by `BuyerConsentExtension`'s JSON-Schema
+ * via the `definition` "buyer".
+ */
+export type BuyerWithConsent = Buyer1 & {
+  consent?: Consent;
+  [k: string]: unknown;
+};
+/**
+ * Checkout extended with consent tracking via buyer object.
+ *
+ * This interface was referenced by `BuyerConsentExtension`'s JSON-Schema
+ * via the `definition` "dev.ucp.shopping.checkout".
+ */
+export type CheckoutWithBuyerConsent = Checkout & {
+  buyer?: BuyerWithConsent1;
+  [k: string]: unknown;
+};
+/**
+ * Buyer object extended with consent tracking.
+ */
+export type BuyerWithConsent1 = Buyer1 & {
+  consent?: Consent;
+  [k: string]: unknown;
+};
+/**
+ * UCP metadata for cart responses. No payment handlers needed pre-checkout.
+ */
+export type UCPCartResponseSchema = Base & {
+  capabilities?: {
+    [k: string]: CapabilityResponseSchema[];
+  };
+  [k: string]: unknown;
+};
+/**
+ * Checkout extended with cart capability. Adds cart_id to create_checkout for cart-to-checkout conversion.
+ *
+ * This interface was referenced by `Cart`'s JSON-Schema
+ * via the `definition` "checkout".
+ */
+export type CheckoutWithCart = Checkout & {
+  /**
+   * Cart ID to convert to checkout. Business MUST use cart contents (line_items, context, buyer) and MUST ignore overlapping fields in checkout payload.
+   */
+  cart_id?: string;
+  [k: string]: unknown;
+};
+/**
+ * Monetary amount in the currency's minor unit as defined by ISO 4217. Refer to the currency's exponent to determine minor-to-major ratio (e.g., 2 for USD, 0 for JPY, 3 for KWD).
+ */
+export type Amount2 = number;
+/**
+ * UCP metadata for catalog responses.
+ */
+export type UCPCatalogResponseSchema = Base & {
+  capabilities?: {
+    [k: string]: CapabilityResponseSchema[];
+  };
+  [k: string]: unknown;
+};
+/**
+ * Checkout extended with discount capability.
+ *
+ * This interface was referenced by `DiscountExtension`'s JSON-Schema
+ * via the `definition` "dev.ucp.shopping.checkout".
+ */
+export type CheckoutWithDiscount = Checkout & {
+  discounts?: DiscountsObject;
+  [k: string]: unknown;
+};
+/**
+ * A destination for fulfillment.
+ */
+export type FulfillmentDestination = ShippingDestination | RetailLocation;
+/**
+ * Shipping destination.
+ */
+export type ShippingDestination = PostalAddress & {
+  /**
+   * ID specific to this shipping destination.
+   */
+  id: string;
+  [k: string]: unknown;
+};
+/**
+ * Checkout extended with hierarchical fulfillment.
+ *
+ * This interface was referenced by `FulfillmentExtension`'s JSON-Schema
+ * via the `definition` "dev.ucp.shopping.checkout".
+ */
+export type CheckoutWithFulfillment = Checkout & {
+  fulfillment?: Fulfillment1;
+  [k: string]: unknown;
+};
+/**
+ * UCP metadata for order responses. No payment handlers needed post-purchase.
+ */
+export type UCPOrderResponseSchema = Base & {
+  capabilities?: {
+    [k: string]: CapabilityResponseSchema[];
+  };
+  [k: string]: unknown;
+};
+
+/**
+ * Extends Checkout with cryptographic mandate support for non-repudiable authorization per the AP2 protocol. Uses embedded signature model with ap2 namespace.
+ */
+export declare interface AP2MandateExtension {
+  [k: string]: unknown;
+}
+/**
+ * AP2 extension data including merchant authorization.
+ *
+ * This interface was referenced by `AP2MandateExtension`'s JSON-Schema
+ * via the `definition` "ap2_with_merchant_authorization".
+ */
+export declare interface Ap2WithMerchantAuthorization {
+  merchant_authorization?: MerchantAuthorization1;
+  [k: string]: unknown;
+}
+/**
+ * AP2 extension data including checkout mandate.
+ *
+ * This interface was referenced by `AP2MandateExtension`'s JSON-Schema
+ * via the `definition` "ap2_with_checkout_mandate".
+ */
+export declare interface Ap2WithCheckoutMandate {
+  checkout_mandate?: CheckoutMandate1;
+  [k: string]: unknown;
+}
+/**
+ * Base checkout schema. Extensions compose onto this using allOf.
+ */
+export declare interface Checkout {
+  ucp: UCPCheckoutResponseSchema;
+  /**
+   * Unique identifier of the checkout session.
+   */
+  id: string;
+  /**
+   * List of line items being checked out.
+   */
+  line_items: LineItem[];
+  buyer?: Buyer;
+  context?: Context;
+  /**
+   * Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details.
+   */
+  status:
+    | 'incomplete'
+    | 'requires_escalation'
+    | 'ready_for_complete'
+    | 'complete_in_progress'
+    | 'completed'
+    | 'canceled';
+  /**
+   * ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.
+   */
+  currency: string;
+  /**
+   * Different cart totals.
+   */
+  totals: Total[];
+  /**
+   * List of messages with error and info about the checkout session state.
+   */
+  messages?: Message[];
+  /**
+   * Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.
+   */
+  links: Link[];
+  /**
+   * RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.
+   */
+  expires_at?: string;
+  /**
+   * URL for checkout handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements.
+   */
+  continue_url?: string;
+  payment?: Payment;
+  order?: OrderConfirmation;
+  [k: string]: unknown;
+}
+/**
+ * Base UCP metadata with shared properties for all schema types.
+ */
+export declare interface Base {
+  /**
+   * UCP version in YYYY-MM-DD format.
+   */
+  version: string;
+  /**
+   * Application-level status of the UCP operation.
+   */
+  status?: 'success' | 'error';
+  /**
+   * Service registry keyed by reverse-domain name.
+   */
+  services?: {
+    [k: string]: Array<Entity & {
+      /**
+       * Transport protocol for this service binding.
+       */
+      transport: 'rest' | 'mcp' | 'a2a' | 'embedded';
+      /**
+       * Endpoint URL for this transport binding.
+       */
+      endpoint?: string;
+      [k: string]: unknown;
+    }>;
+  };
+  /**
+   * Capability registry keyed by reverse-domain name.
+   */
+  capabilities?: {
+    [k: string]: (Entity & {
+      /**
+       * Parent capability(s) this extends. Present for extensions, absent for root capabilities. Use array for multi-parent extensions.
+       */
+      extends?: string | [string, ...string[]];
+      [k: string]: unknown;
+    })[];
+  };
+  /**
+   * Payment handler registry keyed by reverse-domain name.
+   */
+  payment_handlers?: {
+    [k: string]: Array<Entity & {
+      [k: string]: unknown;
+    } & {
+      /**
+       * Instrument types this handler supports, with optional constraints. When absent, every instrument should be considered available.
+       *
+       * @minItems 1
+       */
+      available_instruments?: [AvailablePaymentInstrument, ...AvailablePaymentInstrument[]];
+      [k: string]: unknown;
+    }>;
+  };
+  [k: string]: unknown;
+}
+/**
+ * Shared foundation for all UCP entities.
+ */
+export declare interface Entity {
+  /**
+   * UCP version in YYYY-MM-DD format.
+   */
+  version: string;
+  /**
+   * URL to human-readable specification document.
+   */
+  spec?: string;
+  /**
+   * URL to JSON Schema defining this entity's structure and payloads.
+   */
+  schema?: string;
+  /**
+   * Unique identifier for this entity instance. Used to disambiguate when multiple instances exist.
+   */
+  id?: string;
+  /**
+   * Entity-specific configuration. Structure defined by each entity's schema.
+   */
+  config?: {
+    [k: string]: unknown;
+  };
+  [k: string]: unknown;
+}
+/**
+ * An instrument type available from a payment handler with optional constraints.
+ */
+export declare interface AvailablePaymentInstrument {
+  /**
+   * The instrument type identifier (e.g., 'card', 'gift_card'). References an instrument schema's type constant.
+   */
+  type: string;
+  /**
+   * Constraints on this instrument type. Structure depends on instrument type and active capabilities.
+   */
+  constraints?: {
+    [k: string]: unknown;
+  };
+  [k: string]: unknown;
+}
+/**
+ * Per-checkout configuration for embedded transport binding. Allows businesses to vary ECP availability and delegations based on cart contents, agent authorization, or policy.
+ */
+export declare interface EmbeddedTransportConfig {
+  /**
+   * Delegations the business allows. At service-level, declares available delegations. In checkout responses, confirms accepted delegations for this session.
+   */
+  delegate?: string[];
+  /**
+   * Color schemes the business supports. Hosts use ec_color_scheme query parameter to request a scheme from this list.
+   */
+  color_scheme?: Array<'light' | 'dark'>;
+  [k: string]: unknown;
+}
+/**
+ * Line item object. Expected to use the currency of the parent object.
+ */
+export declare interface LineItem {
+  id: string;
+  item: Item;
+  /**
+   * Quantity of the item being purchased.
+   */
+  quantity: number;
+  /**
+   * Line item totals breakdown.
+   */
+  totals: Total[];
+  /**
+   * Parent line item identifier for any nested structures.
+   */
+  parent_id?: string;
+  [k: string]: unknown;
+}
+export declare interface Item {
+  /**
+   * The product identifier, often the SKU, required to resolve the product details associated with this line item. Should be recognized by both the Platform, and the Business.
+   */
+  id: string;
+  /**
+   * Product title.
+   */
+  title: string;
+  price: Amount;
+  /**
+   * Product image URI.
+   */
+  image_url?: string;
+  [k: string]: unknown;
+}
+export declare interface Total {
+  /**
+   * Type of total categorization.
+   */
+  type: 'items_discount' | 'subtotal' | 'discount' | 'fulfillment' | 'tax' | 'fee' | 'total';
+  /**
+   * Text to display against the amount. Should reflect appropriate method (e.g., 'Shipping', 'Delivery').
+   */
+  display_text?: string;
+  amount: Amount1;
+  [k: string]: unknown;
+}
+export declare interface Buyer {
+  /**
+   * First name of the buyer.
+   */
+  first_name?: string;
+  /**
+   * Last name of the buyer.
+   */
+  last_name?: string;
+  /**
+   * Email of the buyer.
+   */
+  email?: string;
+  /**
+   * E.164 standard.
+   */
+  phone_number?: string;
+  [k: string]: unknown;
+}
+/**
+ * Provisional buyer signals for relevance and localization—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data. Context SHOULD be non-identifying and can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context.
+ */
+export declare interface Context {
+  /**
+   * The country. Recommended to be in 2-letter ISO 3166-1 alpha-2 format, for example "US". For backward compatibility, a 3-letter ISO 3166-1 alpha-3 country code such as "SGP" or a full country name such as "Singapore" can also be used. Optional hint for market context (currency, availability, pricing)—higher-resolution data (e.g., shipping address) supersedes this value.
+   */
+  address_country?: string;
+  /**
+   * The region in which the locality is, and which is in the country. For example, California or another appropriate first-level Administrative division. Optional hint for progressive localization—higher-resolution data (e.g., shipping address) supersedes this value.
+   */
+  address_region?: string;
+  /**
+   * The postal code. For example, 94043. Optional hint for regional refinement—higher-resolution data (e.g., shipping address) supersedes this value.
+   */
+  postal_code?: string;
+  /**
+   * Background context describing buyer's intent (e.g., 'looking for a gift under $50', 'need something durable for outdoor use'). Informs relevance, recommendations, and personalization.
+   */
+  intent?: string;
+  /**
+   * Preferred language for content. Use IETF BCP 47 language tags (e.g., 'en', 'fr-CA', 'zh-Hans'). For REST, equivalent to Accept-Language header—platforms SHOULD fall back to Accept-Language when this field is absent; when provided, overrides Accept-Language. Businesses MAY return content in a different language if unavailable.
+   */
+  language?: string;
+  /**
+   * Preferred currency (ISO 4217, e.g., 'EUR', 'USD'). Businesses determine presentment currency from context and authoritative signals; this hint MAY inform selection in multi-currency markets. Also serves as the denomination for price filter values — platforms SHOULD include this field when sending price filters. Response prices include explicit currency confirming the resolution.
+   */
+  currency?: string;
+  [k: string]: unknown;
+}
+export declare interface MessageError {
+  /**
+   * Message type discriminator.
+   */
+  type: 'error';
+  code: ErrorCode;
+  /**
+   * RFC 9535 JSONPath to the component the message refers to (e.g., $.items[1]).
+   */
+  path?: string;
+  /**
+   * Content format, default = plain.
+   */
+  content_type?: 'plain' | 'markdown';
+  /**
+   * Human-readable message.
+   */
+  content: string;
+  /**
+   * Reflects the resource state and recommended action. 'recoverable': platform can resolve by modifying inputs and retrying via API. 'requires_buyer_input': merchant requires information their API doesn't support collecting programmatically (checkout incomplete). 'requires_buyer_review': buyer must authorize before order placement due to policy, regulatory, or entitlement rules. 'unrecoverable': no valid resource exists to act on, retry with new resource or inputs. Errors with 'requires_*' severity contribute to 'status: requires_escalation'.
+   */
+  severity: 'recoverable' | 'requires_buyer_input' | 'requires_buyer_review' | 'unrecoverable';
+  [k: string]: unknown;
+}
+export declare interface MessageWarning {
+  /**
+   * Message type discriminator.
+   */
+  type: 'warning';
+  /**
+   * JSONPath (RFC 9535) to related field (e.g., $.line_items[0]).
+   */
+  path?: string;
+  /**
+   * Warning code. Machine-readable identifier for the warning type (e.g., final_sale, prop65, fulfillment_changed, age_restricted, etc.).
+   */
+  code: string;
+  /**
+   * Human-readable warning message that MUST be displayed.
+   */
+  content: string;
+  /**
+   * Content format, default = plain.
+   */
+  content_type?: 'plain' | 'markdown';
+  [k: string]: unknown;
+}
+export declare interface MessageInfo {
+  /**
+   * Message type discriminator.
+   */
+  type: 'info';
+  /**
+   * RFC 9535 JSONPath to the component the message refers to.
+   */
+  path?: string;
+  /**
+   * Info code for programmatic handling.
+   */
+  code?: string;
+  /**
+   * Content format, default = plain.
+   */
+  content_type?: 'plain' | 'markdown';
+  /**
+   * Human-readable message.
+   */
+  content: string;
+  [k: string]: unknown;
+}
+export declare interface Link {
+  /**
+   * Type of link. Well-known values: `privacy_policy`, `terms_of_service`, `refund_policy`, `shipping_policy`, `faq`. Consumers SHOULD handle unknown values gracefully by displaying them using the `title` field or omitting the link.
+   */
+  type: string;
+  /**
+   * The actual URL pointing to the content to be displayed.
+   */
+  url: string;
+  /**
+   * Optional display text for the link. When provided, use this instead of generating from type.
+   */
+  title?: string;
+  [k: string]: unknown;
+}
+/**
+ * Payment configuration containing handlers.
+ */
+export declare interface Payment {
+  /**
+   * The payment instruments available for this payment. Each instrument is associated with a specific handler via the handler_id field. Handlers can extend the base payment_instrument schema to add handler-specific fields.
+   */
+  instruments?: SelectedPaymentInstrument[];
+  [k: string]: unknown;
+}
+/**
+ * The base definition for any payment instrument. It links the instrument to a specific payment handler.
+ */
+export declare interface PaymentInstrument {
+  /**
+   * A unique identifier for this instrument instance, assigned by the platform.
+   */
+  id: string;
+  /**
+   * The unique identifier for the handler instance that produced this instrument. This corresponds to the 'id' field in the Payment Handler definition.
+   */
+  handler_id: string;
+  /**
+   * The broad category of the instrument (e.g., 'card', 'tokenized_card'). Specific schemas will constrain this to a constant value.
+   */
+  type: string;
+  billing_address?: PostalAddress;
+  credential?: PaymentCredential;
+  /**
+   * Display information for this payment instrument. Each payment instrument schema defines its specific display properties, as outlined by the payment handler.
+   */
+  display?: {
+    [k: string]: unknown;
+  };
+  [k: string]: unknown;
+}
+export declare interface PostalAddress {
+  /**
+   * An address extension such as an apartment number, C/O or alternative name.
+   */
+  extended_address?: string;
+  /**
+   * The street address.
+   */
+  street_address?: string;
+  /**
+   * The locality in which the street address is, and which is in the region. For example, Mountain View.
+   */
+  address_locality?: string;
+  /**
+   * The region in which the locality is, and which is in the country. Required for applicable countries (i.e. state in US, province in CA). For example, California or another appropriate first-level Administrative division.
+   */
+  address_region?: string;
+  /**
+   * The country. Recommended to be in 2-letter ISO 3166-1 alpha-2 format, for example "US". For backward compatibility, a 3-letter ISO 3166-1 alpha-3 country code such as "SGP" or a full country name such as "Singapore" can also be used.
+   */
+  address_country?: string;
+  /**
+   * The postal code. For example, 94043.
+   */
+  postal_code?: string;
+  /**
+   * Optional. First name of the contact associated with the address.
+   */
+  first_name?: string;
+  /**
+   * Optional. Last name of the contact associated with the address.
+   */
+  last_name?: string;
+  /**
+   * Optional. Phone number of the contact associated with the address.
+   */
+  phone_number?: string;
+  [k: string]: unknown;
+}
+/**
+ * The base definition for any payment credential. Handlers define specific credential types.
+ */
+export declare interface PaymentCredential {
+  /**
+   * The credential type discriminator. Specific schemas will constrain this to a constant value.
+   */
+  type: string;
+  [k: string]: unknown;
+}
+/**
+ * Order details available at the time of checkout completion.
+ */
+export declare interface OrderConfirmation {
+  /**
+   * Unique order identifier.
+   */
+  id: string;
+  /**
+   * Permalink to access the order on merchant site.
+   */
+  permalink_url: string;
+  [k: string]: unknown;
+}
+/**
+ * Extends Checkout with buyer consent tracking for privacy compliance via the buyer object.
+ */
+export declare interface BuyerConsentExtension {
+  [k: string]: unknown;
+}
+/**
+ * User consent states for data processing
+ *
+ * This interface was referenced by `BuyerConsentExtension`'s JSON-Schema
+ * via the `definition` "consent".
+ */
+export declare interface Consent {
+  /**
+   * Consent for analytics and performance tracking.
+   */
+  analytics?: boolean;
+  /**
+   * Consent for storing user preferences.
+   */
+  preferences?: boolean;
+  /**
+   * Consent for marketing communications.
+   */
+  marketing?: boolean;
+  /**
+   * Consent for selling data to third parties (CCPA).
+   */
+  sale_of_data?: boolean;
+  [k: string]: unknown;
+}
+export declare interface Buyer1 {
+  /**
+   * First name of the buyer.
+   */
+  first_name?: string;
+  /**
+   * Last name of the buyer.
+   */
+  last_name?: string;
+  /**
+   * Email of the buyer.
+   */
+  email?: string;
+  /**
+   * E.164 standard.
+   */
+  phone_number?: string;
+  [k: string]: unknown;
+}
+/**
+ * Shopping cart with estimated pricing before checkout. Lightweight pre-purchase exploration with no payment info or complex status states.
+ */
+export declare interface Cart {
+  ucp: UCPCartResponseSchema;
+  /**
+   * Unique cart identifier.
+   */
+  id: string;
+  /**
+   * Cart line items. Same structure as checkout. Full replacement on update.
+   */
+  line_items: LineItem[];
+  context?: Context1;
+  buyer?: Buyer2;
+  /**
+   * ISO 4217 currency code. Determined by merchant based on context or geo-IP.
+   */
+  currency: string;
+  /**
+   * Estimated cost breakdown. May be partial if shipping/tax not yet calculable.
+   */
+  totals: Total[];
+  /**
+   * Validation messages, warnings, or informational notices.
+   */
+  messages?: Message[];
+  /**
+   * Optional merchant links (policies, FAQs).
+   */
+  links?: Link[];
+  /**
+   * URL for cart handoff and session recovery. Enables sharing and human-in-the-loop flows.
+   */
+  continue_url?: string;
+  /**
+   * Cart expiry timestamp (RFC 3339). Optional.
+   */
+  expires_at?: string;
+  [k: string]: unknown;
+}
+/**
+ * Provisional buyer signals for relevance and localization—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data. Context SHOULD be non-identifying and can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context.
+ */
+export declare interface Context1 {
+  /**
+   * The country. Recommended to be in 2-letter ISO 3166-1 alpha-2 format, for example "US". For backward compatibility, a 3-letter ISO 3166-1 alpha-3 country code such as "SGP" or a full country name such as "Singapore" can also be used. Optional hint for market context (currency, availability, pricing)—higher-resolution data (e.g., shipping address) supersedes this value.
+   */
+  address_country?: string;
+  /**
+   * The region in which the locality is, and which is in the country. For example, California or another appropriate first-level Administrative division. Optional hint for progressive localization—higher-resolution data (e.g., shipping address) supersedes this value.
+   */
+  address_region?: string;
+  /**
+   * The postal code. For example, 94043. Optional hint for regional refinement—higher-resolution data (e.g., shipping address) supersedes this value.
+   */
+  postal_code?: string;
+  /**
+   * Background context describing buyer's intent (e.g., 'looking for a gift under $50', 'need something durable for outdoor use'). Informs relevance, recommendations, and personalization.
+   */
+  intent?: string;
+  /**
+   * Preferred language for content. Use IETF BCP 47 language tags (e.g., 'en', 'fr-CA', 'zh-Hans'). For REST, equivalent to Accept-Language header—platforms SHOULD fall back to Accept-Language when this field is absent; when provided, overrides Accept-Language. Businesses MAY return content in a different language if unavailable.
+   */
+  language?: string;
+  /**
+   * Preferred currency (ISO 4217, e.g., 'EUR', 'USD'). Businesses determine presentment currency from context and authoritative signals; this hint MAY inform selection in multi-currency markets. Also serves as the denomination for price filter values — platforms SHOULD include this field when sending price filters. Response prices include explicit currency confirming the resolution.
+   */
+  currency?: string;
+  [k: string]: unknown;
+}
+export declare interface Buyer2 {
+  /**
+   * First name of the buyer.
+   */
+  first_name?: string;
+  /**
+   * Last name of the buyer.
+   */
+  last_name?: string;
+  /**
+   * Email of the buyer.
+   */
+  email?: string;
+  /**
+   * E.164 standard.
+   */
+  phone_number?: string;
+  [k: string]: unknown;
+}
+/**
+ * Product/variant lookup by identifier capability.
+ */
+export declare interface CatalogLookup {
+  [k: string]: unknown;
+}
+/**
+ * A purchasable variant of a product with specific option selections.
+ */
+export declare interface Variant {
+  /**
+   * Global ID (GID) uniquely identifying this variant. Used as item.id in checkout.
+   */
+  id: string;
+  /**
+   * Business-assigned identifier for inventory and fulfillment.
+   */
+  sku?: string;
+  /**
+   * Industry-standard product identifiers for cross-reference and correlation.
+   */
+  barcodes?: Array<{
+    /**
+     * Barcode standard. Well-known values: UPC, EAN, ISBN, GTIN, JAN.
+     */
+    type: string;
+    /**
+     * Barcode value.
+     */
+    value: string;
+    [k: string]: unknown;
+  }>;
+  /**
+   * URL-safe variant handle/slug.
+   */
+  handle?: string;
+  /**
+   * Variant display title (e.g., 'Blue / Large').
+   */
+  title: string;
+  description: Description;
+  /**
+   * Canonical variant page URL.
+   */
+  url?: string;
+  /**
+   * Variant categories with optional taxonomy identifiers.
+   */
+  categories?: Category[];
+  price: Price;
+  list_price?: Price;
+  /**
+   * Price per standard unit of measurement. MAY be omitted when unit pricing does not apply.
+   */
+  unit_price?: {
+    amount: Amount2;
+    /**
+     * ISO 4217 currency code.
+     */
+    currency: string;
+    /**
+     * Product quantity in packaging (e.g., 750ml bottle).
+     */
+    measure: {
+      /**
+       * Package quantity.
+       */
+      value: number;
+      /**
+       * Unit of measurement.
+       */
+      unit: string;
+      [k: string]: unknown;
+    };
+    /**
+     * Denominator for unit price display (e.g., per 100ml, per 1kg).
+     */
+    reference: {
+      /**
+       * Reference quantity.
+       */
+      value: number;
+      /**
+       * Unit of measurement.
+       */
+      unit: string;
+      [k: string]: unknown;
+    };
+    [k: string]: unknown;
+  };
+  /**
+   * Variant availability for purchase.
+   */
+  availability?: {
+    /**
+     * Whether this variant can be purchased. See status for fulfillment details.
+     */
+    available?: boolean;
+    /**
+     * Qualifies available with fulfillment state. Well-known values: `in_stock`, `backorder`, `preorder`, `out_of_stock`, `discontinued`.
+     */
+    status?: string;
+    [k: string]: unknown;
+  };
+  /**
+   * Option selections that define this variant.
+   */
+  selected_options?: SelectedOption[];
+  /**
+   * Variant media (images, videos, 3D models). First item is the featured media for listings.
+   */
+  media?: Media[];
+  rating?: Rating;
+  /**
+   * Variant tags for categorization and search.
+   */
+  tags?: string[];
+  /**
+   * Business-defined custom data extending the standard variant model.
+   */
+  metadata?: {
+    [k: string]: unknown;
+  };
+  /**
+   * Optional seller context for this variant.
+   */
+  seller?: {
+    /**
+     * Seller display name.
+     */
+    name?: string;
+    /**
+     * Seller policy and information links.
+     */
+    links?: Link[];
+    [k: string]: unknown;
+  };
+  [k: string]: unknown;
+}
+/**
+ * Description content in one or more formats. At least one format must be provided.
+ */
+export declare interface Description {
+  /**
+   * Plain text content.
+   */
+  plain?: string;
+  /**
+   * HTML-formatted content. Security: Platforms MUST sanitize before rendering—strip scripts, event handlers, and untrusted elements. Treat all rich text as untrusted input.
+   */
+  html?: string;
+  /**
+   * Markdown-formatted content.
+   */
+  markdown?: string;
+  [k: string]: unknown;
+}
+/**
+ * A product category with optional taxonomy identifier.
+ */
+export declare interface Category {
+  /**
+   * Category value or path (e.g., 'Apparel > Shirts', '1604').
+   */
+  value: string;
+  /**
+   * Source taxonomy. Well-known values: `google_product_category`, `shopify`, `merchant`.
+   */
+  taxonomy?: string;
+  [k: string]: unknown;
+}
+/**
+ * Price with explicit currency.
+ */
+export declare interface Price {
+  amount: Amount2;
+  /**
+   * ISO 4217 currency code (e.g., 'USD', 'EUR', 'GBP').
+   */
+  currency: string;
+  [k: string]: unknown;
+}
+/**
+ * A specific option selection on a variant (e.g., Size: Large).
+ */
+export declare interface SelectedOption {
+  /**
+   * Option name (e.g., 'Size').
+   */
+  name: string;
+  /**
+   * Selected option label (e.g., 'Large').
+   */
+  label: string;
+  [k: string]: unknown;
+}
+/**
+ * Product media item (image, video, etc.).
+ */
+export declare interface Media {
+  /**
+   * Media type. Well-known values: `image`, `video`, `model_3d`.
+   */
+  type: string;
+  /**
+   * URL to the media resource.
+   */
+  url: string;
+  /**
+   * Accessibility text describing the media.
+   */
+  alt_text?: string;
+  /**
+   * Width in pixels (for images/video).
+   */
+  width?: number;
+  /**
+   * Height in pixels (for images/video).
+   */
+  height?: number;
+  [k: string]: unknown;
+}
+/**
+ * Product rating aggregate.
+ */
+export declare interface Rating {
+  /**
+   * Average rating value.
+   */
+  value: number;
+  /**
+   * Minimum value on the rating scale (e.g., 1 for 1-5 stars).
+   */
+  scale_min?: number;
+  /**
+   * Maximum value on the rating scale (e.g., 5 for 5-star).
+   */
+  scale_max: number;
+  /**
+   * Number of reviews contributing to the rating.
+   */
+  count?: number;
+  [k: string]: unknown;
+}
+/**
+ * Maps a request identifier to the variant it resolved to, with match semantics.
+ */
+export declare interface InputCorrelation {
+  /**
+   * The identifier from the lookup request that resolved to this variant.
+   */
+  id: string;
+  /**
+   * How the request identifier resolved to this variant. Well-known values: `exact` (input directly identifies this variant, e.g., variant ID, SKU), `featured` (server selected this variant as representative, e.g., product ID resolved to best match). Businesses MAY implement and provide additional resolution strategies.
+   */
+  match?: string;
+  [k: string]: unknown;
+}
+/**
+ * Provisional buyer signals for relevance and localization—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data. Context SHOULD be non-identifying and can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context.
+ */
+export declare interface Context2 {
+  /**
+   * The country. Recommended to be in 2-letter ISO 3166-1 alpha-2 format, for example "US". For backward compatibility, a 3-letter ISO 3166-1 alpha-3 country code such as "SGP" or a full country name such as "Singapore" can also be used. Optional hint for market context (currency, availability, pricing)—higher-resolution data (e.g., shipping address) supersedes this value.
+   */
+  address_country?: string;
+  /**
+   * The region in which the locality is, and which is in the country. For example, California or another appropriate first-level Administrative division. Optional hint for progressive localization—higher-resolution data (e.g., shipping address) supersedes this value.
+   */
+  address_region?: string;
+  /**
+   * The postal code. For example, 94043. Optional hint for regional refinement—higher-resolution data (e.g., shipping address) supersedes this value.
+   */
+  postal_code?: string;
+  /**
+   * Background context describing buyer's intent (e.g., 'looking for a gift under $50', 'need something durable for outdoor use'). Informs relevance, recommendations, and personalization.
+   */
+  intent?: string;
+  /**
+   * Preferred language for content. Use IETF BCP 47 language tags (e.g., 'en', 'fr-CA', 'zh-Hans'). For REST, equivalent to Accept-Language header—platforms SHOULD fall back to Accept-Language when this field is absent; when provided, overrides Accept-Language. Businesses MAY return content in a different language if unavailable.
+   */
+  language?: string;
+  /**
+   * Preferred currency (ISO 4217, e.g., 'EUR', 'USD'). Businesses determine presentment currency from context and authoritative signals; this hint MAY inform selection in multi-currency markets. Also serves as the denomination for price filter values — platforms SHOULD include this field when sending price filters. Response prices include explicit currency confirming the resolution.
+   */
+  currency?: string;
+  [k: string]: unknown;
+}
+/**
+ * A product in the catalog with variants and options.
+ */
+export declare interface Product {
+  /**
+   * Global ID (GID) uniquely identifying this product.
+   */
+  id: string;
+  /**
+   * URL-safe slug for SEO-friendly URLs (e.g., 'blue-runner-pro'). Use id for stable API references.
+   */
+  handle?: string;
+  /**
+   * Product title.
+   */
+  title: string;
+  description: Description;
+  /**
+   * Canonical product page URL.
+   */
+  url?: string;
+  /**
+   * Product categories with optional taxonomy identifiers.
+   */
+  categories?: Category[];
+  price_range: PriceRange;
+  list_price_range?: PriceRange;
+  /**
+   * Product media (images, videos, 3D models). First item is the featured media for listings.
+   */
+  media?: Media[];
+  /**
+   * Product options (Size, Color, etc.).
+   */
+  options?: ProductOption[];
+  /**
+   * Purchasable variants of this product. First item is the featured variant for listings.
+   *
+   * @minItems 1
+   */
+  variants: [Variant, ...Variant[]];
+  rating?: Rating;
+  /**
+   * Product tags for categorization and search.
+   */
+  tags?: string[];
+  /**
+   * Business-defined custom data extending the standard product model.
+   */
+  metadata?: {
+    [k: string]: unknown;
+  };
+  [k: string]: unknown;
+}
+/**
+ * A price range representing minimum and maximum values (e.g., across product variants).
+ */
+export declare interface PriceRange {
+  min: Price;
+  max: Price;
+  [k: string]: unknown;
+}
+/**
+ * A product option such as size, color, or material.
+ */
+export declare interface ProductOption {
+  /**
+   * Option name (e.g., 'Size', 'Color').
+   */
+  name: string;
+  /**
+   * Available values for this option.
+   *
+   * @minItems 1
+   */
+  values: [OptionValue, ...OptionValue[]];
+  [k: string]: unknown;
+}
+/**
+ * A selectable value for a product option.
+ */
+export declare interface OptionValue {
+  /**
+   * Display text for this option value (e.g., 'Small', 'Blue').
+   */
+  label: string;
+  [k: string]: unknown;
+}
+/**
+ * Product catalog search capability.
+ */
+export declare interface CatalogSearch {
+  [k: string]: unknown;
+}
+/**
+ * Filter criteria to narrow search results. All specified filters combine with AND logic.
+ */
+export declare interface SearchFilters {
+  /**
+   * Filter by product categories (OR logic — matches products in any listed categories). Values match against the value field in product category entries. Valid values can be discovered from the categories field in search results, merchant documentation, or standard taxonomies that businesses may align with.
+   */
+  categories?: string[];
+  price?: PriceFilter;
+  [k: string]: unknown;
+}
+/**
+ * Price range filter denominated in context.currency. When context.currency matches the presentment currency, businesses apply the filter directly. When it differs, businesses SHOULD convert filter values to the presentment currency before applying; if conversion is not supported, businesses MAY ignore the filter and SHOULD indicate this via a message. When context.currency is absent, filter denomination is ambiguous and businesses MAY ignore it.
+ */
+export declare interface PriceFilter {
+  min?: Amount2;
+  max?: Amount2;
+  [k: string]: unknown;
+}
+/**
+ * Pagination parameters for requests.
+ */
+export declare interface Request {
+  /**
+   * Opaque cursor from previous response.
+   */
+  cursor?: string;
+  /**
+   * Requested page size. Implementations MAY clamp to a lower maximum.
+   */
+  limit?: number;
+  [k: string]: unknown;
+}
+/**
+ * Pagination information in responses.
+ */
+export declare interface Response {
+  /**
+   * Cursor to fetch the next page of results. MUST be present when has_next_page is true.
+   */
+  cursor?: string;
+  /**
+   * Whether more results are available.
+   */
+  has_next_page: boolean;
+  /**
+   * Total number of matching items, if available.
+   */
+  total_count?: number;
+  [k: string]: unknown;
+}
+/**
+ * Extends Checkout with discount code support, enabling agents to apply promotional, loyalty, referral, and other discount codes.
+ */
+export declare interface DiscountExtension {
+  [k: string]: unknown;
+}
+/**
+ * Breakdown of how a discount amount was allocated to a specific target.
+ *
+ * This interface was referenced by `DiscountExtension`'s JSON-Schema
+ * via the `definition` "allocation".
+ */
+export declare interface Allocation {
+  /**
+   * JSONPath to the allocation target (e.g., '$.line_items[0]', '$.totals.shipping').
+   */
+  path: string;
+  amount: Amount2;
+  [k: string]: unknown;
+}
+/**
+ * A discount that was successfully applied.
+ *
+ * This interface was referenced by `DiscountExtension`'s JSON-Schema
+ * via the `definition` "applied_discount".
+ */
+export declare interface AppliedDiscount {
+  /**
+   * The discount code. Omitted for automatic discounts.
+   */
+  code?: string;
+  /**
+   * Human-readable discount name (e.g., 'Summer Sale 20% Off').
+   */
+  title: string;
+  amount: Amount2;
+  /**
+   * True if applied automatically by merchant rules (no code required).
+   */
+  automatic?: boolean;
+  /**
+   * Allocation method. 'each' = applied independently per item. 'across' = split proportionally by value.
+   */
+  method?: 'each' | 'across';
+  /**
+   * Stacking order for discount calculation. Lower numbers applied first (1 = first).
+   */
+  priority?: number;
+  /**
+   * Breakdown of where this discount was allocated. Sum of allocation amounts equals total amount.
+   */
+  allocations?: Allocation[];
+  [k: string]: unknown;
+}
+/**
+ * Discount codes input and applied discounts output.
+ */
+export declare interface DiscountsObject {
+  /**
+   * Discount codes to apply. Case-insensitive. Replaces previously submitted codes. Send empty array to clear.
+   */
+  codes?: string[];
+  /**
+   * Discounts successfully applied (code-based and automatic).
+   */
+  applied?: AppliedDiscount[];
+  [k: string]: unknown;
+}
+/**
+ * Extends Checkout with fulfillment support using methods, destinations, and groups.
+ */
+export declare interface FulfillmentExtension {
+  [k: string]: unknown;
+}
+/**
+ * A fulfillment option within a group (e.g., Standard Shipping $5, Express $15).
+ *
+ * This interface was referenced by `FulfillmentExtension`'s JSON-Schema
+ * via the `definition` "fulfillment_option".
+ */
+export declare interface FulfillmentOption {
+  /**
+   * Unique fulfillment option identifier.
+   */
+  id: string;
+  /**
+   * Short label (e.g., 'Express Shipping', 'Curbside Pickup').
+   */
+  title: string;
+  /**
+   * Complete context for buyer decision (e.g., 'Arrives Dec 12-15 via FedEx').
+   */
+  description?: string;
+  /**
+   * Carrier name (for shipping).
+   */
+  carrier?: string;
+  /**
+   * Earliest fulfillment date.
+   */
+  earliest_fulfillment_time?: string;
+  /**
+   * Latest fulfillment date.
+   */
+  latest_fulfillment_time?: string;
+  /**
+   * Fulfillment option totals breakdown.
+   */
+  totals: Total[];
+  [k: string]: unknown;
+}
+/**
+ * A merchant-generated package/group of line items with fulfillment options.
+ *
+ * This interface was referenced by `FulfillmentExtension`'s JSON-Schema
+ * via the `definition` "fulfillment_group".
+ */
+export declare interface FulfillmentGroup {
+  /**
+   * Group identifier for referencing merchant-generated groups in updates.
+   */
+  id: string;
+  /**
+   * Line item IDs included in this group/package.
+   */
+  line_item_ids: string[];
+  /**
+   * Available fulfillment options for this group.
+   */
+  options?: FulfillmentOption[];
+  /**
+   * ID of the selected fulfillment option for this group.
+   */
+  selected_option_id?: string | null;
+  [k: string]: unknown;
+}
+/**
+ * A fulfillment method (shipping or pickup) with destinations and groups.
+ *
+ * This interface was referenced by `FulfillmentExtension`'s JSON-Schema
+ * via the `definition` "fulfillment_method".
+ */
+export declare interface FulfillmentMethod {
+  /**
+   * Unique fulfillment method identifier.
+   */
+  id: string;
+  /**
+   * Fulfillment method type.
+   */
+  type: 'shipping' | 'pickup';
+  /**
+   * Line item IDs fulfilled via this method.
+   */
+  line_item_ids: string[];
+  /**
+   * Available destinations. For shipping: addresses. For pickup: retail locations.
+   */
+  destinations?: FulfillmentDestination[];
+  /**
+   * ID of the selected destination.
+   */
+  selected_destination_id?: string | null;
+  /**
+   * Fulfillment groups for selecting options. Agent sets selected_option_id on groups to choose shipping method.
+   */
+  groups?: FulfillmentGroup[];
+  [k: string]: unknown;
+}
+/**
+ * A pickup location (retail store, locker, etc.).
+ */
+export declare interface RetailLocation {
+  /**
+   * Unique location identifier.
+   */
+  id: string;
+  /**
+   * Location name (e.g., store name).
+   */
+  name: string;
+  address?: PostalAddress;
+  [k: string]: unknown;
+}
+/**
+ * Inventory availability hint for a fulfillment method type.
+ *
+ * This interface was referenced by `FulfillmentExtension`'s JSON-Schema
+ * via the `definition` "fulfillment_available_method".
+ */
+export declare interface FulfillmentAvailableMethod {
+  /**
+   * Fulfillment method type this availability applies to.
+   */
+  type: 'shipping' | 'pickup';
+  /**
+   * Line items available for this fulfillment method.
+   */
+  line_item_ids: string[];
+  /**
+   * 'now' for immediate availability, or ISO 8601 date for future (preorders, transfers).
+   */
+  fulfillable_on?: string | null;
+  /**
+   * Human-readable availability info (e.g., 'Available for pickup at Downtown Store today').
+   */
+  description?: string;
+  [k: string]: unknown;
+}
+/**
+ * Container for fulfillment methods and availability.
+ *
+ * This interface was referenced by `FulfillmentExtension`'s JSON-Schema
+ * via the `definition` "fulfillment".
+ */
+export declare interface Fulfillment {
+  /**
+   * Fulfillment methods for cart items.
+   */
+  methods?: FulfillmentMethod[];
+  /**
+   * Inventory availability hints.
+   */
+  available_methods?: FulfillmentAvailableMethod[];
+  [k: string]: unknown;
+}
+/**
+ * Container for fulfillment methods and availability.
+ */
+export declare interface Fulfillment1 {
+  /**
+   * Fulfillment methods for cart items.
+   */
+  methods?: FulfillmentMethod[];
+  /**
+   * Inventory availability hints.
+   */
+  available_methods?: FulfillmentAvailableMethod[];
+  [k: string]: unknown;
+}
+/**
+ * Order schema with line items, buyer-facing fulfillment expectations, and event logs.
+ */
+export declare interface Order {
+  ucp: UCPOrderResponseSchema;
+  /**
+   * Unique order identifier.
+   */
+  id: string;
+  /**
+   * Associated checkout sessions. Orders reference one or more checkouts—order edits and exchanges create additional checkout sessions against the same order.
+   *
+   * @minItems 1
+   */
+  checkouts: [
+    {
+      /**
+       * Unique identifier of the checkout session.
+       */
+      id: string;
+      /**
+       * RFC 3339 timestamp when this checkout session was created.
+       */
+      created_at: string;
+      [k: string]: unknown;
+    },
+    ...{
+      /**
+       * Unique identifier of the checkout session.
+       */
+      id: string;
+      /**
+       * RFC 3339 timestamp when this checkout session was created.
+       */
+      created_at: string;
+      [k: string]: unknown;
+    }[]
+  ];
+  /**
+   * Permalink to access the order on merchant site.
+   */
+  permalink_url: string;
+  /**
+   * Line items representing what was purchased — can change post-order via edits or exchanges.
+   */
+  line_items: OrderLineItem[];
+  /**
+   * Fulfillment data: buyer expectations and what actually happened.
+   */
+  fulfillment: {
+    /**
+     * Buyer-facing groups representing when/how items will be delivered. Can be split, merged, or adjusted post-order.
+     */
+    expectations?: Expectation[];
+    /**
+     * Append-only event log of actual shipments. Each event references line items by ID.
+     */
+    events?: FulfillmentEvent[];
+    [k: string]: unknown;
+  };
+  /**
+   * Post-order events (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment.
+   */
+  adjustments?: Adjustment[];
+  /**
+   * ISO 4217 currency code. MUST match the currency from the originating checkout session.
+   */
+  currency?: string;
+  /**
+   * Different totals for the order.
+   */
+  totals: Total[];
+  [k: string]: unknown;
+}
+export declare interface OrderLineItem {
+  /**
+   * Line item identifier.
+   */
+  id: string;
+  item: Item;
+  /**
+   * Quantity tracking for the line item.
+   */
+  quantity: {
+    /**
+     * Quantity from the original checkout (earliest created_at). Convenience property—avoids requiring a separate Checkout lookup.
+     */
+    original?: number;
+    /**
+     * Current total quantity. May differ from original due to order edits or exchanges.
+     */
+    total: number;
+    /**
+     * Quantity fulfilled so far.
+     */
+    fulfilled: number;
+    [k: string]: unknown;
+  };
+  /**
+   * Line item totals breakdown.
+   */
+  totals: Total[];
+  /**
+   * Derived status: fulfilled if quantity.fulfilled == quantity.total, partial if quantity.fulfilled > 0, otherwise processing.
+   */
+  status: 'processing' | 'partial' | 'fulfilled';
+  /**
+   * Parent line item identifier for any nested structures.
+   */
+  parent_id?: string;
+  [k: string]: unknown;
+}
+/**
+ * Buyer-facing fulfillment expectation representing logical groupings of items (e.g., 'package'). Can be split, merged, or adjusted post-order to set buyer expectations for when/how items arrive.
+ */
+export declare interface Expectation {
+  /**
+   * Expectation identifier.
+   */
+  id: string;
+  /**
+   * Which line items and quantities are in this expectation.
+   */
+  line_items: Array<{
+    /**
+     * Line item ID reference.
+     */
+    id: string;
+    /**
+     * Quantity of this item in this expectation.
+     */
+    quantity: number;
+    [k: string]: unknown;
+  }>;
+  /**
+   * Delivery method type (shipping, pickup, digital).
+   */
+  method_type: 'shipping' | 'pickup' | 'digital';
+  destination: PostalAddress;
+  /**
+   * Human-readable delivery description (e.g., 'Arrives in 5-8 business days').
+   */
+  description?: string;
+  /**
+   * When this expectation can be fulfilled: 'now' or ISO 8601 timestamp for future date (backorder, pre-order).
+   */
+  fulfillable_on?: string;
+  [k: string]: unknown;
+}
+/**
+ * Append-only fulfillment event representing an actual shipment. References line items by ID.
+ */
+export declare interface FulfillmentEvent {
+  /**
+   * Fulfillment event identifier.
+   */
+  id: string;
+  /**
+   * RFC 3339 timestamp when this fulfillment event occurred.
+   */
+  occurred_at: string;
+  /**
+   * Fulfillment event type. Common values include: processing (preparing to ship), shipped (handed to carrier), in_transit (in delivery network), delivered (received by buyer), failed_attempt (delivery attempt failed), canceled (fulfillment canceled), undeliverable (cannot be delivered), returned_to_sender (returned to merchant).
+   */
+  type: string;
+  /**
+   * Which line items and quantities are fulfilled in this event.
+   */
+  line_items: Array<{
+    /**
+     * Line item ID reference.
+     */
+    id: string;
+    /**
+     * Quantity fulfilled in this event.
+     */
+    quantity: number;
+    [k: string]: unknown;
+  }>;
+  /**
+   * Carrier tracking number (required if type != processing).
+   */
+  tracking_number?: string;
+  /**
+   * URL to track this shipment (required if type != processing).
+   */
+  tracking_url?: string;
+  /**
+   * Carrier name (e.g., 'FedEx', 'USPS').
+   */
+  carrier?: string;
+  /**
+   * Human-readable description of the shipment status or delivery information (e.g., 'Delivered to front door', 'Out for delivery').
+   */
+  description?: string;
+  [k: string]: unknown;
+}
+/**
+ * Post-order event that exists independently of fulfillment. Typically represents money movements but can be any post-order change. Polymorphic type that can optionally reference line items.
+ */
+export declare interface Adjustment {
+  /**
+   * Adjustment event identifier.
+   */
+  id: string;
+  /**
+   * Type of adjustment (open string). Typically money-related like: refund, return, credit, price_adjustment, dispute, cancellation. Can be any value that makes sense for the merchant's business.
+   */
+  type: string;
+  /**
+   * RFC 3339 timestamp when this adjustment occurred.
+   */
+  occurred_at: string;
+  /**
+   * Adjustment status.
+   */
+  status: 'pending' | 'completed' | 'failed';
+  /**
+   * Which line items and quantities are affected (optional).
+   */
+  line_items?: Array<{
+    /**
+     * Line item ID reference.
+     */
+    id: string;
+    /**
+     * Signed quantity affected by this adjustment. Negative values represent reductions (e.g. returns); positive values represent additions (e.g. exchanges).
+     */
+    quantity: number;
+    [k: string]: unknown;
+  }>;
+  /**
+   * Adjustment totals breakdown. Signed values—negative for money returned to buyer (refunds, credits), positive for additional charges (exchanges).
+   */
+  totals?: Total[];
+  /**
+   * Human-readable reason or description (e.g., 'Defective item', 'Customer requested').
+   */
+  description?: string;
+  [k: string]: unknown;
+}
+/**
+ * Platform's order capability configuration.
+ *
+ * This interface was referenced by `Order`'s JSON-Schema
+ * via the `definition` "platform_schema".
+ */
+export declare interface PlatformOrderSchema {
+  /**
+   * URL where merchant sends order lifecycle events (webhooks).
+   */
+  webhook_url: string;
+  [k: string]: unknown;
+}
+/**
+ * Payment configuration containing handlers.
+ */
+export declare interface Payment1 {
+  /**
+   * The payment instruments available for this payment. Each instrument is associated with a specific handler via the handler_id field. Handlers can extend the base payment_instrument schema to add handler-specific fields.
+   */
+  instruments?: SelectedPaymentInstrument[];
+  [k: string]: unknown;
+}
