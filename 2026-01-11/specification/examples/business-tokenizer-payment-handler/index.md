@@ -34,7 +34,7 @@ ______________________________________________________________________
 
 ### Pattern Flow
 
-```text
+```json
 ┌────────────┐                         ┌───────────────────────────────────┐
 │  Platform  │                         │       Tokenizer / Processor       │
 │ (Collector)│                         │      (Business or PSP)            │
@@ -71,24 +71,24 @@ The Business advertises this handler in the checkout's `payment.handlers` array.
 
 ```json
 {
-  "payment": {
-    "handlers": [
-      {
-        "id": "processor_tokenizer",
-        "name": "com.example.processor_tokenizer",
-        "spec": "https://example.com/ucp/processor-tokenizer.json",
-        "instrument_schemas": [
-           "https://ucp.dev/schemas/shopping/types/card_payment_instrument.json"
-        ],
-        "config": {
-          "endpoint": "https://api.psp.com/v1/tokenize",
-          "identity": {
-            "access_token": "merchant_xyz789"
-          }
-        }
-      }
-    ]
-  }
+    "payment": {
+        "handlers": [
+            {
+                "id": "processor_tokenizer",
+                "name": "com.example.processor_tokenizer",
+                "spec": "https://example.com/ucp/processor-tokenizer.json",
+                "instrument_schemas": [
+                    "https://ucp.dev/2026-01-11/schemas/shopping/types/card_payment_instrument.json"
+                ],
+                "config": {
+                    "endpoint": "https://api.psp.com/v1/tokenize",
+                    "identity": {
+                        "access_token": "merchant_xyz789"
+                    }
+                }
+            }
+        ]
+    }
 }
 ```
 
@@ -101,7 +101,7 @@ Before using this handler, platforms must:
 1. Have access to a **compliant secure payment credential providers** that collects sensitive payment data from users. This service must meet the compliance requirements of the instruments being handled (e.g., PCI DSS).
 1. Obtain authentication credentials (e.g., API Key) authorized to call the specific `endpoint` defined in the handler configuration.
 
-**Prerequisites Output:**
+### Prerequisites Output
 
 | Field                        | Description                                                                   |
 | ---------------------------- | ----------------------------------------------------------------------------- |
@@ -116,15 +116,15 @@ Platform identifies the processor tokenizer handler and retrieves the configurat
 
 ```json
 {
-  "id": "processor_tokenizer",
-  "name": "com.example.processor_tokenizer",
-  "spec": "https://example.com/ucp/processor-tokenizer.json",
-  "config": {
-    "endpoint": "https://api.processor.com/v1/tokenize",
-    "identity": {
-      "access_token": "merchant_xyz789"
+    "id": "processor_tokenizer",
+    "name": "com.example.processor_tokenizer",
+    "spec": "https://example.com/ucp/processor-tokenizer.json",
+    "config": {
+        "endpoint": "https://api.processor.com/v1/tokenize",
+        "identity": {
+            "access_token": "merchant_xyz789"
+        }
     }
-  }
 }
 ```
 
@@ -142,7 +142,7 @@ Response:
 
 ```json
 {
-  "token": "tok_a1b2c3d4e5f6"
+    "token": "tok_a1b2c3d4e5f6"
 }
 ```
 

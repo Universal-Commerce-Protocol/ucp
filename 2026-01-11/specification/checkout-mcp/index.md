@@ -10,34 +10,34 @@ Businesses advertise MCP transport availability through their UCP profile at `/.
 
 ```json
 {
-  "ucp": {
-    "version": "2026-01-11",
-    "services": {
-      "dev.ucp.shopping": {
+    "ucp": {
         "version": "2026-01-11",
-        "spec": "https://ucp.dev/specification/overview",
-        "mcp": {
-          "schema": "https://ucp.dev/services/shopping/mcp.openrpc.json",
-          "endpoint": "https://business.example.com/ucp/mcp"
-        }
-      }
-    },
-    "capabilities": [
-      {
-        "name": "dev.ucp.shopping.checkout",
-        "version": "2026-01-11",
-        "spec": "https://ucp.dev/specification/checkout",
-        "schema": "https://ucp.dev/schemas/shopping/checkout.json"
-      },
-      {
-        "name": "dev.ucp.shopping.fulfillment",
-        "version": "2026-01-11",
-        "spec": "https://ucp.dev/specification/fulfillment",
-        "schema": "https://ucp.dev/schemas/shopping/fulfillment.json",
-        "extends": "dev.ucp.shopping.checkout"
-      }
-    ]
-  }
+        "services": {
+            "dev.ucp.shopping": {
+                "version": "2026-01-11",
+                "spec": "https://ucp.dev/2026-01-11/specification/overview",
+                "mcp": {
+                    "schema": "https://ucp.dev/2026-01-11/services/shopping/openrpc.json",
+                    "endpoint": "https://business.example.com/ucp/mcp"
+                }
+            }
+        },
+        "capabilities": [
+            {
+                "name": "dev.ucp.shopping.checkout",
+                "version": "2026-01-11",
+                "spec": "https://ucp.dev/2026-01-11/specification/checkout",
+                "schema": "https://ucp.dev/2026-01-11/schemas/shopping/checkout.json"
+            },
+            {
+                "name": "dev.ucp.shopping.fulfillment",
+                "version": "2026-01-11",
+                "spec": "https://ucp.dev/2026-01-11/specification/fulfillment",
+                "schema": "https://ucp.dev/2026-01-11/schemas/shopping/fulfillment.json",
+                "extends": "dev.ucp.shopping.checkout"
+            }
+        ]
+    }
 }
 ```
 
@@ -47,17 +47,17 @@ MCP clients **MUST** include the UCP platform profile URI with every request. Th
 
 ```json
 {
-  "jsonrpc": "2.0",
-  "id": 1,
-  "method": "create_checkout",
-  "params": {
-    "_meta": {
-      "ucp": {
-        "profile": "https://platform.example/profiles/v2026-01/shopping-agent.json"
-      }
-    },
-    "idempotency_key": "..."
-  }
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "create_checkout",
+    "params": {
+        "_meta": {
+            "ucp": {
+                "profile": "https://platform.example/profiles/v2026-01/shopping-agent.json"
+            }
+        },
+        "idempotency_key": "..."
+    }
 }
 ```
 
@@ -535,25 +535,25 @@ Error responses follow JSON-RPC 2.0 format while using the UCP error structure d
 
 ```json
 {
-  "jsonrpc": "2.0",
-  "id": 1,
-  "error": {
-    "code": -32603,
-    "message": "Internal error",
-    "data": {
-      "status": "error",
-      "errors": [
-        {
-          "code": "MERCHANDISE_NOT_AVAILABLE",
-          "message": "One or more cart items are not available",
-          "severity": "requires_buyer_input",
-          "details": {
-            "invalid_items": ["sku_999"]
-          }
+    "jsonrpc": "2.0",
+    "id": 1,
+    "error": {
+        "code": -32603,
+        "message": "Internal error",
+        "data": {
+            "status": "error",
+            "errors": [
+                {
+                    "code": "MERCHANDISE_NOT_AVAILABLE",
+                    "message": "One or more cart items are not available",
+                    "severity": "requires_buyer_input",
+                    "details": {
+                        "invalid_items": ["sku_999"]
+                    }
+                }
+            ]
         }
-      ]
     }
-  }
 }
 ```
 

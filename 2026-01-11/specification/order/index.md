@@ -84,7 +84,7 @@ Expectations can be split, merged, or adjusted post-order. For example:
 | line_items    | Array\[[Order Line Item](/2026-01-11/specification/order/#order-line-item)\] | **Yes**  | Immutable line items — source of truth for what was ordered.                                                                                 |
 | fulfillment   | object                                                                       | **Yes**  | Fulfillment data: buyer expectations and what actually happened.                                                                             |
 | adjustments   | Array\[[Adjustment](/2026-01-11/specification/order/#adjustment)\]           | No       | Append-only event log of money movements (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment. |
-| totals        | Array\[[Total Response](/2026-01-11/specification/order/#total-response)\]   | **Yes**  | Different totals for the order.                                                                                                              |
+| totals        | Array\[[Total Response](/2026-01-11/specification/order/#total)\]            | **Yes**  | Different totals for the order.                                                                                                              |
 
 ### Order Line Item
 
@@ -99,18 +99,18 @@ Line items reflect what was purchased at checkout and their current state. Statu
 | status    | string                                                   | **Yes**  | Derived status: fulfilled if quantity.fulfilled == quantity.total, partial if quantity.fulfilled > 0, otherwise processing. **Enum:** `processing`, `partial`, `fulfilled` |
 | parent_id | string                                                   | No       | Parent line item identifier for any nested structures.                                                                                                                     |
 
-**Quantity Structure:**
+### Quantity Structure
 
 ```json
 {
-  "total": 3,      // Current total quantity
-  "fulfilled": 2   // What has been fulfilled
+    "total": 3, // Current total quantity
+    "fulfilled": 2 // What has been fulfilled
 }
 ```
 
-**Status Derivation:**
+### Status Derivation
 
-```text
+```json
 if (fulfilled == total) → "fulfilled"
 else if (fulfilled > 0) → "partial"
 else → "processing"
@@ -166,97 +166,105 @@ Examples: `refund`, `return`, `credit`, `price_adjustment`, `dispute`, `cancella
 
 ```json
 {
-  "ucp": {
-    "version": "2026-01-11",
-    "capabilities": [
-      {"name": "dev.ucp.shopping.order", "version": "2026-01-11"}
-    ]
-  },
-  "id": "order_abc123",
-  "checkout_id": "checkout_xyz789",
-  "permalink_url": "https://business.com/orders/abc123",
-  "line_items": [
-    {
-      "id": "li_shoes",
-      "item": { "id": "prod_shoes", "title": "Running Shoes", "price": 3000 },
-      "quantity": { "total": 3, "fulfilled": 3 },
-      "totals": [
-        {"type": "subtotal", "amount": 9000},
-        {"type": "total", "amount": 9000}
-      ],
-      "status": "fulfilled"
+    "ucp": {
+        "version": "2026-01-11",
+        "capabilities": [
+            { "name": "dev.ucp.shopping.order", "version": "2026-01-11" }
+        ]
     },
-    {
-      "id": "li_shirts",
-      "item": { "id": "prod_shirts", "title": "Cotton T-Shirt", "price": 2000 },
-      "quantity": { "total": 2, "fulfilled": 0 },
-      "totals": [
-        {"type": "subtotal", "amount": 4000},
-        {"type": "total", "amount": 4000}
-      ],
-      "status": "processing"
-    }
-  ],
-  "fulfillment": {
-    "expectations": [
-      {
-        "id": "exp_1",
-        "line_items": [{ "id": "li_shoes", "quantity": 3 }],
-        "method_type": "shipping",
-        "destination": {
-          "street_address": "123 Main St",
-          "address_locality": "Austin",
-          "address_region": "TX",
-          "address_country": "US",
-          "postal_code": "78701"
+    "id": "order_abc123",
+    "checkout_id": "checkout_xyz789",
+    "permalink_url": "https://business.com/orders/abc123",
+    "line_items": [
+        {
+            "id": "li_shoes",
+            "item": {
+                "id": "prod_shoes",
+                "title": "Running Shoes",
+                "price": 3000
+            },
+            "quantity": { "total": 3, "fulfilled": 3 },
+            "totals": [
+                { "type": "subtotal", "amount": 9000 },
+                { "type": "total", "amount": 9000 }
+            ],
+            "status": "fulfilled"
         },
-        "description": "Arrives in 2-3 business days",
-        "fulfillable_on": "now"
-      },
-      {
-        "id": "exp_2",
-        "line_items": [{ "id": "li_shirts", "quantity": 2 }],
-        "method_type": "shipping",
-        "destination": {
-          "street_address": "123 Main St",
-          "address_locality": "Austin",
-          "address_region": "TX",
-          "address_country": "US",
-          "postal_code": "78701"
-        },
-        "description": "Backordered - ships Jan 15, arrives in 7-10 days",
-        "fulfillable_on": "2025-01-15T00:00:00Z"
-      }
+        {
+            "id": "li_shirts",
+            "item": {
+                "id": "prod_shirts",
+                "title": "Cotton T-Shirt",
+                "price": 2000
+            },
+            "quantity": { "total": 2, "fulfilled": 0 },
+            "totals": [
+                { "type": "subtotal", "amount": 4000 },
+                { "type": "total", "amount": 4000 }
+            ],
+            "status": "processing"
+        }
     ],
-    "events": [
-      {
-        "id": "evt_1",
-        "occurred_at": "2025-01-08T10:30:00Z",
-        "type": "delivered",
-        "line_items": [{ "id": "li_shoes", "quantity": 3 }],
-        "tracking_number": "123456789",
-        "tracking_url": "https://fedex.com/track/123456789",
-        "description": "Delivered to front door"
-      }
+    "fulfillment": {
+        "expectations": [
+            {
+                "id": "exp_1",
+                "line_items": [{ "id": "li_shoes", "quantity": 3 }],
+                "method_type": "shipping",
+                "destination": {
+                    "street_address": "123 Main St",
+                    "address_locality": "Austin",
+                    "address_region": "TX",
+                    "address_country": "US",
+                    "postal_code": "78701"
+                },
+                "description": "Arrives in 2-3 business days",
+                "fulfillable_on": "now"
+            },
+            {
+                "id": "exp_2",
+                "line_items": [{ "id": "li_shirts", "quantity": 2 }],
+                "method_type": "shipping",
+                "destination": {
+                    "street_address": "123 Main St",
+                    "address_locality": "Austin",
+                    "address_region": "TX",
+                    "address_country": "US",
+                    "postal_code": "78701"
+                },
+                "description": "Backordered - ships Jan 15, arrives in 7-10 days",
+                "fulfillable_on": "2025-01-15T00:00:00Z"
+            }
+        ],
+        "events": [
+            {
+                "id": "evt_1",
+                "occurred_at": "2025-01-08T10:30:00Z",
+                "type": "delivered",
+                "line_items": [{ "id": "li_shoes", "quantity": 3 }],
+                "tracking_number": "123456789",
+                "tracking_url": "https://fedex.com/track/123456789",
+                "description": "Delivered to front door"
+            }
+        ]
+    },
+    "adjustments": [
+        {
+            "id": "adj_1",
+            "type": "refund",
+            "occurred_at": "2025-01-10T14:30:00Z",
+            "status": "completed",
+            "line_items": [{ "id": "li_shoes", "quantity": 1 }],
+            "amount": 3000,
+            "description": "Defective item"
+        }
+    ],
+    "totals": [
+        { "type": "subtotal", "amount": 13000 },
+        { "type": "shipping", "amount": 1200 },
+        { "type": "tax", "amount": 1142 },
+        { "type": "total", "amount": 15342 }
     ]
-  },
-  "adjustments": [
-    {
-      "id": "adj_1",
-      "type": "refund",
-      "occurred_at": "2025-01-10T14:30:00Z",
-      "status": "completed",
-      "line_items": [{ "id": "li_shoes", "quantity": 1 }],
-      "amount": 3000,
-      "description": "Defective item"
-    }
-  ],
-  "totals": [
-    { "type": "subtotal", "amount": 13000 },
-    { "type": "shipping", "amount": 1200 },
-    { "type": "tax", "amount": 1142 },
-    { "type": "total", "amount": 15342 }
-  ]
 }
 ```
 
@@ -301,15 +309,15 @@ The platform provides its webhook URL in the order capability's `config` field d
 | ----------- | ------ | -------- | ----------------------------------------------------------- |
 | webhook_url | string | **Yes**  | URL where merchant sends order lifecycle events (webhooks). |
 
-**Example:**
+### Example
 
 ```json
 {
-  "name": "dev.ucp.shopping.order",
-  "version": "2026-01-11",
-  "config": {
-    "webhook_url": "https://platform.example.com/webhooks/ucp/orders"
-  }
+    "name": "dev.ucp.shopping.order",
+    "version": "2026-01-11",
+    "config": {
+        "webhook_url": "https://platform.example.com/webhooks/ucp/orders"
+    }
 }
 ```
 
@@ -317,14 +325,14 @@ The platform provides its webhook URL in the order capability's `config` field d
 
 Webhook payloads **MUST** be signed by the business and verified by the platform to ensure authenticity and integrity.
 
-**Signing (Business)**
+### Signing (Business)
 
 1. Select a key from the `signing_keys` array in UCP profile.
 1. Create a detached JWT (RFC 7797) over the request body using the selected key.
 1. Include the JWT in the `Request-Signature` header.
 1. Include the key ID in the JWT header's `kid` claim to allow the receiver to identify which key to use for verification.
 
-**Verification (Platform)**
+### Verification (Platform)
 
 1. Extract the `Request-Signature` header from the incoming webhook request.
 1. Parse the JWT header to retrieve the `kid` (key ID).
@@ -333,7 +341,7 @@ Webhook payloads **MUST** be signed by the business and verified by the platform
 1. Verify the JWT signature against the request body using the public key.
 1. If verification fails, reject the webhook with an appropriate error response.
 
-**Key Rotation**
+### Key Rotation
 
 The `signing_keys` array supports multiple keys to enable zero-downtime rotation:
 
@@ -342,12 +350,12 @@ The `signing_keys` array supports multiple keys to enable zero-downtime rotation
 
 ## Guidelines
 
-**Platform:**
+### Platform
 
 - **MUST** respond quickly with a 2xx HTTP status code to acknowledge receipt
 - Process events asynchronously after responding
 
-**Business:**
+### Business
 
 - **MUST** sign all webhook payloads using a key from their `signing_keys` array (published in `/.well-known/ucp`). The signature **MUST** be included in the `Request-Signature` header as a detached JWT (RFC 7797).
 - **MUST** send "Order created" event with fully populated order entity

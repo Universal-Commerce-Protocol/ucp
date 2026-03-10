@@ -36,7 +36,7 @@ ______________________________________________________________________
 
 {Optional: ASCII diagram showing participant relationships}
 
-```text
+```json
 ┌─────────┐     ┌───────────────┐     ┌────────────┐
 │Platform │     │   {Provider}  │     │  Business  │
 └────┬────┘     └───────┬───────┘     └──────┬─────┘
@@ -62,7 +62,7 @@ Before advertising this handler, businesses **MUST** complete:
 1. {Prerequisite 1, e.g., "Register with {provider} to obtain a business identifier"}
 1. {Prerequisite 2}
 
-**Prerequisites Output:**
+### Prerequisites Output
 
 | Field                   | Description                                      |
 | ----------------------- | ------------------------------------------------ |
@@ -85,23 +85,21 @@ Businesses advertise support for this handler in the checkout's `payment.handler
 
 ```json
 {
-  "payment": {
-    "handlers": [
-      {
-        "id": "{handler_id}",
-        "name": "{handler_name}",
-        "version": "{version}",
-        "spec": "{spec_url}",
-        "config_schema": "{config_schema_url}",
-        "instrument_schemas": [
-          "{instrument_schema_url}"
-        ],
-        "config": {
-          // Handler-specific configuration
-        }
-      }
-    ]
-  }
+    "payment": {
+        "handlers": [
+            {
+                "id": "{handler_id}",
+                "name": "{handler_name}",
+                "version": "{version}",
+                "spec": "{spec_url}",
+                "config_schema": "{config_schema_url}",
+                "instrument_schemas": ["{instrument_schema_url}"],
+                "config": {
+                    // Handler-specific configuration
+                }
+            }
+        ]
+    }
 }
 ```
 
@@ -128,7 +126,7 @@ Before using this handler, Platforms **MUST** complete:
 1. {Prerequisite 1, e.g., "Register with {provider} to obtain a Platform identifier"}
 1. {Prerequisite 2}
 
-**Prerequisites Output:**
+### Prerequisites Output
 
 | Field                   | Description                                    |
 | ----------------------- | ---------------------------------------------- |
@@ -145,11 +143,11 @@ The Platform identifies `{handler_name}` in the business's `payment.handlers` ar
 
 ```json
 {
-  "id": "{handler_id}",
-  "name": "{handler_name}",
-  "config": {
-    // Business's configuration
-  }
+    "id": "{handler_id}",
+    "name": "{handler_name}",
+    "config": {
+        // Business's configuration
+    }
 }
 ```
 
@@ -203,7 +201,7 @@ Before participating in this handler's flow, {participants} **MUST** complete:
 1. {Prerequisite 1}
 1. {Prerequisite 2}
 
-**Prerequisites Output:**
+### Prerequisites Output
 
 | Field                   | Description                                    |
 | ----------------------- | ---------------------------------------------- |

@@ -121,9 +121,9 @@ Content-Type: application/json
         "name": "gpay",
         "version": "2024-12-03",
         "spec": "https://developers.google.com/merchant/ucp/guides/gpay-payment-handler",
-        "config_schema": "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/gpay_config.json",
+        "config_schema": "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/config.json",
         "instrument_schemas": [
-          "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/gpay_card_payment_instrument.json"
+          "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/card_payment_instrument.json"
         ],
         "config": {
           "allowed_payment_methods": [
@@ -257,13 +257,13 @@ Content-Type: application/json
   "payment": {
     "handlers": [
       {
-        "id": "com.google.pay",
-        "name": "gpay",
-        "version": "2024-12-03",
-        "spec": "https://ucp.dev/handlers/google_pay",
-        "config_schema": "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/gpay_config.json",
+        "id": "8c9202bd-63cc-4241-8d24-d57ce69ea31c",
+        "name": "com.google.pay",
+        "version": "2026-01-11",
+        "spec": "https://pay.google.com/gp/p/ucp/2026-01-11/",
+        "config_schema": "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/config.json",
         "instrument_schemas": [
-          "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/gpay_card_payment_instrument.json"
+          "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/card_payment_instrument.json"
         ],
         "config": {
           "allowed_payment_methods": [
@@ -462,13 +462,13 @@ Content-Type: application/json
   "payment": {
     "handlers": [
       {
-        "id": "com.google.pay",
-        "name": "gpay",
-        "version": "2024-12-03",
-        "spec": "https://ucp.dev/handlers/google_pay",
-        "config_schema": "https://ucp.dev/handlers/google_pay/config.json",
+        "id": "8c9202bd-63cc-4241-8d24-d57ce69ea31c",
+        "name": "com.google.pay",
+        "version": "2026-01-11",
+        "spec": "https://pay.google.com/gp/p/ucp/2026-01-11/",
+        "config_schema": "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/config.json",
         "instrument_schemas": [
-          "https://ucp.dev/handlers/google_pay/card_payment_instrument.json"
+          "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/card_payment_instrument.json"
         ],
         "config": {
           "allowed_payment_methods": [
@@ -668,13 +668,13 @@ Content-Type: application/json
   "payment": {
     "handlers": [
       {
-        "id": "com.google.pay",
-        "name": "gpay",
-        "version": "2024-12-03",
-        "spec": "https://ucp.dev/handlers/google_pay",
-        "config_schema": "https://ucp.dev/handlers/google_pay/config.json",
+        "id": "8c9202bd-63cc-4241-8d24-d57ce69ea31c",
+        "name": "com.google.pay",
+        "version": "2026-01-11",
+        "spec": "https://pay.google.com/gp/p/ucp/2026-01-11/",
+        "config_schema": "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/config.json",
         "instrument_schemas": [
-          "https://ucp.dev/handlers/google_pay/card_payment_instrument.json"
+          "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/card_payment_instrument.json"
         ],
         "config": {
           "allowed_payment_methods": [
@@ -858,13 +858,13 @@ Content-Type: application/json
   "payment": {
     "handlers": [
       {
-        "id": "com.google.pay",
-        "name": "gpay",
-        "version": "2024-12-03",
-        "spec": "https://ucp.dev/handlers/google_pay",
-        "config_schema": "https://ucp.dev/handlers/google_pay/config.json",
+        "id": "8c9202bd-63cc-4241-8d24-d57ce69ea31c",
+        "name": "com.google.pay",
+        "version": "2026-01-11",
+        "spec": "https://pay.google.com/gp/p/ucp/2026-01-11/",
+        "config_schema": "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/config.json",
         "instrument_schemas": [
-          "https://ucp.dev/handlers/google_pay/card_payment_instrument.json"
+          "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/card_payment_instrument.json"
         ],
         "config": {
           "allowed_payment_methods": [
@@ -1022,13 +1022,13 @@ Content-Type: application/json
   "payment": {
     "handlers": [
       {
-        "id": "com.google.pay",
-        "name": "gpay",
-        "version": "2024-12-03",
-        "spec": "https://ucp.dev/handlers/google_pay",
-        "config_schema": "https://ucp.dev/handlers/google_pay/config.json",
+        "id": "8c9202bd-63cc-4241-8d24-d57ce69ea31c",
+        "name": "com.google.pay",
+        "version": "2026-01-11",
+        "spec": "https://pay.google.com/gp/p/ucp/2026-01-11/",
+        "config_schema": "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/config.json",
         "instrument_schemas": [
-          "https://ucp.dev/handlers/google_pay/card_payment_instrument.json"
+          "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/card_payment_instrument.json"
         ],
         "config": {
           "allowed_payment_methods": [
@@ -1182,13 +1182,13 @@ Content-Type: application/json
   "payment": {
     "handlers": [
       {
-        "id": "com.google.pay",
-        "name": "gpay",
-        "version": "2024-12-03",
-        "spec": "https://ucp.dev/handlers/google_pay",
-        "config_schema": "https://ucp.dev/handlers/google_pay/config.json",
+        "id": "8c9202bd-63cc-4241-8d24-d57ce69ea31c",
+        "name": "com.google.pay",
+        "version": "2026-01-11",
+        "spec": "https://pay.google.com/gp/p/ucp/2026-01-11/",
+        "config_schema": "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/config.json",
         "instrument_schemas": [
-          "https://ucp.dev/handlers/google_pay/card_payment_instrument.json"
+          "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/card_payment_instrument.json"
         ],
         "config": {
           "allowed_payment_methods": [
@@ -1273,15 +1273,15 @@ Error responses follow the standard UCP error structure:
 
 ```json
 {
-  "status": "requires_escalation",
-  "messages": [
-    {
-      "type": "error",
-      "code": "invalid_cart_items",
-      "content": "One or more cart items are invalid",
-      "severity": "requires_buyer_input",
-    }
-  ]
+    "status": "requires_escalation",
+    "messages": [
+        {
+            "type": "error",
+            "code": "invalid_cart_items",
+            "content": "One or more cart items are invalid",
+            "severity": "requires_buyer_input"
+        }
+    ]
 }
 ```
 

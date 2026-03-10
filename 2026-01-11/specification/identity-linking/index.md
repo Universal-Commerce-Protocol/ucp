@@ -8,13 +8,15 @@ The Identity Linking capability enables a **platform** (e.g., Google, an agentic
 
 This linkage is foundational for commerce experiences, such as accessing loyalty benefits, utilizing personalized offers, managing wishlists, and executing authenticated checkouts.
 
-**This specification leverages [OAuth 2.0](https://datatracker.ietf.org/doc/html/rfc6749)** as the mechanism for securely linking a user's platform account with their business account.
+### This specification leverages
+
+[OAuth 2.0](https://datatracker.ietf.org/doc/html/rfc6749) as the mechanism for securely linking a user's platform account with their business account.
 
 ## General guidelines
 
 (In addition to the overarching guidelines)
 
-**For platforms**
+### For platforms
 
 - **MUST** authenticate using their `client_id` and `client_secret` ([RFC 6749 2.3.1](https://datatracker.ietf.org/doc/html/rfc6749#section-2.3.1)) through HTTP Basic Authentication ([RFC 7617](https://datatracker.ietf.org/doc/html/rfc7617)) when exchanging codes for tokens.
   - **MAY** support Client Metadata
@@ -26,7 +28,7 @@ This linkage is foundational for commerce experiences, such as accessing loyalty
   - **SHOULD** call the business's revocation endpoint ([RFC 7009](https://datatracker.ietf.org/doc/html/rfc7009)) when a user initiates an unlink action on the platform side.
   - **SHOULD** support [OpenID RISC Profile 1.0](https://openid.net/specs/openid-risc-1_0-final.html) to handle asynchronous account updates, unlinking events, and cross-account protection.
 
-**For businesses**
+### For businesses
 
 - **MUST** implement OAuth 2.0 ([RFC 6749](https://datatracker.ietf.org/doc/html/rfc6749))
 - **MUST** adhere to [RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414) to declare the location of their OAuth 2.0 endpoints (`/.well-known/oauth-authorization-server`)
@@ -72,23 +74,14 @@ Example of [metadata](https://datatracker.ietf.org/doc/html/rfc8414#section-2) s
 
 ```json
 {
-  "issuer": "https://merchant.example.com",
-  "authorization_endpoint": "https://merchant.example.com/oauth2/authorize",
-  "token_endpoint": "https://merchant.example.com/oauth2/token",
-  "revocation_endpoint": "https://merchant.example.com/oauth2/revoke",
-  "scopes_supported": [
-    "ucp:scopes:checkout_session",
-  ],
-  "response_types_supported": [
-    "code"
-  ],
-  "grant_types_supported": [
-    "authorization_code",
-    "refresh_token"
-  ],
-  "token_endpoint_auth_methods_supported": [
-    "client_secret_basic"
-  ],
-  "service_documentation": "https://merchant.example.com/docs/oauth2"
+    "issuer": "https://merchant.example.com",
+    "authorization_endpoint": "https://merchant.example.com/oauth2/authorize",
+    "token_endpoint": "https://merchant.example.com/oauth2/token",
+    "revocation_endpoint": "https://merchant.example.com/oauth2/revoke",
+    "scopes_supported": ["ucp:scopes:checkout_session"],
+    "response_types_supported": ["code"],
+    "grant_types_supported": ["authorization_code", "refresh_token"],
+    "token_endpoint_auth_methods_supported": ["client_secret_basic"],
+    "service_documentation": "https://merchant.example.com/docs/oauth2"
 }
 ```

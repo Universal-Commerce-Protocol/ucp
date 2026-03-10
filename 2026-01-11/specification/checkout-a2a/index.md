@@ -8,18 +8,18 @@ Businesses that support A2A transport must specify the agent card endpoint as pa
 
 ```json
 {
-  "ucp": {
-    "version": "2026-01-11",
-    "services": {
-      "dev.ucp.shopping": {
+    "ucp": {
         "version": "2026-01-11",
-        "spec": "https://ucp.dev/specification/overview",
-        "a2a": {
-          "endpoint": "https://example-business.com/.well-known/agent-card.json"
+        "services": {
+            "dev.ucp.shopping": {
+                "version": "2026-01-11",
+                "spec": "https://ucp.dev/2026-01-11/specification/overview",
+                "a2a": {
+                    "endpoint": "https://example-business.com/.well-known/agent-card.json"
+                }
+            }
         }
-      }
     }
-  }
 }
 ```
 
@@ -27,7 +27,7 @@ Businesses that support A2A transport must specify the agent card endpoint as pa
 
 Shopping platforms interacting with the business agent must send their profile URI as `UCP-Agent` request headers with every request.
 
-```text
+```json
 UCP-Agent: profile="https://agent.example/profiles/v2025-11/shopping-agent.json"
 Content-Type: application/json
 ```
@@ -53,25 +53,25 @@ An example:
 
 ```json
 {
-  "extensions": [
-    {
-      "uri": "https://ucp.dev/specification/reference?v=2026-01-11",
-      "description": "Business agent supporting UCP",
-      "params": {
-        "capabilities": [
-          {
-            "name": "dev.ucp.shopping.checkout",
-            "version": "2026-01-11"
-          },
-          {
-            "name": "dev.ucp.shopping.fulfillment",
-            "version": "2026-01-11",
-            "extends": "dev.ucp.shopping.checkout"
-          }
-        ]
-      }
-    }
-  ]
+    "extensions": [
+        {
+            "uri": "https://ucp.dev/specification/reference?v=2026-01-11",
+            "description": "Business agent supporting UCP",
+            "params": {
+                "capabilities": [
+                    {
+                        "name": "dev.ucp.shopping.checkout",
+                        "version": "2026-01-11"
+                    },
+                    {
+                        "name": "dev.ucp.shopping.fulfillment",
+                        "version": "2026-01-11",
+                        "extends": "dev.ucp.shopping.checkout"
+                    }
+                ]
+            }
+        }
+    ]
 }
 ```
 
@@ -101,18 +101,18 @@ Examples:
 
 ```json
 {
-  "message": {
-    "role": "user",
-    "parts": [
-      {
-        "type": "text",
-        "text": "add Pixel 10 Pro to my checkout"
-      }
-    ],
-    "messageId": "69da8f87-991b-479e-80dc-ed92fcb57cbe",
-    "kind": "message",
-    "contextId": "aad14abc-4082-4748-84ca-4afff85aedfa"
-  }
+    "message": {
+        "role": "user",
+        "parts": [
+            {
+                "type": "text",
+                "text": "add Pixel 10 Pro to my checkout"
+            }
+        ],
+        "messageId": "69da8f87-991b-479e-80dc-ed92fcb57cbe",
+        "kind": "message",
+        "contextId": "aad14abc-4082-4748-84ca-4afff85aedfa"
+    }
 }
 ```
 
@@ -120,22 +120,22 @@ Examples:
 
 ```json
 {
-  "message": {
-    "role": "user",
-    "parts": [
-      {
-        "type": "data",
-        "data": {
-          "action": "add_to_checkout",
-          "product_id": "PIXEL-10-PRO",
-          "quantity": 1
-        }
-      }
-    ],
-    "messageId": "e94a8c10-69f4-4c4c-b988-21a298302da6",
-    "kind": "message",
-    "contextId": "aad14abc-4082-4748-84ca-4afff85aedfa"
-  }
+    "message": {
+        "role": "user",
+        "parts": [
+            {
+                "type": "data",
+                "data": {
+                    "action": "add_to_checkout",
+                    "product_id": "PIXEL-10-PRO",
+                    "quantity": 1
+                }
+            }
+        ],
+        "messageId": "e94a8c10-69f4-4c4c-b988-21a298302da6",
+        "kind": "message",
+        "contextId": "aad14abc-4082-4748-84ca-4afff85aedfa"
+    }
 }
 ```
 
@@ -168,7 +168,7 @@ When a user is ready to make a payment, `payment_data` must be submitted to the 
 
 Upon completion of the checkout process, the business agent must return the checkout object containing an `order` attribute with `id` and `permalink_url`.
 
-**Request format:**
+### Request format
 
 ```json
 {
@@ -253,48 +253,48 @@ When AP2 mandates extension is enabled, the business agent must create a detache
 
 When the user confirms the payment on a platform, the user signed checkout and payment mandate objects must be sent as `DataPart`s to the business agent for completing checkout. The `payment_data` which includes the payment mandate must be submitted as part of a `DataPart` with attribute name `a2a.ucp.checkout.payment_data`. Signed checkout mandate must be specified in the `DataPart` as `ap2.checkout_mandate`. The `token` attribute of `payment_data` contains the payment mandate. Refer to [AP2 Mandates Extension](https://ucp.dev/2026-01-11/specification/ap2-mandates/index.md) documentation for more details about verification and processing of the mandates to complete the checkout.
 
-**Request format:**
+### Request format
 
 ```json
 {
-  "message": {
-    "role": "user",
-    "parts": [
-      {
-        "type": "data",
-        "data": {
-          "action": "complete_checkout"
-        }
-      },
-      {
-        "kind": "data",
-        "data": {
-          "a2a.ucp.checkout.payment_data": {
-            "id": "instr_1",
-            "handler_id": "gpay",
-            "type": "card",
-            "description": "Visa •••• 1234",
-            "billing_address": {
-              "street_address": "123 Main St",
-              "address_locality": "Anytown",
-              "address_region": "CA",
-              "address_country": "US",
-              "postal_code": "12345"
+    "message": {
+        "role": "user",
+        "parts": [
+            {
+                "type": "data",
+                "data": {
+                    "action": "complete_checkout"
+                }
             },
-            "credential": {
-              "type": "PAYMENT_GATEWAY",
-              "token": "examplePaymentMethodToken"
+            {
+                "kind": "data",
+                "data": {
+                    "a2a.ucp.checkout.payment_data": {
+                        "id": "instr_1",
+                        "handler_id": "gpay",
+                        "type": "card",
+                        "description": "Visa •••• 1234",
+                        "billing_address": {
+                            "street_address": "123 Main St",
+                            "address_locality": "Anytown",
+                            "address_region": "CA",
+                            "address_country": "US",
+                            "postal_code": "12345"
+                        },
+                        "credential": {
+                            "type": "PAYMENT_GATEWAY",
+                            "token": "examplePaymentMethodToken"
+                        }
+                    },
+                    "ap2": {
+                        "checkout_mandate": "eyJhbGciOiJFUz..."
+                    }
+                }
             }
-          },
-          "ap2": {
-            "checkout_mandate": "eyJhbGciOiJFUz..."
-          }
-        }
-      }
-    ],
-    "messageId": "e94a8c10-69f4-4c4c-b988-21a298302da6",
-    "kind": "message",
-    "contextId": "aad14abc-4082-4748-84ca-4afff85aedfa"
-  }
+        ],
+        "messageId": "e94a8c10-69f4-4c4c-b988-21a298302da6",
+        "kind": "message",
+        "contextId": "aad14abc-4082-4748-84ca-4afff85aedfa"
+    }
 }
 ```

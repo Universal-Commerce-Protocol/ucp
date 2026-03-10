@@ -33,7 +33,7 @@ ______________________________________________________________________
 
 ### Pattern Flow
 
-```text
+```json
 ┌─────────────────┐                              ┌────────────┐
 │  Platform       │                              │  Business  │
 │                 │                              │            │
@@ -69,7 +69,7 @@ ______________________________________________________________________
 
 ### Prerequisites
 
-**CRITICAL: PCI DSS Compliance Required**
+### CRITICAL: PCI DSS Compliance Required
 
 Before accepting this handler, businesses must register their public encryption key with the platform.
 
@@ -79,7 +79,7 @@ While businesses receive only encrypted `EncryptedCredential` payloads during ch
 - Secure handling of raw credentials after decryption
 - Compliance with all PCI DSS requirements for handling Primary Account Numbers (PANs)
 
-**Prerequisites Output:**
+### Prerequisites Output
 
 | Field                   | Description                                                |
 | ----------------------- | ---------------------------------------------------------- |
@@ -90,9 +90,9 @@ While businesses receive only encrypted `EncryptedCredential` payloads during ch
 
 Businesses advertise the platform's handler. The `identity` field contains the **business's identity**, which the platform uses to look up the correct public key for encryption.
 
-The only supported identity schema is [PaymentIdentity](https://ucp.dev/schemas/shopping/types/payment_identity.json).
+The only supported identity schema is [PaymentIdentity](/2026-01-11/schemas/shopping/types/payment_identity.json).
 
-The only supported instrument schema is [CardPaymentInstrument](https://ucp.dev/schemas/shopping/types/card_payment_instrument.json), the only supported checkout credential schema is `EncryptedCredential`, and the only supported source credential schema is [CardCredential](https://ucp.dev/schemas/shopping/types/card_credential.json).
+The only supported instrument schema is [CardPaymentInstrument](/2026-01-11/schemas/shopping/types/card_payment_instrument.json), the only supported checkout credential schema is `EncryptedCredential`, and the only supported source credential schema is [CardCredential](/2026-01-11/schemas/shopping/types/card_credential.json).
 
 **Note:** `CardCredential` contains raw PANs. The platform's **PCI DSS compliant** vaulting service handles these credentials and encrypts them before transmission. Businesses receive only encrypted payloads but MUST be PCI DSS compliant once they decrypt the credentials locally.
 
@@ -100,24 +100,24 @@ The only supported instrument schema is [CardPaymentInstrument](https://ucp.dev/
 
 ```json
 {
-  "payment": {
-    "handlers": [
-      {
-        "id": "platform_encrypted",
-        "name": "com.example.platform_encrypted",
-        "version": "2026-01-11",
-        "spec": "https://platform.example.com/ucp/encrypted-handler.json",
-        "config_schema": "https://platform.example.com/ucp/encrypted-handler/config.json",
-        "instrument_schemas": [
-          "https://ucp.dev/schemas/shopping/types/card_payment_instrument.json"
-        ],
-        "config": {
-          "merchant_id": "merchant_abc123",
-          "environment": "production"
-        }
-      }
-    ]
-  }
+    "payment": {
+        "handlers": [
+            {
+                "id": "platform_encrypted",
+                "name": "com.example.platform_encrypted",
+                "version": "2026-01-11",
+                "spec": "https://platform.example.com/ucp/encrypted-handler.json",
+                "config_schema": "https://platform.example.com/ucp/encrypted-handler/config.json",
+                "instrument_schemas": [
+                    "https://ucp.dev/2026-01-11/schemas/shopping/types/card_payment_instrument.json"
+                ],
+                "config": {
+                    "merchant_id": "merchant_abc123",
+                    "environment": "production"
+                }
+            }
+        ]
+    }
 }
 ```
 
@@ -143,7 +143,7 @@ This handler is implemented by platforms that operate **PCI DSS compliant** cred
 1. Store business public keys during onboarding
 1. Encrypt credentials using the correct business's key based on handler identity
 
-**Implementation Requirements:**
+### Implementation Requirements
 
 | Requirement | Description                                                      |
 | ----------- | ---------------------------------------------------------------- |
@@ -209,5 +209,5 @@ ______________________________________________________________________
 
 ## References
 
-- **Identity Schema:** `https://ucp.dev/schemas/shopping/types/payment_identity.json`
-- **Instrument Schema:** `https://ucp.dev/schemas/shopping/types/card_payment_instrument.json`
+- **Identity Schema:** `https://ucp.dev/2026-01-11/schemas/shopping/types/payment_identity.json`
+- **Instrument Schema:** `https://ucp.dev/2026-01-11/schemas/shopping/types/card_payment_instrument.json`

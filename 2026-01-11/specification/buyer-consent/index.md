@@ -14,13 +14,13 @@ Businesses advertise consent support in their profile:
 
 ```json
 {
-  "capabilities": [
-    {
-      "name": "dev.ucp.shopping.buyer_consent",
-      "version": "2026-01-11",
-      "extends": "dev.ucp.shopping.checkout"
-    }
-  ]
+    "capabilities": [
+        {
+            "name": "dev.ucp.shopping.buyer_consent",
+            "version": "2026-01-11",
+            "extends": "dev.ucp.shopping.checkout"
+        }
+    ]
 }
 ```
 
