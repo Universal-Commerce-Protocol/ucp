@@ -145,7 +145,9 @@ operations. The same semantics apply to both resources.
 
 **Cart-to-checkout continuity:** When a cart is converted to a checkout via the
 cart capability's `cart_id` field, businesses MUST carry forward any discount
-codes that were applied to the cart.
+codes that were applied to the cart. Codes that are no longer valid at checkout
+time (e.g., expired, ineligible) SHOULD be communicated via `messages[]` using
+standard rejection codes.
 
 ## Rejected Codes
 
