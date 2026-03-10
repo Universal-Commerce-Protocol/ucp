@@ -16,8 +16,8 @@
 
 # {Handler Name} Payment Handler
 
-* **Handler Name:** `{reverse-dns.name}`
-* **Version:** `{YYYY-MM-DD}`
+- **Handler Name:** `{reverse-dns.name}`
+- **Version:** `{YYYY-MM-DD}`
 
 ## Introduction
 
@@ -32,10 +32,10 @@ supports.}
 
 ### Integration Guide
 
-| Participant | Integration Section |
-|:------------|:--------------------|
+| Participant  | Integration Section                           |
+| :----------- | :-------------------------------------------- |
 | **Business** | [Business Integration](#business-integration) |
-| **Platform**   | [Platform Integration](#platform-integration) |
+| **Platform** | [Platform Integration](#platform-integration) |
 
 ---
 
@@ -43,20 +43,20 @@ supports.}
 
 {Describe all participants in this handler and their roles.}
 
-> **Note on Terminology:**
-> While this specification refers to the participant as the **"business,"**
-> technical schema fields may retain the standard industry nomenclature
-> **`merchant_*`** (e.g., `merchant_id`). Mappings are documented below.
+> **Note on Terminology:** While this specification refers to the participant as
+> the **"business,"** technical schema fields may retain the standard industry
+> nomenclature **`merchant_*`** (e.g., `merchant_id`). Mappings are documented
+> below.
 
-| Participant | Role | Prerequisites |
-|:------------|:-----|:--------------|
-| **Business** | {role description} | {Yes/No — brief description} |
-| **Platform** | {role description} | {Yes/No — brief description} |
+| Participant             | Role               | Prerequisites                |
+| :---------------------- | :----------------- | :--------------------------- |
+| **Business**            | {role description} | {Yes/No — brief description} |
+| **Platform**            | {role description} | {Yes/No — brief description} |
 | **{Other Participant}** | {role description} | {Yes/No — brief description} |
 
 {Optional: ASCII diagram showing participant relationships}
 
-```
+```json
 ┌─────────┐     ┌───────────────┐     ┌────────────┐
 │Platform │     │   {Provider}  │     │  Business  │
 └────┬────┘     └───────┬───────┘     └──────┬─────┘
@@ -90,15 +90,16 @@ supports.}
 
 Before advertising this handler, businesses **MUST** complete:
 
-1. {Prerequisite 1, e.g., "Register with {provider} to obtain a business identifier"}
+1. {Prerequisite 1, e.g., "Register with {provider} to obtain a business
+   identifier"}
 2. {Prerequisite 2}
 
-**Prerequisites Output:**
+### Prerequisites Output
 
-| Field | Description |
-|:------|:------------|
+| Field                   | Description                                      |
+| :---------------------- | :----------------------------------------------- |
 | `identity.access_token` | {what identifier is assigned, e.g., business_id} |
-| {additional config} | {any additional configuration from onboarding} |
+| {additional config}     | {any additional configuration from onboarding}   |
 
 ### Handler Configuration
 
@@ -109,31 +110,29 @@ Businesses advertise support for this handler in the checkout's
 
 **Schema URL:** `{url to config JSON schema}`
 
-| Field | Type | Required | Description |
-|:------|:-----|:---------|:------------|
+| Field   | Type   | Required | Description   |
+| :------ | :----- | :------- | :------------ |
 | {field} | {type} | {Yes/No} | {description} |
 
 #### Example Handler Declaration
 
 ```json
 {
-  "payment": {
-    "handlers": [
-      {
-        "id": "{handler_id}",
-        "name": "{handler_name}",
-        "version": "{version}",
-        "spec": "{spec_url}",
-        "config_schema": "{config_schema_url}",
-        "instrument_schemas": [
-          "{instrument_schema_url}"
-        ],
-        "config": {
-          // Handler-specific configuration
-        }
-      }
-    ]
-  }
+    "payment": {
+        "handlers": [
+            {
+                "id": "{handler_id}",
+                "name": "{handler_name}",
+                "version": "{version}",
+                "spec": "{spec_url}",
+                "config_schema": "{config_schema_url}",
+                "instrument_schemas": ["{instrument_schema_url}"],
+                "config": {
+                    // Handler-specific configuration
+                }
+            }
+        ]
+    }
 }
 ```
 
@@ -141,10 +140,11 @@ Businesses advertise support for this handler in the checkout's
 
 Upon receiving a payment with this handler's instrument, businesses **MUST**:
 
-1. **Validate Handler:** Confirm `instrument.handler_name` matches an advertised handler.
+1. **Validate Handler:** Confirm `instrument.handler_name` matches an advertised
+   handler.
 2. **Ensure Idempotency:** If the request is a retry (matches a previous
-  `checkout_id` or idempotency key), return the previous result immediately
-  without re-processing funds.
+   `checkout_id` or idempotency key), return the previous result immediately
+   without re-processing funds.
 3. **{Step 3}:** {description}
 4. **{Step 4}:** {description}
 5. **Return Response:** Respond with the finalized checkout state.
@@ -159,15 +159,16 @@ Upon receiving a payment with this handler's instrument, businesses **MUST**:
 
 Before using this handler, Platforms **MUST** complete:
 
-1. {Prerequisite 1, e.g., "Register with {provider} to obtain a Platform identifier"}
+1. {Prerequisite 1, e.g., "Register with {provider} to obtain a Platform
+   identifier"}
 2. {Prerequisite 2}
 
-**Prerequisites Output:**
+### Prerequisites Output
 
-| Field | Description |
-|:------|:------------|
-| `identity.access_token` | {what identifier is assigned} |
-| {additional config} | {any additional configuration from onboarding} |
+| Field                   | Description                                    |
+| :---------------------- | :--------------------------------------------- |
+| `identity.access_token` | {what identifier is assigned}                  |
+| {additional config}     | {any additional configuration from onboarding} |
 
 ### Payment Protocol
 
@@ -180,11 +181,11 @@ array.
 
 ```json
 {
-  "id": "{handler_id}",
-  "name": "{handler_name}",
-  "config": {
-    // Business's configuration
-  }
+    "id": "{handler_id}",
+    "name": "{handler_name}",
+    "config": {
+        // Business's configuration
+    }
 }
 ```
 
@@ -245,12 +246,12 @@ Before participating in this handler's flow, {participants} **MUST** complete:
 1. {Prerequisite 1}
 2. {Prerequisite 2}
 
-**Prerequisites Output:**
+### Prerequisites Output
 
-| Field | Description |
-|:------|:------------|
-| `identity.access_token` | {what identifier is assigned} |
-| {additional config} | {any additional configuration from onboarding} |
+| Field                   | Description                                    |
+| :---------------------- | :--------------------------------------------- |
+| `identity.access_token` | {what identifier is assigned}                  |
+| {additional config}     | {any additional configuration from onboarding} |
 
 ### {Action or Configuration}
 
@@ -262,14 +263,14 @@ Before participating in this handler's flow, {participants} **MUST** complete:
 
 ## Security Considerations
 
-| Requirement | Description |
-|:------------|:------------|
-| **Binding required** | Credentials **MUST** be bound to `checkout_id` and `identity` to prevent reuse. |
-| **Binding placement** | Binding data (e.g., `checkout_id`) **SHOULD** be included within the `credential` payload to ensure it is covered by the signature, rather than in transport headers. |
-| **Binding verified** | The processing participant **MUST** verify binding matches before processing. |
-| **Token Expiry** | {If using tokens: Tokens **MUST** expire after {duration} or single-use.} |
-| **Data Residency** | {Specify if PII **MUST** be processed/stored in specific geographic regions (e.g., EU, US) to comply with local laws.} |
-| **{Additional requirement}** | {description} |
+| Requirement                  | Description                                                                                                                                                           |
+| :--------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Binding required**         | Credentials **MUST** be bound to `checkout_id` and `identity` to prevent reuse.                                                                                       |
+| **Binding placement**        | Binding data (e.g., `checkout_id`) **SHOULD** be included within the `credential` payload to ensure it is covered by the signature, rather than in transport headers. |
+| **Binding verified**         | The processing participant **MUST** verify binding matches before processing.                                                                                         |
+| **Token Expiry**             | {If using tokens: Tokens **MUST** expire after {duration} or single-use.}                                                                                             |
+| **Data Residency**           | {Specify if PII **MUST** be processed/stored in specific geographic regions (e.g., EU, US) to comply with local laws.}                                                |
+| **{Additional requirement}** | {description}                                                                                                                                                         |
 
 ---
 

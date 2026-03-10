@@ -21,17 +21,17 @@ required metadata fields and versioning strategy.
 
 ## Schema Metadata Fields
 
-UCP schemas use a combination of standard JSON Schema fields and
-UCP-specific metadata:
+UCP schemas use a combination of standard JSON Schema fields and UCP-specific
+metadata:
 
-| Field | Standard | Purpose | Required For |
-|-------|----------|---------|--------------|
-| `$schema` | JSON Schema | Declares JSON Schema draft version (**SHOULD** use `draft/2020-12`) | All schemas |
-| `$id` | JSON Schema | Schema's canonical URI for `$ref` resolution | All schemas |
-| `title` | JSON Schema | Human-readable display name | All schemas |
-| `description` | JSON Schema | Schema purpose and usage | All schemas |
-| `name` | UCP | Reverse-domain capability identifier | Capability schemas only |
-| `version` | UCP | Capability version (YYYY-MM-DD format) | Capability schemas only |
+| Field         | Standard    | Purpose                                                             | Required For            |
+| ------------- | ----------- | ------------------------------------------------------------------- | ----------------------- |
+| `$schema`     | JSON Schema | Declares JSON Schema draft version (**SHOULD** use `draft/2020-12`) | All schemas             |
+| `$id`         | JSON Schema | Schema's canonical URI for `$ref` resolution                        | All schemas             |
+| `title`       | JSON Schema | Human-readable display name                                         | All schemas             |
+| `description` | JSON Schema | Schema purpose and usage                                            | All schemas             |
+| `name`        | UCP         | Reverse-domain capability identifier                                | Capability schemas only |
+| `version`     | UCP         | Capability version (YYYY-MM-DD format)                              | Capability schemas only |
 
 ## Self-Describing Schemas
 
@@ -57,32 +57,31 @@ represents without cross-referencing other documents.
 
 ### Why both `$id` and `name`?
 
-| Field | Role | Format |
-|-------|------|--------|
-| `$id` | JSON Schema primitive for `$ref` resolution and tooling | URI (required by spec) |
-| `name` | Stable capability identity, independent of hosting | Reverse-domain |
+| Field  | Role                                                    | Format                 |
+| ------ | ------------------------------------------------------- | ---------------------- |
+| `$id`  | JSON Schema primitive for `$ref` resolution and tooling | URI (required by spec) |
+| `name` | Stable capability identity, independent of hosting      | Reverse-domain         |
 
 `$id` must be a valid URI per JSON Schema spec. `name` is the wire protocol
 identifier used in capability declarations and negotiation, decoupled from
 schema hosting—`schema` URLs can change as infrastructure evolves.
 
-UCP uses reverse-domain notation for `name` (e.g.,
-`dev.ucp.shopping.checkout`) with DNS-based namespace governance. The stable
-identity layer allows trust and resolution mechanisms to evolve
-independently—future versions could adopt verifiable credentials,
-content-addressed schemas, or other verification methods without breaking
-capability negotiation.
+UCP uses reverse-domain notation for `name` (e.g., `dev.ucp.shopping.checkout`)
+with DNS-based namespace governance. The stable identity layer allows trust and
+resolution mechanisms to evolve independently—future versions could adopt
+verifiable credentials, content-addressed schemas, or other verification methods
+without breaking capability negotiation.
 
 ```json
 {
-  "capabilities": [
-    {"name": "dev.ucp.shopping.checkout", "version": "2026-01-11"},
-    {
-      "name": "dev.ucp.shopping.fulfillment",
-      "version": "2026-01-11",
-      "extends": "dev.ucp.shopping.checkout"
-    }
-  ]
+    "capabilities": [
+        { "name": "dev.ucp.shopping.checkout", "version": "2026-01-11" },
+        {
+            "name": "dev.ucp.shopping.fulfillment",
+            "version": "2026-01-11",
+            "extends": "dev.ucp.shopping.checkout"
+        }
+    ]
 }
 ```
 
@@ -90,7 +89,7 @@ capability negotiation.
 
 The `name` field uses reverse-domain notation for capability identification:
 
-```
+```text
 dev.ucp.shopping.checkout        # UCP checkout capability
 dev.ucp.shopping.fulfillment     # UCP fulfillment extension
 com.shopify.loyalty              # Vendor capability
@@ -139,8 +138,8 @@ Examples:
 Schemas that define data structures embedded within capabilities but are not
 independently negotiated.
 
-**MUST include**: `$schema`, `$id`, `title`, `description`
-**MUST NOT include**: `name`, `version`
+**MUST include**: `$schema`, `$id`, `title`, `description` **MUST NOT include**:
+`name`, `version`
 
 Examples:
 
@@ -151,8 +150,8 @@ Examples:
 
 Reusable type definitions referenced by capability and component schemas.
 
-**MUST include**: `$schema`, `$id`, `title`, `description`
-**MUST NOT include**: `name`, `version`
+**MUST include**: `$schema`, `$id`, `title`, `description` **MUST NOT include**:
+`name`, `version`
 
 Examples:
 
@@ -164,8 +163,8 @@ Examples:
 
 Schemas that define protocol structure rather than capability payloads.
 
-**MUST include**: `$schema`, `$id`, `title`, `description`
-**MUST NOT include**: `name`, `version`
+**MUST include**: `$schema`, `$id`, `title`, `description` **MUST NOT include**:
+`name`, `version`
 
 Examples:
 
@@ -185,10 +184,10 @@ Capabilities outside the `dev.ucp.*` namespace version fully independently:
 
 ```json
 {
-  "name": "com.shopify.loyalty",
-  "version": "2025-09-01",
-  "spec": "https://shopify.dev/ucp/loyalty",
-  "schema": "https://shopify.dev/ucp/schemas/loyalty.json"
+    "name": "com.shopify.loyalty",
+    "version": "2025-09-01",
+    "spec": "https://shopify.dev/ucp/loyalty",
+    "schema": "https://shopify.dev/ucp/schemas/loyalty.json"
 }
 ```
 

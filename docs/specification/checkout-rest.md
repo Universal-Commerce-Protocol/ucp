@@ -22,32 +22,33 @@ This document specifies the REST binding for the
 ## Protocol Fundamentals
 
 ### Base URL
+
 All UCP REST endpoints are relative to the business's base URL, which is
 discovered through the UCP profile at `/.well-known/ucp`. The endpoint for the
-checkout capability is defined in the `rest.endpoint` field of the
-business profile.
+checkout capability is defined in the `rest.endpoint` field of the business
+profile.
 
 ### Content Types
 
-*   **Request**: `application/json`
-*   **Response**: `application/json`
+- **Request**: `application/json`
+- **Response**: `application/json`
 
 All request and response bodies **MUST** be valid JSON as specified in
-[RFC 8259](https://tools.ietf.org/html/rfc8259){ target="_blank" }.
+[RFC 8259](https://tools.ietf.org/html/rfc8259){ target="\_blank" }.
 
 ### Transport Security
-All REST endpoints **MUST** be served over HTTPS with minimum TLS version
-1.3.
+
+All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
 ## Operations
 
-| Operation | Method | Endpoint | Description |
-| :---- | :---- | :---- | :---- |
-| [Create Checkout](checkout.md#create-checkout) | `POST` | `/checkout-sessions` | Create a checkout session. |
-| [Get Checkout](checkout.md#get-checkout) | `GET` | `/checkout-sessions/{id}` | Get a checkout session. |
-| [Update Checkout](checkout.md#update-checkout) | `PUT` | `/checkout-sessions/{id}` | Update a checkout session. |
-| [Complete Checkout](checkout.md#complete-checkout) | `POST` | `/checkout-sessions/{id}/complete` | Place the order. |
-| [Cancel Checkout](checkout.md#cancel-checkout) | `POST` | `/checkout-sessions/{id}/cancel` | Cancel a checkout session. |
+| Operation                                          | Method | Endpoint                           | Description                |
+| :------------------------------------------------- | :----- | :--------------------------------- | :------------------------- |
+| [Create Checkout](checkout.md#create-checkout)     | `POST` | `/checkout-sessions`               | Create a checkout session. |
+| [Get Checkout](checkout.md#get-checkout)           | `GET`  | `/checkout-sessions/{id}`          | Get a checkout session.    |
+| [Update Checkout](checkout.md#update-checkout)     | `PUT`  | `/checkout-sessions/{id}`          | Update a checkout session. |
+| [Complete Checkout](checkout.md#complete-checkout) | `POST` | `/checkout-sessions/{id}/complete` | Place the order.           |
+| [Cancel Checkout](checkout.md#cancel-checkout)     | `POST` | `/checkout-sessions/{id}/cancel`   | Cancel a checkout session. |
 
 ## Examples
 
@@ -145,9 +146,9 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
             "name": "gpay",
             "version": "2024-12-03",
             "spec": "https://developers.google.com/merchant/ucp/guides/gpay-payment-handler",
-            "config_schema": "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/gpay_config.json",
+            "config_schema": "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/config.json",
             "instrument_schemas": [
-              "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/gpay_card_payment_instrument.json"
+              "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/card_payment_instrument.json"
             ],
             "config": {
               "allowed_payment_methods": [
@@ -184,9 +185,9 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
 
 #### Update Buyer Info
 
-All fields in `buyer` are optional, allowing clients to progressively build
-the checkout state across multiple calls. Each PUT replaces the entire session,
-so clients must include all previously set fields they wish to retain.
+All fields in `buyer` are optional, allowing clients to progressively build the
+checkout state across multiple calls. Each PUT replaces the entire session, so
+clients must include all previously set fields they wish to retain.
 
 === "Request"
 
@@ -287,13 +288,13 @@ so clients must include all previously set fields they wish to retain.
       "payment": {
         "handlers": [
           {
-            "id": "com.google.pay",
-            "name": "gpay",
-            "version": "2024-12-03",
-            "spec": "https://ucp.dev/handlers/google_pay",
-            "config_schema": "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/gpay_config.json",
+            "id": "8c9202bd-63cc-4241-8d24-d57ce69ea31c",
+            "name": "com.google.pay",
+            "version": "2026-01-11",
+            "spec": "https://pay.google.com/gp/p/ucp/2026-01-11/",
+            "config_schema": "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/config.json",
             "instrument_schemas": [
-              "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/gpay_card_payment_instrument.json"
+              "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/card_payment_instrument.json"
             ],
             "config": {
               "allowed_payment_methods": [
@@ -329,8 +330,8 @@ so clients must include all previously set fields they wish to retain.
 #### Update Fulfillment
 
 Fulfillment is an extension to the checkout capability. Most fields are provided
-by the business based on buyer inputs, which includes desired fulfillment
-type & addresses.
+by the business based on buyer inputs, which includes desired fulfillment type &
+addresses.
 
 === "Request"
 
@@ -498,13 +499,13 @@ type & addresses.
       "payment": {
         "handlers": [
           {
-            "id": "com.google.pay",
-            "name": "gpay",
-            "version": "2024-12-03",
-            "spec": "https://ucp.dev/handlers/google_pay",
-            "config_schema": "https://ucp.dev/handlers/google_pay/config.json",
+            "id": "8c9202bd-63cc-4241-8d24-d57ce69ea31c",
+            "name": "com.google.pay",
+            "version": "2026-01-11",
+            "spec": "https://pay.google.com/gp/p/ucp/2026-01-11/",
+            "config_schema": "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/config.json",
             "instrument_schemas": [
-              "https://ucp.dev/handlers/google_pay/card_payment_instrument.json"
+              "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/card_payment_instrument.json"
             ],
             "config": {
               "allowed_payment_methods": [
@@ -708,13 +709,13 @@ Follow-up calls after initial `fulfillment` data to update selection.
       "payment": {
         "handlers": [
           {
-            "id": "com.google.pay",
-            "name": "gpay",
-            "version": "2024-12-03",
-            "spec": "https://ucp.dev/handlers/google_pay",
-            "config_schema": "https://ucp.dev/handlers/google_pay/config.json",
+            "id": "8c9202bd-63cc-4241-8d24-d57ce69ea31c",
+            "name": "com.google.pay",
+            "version": "2026-01-11",
+            "spec": "https://pay.google.com/gp/p/ucp/2026-01-11/",
+            "config_schema": "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/config.json",
             "instrument_schemas": [
-              "https://ucp.dev/handlers/google_pay/card_payment_instrument.json"
+              "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/card_payment_instrument.json"
             ],
             "config": {
               "allowed_payment_methods": [
@@ -904,13 +905,13 @@ place to set these expectations via `messages`.
       "payment": {
         "handlers": [
           {
-            "id": "com.google.pay",
-            "name": "gpay",
-            "version": "2024-12-03",
-            "spec": "https://ucp.dev/handlers/google_pay",
-            "config_schema": "https://ucp.dev/handlers/google_pay/config.json",
+            "id": "8c9202bd-63cc-4241-8d24-d57ce69ea31c",
+            "name": "com.google.pay",
+            "version": "2026-01-11",
+            "spec": "https://pay.google.com/gp/p/ucp/2026-01-11/",
+            "config_schema": "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/config.json",
             "instrument_schemas": [
-              "https://ucp.dev/handlers/google_pay/card_payment_instrument.json"
+              "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/card_payment_instrument.json"
             ],
             "config": {
               "allowed_payment_methods": [
@@ -1072,13 +1073,13 @@ place to set these expectations via `messages`.
       "payment": {
         "handlers": [
           {
-            "id": "com.google.pay",
-            "name": "gpay",
-            "version": "2024-12-03",
-            "spec": "https://ucp.dev/handlers/google_pay",
-            "config_schema": "https://ucp.dev/handlers/google_pay/config.json",
+            "id": "8c9202bd-63cc-4241-8d24-d57ce69ea31c",
+            "name": "com.google.pay",
+            "version": "2026-01-11",
+            "spec": "https://pay.google.com/gp/p/ucp/2026-01-11/",
+            "config_schema": "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/config.json",
             "instrument_schemas": [
-              "https://ucp.dev/handlers/google_pay/card_payment_instrument.json"
+              "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/card_payment_instrument.json"
             ],
             "config": {
               "allowed_payment_methods": [
@@ -1236,13 +1237,13 @@ place to set these expectations via `messages`.
       "payment": {
         "handlers": [
           {
-            "id": "com.google.pay",
-            "name": "gpay",
-            "version": "2024-12-03",
-            "spec": "https://ucp.dev/handlers/google_pay",
-            "config_schema": "https://ucp.dev/handlers/google_pay/config.json",
+            "id": "8c9202bd-63cc-4241-8d24-d57ce69ea31c",
+            "name": "com.google.pay",
+            "version": "2026-01-11",
+            "spec": "https://pay.google.com/gp/p/ucp/2026-01-11/",
+            "config_schema": "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/config.json",
             "instrument_schemas": [
-              "https://ucp.dev/handlers/google_pay/card_payment_instrument.json"
+              "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/card_payment_instrument.json"
             ],
             "config": {
               "allowed_payment_methods": [
@@ -1284,15 +1285,15 @@ operations unless otherwise noted.
 
 ### Specific Header Requirements
 
-*   **UCP-Agent**: All requests **MUST** include the `UCP-Agent` header
-    containing the platform profile URI using Dictionary Structured Field syntax
-    ([RFC 8941](https://datatracker.ietf.org/doc/html/rfc8941){target="_blank"}).
-    Format: `profile="https://platform.example/profile"`.
-*   **Idempotency-Key**: Operations that modify state **SHOULD** support
-    idempotency. When provided, the server **MUST**:
-    1.  Store the key with the operation result for at least 24 hours.
-    2.  Return the cached result for duplicate keys.
-    3.  Return `409 Conflict` if the key is reused with different parameters.
+- **UCP-Agent**: All requests **MUST** include the `UCP-Agent` header containing
+  the platform profile URI using Dictionary Structured Field syntax
+  ([RFC 8941](https://datatracker.ietf.org/doc/html/rfc8941){target="\_blank"}).
+  Format: `profile="https://platform.example/profile"`.
+- **Idempotency-Key**: Operations that modify state **SHOULD** support
+  idempotency. When provided, the server **MUST**:
+    1. Store the key with the operation result for at least 24 hours.
+    2. Return the cached result for duplicate keys.
+    3. Return `409 Conflict` if the key is reused with different parameters.
 
 ## Protocol Mechanics
 
@@ -1301,18 +1302,18 @@ operations unless otherwise noted.
 UCP uses standard HTTP status codes to indicate the success or failure of an API
 request.
 
-| Status Code | Description |
-| :--- | :--- |
-| `200 OK` | The request was successful. |
-| `201 Created` | The resource was successfully created. |
-| `400 Bad Request` | The request was invalid or cannot be served. |
-| `401 Unauthorized` | Authentication is required and has failed or has not been provided. |
-| `403 Forbidden` | The request is authenticated but the user does not have the necessary permissions. |
-| `404 Not Found` | The requested resource could not be found. |
-| `409 Conflict` | The request could not be completed due to a conflict (e.g., idempotent key reuse). |
-| `429 Too Many Requests` | Rate limit exceeded. |
-| `503 Service Unavailable` | Temporary unavailability. |
-| `500 Internal Server Error` | An unexpected condition was encountered on the server. |
+| Status Code                 | Description                                                                        |
+| :-------------------------- | :--------------------------------------------------------------------------------- |
+| `200 OK`                    | The request was successful.                                                        |
+| `201 Created`               | The resource was successfully created.                                             |
+| `400 Bad Request`           | The request was invalid or cannot be served.                                       |
+| `401 Unauthorized`          | Authentication is required and has failed or has not been provided.                |
+| `403 Forbidden`             | The request is authenticated but the user does not have the necessary permissions. |
+| `404 Not Found`             | The requested resource could not be found.                                         |
+| `409 Conflict`              | The request could not be completed due to a conflict (e.g., idempotent key reuse). |
+| `429 Too Many Requests`     | Rate limit exceeded.                                                               |
+| `503 Service Unavailable`   | Temporary unavailability.                                                          |
+| `500 Internal Server Error` | An unexpected condition was encountered on the server.                             |
 
 ### Error Responses
 
@@ -1320,15 +1321,15 @@ Error responses follow the standard UCP error structure:
 
 ```json
 {
-  "status": "requires_escalation",
-  "messages": [
-    {
-      "type": "error",
-      "code": "invalid_cart_items",
-      "content": "One or more cart items are invalid",
-      "severity": "requires_buyer_input",
-    }
-  ]
+    "status": "requires_escalation",
+    "messages": [
+        {
+            "type": "error",
+            "code": "invalid_cart_items",
+            "content": "One or more cart items are invalid",
+            "severity": "requires_buyer_input"
+        }
+    ]
 }
 ```
 
@@ -1339,11 +1340,11 @@ Error responses follow the standard UCP error structure:
 Authentication is optional and depends on business requirements. When
 authentication is required, the REST transport **MAY** use:
 
-1.  **Open API**: No authentication required for public operations.
-2.  **API Keys**: Via `X-API-Key` header.
-3.  **OAuth 2.0**: Via `Authorization: Bearer {token}` header, following
-    [RFC 6749](https://tools.ietf.org/html/rfc6749){ target="_blank" }.
-4.  **Mutual TLS**: For high-security environments.
+1. **Open API**: No authentication required for public operations.
+2. **API Keys**: Via `X-API-Key` header.
+3. **OAuth 2.0**: Via `Authorization: Bearer {token}` header, following
+   [RFC 6749](https://tools.ietf.org/html/rfc6749){ target="\_blank" }.
+4. **Mutual TLS**: For high-security environments.
 
 Businesses **MAY** require authentication for some operations while leaving
 others open (e.g., public checkout without authentication).

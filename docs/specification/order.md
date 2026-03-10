@@ -16,13 +16,13 @@
 
 # Order Capability
 
-* **Capability Name:** `dev.ucp.shopping.order`
+- **Capability Name:** `dev.ucp.shopping.order`
 
 ## Overview
 
 Orders represent confirmed transactions resulting from a successful checkout
-submission. It provides a complete record of what was purchased, how
-it will be delivered, and what has happened since order placement.
+submission. It provides a complete record of what was purchased, how it will be
+delivered, and what has happened since order placement.
 
 ### Key Concepts
 
@@ -34,10 +34,11 @@ Orders have three main components:
 
 **Fulfillment** — how items get delivered:
 
-- **Expectations** — buyer-facing *promises* about when/how items will arrive
+- **Expectations** — buyer-facing _promises_ about when/how items will arrive
 - **Events** (append-only log) — what actually happened (e.g. 👕 was shipped)
 
-**Adjustments** (append-only log) — post-order events independent of fulfillment:
+**Adjustments** (append-only log) — post-order events independent of
+fulfillment:
 
 - Typically money movements (refunds, returns, credits, disputes, cancellations)
 - Can be any post-order change
@@ -58,7 +59,8 @@ Fulfillment tracks how items are delivered to the buyer.
 
 #### Expectations
 
-**Expectations** are buyer-facing groupings of items (e.g., "package 📦"). They represent:
+**Expectations** are buyer-facing groupings of items (e.g., "package 📦"). They
+represent:
 
 - What items are grouped together
 - Where they're going (`destination`)
@@ -90,7 +92,8 @@ fulfillment:
   (typically money movements like `refund`, `return`, `credit`,
   `price_adjustment`, `dispute`, `cancellation`)
 - Can be any post-order change
-- Optionally link to line items (or order-level for things like shipping refunds)
+- Optionally link to line items (or order-level for things like shipping
+  refunds)
 - Include amount when relevant
 - Can happen at any time regardless of fulfillment status
 
@@ -107,18 +110,18 @@ Status and quantity counts should reflect the event logs.
 
 {{ schema_fields('order_line_item', 'order') }}
 
-**Quantity Structure:**
+### Quantity Structure
 
 ```json
 {
-  "total": 3,      // Current total quantity
-  "fulfilled": 2   // What has been fulfilled
+    "total": 3, // Current total quantity
+    "fulfilled": 2 // What has been fulfilled
 }
 ```
 
-**Status Derivation:**
+### Status Derivation
 
-```
+```json
 if (fulfilled == total) → "fulfilled"
 else if (fulfilled > 0) → "partial"
 else → "processing"
@@ -127,15 +130,15 @@ else → "processing"
 ### Expectation
 
 Expectations are buyer-facing groupings representing when/how items will be
-delivered. They represent the current promise to the buyer and can be
-split, merged, or adjusted post-order.
+delivered. They represent the current promise to the buyer and can be split,
+merged, or adjusted post-order.
 
 {{ schema_fields('expectation', 'order') }}
 
 ### Fulfillment Event
 
-Events are append-only records tracking actual shipments. The `type` field is
-an open string - businesses can use any values that make sense for their
+Events are append-only records tracking actual shipments. The `type` field is an
+open string - businesses can use any values that make sense for their
 fulfillment process.
 
 {{ schema_fields('fulfillment_event', 'order') }}
@@ -145,9 +148,9 @@ Examples: `processing`, `shipped`, `in_transit`, `delivered`, `failed_attempt`,
 
 ### Adjustment
 
-Adjustments are polymorphic events that exist independently of fulfillment.
-The `type` field is an open string - businesses can use any values that make
-sense to them.
+Adjustments are polymorphic events that exist independently of fulfillment. The
+`type` field is an open string - businesses can use any values that make sense
+to them.
 
 {{ schema_fields('adjustment', 'order') }}
 
@@ -158,97 +161,105 @@ Examples: `refund`, `return`, `credit`, `price_adjustment`, `dispute`,
 
 ```json
 {
-  "ucp": {
-    "version": "2026-01-11",
-    "capabilities": [
-      {"name": "dev.ucp.shopping.order", "version": "2026-01-11"}
-    ]
-  },
-  "id": "order_abc123",
-  "checkout_id": "checkout_xyz789",
-  "permalink_url": "https://business.com/orders/abc123",
-  "line_items": [
-    {
-      "id": "li_shoes",
-      "item": { "id": "prod_shoes", "title": "Running Shoes", "price": 3000 },
-      "quantity": { "total": 3, "fulfilled": 3 },
-      "totals": [
-        {"type": "subtotal", "amount": 9000},
-        {"type": "total", "amount": 9000}
-      ],
-      "status": "fulfilled"
+    "ucp": {
+        "version": "2026-01-11",
+        "capabilities": [
+            { "name": "dev.ucp.shopping.order", "version": "2026-01-11" }
+        ]
     },
-    {
-      "id": "li_shirts",
-      "item": { "id": "prod_shirts", "title": "Cotton T-Shirt", "price": 2000 },
-      "quantity": { "total": 2, "fulfilled": 0 },
-      "totals": [
-        {"type": "subtotal", "amount": 4000},
-        {"type": "total", "amount": 4000}
-      ],
-      "status": "processing"
-    }
-  ],
-  "fulfillment": {
-    "expectations": [
-      {
-        "id": "exp_1",
-        "line_items": [{ "id": "li_shoes", "quantity": 3 }],
-        "method_type": "shipping",
-        "destination": {
-          "street_address": "123 Main St",
-          "address_locality": "Austin",
-          "address_region": "TX",
-          "address_country": "US",
-          "postal_code": "78701"
+    "id": "order_abc123",
+    "checkout_id": "checkout_xyz789",
+    "permalink_url": "https://business.com/orders/abc123",
+    "line_items": [
+        {
+            "id": "li_shoes",
+            "item": {
+                "id": "prod_shoes",
+                "title": "Running Shoes",
+                "price": 3000
+            },
+            "quantity": { "total": 3, "fulfilled": 3 },
+            "totals": [
+                { "type": "subtotal", "amount": 9000 },
+                { "type": "total", "amount": 9000 }
+            ],
+            "status": "fulfilled"
         },
-        "description": "Arrives in 2-3 business days",
-        "fulfillable_on": "now"
-      },
-      {
-        "id": "exp_2",
-        "line_items": [{ "id": "li_shirts", "quantity": 2 }],
-        "method_type": "shipping",
-        "destination": {
-          "street_address": "123 Main St",
-          "address_locality": "Austin",
-          "address_region": "TX",
-          "address_country": "US",
-          "postal_code": "78701"
-        },
-        "description": "Backordered - ships Jan 15, arrives in 7-10 days",
-        "fulfillable_on": "2025-01-15T00:00:00Z"
-      }
+        {
+            "id": "li_shirts",
+            "item": {
+                "id": "prod_shirts",
+                "title": "Cotton T-Shirt",
+                "price": 2000
+            },
+            "quantity": { "total": 2, "fulfilled": 0 },
+            "totals": [
+                { "type": "subtotal", "amount": 4000 },
+                { "type": "total", "amount": 4000 }
+            ],
+            "status": "processing"
+        }
     ],
-    "events": [
-      {
-        "id": "evt_1",
-        "occurred_at": "2025-01-08T10:30:00Z",
-        "type": "delivered",
-        "line_items": [{ "id": "li_shoes", "quantity": 3 }],
-        "tracking_number": "123456789",
-        "tracking_url": "https://fedex.com/track/123456789",
-        "description": "Delivered to front door"
-      }
+    "fulfillment": {
+        "expectations": [
+            {
+                "id": "exp_1",
+                "line_items": [{ "id": "li_shoes", "quantity": 3 }],
+                "method_type": "shipping",
+                "destination": {
+                    "street_address": "123 Main St",
+                    "address_locality": "Austin",
+                    "address_region": "TX",
+                    "address_country": "US",
+                    "postal_code": "78701"
+                },
+                "description": "Arrives in 2-3 business days",
+                "fulfillable_on": "now"
+            },
+            {
+                "id": "exp_2",
+                "line_items": [{ "id": "li_shirts", "quantity": 2 }],
+                "method_type": "shipping",
+                "destination": {
+                    "street_address": "123 Main St",
+                    "address_locality": "Austin",
+                    "address_region": "TX",
+                    "address_country": "US",
+                    "postal_code": "78701"
+                },
+                "description": "Backordered - ships Jan 15, arrives in 7-10 days",
+                "fulfillable_on": "2025-01-15T00:00:00Z"
+            }
+        ],
+        "events": [
+            {
+                "id": "evt_1",
+                "occurred_at": "2025-01-08T10:30:00Z",
+                "type": "delivered",
+                "line_items": [{ "id": "li_shoes", "quantity": 3 }],
+                "tracking_number": "123456789",
+                "tracking_url": "https://fedex.com/track/123456789",
+                "description": "Delivered to front door"
+            }
+        ]
+    },
+    "adjustments": [
+        {
+            "id": "adj_1",
+            "type": "refund",
+            "occurred_at": "2025-01-10T14:30:00Z",
+            "status": "completed",
+            "line_items": [{ "id": "li_shoes", "quantity": 1 }],
+            "amount": 3000,
+            "description": "Defective item"
+        }
+    ],
+    "totals": [
+        { "type": "subtotal", "amount": 13000 },
+        { "type": "shipping", "amount": 1200 },
+        { "type": "tax", "amount": 1142 },
+        { "type": "total", "amount": 15342 }
     ]
-  },
-  "adjustments": [
-    {
-      "id": "adj_1",
-      "type": "refund",
-      "occurred_at": "2025-01-10T14:30:00Z",
-      "status": "completed",
-      "line_items": [{ "id": "li_shoes", "quantity": 1 }],
-      "amount": 3000,
-      "description": "Defective item"
-    }
-  ],
-  "totals": [
-    { "type": "subtotal", "amount": 13000 },
-    { "type": "shipping", "amount": 1200 },
-    { "type": "tax", "amount": 1142 },
-    { "type": "total", "amount": 15342 }
-  ]
 }
 ```
 
@@ -256,14 +267,14 @@ Examples: `refund`, `return`, `credit`, `price_adjustment`, `dispute`,
 
 Businesses send order status changes as events after order placement.
 
-| Event Mechanism | Method | Endpoint | Description |
-| :---- | :---- | :---- | :---- |
+| Event Mechanism                             | Method | Endpoint              | Description                                            |
+| :------------------------------------------ | :----- | :-------------------- | :----------------------------------------------------- |
 | [Order Event Webhook](#order-event-webhook) | `POST` | Platform-provided URL | Business sends order lifecycle events to the platform. |
 
 ### Order Event Webhook
 
-Businesses POST order events to a webhook URL provided by the platform
-during partner onboarding. The URL format is platform-specific.
+Businesses POST order events to a webhook URL provided by the platform during
+partner onboarding. The URL format is platform-specific.
 
 {{ method_fields('order_event_webhook', 'openapi.json', 'order') }}
 
@@ -275,14 +286,15 @@ platform's profile and uses it to send order lifecycle events.
 
 {{ extension_schema_fields('order.json#/$defs/platform_config', 'order') }}
 
-**Example:**
+### Example
+
 ```json
 {
-  "name": "dev.ucp.shopping.order",
-  "version": "2026-01-11",
-  "config": {
-    "webhook_url": "https://platform.example.com/webhooks/ucp/orders"
-  }
+    "name": "dev.ucp.shopping.order",
+    "version": "2026-01-11",
+    "config": {
+        "webhook_url": "https://platform.example.com/webhooks/ucp/orders"
+    }
 }
 ```
 
@@ -291,45 +303,47 @@ platform's profile and uses it to send order lifecycle events.
 Webhook payloads **MUST** be signed by the business and verified by the platform
 to ensure authenticity and integrity.
 
-**Signing (Business)**
+### Signing (Business)
 
-1.  Select a key from the `signing_keys` array in UCP profile.
-2.  Create a detached JWT (RFC 7797) over the request body using the selected key.
-3.  Include the JWT in the `Request-Signature` header.
-4.  Include the key ID in the JWT header's `kid` claim to allow the receiver to
-    identify which key to use for verification.
+1. Select a key from the `signing_keys` array in UCP profile.
+2. Create a detached JWT (RFC 7797) over the request body using the selected
+   key.
+3. Include the JWT in the `Request-Signature` header.
+4. Include the key ID in the JWT header's `kid` claim to allow the receiver to
+   identify which key to use for verification.
 
-**Verification (Platform)**
+### Verification (Platform)
 
-1.  Extract the `Request-Signature` header from the incoming webhook request.
-2.  Parse the JWT header to retrieve the `kid` (key ID).
-3.  Fetch the business's UCP profile from `/.well-known/ucp` (cache as appropriate).
-4.  Locate the key in `signing_keys` with the matching `kid`.
-5.  Verify the JWT signature against the request body using the public key.
-6.  If verification fails, reject the webhook with an appropriate error response.
+1. Extract the `Request-Signature` header from the incoming webhook request.
+2. Parse the JWT header to retrieve the `kid` (key ID).
+3. Fetch the business's UCP profile from `/.well-known/ucp` (cache as
+   appropriate).
+4. Locate the key in `signing_keys` with the matching `kid`.
+5. Verify the JWT signature against the request body using the public key.
+6. If verification fails, reject the webhook with an appropriate error response.
 
-**Key Rotation**
+### Key Rotation
 
 The `signing_keys` array supports multiple keys to enable zero-downtime
 rotation:
 
-*   **Adding a new key:** Add the new key to `signing_keys`, then start signing
-    with it. Verifiers will find it by `kid`.
-*   **Removing an old key:** After sufficient time for all in-flight webhooks to
-    be delivered, remove the old key from `signing_keys`.
+- **Adding a new key:** Add the new key to `signing_keys`, then start signing
+  with it. Verifiers will find it by `kid`.
+- **Removing an old key:** After sufficient time for all in-flight webhooks to
+  be delivered, remove the old key from `signing_keys`.
 
 ## Guidelines
 
-**Platform:**
+### Platform
 
 - **MUST** respond quickly with a 2xx HTTP status code to acknowledge receipt
 - Process events asynchronously after responding
 
-**Business:**
+### Business
 
-- **MUST** sign all webhook payloads using a key from their `signing_keys`
-  array (published in `/.well-known/ucp`). The signature **MUST** be included
-  in the `Request-Signature` header as a detached JWT (RFC 7797).
+- **MUST** sign all webhook payloads using a key from their `signing_keys` array
+  (published in `/.well-known/ucp`). The signature **MUST** be included in the
+  `Request-Signature` header as a detached JWT (RFC 7797).
 - **MUST** send "Order created" event with fully populated order entity
 - **MUST** send full order entity on updates (not incremental deltas)
 - **MUST** retry failed webhook deliveries
@@ -337,7 +351,7 @@ rotation:
 
 ## Entities
 
-### Item Response
+### Item Response <span id="item"></span>
 
 {{ schema_fields('types/item_resp', 'order') }}
 
@@ -349,10 +363,10 @@ rotation:
 
 {{ extension_schema_fields('capability.json#/$defs/response', 'order') }}
 
-### Total Response
+### Total Response <span id="total"></span>
 
 {{ schema_fields('types/total_resp', 'order') }}
 
-### UCP Response Order
+### UCP Response Order <span id="ucp"></span>
 
 {{ extension_schema_fields('ucp.json#/$defs/response_order', 'order') }}
