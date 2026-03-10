@@ -51,9 +51,12 @@
       },
       "description": "Which line items and quantities are affected (optional)."
     },
-    "amount": {
-      "$ref": "amount.json",
-      "description": "Net amount in ISO 4217 minor units. Signed value—negative for money returned to buyer (refunds, credits), positive for additional charges (exchanges with higher-value items)."
+    "totals": {
+      "type": "array",
+      "items": {
+        "$ref": "total.json"
+      },
+      "description": "Adjustment totals breakdown. Signed values—negative for money returned to buyer (refunds, credits), positive for additional charges (exchanges)."
     },
     "description": {
       "type": "string",

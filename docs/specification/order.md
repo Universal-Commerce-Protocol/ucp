@@ -44,7 +44,7 @@ Orders have three main components:
 * Can be any post-order change
 * Can happen before, during, or after fulfillment
 * Businesses may append new entries or update existing ones in place
-  (e.g. a single "return" adjustment can transition from started to completed)
+  (e.g. a single `return` adjustment can transition from `pending` to `completed`)
 
 ## Data Model
 
@@ -96,7 +96,7 @@ fulfillment:
 * Optionally link to line items (or order-level for things like shipping refunds)
 * Quantities and amounts are signed—negative for reductions (returns, refunds),
   positive for additions (exchanges)
-* Include net amount when relevant
+* Include totals breakdown when relevant
 * Can happen at any time regardless of fulfillment status
 
 ## Schema
@@ -115,7 +115,7 @@ Line items reflect what was purchased at checkout and their current state.
 
 ```json
 {
-  "original": 3,   // Quantity at checkout
+  "original": 3,   // Quantity from the original checkout
   "total": 3,      // Current total (may differ after edits/exchanges)
   "fulfilled": 2   // What has been fulfilled
 }
@@ -246,7 +246,9 @@ Examples: `refund`, `return`, `credit`, `price_adjustment`, `dispute`,
       "occurred_at": "2025-01-10T14:30:00Z",
       "status": "completed",
       "line_items": [{ "id": "li_shoes", "quantity": -1 }],
-      "amount": -3000,
+      "totals": [
+        { "type": "total", "amount": -3000 }
+      ],
       "description": "Defective item"
     }
   ],

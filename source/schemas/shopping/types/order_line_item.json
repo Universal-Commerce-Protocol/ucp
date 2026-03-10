@@ -26,7 +26,7 @@
         "original": {
           "type": "integer",
           "minimum": 0,
-          "description": "Quantity originally ordered at checkout. Convenience property—avoids requiring a separate Checkout lookup."
+          "description": "Quantity from the original checkout (earliest created_at). Convenience property—avoids requiring a separate Checkout lookup."
         },
         "total": {
           "type": "integer",
