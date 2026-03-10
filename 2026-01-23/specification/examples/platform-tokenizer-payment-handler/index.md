@@ -141,7 +141,7 @@ Optionally, businesses may configure their PSP to detokenize on their behalf (PS
 
 Businesses advertise the platform's tokenization handler. The `config` contains the business's identity with the platform for token binding. The platform's handler specification (referenced via `spec`) documents the `/detokenize` endpoint URL exposed by the platform's **payment credential provider**.
 
-The handler accepts [CardCredential](https://ucp.dev/schemas/shopping/types/card_credential.json) for tokenization and produces [TokenCredential](https://ucp.dev/schemas/shopping/types/token_credential.json) for checkout.
+The handler accepts [CardCredential](/2026-01-23/schemas/shopping/types/card_credential.json) for tokenization and produces [TokenCredential](/2026-01-23/schemas/shopping/types/token_credential.json) for checkout.
 
 **Note:** The result of `/detokenize` contains **sensitive payment data**. Both the sender (platform's credential provider) and receiver (business or PSP) **MUST** be compliant with relevant standards for the credential type (e.g., PCI DSS for cards).
 
@@ -410,6 +410,6 @@ ______________________________________________________________________
 
 ## References
 
-- **Pattern:** [Tokenization Payment Handler](https://ucp.dev/specification/payment-handler-guide)
-- **API Pattern:** `https://ucp.dev/handlers/tokenization/openapi.json`
-- **Identity Schema:** `https://ucp.dev/schemas/shopping/types/payment_identity.json`
+- **Pattern:** [Tokenization Payment Handler](https://ucp.dev/2026-01-23/specification/payment-handler-guide/index.md)
+- **API Pattern:** `https://ucp.dev/2026-01-23/handlers/tokenization/openapi.json`
+- **Identity Schema:** `https://ucp.dev/2026-01-23/schemas/shopping/types/payment_identity.json`

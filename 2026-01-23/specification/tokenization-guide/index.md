@@ -1,6 +1,6 @@
 # Tokenization Guide
 
-**OpenAPI:** [Tokenization API](https://ucp.dev/handlers/tokenization/openapi.json)
+**OpenAPI:** [Tokenization API](/2026-01-23/handlers/tokenization/openapi.json)
 
 ## Overview
 
@@ -75,7 +75,7 @@ All tokenization requests require a `binding` object that ties the token to a sp
 | `checkout_id` | Yes         | The checkout session this token is valid for                                                    |
 | `identity`    | Conditional | The participant identity to bind to; required when caller acts on behalf of another participant |
 
-The tokenizer **MUST** verify binding matches on `/detokenize`. See [Binding Schema](https://ucp.dev/schemas/shopping/types/binding.json).
+The tokenizer **MUST** verify binding matches on `/detokenize`. See [Binding Schema](/2026-01-23/schemas/shopping/types/binding.json).
 
 ______________________________________________________________________
 
@@ -153,7 +153,7 @@ Authorization: Bearer {caller_access_token}
 
 **Note:** `binding.identity` is omitted when the authenticated caller is the binding target. Include it when acting on behalf of another participant (e.g., PSP detokenizing for business).
 
-See the full [OpenAPI specification](https://ucp.dev/handlers/tokenization/openapi.json) for complete request/response schemas.
+See the full [OpenAPI specification](/2026-01-23/handlers/tokenization/openapi.json) for complete request/response schemas.
 
 ______________________________________________________________________
 
@@ -189,8 +189,8 @@ When publishing your handler, your specification document **MUST** include:
 ### Example Specification Outline
 
 ```markdown
-**Handler Name:** `com.acme.tokenization_payment`
-**OpenAPI:** [Tokenization API](https://ucp.dev/handlers/tokenization/openapi.json)
+**Handler Name:** `com.acme.tokenization_payment` **OpenAPI:**
+[Tokenization API](site:handlers/tokenization/openapi.json)
 
 | Environment | Base URL                           |
 | :---------- | :--------------------------------- |
@@ -231,13 +231,13 @@ ______________________________________________________________________
 
 ## References
 
-| Resource                | URL                                                                   |
-| ----------------------- | --------------------------------------------------------------------- |
-| Tokenization OpenAPI    | `https://ucp.dev/handlers/tokenization/openapi.json`                  |
-| Identity Schema         | `https://ucp.dev/schemas/shopping/types/payment_identity.json`        |
-| Binding Schema          | `https://ucp.dev/schemas/shopping/types/binding.json`                 |
-| Token Credential Schema | `https://ucp.dev/schemas/shopping/types/token_credential.json`        |
-| Card Instrument Schema  | `https://ucp.dev/schemas/shopping/types/card_payment_instrument.json` |
+| Resource                | URL                                                                              |
+| ----------------------- | -------------------------------------------------------------------------------- |
+| Tokenization OpenAPI    | `https://ucp.dev/2026-01-23/handlers/tokenization/openapi.json`                  |
+| Identity Schema         | `https://ucp.dev/2026-01-23/schemas/shopping/types/payment_identity.json`        |
+| Binding Schema          | `https://ucp.dev/2026-01-23/schemas/shopping/types/binding.json`                 |
+| Token Credential Schema | `https://ucp.dev/2026-01-23/schemas/shopping/types/token_credential.json`        |
+| Card Instrument Schema  | `https://ucp.dev/2026-01-23/schemas/shopping/types/card_payment_instrument.json` |
 
 ______________________________________________________________________
 

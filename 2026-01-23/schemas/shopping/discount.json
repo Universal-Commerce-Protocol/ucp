@@ -2,7 +2,6 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/2026-01-23/schemas/shopping/discount.json",
   "name": "dev.ucp.shopping.discount",
-  "version": "2026-01-23",
   "title": "Discount Extension",
   "description": "Extends Checkout with discount code support, enabling agents to apply promotional, loyalty, referral, and other discount codes.",
   "$defs": {
@@ -116,5 +115,6 @@
         }
       ]
     }
-  }
+  },
+  "version": "2026-01-23"
 }

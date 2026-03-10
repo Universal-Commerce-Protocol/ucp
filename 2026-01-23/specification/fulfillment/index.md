@@ -46,7 +46,7 @@ Fulfillment applies only to items requiring physical delivery. Items not requiri
 | methods           | Array\[[Fulfillment Method](/2026-01-23/specification/fulfillment/#fulfillment-method)\]                     | No       | Fulfillment methods for cart items. |
 | available_methods | Array\[[Fulfillment Available Method](/2026-01-23/specification/fulfillment/#fulfillment-available-method)\] | No       | Inventory availability hints.       |
 
-#### Fulfillment Method Response
+#### Fulfillment Method
 
 | Name                    | Type                                                                                               | Required | Description                                                                                                  |
 | ----------------------- | -------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------ |
@@ -57,11 +57,11 @@ Fulfillment applies only to items requiring physical delivery. Items not requiri
 | selected_destination_id | ['string', 'null']                                                                                 | No       | ID of the selected destination.                                                                              |
 | groups                  | Array\[[Fulfillment Group](/2026-01-23/specification/fulfillment/#fulfillment-group)\]             | No       | Fulfillment groups for selecting options. Agent sets selected_option_id on groups to choose shipping method. |
 
-#### Fulfillment Destination Response
+#### Fulfillment Destination
 
 This object MUST be one of the following types: [Shipping Destination](/2026-01-23/specification/fulfillment/#shipping-destination), [Retail Location](/2026-01-23/specification/fulfillment/#retail-location).
 
-#### Shipping Destination Response
+#### Shipping Destination
 
 | Name             | Type   | Required | Description                                                                                                                                                                                                                               |
 | ---------------- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -76,7 +76,7 @@ This object MUST be one of the following types: [Shipping Destination](/2026-01-
 | phone_number     | string | No       | Optional. Phone number of the contact associated with the address.                                                                                                                                                                        |
 | id               | string | **Yes**  | ID specific to this shipping destination.                                                                                                                                                                                                 |
 
-#### Retail Location Response
+#### Retail Location
 
 | Name    | Type                                                                    | Required | Description                       |
 | ------- | ----------------------------------------------------------------------- | -------- | --------------------------------- |
@@ -84,7 +84,7 @@ This object MUST be one of the following types: [Shipping Destination](/2026-01-
 | name    | string                                                                  | **Yes**  | Location name (e.g., store name). |
 | address | [Postal Address](/2026-01-23/specification/fulfillment/#postal-address) | No       | Physical address of the location. |
 
-#### Fulfillment Group Response
+#### Fulfillment Group
 
 | Name               | Type                                                                                     | Required | Description                                                            |
 | ------------------ | ---------------------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------- |
@@ -93,7 +93,7 @@ This object MUST be one of the following types: [Shipping Destination](/2026-01-
 | options            | Array\[[Fulfillment Option](/2026-01-23/specification/fulfillment/#fulfillment-option)\] | No       | Available fulfillment options for this group.                          |
 | selected_option_id | ['string', 'null']                                                                       | No       | ID of the selected fulfillment option for this group.                  |
 
-#### Fulfillment Option Response
+#### Fulfillment Option
 
 | Name                      | Type                                                           | Required | Description                                                                |
 | ------------------------- | -------------------------------------------------------------- | -------- | -------------------------------------------------------------------------- |
@@ -105,7 +105,7 @@ This object MUST be one of the following types: [Shipping Destination](/2026-01-
 | latest_fulfillment_time   | string                                                         | No       | Latest fulfillment date.                                                   |
 | totals                    | Array\[[Total](/2026-01-23/specification/fulfillment/#total)\] | **Yes**  | Fulfillment option totals breakdown.                                       |
 
-#### Fulfillment Available Method Response
+#### Fulfillment Available Method
 
 | Name           | Type               | Required | Description                                                                              |
 | -------------- | ------------------ | -------- | ---------------------------------------------------------------------------------------- |
@@ -114,7 +114,7 @@ This object MUST be one of the following types: [Shipping Destination](/2026-01-
 | fulfillable_on | ['string', 'null'] | No       | 'now' for immediate availability, or ISO 8601 date for future (preorders, transfers).    |
 | description    | string             | No       | Human-readable availability info (e.g., 'Available for pickup at Downtown Store today'). |
 
-#### Total Response
+#### Total
 
 | Name         | Type    | Required | Description                                                                                                                   |
 | ------------ | ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |

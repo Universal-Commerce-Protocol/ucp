@@ -2,7 +2,6 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/2026-01-23/schemas/shopping/order.json",
   "name": "dev.ucp.shopping.order",
-  "version": "2026-01-23",
   "title": "Order",
   "description": "Order schema with immutable line items, buyer-facing fulfillment expectations, and append-only event logs.",
   "$defs": {
@@ -90,5 +89,6 @@
       },
       "description": "Different totals for the order."
     }
-  }
+  },
+  "version": "2026-01-23"
 }

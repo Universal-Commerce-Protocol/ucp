@@ -2,7 +2,6 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/2026-01-23/schemas/shopping/ap2_mandate.json",
   "name": "dev.ucp.shopping.ap2_mandate",
-  "version": "2026-01-23",
   "title": "AP2 Mandate Extension",
   "description": "Extends Checkout with cryptographic mandate support for non-repudiable authorization per the AP2 protocol. Uses embedded signature model with ap2 namespace.",
   "$defs": {
@@ -87,5 +86,6 @@
         "merchant_authorization_missing"
       ]
     }
-  }
+  },
+  "version": "2026-01-23"
 }

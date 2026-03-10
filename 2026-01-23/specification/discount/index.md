@@ -28,7 +28,7 @@ Businesses advertise discount support in their profile:
         {
           "version": "2026-01-23",
           "extends": "dev.ucp.shopping.checkout",
-          "spec": "https://ucp.dev/specification/discount",
+          "spec": "https://ucp.dev/2026-01-23/specification/discount",
           "schema": "https://ucp.dev/2026-01-23/schemas/shopping/discount.json"
         }
       ]

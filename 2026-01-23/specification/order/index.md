@@ -84,7 +84,7 @@ Expectations can be split, merged, or adjusted post-order. For example:
 | line_items    | Array\[[Order Line Item](/2026-01-23/specification/order/#order-line-item)\]            | **Yes**  | Immutable line items — source of truth for what was ordered.                                                                                 |
 | fulfillment   | object                                                                                  | **Yes**  | Fulfillment data: buyer expectations and what actually happened.                                                                             |
 | adjustments   | Array\[[Adjustment](/2026-01-23/specification/order/#adjustment)\]                      | No       | Append-only event log of money movements (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment. |
-| totals        | Array\[[Total Response](/2026-01-23/specification/order/#total-response)\]              | **Yes**  | Different totals for the order.                                                                                                              |
+| totals        | Array\[[Total Response](/2026-01-23/specification/order/#total)\]                       | **Yes**  | Different totals for the order.                                                                                                              |
 
 ### Order Line Item
 
@@ -360,7 +360,7 @@ The `signing_keys` array supports multiple keys to enable zero-downtime rotation
 
 ## Entities
 
-### Item Response
+### Item
 
 | Name      | Type    | Required | Description                                                                                                                                    |
 | --------- | ------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -394,7 +394,7 @@ The `signing_keys` array supports multiple keys to enable zero-downtime rotation
 | config  | object | No       | Entity-specific configuration. Structure defined by each entity's schema.                       |
 | extends | string | No       | Parent capability this extends. Present for extensions, absent for root capabilities.           |
 
-### Total Response
+### Total
 
 | Name         | Type    | Required | Description                                                                                                                   |
 | ------------ | ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
@@ -402,7 +402,7 @@ The `signing_keys` array supports multiple keys to enable zero-downtime rotation
 | display_text | string  | No       | Text to display against the amount. Should reflect appropriate method (e.g., 'Shipping', 'Delivery').                         |
 | amount       | integer | **Yes**  | If type == total, sums subtotal - discount + fulfillment + tax + fee. Should be >= 0. Amount in minor (cents) currency units. |
 
-### UCP Response Order
+### UCP Response Order Schema
 
 | Name             | Type   | Required | Description                                            |
 | ---------------- | ------ | -------- | ------------------------------------------------------ |

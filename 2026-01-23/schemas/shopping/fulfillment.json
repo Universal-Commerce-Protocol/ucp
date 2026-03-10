@@ -2,7 +2,6 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/2026-01-23/schemas/shopping/fulfillment.json",
   "name": "dev.ucp.shopping.fulfillment",
-  "version": "2026-01-23",
   "title": "Fulfillment Extension",
   "description": "Extends Checkout with fulfillment support using methods, destinations, and groups.",
   "$defs": {
@@ -139,5 +138,6 @@
         }
       }
     ]
-  }
+  },
+  "version": "2026-01-23"
 }

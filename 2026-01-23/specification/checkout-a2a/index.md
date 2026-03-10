@@ -14,7 +14,7 @@ Businesses that support A2A transport must specify the agent card endpoint as pa
       "dev.ucp.shopping": [
         {
           "version": "2026-01-23",
-          "spec": "https://ucp.dev/specification/overview",
+          "spec": "https://ucp.dev/2026-01-23/specification/overview",
           "transport": "a2a",
           "endpoint": "https://example-business.com/.well-known/agent-card.json"
         }
@@ -46,7 +46,7 @@ The following table defines the required headers for enabling an A2A Agent to co
 
 The A2A Protocol provides a strong foundation for inter-agent communication. [A2A extensions](https://a2a-protocol.org/latest/topics/extensions/) enable communication between agents with structured data types. This enables businesses to build AI applications to leverage UCP data types for communication with platforms.
 
-The URI for UCP A2A extension: `https://ucp.dev/specification/reference?v=2026-01-11`
+The URI for UCP A2A extension: `https://ucp.dev/2026-01-23/specification/reference`
 
 Businesses supporting UCP must advertise the extension and any optional capabilities in their A2A Agent Card to allow platforms to activate the extension.
 
@@ -56,7 +56,7 @@ An example:
 {
   "extensions": [
     {
-      "uri": "https://ucp.dev/specification/reference?v=2026-01-11",
+      "uri": "https://ucp.dev/2026-01-23/specification/reference",
       "description": "Business agent supporting UCP",
       "params": {
         "capabilities": {

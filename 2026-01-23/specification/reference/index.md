@@ -442,6 +442,18 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
+### Selected Payment Instrument
+
+| Name            | Type    | Required | Description                                                                                                                                                  |
+| --------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| id              | string  | **Yes**  | A unique identifier for this instrument instance, assigned by the platform.                                                                                  |
+| handler_id      | string  | **Yes**  | The unique identifier for the handler instance that produced this instrument. This corresponds to the 'id' field in the Payment Handler definition.          |
+| type            | string  | **Yes**  | The broad category of the instrument (e.g., 'card', 'tokenized_card'). Specific schemas will constrain this to a constant value.                             |
+| billing_address | object  | No       | The billing address associated with this payment method.                                                                                                     |
+| credential      | object  | No       | The base definition for any payment credential. Handlers define specific credential types.                                                                   |
+| display         | object  | No       | Display information for this payment instrument. Each payment instrument schema defines its specific display properties, as outlined by the payment handler. |
+| selected        | boolean | No       | Whether this instrument is selected by the user.                                                                                                             |
+
 ## Extension Schemas
 
 ### AP2 Mandate Extension

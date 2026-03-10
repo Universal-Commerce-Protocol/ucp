@@ -149,7 +149,7 @@ An **extension** is an optional module that augments another capability. Extensi
   "dev.ucp.shopping.fulfillment": [
     {
       "version": "2026-01-23",
-      "spec": "https://ucp.dev/specification/fulfillment",
+      "spec": "https://ucp.dev/2026-01-23/specification/fulfillment",
       "schema": "https://ucp.dev/2026-01-23/schemas/shopping/fulfillment.json",
       "extends": "dev.ucp.shopping.checkout"
     }
@@ -223,29 +223,29 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
       "dev.ucp.shopping": [
         {
           "version": "2026-01-23",
-          "spec": "https://ucp.dev/specification/overview",
+          "spec": "https://ucp.dev/2026-01-23/specification/overview",
           "transport": "rest",
           "endpoint": "https://business.example.com/ucp/v1",
           "schema": "https://ucp.dev/2026-01-23/services/shopping/openapi.json"
         },
         {
           "version": "2026-01-23",
-          "spec": "https://ucp.dev/specification/overview",
+          "spec": "https://ucp.dev/2026-01-23/specification/overview",
           "transport": "mcp",
           "endpoint": "https://business.example.com/ucp/mcp",
-          "schema": "https://ucp.dev/2026-01-23/services/shopping/mcp.openrpc.json"
+          "schema": "https://ucp.dev/2026-01-23/services/shopping/openrpc.json"
         },
         {
           "version": "2026-01-23",
-          "spec": "https://ucp.dev/specification/overview",
+          "spec": "https://ucp.dev/2026-01-23/specification/overview",
           "transport": "a2a",
           "endpoint": "https://business.example.com/.well-known/agent-card.json"
         },
         {
           "version": "2026-01-23",
-          "spec": "https://ucp.dev/specification/overview",
+          "spec": "https://ucp.dev/2026-01-23/specification/overview",
           "transport": "embedded",
-          "schema": "https://ucp.dev/2026-01-23/services/shopping/embedded.openrpc.json"
+          "schema": "https://ucp.dev/2026-01-23/services/shopping/embedded.json"
         }
       ]
     },
@@ -253,14 +253,14 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
       "dev.ucp.shopping.checkout": [
         {
           "version": "2026-01-23",
-          "spec": "https://ucp.dev/specification/checkout",
+          "spec": "https://ucp.dev/2026-01-23/specification/checkout",
           "schema": "https://ucp.dev/2026-01-23/schemas/shopping/checkout.json"
         }
       ],
       "dev.ucp.shopping.fulfillment": [
         {
           "version": "2026-01-23",
-          "spec": "https://ucp.dev/specification/fulfillment",
+          "spec": "https://ucp.dev/2026-01-23/specification/fulfillment",
           "schema": "https://ucp.dev/2026-01-23/schemas/shopping/fulfillment.json",
           "extends": "dev.ucp.shopping.checkout"
         }
@@ -268,7 +268,7 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
       "dev.ucp.shopping.discount": [
         {
           "version": "2026-01-23",
-          "spec": "https://ucp.dev/specification/discount",
+          "spec": "https://ucp.dev/2026-01-23/specification/discount",
           "schema": "https://ucp.dev/2026-01-23/schemas/shopping/discount.json",
           "extends": "dev.ucp.shopping.checkout"
         }
@@ -322,7 +322,7 @@ Platform profiles are similar and include signing keys for capabilities requirin
       "dev.ucp.shopping": [
         {
           "version": "2026-01-23",
-          "spec": "https://ucp.dev/specification/overview",
+          "spec": "https://ucp.dev/2026-01-23/specification/overview",
           "transport": "rest",
           "schema": "https://ucp.dev/2026-01-23/services/shopping/openapi.json"
         }
@@ -332,14 +332,14 @@ Platform profiles are similar and include signing keys for capabilities requirin
       "dev.ucp.shopping.checkout": [
         {
           "version": "2026-01-23",
-          "spec": "https://ucp.dev/specification/checkout",
+          "spec": "https://ucp.dev/2026-01-23/specification/checkout",
           "schema": "https://ucp.dev/2026-01-23/schemas/shopping/checkout.json"
         }
       ],
       "dev.ucp.shopping.fulfillment": [
         {
           "version": "2026-01-23",
-          "spec": "https://ucp.dev/specification/fulfillment",
+          "spec": "https://ucp.dev/2026-01-23/specification/fulfillment",
           "schema": "https://ucp.dev/2026-01-23/schemas/shopping/fulfillment.json",
           "extends": "dev.ucp.shopping.checkout"
         }
@@ -347,7 +347,7 @@ Platform profiles are similar and include signing keys for capabilities requirin
       "dev.ucp.shopping.order": [
         {
           "version": "2026-01-23",
-          "spec": "https://ucp.dev/specification/order",
+          "spec": "https://ucp.dev/2026-01-23/specification/order",
           "schema": "https://ucp.dev/2026-01-23/schemas/shopping/order.json",
           "config": {
             "webhook_url": "https://platform.example.com/webhooks/ucp/orders"
@@ -372,12 +372,12 @@ Platform profiles are similar and include signing keys for capabilities requirin
           "schema": "https://shopify.dev/ucp/schemas/shop-pay-config.json"
         }
       ],
-      "dev.ucp.processor_tokenizer": [
+      "com.example.processor_tokenizer": [
         {
           "id": "processor_tokenizer",
           "version": "2026-01-23",
           "spec": "https://example.com/specs/payments/processor_tokenizer-payment",
-          "schema": "https://ucp.dev/2026-01-23/schemas/payments/delegate-payment.json"
+          "schema": "https://example.com/schemas/payments/delegate-payment.json"
         }
       ]
     }
@@ -767,12 +767,12 @@ This scenario demonstrates the **Recommended Flow for Agents**. Instead of a ses
 {
   "ucp": {
     "payment_handlers": {
-      "dev.ucp.ap2_mandate_compatible_handlers": [
+      "com.example.ap2_mandate_compatible_handlers": [
         {
           "id": "ap2_234352",
           "version": "2026-01-23",
-          "spec": "https://ucp.dev/specs/ap2-handler",
-          "schema": "https://ucp.dev/2026-01-23/schemas/ap2-handler.json"
+          "spec": "https://example.com/specs/ap2-handler",
+          "schema": "https://example.com/2026-01-23/schemas/ap2-handler.json"
         }
       ]
     }
@@ -921,11 +921,11 @@ Initiation comes through a `continue_url` that is returned by the business.
 
 UCP defines a set of standard capabilities:
 
-| Capability Name      | ID (URI)                                         | Description                                                                                                  |
-| -------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
-| **Checkout**         | `https://ucp.dev/schemas/shopping/checkout.json` | Facilitates the creation and management of checkout sessions, including cart management and tax calculation. |
-| **Identity Linking** | -                                                | Enables platforms to obtain authorization via OAuth 2.0 to perform actions on a user's behalf.               |
-| **Order**            | `https://ucp.dev/schemas/shopping/order.json`    | Allows businesses to push asynchronous updates about an order's lifecycle (shipping, delivery, returns).     |
+| Capability Name      | ID (URI)                                                    | Description                                                                                                  |
+| -------------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| **Checkout**         | `https://ucp.dev/2026-01-23/schemas/shopping/checkout.json` | Facilitates the creation and management of checkout sessions, including cart management and tax calculation. |
+| **Identity Linking** | -                                                           | Enables platforms to obtain authorization via OAuth 2.0 to perform actions on a user's behalf.               |
+| **Order**            | `https://ucp.dev/2026-01-23/schemas/shopping/order.json`    | Allows businesses to push asynchronous updates about an order's lifecycle (shipping, delivery, returns).     |
 
 ### Definition & Extensions
 
@@ -1291,11 +1291,11 @@ A stateless URL that encodes checkout state directly, allowing reconstruction wi
 | ------------ | ------------------------------------------------------------------------------------------------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | ucp          | [UCP Response Checkout Schema](/2026-01-23/specification/checkout/#ucp-response-checkout-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                                                                                                                                         |
 | id           | string                                                                                           | **Yes**  | Unique identifier of the checkout session.                                                                                                                                                                                                                      |
-| line_items   | Array\[[Line Item Response](/2026-01-23/specification/checkout/#line-item-response)\]            | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                           |
+| line_items   | Array\[[Line Item Response](/2026-01-23/specification/checkout/#line-item)\]                     | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                           |
 | buyer        | [Buyer](/2026-01-23/specification/checkout/#buyer)                                               | No       | Representation of the buyer.                                                                                                                                                                                                                                    |
 | status       | string                                                                                           | **Yes**  | Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details. **Enum:** `incomplete`, `requires_escalation`, `ready_for_complete`, `complete_in_progress`, `completed`, `canceled` |
 | currency     | string                                                                                           | **Yes**  | ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.                                                                                          |
-| totals       | Array\[[Total Response](/2026-01-23/specification/checkout/#total-response)\]                    | **Yes**  | Different cart totals.                                                                                                                                                                                                                                          |
+| totals       | Array\[[Total Response](/2026-01-23/specification/checkout/#total)\]                             | **Yes**  | Different cart totals.                                                                                                                                                                                                                                          |
 | messages     | Array\[[Message](/2026-01-23/specification/checkout/#message)\]                                  | No       | List of messages with error and info about the checkout session state.                                                                                                                                                                                          |
 | links        | Array\[[Link](/2026-01-23/specification/checkout/#link)\]                                        | **Yes**  | Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.                                                                                                                                                                    |
 | expires_at   | string                                                                                           | No       | RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.                                                                                                                                                                                    |
@@ -1336,11 +1336,11 @@ To be invoked by the platform when the user has expressed purchase intent (e.g.,
 | ------------ | ------------------------------------------------------------------------------------------------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | ucp          | [UCP Response Checkout Schema](/2026-01-23/specification/checkout/#ucp-response-checkout-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                                                                                                                                         |
 | id           | string                                                                                           | **Yes**  | Unique identifier of the checkout session.                                                                                                                                                                                                                      |
-| line_items   | Array\[[Line Item Response](/2026-01-23/specification/checkout/#line-item-response)\]            | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                           |
+| line_items   | Array\[[Line Item Response](/2026-01-23/specification/checkout/#line-item)\]                     | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                           |
 | buyer        | [Buyer](/2026-01-23/specification/checkout/#buyer)                                               | No       | Representation of the buyer.                                                                                                                                                                                                                                    |
 | status       | string                                                                                           | **Yes**  | Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details. **Enum:** `incomplete`, `requires_escalation`, `ready_for_complete`, `complete_in_progress`, `completed`, `canceled` |
 | currency     | string                                                                                           | **Yes**  | ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.                                                                                          |
-| totals       | Array\[[Total Response](/2026-01-23/specification/checkout/#total-response)\]                    | **Yes**  | Different cart totals.                                                                                                                                                                                                                                          |
+| totals       | Array\[[Total Response](/2026-01-23/specification/checkout/#total)\]                             | **Yes**  | Different cart totals.                                                                                                                                                                                                                                          |
 | messages     | Array\[[Message](/2026-01-23/specification/checkout/#message)\]                                  | No       | List of messages with error and info about the checkout session state.                                                                                                                                                                                          |
 | links        | Array\[[Link](/2026-01-23/specification/checkout/#link)\]                                        | **Yes**  | Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.                                                                                                                                                                    |
 | expires_at   | string                                                                                           | No       | RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.                                                                                                                                                                                    |
@@ -1366,11 +1366,11 @@ The platform will honor the TTL provided by the business via `expires_at` at the
 | ------------ | ------------------------------------------------------------------------------------------------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | ucp          | [UCP Response Checkout Schema](/2026-01-23/specification/checkout/#ucp-response-checkout-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                                                                                                                                         |
 | id           | string                                                                                           | **Yes**  | Unique identifier of the checkout session.                                                                                                                                                                                                                      |
-| line_items   | Array\[[Line Item Response](/2026-01-23/specification/checkout/#line-item-response)\]            | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                           |
+| line_items   | Array\[[Line Item Response](/2026-01-23/specification/checkout/#line-item)\]                     | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                           |
 | buyer        | [Buyer](/2026-01-23/specification/checkout/#buyer)                                               | No       | Representation of the buyer.                                                                                                                                                                                                                                    |
 | status       | string                                                                                           | **Yes**  | Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details. **Enum:** `incomplete`, `requires_escalation`, `ready_for_complete`, `complete_in_progress`, `completed`, `canceled` |
 | currency     | string                                                                                           | **Yes**  | ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.                                                                                          |
-| totals       | Array\[[Total Response](/2026-01-23/specification/checkout/#total-response)\]                    | **Yes**  | Different cart totals.                                                                                                                                                                                                                                          |
+| totals       | Array\[[Total Response](/2026-01-23/specification/checkout/#total)\]                             | **Yes**  | Different cart totals.                                                                                                                                                                                                                                          |
 | messages     | Array\[[Message](/2026-01-23/specification/checkout/#message)\]                                  | No       | List of messages with error and info about the checkout session state.                                                                                                                                                                                          |
 | links        | Array\[[Link](/2026-01-23/specification/checkout/#link)\]                                        | **Yes**  | Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.                                                                                                                                                                    |
 | expires_at   | string                                                                                           | No       | RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.                                                                                                                                                                                    |
@@ -1399,11 +1399,11 @@ Performs a full replacement of the checkout resource. The platform is **REQUIRED
 | ------------ | ------------------------------------------------------------------------------------------------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | ucp          | [UCP Response Checkout Schema](/2026-01-23/specification/checkout/#ucp-response-checkout-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                                                                                                                                         |
 | id           | string                                                                                           | **Yes**  | Unique identifier of the checkout session.                                                                                                                                                                                                                      |
-| line_items   | Array\[[Line Item Response](/2026-01-23/specification/checkout/#line-item-response)\]            | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                           |
+| line_items   | Array\[[Line Item Response](/2026-01-23/specification/checkout/#line-item)\]                     | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                           |
 | buyer        | [Buyer](/2026-01-23/specification/checkout/#buyer)                                               | No       | Representation of the buyer.                                                                                                                                                                                                                                    |
 | status       | string                                                                                           | **Yes**  | Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details. **Enum:** `incomplete`, `requires_escalation`, `ready_for_complete`, `complete_in_progress`, `completed`, `canceled` |
 | currency     | string                                                                                           | **Yes**  | ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.                                                                                          |
-| totals       | Array\[[Total Response](/2026-01-23/specification/checkout/#total-response)\]                    | **Yes**  | Different cart totals.                                                                                                                                                                                                                                          |
+| totals       | Array\[[Total Response](/2026-01-23/specification/checkout/#total)\]                             | **Yes**  | Different cart totals.                                                                                                                                                                                                                                          |
 | messages     | Array\[[Message](/2026-01-23/specification/checkout/#message)\]                                  | No       | List of messages with error and info about the checkout session state.                                                                                                                                                                                          |
 | links        | Array\[[Link](/2026-01-23/specification/checkout/#link)\]                                        | **Yes**  | Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.                                                                                                                                                                    |
 | expires_at   | string                                                                                           | No       | RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.                                                                                                                                                                                    |
@@ -1431,11 +1431,11 @@ After this call, other details will be updated through subsequent events as the 
 | ------------ | ------------------------------------------------------------------------------------------------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | ucp          | [UCP Response Checkout Schema](/2026-01-23/specification/checkout/#ucp-response-checkout-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                                                                                                                                         |
 | id           | string                                                                                           | **Yes**  | Unique identifier of the checkout session.                                                                                                                                                                                                                      |
-| line_items   | Array\[[Line Item Response](/2026-01-23/specification/checkout/#line-item-response)\]            | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                           |
+| line_items   | Array\[[Line Item Response](/2026-01-23/specification/checkout/#line-item)\]                     | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                           |
 | buyer        | [Buyer](/2026-01-23/specification/checkout/#buyer)                                               | No       | Representation of the buyer.                                                                                                                                                                                                                                    |
 | status       | string                                                                                           | **Yes**  | Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details. **Enum:** `incomplete`, `requires_escalation`, `ready_for_complete`, `complete_in_progress`, `completed`, `canceled` |
 | currency     | string                                                                                           | **Yes**  | ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.                                                                                          |
-| totals       | Array\[[Total Response](/2026-01-23/specification/checkout/#total-response)\]                    | **Yes**  | Different cart totals.                                                                                                                                                                                                                                          |
+| totals       | Array\[[Total Response](/2026-01-23/specification/checkout/#total)\]                             | **Yes**  | Different cart totals.                                                                                                                                                                                                                                          |
 | messages     | Array\[[Message](/2026-01-23/specification/checkout/#message)\]                                  | No       | List of messages with error and info about the checkout session state.                                                                                                                                                                                          |
 | links        | Array\[[Link](/2026-01-23/specification/checkout/#link)\]                                        | **Yes**  | Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.                                                                                                                                                                    |
 | expires_at   | string                                                                                           | No       | RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.                                                                                                                                                                                    |
@@ -1459,11 +1459,11 @@ This operation will be used to cancel a checkout session, if it can be canceled.
 | ------------ | ------------------------------------------------------------------------------------------------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | ucp          | [UCP Response Checkout Schema](/2026-01-23/specification/checkout/#ucp-response-checkout-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                                                                                                                                         |
 | id           | string                                                                                           | **Yes**  | Unique identifier of the checkout session.                                                                                                                                                                                                                      |
-| line_items   | Array\[[Line Item Response](/2026-01-23/specification/checkout/#line-item-response)\]            | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                           |
+| line_items   | Array\[[Line Item Response](/2026-01-23/specification/checkout/#line-item)\]                     | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                           |
 | buyer        | [Buyer](/2026-01-23/specification/checkout/#buyer)                                               | No       | Representation of the buyer.                                                                                                                                                                                                                                    |
 | status       | string                                                                                           | **Yes**  | Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details. **Enum:** `incomplete`, `requires_escalation`, `ready_for_complete`, `complete_in_progress`, `completed`, `canceled` |
 | currency     | string                                                                                           | **Yes**  | ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.                                                                                          |
-| totals       | Array\[[Total Response](/2026-01-23/specification/checkout/#total-response)\]                    | **Yes**  | Different cart totals.                                                                                                                                                                                                                                          |
+| totals       | Array\[[Total Response](/2026-01-23/specification/checkout/#total)\]                             | **Yes**  | Different cart totals.                                                                                                                                                                                                                                          |
 | messages     | Array\[[Message](/2026-01-23/specification/checkout/#message)\]                                  | No       | List of messages with error and info about the checkout session state.                                                                                                                                                                                          |
 | links        | Array\[[Link](/2026-01-23/specification/checkout/#link)\]                                        | **Yes**  | Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.                                                                                                                                                                    |
 | expires_at   | string                                                                                           | No       | RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.                                                                                                                                                                                    |
@@ -1527,7 +1527,7 @@ Context signals are provisional hints. Businesses SHOULD use these values when a
 | ---- | ------ | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
 | id   | string | **Yes**  | Should be recognized by both the Platform, and the Business. For Google it should match the id provided in the "id" field in the product feed. |
 
-#### Item Response
+#### Item
 
 | Name      | Type    | Required | Description                                                                                                                                    |
 | --------- | ------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -1554,7 +1554,7 @@ Context signals are provisional hints. Businesses SHOULD use these values when a
 | quantity  | integer                                          | **Yes**  | Quantity of the item being purchased.                  |
 | parent_id | string                                           | No       | Parent line item identifier for any nested structures. |
 
-#### Line Item Response
+#### Line Item
 
 | Name      | Type                                                        | Required | Description                                            |
 | --------- | ----------------------------------------------------------- | -------- | ------------------------------------------------------ |
@@ -1638,6 +1638,18 @@ This object MUST be one of the following types: [Message Error](/2026-01-23/spec
 | credential      | [Payment Credential](/2026-01-23/specification/checkout/#payment-credential) | No       | The base definition for any payment credential. Handlers define specific credential types.                                                                   |
 | display         | object                                                                       | No       | Display information for this payment instrument. Each payment instrument schema defines its specific display properties, as outlined by the payment handler. |
 
+#### Selected Payment Instrument
+
+| Name            | Type    | Required | Description                                                                                                                                                  |
+| --------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| id              | string  | **Yes**  | A unique identifier for this instrument instance, assigned by the platform.                                                                                  |
+| handler_id      | string  | **Yes**  | The unique identifier for the handler instance that produced this instrument. This corresponds to the 'id' field in the Payment Handler definition.          |
+| type            | string  | **Yes**  | The broad category of the instrument (e.g., 'card', 'tokenized_card'). Specific schemas will constrain this to a constant value.                             |
+| billing_address | object  | No       | The billing address associated with this payment method.                                                                                                     |
+| credential      | object  | No       | The base definition for any payment credential. Handlers define specific credential types.                                                                   |
+| display         | object  | No       | Display information for this payment instrument. Each payment instrument schema defines its specific display properties, as outlined by the payment handler. |
+| selected        | boolean | No       | Whether this instrument is selected by the user.                                                                                                             |
+
 ### Payment Credential
 
 | Name | Type   | Required | Description                                                                                  |
@@ -1671,7 +1683,7 @@ This object MUST be one of the following types: [Message Error](/2026-01-23/spec
 
 ### Total
 
-#### Total Response
+#### Total
 
 | Name         | Type    | Required | Description                                                                                                                   |
 | ------------ | ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
@@ -2938,9 +2950,9 @@ Businesses advertise MCP transport availability through their UCP profile at `/.
       "dev.ucp.shopping": [
         {
           "version": "2026-01-23",
-          "spec": "https://ucp.dev/specification/overview",
+          "spec": "https://ucp.dev/2026-01-23/specification/overview",
           "transport": "mcp",
-          "schema": "https://ucp.dev/2026-01-23/services/shopping/mcp.openrpc.json",
+          "schema": "https://ucp.dev/2026-01-23/services/shopping/openrpc.json",
           "endpoint": "https://business.example.com/ucp/mcp"
         }
       ]
@@ -2949,14 +2961,14 @@ Businesses advertise MCP transport availability through their UCP profile at `/.
       "dev.ucp.shopping.checkout": [
         {
           "version": "2026-01-23",
-          "spec": "https://ucp.dev/specification/checkout",
+          "spec": "https://ucp.dev/2026-01-23/specification/checkout",
           "schema": "https://ucp.dev/2026-01-23/schemas/shopping/checkout.json"
         }
       ],
       "dev.ucp.shopping.fulfillment": [
         {
           "version": "2026-01-23",
-          "spec": "https://ucp.dev/specification/fulfillment",
+          "spec": "https://ucp.dev/2026-01-23/specification/fulfillment",
           "schema": "https://ucp.dev/2026-01-23/schemas/shopping/fulfillment.json",
           "extends": "dev.ucp.shopping.checkout"
         }
@@ -3556,7 +3568,7 @@ Businesses that support A2A transport must specify the agent card endpoint as pa
       "dev.ucp.shopping": [
         {
           "version": "2026-01-23",
-          "spec": "https://ucp.dev/specification/overview",
+          "spec": "https://ucp.dev/2026-01-23/specification/overview",
           "transport": "a2a",
           "endpoint": "https://example-business.com/.well-known/agent-card.json"
         }
@@ -3588,7 +3600,7 @@ The following table defines the required headers for enabling an A2A Agent to co
 
 The A2A Protocol provides a strong foundation for inter-agent communication. [A2A extensions](https://a2a-protocol.org/latest/topics/extensions/) enable communication between agents with structured data types. This enables businesses to build AI applications to leverage UCP data types for communication with platforms.
 
-The URI for UCP A2A extension: `https://ucp.dev/specification/reference?v=2026-01-11`
+The URI for UCP A2A extension: `https://ucp.dev/2026-01-23/specification/reference`
 
 Businesses supporting UCP must advertise the extension and any optional capabilities in their A2A Agent Card to allow platforms to activate the extension.
 
@@ -3598,7 +3610,7 @@ An example:
 {
   "extensions": [
     {
-      "uri": "https://ucp.dev/specification/reference?v=2026-01-11",
+      "uri": "https://ucp.dev/2026-01-23/specification/reference",
       "description": "Business agent supporting UCP",
       "params": {
         "capabilities": {
@@ -3913,13 +3925,13 @@ When a business advertises the `embedded` transport in their `/.well-known/ucp` 
             {
                 "version": "2026-01-23",
                 "transport": "mcp",
-                "schema": "https://ucp.dev/2026-01-23/services/shopping/mcp.openrpc.json",
+                "schema": "https://ucp.dev/2026-01-23/services/shopping/openrpc.json",
                 "endpoint": "https://merchant.example.com/ucp/mcp"
             },
             {
                 "version": "2026-01-23",
                 "transport": "embedded",
-                "schema": "https://ucp.dev/2026-01-23/services/shopping/embedded.openrpc.json"
+                "schema": "https://ucp.dev/2026-01-23/services/shopping/embedded.json"
             }
         ]
     }
@@ -4879,6 +4891,8 @@ The host **MUST** respond with either an error, or the newly-selected address. I
 
 The address object uses the UCP [PostalAddress](/2026-01-23/specification/checkout/#postal-address) format:
 
+### Postal Address
+
 | Name             | Type   | Required | Description                                                                                                                                                                                                                               |
 | ---------------- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | extended_address | string | No       | An address extension such as an apartment number, C/O or alternative name.                                                                                                                                                                |
@@ -4958,11 +4972,11 @@ The core object representing the current state of the transaction, including lin
 | ------------ | ------------------------------------------------------------------------------------------------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | ucp          | [UCP Response Checkout Schema](/2026-01-23/specification/checkout/#ucp-response-checkout-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                                                                                                                                         |
 | id           | string                                                                                           | **Yes**  | Unique identifier of the checkout session.                                                                                                                                                                                                                      |
-| line_items   | Array\[[Line Item Response](/2026-01-23/specification/checkout/#line-item-response)\]            | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                           |
+| line_items   | Array\[[Line Item Response](/2026-01-23/specification/checkout/#line-item)\]                     | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                           |
 | buyer        | [Buyer](/2026-01-23/specification/checkout/#buyer)                                               | No       | Representation of the buyer.                                                                                                                                                                                                                                    |
 | status       | string                                                                                           | **Yes**  | Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details. **Enum:** `incomplete`, `requires_escalation`, `ready_for_complete`, `complete_in_progress`, `completed`, `canceled` |
 | currency     | string                                                                                           | **Yes**  | ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.                                                                                          |
-| totals       | Array\[[Total Response](/2026-01-23/specification/checkout/#total-response)\]                    | **Yes**  | Different cart totals.                                                                                                                                                                                                                                          |
+| totals       | Array\[[Total Response](/2026-01-23/specification/checkout/#total)\]                             | **Yes**  | Different cart totals.                                                                                                                                                                                                                                          |
 | messages     | Array\[[Message](/2026-01-23/specification/checkout/#message)\]                                  | No       | List of messages with error and info about the checkout session state.                                                                                                                                                                                          |
 | links        | Array\[[Link](/2026-01-23/specification/checkout/#link)\]                                        | **Yes**  | Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.                                                                                                                                                                    |
 | expires_at   | string                                                                                           | No       | RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.                                                                                                                                                                                    |
@@ -4983,7 +4997,7 @@ The object returned upon successful completion of a checkout, containing confirm
 | line_items    | Array\[[Order Line Item](/2026-01-23/specification/order/#order-line-item)\]            | **Yes**  | Immutable line items — source of truth for what was ordered.                                                                                 |
 | fulfillment   | object                                                                                  | **Yes**  | Fulfillment data: buyer expectations and what actually happened.                                                                             |
 | adjustments   | Array\[[Adjustment](/2026-01-23/specification/order/#adjustment)\]                      | No       | Append-only event log of money movements (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment. |
-| totals        | Array\[[Total Response](/2026-01-23/specification/order/#total-response)\]              | **Yes**  | Different totals for the order.                                                                                                              |
+| totals        | Array\[[Total Response](/2026-01-23/specification/order/#total)\]                       | **Yes**  | Different totals for the order.                                                                                                              |
 
 ### Payment
 
@@ -5004,7 +5018,60 @@ Represents a specific method of payment (e.g., a specific credit card, bank acco
 | credential      | [Payment Credential](/2026-01-23/specification/embedded-checkout/#payment-credential) | No       | The base definition for any payment credential. Handlers define specific credential types.                                                                   |
 | display         | object                                                                                | No       | Display information for this payment instrument. Each payment instrument schema defines its specific display properties, as outlined by the payment handler. |
 
-### Payment Handler Response
+#### Selected Payment Instrument
+
+| Name            | Type    | Required | Description                                                                                                                                                  |
+| --------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| id              | string  | **Yes**  | A unique identifier for this instrument instance, assigned by the platform.                                                                                  |
+| handler_id      | string  | **Yes**  | The unique identifier for the handler instance that produced this instrument. This corresponds to the 'id' field in the Payment Handler definition.          |
+| type            | string  | **Yes**  | The broad category of the instrument (e.g., 'card', 'tokenized_card'). Specific schemas will constrain this to a constant value.                             |
+| billing_address | object  | No       | The billing address associated with this payment method.                                                                                                     |
+| credential      | object  | No       | The base definition for any payment credential. Handlers define specific credential types.                                                                   |
+| display         | object  | No       | Display information for this payment instrument. Each payment instrument schema defines its specific display properties, as outlined by the payment handler. |
+| selected        | boolean | No       | Whether this instrument is selected by the user.                                                                                                             |
+
+### Card Payment Instrument
+
+| Name            | Type                                                                                  | Required | Description                                                                                                                                                  |
+| --------------- | ------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| id              | string                                                                                | **Yes**  | A unique identifier for this instrument instance, assigned by the platform.                                                                                  |
+| handler_id      | string                                                                                | **Yes**  | The unique identifier for the handler instance that produced this instrument. This corresponds to the 'id' field in the Payment Handler definition.          |
+| type            | string                                                                                | **Yes**  | The broad category of the instrument (e.g., 'card', 'tokenized_card'). Specific schemas will constrain this to a constant value.                             |
+| billing_address | [Postal Address](/2026-01-23/specification/embedded-checkout/#postal-address)         | No       | The billing address associated with this payment method.                                                                                                     |
+| credential      | [Payment Credential](/2026-01-23/specification/embedded-checkout/#payment-credential) | No       | The base definition for any payment credential. Handlers define specific credential types.                                                                   |
+| display         | object                                                                                | No       | Display information for this payment instrument. Each payment instrument schema defines its specific display properties, as outlined by the payment handler. |
+| type            | string                                                                                | **Yes**  | **Constant = card**. Indicates this is a card payment instrument.                                                                                            |
+| display         | object                                                                                | No       | Display information for this card payment instrument.                                                                                                        |
+
+### Payment Credential
+
+| Name | Type   | Required | Description                                                                                  |
+| ---- | ------ | -------- | -------------------------------------------------------------------------------------------- |
+| type | string | **Yes**  | The credential type discriminator. Specific schemas will constrain this to a constant value. |
+
+### Token Credential
+
+| Name | Type   | Required | Description                                                                                  |
+| ---- | ------ | -------- | -------------------------------------------------------------------------------------------- |
+| type | string | **Yes**  | The credential type discriminator. Specific schemas will constrain this to a constant value. |
+| type | string | **Yes**  | The specific type of token produced by the handler (e.g., 'stripe_token').                   |
+
+### Card Credential
+
+| Name             | Type    | Required | Description                                                                                                                                            |
+| ---------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| type             | string  | **Yes**  | The credential type discriminator. Specific schemas will constrain this to a constant value.                                                           |
+| type             | any     | **Yes**  | **Constant = card**. The credential type identifier for card credentials.                                                                              |
+| card_number_type | string  | **Yes**  | The type of card number. Network tokens are preferred with fallback to FPAN. See PCI Scope for more details. **Enum:** `fpan`, `network_token`, `dpan` |
+| number           | string  | No       | Card number.                                                                                                                                           |
+| expiry_month     | integer | No       | The month of the card's expiration date (1-12).                                                                                                        |
+| expiry_year      | integer | No       | The year of the card's expiration date.                                                                                                                |
+| name             | string  | No       | Cardholder name.                                                                                                                                       |
+| cvc              | string  | No       | Card CVC number.                                                                                                                                       |
+| cryptogram       | string  | No       | Cryptogram provided with network tokens.                                                                                                               |
+| eci_value        | string  | No       | Electronic Commerce Indicator / Security Level Indicator provided with network tokens.                                                                 |
+
+### Payment Handler
 
 Represents the processor or wallet provider responsible for authenticating and processing a specific payment instrument (e.g., Google Pay, Stripe, or a Bank App).
 
@@ -5048,14 +5115,14 @@ Businesses declare support by adding `dev.ucp.shopping.ap2_mandate` to their `ca
     "dev.ucp.shopping.checkout": [
       {
         "version": "2026-01-23",
-        "spec": "https://ucp.dev/specification/checkout",
+        "spec": "https://ucp.dev/2026-01-23/specification/checkout",
         "schema": "https://ucp.dev/2026-01-23/schemas/shopping/checkout.json"
       }
     ],
     "dev.ucp.shopping.ap2_mandate": [
       {
         "version": "2026-01-23",
-        "spec": "https://ucp.dev/specification/ap2-mandates",
+        "spec": "https://ucp.dev/2026-01-23/specification/ap2-mandates",
         "schema": "https://ucp.dev/2026-01-23/schemas/shopping/ap2_mandate.json",
         "extends": "dev.ucp.shopping.checkout",
         "config": {
@@ -5545,7 +5612,7 @@ Businesses advertise discount support in their profile:
         {
           "version": "2026-01-23",
           "extends": "dev.ucp.shopping.checkout",
-          "spec": "https://ucp.dev/specification/discount",
+          "spec": "https://ucp.dev/2026-01-23/specification/discount",
           "schema": "https://ucp.dev/2026-01-23/schemas/shopping/discount.json"
         }
       ]
@@ -5965,7 +6032,7 @@ Fulfillment applies only to items requiring physical delivery. Items not requiri
 | methods           | Array\[[Fulfillment Method](/2026-01-23/specification/fulfillment/#fulfillment-method)\]                     | No       | Fulfillment methods for cart items. |
 | available_methods | Array\[[Fulfillment Available Method](/2026-01-23/specification/fulfillment/#fulfillment-available-method)\] | No       | Inventory availability hints.       |
 
-#### Fulfillment Method Response
+#### Fulfillment Method
 
 | Name                    | Type                                                                                               | Required | Description                                                                                                  |
 | ----------------------- | -------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------ |
@@ -5976,11 +6043,11 @@ Fulfillment applies only to items requiring physical delivery. Items not requiri
 | selected_destination_id | ['string', 'null']                                                                                 | No       | ID of the selected destination.                                                                              |
 | groups                  | Array\[[Fulfillment Group](/2026-01-23/specification/fulfillment/#fulfillment-group)\]             | No       | Fulfillment groups for selecting options. Agent sets selected_option_id on groups to choose shipping method. |
 
-#### Fulfillment Destination Response
+#### Fulfillment Destination
 
 This object MUST be one of the following types: [Shipping Destination](/2026-01-23/specification/fulfillment/#shipping-destination), [Retail Location](/2026-01-23/specification/fulfillment/#retail-location).
 
-#### Shipping Destination Response
+#### Shipping Destination
 
 | Name             | Type   | Required | Description                                                                                                                                                                                                                               |
 | ---------------- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -5995,7 +6062,7 @@ This object MUST be one of the following types: [Shipping Destination](/2026-01-
 | phone_number     | string | No       | Optional. Phone number of the contact associated with the address.                                                                                                                                                                        |
 | id               | string | **Yes**  | ID specific to this shipping destination.                                                                                                                                                                                                 |
 
-#### Retail Location Response
+#### Retail Location
 
 | Name    | Type                                                                    | Required | Description                       |
 | ------- | ----------------------------------------------------------------------- | -------- | --------------------------------- |
@@ -6003,7 +6070,7 @@ This object MUST be one of the following types: [Shipping Destination](/2026-01-
 | name    | string                                                                  | **Yes**  | Location name (e.g., store name). |
 | address | [Postal Address](/2026-01-23/specification/fulfillment/#postal-address) | No       | Physical address of the location. |
 
-#### Fulfillment Group Response
+#### Fulfillment Group
 
 | Name               | Type                                                                                     | Required | Description                                                            |
 | ------------------ | ---------------------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------- |
@@ -6012,7 +6079,7 @@ This object MUST be one of the following types: [Shipping Destination](/2026-01-
 | options            | Array\[[Fulfillment Option](/2026-01-23/specification/fulfillment/#fulfillment-option)\] | No       | Available fulfillment options for this group.                          |
 | selected_option_id | ['string', 'null']                                                                       | No       | ID of the selected fulfillment option for this group.                  |
 
-#### Fulfillment Option Response
+#### Fulfillment Option
 
 | Name                      | Type                                                           | Required | Description                                                                |
 | ------------------------- | -------------------------------------------------------------- | -------- | -------------------------------------------------------------------------- |
@@ -6024,7 +6091,7 @@ This object MUST be one of the following types: [Shipping Destination](/2026-01-
 | latest_fulfillment_time   | string                                                         | No       | Latest fulfillment date.                                                   |
 | totals                    | Array\[[Total](/2026-01-23/specification/fulfillment/#total)\] | **Yes**  | Fulfillment option totals breakdown.                                       |
 
-#### Fulfillment Available Method Response
+#### Fulfillment Available Method
 
 | Name           | Type               | Required | Description                                                                              |
 | -------------- | ------------------ | -------- | ---------------------------------------------------------------------------------------- |
@@ -6033,7 +6100,7 @@ This object MUST be one of the following types: [Shipping Destination](/2026-01-
 | fulfillable_on | ['string', 'null'] | No       | 'now' for immediate availability, or ISO 8601 date for future (preorders, transfers).    |
 | description    | string             | No       | Human-readable availability info (e.g., 'Available for pickup at Downtown Store today'). |
 
-#### Total Response
+#### Total
 
 | Name         | Type    | Required | Description                                                                                                                   |
 | ------------ | ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
@@ -6602,7 +6669,7 @@ Expectations can be split, merged, or adjusted post-order. For example:
 | line_items    | Array\[[Order Line Item](/2026-01-23/specification/order/#order-line-item)\]            | **Yes**  | Immutable line items — source of truth for what was ordered.                                                                                 |
 | fulfillment   | object                                                                                  | **Yes**  | Fulfillment data: buyer expectations and what actually happened.                                                                             |
 | adjustments   | Array\[[Adjustment](/2026-01-23/specification/order/#adjustment)\]                      | No       | Append-only event log of money movements (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment. |
-| totals        | Array\[[Total Response](/2026-01-23/specification/order/#total-response)\]              | **Yes**  | Different totals for the order.                                                                                                              |
+| totals        | Array\[[Total Response](/2026-01-23/specification/order/#total)\]                       | **Yes**  | Different totals for the order.                                                                                                              |
 
 ### Order Line Item
 
@@ -6878,7 +6945,7 @@ The `signing_keys` array supports multiple keys to enable zero-downtime rotation
 
 ## Entities
 
-### Item Response
+### Item
 
 | Name      | Type    | Required | Description                                                                                                                                    |
 | --------- | ------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -6912,7 +6979,7 @@ The `signing_keys` array supports multiple keys to enable zero-downtime rotation
 | config  | object | No       | Entity-specific configuration. Structure defined by each entity's schema.                       |
 | extends | string | No       | Parent capability this extends. Present for extensions, absent for root capabilities.           |
 
-### Total Response
+### Total
 
 | Name         | Type    | Required | Description                                                                                                                   |
 | ------------ | ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
@@ -6920,7 +6987,7 @@ The `signing_keys` array supports multiple keys to enable zero-downtime rotation
 | display_text | string  | No       | Text to display against the amount. Should reflect appropriate method (e.g., 'Shipping', 'Delivery').                         |
 | amount       | integer | **Yes**  | If type == total, sums subtotal - discount + fulfillment + tax + fee. Should be >= 0. Amount in minor (cents) currency units. |
 
-### UCP Response Order
+### UCP Response Order Schema
 
 | Name             | Type   | Required | Description                                            |
 | ---------------- | ------ | -------- | ------------------------------------------------------ |
@@ -7120,7 +7187,7 @@ PREREQUISITES(participant, onboarding_input) → prerequisites_output
 
 **Prerequisites Output:**
 
-The `prerequisites_output` contains what a participant receives from onboarding. At minimum, this includes an **identity** (see [Payment Identity](https://ucp.dev/schemas/shopping/types/payment_identity.json)). It **MAY** also include additional configuration, credentials, or settings specific to the handler.
+The `prerequisites_output` contains what a participant receives from onboarding. At minimum, this includes an **identity** (see [Payment Identity](/2026-01-23/schemas/shopping/types/payment_identity.json)). It **MAY** also include additional configuration, credentials, or settings specific to the handler.
 
 Payment handler specifications **are not required** to define a formal schema for `prerequisites_output`. Instead, the specification **SHOULD** clearly document:
 
@@ -7152,7 +7219,7 @@ HANDLER_DECLARATION(prerequisites_output) → handler_declaration
 
 **Output Structure:**
 
-The handler declaration conforms to the [`PaymentHandler`](https://ucp.dev/schemas/payment_handler.json) schema. The specification **SHOULD** define the available config and instrument schemas, and how to construct each based on the business's prerequisites output and desired configuration.
+The handler declaration conforms to the [`PaymentHandler`](/2026-01-23/schemas/payment_handler.json) schema. The specification **SHOULD** define the available config and instrument schemas, and how to construct each based on the business's prerequisites output and desired configuration.
 
 ```json
 {
@@ -7279,7 +7346,7 @@ The `schema` field points to a JSON schema that defines handler-specific shapes.
         "title": "Tokenizer (Platform)",
         "description": "Platform-level handler configuration for discovery.",
         "allOf": [
-          { "$ref": "https://ucp.dev/schemas/payment_handler.json#/$defs/platform_schema" },
+          { "$ref": "https://ucp.dev/2026-01-23/schemas/payment_handler.json#/$defs/platform_schema" },
           {
             "properties": {
               "config": {
@@ -7294,7 +7361,7 @@ The `schema` field points to a JSON schema that defines handler-specific shapes.
         "title": "Tokenizer (Business)",
         "description": "Business-level handler configuration for discovery.",
         "allOf": [
-          { "$ref": "https://ucp.dev/schemas/payment_handler.json#/$defs/business_schema" },
+          { "$ref": "https://ucp.dev/2026-01-23/schemas/payment_handler.json#/$defs/business_schema" },
           {
             "properties": {
               "config": {
@@ -7309,7 +7376,7 @@ The `schema` field points to a JSON schema that defines handler-specific shapes.
         "title": "Tokenizer (Response)",
         "description": "Runtime handler configuration in checkout responses.",
         "allOf": [
-          { "$ref": "https://ucp.dev/schemas/payment_handler.json#/$defs/response_schema" },
+          { "$ref": "https://ucp.dev/2026-01-23/schemas/payment_handler.json#/$defs/response_schema" },
           {
             "properties": {
               "config": {
@@ -7420,10 +7487,10 @@ ______________________________________________________________________
 
 **Base Instrument Schemas:**
 
-| Schema                                                                                                | Description                                                      |
-| ----------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
-| [`payment_instrument.json`](https://ucp.dev/schemas/shopping/types/payment_instrument.json)           | Base: id, handler_id, type, billing_address, credential, display |
-| [`card_payment_instrument.json`](https://ucp.dev/schemas/shopping/types/card_payment_instrument.json) | Extends base with display: brand, last_digits, expiry, card art  |
+| Schema                                                                                            | Description                                                      |
+| ------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| [`payment_instrument.json`](/2026-01-23/schemas/shopping/types/payment_instrument.json)           | Base: id, handler_id, type, billing_address, credential, display |
+| [`card_payment_instrument.json`](/2026-01-23/schemas/shopping/types/card_payment_instrument.json) | Extends base with display: brand, last_digits, expiry, card art  |
 
 UCP provides base schemas for universal payment instruments like `card`. Spec authors **MAY** extend any of the base instruments to add handler-specific display data or customize the credential reference. Handlers **MAY** define multiple instrument types for different payment flows.
 
@@ -7436,7 +7503,7 @@ UCP provides base schemas for universal payment instruments like `card`. Spec au
   "title": "Tokenizer Card Instrument",
   "description": "Card-based payment instrument for com.example.tokenizer.",
   "allOf": [
-    { "$ref": "https://ucp.dev/schemas/shopping/types/card_payment_instrument.json" }
+    { "$ref": "https://ucp.dev/2026-01-23/schemas/shopping/types/card_payment_instrument.json" }
   ],
   "type": "object",
   "required": ["type"],
@@ -7465,7 +7532,7 @@ UCP provides base schemas for universal payment instruments like `card`. Spec au
   "title": "Tokenizer Alt Instrument",
   "description": "Alternative payment instrument for com.example.tokenizer.",
   "allOf": [
-    { "$ref": "https://ucp.dev/schemas/shopping/types/payment_instrument.json" }
+    { "$ref": "https://ucp.dev/2026-01-23/schemas/shopping/types/payment_instrument.json" }
   ],
   "type": "object",
   "required": ["type"],
@@ -7491,10 +7558,10 @@ ______________________________________________________________________
 
 **Base Credential Schemas:**
 
-| Schema                                                                                      | Description                   |
-| ------------------------------------------------------------------------------------------- | ----------------------------- |
-| [`payment_credential.json`](https://ucp.dev/schemas/shopping/types/payment_credential.json) | Base: type discriminator only |
-| [`token_credential.json`](https://ucp.dev/schemas/shopping/types/token_credential.json)     | Token: type + token string    |
+| Schema                                                                                  | Description                   |
+| --------------------------------------------------------------------------------------- | ----------------------------- |
+| [`payment_credential.json`](/2026-01-23/schemas/shopping/types/payment_credential.json) | Base: type discriminator only |
+| [`token_credential.json`](/2026-01-23/schemas/shopping/types/token_credential.json)     | Token: type + token string    |
 
 UCP provides base schemas for universal payment credentials. Authors **MAY** extend these schemas to include handler-specific credential context. Handlers **MAY** define multiple credential types for different instrument flows.
 
@@ -7511,7 +7578,7 @@ The specification **MUST** define which credential types are accepted by the han
   "title": "Tokenizer Card Token",
   "description": "Card token credential for com.example.tokenizer.",
   "allOf": [
-    { "$ref": "https://ucp.dev/schemas/shopping/types/token_credential.json" }
+    { "$ref": "https://ucp.dev/2026-01-23/schemas/shopping/types/token_credential.json" }
   ],
   "type": "object",
   "required": ["type", "token", "expiry"],
@@ -7538,7 +7605,7 @@ The specification **MUST** define which credential types are accepted by the han
   "title": "Tokenizer Alt Token",
   "description": "Alt token credential for com.example.tokenizer, adding routing hints",
   "allOf": [
-    { "$ref": "https://ucp.dev/schemas/shopping/types/token_credential.json" }
+    { "$ref": "https://ucp.dev/2026-01-23/schemas/shopping/types/token_credential.json" }
   ],
   "type": "object",
   "required": ["type", "token", "expiry"],
@@ -8033,7 +8100,7 @@ ______________________________________________________________________
 
 # Tokenization Guide
 
-**OpenAPI:** [Tokenization API](https://ucp.dev/handlers/tokenization/openapi.json)
+**OpenAPI:** [Tokenization API](/2026-01-23/handlers/tokenization/openapi.json)
 
 ## Overview
 
@@ -8108,7 +8175,7 @@ All tokenization requests require a `binding` object that ties the token to a sp
 | `checkout_id` | Yes         | The checkout session this token is valid for                                                    |
 | `identity`    | Conditional | The participant identity to bind to; required when caller acts on behalf of another participant |
 
-The tokenizer **MUST** verify binding matches on `/detokenize`. See [Binding Schema](https://ucp.dev/schemas/shopping/types/binding.json).
+The tokenizer **MUST** verify binding matches on `/detokenize`. See [Binding Schema](/2026-01-23/schemas/shopping/types/binding.json).
 
 ______________________________________________________________________
 
@@ -8186,7 +8253,7 @@ Authorization: Bearer {caller_access_token}
 
 **Note:** `binding.identity` is omitted when the authenticated caller is the binding target. Include it when acting on behalf of another participant (e.g., PSP detokenizing for business).
 
-See the full [OpenAPI specification](https://ucp.dev/handlers/tokenization/openapi.json) for complete request/response schemas.
+See the full [OpenAPI specification](/2026-01-23/handlers/tokenization/openapi.json) for complete request/response schemas.
 
 ______________________________________________________________________
 
@@ -8222,8 +8289,8 @@ When publishing your handler, your specification document **MUST** include:
 ### Example Specification Outline
 
 ```markdown
-**Handler Name:** `com.acme.tokenization_payment`
-**OpenAPI:** [Tokenization API](https://ucp.dev/handlers/tokenization/openapi.json)
+**Handler Name:** `com.acme.tokenization_payment` **OpenAPI:**
+[Tokenization API](site:handlers/tokenization/openapi.json)
 
 | Environment | Base URL                           |
 | :---------- | :--------------------------------- |
@@ -8264,13 +8331,13 @@ ______________________________________________________________________
 
 ## References
 
-| Resource                | URL                                                                   |
-| ----------------------- | --------------------------------------------------------------------- |
-| Tokenization OpenAPI    | `https://ucp.dev/handlers/tokenization/openapi.json`                  |
-| Identity Schema         | `https://ucp.dev/schemas/shopping/types/payment_identity.json`        |
-| Binding Schema          | `https://ucp.dev/schemas/shopping/types/binding.json`                 |
-| Token Credential Schema | `https://ucp.dev/schemas/shopping/types/token_credential.json`        |
-| Card Instrument Schema  | `https://ucp.dev/schemas/shopping/types/card_payment_instrument.json` |
+| Resource                | URL                                                                              |
+| ----------------------- | -------------------------------------------------------------------------------- |
+| Tokenization OpenAPI    | `https://ucp.dev/2026-01-23/handlers/tokenization/openapi.json`                  |
+| Identity Schema         | `https://ucp.dev/2026-01-23/schemas/shopping/types/payment_identity.json`        |
+| Binding Schema          | `https://ucp.dev/2026-01-23/schemas/shopping/types/binding.json`                 |
+| Token Credential Schema | `https://ucp.dev/2026-01-23/schemas/shopping/types/token_credential.json`        |
+| Card Instrument Schema  | `https://ucp.dev/2026-01-23/schemas/shopping/types/card_payment_instrument.json` |
 
 ______________________________________________________________________
 
@@ -8675,7 +8742,7 @@ Optionally, businesses may configure their PSP to detokenize on their behalf (PS
 
 Businesses advertise the platform's tokenization handler. The `config` contains the business's identity with the platform for token binding. The platform's handler specification (referenced via `spec`) documents the `/detokenize` endpoint URL exposed by the platform's **payment credential provider**.
 
-The handler accepts [CardCredential](https://ucp.dev/schemas/shopping/types/card_credential.json) for tokenization and produces [TokenCredential](https://ucp.dev/schemas/shopping/types/token_credential.json) for checkout.
+The handler accepts [CardCredential](/2026-01-23/schemas/shopping/types/card_credential.json) for tokenization and produces [TokenCredential](/2026-01-23/schemas/shopping/types/token_credential.json) for checkout.
 
 **Note:** The result of `/detokenize` contains **sensitive payment data**. Both the sender (platform's credential provider) and receiver (business or PSP) **MUST** be compliant with relevant standards for the credential type (e.g., PCI DSS for cards).
 
@@ -8944,9 +9011,9 @@ ______________________________________________________________________
 
 ## References
 
-- **Pattern:** [Tokenization Payment Handler](https://ucp.dev/specification/payment-handler-guide)
-- **API Pattern:** `https://ucp.dev/handlers/tokenization/openapi.json`
-- **Identity Schema:** `https://ucp.dev/schemas/shopping/types/payment_identity.json`
+- **Pattern:** [Tokenization Payment Handler](https://ucp.dev/2026-01-23/specification/payment-handler-guide/index.md)
+- **API Pattern:** `https://ucp.dev/2026-01-23/handlers/tokenization/openapi.json`
+- **Identity Schema:** `https://ucp.dev/2026-01-23/schemas/shopping/types/payment_identity.json`
 
 # Encrypted Credential Handler
 
@@ -9042,7 +9109,7 @@ While businesses receive only encrypted `EncryptedCredential` payloads during ch
 
 Businesses advertise the platform's handler. The `business_id` field identifies the business, which the platform uses to look up the correct public key for encryption.
 
-The only supported instrument schema is [CardPaymentInstrument](https://ucp.dev/schemas/shopping/types/card_payment_instrument.json), the only supported checkout credential schema is `EncryptedCredential`, and the only supported source credential schema is [CardCredential](https://ucp.dev/schemas/shopping/types/card_credential.json).
+The only supported instrument schema is [CardPaymentInstrument](/2026-01-23/schemas/shopping/types/card_payment_instrument.json), the only supported checkout credential schema is `EncryptedCredential`, and the only supported source credential schema is [CardCredential](/2026-01-23/schemas/shopping/types/card_credential.json).
 
 **Note:** The `EncryptedCredential` shape would be formally defined in the handler's schema (referenced via the `schema` field in the handler declaration).
 
@@ -9237,8 +9304,8 @@ ______________________________________________________________________
 
 ## References
 
-- **Identity Schema:** `https://ucp.dev/schemas/shopping/types/payment_identity.json`
-- **Instrument Schema:** `https://ucp.dev/schemas/shopping/types/card_payment_instrument.json`
+- **Identity Schema:** `https://ucp.dev/2026-01-23/schemas/shopping/types/payment_identity.json`
+- **Instrument Schema:** `https://ucp.dev/2026-01-23/schemas/shopping/types/card_payment_instrument.json`
 
 # Schema Reference
 
@@ -9683,6 +9750,18 @@ ______________________________________________________________________
 | amount       | integer | **Yes**  | If type == total, sums subtotal - discount + fulfillment + tax + fee. Should be >= 0. Amount in minor (cents) currency units. |
 
 ______________________________________________________________________
+
+### Selected Payment Instrument
+
+| Name            | Type    | Required | Description                                                                                                                                                  |
+| --------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| id              | string  | **Yes**  | A unique identifier for this instrument instance, assigned by the platform.                                                                                  |
+| handler_id      | string  | **Yes**  | The unique identifier for the handler instance that produced this instrument. This corresponds to the 'id' field in the Payment Handler definition.          |
+| type            | string  | **Yes**  | The broad category of the instrument (e.g., 'card', 'tokenized_card'). Specific schemas will constrain this to a constant value.                             |
+| billing_address | object  | No       | The billing address associated with this payment method.                                                                                                     |
+| credential      | object  | No       | The base definition for any payment credential. Handlers define specific credential types.                                                                   |
+| display         | object  | No       | Display information for this payment instrument. Each payment instrument schema defines its specific display properties, as outlined by the payment handler. |
+| selected        | boolean | No       | Whether this instrument is selected by the user.                                                                                                             |
 
 ## Extension Schemas
 
