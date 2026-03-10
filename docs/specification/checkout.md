@@ -240,7 +240,7 @@ handle with specific, appropriate UX rather than generic error treatment.
 | `item_unavailable`       | Item cannot be purchased (e.g. delisted)                                   |
 | `address_undeliverable`  | Cannot deliver to the provided address                                     |
 | `payment_failed`         | Payment processing failed                                                  |
-| `invalid_eligibility`    | Eligibility claim could not be verified at completion                      |
+| `eligibility_invalid`    | Eligibility claim could not be verified at completion                      |
 
 Businesses **SHOULD** mark standard errors with `severity: recoverable` to
 signal that platforms should provide appropriate UX (out-of-stock messaging,
@@ -262,7 +262,7 @@ before the transaction can complete.
 Unrecognized or inapplicable claims **MUST NOT** block the checkout.
 Businesses **SHOULD** notify the buyer via `messages` with `type: "warning"`
 when a claim is not applied. At completion, unverified claims **MUST**
-result in `type: "error"` with `code: "invalid_eligibility"` (see below).
+result in `type: "error"` with `code: "eligibility_invalid"` (see below).
 
 A claim is resolved when it is either **verified** or **rescinded**:
 
@@ -281,7 +281,7 @@ access to restricted products.
 **When verification fails:**
 
 The Business **MUST NOT** mutate the checkout and **MUST** return an error
-in `messages` with `code: "invalid_eligibility"` and
+in `messages` with `code: "eligibility_invalid"` and
 `severity: "recoverable"`. Messages **SHOULD** use the `path` field to
 identify which specific claim(s) could not be verified. The
 Platform **MAY** then provide valid proof and resubmit, restructure the
@@ -302,7 +302,7 @@ At completion, the payment credential does not match the claimed instrument:
   "messages": [
     {
       "type": "error",
-      "code": "invalid_eligibility",
+      "code": "eligibility_invalid",
       "severity": "recoverable",
       "content": "Payment credential does not match the claimed store card benefit."
     }
