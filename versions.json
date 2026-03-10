@@ -7,13 +7,13 @@
   {
     "version": "2026-01-23",
     "title": "2026-01-23",
-    "aliases": []
+    "aliases": [
+      "latest"
+    ]
   },
   {
     "version": "2026-01-11",
     "title": "2026-01-11",
-    "aliases": [
-      "latest"
-    ]
+    "aliases": []
   }
 ]
