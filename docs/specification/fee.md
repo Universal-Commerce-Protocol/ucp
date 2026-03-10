@@ -37,8 +37,9 @@ costs beyond the item subtotal.
 
 ## Discovery
 
-Businesses advertise fee support in their profile. The `extends` field MAY
-contain one or both of `dev.ucp.shopping.checkout` and `dev.ucp.shopping.cart`:
+Businesses advertise fee support in their profile. The `extends` field uses the
+multi-parent array form to declare which base capabilities the fee extension
+augments:
 
 ```json
 {
@@ -48,13 +49,7 @@ contain one or both of `dev.ucp.shopping.checkout` and `dev.ucp.shopping.cart`:
       "dev.ucp.shopping.fee": [
         {
           "version": "2026-01-11",
-          "extends": "dev.ucp.shopping.checkout",
-          "spec": "https://ucp.dev/specification/fee",
-          "schema": "https://ucp.dev/schemas/shopping/fee.json"
-        },
-        {
-          "version": "2026-01-11",
-          "extends": "dev.ucp.shopping.cart",
+          "extends": ["dev.ucp.shopping.checkout", "dev.ucp.shopping.cart"],
           "spec": "https://ucp.dev/specification/fee",
           "schema": "https://ucp.dev/schemas/shopping/fee.json"
         }
@@ -65,9 +60,10 @@ contain one or both of `dev.ucp.shopping.checkout` and `dev.ucp.shopping.cart`:
 ```
 
 !!! note "Partial adoption"
-    A business MAY support fees on checkout only, cart only, or both. Each
-    `extends` entry is independent. Platforms should check which base
-    capabilities the fee extension extends before expecting `fees` in responses.
+    A business MAY support fees on checkout only, cart only, or both. When
+    extending only one parent, use a single-element array or a plain string.
+    Platforms should check which base capabilities the fee extension extends
+    before expecting `fees` in responses.
 
 ## Schema
 
@@ -599,6 +595,7 @@ A convenience fee applied to a cart response.
 }
 ```
 
-> **Note:** The request does not include `fees` in any of the above examples.
-> This demonstrates the read-only nature of the fee extension — fees are
-> determined entirely by the business and returned in responses.
+!!! note "Read-only"
+    The request does not include `fees` in any of the above examples. This
+    demonstrates the read-only nature of the fee extension — fees are determined
+    entirely by the business and returned in responses.
