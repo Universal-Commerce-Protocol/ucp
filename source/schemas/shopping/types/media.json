@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/media.json",
+  "title": "Media",
+  "description": "Product media item (image, video, etc.).",
+  "type": "object",
+  "required": [
+    "type",
+    "url"
+  ],
+  "properties": {
+    "type": {
+      "type": "string",
+      "description": "Media type. Well-known values: `image`, `video`, `model_3d`."
+    },
+    "url": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL to the media resource."
+    },
+    "alt_text": {
+      "type": "string",
+      "description": "Accessibility text describing the media."
+    },
+    "width": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Width in pixels (for images/video)."
+    },
+    "height": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Height in pixels (for images/video)."
+    }
+  }
+}
