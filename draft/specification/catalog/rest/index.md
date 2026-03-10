@@ -11,27 +11,27 @@ Businesses advertise REST transport availability through their UCP profile at `/
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "draft",
     "services": {
       "dev.ucp.shopping": {
-        "version": "2026-01-11",
-        "spec": "https://ucp.dev/specification/overview",
+        "version": "draft",
+        "spec": "https://ucp.dev/draft/specification/overview",
         "rest": {
-          "schema": "https://ucp.dev/services/shopping/rest.openapi.json",
+          "schema": "https://ucp.dev/draft/services/shopping/rest.openapi.json",
           "endpoint": "https://business.example.com/ucp"
         }
       }
     },
     "capabilities": {
       "dev.ucp.shopping.catalog.search": [{
-        "version": "2026-01-11",
-        "spec": "https://ucp.dev/specification/catalog/search",
-        "schema": "https://ucp.dev/schemas/shopping/catalog_search.json"
+        "version": "draft",
+        "spec": "https://ucp.dev/draft/specification/catalog/search",
+        "schema": "https://ucp.dev/draft/schemas/shopping/catalog_search.json"
       }],
       "dev.ucp.shopping.catalog.lookup": [{
-        "version": "2026-01-11",
-        "spec": "https://ucp.dev/specification/catalog/lookup",
-        "schema": "https://ucp.dev/schemas/shopping/catalog_lookup.json"
+        "version": "draft",
+        "spec": "https://ucp.dev/draft/specification/catalog/lookup",
+        "schema": "https://ucp.dev/draft/schemas/shopping/catalog_lookup.json"
       }]
     }
   }
@@ -51,21 +51,21 @@ Maps to the [Catalog Search](https://ucp.dev/draft/specification/catalog/search/
 
 **Inputs**
 
-| Name       | Type                                                                        | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| ---------- | --------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| query      | string                                                                      | No       | Free-text search query.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| context    | [Context](/draft/specification/catalog-rest/#context)                       | No       | Provisional buyer signals for relevance and localization—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data. Context SHOULD be non-identifying and can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. |
-| filters    | [Search Filters](/draft/specification/catalog-rest/#search-filters)         | No       | Filter criteria to narrow search results. All specified filters combine with AND logic.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| pagination | [Pagination Request](/draft/specification/catalog-rest/#pagination-request) | No       | Cursor-based pagination for list operations.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| Name       | Type                                                                     | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| ---------- | ------------------------------------------------------------------------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| query      | string                                                                   | No       | Free-text search query.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| context    | [Context](/draft/specification/reference/#context)                       | No       | Provisional buyer signals for relevance and localization—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data. Context SHOULD be non-identifying and can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. |
+| filters    | [Search Filters](/draft/specification/reference/#search-filters)         | No       | Filter criteria to narrow search results. All specified filters combine with AND logic.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| pagination | [Pagination Request](/draft/specification/reference/#pagination-request) | No       | Cursor-based pagination for list operations.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 
 **Output**
 
 | Name       | Type                                                                                          | Required | Description                                                                                                             |
 | ---------- | --------------------------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------- |
-| ucp        | [Ucp Response Catalog Schema](/draft/specification/catalog-rest/#ucp-response-catalog-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields. |
-| products   | Array\[[Product](/draft/specification/catalog-rest/#product)\]                                | **Yes**  | Products matching the search criteria.                                                                                  |
-| pagination | [Pagination Response](/draft/specification/catalog-rest/#pagination-response)                 | No       | Cursor-based pagination for list operations.                                                                            |
-| messages   | Array\[[Message](/draft/specification/catalog-rest/#message)\]                                | No       | Errors, warnings, or informational messages about the search results.                                                   |
+| ucp        | [Ucp Response Catalog Schema](/draft/specification/catalog/rest/#ucp-response-catalog-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields. |
+| products   | Array\[[Product](/draft/specification/reference/#product)\]                                   | **Yes**  | Products matching the search criteria.                                                                                  |
+| pagination | [Pagination Response](/draft/specification/reference/#pagination-response)                    | No       | Cursor-based pagination for list operations.                                                                            |
+| messages   | Array\[[Message](/draft/specification/reference/#message)\]                                   | No       | Errors, warnings, or informational messages about the search results.                                                   |
 
 #### Example
 
@@ -92,10 +92,10 @@ Maps to the [Catalog Search](https://ucp.dev/draft/specification/catalog/search/
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "draft",
     "capabilities": {
       "dev.ucp.shopping.catalog.search": [
-        {"version": "2026-01-11"}
+        {"version": "draft"}
       ]
     }
   },
@@ -127,7 +127,13 @@ Maps to the [Catalog Search](https://ucp.dev/draft/specification/catalog/search/
       "options": [
         {
           "name": "Size",
-          "values": [{"label": "8"}, {"label": "9"}, {"label": "10"}, {"label": "11"}, {"label": "12"}]
+          "values": [
+            {"label": "8"},
+            {"label": "9"},
+            {"label": "10"},
+            {"label": "11"},
+            {"label": "12"}
+          ]
         }
       ],
       "variants": [
@@ -145,7 +151,10 @@ Maps to the [Catalog Search](https://ucp.dev/draft/specification/catalog/search/
           "seller": {
             "name": "Example Store",
             "links": [
-              { "type": "refund_policy", "url": "https://business.example.com/policies/refunds" }
+              {
+                "type": "refund_policy",
+                "url": "https://business.example.com/refunds"
+              }
             ]
           }
         }
@@ -180,18 +189,18 @@ The request body contains an array of identifiers and optional context that appl
 
 **Inputs**
 
-| Name    | Type                                                  | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| ------- | ----------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ids     | Array[string]                                         | **Yes**  | Identifiers to lookup. Implementations MUST support product ID and variant ID; MAY support secondary identifiers (SKU, handle, etc.).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| context | [Context](/draft/specification/catalog-rest/#context) | No       | Provisional buyer signals for relevance and localization—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data. Context SHOULD be non-identifying and can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. |
+| Name    | Type                                               | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| ------- | -------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ids     | Array[string]                                      | **Yes**  | Identifiers to lookup. Implementations MUST support product ID and variant ID; MAY support secondary identifiers (SKU, handle, etc.).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| context | [Context](/draft/specification/reference/#context) | No       | Provisional buyer signals for relevance and localization—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data. Context SHOULD be non-identifying and can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. |
 
 **Output**
 
 | Name     | Type                                                                                          | Required | Description                                                                                                                                         |
 | -------- | --------------------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ucp      | [Ucp Response Catalog Schema](/draft/specification/catalog-rest/#ucp-response-catalog-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                             |
+| ucp      | [Ucp Response Catalog Schema](/draft/specification/catalog/rest/#ucp-response-catalog-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                             |
 | products | Array[any]                                                                                    | **Yes**  | Products matching the requested identifiers. May contain fewer items if some identifiers not found, or more if identifiers match multiple products. |
-| messages | Array\[[Message](/draft/specification/catalog-rest/#message)\]                                | No       | Errors, warnings, or informational messages about the requested items.                                                                              |
+| messages | Array\[[Message](/draft/specification/reference/#message)\]                                   | No       | Errors, warnings, or informational messages about the requested items.                                                                              |
 
 #### Example: Batch Lookup with Context
 
@@ -212,10 +221,10 @@ Content-Type: application/json
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "draft",
     "capabilities": {
       "dev.ucp.shopping.catalog.lookup": [
-        {"version": "2026-01-11"}
+        {"version": "draft"}
       ]
     }
   },
@@ -284,10 +293,10 @@ When some identifiers in the batch are not found, the response includes the foun
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "draft",
     "capabilities": {
       "dev.ucp.shopping.catalog.lookup": [
-        {"version": "2026-01-11"}
+        {"version": "draft"}
       ]
     }
   },
@@ -345,10 +354,10 @@ When all requested identifiers fail lookup, the `products` array is empty. The r
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "draft",
     "capabilities": {
       "dev.ucp.shopping.catalog.lookup": [
-        {"version": "2026-01-11"}
+        {"version": "draft"}
       ]
     }
   },
@@ -369,6 +378,19 @@ When all requested identifiers fail lookup, the `products` array is empty. The r
 ```
 
 Business outcomes use the standard HTTP 200 status with messages in the response body.
+
+## Entities
+
+### UCP Response Catalog
+
+| Name             | Type   | Required | Description                                                                 |
+| ---------------- | ------ | -------- | --------------------------------------------------------------------------- |
+| version          | string | **Yes**  | UCP version in YYYY-MM-DD format.                                           |
+| status           | string | No       | Application-level status of the UCP operation. **Enum:** `success`, `error` |
+| services         | object | No       | Service registry keyed by reverse-domain name.                              |
+| capabilities     | object | No       | Capability registry keyed by reverse-domain name.                           |
+| payment_handlers | object | No       | Payment handler registry keyed by reverse-domain name.                      |
+| capabilities     | any    | No       |                                                                             |
 
 ## Conformance
 

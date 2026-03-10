@@ -22,14 +22,14 @@ Businesses advertise discount support in their profile:
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "draft",
     "capabilities": {
       "dev.ucp.shopping.discount": [
         {
-          "version": "2026-01-11",
+          "version": "draft",
           "extends": "dev.ucp.shopping.checkout",
-          "spec": "https://ucp.dev/specification/discount",
-          "schema": "https://ucp.dev/schemas/shopping/discount.json"
+          "spec": "https://ucp.dev/draft/specification/discount",
+          "schema": "https://ucp.dev/draft/schemas/shopping/discount.json"
         }
       ]
     }

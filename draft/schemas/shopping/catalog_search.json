@@ -2,7 +2,6 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/draft/schemas/shopping/catalog_search.json",
   "name": "dev.ucp.shopping.catalog.search",
-  "version": "2026-03-10",
   "title": "Catalog Search",
   "description": "Product catalog search capability.",
   "type": "object",
@@ -54,5 +53,6 @@
         }
       }
     }
-  }
+  },
+  "version": "2026-03-10"
 }

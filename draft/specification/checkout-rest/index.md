@@ -59,17 +59,17 @@ Content-Type: application/json
 
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "draft",
     "capabilities": {
       "dev.ucp.shopping.checkout": [
-        {"version": "2026-01-11"}
+        {"version": "draft"}
       ]
     },
     "payment_handlers": {
       "com.shopify.shop_pay": [
         {
           "id": "shop_pay_1234",
-          "version": "2026-01-11",
+          "version": "draft",
           "available_instruments": [
             {"type": "shop_pay"}
           ],
@@ -201,17 +201,17 @@ Content-Type: application/json
 
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "draft",
     "capabilities": {
       "dev.ucp.shopping.checkout": [
-        {"version": "2026-01-11"}
+        {"version": "draft"}
       ]
     },
     "payment_handlers": {
       "com.shopify.shop_pay": [
         {
           "id": "shop_pay_1234",
-          "version": "2026-01-11",
+          "version": "draft",
           "available_instruments": [
             {"type": "shop_pay"}
           ],
@@ -342,17 +342,17 @@ Content-Type: application/json
 
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "draft",
     "capabilities": {
       "dev.ucp.shopping.checkout": [
-        {"version": "2026-01-11"}
+        {"version": "draft"}
       ]
     },
     "payment_handlers": {
       "com.google.pay": [
         {
           "id": "gpay_1234",
-          "version": "2026-01-11",
+          "version": "draft",
           "config": {
             "allowed_payment_methods": [
               {
@@ -550,17 +550,17 @@ Content-Type: application/json
 
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "draft",
     "capabilities": {
       "dev.ucp.shopping.checkout": [
-        {"version": "2026-01-11"}
+        {"version": "draft"}
       ]
     },
     "payment_handlers": {
       "com.shopify.shop_pay": [
         {
           "id": "shop_pay_1234",
-          "version": "2026-01-11",
+          "version": "draft",
           "available_instruments": [
             {"type": "shop_pay"}
           ],
@@ -730,17 +730,17 @@ Content-Type: application/json
 
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "draft",
     "capabilities": {
       "dev.ucp.shopping.checkout": [
-        {"version": "2026-01-11"}
+        {"version": "draft"}
       ]
     },
     "payment_handlers": {
       "com.google.pay": [
         {
           "id": "gpay_1234",
-          "version": "2026-01-11",
+          "version": "draft",
           "config": {
             "allowed_payment_methods": [
               {
@@ -887,17 +887,17 @@ Content-Type: application/json
 
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "draft",
     "capabilities": {
       "dev.ucp.shopping.checkout": [
-        {"version": "2026-01-11"}
+        {"version": "draft"}
       ]
     },
     "payment_handlers": {
       "com.shopify.shop_pay": [
         {
           "id": "shop_pay_1234",
-          "version": "2026-01-11",
+          "version": "draft",
           "available_instruments": [
             {"type": "shop_pay"}
           ],
@@ -1038,17 +1038,17 @@ Content-Type: application/json
 
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "draft",
     "capabilities": {
       "dev.ucp.shopping.checkout": [
-        {"version": "2026-01-11"}
+        {"version": "draft"}
       ]
     },
     "payment_handlers": {
       "com.google.pay": [
         {
           "id": "gpay_1234",
-          "version": "2026-01-11",
+          "version": "draft",
           "config": {
             "allowed_payment_methods": [
               {
@@ -1239,9 +1239,9 @@ Business outcomes (including errors like unavailable merchandise) are returned w
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "draft",
     "capabilities": {
-      "dev.ucp.shopping.checkout": [{"version": "2026-01-11"}]
+      "dev.ucp.shopping.checkout": [{"version": "draft"}]
     }
   },
   "id": "checkout_abc123",

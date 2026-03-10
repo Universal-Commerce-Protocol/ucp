@@ -9,12 +9,12 @@ Businesses that support A2A transport must specify the agent card endpoint as pa
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "draft",
     "services": {
       "dev.ucp.shopping": [
         {
-          "version": "2026-01-11",
-          "spec": "https://ucp.dev/specification/overview",
+          "version": "draft",
+          "spec": "https://ucp.dev/draft/specification/overview",
           "transport": "a2a",
           "endpoint": "https://example-business.com/.well-known/agent-card.json"
         }
@@ -28,7 +28,7 @@ Businesses that support A2A transport must specify the agent card endpoint as pa
 
 Shopping platforms interacting with the business agent must send their profile URI as `UCP-Agent` request headers with every request.
 
-```text
+```json
 UCP-Agent: profile="https://agent.example/profiles/v2025-11/shopping-agent.json"
 Content-Type: application/json
 ```
@@ -46,7 +46,7 @@ The following table defines the required headers for enabling an A2A Agent to co
 
 The A2A Protocol provides a strong foundation for inter-agent communication. [A2A extensions](https://a2a-protocol.org/latest/topics/extensions/) enable communication between agents with structured data types. This enables businesses to build AI applications to leverage UCP data types for communication with platforms.
 
-The URI for UCP A2A extension: `https://ucp.dev/specification/reference?v=2026-01-11`
+The URI for UCP A2A extension: `https://ucp.dev/draft/specification/reference`
 
 Businesses supporting UCP must advertise the extension and any optional capabilities in their A2A Agent Card to allow platforms to activate the extension.
 
@@ -56,16 +56,16 @@ An example:
 {
   "extensions": [
     {
-      "uri": "https://ucp.dev/specification/reference?v=2026-01-11",
+      "uri": "https://ucp.dev/draft/specification/reference",
       "description": "Business agent supporting UCP",
       "params": {
         "capabilities": {
           "dev.ucp.shopping.checkout": [
-            {"version": "2026-01-11"}
+            {"version": "draft"}
           ],
           "dev.ucp.shopping.fulfillment": [
             {
-              "version": "2026-01-11",
+              "version": "draft",
               "extends": "dev.ucp.shopping.checkout"
             }
           ]
@@ -169,7 +169,7 @@ When a user is ready to make a payment, `payment` must be submitted to the busin
 
 Upon completion of the checkout process, the business agent must return the checkout object containing an `order` attribute with `id` and `permalink_url`.
 
-**Request format:**
+### Request format
 
 ```json
 {
@@ -252,9 +252,9 @@ When AP2 mandates extension is enabled, the business agent must create a detache
 }
 ```
 
-When the user confirms the payment on a platform, the user signed checkout and payment mandate objects must be sent as `DataPart`s to the business agent for completing checkout. The `payment` which includes the payment mandate must be submitted as part of a `DataPart` with attribute name `a2a.ucp.checkout.payment`. Signed checkout mandate must be specified in the `DataPart` as `ap2.checkout_mandate`. The `token` attribute of `payment.instruments[*].credential` contains the payment mandate. Refer to [AP2 Mandates Extension](https://ucp.dev/draft/specification/ap2-mandates/index.md) documentation for more details about verification and processing of the mandates to complete the checkout.
+When the user confirms the payment on a platform, the user signed checkout and payment mandate objects must be sent as `DataPart`s to the business agent for completing checkout. The `payment` which includes the payment mandate must be submitted as part of a `DataPart` with attribute name `a2a.ucp.checkout.payment`. Signed checkout mandate must be specified in the `DataPart` as `ap2.checkout_mandate`. The `token` attribute of `payment` contains the payment mandate. Refer to [AP2 Mandates Extension](https://ucp.dev/draft/specification/ap2-mandates/index.md) documentation for more details about verification and processing of the mandates to complete the checkout.
 
-**Request format:**
+### Request format
 
 ```json
 {
@@ -271,28 +271,21 @@ When the user confirms the payment on a platform, the user signed checkout and p
         "kind": "data",
         "data": {
           "a2a.ucp.checkout.payment": {
-            "instruments": [
-              {
-                "id": "instr_1",
-                "handler_id": "gpay_1234",
-                "type": "card",
-                "selected": true,
-                "display": {
-                  "description": "Visa •••• 1234",
-                },
-                "billing_address": {
-                  "street_address": "123 Main St",
-                  "address_locality": "Anytown",
-                  "address_region": "CA",
-                  "address_country": "US",
-                  "postal_code": "12345"
-                },
-                "credential": {
-                  "type": "PAYMENT_GATEWAY",
-                  "token": "examplePaymentMethodToken"
-                }
-              }
-            ]
+            "id": "instr_1",
+            "handler_id": "gpay",
+            "type": "card",
+            "description": "Visa •••• 1234",
+            "billing_address": {
+              "street_address": "123 Main St",
+              "address_locality": "Anytown",
+              "address_region": "CA",
+              "address_country": "US",
+              "postal_code": "12345"
+            },
+            "credential": {
+              "type": "PAYMENT_GATEWAY",
+              "token": "examplePaymentMethodToken"
+            }
           },
           "ap2": {
             "checkout_mandate": "eyJhbGciOiJFUz..."

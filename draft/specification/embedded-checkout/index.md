@@ -54,21 +54,21 @@ When a business advertises the `embedded` transport in their `/.well-known/ucp` 
     "services": {
         "dev.ucp.shopping": [
             {
-                "version": "2026-01-11",
+                "version": "draft",
                 "transport": "rest",
-                "schema": "https://ucp.dev/services/shopping/openapi.json",
+                "schema": "https://ucp.dev/draft/services/shopping/rest.openapi.json",
                 "endpoint": "https://merchant.example.com/ucp/v1"
             },
             {
-                "version": "2026-01-11",
+                "version": "draft",
                 "transport": "mcp",
-                "schema": "https://ucp.dev/services/shopping/mcp.openrpc.json",
+                "schema": "https://ucp.dev/draft/services/shopping/mcp.openrpc.json",
                 "endpoint": "https://merchant.example.com/ucp/mcp"
             },
             {
-                "version": "2026-01-11",
+                "version": "draft",
                 "transport": "embedded",
-                "schema": "https://ucp.dev/services/shopping/embedded.openrpc.json"
+                "schema": "https://ucp.dev/draft/services/shopping/embedded.openrpc.json"
             }
         ]
     }
@@ -89,11 +89,11 @@ Service-level discovery declares that a business supports ECP, but does not guar
     "status": "open",
     "continue_url": "https://merchant.example.com/checkout/abc123",
     "ucp": {
-        "version": "2026-01-11",
+        "version": "draft",
         "services": {
             "dev.ucp.shopping": [
                 {
-                    "version": "2026-01-11",
+                    "version": "draft",
                     "transport": "embedded",
                     "config": {
                         "delegate": ["payment.credential", "fulfillment.address_change"]
@@ -1056,6 +1056,8 @@ The host **MUST** respond with either an error, or the newly-selected address. I
 
 The address object uses the UCP [PostalAddress](/draft/specification/checkout/#postal-address) format:
 
+### Postal Address
+
 | Name             | Type   | Required | Description                                                                                                                                                                                                                               |
 | ---------------- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | extended_address | string | No       | An address extension such as an apartment number, C/O or alternative name.                                                                                                                                                                |
@@ -1135,17 +1137,17 @@ The core object representing the current state of the transaction, including lin
 | ------------ | ------------------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | ucp          | [Ucp Response Checkout Schema](/draft/specification/checkout/#ucp-response-checkout-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                                                                                                                                         |
 | id           | string                                                                                      | **Yes**  | Unique identifier of the checkout session.                                                                                                                                                                                                                      |
-| line_items   | Array\[[Line Item Response](/draft/specification/checkout/#line-item-response)\]            | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                           |
-| buyer        | [Buyer](/draft/specification/checkout/#buyer)                                               | No       | Representation of the buyer.                                                                                                                                                                                                                                    |
+| line_items   | Array\[[Line Item Response](/draft/specification/reference/#line-item)\]                    | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                           |
+| buyer        | [Buyer](/draft/specification/reference/#buyer)                                              | No       | Representation of the buyer.                                                                                                                                                                                                                                    |
 | status       | string                                                                                      | **Yes**  | Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details. **Enum:** `incomplete`, `requires_escalation`, `ready_for_complete`, `complete_in_progress`, `completed`, `canceled` |
 | currency     | string                                                                                      | **Yes**  | ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.                                                                                          |
-| totals       | Array\[[Total Response](/draft/specification/checkout/#total-response)\]                    | **Yes**  | Different cart totals.                                                                                                                                                                                                                                          |
-| messages     | Array\[[Message](/draft/specification/checkout/#message)\]                                  | No       | List of messages with error and info about the checkout session state.                                                                                                                                                                                          |
-| links        | Array\[[Link](/draft/specification/checkout/#link)\]                                        | **Yes**  | Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.                                                                                                                                                                    |
+| totals       | Array\[[Total Response](/draft/specification/reference/#total)\]                            | **Yes**  | Different cart totals.                                                                                                                                                                                                                                          |
+| messages     | Array\[[Message](/draft/specification/reference/#message)\]                                 | No       | List of messages with error and info about the checkout session state.                                                                                                                                                                                          |
+| links        | Array\[[Link](/draft/specification/reference/#link)\]                                       | **Yes**  | Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.                                                                                                                                                                    |
 | expires_at   | string                                                                                      | No       | RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.                                                                                                                                                                                    |
 | continue_url | string                                                                                      | No       | URL for checkout handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements.                                                                                                 |
 | payment      | [Payment](/draft/specification/checkout/#payment)                                           | No       | Payment configuration containing handlers.                                                                                                                                                                                                                      |
-| order        | [Order Confirmation](/draft/specification/checkout/#order-confirmation)                     | No       | Details about an order created for this checkout session.                                                                                                                                                                                                       |
+| order        | [Order Confirmation](/draft/specification/reference/#order-confirmation)                    | No       | Details about an order created for this checkout session.                                                                                                                                                                                                       |
 
 ### Order
 
@@ -1157,33 +1159,94 @@ The object returned upon successful completion of a checkout, containing confirm
 | id            | string                                                                             | **Yes**  | Unique order identifier.                                                                                                                     |
 | checkout_id   | string                                                                             | **Yes**  | Associated checkout ID for reconciliation.                                                                                                   |
 | permalink_url | string                                                                             | **Yes**  | Permalink to access the order on merchant site.                                                                                              |
-| line_items    | Array\[[Order Line Item](/draft/specification/order/#order-line-item)\]            | **Yes**  | Immutable line items — source of truth for what was ordered.                                                                                 |
+| line_items    | Array\[[Order Line Item](/draft/specification/reference/#order-line-item)\]        | **Yes**  | Immutable line items — source of truth for what was ordered.                                                                                 |
 | fulfillment   | object                                                                             | **Yes**  | Fulfillment data: buyer expectations and what actually happened.                                                                             |
-| adjustments   | Array\[[Adjustment](/draft/specification/order/#adjustment)\]                      | No       | Append-only event log of money movements (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment. |
+| adjustments   | Array\[[Adjustment](/draft/specification/reference/#adjustment)\]                  | No       | Append-only event log of money movements (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment. |
 | currency      | string                                                                             | No       | ISO 4217 currency code. MUST match the currency from the originating checkout session.                                                       |
-| totals        | Array\[[Total Response](/draft/specification/order/#total-response)\]              | **Yes**  | Different totals for the order.                                                                                                              |
+| totals        | Array\[[Total Response](/draft/specification/reference/#total)\]                   | **Yes**  | Different totals for the order.                                                                                                              |
 
 ### Payment
 
-| Name        | Type                                                                                                                                              | Required | Description                                                                                                                                                                                                                |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| instruments | Array\[[Payment Instrument Selected Payment Instrument](/draft/specification/embedded-checkout/#payment-instrument-selected-payment-instrument)\] | No       | The payment instruments available for this payment. Each instrument is associated with a specific handler via the handler_id field. Handlers can extend the base payment_instrument schema to add handler-specific fields. |
+| Name        | Type                                                                                                                                      | Required | Description                                                                                                                                                                                                                |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| instruments | Array\[[Payment Instrument Selected Payment Instrument](/draft/specification/reference/#payment-instrument-selected-payment-instrument)\] | No       | The payment instruments available for this payment. Each instrument is associated with a specific handler via the handler_id field. Handlers can extend the base payment_instrument schema to add handler-specific fields. |
 
 ### Payment Instrument
 
 Represents a specific method of payment (e.g., a specific credit card, bank account, or wallet credential) available to the buyer.
 
-| Name            | Type                                                                             | Required | Description                                                                                                                                                  |
-| --------------- | -------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| id              | string                                                                           | **Yes**  | A unique identifier for this instrument instance, assigned by the platform.                                                                                  |
-| handler_id      | string                                                                           | **Yes**  | The unique identifier for the handler instance that produced this instrument. This corresponds to the 'id' field in the Payment Handler definition.          |
-| type            | string                                                                           | **Yes**  | The broad category of the instrument (e.g., 'card', 'tokenized_card'). Specific schemas will constrain this to a constant value.                             |
-| billing_address | [Postal Address](/draft/specification/embedded-checkout/#postal-address)         | No       | The billing address associated with this payment method.                                                                                                     |
-| credential      | [Payment Credential](/draft/specification/embedded-checkout/#payment-credential) | No       | The base definition for any payment credential. Handlers define specific credential types.                                                                   |
-| display         | object                                                                           | No       | Display information for this payment instrument. Each payment instrument schema defines its specific display properties, as outlined by the payment handler. |
+| Name            | Type                                                                     | Required | Description                                                                                                                                                  |
+| --------------- | ------------------------------------------------------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| id              | string                                                                   | **Yes**  | A unique identifier for this instrument instance, assigned by the platform.                                                                                  |
+| handler_id      | string                                                                   | **Yes**  | The unique identifier for the handler instance that produced this instrument. This corresponds to the 'id' field in the Payment Handler definition.          |
+| type            | string                                                                   | **Yes**  | The broad category of the instrument (e.g., 'card', 'tokenized_card'). Specific schemas will constrain this to a constant value.                             |
+| billing_address | [Postal Address](/draft/specification/reference/#postal-address)         | No       | The billing address associated with this payment method.                                                                                                     |
+| credential      | [Payment Credential](/draft/specification/reference/#payment-credential) | No       | The base definition for any payment credential. Handlers define specific credential types.                                                                   |
+| display         | object                                                                   | No       | Display information for this payment instrument. Each payment instrument schema defines its specific display properties, as outlined by the payment handler. |
 
-### Payment Handler Response
+#### Selected Payment Instrument
+
+| Name            | Type    | Required | Description                                                                                                                                                  |
+| --------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| id              | string  | **Yes**  | A unique identifier for this instrument instance, assigned by the platform.                                                                                  |
+| handler_id      | string  | **Yes**  | The unique identifier for the handler instance that produced this instrument. This corresponds to the 'id' field in the Payment Handler definition.          |
+| type            | string  | **Yes**  | The broad category of the instrument (e.g., 'card', 'tokenized_card'). Specific schemas will constrain this to a constant value.                             |
+| billing_address | object  | No       | The billing address associated with this payment method.                                                                                                     |
+| credential      | object  | No       | The base definition for any payment credential. Handlers define specific credential types.                                                                   |
+| display         | object  | No       | Display information for this payment instrument. Each payment instrument schema defines its specific display properties, as outlined by the payment handler. |
+| selected        | boolean | No       | Whether this instrument is selected by the user.                                                                                                             |
+
+### Card Payment Instrument
+
+| Name            | Type                                                                     | Required | Description                                                                                                                                                  |
+| --------------- | ------------------------------------------------------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| id              | string                                                                   | **Yes**  | A unique identifier for this instrument instance, assigned by the platform.                                                                                  |
+| handler_id      | string                                                                   | **Yes**  | The unique identifier for the handler instance that produced this instrument. This corresponds to the 'id' field in the Payment Handler definition.          |
+| type            | string                                                                   | **Yes**  | The broad category of the instrument (e.g., 'card', 'tokenized_card'). Specific schemas will constrain this to a constant value.                             |
+| billing_address | [Postal Address](/draft/specification/reference/#postal-address)         | No       | The billing address associated with this payment method.                                                                                                     |
+| credential      | [Payment Credential](/draft/specification/reference/#payment-credential) | No       | The base definition for any payment credential. Handlers define specific credential types.                                                                   |
+| display         | object                                                                   | No       | Display information for this payment instrument. Each payment instrument schema defines its specific display properties, as outlined by the payment handler. |
+| type            | string                                                                   | **Yes**  | **Constant = card**. Indicates this is a card payment instrument.                                                                                            |
+| display         | object                                                                   | No       | Display information for this card payment instrument.                                                                                                        |
+
+### Payment Credential
+
+| Name | Type   | Required | Description                                                                                  |
+| ---- | ------ | -------- | -------------------------------------------------------------------------------------------- |
+| type | string | **Yes**  | The credential type discriminator. Specific schemas will constrain this to a constant value. |
+
+### Token Credential
+
+| Name | Type   | Required | Description                                                                                  |
+| ---- | ------ | -------- | -------------------------------------------------------------------------------------------- |
+| type | string | **Yes**  | The credential type discriminator. Specific schemas will constrain this to a constant value. |
+| type | string | **Yes**  | The specific type of token produced by the handler (e.g., 'stripe_token').                   |
+
+### Card Credential
+
+| Name             | Type    | Required | Description                                                                                                                                            |
+| ---------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| type             | string  | **Yes**  | The credential type discriminator. Specific schemas will constrain this to a constant value.                                                           |
+| type             | any     | **Yes**  | **Constant = card**. The credential type identifier for card credentials.                                                                              |
+| card_number_type | string  | **Yes**  | The type of card number. Network tokens are preferred with fallback to FPAN. See PCI Scope for more details. **Enum:** `fpan`, `network_token`, `dpan` |
+| number           | string  | No       | Card number.                                                                                                                                           |
+| expiry_month     | integer | No       | The month of the card's expiration date (1-12).                                                                                                        |
+| expiry_year      | integer | No       | The year of the card's expiration date.                                                                                                                |
+| name             | string  | No       | Cardholder name.                                                                                                                                       |
+| cvc              | string  | No       | Card CVC number.                                                                                                                                       |
+| cryptogram       | string  | No       | Cryptogram provided with network tokens.                                                                                                               |
+| eci_value        | string  | No       | Electronic Commerce Indicator / Security Level Indicator provided with network tokens.                                                                 |
+
+### Payment Handler
 
 Represents the processor or wallet provider responsible for authenticating and processing a specific payment instrument (e.g., Google Pay, Stripe, or a Bank App).
 
-*No properties defined.*
+| Name    | Type   | Required | Description                                                                                     |
+| ------- | ------ | -------- | ----------------------------------------------------------------------------------------------- |
+| version | string | **Yes**  | Entity version in YYYY-MM-DD format.                                                            |
+| spec    | string | No       | URL to human-readable specification document.                                                   |
+| schema  | string | No       | URL to JSON Schema defining this entity's structure and payloads.                               |
+| id      | string | No       | Unique identifier for this entity instance. Used to disambiguate when multiple instances exist. |
+| config  | object | No       | Entity-specific configuration. Structure defined by each entity's schema.                       |
+
+| available_instruments | Array[object] | No | Instrument types this handler supports, with optional constraints. When absent, every instrument should be considered available. |

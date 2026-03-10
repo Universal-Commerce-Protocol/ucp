@@ -83,12 +83,12 @@ The business advertises their tokenization endpoint and identity during discover
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "draft",
     "payment_handlers": {
       "com.example.processor_tokenizer": [
         {
           "id": "processor_tokenizer",
-          "version": "2026-01-11",
+          "version": "draft",
           "spec": "https://example.com/ucp/processor-tokenizer.json",
           "schema": "https://example.com/ucp/processor-tokenizer/schema.json",
           "available_instruments": [
@@ -124,7 +124,7 @@ The response config includes runtime information about what's available for this
 ```json
 {
   "id": "processor_tokenizer",
-  "version": "2026-01-11",
+  "version": "draft",
   "available_instruments": [
     {
       "type": "card",
@@ -169,7 +169,7 @@ Platform identifies the processor tokenizer handler and retrieves the business's
       "com.example.processor_tokenizer": [
         {
           "id": "processor_tokenizer",
-          "version": "2026-01-11",
+          "version": "draft",
           "available_instruments": [
             {"type": "card", "constraints": {"brands": ["visa", "mastercard", "amex"]}}
           ],

@@ -93,7 +93,7 @@ PREREQUISITES(participant, onboarding_input) → prerequisites_output
 
 **Prerequisites Output:**
 
-The `prerequisites_output` contains what a participant receives from onboarding. At minimum, this includes an **identity** (see [Payment Identity](https://ucp.dev/schemas/shopping/types/payment_identity.json)). It **MAY** also include additional configuration, credentials, or settings specific to the handler.
+The `prerequisites_output` contains what a participant receives from onboarding. At minimum, this includes an **identity** (see [Payment Identity](/draft/schemas/shopping/types/payment_identity.json)). It **MAY** also include additional configuration, credentials, or settings specific to the handler.
 
 Payment handler specifications **are not required** to define a formal schema for `prerequisites_output`. Instead, the specification **SHOULD** clearly document:
 
@@ -125,7 +125,7 @@ HANDLER_DECLARATION(prerequisites_output) → handler_declaration
 
 **Output Structure:**
 
-The handler declaration conforms to the [`PaymentHandler`](https://ucp.dev/schemas/payment_handler.json) schema. The specification **SHOULD** define the available config and instrument schemas, and how to construct each based on the business's prerequisites output and desired configuration.
+The handler declaration conforms to the [`PaymentHandler`](/draft/schemas/payment_handler.json) schema. The specification **SHOULD** define the available config and instrument schemas, and how to construct each based on the business's prerequisites output and desired configuration.
 
 ```json
 {
@@ -134,7 +134,7 @@ The handler declaration conforms to the [`PaymentHandler`](https://ucp.dev/schem
       "com.example.handler": [
         {
           "id": "processor_tokenizer_1234",
-          "version": "2026-01-11",
+          "version": "draft",
           "spec": "https://example.com/ucp/handler",
           "schema": "https://example.com/ucp/handler/schema.json",
           "available_instruments": [
@@ -169,7 +169,7 @@ The `PaymentHandler` schema defines three variants for different contexts. While
 ```json
 {
   "id": "processor_tokenizer_1234",
-  "version": "2026-01-11",
+  "version": "draft",
   "spec": "https://example.com/ucp/handler",
   "schema": "https://example.com/ucp/handler/schema.json",
   "available_instruments": [
@@ -192,7 +192,7 @@ The `PaymentHandler` schema defines three variants for different contexts. While
 ```json
 {
   "id": "platform_tokenizer_2345", // note: ids are for disambiguation, they may differ between business and platform
-  "version": "2026-01-11",
+  "version": "draft",
   "spec": "https://example.com/ucp/handler",
   "schema": "https://example.com/ucp/handler/schema.json",
   "available_instruments": [
@@ -215,7 +215,7 @@ The `PaymentHandler` schema defines three variants for different contexts. While
 ```json
 {
   "id": "processor_tokenizer_1234",
-  "version": "2026-01-11",
+  "version": "draft",
   "available_instruments": [
     {
       "type": "card",
@@ -274,7 +274,7 @@ The `schema` field points to a JSON schema that defines handler-specific shapes.
   "title": "Tokenizer Handler Schema",
   "description": "Schema for the com.example.tokenizer payment handler.",
   "name": "com.example.tokenizer",
-  "version": "2026-01-11",
+  "version": "draft",
 
   "$defs": {
     "tokenizer_token": { "$ref": "types/tokenizer_token.json" },
@@ -296,7 +296,7 @@ The `schema` field points to a JSON schema that defines handler-specific shapes.
         "title": "Tokenizer (Platform)",
         "description": "Platform-level handler configuration for discovery.",
         "allOf": [
-          { "$ref": "https://ucp.dev/schemas/payment_handler.json#/$defs/platform_schema" },
+          { "$ref": "https://ucp.dev/draft/schemas/payment_handler.json#/$defs/platform_schema" },
           {
             "properties": {
               "config": {
@@ -311,7 +311,7 @@ The `schema` field points to a JSON schema that defines handler-specific shapes.
         "title": "Tokenizer (Business)",
         "description": "Business-level handler configuration for discovery.",
         "allOf": [
-          { "$ref": "https://ucp.dev/schemas/payment_handler.json#/$defs/business_schema" },
+          { "$ref": "https://ucp.dev/draft/schemas/payment_handler.json#/$defs/business_schema" },
           {
             "properties": {
               "config": {
@@ -326,7 +326,7 @@ The `schema` field points to a JSON schema that defines handler-specific shapes.
         "title": "Tokenizer (Response)",
         "description": "Runtime handler configuration in checkout responses.",
         "allOf": [
-          { "$ref": "https://ucp.dev/schemas/payment_handler.json#/$defs/response_schema" },
+          { "$ref": "https://ucp.dev/draft/schemas/payment_handler.json#/$defs/response_schema" },
           {
             "properties": {
               "config": {
@@ -434,21 +434,21 @@ ______________________________________________________________________
 
 **Base Instrument Schemas:**
 
-| Schema                                                                                                | Description                                                      |
-| ----------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
-| [`payment_instrument.json`](https://ucp.dev/schemas/shopping/types/payment_instrument.json)           | Base: id, handler_id, type, billing_address, credential, display |
-| [`card_payment_instrument.json`](https://ucp.dev/schemas/shopping/types/card_payment_instrument.json) | Extends base with display: brand, last_digits, expiry, card art  |
+| Schema                                                                                       | Description                                                      |
+| -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| [`payment_instrument.json`](/draft/schemas/shopping/types/payment_instrument.json)           | Base: id, handler_id, type, billing_address, credential, display |
+| [`card_payment_instrument.json`](/draft/schemas/shopping/types/card_payment_instrument.json) | Extends base with display: brand, last_digits, expiry, card art  |
 
 UCP provides base schemas for universal payment instruments like `card`. Spec authors **MAY** extend any of the base instruments to add handler-specific display data or customize the credential reference. Handlers **MAY** define multiple instrument types for different payment flows.
 
 **Available Instrument Schemas:**
 
-Each instrument schema defines its own `available_*` variant in `$defs` that specifies what constraints are valid for that instrument type. For example, [`card_payment_instrument.json`](https://ucp.dev/schemas/shopping/types/card_payment_instrument.json) defines `available_card_payment_instrument` with a `brands` constraint.
+Each instrument schema defines its own `available_*` variant in `$defs` that specifies what constraints are valid for that instrument type. For example, [`card_payment_instrument.json`](/draft/schemas/shopping/types/card_payment_instrument.json) defines `available_card_payment_instrument` with a `brands` constraint.
 
-| Schema                                                                                                          | Constraints                                              |
-| --------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
-| [`available_payment_instrument.json`](https://ucp.dev/schemas/shopping/types/available_payment_instrument.json) | Base: type, constraints (open object)                    |
-| `card_payment_instrument.json#/$defs/available_card_payment_instrument`                                         | Extends base with `constraints.brands` for card networks |
+| Schema                                                                                                 | Constraints                                              |
+| ------------------------------------------------------------------------------------------------------ | -------------------------------------------------------- |
+| [`available_payment_instrument.json`](/draft/schemas/shopping/types/available_payment_instrument.json) | Base: type, constraints (open object)                    |
+| `card_payment_instrument.json#/$defs/available_card_payment_instrument`                                | Extends base with `constraints.brands` for card networks |
 
 Handlers reference these instrument-defined schemas when declaring `available_instruments`. The **instrument schema authors** define what constraints are meaningful (e.g., `brands` for cards), and **platforms/businesses** use this to advertise what they support (e.g., `["visa", "mastercard"]`).
 
@@ -466,7 +466,7 @@ Handlers reference these instrument-defined schemas when declaring `available_in
       "title": "Available Tokenizer Card",
       "description": "Card instrument availability with tokenizer-specific constraints.",
       "allOf": [
-        { "$ref": "https://ucp.dev/schemas/shopping/types/card_payment_instrument.json#/$defs/available_card_payment_instrument" },
+        { "$ref": "https://ucp.dev/draft/schemas/shopping/types/card_payment_instrument.json#/$defs/available_card_payment_instrument" },
         {
           "type": "object",
           "properties": {
@@ -488,7 +488,7 @@ Handlers reference these instrument-defined schemas when declaring `available_in
   },
 
   "allOf": [
-    { "$ref": "https://ucp.dev/schemas/shopping/types/card_payment_instrument.json" }
+    { "$ref": "https://ucp.dev/draft/schemas/shopping/types/card_payment_instrument.json" }
   ],
   "type": "object",
   "required": ["type"],
@@ -517,7 +517,7 @@ Handlers reference these instrument-defined schemas when declaring `available_in
   "title": "Tokenizer Alt Instrument",
   "description": "Alternative payment instrument for com.example.tokenizer.",
   "allOf": [
-    { "$ref": "https://ucp.dev/schemas/shopping/types/payment_instrument.json" }
+    { "$ref": "https://ucp.dev/draft/schemas/shopping/types/payment_instrument.json" }
   ],
   "type": "object",
   "required": ["type"],
@@ -543,10 +543,10 @@ ______________________________________________________________________
 
 **Base Credential Schemas:**
 
-| Schema                                                                                      | Description                   |
-| ------------------------------------------------------------------------------------------- | ----------------------------- |
-| [`payment_credential.json`](https://ucp.dev/schemas/shopping/types/payment_credential.json) | Base: type discriminator only |
-| [`token_credential.json`](https://ucp.dev/schemas/shopping/types/token_credential.json)     | Token: type + token string    |
+| Schema                                                                             | Description                   |
+| ---------------------------------------------------------------------------------- | ----------------------------- |
+| [`payment_credential.json`](/draft/schemas/shopping/types/payment_credential.json) | Base: type discriminator only |
+| [`token_credential.json`](/draft/schemas/shopping/types/token_credential.json)     | Token: type + token string    |
 
 UCP provides base schemas for universal payment credentials. Authors **MAY** extend these schemas to include handler-specific credential context. Handlers **MAY** define multiple credential types for different instrument flows.
 
@@ -563,7 +563,7 @@ The specification **MUST** define which credential types are accepted by the han
   "title": "Tokenizer Card Token",
   "description": "Card token credential for com.example.tokenizer.",
   "allOf": [
-    { "$ref": "https://ucp.dev/schemas/shopping/types/token_credential.json" }
+    { "$ref": "https://ucp.dev/draft/schemas/shopping/types/token_credential.json" }
   ],
   "type": "object",
   "required": ["type", "token", "expiry"],
@@ -590,7 +590,7 @@ The specification **MUST** define which credential types are accepted by the han
   "title": "Tokenizer Alt Token",
   "description": "Alt token credential for com.example.tokenizer, adding routing hints",
   "allOf": [
-    { "$ref": "https://ucp.dev/schemas/shopping/types/token_credential.json" }
+    { "$ref": "https://ucp.dev/draft/schemas/shopping/types/token_credential.json" }
   ],
   "type": "object",
   "required": ["type", "token", "expiry"],

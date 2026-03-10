@@ -1087,6 +1087,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#ucp-response-cart-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        UCP Response Cart
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#line-item" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1121,10 +1132,21 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#line-item-response" class="md-nav__link">
+  <a href="#line-item_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Line Item Response
+        Line Item
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#item" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Item
       
     </span>
   </a>
@@ -2120,6 +2142,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#ucp-response-cart-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        UCP Response Cart
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#line-item" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2154,10 +2187,21 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#line-item-response" class="md-nav__link">
+  <a href="#line-item_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Line Item Response
+        Line Item
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#item" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Item
       
     </span>
   </a>
@@ -2441,19 +2485,19 @@ SHOULD be linked for the duration of the checkout.</p>
 </tr>
 <tr>
 <td style="text-align: left;">line_items</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/cart/#line-item-response">Line Item Response</a>]</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#line-item">Line Item Response</a>]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Cart line items. Same structure as checkout. Full replacement on update.</td>
 </tr>
 <tr>
 <td style="text-align: left;">context</td>
-<td style="text-align: left;"><a href="/draft/specification/cart/#context">Context</a></td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#context">Context</a></td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Buyer signals for localization (country, region, postal_code). Merchant uses for pricing, availability, currency. Falls back to geo-IP if omitted.</td>
 </tr>
 <tr>
 <td style="text-align: left;">buyer</td>
-<td style="text-align: left;"><a href="/draft/specification/cart/#buyer">Buyer</a></td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#buyer">Buyer</a></td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Optional buyer information for personalized estimates.</td>
 </tr>
@@ -2465,19 +2509,19 @@ SHOULD be linked for the duration of the checkout.</p>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/cart/#total-response">Total Response</a>]</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#total">Total Response</a>]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Estimated cost breakdown. May be partial if shipping/tax not yet calculable.</td>
 </tr>
 <tr>
 <td style="text-align: left;">messages</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/cart/#message">Message</a>]</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#message">Message</a>]</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Validation messages, warnings, or informational notices.</td>
 </tr>
 <tr>
 <td style="text-align: left;">links</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/cart/#link">Link</a>]</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#link">Link</a>]</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Optional merchant links (policies, FAQs).</td>
 </tr>
@@ -2572,6 +2616,55 @@ Subsequent operations for this cart ID SHOULD return <code>not_found</code>.</p>
 <h2 id="entities">Entities<a class="headerlink" href="#entities" title="Permanent link">&para;</a></h2>
 <p>Cart reuses the same entity schemas as <a href="../checkout/">Checkout</a>. This ensures
 consistent data structures when converting a cart to a checkout session.</p>
+<h3 id="ucp-response-cart-schema">UCP Response Cart<a class="headerlink" href="#ucp-response-cart-schema" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">version</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">UCP version in YYYY-MM-DD format.</td>
+</tr>
+<tr>
+<td style="text-align: left;">status</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Application-level status of the UCP operation.<br><strong>Enum:</strong> <code>success</code>, <code>error</code></td>
+</tr>
+<tr>
+<td style="text-align: left;">services</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Service registry keyed by reverse-domain name.</td>
+</tr>
+<tr>
+<td style="text-align: left;">capabilities</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Capability registry keyed by reverse-domain name.</td>
+</tr>
+<tr>
+<td style="text-align: left;">payment_handlers</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Payment handler registry keyed by reverse-domain name.</td>
+</tr>
+<tr>
+<td style="text-align: left;">capabilities</td>
+<td style="text-align: left;">any</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;"></td>
+</tr>
+</tbody>
+</table>
 <h3 id="line-item">Line Item<a class="headerlink" href="#line-item" title="Permanent link">&para;</a></h3>
 <h4 id="line-item-create-request">Line Item Create Request<a class="headerlink" href="#line-item-create-request" title="Permanent link">&para;</a></h4>
 <table>
@@ -2586,7 +2679,7 @@ consistent data structures when converting a cart to a checkout session.</p>
 <tbody>
 <tr>
 <td style="text-align: left;">item</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#item">Item</a></td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#item">Item</a></td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;"></td>
 </tr>
@@ -2617,7 +2710,7 @@ consistent data structures when converting a cart to a checkout session.</p>
 </tr>
 <tr>
 <td style="text-align: left;">item</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#item">Item</a></td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#item">Item</a></td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;"></td>
 </tr>
@@ -2635,7 +2728,7 @@ consistent data structures when converting a cart to a checkout session.</p>
 </tr>
 </tbody>
 </table>
-<h4 id="line-item-response">Line Item Response<a class="headerlink" href="#line-item-response" title="Permanent link">&para;</a></h4>
+<h4 id="line-item_1">Line Item<a class="headerlink" href="#line-item_1" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
 <tr>
@@ -2654,7 +2747,7 @@ consistent data structures when converting a cart to a checkout session.</p>
 </tr>
 <tr>
 <td style="text-align: left;">item</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#item">Item</a></td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#item">Item</a></td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;"></td>
 </tr>
@@ -2666,7 +2759,7 @@ consistent data structures when converting a cart to a checkout session.</p>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/checkout/#total">Total</a>]</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#total">Total</a>]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Line item totals breakdown.</td>
 </tr>
@@ -2675,6 +2768,43 @@ consistent data structures when converting a cart to a checkout session.</p>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Parent line item identifier for any nested structures.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="item">Item<a class="headerlink" href="#item" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">id</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">The product identifier, often the SKU, required to resolve the product details associated with this line item. Should be recognized by both the Platform, and the Business.</td>
+</tr>
+<tr>
+<td style="text-align: left;">title</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Product title.</td>
+</tr>
+<tr>
+<td style="text-align: left;">price</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#amount">Amount</a></td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Unit price in ISO 4217 minor units.</td>
+</tr>
+<tr>
+<td style="text-align: left;">image_url</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Product image URI.</td>
 </tr>
 </tbody>
 </table>
@@ -2789,7 +2919,7 @@ consistent data structures when converting a cart to a checkout session.</p>
 </tr>
 <tr>
 <td style="text-align: left;">amount</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#amount">Amount</a></td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#amount">Amount</a></td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">If type == total, sums subtotal - discount + fulfillment + tax + fee. Should be &gt;= 0. Amount in ISO 4217 minor units.</td>
 </tr>
@@ -2798,7 +2928,7 @@ consistent data structures when converting a cart to a checkout session.</p>
 <p>Taxes MAY be included where calculable. Platforms SHOULD assume cart totals
 are estimates; accurate taxes are computed at checkout.</p>
 <h3 id="message">Message<a class="headerlink" href="#message" title="Permanent link">&para;</a></h3>
-<p>This object MUST be one of the following types: <a href="/draft/specification/checkout/#message-error">Message Error</a>, <a href="/draft/specification/checkout/#message-warning">Message Warning</a>, <a href="/draft/specification/checkout/#message-info">Message Info</a>.</p>
+<p>This object MUST be one of the following types: <a href="/draft/specification/reference/#message-error">Message Error</a>, <a href="/draft/specification/reference/#message-warning">Message Warning</a>, <a href="/draft/specification/reference/#message-info">Message Info</a>.</p>
 <h4 id="message-error">Message Error<a class="headerlink" href="#message-error" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
@@ -2818,7 +2948,7 @@ are estimates; accurate taxes are computed at checkout.</p>
 </tr>
 <tr>
 <td style="text-align: left;">code</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#error-code">Error Code</a></td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#error-code">Error Code</a></td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Error code identifying the type of error. Standard errors are defined in specification (see examples), and have standardized semantics; freeform codes are permitted.</td>
 </tr>

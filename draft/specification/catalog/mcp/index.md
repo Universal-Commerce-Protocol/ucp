@@ -11,27 +11,27 @@ Businesses advertise MCP transport availability through their UCP profile at `/.
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "draft",
     "services": {
       "dev.ucp.shopping": {
-        "version": "2026-01-11",
-        "spec": "https://ucp.dev/specification/overview",
+        "version": "draft",
+        "spec": "https://ucp.dev/draft/specification/overview",
         "mcp": {
-          "schema": "https://ucp.dev/services/shopping/mcp.openrpc.json",
+          "schema": "https://ucp.dev/draft/services/shopping/mcp.openrpc.json",
           "endpoint": "https://business.example.com/ucp/mcp"
         }
       }
     },
     "capabilities": {
       "dev.ucp.shopping.catalog.search": [{
-        "version": "2026-01-11",
-        "spec": "https://ucp.dev/specification/catalog/search",
-        "schema": "https://ucp.dev/schemas/shopping/catalog_search.json"
+        "version": "draft",
+        "spec": "https://ucp.dev/draft/specification/catalog/search",
+        "schema": "https://ucp.dev/draft/schemas/shopping/catalog_search.json"
       }],
       "dev.ucp.shopping.catalog.lookup": [{
-        "version": "2026-01-11",
-        "spec": "https://ucp.dev/specification/catalog/lookup",
-        "schema": "https://ucp.dev/schemas/shopping/catalog_lookup.json"
+        "version": "draft",
+        "spec": "https://ucp.dev/draft/specification/catalog/lookup",
+        "schema": "https://ucp.dev/draft/schemas/shopping/catalog_lookup.json"
       }]
     }
   }
@@ -80,7 +80,7 @@ The `meta["ucp-agent"]` field is **required** on all requests to enable version 
 
 Maps to the [Catalog Search](https://ucp.dev/draft/specification/catalog/search/index.md) capability.
 
-#### Request
+#### Search Request
 
 | Name       | Type   | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | ---------- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -89,7 +89,7 @@ Maps to the [Catalog Search](https://ucp.dev/draft/specification/catalog/search/
 | filters    | object | No       | Filter criteria to narrow search results. All specified filters combine with AND logic.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | pagination | object | No       | Pagination parameters for requests.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 
-#### Response
+### Search Response
 
 | Name       | Type          | Required | Description                                                           |
 | ---------- | ------------- | -------- | --------------------------------------------------------------------- |
@@ -98,7 +98,7 @@ Maps to the [Catalog Search](https://ucp.dev/draft/specification/catalog/search/
 | pagination | object        | No       | Pagination information in responses.                                  |
 | messages   | Array[object] | No       | Errors, warnings, or informational messages about the search results. |
 
-#### Example
+#### Search Example
 
 ```json
 {
@@ -142,10 +142,10 @@ Maps to the [Catalog Search](https://ucp.dev/draft/specification/catalog/search/
   "result": {
     "structuredContent": {
       "ucp": {
-        "version": "2026-01-11",
+        "version": "draft",
         "capabilities": {
           "dev.ucp.shopping.catalog.search": [
-            {"version": "2026-01-11"}
+            {"version": "draft"}
           ]
         }
       },
@@ -177,7 +177,13 @@ Maps to the [Catalog Search](https://ucp.dev/draft/specification/catalog/search/
           "options": [
             {
               "name": "Size",
-              "values": [{"label": "8"}, {"label": "9"}, {"label": "10"}, {"label": "11"}, {"label": "12"}]
+              "values": [
+                {"label": "8"},
+                {"label": "9"},
+                {"label": "10"},
+                {"label": "11"},
+                {"label": "12"}
+              ]
             }
           ],
           "variants": [
@@ -195,7 +201,10 @@ Maps to the [Catalog Search](https://ucp.dev/draft/specification/catalog/search/
               "seller": {
                 "name": "Example Store",
                 "links": [
-                  { "type": "refund_policy", "url": "https://business.example.com/policies/refunds" }
+                  {
+                    "type": "refund_policy",
+                    "url": "https://business.example.com/refunds"
+                  }
                 ]
               }
             }
@@ -230,14 +239,14 @@ Maps to the [Catalog Lookup](https://ucp.dev/draft/specification/catalog/lookup/
 
 The `catalog.ids` parameter accepts an array of identifiers and optional context.
 
-#### Request
+#### Lookup Request
 
 | Name    | Type          | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | ------- | ------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | ids     | Array[string] | **Yes**  | Identifiers to lookup. Implementations MUST support product ID and variant ID; MAY support secondary identifiers (SKU, handle, etc.).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | context | object        | No       | Provisional buyer signals for relevance and localization—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data. Context SHOULD be non-identifying and can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. |
 
-#### Response
+### Lookup Response
 
 | Name     | Type          | Required | Description                                                                                                                                         |
 | -------- | ------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -245,7 +254,7 @@ The `catalog.ids` parameter accepts an array of identifiers and optional context
 | products | Array[any]    | **Yes**  | Products matching the requested identifiers. May contain fewer items if some identifiers not found, or more if identifiers match multiple products. |
 | messages | Array[object] | No       | Errors, warnings, or informational messages about the requested items.                                                                              |
 
-#### Example
+#### Lookup Example
 
 ```json
 {
@@ -278,10 +287,10 @@ The `catalog.ids` parameter accepts an array of identifiers and optional context
   "result": {
     "structuredContent": {
       "ucp": {
-        "version": "2026-01-11",
+        "version": "draft",
         "capabilities": {
           "dev.ucp.shopping.catalog.lookup": [
-            {"version": "2026-01-11"}
+            {"version": "draft"}
           ]
         }
       },
@@ -311,7 +320,10 @@ The `catalog.ids` parameter accepts an array of identifiers and optional context
               "seller": {
                 "name": "Example Store",
                 "links": [
-                  { "type": "refund_policy", "url": "https://business.example.com/policies/refunds" }
+                  {
+                    "type": "refund_policy",
+                    "url": "https://business.example.com/policies/refunds"
+                  }
                 ]
               }
             }
@@ -369,10 +381,10 @@ When some identifiers are not found, the response includes the found products. T
   "result": {
     "structuredContent": {
       "ucp": {
-        "version": "2026-01-11",
+        "version": "draft",
         "capabilities": {
           "dev.ucp.shopping.catalog.lookup": [
-            {"version": "2026-01-11"}
+            {"version": "draft"}
           ]
         }
       },
@@ -434,10 +446,10 @@ When all requested identifiers fail to resolve, the response contains an empty `
   "result": {
     "structuredContent": {
       "ucp": {
-        "version": "2026-01-11",
+        "version": "draft",
         "capabilities": {
           "dev.ucp.shopping.catalog.lookup": [
-            {"version": "2026-01-11"}
+            {"version": "draft"}
           ]
         }
       },

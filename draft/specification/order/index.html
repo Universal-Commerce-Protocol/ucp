@@ -1520,10 +1520,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#item-response" class="md-nav__link">
+  <a href="#item" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Item Response
+        Item
       
     </span>
   </a>
@@ -1553,10 +1553,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#total-response" class="md-nav__link">
+  <a href="#total" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Total Response
+        Total
       
     </span>
   </a>
@@ -1564,10 +1564,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#ucp-response-order" class="md-nav__link">
+  <a href="#ucp-response-order-schema" class="md-nav__link">
     <span class="md-ellipsis">
       
-        UCP Response Order
+        UCP Response Order Schema
       
     </span>
   </a>
@@ -2319,10 +2319,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#item-response" class="md-nav__link">
+  <a href="#item" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Item Response
+        Item
       
     </span>
   </a>
@@ -2352,10 +2352,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#total-response" class="md-nav__link">
+  <a href="#total" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Total Response
+        Total
       
     </span>
   </a>
@@ -2363,10 +2363,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#ucp-response-order" class="md-nav__link">
+  <a href="#ucp-response-order-schema" class="md-nav__link">
     <span class="md-ellipsis">
       
-        UCP Response Order
+        UCP Response Order Schema
       
     </span>
   </a>
@@ -2521,7 +2521,7 @@ fulfillment:</p>
 </tr>
 <tr>
 <td style="text-align: left;">line_items</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/order/#order-line-item">Order Line Item</a>]</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#order-line-item">Order Line Item</a>]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Immutable line items — source of truth for what was ordered.</td>
 </tr>
@@ -2533,7 +2533,7 @@ fulfillment:</p>
 </tr>
 <tr>
 <td style="text-align: left;">adjustments</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/order/#adjustment">Adjustment</a>]</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#adjustment">Adjustment</a>]</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Append-only event log of money movements (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment.</td>
 </tr>
@@ -2545,7 +2545,7 @@ fulfillment:</p>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/order/#total-response">Total Response</a>]</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#total">Total Response</a>]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Different totals for the order.</td>
 </tr>
@@ -2572,7 +2572,7 @@ Status and quantity counts should reflect the event logs.</p>
 </tr>
 <tr>
 <td style="text-align: left;">item</td>
-<td style="text-align: left;"><a href="/draft/specification/order/#item">Item</a></td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#item">Item</a></td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Product data (id, title, price, image_url).</td>
 </tr>
@@ -2584,7 +2584,7 @@ Status and quantity counts should reflect the event logs.</p>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/order/#total">Total</a>]</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#total">Total</a>]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Line item totals breakdown.</td>
 </tr>
@@ -2647,7 +2647,7 @@ split, merged, or adjusted post-order.</p>
 </tr>
 <tr>
 <td style="text-align: left;">destination</td>
-<td style="text-align: left;"><a href="/draft/specification/order/#postal-address">Postal Address</a></td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#postal-address">Postal Address</a></td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Delivery destination address.</td>
 </tr>
@@ -2777,7 +2777,7 @@ sense to them.</p>
 </tr>
 <tr>
 <td style="text-align: left;">amount</td>
-<td style="text-align: left;"><a href="/draft/specification/order/#amount">Amount</a></td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#amount">Amount</a></td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Amount in ISO 4217 minor units for refunds, credits, or price adjustments.</td>
 </tr>
@@ -2794,9 +2794,9 @@ sense to them.</p>
 <h2 id="example">Example<a class="headerlink" href="#example" title="Permanent link">&para;</a></h2>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="p">{</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="nt">&quot;ucp&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-01-11&quot;</span><span class="p">,</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;draft&quot;</span><span class="p">,</span>
 </span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="nt">&quot;capabilities&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">      </span><span class="nt">&quot;dev.ucp.shopping.order&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-01-11&quot;</span><span class="p">}]</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">      </span><span class="nt">&quot;dev.ucp.shopping.order&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;draft&quot;</span><span class="p">}]</span>
 </span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">    </span><span class="p">}</span>
 </span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">  </span><span class="p">},</span>
 </span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;order_abc123&quot;</span><span class="p">,</span>
@@ -2946,7 +2946,7 @@ during partner onboarding. The URL format is platform-specific.</p>
 </tr>
 <tr>
 <td style="text-align: left;">line_items</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/order/#order-line-item">Order Line Item</a>]</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#order-line-item">Order Line Item</a>]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Immutable line items — source of truth for what was ordered.</td>
 </tr>
@@ -2958,7 +2958,7 @@ during partner onboarding. The URL format is platform-specific.</p>
 </tr>
 <tr>
 <td style="text-align: left;">adjustments</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/order/#adjustment">Adjustment</a>]</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#adjustment">Adjustment</a>]</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Append-only event log of money movements (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment.</td>
 </tr>
@@ -2970,7 +2970,7 @@ during partner onboarding. The URL format is platform-specific.</p>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/order/#total">Total</a>]</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#total">Total</a>]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Different totals for the order.</td>
 </tr>
@@ -3033,7 +3033,7 @@ platform's profile and uses it to send order lifecycle events.</p>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="p">{</span>
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="nt">&quot;dev.ucp.shopping.order&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 </span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">    </span><span class="p">{</span>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">      </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-01-11&quot;</span><span class="p">,</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">      </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;draft&quot;</span><span class="p">,</span>
 </span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">      </span><span class="nt">&quot;config&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 </span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">        </span><span class="nt">&quot;webhook_url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://platform.example.com/webhooks/ucp/orders&quot;</span>
 </span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">      </span><span class="p">}</span>
@@ -3134,7 +3134,7 @@ zero-downtime key rotation procedures.</p>
 <li><strong>MUST</strong> retry failed webhook deliveries</li>
 </ul>
 <h2 id="entities">Entities<a class="headerlink" href="#entities" title="Permanent link">&para;</a></h2>
-<h3 id="item-response">Item Response<a class="headerlink" href="#item-response" title="Permanent link">&para;</a></h3>
+<h3 id="item">Item<a class="headerlink" href="#item" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -3159,7 +3159,7 @@ zero-downtime key rotation procedures.</p>
 </tr>
 <tr>
 <td style="text-align: left;">price</td>
-<td style="text-align: left;"><a href="/draft/specification/order/#amount">Amount</a></td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#amount">Amount</a></td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Unit price in ISO 4217 minor units.</td>
 </tr>
@@ -3287,7 +3287,7 @@ zero-downtime key rotation procedures.</p>
 </tr>
 </tbody>
 </table>
-<h3 id="total-response">Total Response<a class="headerlink" href="#total-response" title="Permanent link">&para;</a></h3>
+<h3 id="total">Total<a class="headerlink" href="#total" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -3312,13 +3312,13 @@ zero-downtime key rotation procedures.</p>
 </tr>
 <tr>
 <td style="text-align: left;">amount</td>
-<td style="text-align: left;"><a href="/draft/specification/order/#amount">Amount</a></td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#amount">Amount</a></td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">If type == total, sums subtotal - discount + fulfillment + tax + fee. Should be &gt;= 0. Amount in ISO 4217 minor units.</td>
 </tr>
 </tbody>
 </table>
-<h3 id="ucp-response-order">UCP Response Order<a class="headerlink" href="#ucp-response-order" title="Permanent link">&para;</a></h3>
+<h3 id="ucp-response-order-schema">UCP Response Order Schema <span id="ucp"></span><a class="headerlink" href="#ucp-response-order-schema" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>

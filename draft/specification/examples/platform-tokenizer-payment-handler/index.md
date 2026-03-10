@@ -142,7 +142,7 @@ Optionally, businesses may configure their PSP to detokenize on their behalf (PS
 
 Businesses advertise the platform's tokenization handler. The `config` contains the business's identity with the platform for token binding. The platform's handler specification (referenced via `spec`) documents the `/detokenize` endpoint URL exposed by the platform's **payment credential provider**.
 
-The handler accepts [CardCredential](https://ucp.dev/schemas/shopping/types/card_credential.json) for tokenization and produces [TokenCredential](https://ucp.dev/schemas/shopping/types/token_credential.json) for checkout.
+The handler accepts [CardCredential](/draft/schemas/shopping/types/card_credential.json) for tokenization and produces [TokenCredential](/draft/schemas/shopping/types/token_credential.json) for checkout.
 
 **Note:** The result of `/detokenize` contains **sensitive payment data**. Both the sender (platform's credential provider) and receiver (business or PSP) **MUST** be compliant with relevant standards for the credential type (e.g., PCI DSS for cards).
 
@@ -158,12 +158,12 @@ The handler accepts [CardCredential](https://ucp.dev/schemas/shopping/types/card
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "draft",
     "payment_handlers": {
       "com.example.platform_tokenizer": [
         {
           "id": "platform_wallet",
-          "version": "2026-01-11",
+          "version": "draft",
           "spec": "https://platform.example.com/ucp/handler.json",
           "schema": "https://platform.example.com/ucp/handler/schema.json",
           "available_instruments": [
@@ -200,7 +200,7 @@ The response config includes runtime token lifecycle information.
 ```json
 {
   "id": "platform_wallet",
-  "version": "2026-01-11",
+  "version": "draft",
   "available_instruments": [
     {
       "type": "card",
@@ -284,12 +284,12 @@ Platforms advertise this handler in their UCP profile's `payment_handlers` regis
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "draft",
     "payment_handlers": {
       "com.example.platform_tokenizer": [
         {
           "id": "platform_wallet",
-          "version": "2026-01-11",
+          "version": "draft",
           "spec": "https://platform.example.com/ucp/handler.json",
           "schema": "https://platform.example.com/ucp/handler/schema.json",
           "available_instruments": [
@@ -437,6 +437,6 @@ ______________________________________________________________________
 
 ## References
 
-- **Pattern:** [Tokenization Payment Handler](https://ucp.dev/specification/payment-handler-guide)
-- **API Pattern:** `https://ucp.dev/handlers/tokenization/openapi.json`
-- **Identity Schema:** `https://ucp.dev/schemas/shopping/types/payment_identity.json`
+- **Pattern:** [Tokenization Payment Handler](https://ucp.dev/draft/specification/payment-handler-guide/index.md)
+- **API Pattern:** [handlers/tokenization/openapi.json](/draft/handlers/tokenization/openapi.json)
+- **Identity Schema:** [schemas/shopping/types/payment_identity.json](/draft/schemas/shopping/types/payment_identity.json)

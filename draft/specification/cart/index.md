@@ -78,13 +78,13 @@ When checkout is initialized via `cart_id`, the cart and checkout sessions SHOUL
 | ------------ | ------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
 | ucp          | [Ucp Response Cart Schema](/draft/specification/cart/#ucp-response-cart-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                            |
 | id           | string                                                                          | **Yes**  | Unique cart identifier.                                                                                                                            |
-| line_items   | Array\[[Line Item Response](/draft/specification/cart/#line-item-response)\]    | **Yes**  | Cart line items. Same structure as checkout. Full replacement on update.                                                                           |
-| context      | [Context](/draft/specification/cart/#context)                                   | No       | Buyer signals for localization (country, region, postal_code). Merchant uses for pricing, availability, currency. Falls back to geo-IP if omitted. |
-| buyer        | [Buyer](/draft/specification/cart/#buyer)                                       | No       | Optional buyer information for personalized estimates.                                                                                             |
+| line_items   | Array\[[Line Item Response](/draft/specification/reference/#line-item)\]        | **Yes**  | Cart line items. Same structure as checkout. Full replacement on update.                                                                           |
+| context      | [Context](/draft/specification/reference/#context)                              | No       | Buyer signals for localization (country, region, postal_code). Merchant uses for pricing, availability, currency. Falls back to geo-IP if omitted. |
+| buyer        | [Buyer](/draft/specification/reference/#buyer)                                  | No       | Optional buyer information for personalized estimates.                                                                                             |
 | currency     | string                                                                          | **Yes**  | ISO 4217 currency code. Determined by merchant based on context or geo-IP.                                                                         |
-| totals       | Array\[[Total Response](/draft/specification/cart/#total-response)\]            | **Yes**  | Estimated cost breakdown. May be partial if shipping/tax not yet calculable.                                                                       |
-| messages     | Array\[[Message](/draft/specification/cart/#message)\]                          | No       | Validation messages, warnings, or informational notices.                                                                                           |
-| links        | Array\[[Link](/draft/specification/cart/#link)\]                                | No       | Optional merchant links (policies, FAQs).                                                                                                          |
+| totals       | Array\[[Total Response](/draft/specification/reference/#total)\]                | **Yes**  | Estimated cost breakdown. May be partial if shipping/tax not yet calculable.                                                                       |
+| messages     | Array\[[Message](/draft/specification/reference/#message)\]                     | No       | Validation messages, warnings, or informational notices.                                                                                           |
+| links        | Array\[[Link](/draft/specification/reference/#link)\]                           | No       | Optional merchant links (policies, FAQs).                                                                                                          |
 | continue_url | string                                                                          | No       | URL for cart handoff and session recovery. Enables sharing and human-in-the-loop flows.                                                            |
 | expires_at   | string                                                                          | No       | Cart expiry timestamp (RFC 3339). Optional.                                                                                                        |
 
@@ -148,33 +148,53 @@ Cancels a cart session. Business MUST return the cart state before deletion. Sub
 
 Cart reuses the same entity schemas as [Checkout](https://ucp.dev/draft/specification/checkout/index.md). This ensures consistent data structures when converting a cart to a checkout session.
 
+### UCP Response Cart
+
+| Name             | Type   | Required | Description                                                                 |
+| ---------------- | ------ | -------- | --------------------------------------------------------------------------- |
+| version          | string | **Yes**  | UCP version in YYYY-MM-DD format.                                           |
+| status           | string | No       | Application-level status of the UCP operation. **Enum:** `success`, `error` |
+| services         | object | No       | Service registry keyed by reverse-domain name.                              |
+| capabilities     | object | No       | Capability registry keyed by reverse-domain name.                           |
+| payment_handlers | object | No       | Payment handler registry keyed by reverse-domain name.                      |
+| capabilities     | any    | No       |                                                                             |
+
 ### Line Item
 
 #### Line Item Create Request
 
-| Name     | Type                                        | Required | Description                           |
-| -------- | ------------------------------------------- | -------- | ------------------------------------- |
-| item     | [Item](/draft/specification/checkout/#item) | **Yes**  |                                       |
-| quantity | integer                                     | **Yes**  | Quantity of the item being purchased. |
+| Name     | Type                                         | Required | Description                           |
+| -------- | -------------------------------------------- | -------- | ------------------------------------- |
+| item     | [Item](/draft/specification/reference/#item) | **Yes**  |                                       |
+| quantity | integer                                      | **Yes**  | Quantity of the item being purchased. |
 
 #### Line Item Update Request
 
-| Name      | Type                                        | Required | Description                                            |
-| --------- | ------------------------------------------- | -------- | ------------------------------------------------------ |
-| id        | string                                      | No       |                                                        |
-| item      | [Item](/draft/specification/checkout/#item) | **Yes**  |                                                        |
-| quantity  | integer                                     | **Yes**  | Quantity of the item being purchased.                  |
-| parent_id | string                                      | No       | Parent line item identifier for any nested structures. |
+| Name      | Type                                         | Required | Description                                            |
+| --------- | -------------------------------------------- | -------- | ------------------------------------------------------ |
+| id        | string                                       | No       |                                                        |
+| item      | [Item](/draft/specification/reference/#item) | **Yes**  |                                                        |
+| quantity  | integer                                      | **Yes**  | Quantity of the item being purchased.                  |
+| parent_id | string                                       | No       | Parent line item identifier for any nested structures. |
 
-#### Line Item Response
+#### Line Item
 
-| Name      | Type                                                   | Required | Description                                            |
-| --------- | ------------------------------------------------------ | -------- | ------------------------------------------------------ |
-| id        | string                                                 | **Yes**  |                                                        |
-| item      | [Item](/draft/specification/checkout/#item)            | **Yes**  |                                                        |
-| quantity  | integer                                                | **Yes**  | Quantity of the item being purchased.                  |
-| totals    | Array\[[Total](/draft/specification/checkout/#total)\] | **Yes**  | Line item totals breakdown.                            |
-| parent_id | string                                                 | No       | Parent line item identifier for any nested structures. |
+| Name      | Type                                                    | Required | Description                                            |
+| --------- | ------------------------------------------------------- | -------- | ------------------------------------------------------ |
+| id        | string                                                  | **Yes**  |                                                        |
+| item      | [Item](/draft/specification/reference/#item)            | **Yes**  |                                                        |
+| quantity  | integer                                                 | **Yes**  | Quantity of the item being purchased.                  |
+| totals    | Array\[[Total](/draft/specification/reference/#total)\] | **Yes**  | Line item totals breakdown.                            |
+| parent_id | string                                                  | No       | Parent line item identifier for any nested structures. |
+
+#### Item
+
+| Name      | Type                                             | Required | Description                                                                                                                                                                 |
+| --------- | ------------------------------------------------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| id        | string                                           | **Yes**  | The product identifier, often the SKU, required to resolve the product details associated with this line item. Should be recognized by both the Platform, and the Business. |
+| title     | string                                           | **Yes**  | Product title.                                                                                                                                                              |
+| price     | [Amount](/draft/specification/reference/#amount) | **Yes**  | Unit price in ISO 4217 minor units.                                                                                                                                         |
+| image_url | string                                           | No       | Product image URI.                                                                                                                                                          |
 
 ### Buyer
 
@@ -198,28 +218,28 @@ Cart reuses the same entity schemas as [Checkout](https://ucp.dev/draft/specific
 
 ### Total
 
-| Name         | Type                                            | Required | Description                                                                                                            |
-| ------------ | ----------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------- |
-| type         | string                                          | **Yes**  | Type of total categorization. **Enum:** `items_discount`, `subtotal`, `discount`, `fulfillment`, `tax`, `fee`, `total` |
-| display_text | string                                          | No       | Text to display against the amount. Should reflect appropriate method (e.g., 'Shipping', 'Delivery').                  |
-| amount       | [Amount](/draft/specification/checkout/#amount) | **Yes**  | If type == total, sums subtotal - discount + fulfillment + tax + fee. Should be >= 0. Amount in ISO 4217 minor units.  |
+| Name         | Type                                             | Required | Description                                                                                                            |
+| ------------ | ------------------------------------------------ | -------- | ---------------------------------------------------------------------------------------------------------------------- |
+| type         | string                                           | **Yes**  | Type of total categorization. **Enum:** `items_discount`, `subtotal`, `discount`, `fulfillment`, `tax`, `fee`, `total` |
+| display_text | string                                           | No       | Text to display against the amount. Should reflect appropriate method (e.g., 'Shipping', 'Delivery').                  |
+| amount       | [Amount](/draft/specification/reference/#amount) | **Yes**  | If type == total, sums subtotal - discount + fulfillment + tax + fee. Should be >= 0. Amount in ISO 4217 minor units.  |
 
 Taxes MAY be included where calculable. Platforms SHOULD assume cart totals are estimates; accurate taxes are computed at checkout.
 
 ### Message
 
-This object MUST be one of the following types: [Message Error](/draft/specification/checkout/#message-error), [Message Warning](/draft/specification/checkout/#message-warning), [Message Info](/draft/specification/checkout/#message-info).
+This object MUST be one of the following types: [Message Error](/draft/specification/reference/#message-error), [Message Warning](/draft/specification/reference/#message-warning), [Message Info](/draft/specification/reference/#message-info).
 
 #### Message Error
 
-| Name         | Type                                                    | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| ------------ | ------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| type         | string                                                  | **Yes**  | **Constant = error**. Message type discriminator.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| code         | [Error Code](/draft/specification/checkout/#error-code) | **Yes**  | Error code identifying the type of error. Standard errors are defined in specification (see examples), and have standardized semantics; freeform codes are permitted.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| path         | string                                                  | No       | RFC 9535 JSONPath to the component the message refers to (e.g., $.items[1]).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| content_type | string                                                  | No       | Content format, default = plain. **Enum:** `plain`, `markdown`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| content      | string                                                  | **Yes**  | Human-readable message.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| severity     | string                                                  | **Yes**  | Reflects the resource state and recommended action. 'recoverable': platform can resolve by modifying inputs and retrying via API. 'requires_buyer_input': merchant requires information their API doesn't support collecting programmatically (checkout incomplete). 'requires_buyer_review': buyer must authorize before order placement due to policy, regulatory, or entitlement rules. 'unrecoverable': no valid resource exists to act on, retry with new resource or inputs. Errors with 'requires\_*' severity contribute to 'status: requires_escalation'.* *Enum:*\* `recoverable`, `requires_buyer_input`, `requires_buyer_review`, `unrecoverable` |
+| Name         | Type                                                     | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| ------------ | -------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type         | string                                                   | **Yes**  | **Constant = error**. Message type discriminator.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| code         | [Error Code](/draft/specification/reference/#error-code) | **Yes**  | Error code identifying the type of error. Standard errors are defined in specification (see examples), and have standardized semantics; freeform codes are permitted.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| path         | string                                                   | No       | RFC 9535 JSONPath to the component the message refers to (e.g., $.items[1]).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| content_type | string                                                   | No       | Content format, default = plain. **Enum:** `plain`, `markdown`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| content      | string                                                   | **Yes**  | Human-readable message.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| severity     | string                                                   | **Yes**  | Reflects the resource state and recommended action. 'recoverable': platform can resolve by modifying inputs and retrying via API. 'requires_buyer_input': merchant requires information their API doesn't support collecting programmatically (checkout incomplete). 'requires_buyer_review': buyer must authorize before order placement due to policy, regulatory, or entitlement rules. 'unrecoverable': no valid resource exists to act on, retry with new resource or inputs. Errors with 'requires\_*' severity contribute to 'status: requires_escalation'.* *Enum:*\* `recoverable`, `requires_buyer_input`, `requires_buyer_review`, `unrecoverable` |
 
 #### Message Info
 

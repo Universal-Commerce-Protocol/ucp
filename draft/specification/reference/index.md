@@ -103,6 +103,12 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
+### Amount
+
+Monetary amount in the currency's minor unit as defined by ISO 4217. Refer to the currency's exponent to determine minor-to-major ratio (e.g., 2 for USD, 0 for JPY, 3 for KWD).
+
+______________________________________________________________________
+
 ### Available Payment Instrument
 
 | Name        | Type   | Required | Description                                                                                                  |
@@ -202,6 +208,12 @@ ______________________________________________________________________
 | plain    | string | No       | Plain text content.                                                                                                                                                       |
 | html     | string | No       | HTML-formatted content. Security: Platforms MUST sanitize before rendering—strip scripts, event handlers, and untrusted elements. Treat all rich text as untrusted input. |
 | markdown | string | No       | Markdown-formatted content.                                                                                                                                               |
+
+______________________________________________________________________
+
+### Error Code
+
+Error code identifying the type of error. Standard errors are defined in specification (see examples), and have standardized semantics; freeform codes are permitted.
 
 ______________________________________________________________________
 
@@ -660,6 +672,37 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
+### Selected Payment Instrument
+
+| Name            | Type    | Required | Description                                                                                                                                                  |
+| --------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| id              | string  | **Yes**  | A unique identifier for this instrument instance, assigned by the platform.                                                                                  |
+| handler_id      | string  | **Yes**  | The unique identifier for the handler instance that produced this instrument. This corresponds to the 'id' field in the Payment Handler definition.          |
+| type            | string  | **Yes**  | The broad category of the instrument (e.g., 'card', 'tokenized_card'). Specific schemas will constrain this to a constant value.                             |
+| billing_address | object  | No       | The billing address associated with this payment method.                                                                                                     |
+| credential      | object  | No       | The base definition for any payment credential. Handlers define specific credential types.                                                                   |
+| display         | object  | No       | Display information for this payment instrument. Each payment instrument schema defines its specific display properties, as outlined by the payment handler. |
+| selected        | boolean | No       | Whether this instrument is selected by the user.                                                                                                             |
+
+### Pagination Request
+
+| Name   | Type    | Required | Description                                                        |
+| ------ | ------- | -------- | ------------------------------------------------------------------ |
+| cursor | string  | No       | Opaque cursor from previous response.                              |
+| limit  | integer | No       | Requested page size. Implementations MAY clamp to a lower maximum. |
+
+### Pagination Response
+
+| Name          | Type    | Required | Description                                                                           |
+| ------------- | ------- | -------- | ------------------------------------------------------------------------------------- |
+| cursor        | string  | No       | Cursor to fetch the next page of results. MUST be present when has_next_page is true. |
+| has_next_page | boolean | **Yes**  | Whether more results are available.                                                   |
+| total_count   | integer | No       | Total number of matching items, if available.                                         |
+
+### Error Code
+
+Error code identifying the type of error. Standard errors are defined in specification (see examples), and have standardized semantics; freeform codes are permitted.
+
 ## Extension Schemas
 
 ### AP2 Mandate Extension
@@ -930,6 +973,19 @@ The `ucp` object included in checkout responses.
 | services         | any    | No       |                                                                             |
 | capabilities     | any    | No       |                                                                             |
 | payment_handlers | any    | **Yes**  |                                                                             |
+
+### Cart Response Metadata
+
+The `ucp` object included in cart responses.
+
+| Name             | Type   | Required | Description                                                                 |
+| ---------------- | ------ | -------- | --------------------------------------------------------------------------- |
+| version          | string | **Yes**  | UCP version in YYYY-MM-DD format.                                           |
+| status           | string | No       | Application-level status of the UCP operation. **Enum:** `success`, `error` |
+| services         | object | No       | Service registry keyed by reverse-domain name.                              |
+| capabilities     | object | No       | Capability registry keyed by reverse-domain name.                           |
+| payment_handlers | object | No       | Payment handler registry keyed by reverse-domain name.                      |
+| capabilities     | any    | No       |                                                                             |
 
 ### Order Response Metadata
 

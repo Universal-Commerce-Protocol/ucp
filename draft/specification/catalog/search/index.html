@@ -2100,7 +2100,7 @@ merchants MAY support additional custom filters via <code>additionalProperties</
 </tr>
 <tr>
 <td style="text-align: left;">price</td>
-<td style="text-align: left;"><a href="/draft/specification/catalog/#price-filter">Price Filter</a></td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#price-filter">Price Filter</a></td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Price range filter denominated in context.currency. When context.currency matches the presentment currency, businesses apply the filter directly. When it differs, businesses SHOULD convert filter values to the presentment currency before applying; if conversion is not supported, businesses MAY ignore the filter and SHOULD indicate this via a message. When context.currency is absent, filter denomination is ambiguous and businesses MAY ignore it.</td>
 </tr>
@@ -2119,13 +2119,13 @@ merchants MAY support additional custom filters via <code>additionalProperties</
 <tbody>
 <tr>
 <td style="text-align: left;">min</td>
-<td style="text-align: left;"><a href="/draft/specification/catalog/#amount">Amount</a></td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#amount">Amount</a></td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Minimum price in ISO 4217 minor units.</td>
 </tr>
 <tr>
 <td style="text-align: left;">max</td>
-<td style="text-align: left;"><a href="/draft/specification/catalog/#amount">Amount</a></td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#amount">Amount</a></td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Maximum price in ISO 4217 minor units.</td>
 </tr>
