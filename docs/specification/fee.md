@@ -107,14 +107,18 @@ fees into the order total calculation.
 **Invariant:** `totals[type=fee].amount` equals `sum(fees.applied[].amount)`.
 Businesses MUST ensure this invariant holds. If a platform detects a mismatch
 between the aggregated fee total and the sum of itemized fees, the platform
-SHOULD treat the response as invalid and MUST NOT complete the checkout without
-surfacing the discrepancy to the user.
+SHOULD treat the response as potentially invalid and SHOULD surface the
+discrepancy to the user. Platforms MAY use `continue_url` to hand off to the
+business UI for resolution rather than attempting to complete the checkout with
+inconsistent fee data.
 
 !!! note "When the Fee Extension is absent"
-    If a business does not advertise `dev.ucp.shopping.fee`, a
-    `totals[type=fee]` entry MAY still appear (e.g., as an opaque line item).
-    Platforms SHOULD render it using `display_text` but cannot assume itemized
-    fee data is available.
+    When the Fee Extension is present, there MUST be at most one `totals[]`
+    entry with `type: "fee"`, and its `amount` MUST equal
+    `sum(fees.applied[].amount)`. When the Fee Extension is not advertised,
+    the interpretation of any `totals[type=fee]` entry is business-defined —
+    platforms SHOULD render it using `display_text` but MUST NOT assume
+    itemized fee data is available.
 
 ### Fee Types
 
@@ -144,6 +148,11 @@ individual fees across checkout updates (e.g., to track which fees changed
 between updates or to display consistent UI elements). Therefore, `id` is
 required on every fee.
 
+Fee IDs are scoped to a single checkout or cart session. The same fee retains
+its `id` across requests within a session (create → update → complete), but the
+`id` is not guaranteed to be consistent across separate sessions. Businesses
+control ID generation.
+
 ## Multiple Fees
 
 A checkout or cart may include multiple fees. The following invariants hold:
@@ -161,6 +170,21 @@ A checkout or cart may include multiple fees. The following invariants hold:
    fee marked `waivable: true` is actually waived, the business omits it rather
    than including a zero-amount entry.
 
+4. **Communicating waived fees:** To inform the platform and user that a fee was
+   waived, businesses MAY include a `messages[]` entry with `type: "info"`:
+
+    ```json
+    {
+      "messages": [
+        {
+          "type": "info",
+          "code": "fee_waived",
+          "content": "Service Fee waived for loyalty members."
+        }
+      ]
+    }
+    ```
+
 ## Operations
 
 Fees are fully read-only. The `fees` object uses `ucp_request: "omit"` for all
@@ -171,6 +195,8 @@ Business receivers MUST reject any `fees` fields provided by platforms in
 requests. Because fees directly affect money movement, silently ignoring
 client-supplied fee data is insufficient — an explicit error response prevents
 parameter-smuggling attacks where a platform attempts to influence fee amounts.
+Businesses SHOULD use the `readonly_field_not_allowed` error code when rejecting
+such requests.
 
 **Checkout operations:**
 
@@ -217,7 +243,10 @@ Order Summary
 
 When a fee includes a `description`, platforms MAY display it as supplementary
 text (e.g., a tooltip or fine print) to help users understand why the fee is
-charged.
+charged. The `description` field is plain text — for richer content such as
+regulatory disclosures, images, or formatted copy, businesses should use the
+Disclosures capability (see [#222](https://github.com/Universal-Commerce-Protocol/ucp/issues/222))
+when available.
 
 If a fee has `waivable: true`, platforms MAY indicate this to the user (e.g.,
 "This fee is waived for members").

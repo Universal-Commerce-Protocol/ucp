@@ -14,7 +14,7 @@
   "properties": {
     "id": {
       "type": "string",
-      "description": "Unique fee identifier. Unlike applied discounts, fees always require an id to enable stable referencing across updates."
+      "description": "Unique fee identifier within the scope of a single checkout or cart session. Stable across requests within a session (create, update, complete) to enable platforms to track fee changes. Not guaranteed to be consistent across separate sessions."
     },
     "title": {
       "type": "string",
@@ -22,7 +22,7 @@
     },
     "description": {
       "type": "string",
-      "description": "Optional explanation of why the fee is charged."
+      "description": "Optional plain-text explanation of why the fee is charged. For richer content (e.g., regulatory disclosures), see the Disclosures capability."
     },
     "amount": {
       "$ref": "amount.json",
