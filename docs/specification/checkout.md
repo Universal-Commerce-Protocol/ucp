@@ -261,7 +261,7 @@ before the transaction can complete.
 
 Unrecognized or inapplicable claims **MUST NOT** block the checkout.
 Businesses **SHOULD** notify the buyer via `messages` with `type: "warning"`
-when a claim is not applied. At completion, unverified claims **MUST**
+when a claim is not applied. At completion, unverified claims that influenced the checkout **MUST**
 result in `type: "error"` with `code: "eligibility_invalid"` (see below).
 
 A claim is resolved when it is either **verified** or **rescinded**:
