@@ -2515,6 +2515,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#cart-with-discount" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cart with Discount
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#checkout-with-discount" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3732,6 +3743,17 @@
     <span class="md-ellipsis">
       
         Discounts Object
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cart-with-discount" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cart with Discount
       
     </span>
   </a>
@@ -6828,6 +6850,91 @@ within the UCP.</p>
 <td style="text-align: left;">Array[object]</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Discounts successfully applied (code-based and automatic).</td>
+</tr>
+</tbody>
+</table>
+<h4 id="cart-with-discount">Cart with Discount<a class="headerlink" href="#cart-with-discount" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">ucp</td>
+<td style="text-align: left;">any</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">UCP metadata for cart responses. No payment handlers needed pre-checkout.</td>
+</tr>
+<tr>
+<td style="text-align: left;">id</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Unique cart identifier.</td>
+</tr>
+<tr>
+<td style="text-align: left;">line_items</td>
+<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Cart line items. Same structure as checkout. Full replacement on update.</td>
+</tr>
+<tr>
+<td style="text-align: left;">context</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Buyer signals for localization (country, region, postal_code). Merchant uses for pricing, availability, currency. Falls back to geo-IP if omitted.</td>
+</tr>
+<tr>
+<td style="text-align: left;">buyer</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional buyer information for personalized estimates.</td>
+</tr>
+<tr>
+<td style="text-align: left;">currency</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">ISO 4217 currency code. Determined by merchant based on context or geo-IP.</td>
+</tr>
+<tr>
+<td style="text-align: left;">totals</td>
+<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Estimated cost breakdown. May be partial if shipping/tax not yet calculable.</td>
+</tr>
+<tr>
+<td style="text-align: left;">messages</td>
+<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Validation messages, warnings, or informational notices.</td>
+</tr>
+<tr>
+<td style="text-align: left;">links</td>
+<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional merchant links (policies, FAQs).</td>
+</tr>
+<tr>
+<td style="text-align: left;">continue_url</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">URL for cart handoff and session recovery. Enables sharing and human-in-the-loop flows.</td>
+</tr>
+<tr>
+<td style="text-align: left;">expires_at</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Cart expiry timestamp (RFC 3339). Optional.</td>
+</tr>
+<tr>
+<td style="text-align: left;">discounts</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Discount codes input and applied discounts output.</td>
 </tr>
 </tbody>
 </table>

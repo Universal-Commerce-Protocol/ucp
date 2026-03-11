@@ -828,6 +828,23 @@ ______________________________________________________________________
 | codes   | Array[string] | No       | Discount codes to apply. Case-insensitive. Replaces previously submitted codes. Send empty array to clear. |
 | applied | Array[object] | No       | Discounts successfully applied (code-based and automatic).                                                 |
 
+#### Cart with Discount
+
+| Name         | Type          | Required | Description                                                                                                                                        |
+| ------------ | ------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ucp          | any           | **Yes**  | UCP metadata for cart responses. No payment handlers needed pre-checkout.                                                                          |
+| id           | string        | **Yes**  | Unique cart identifier.                                                                                                                            |
+| line_items   | Array[object] | **Yes**  | Cart line items. Same structure as checkout. Full replacement on update.                                                                           |
+| context      | object        | No       | Buyer signals for localization (country, region, postal_code). Merchant uses for pricing, availability, currency. Falls back to geo-IP if omitted. |
+| buyer        | object        | No       | Optional buyer information for personalized estimates.                                                                                             |
+| currency     | string        | **Yes**  | ISO 4217 currency code. Determined by merchant based on context or geo-IP.                                                                         |
+| totals       | Array[object] | **Yes**  | Estimated cost breakdown. May be partial if shipping/tax not yet calculable.                                                                       |
+| messages     | Array[object] | No       | Validation messages, warnings, or informational notices.                                                                                           |
+| links        | Array[object] | No       | Optional merchant links (policies, FAQs).                                                                                                          |
+| continue_url | string        | No       | URL for cart handoff and session recovery. Enables sharing and human-in-the-loop flows.                                                            |
+| expires_at   | string        | No       | Cart expiry timestamp (RFC 3339). Optional.                                                                                                        |
+| discounts    | object        | No       | Discount codes input and applied discounts output.                                                                                                 |
+
 #### Checkout with Discount
 
 | Name         | Type          | Required | Description                                                                                                                                                                                                                                                     |

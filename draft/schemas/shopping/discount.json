@@ -3,7 +3,7 @@
   "$id": "https://ucp.dev/draft/schemas/shopping/discount.json",
   "name": "dev.ucp.shopping.discount",
   "title": "Discount Extension",
-  "description": "Extends Checkout with discount code support, enabling agents to apply promotional, loyalty, referral, and other discount codes.",
+  "description": "Extends Cart and Checkout with discount code support, enabling agents to apply promotional, loyalty, referral, and other discount codes.",
   "$defs": {
     "allocation": {
       "type": "object",
@@ -91,6 +91,27 @@
         }
       }
     },
+    "dev.ucp.shopping.cart": {
+      "title": "Cart with Discount",
+      "description": "Cart extended with discount capability.",
+      "allOf": [
+        {
+          "$ref": "https://ucp.dev/draft/schemas/shopping/cart.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "discounts": {
+              "$ref": "#/$defs/discounts_object",
+              "ucp_request": {
+                "create": "optional",
+                "update": "optional"
+              }
+            }
+          }
+        }
+      ]
+    },
     "dev.ucp.shopping.checkout": {
       "title": "Checkout with Discount",
       "description": "Checkout extended with discount capability.",
@@ -114,5 +135,5 @@
       ]
     }
   },
-  "version": "2026-03-10"
+  "version": "2026-03-11"
 }
