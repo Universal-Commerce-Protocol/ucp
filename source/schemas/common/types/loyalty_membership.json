@@ -10,10 +10,9 @@
       "type": "string",
       "description": "Unique loyalty membership identifier."
     },
-    "membership_id": {
+    "member_id": {
       "type": "string",
-      "description": "User's loyalty membership ID (e.g. loyalty card #, membership #).",
-      "ucp_request": "omit"
+      "description": "User's loyalty membership ID (e.g. loyalty card #, membership #)."
     },
     "name": {
       "type": "string",

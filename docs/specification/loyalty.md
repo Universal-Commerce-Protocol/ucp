@@ -20,11 +20,12 @@
 
 The loyalty extension is designed to facilitate high-fidelity loyalty experiences across various commerce journeys, ensuring that shoppers can for example sign-up for membership, access personalized benefits, redeem rewards, and manage memberships seamlessly across various capabilities.
 
-A few examples on how it might be used when decorating existing Capabilities:
+In its current format, it can be used to decorate the following Capabilities for example:
 
-* **Identity Linking**: For sharing membership status and point balances during account association.
-* **Checkout**: For applying member-specific discounts/fulfillment benefits, calculating point earnings, or initiating reward redemptions.
-* **Order**: For persisting the loyalty benefits applied to a completed transaction.
+* **Checkout**: For applying member-specific discounts/fulfillment benefits, calculating point earnings, or initiating reward redemptions, in conjunction with discount extension to specify the monetary effect of applicable loyalty benefits
+* **Cart**: For displaying the loyalty benefits for potential usage on subsequent checkout (e.g. redeemable balance, tier evaluations), with or without the help of discount extension to upsell potential savings and non-monetary benefits from membership
+
+In the future, for membership lifecycle management by agents (e.g. membership status fetching, program sign-up, balance transfer, etc.). it is possible that loyalty could be considered an independent capability. The other direction is fitting them within higher-order account and profile management capabilities that allow for broader operations, with loyalty being a subset and hence potentially represented by the same extension as it. This is not yet finalized among community discussion and pending future updates to achieve.
 
 ## Key Concepts
 
@@ -122,7 +123,7 @@ Businesses can follow standard advertisement mechanism to advertise loyalty supp
   "memberships": [
     {
       "id": "membership_1",
-      "membership_id": "membership_id_1",
+      "member_id": "member_id_1",
       "name": "My Loyalty Program",
       "enrollment_date": "2022-11-12T00:00:00Z",
       "last_activity_date": "2026-01-12T00:00:00Z",
@@ -161,7 +162,8 @@ Businesses can follow standard advertisement mechanism to advertise loyalty supp
             {
               "id": "BEN_001",
               "title": "Free shipping",
-              "description": "Complimentary standard shipping on all orders"
+              "description": "Complimentary standard shipping on all orders",
+              "applies_on": ["$.discounts.applied[0]"]
             },
             {
               "id": "BEN_002",
@@ -172,10 +174,10 @@ Businesses can follow standard advertisement mechanism to advertise loyalty supp
               "id": "BEN_003",
               "title": "Member discount",
               "description": "Members get $5 off",
-              "applies_on": ["$.discounts.applied[0]"]
+              "applies_on": ["$.discounts.applied[1]"]
             }
           ],
-          "conditions": [
+          "enrollment_conditions": [
             {
               "id": "CON_002",
               "description": "$99/yr membership fee"
@@ -226,13 +228,13 @@ Businesses can follow standard advertisement mechanism to advertise loyalty supp
 
 ### Request
 
-* Non-empty `activated_memberships` and `activated_tiers` implies membership sign-up intention from the customer. No eligibility verification needed.
+* Non-empty `activated_memberships` and `activated_tiers` implies membership sign-up intention from the customer. No eligibility verification needed, but can rely on the `condition_type` of `membership_tier_condition` within each `membership_tier`to provide selections for customers (e.g. only offer `free` typed tier for sign up).
 * Render applicable loyalty benefits based on the human-readable `title` and `description` provided, and highlight the source of immediate-value benefits alongside where they are applied based on the back referencing from `applies_on` to provide necessary disclosure or explanation.
 * Only request rewards redemption when there is non-zero available balance but no need to run any extra check as redemption rules can be complicated even if there is sufficient available balance for example.
 
 ### Response
 
-* Check and determine user’s eligibility in context (e.g. checkout with member benefits applied, checkout with rewards redemption, sign-up new membership etc) for both existing and prospective customers.
+* Check and determine user’s eligibility in context (e.g. checkout with member benefits applied, checkout with rewards redemption, sign-up new membership etc) for both existing and prospective customers. When eligibility condition is not met, response clear ERROR message to indicate that.
 * Populate `applies_on` when immediate-value membership benefits are applicable to the transaction and reference them to the corresponding line items.
 * Provide a comprehensive list of tiers that the membership offers, but at the minimum it MUST contain the ones that the customer is activated with (if applicable).
 * For memberships that do not have a tiered system (i.e. loyalty level can not be upgraded or downgraded), it MUST still be treated as a single-tiered membership.

@@ -8,6 +8,27 @@
     "loyalty": {
       "$ref": "types/loyalty.json"
     },
+    "dev.ucp.shopping.cart": {
+      "title": "Cart with Loyalty",
+      "description": "Cart extended with Loyalty capability.",
+      "allOf": [
+        {
+          "$ref": "cart.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "loyalty": {
+              "$ref": "#/$defs/loyalty",
+              "ucp_request": {
+                "create": "optional",
+                "update": "optional"
+              }
+            }
+          }
+        }
+      ]
+    },
     "dev.ucp.shopping.checkout": {
       "title": "Checkout with Loyalty",
       "description": "Checkout extended with Loyalty capability.",

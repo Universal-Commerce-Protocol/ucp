@@ -13,6 +13,16 @@
     "description": {
       "type": "string",
       "description": "Short and succinct explanation of the tier participation condition (e.g. “Free to join”)."
+    },
+    "condition_type": {
+      "type": "string",
+      "enum": [
+        "free",
+        "fee",
+        "spend",
+        "brand_card"
+      ],
+      "description": "The type of condition is about."
     }
   }
 }

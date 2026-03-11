@@ -19,12 +19,12 @@
       "minimum": 1,
       "description": "The relative ranking or numerical level of the tier within the loyalty program."
     },
-    "conditions": {
+    "enrollment_conditions": {
       "type": "array",
       "items": {
         "$ref": "membership_tier_condition.json"
       },
-      "description": "List of conditions to gain eligibility for the tier."
+      "description": "List of conditions to enroll in the tier."
     },
     "benefits": {
       "type": "array",

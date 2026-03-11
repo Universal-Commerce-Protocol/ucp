@@ -13,7 +13,7 @@
     },
     "code": {
       "type": "string",
-      "description": "Business-specific internal representation of the currency (e.g. “LST”)."
+      "description": "Business-specific representation of the currency (e.g. “LST”)."
     }
   }
 }

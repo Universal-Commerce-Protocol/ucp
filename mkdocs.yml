@@ -52,6 +52,7 @@ nav:
           - Overview: specification/cart.md
           - HTTP/REST Binding: specification/cart-rest.md
           - MCP Binding: specification/cart-mcp.md
+          - Loyalty Extension: specification/loyalty.md
       - Catalog Capability:
           - Overview: specification/catalog/index.md
           - Search: specification/catalog/search.md
