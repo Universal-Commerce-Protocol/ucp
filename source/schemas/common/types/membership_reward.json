@@ -9,8 +9,7 @@
     "currency": {
       "type": "object",
       "$ref": "balance_currency.json",
-      "description": "A unit of value that customers can accumulate through various commercial activities.",
-      "ucp_request": "omit"
+      "description": "A unit of value that customers can accumulate through various commercial activities."
     },
     "balance": {
       "type": "object",

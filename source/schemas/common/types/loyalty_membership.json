@@ -8,8 +8,7 @@
   "properties": {
     "id": {
       "type": "string",
-      "description": "Unique loyalty membership identifier.",
-      "ucp_request": "omit"
+      "description": "Unique loyalty membership identifier."
     },
     "membership_id": {
       "type": "string",
