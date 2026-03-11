@@ -326,7 +326,7 @@ platform can prefill checkout state when initiating a buy-now flow.
 * After a checkout session reaches the state "completed", it is considered
     immutable.
 
-## Capability Schema Definition
+## Capability Schema Definition <span id="checkout"></span>
 
 {{ schema_fields('checkout_resp', 'checkout') }}
 
@@ -442,7 +442,7 @@ binding transaction data.
 
 {{ schema_fields('types/item_update_req', 'checkout') }}
 
-#### Item Response
+#### Item
 
 {{ schema_fields('types/item_resp', 'checkout') }}
 
@@ -456,7 +456,7 @@ binding transaction data.
 
 {{ schema_fields('types/line_item_update_req', 'checkout') }}
 
-#### Line Item Response
+#### Line Item
 
 {{ schema_fields('types/line_item_resp', 'checkout') }}
 
@@ -489,6 +489,10 @@ field or omitting them.
 
 {{ schema_fields('types/message_error', 'checkout') }}
 
+#### Error Code
+
+{{ schema_fields('types/error_code', 'checkout') }}
+
 ### Message Info
 
 {{ schema_fields('types/message_info', 'checkout') }}
@@ -501,9 +505,9 @@ field or omitting them.
 
 {{ schema_fields('payment', 'checkout') }}
 
-### Payment Instrument
+#### Selected Payment Instrument
 
-{{ schema_fields('payment_instrument', 'checkout') }}
+{{ extension_schema_fields('types/payment_instrument.json#/$defs/selected_payment_instrument', 'checkout') }}
 
 ### Payment Credential
 
@@ -519,14 +523,18 @@ field or omitting them.
 
 ### Total
 
-#### Total Response
+#### Total
 
 {{ schema_fields('types/total_resp', 'checkout') }}
 
-### UCP Response Checkout
+### UCP Response Checkout {: #ucp-response-checkout-schema }
 
 {{ extension_schema_fields('ucp.json#/$defs/response_checkout_schema', 'checkout') }}
 
 ### Order Confirmation
 
 {{ schema_fields('order_confirmation', 'checkout') }}
+
+### Error Response <span id="error-response"></span>
+
+{{ schema_fields('types/error_response', 'checkout') }}

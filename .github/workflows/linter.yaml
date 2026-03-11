@@ -66,3 +66,4 @@ jobs:
           VALIDATE_GITHUB_ACTIONS_ZIZMOR: false
           VALIDATE_JSCPD: false
           VALIDATE_SPELL_CODESPELL: false  # Using cspell (spellcheck.yaml)
+          VALIDATE_OPENAPI: false
