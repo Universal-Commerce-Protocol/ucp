@@ -120,11 +120,17 @@ fees into the order total calculation.
 
 **Invariant:** `totals[type=fee].amount` equals `sum(fees.applied[].amount)`.
 Businesses MUST ensure this invariant holds. If a platform detects a mismatch
-between the aggregated fee total and the sum of itemized fees, the platform
-SHOULD treat the response as potentially invalid and SHOULD surface the
-discrepancy to the user. Platforms MAY use `continue_url` to hand off to the
-business UI for resolution rather than attempting to complete the checkout with
-inconsistent fee data.
+between the aggregated fee total and the sum of itemized fees:
+
+- If `totals[type=fee].amount` **exceeds** `sum(fees.applied[].amount)`, the
+  platform MUST treat this as an error — the user would otherwise pay
+  unspecified fees through an intermediary, complicating dispute resolution.
+  Platforms MUST NOT complete the checkout in this case and SHOULD use
+  `continue_url` to hand off to the business UI for resolution.
+
+- If `totals[type=fee].amount` is **less than** `sum(fees.applied[].amount)`,
+  the platform SHOULD surface the discrepancy to the user but MAY proceed
+  with caution, as the user is not being overcharged.
 
 !!! note "When the Fee Extension is absent"
     When the Fee Extension is present, there MUST be at most one `totals[]`
@@ -150,7 +156,6 @@ by displaying the fee's `title` to the user.
 | `processing`    | Payment or order processing surcharge            | Credit card processing fee         |
 | `regulatory`    | Government-mandated fee or compliance charge     | Mattress recycling surcharge       |
 | `convenience`   | Fee for using a particular ordering channel      | Online ordering convenience fee    |
-| `restocking`    | Fee for processing returns or exchanges          | Return restocking fee              |
 | `environmental` | Environmental impact or sustainability surcharge | Carbon offset fee                  |
 
 ### Why `id` Is Required
