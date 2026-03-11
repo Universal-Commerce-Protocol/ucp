@@ -2,14 +2,14 @@
   {
     "version": "draft",
     "title": "draft",
-    "aliases": []
+    "aliases": [
+      "latest"
+    ]
   },
   {
     "version": "2026-01-23",
     "title": "2026-01-23",
-    "aliases": [
-      "latest"
-    ]
+    "aliases": []
   },
   {
     "version": "2026-01-11",
