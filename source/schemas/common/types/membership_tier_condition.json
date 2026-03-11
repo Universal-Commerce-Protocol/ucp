@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/membership_tier_condition.json",
+  "title": "Membership Tier Condition",
+  "description": "Condition to gain eligibility for the membership tier.",
+  "type": "object",
+  "required": ["id", "description"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the tier condition."
+    },
+    "description": {
+      "type": "string",
+      "description": "Short and succinct explanation of the tier participation condition (e.g. “Free to join”)."
+    }
+  }
+}

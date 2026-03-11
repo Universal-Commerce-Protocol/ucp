@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/membership_tier.json",
+  "title": "Membership Tier",
+  "description": "A level within a loyalty program structured ranking system that offers escalating benefits and exclusive perks.",
+  "type": "object",
+  "required": ["id", "name", "level"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the membership tier."
+    },
+    "name": {
+      "type": "string",
+      "description": "The human-readable name of the tier (e.g., “Platinum”)."
+    },
+    "level": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "The relative ranking or numerical level of the tier within the loyalty program."
+    },
+    "conditions": {
+      "type": "array",
+      "items": {
+        "$ref": "membership_tier_condition.json"
+      },
+      "description": "List of conditions to gain eligibility for the tier."
+    },
+    "benefits": {
+      "type": "array",
+      "items": {
+        "$ref": "membership_tier_benefit.json"
+      },
+      "description": "List of possible benefits associated with this tier."
+    },
+    "links": {
+      "type": "array",
+      "items": {
+        "$ref": "../../shopping/types/link.json"
+      },
+      "description": "URLs for detailed fine prints of tier (including sign-up requirements, benefits summary, terms of service, etc.)."
+    }
+  }
+}

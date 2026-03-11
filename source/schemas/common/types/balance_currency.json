@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/balance_currency.json",
+  "title": "Expiring Balance",
+  "description": "The currency of the balance.",
+  "type": "object",
+  "required": ["name"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Human-readable name of the currency (e.g. “LoyaltyStars”)."
+    },
+    "code": {
+      "type": "string",
+      "description": "Business-specific internal representation of the currency (e.g. “LST”)."
+    }
+  }
+}

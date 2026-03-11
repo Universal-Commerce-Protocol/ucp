@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/loyalty_membership.json",
+  "title": "Loyalty Membership",
+  "description": "Loyalty membership that the business offers or associated with.",
+  "type": "object",
+  "required": ["id", "name", "tiers", "activated_tiers"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique loyalty membership identifier.",
+      "ucp_request": "omit"
+    },
+    "membership_id": {
+      "type": "string",
+      "description": "User's loyalty membership ID (e.g. loyalty card #, membership #).",
+      "ucp_request": "omit"
+    },
+    "name": {
+      "type": "string",
+      "description": "Business specific name of the loyalty membership/program.",
+      "ucp_request": "omit"
+    },
+    "enrollment_time": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Membership enrollment date (RFC 3339).",
+      "ucp_request": "omit"
+    },
+    "end_time": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Membership end/expiration date (RFC 3339).",
+      "ucp_request": "omit"
+    },
+    "tiers": {
+      "type": "array",
+      "items": {
+        "$ref": "membership_tier.json"
+      },
+      "description": "List of tiers associated with the loyalty membership.",
+      "ucp_request": "omit"
+    },
+    "activated_tiers": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "List of tiers that the customer is activated for or wish to activate, identified by the `id` of the Membership Tier object."
+    },
+    "rewards": {
+      "type": "array",
+      "items": {
+        "$ref": "membership_reward.json"
+      },
+      "description": "List of quantifiable rewards value the user holds. Each object encapsulates one type of reward the membership offers."
+    }
+  }
+}

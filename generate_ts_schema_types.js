@@ -28,6 +28,18 @@ async function generate() {
     }
   }
 
+  // Add common schemas
+  const commonDir = path.join(SOURCE_ROOT, 'schemas/common');
+  if (fs.existsSync(commonDir)) {
+    for (const file of fs.readdirSync(commonDir)) {
+      if (file.endsWith('.json')) {
+        properties[path.basename(file, '.json')] = {
+          $ref: path.join(commonDir, file)
+        };
+      }
+    }
+  }
+
   // Add handler schemas
   const handlersDir = path.join(SOURCE_ROOT, 'handlers');
   if (fs.existsSync(handlersDir)) {
