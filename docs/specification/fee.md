@@ -65,6 +65,24 @@ augments:
     Platforms should check which base capabilities the fee extension extends
     before expecting `fees` in responses.
 
+!!! tip "Fee disclosure timing"
+    To avoid late-stage price surprises and ensure a stable state machine
+    across the transaction lifecycle:
+
+    1. **Early disclosure:** A business SHOULD include fees at the cart level
+       whenever the fee criteria (e.g., item types or subtotal thresholds) are
+       known. Fees SHOULD NOT be deferred to checkout unless they are strictly
+       dependent on data only available at that stage (e.g., payment method
+       surcharges).
+
+    2. **Disclosure continuity:** A business SHOULD include fees at checkout if
+       they were provided at the cart level to ensure continuity of disclosure
+       granularity and avoid a "lossy" state transition.
+
+    This ensures the merchant-controlled portion of the cost is deterministic
+    as early as possible and remains consistent throughout the transaction
+    lifecycle.
+
 ## Schema
 
 When this capability is active, checkout and/or cart responses are extended with
