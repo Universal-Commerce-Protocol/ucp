@@ -304,7 +304,8 @@ At completion, the payment credential does not match the claimed instrument:
       "type": "error",
       "code": "eligibility_invalid",
       "severity": "recoverable",
-      "content": "Payment credential does not match the claimed store card benefit."
+      "content": "Payment credential does not match the claimed store card benefit.",
+      "path": "$.context.eligibility[0]"
     }
   ]
 }
