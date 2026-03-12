@@ -592,6 +592,14 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
+### Reverse Domain Name
+
+Reverse-domain identifier used for collision-safe namespacing of capabilities, services, handlers, eligibility claims, and extension-contributed keys. Must contain at least two dot-separated segments (e.g., 'dev.ucp.shopping.checkout', 'com.example.loyalty_gold').
+
+**Pattern:** `^[a-z][a-z0-9]*(?:\.[a-z][a-z0-9_]*)+$`
+
+______________________________________________________________________
+
 ### Search Filters
 
 | Name       | Type                                                         | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
