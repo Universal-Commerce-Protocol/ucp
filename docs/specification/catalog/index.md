@@ -48,6 +48,11 @@ Catalog operations return product and variant IDs that can be used directly in
 checkout `line_items[].item.id`. The variant ID from catalog retrieval should match
 the item ID expected by checkout.
 
+Catalog responses (pricing, availability, etc.) reflect the Business's current
+terms for the given request but are not transactional commitments — checkout
+is authoritative. Responses can be session-specific and **SHOULD NOT** be
+reused across sessions without re-validation.
+
 ## Shared Entities
 
 ### Context

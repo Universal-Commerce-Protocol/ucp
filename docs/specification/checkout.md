@@ -256,13 +256,15 @@ Platforms provide `context.eligibility` — buyer claims about eligible benefits
 such as loyalty membership, payment instrument perks, and similar. These are
 claims, not verified facts. Businesses **MAY** act on recognized claims during
 the session (adjusting pricing, granting product access, applying provisional
-discounts), but all claims that influenced the checkout **MUST** be resolved
-before the transaction can complete.
+discounts), but all accepted claims **MUST** be resolved before the
+transaction can complete.
 
 Unrecognized or inapplicable claims **MUST NOT** block the checkout.
 Businesses **SHOULD** notify the buyer via `messages` with `type: "warning"`
-when a claim is not applied. At completion, unverified claims that influenced the checkout **MUST**
-result in `type: "error"` with `code: "eligibility_invalid"` (see below).
+when a claim is not accepted, and **MAY** use `type: "info"` to explain
+the effects of accepted claims. At completion, accepted claims that remain
+unverified **MUST** result in `type: "error"` with
+`code: "eligibility_invalid"` (see below).
 
 A claim is resolved when it is either **verified** or **rescinded**:
 
@@ -280,13 +282,13 @@ access to restricted products.
 
 **When verification fails:**
 
-The Business **MUST NOT** mutate the checkout and **MUST** return an error
-in `messages` with `code: "eligibility_invalid"` and
-`severity: "recoverable"`. Messages **SHOULD** use the `path` field to
-identify which specific claim(s) could not be verified. The
-Platform **MAY** then provide valid proof and resubmit, restructure the
-checkout (e.g., remove ineligible items, update claims), or abandon the
-attempt.
+Verification failure **MUST** only affect the `messages` array. The
+Business **MUST** return an error in `messages` with
+`code: "eligibility_invalid"` and `severity: "recoverable"`. Messages
+**SHOULD** use the `path` field to identify which specific claim(s) could
+not be verified. The Platform **MAY** then provide valid proof and
+resubmit, restructure the checkout (e.g., remove ineligible items, update
+claims), or abandon the attempt.
 
 For example, the Platform claims a store card benefit via
 `context.eligibility`. The Business applies member pricing during the session.
