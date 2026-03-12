@@ -90,7 +90,7 @@ method.
 
 #### Total
 
-{{ schema_fields('types/total_resp', 'fulfillment') }}
+{{ schema_fields('types/total_line_resp', 'fulfillment') }}
 
 #### Postal Address
 

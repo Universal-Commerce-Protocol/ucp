@@ -521,11 +521,143 @@ field or omitting them.
 
 {{ extension_schema_fields('capability.json#/$defs/response_schema', 'checkout') }}
 
-### Total
+### Total {: #totals }
 
-#### Total
+{{ schema_fields('types/total_line_resp', 'checkout') }}
 
-{{ schema_fields('types/total_resp', 'checkout') }}
+#### Rendering Contract
+
+Businesses are the authoritative source for presented totals — their content
+and order — because the correct presentation is subject to regional, product,
+and regulatory requirements that the business is obligated to satisfy (e.g.,
+multi-jurisdiction tax itemization, mandatory fee disclosures).
+
+Platforms MUST render all top-level entries in the order provided:
+
+```python
+for entry in totals:
+    render_line(entry.display_text, entry.amount, entry.effect or default_effect(entry.type))
+```
+
+Platforms MAY render sub-lines as supplementary detail:
+
+```python
+for entry in totals:
+    render_line(entry.display_text, entry.amount, entry.effect or default_effect(entry.type))
+    if entry.lines:
+        for sub in entry.lines:
+            render_detail_line(sub.display_text, sub.amount)
+```
+
+Platforms MUST NOT interpret, filter, reorder, aggregate, or apply display
+logic of their own.
+
+Invariants of `totals[]`:
+
+* Every entry carries a `display_text` and an `amount`.
+* Every entry except `type: "total"` has an `effect`.
+* Exactly one `type: "subtotal"` MUST be present.
+* Exactly one `type: "total"` MUST be present.
+
+#### Verification
+
+Platforms MUST NOT substitute their own computed totals for the business's
+values. Platforms MAY verify the provided totals:
+
+```python
+computed = 0
+for entry in totals:
+    if entry.type == "total":
+        continue
+    effect = entry.effect or default_effect(entry.type)
+    if effect == "add":
+        computed += entry.amount
+    elif effect == "subtract":
+        computed -= entry.amount
+
+assert computed == totals.find(type == "total").amount
+```
+
+If the computed sum of entries does not match the `type: "total"` entry, the
+platform MUST NOT alter the rendered output — the business's total is
+authoritative. Platforms MAY prevent checkout completion or surface the
+discrepancy to the buyer.
+
+#### Well-Known Types
+
+| Type              | Default `effect` | Meaning                                        |
+| ----------------- | ---------------- | ---------------------------------------------- |
+| `subtotal`        | `add`            | Sum of line item prices                        |
+| `discount`        | `subtract`       | Order or line-item level discount              |
+| `items_discount`  | `subtract`       | Rollup of line-item discounts                  |
+| `fulfillment`     | `add`            | Shipping, delivery, or pickup charges          |
+| `tax`             | `add`            | Tax charges                                    |
+| `fee`             | `add`            | Fees and surcharges                            |
+| `total`           | —                | Authoritative grand total (exactly one)        |
+
+Businesses MAY use `type` values beyond the well-known set. Types outside
+the well-known set MUST include an explicit `effect` field. If `effect` is
+included on a well-known type, it MUST match the default above.
+
+#### Repeating Types
+
+All types except `subtotal` and `total` MAY appear multiple times —
+for example, multi-jurisdiction tax lines or itemized fees.
+
+#### Sub-Lines (`lines`)
+
+Each top-level entry MAY include a `lines` array. Sub-lines share the same
+base shape as top-level entries — `display_text` and `amount` — providing an
+itemized breakdown under the parent.
+
+**Invariant:** `sum(lines[].amount)` MUST equal the parent entry's `amount`.
+
+The business controls what MUST be rendered (top-level entries) versus what
+MAY be optionally surfaced (sub-lines). Platforms SHOULD render sub-lines
+when provided.
+
+#### Examples
+
+**Split tax, itemized at top-level:**
+
+```json
+"totals": [
+  { "type": "subtotal",    "display_text": "Subtotal",      "amount": 5750 },
+  { "type": "fulfillment", "display_text": "Shipping",      "amount": 899 },
+  { "type": "tax",         "display_text": "Federal Tax",   "amount": 332 },
+  { "type": "tax",         "display_text": "State Tax",     "amount": 465 },
+  { "type": "total",       "display_text": "Total",         "amount": 7446 }
+]
+```
+
+**Collapsed fees with optional breakdown:**
+
+```json
+"totals": [
+  { "type": "subtotal", "display_text": "Subtotal", "amount": 4999 },
+  {
+    "type": "fee", "display_text": "Fees", "amount": 549,
+    "lines": [
+      { "display_text": "Service Fee", "amount": 399 },
+      { "display_text": "Recycling Fee", "amount": 150 }
+    ]
+  },
+  { "type": "tax",   "display_text": "Tax",   "amount": 444 },
+  { "type": "total", "display_text": "Total", "amount": 5992 }
+]
+```
+
+**Account credit — custom type with explicit `effect`:**
+
+```json
+"totals": [
+  { "type": "subtotal",     "display_text": "Subtotal",     "amount": 10000 },
+  { "type": "tax",          "display_text": "Tax",          "amount": 800 },
+  { "type": "account_credit", "display_text": "Account Credit", "amount": 2500,
+    "effect": "subtract" },
+  { "type": "total",        "display_text": "Amount Due",   "amount": 8300 }
+]
+```
 
 ### UCP Response Checkout {: #ucp-response-checkout-schema }
 
