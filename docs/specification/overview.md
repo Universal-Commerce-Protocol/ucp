@@ -33,11 +33,21 @@ Schema notes:
 
 ## Discovery, Governance, and Negotiation
 
-UCP employs a server-selects architecture where the business (server) chooses
-the protocol version and capabilities from the intersection of both parties'
-capabilities. Both business and platform profiles can be cached by both parties,
-allowing efficient capability negotiation within the normal request/response
-flow between platform and business.
+UCP separates protocol version compatibility from capability negotiation.
+The business's profile at `/.well-known/ucp` describes capabilities for
+the protocol version it declares. Businesses that support older protocol
+versions **SHOULD** publish version-specific profiles and advertise them
+via the `supported_versions` field — a map from protocol version to
+profile URI, enabling platforms to discover the exact capabilities for a
+specific protocol version. Version lifecycle, including when to deprecate
+or remove older versions from `supported_versions`, is a business policy
+decision. The protocol does not prescribe a deprecation schedule.
+Capability negotiation follows a server-selects architecture where the
+business (server) determines the active capabilities from the
+intersection of both parties' declared capabilities. Both business and
+platform profiles can be cached by both parties, allowing efficient
+capability negotiation within the normal request/response flow between
+platform and business.
 
 ### Namespace Governance
 
@@ -132,9 +142,9 @@ appended to this endpoint to form the complete URL.
 
 ```json
 {
-  "version": "2026-01-11",
+  "version": "{{ ucp_version }}",
   "transport": "rest",
-  "schema": "https://ucp.dev/services/shopping/openapi.json",
+  "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/rest.openapi.json",
   "endpoint": "https://business.example.com/api/v2"
 }
 ```
@@ -171,9 +181,9 @@ Extensions use the `extends` field to declare their parent(s):
 {
   "dev.ucp.shopping.fulfillment": [
     {
-      "version": "2026-01-23",
-      "spec": "https://ucp.dev/2026-01-23/specification/fulfillment",
-      "schema": "https://ucp.dev/2026-01-23/schemas/shopping/fulfillment.json",
+      "version": "{{ ucp_version }}",
+      "spec": "https://ucp.dev/{{ ucp_version }}/specification/fulfillment",
+      "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json",
       "extends": "dev.ucp.shopping.checkout"
     }
   ]
@@ -188,9 +198,9 @@ Extensions **MAY** extend multiple parent capabilities by using an array:
 {
   "dev.ucp.shopping.discount": [
     {
-      "version": "2026-01-23",
-      "spec": "https://ucp.dev/2026-01-23/specification/discount",
-      "schema": "https://ucp.dev/2026-01-23/schemas/shopping/discount.json",
+      "version": "{{ ucp_version }}",
+      "spec": "https://ucp.dev/{{ ucp_version }}/specification/discount",
+      "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/discount.json",
       "extends": ["dev.ucp.shopping.checkout", "dev.ucp.shopping.cart"]
     }
   ]
@@ -264,6 +274,56 @@ This convention ensures:
 - **Verifiable**: Build-time checks can confirm each `extends` entry has a
     matching `$defs` key
 
+##### Version Requirements
+
+Extension schemas **SHOULD** declare a `requires` object (alongside
+`name`, `title`, `description`) to indicate the protocol and
+capability versions required for correct operation:
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://acme.com/ucp/schemas/loyalty.json",
+  "name": "com.acme.shopping.loyalty",
+  "title": "Acme Loyalty Points",
+  "requires": {
+    "protocol": { "min": "2026-01-23" },
+    "capabilities": {
+      "dev.ucp.shopping.checkout": { "min": "2026-06-01" }
+    }
+  },
+  "$defs": {
+    "dev.ucp.shopping.checkout": { ... }
+  }
+}
+```
+
+The schema author — not the profile publisher — declares version
+requirements. The profile publisher selects and advertises compatible
+versions in their profile.
+
+Each constraint is an object with a required `min` (inclusive) and
+optional `max` (inclusive) version. When `max` is absent, there is
+no upper bound:
+
+```json
+"requires": {
+  "protocol": { "min": "2026-01-23", "max": "2026-09-01" },
+  "capabilities": {
+    "dev.ucp.shopping.checkout": { "min": "2026-06-01" }
+  }
+}
+```
+
+Keys in `requires.capabilities` **MUST** be a subset of the
+extension's `$defs` keys. If `requires` is present, platforms and
+businesses **MUST** verify the negotiated protocol version and
+capability versions satisfy the declared constraints during schema
+resolution. Incompatible extensions are excluded from the active
+capability set (see [Resolution Flow](#resolution-flow)). If
+`requires` is absent, the extension is assumed to be compatible
+with the versions declared by the profile.
+
 #### Schema Resolution Convention
 
 To validate payloads, implementations resolve extension schemas as follows:
@@ -286,8 +346,13 @@ Platforms **MUST** resolve schemas following this sequence:
 2. **Negotiation**: Compute capability intersection (see
     [Intersection Algorithm](#intersection-algorithm))
 3. **Schema Fetch**: Fetch base schema and all active extension schemas
-4. **Compose**: Merge schemas via `allOf` chains based on active extensions
-5. **Validate**: Validate requests and responses against the composed schema
+4. **Version Compatibility**: For each fetched extension schema,
+    if `requires` is present, verify the negotiated protocol version
+    and capability versions satisfy the declared constraints. Exclude
+    incompatible extensions and re-prune orphaned extensions
+    (steps 3-4 of the [Intersection Algorithm](#intersection-algorithm))
+5. **Compose**: Merge schemas via `allOf` chains based on active extensions
+6. **Validate**: Validate requests and responses against the composed schema
 
 ### Profile Structure
 
@@ -298,58 +363,58 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "{{ ucp_version }}",
     "services": {
       "dev.ucp.shopping": [
         {
-          "version": "2026-01-11",
-          "spec": "https://ucp.dev/specification/overview",
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview",
           "transport": "rest",
           "endpoint": "https://business.example.com/ucp/v1",
-          "schema": "https://ucp.dev/services/shopping/openapi.json"
+          "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/rest.openapi.json"
         },
         {
-          "version": "2026-01-11",
-          "spec": "https://ucp.dev/specification/overview",
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview",
           "transport": "mcp",
           "endpoint": "https://business.example.com/ucp/mcp",
-          "schema": "https://ucp.dev/services/shopping/mcp.openrpc.json"
+          "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/mcp.openrpc.json"
         },
         {
-          "version": "2026-01-11",
-          "spec": "https://ucp.dev/specification/overview",
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview",
           "transport": "a2a",
           "endpoint": "https://business.example.com/.well-known/agent-card.json"
         },
         {
-          "version": "2026-01-11",
-          "spec": "https://ucp.dev/specification/overview",
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview",
           "transport": "embedded",
-          "schema": "https://ucp.dev/services/shopping/embedded.openrpc.json"
+          "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/embedded.openrpc.json"
         }
       ]
     },
     "capabilities": {
       "dev.ucp.shopping.checkout": [
         {
-          "version": "2026-01-11",
-          "spec": "https://ucp.dev/specification/checkout",
-          "schema": "https://ucp.dev/schemas/shopping/checkout.json"
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/checkout",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/checkout.json"
         }
       ],
       "dev.ucp.shopping.fulfillment": [
         {
-          "version": "2026-01-11",
-          "spec": "https://ucp.dev/specification/fulfillment",
-          "schema": "https://ucp.dev/schemas/shopping/fulfillment.json",
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/fulfillment",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json",
           "extends": "dev.ucp.shopping.checkout"
         }
       ],
       "dev.ucp.shopping.discount": [
         {
-          "version": "2026-01-11",
-          "spec": "https://ucp.dev/specification/discount",
-          "schema": "https://ucp.dev/schemas/shopping/discount.json",
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/discount",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/discount.json",
           "extends": "dev.ucp.shopping.checkout"
         }
       ]
@@ -358,7 +423,7 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
       "com.example.processor_tokenizer": [
         {
           "id": "processor_tokenizer",
-          "version": "2026-01-11",
+          "version": "{{ ucp_version }}",
           "spec": "https://example.com/specs/payments/processor_tokenizer",
           "schema": "https://example.com/specs/payments/merchant_tokenizer.json",
           "available_instruments": [
@@ -402,6 +467,11 @@ used to verify signatures on webhooks and other authenticated messages from the
 business. See [Key Discovery](#key-discovery) for key lookup and resolution,
 and [Message Signatures](signatures.md) for signing mechanics.
 
+Businesses that support older protocol versions **SHOULD** include a
+`supported_versions` object mapping each older version to a
+version-specific profile URI. See [Protocol Version](#protocol-version)
+for details.
+
 #### Platform Profile
 
 Platform profiles are similar and include signing keys for capabilities
@@ -412,38 +482,38 @@ example:
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "{{ ucp_version }}",
     "services": {
       "dev.ucp.shopping": [
         {
-          "version": "2026-01-11",
-          "spec": "https://ucp.dev/specification/overview",
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview",
           "transport": "rest",
-          "schema": "https://ucp.dev/services/shopping/openapi.json"
+          "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/rest.openapi.json"
         }
       ]
     },
     "capabilities": {
       "dev.ucp.shopping.checkout": [
         {
-          "version": "2026-01-11",
-          "spec": "https://ucp.dev/specification/checkout",
-          "schema": "https://ucp.dev/schemas/shopping/checkout.json"
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/checkout",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/checkout.json"
         }
       ],
       "dev.ucp.shopping.fulfillment": [
         {
-          "version": "2026-01-11",
-          "spec": "https://ucp.dev/specification/fulfillment",
-          "schema": "https://ucp.dev/schemas/shopping/fulfillment.json",
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/fulfillment",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json",
           "extends": "dev.ucp.shopping.checkout"
         }
       ],
       "dev.ucp.shopping.order": [
         {
-          "version": "2026-01-11",
-          "spec": "https://ucp.dev/specification/order",
-          "schema": "https://ucp.dev/schemas/shopping/order.json",
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/order",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/order.json",
           "config": {
             "webhook_url": "https://platform.example.com/webhooks/ucp/orders"
           }
@@ -462,7 +532,7 @@ example:
       "dev.shopify.shop_pay": [
         {
           "id": "shop_pay_1234",
-          "version": "2026-01-11",
+          "version": "{{ ucp_version }}",
           "spec": "https://shopify.dev/ucp/shop-pay-handler",
           "schema": "https://shopify.dev/ucp/schemas/shop-pay-config.json",
           "available_instruments": [
@@ -473,9 +543,9 @@ example:
       "dev.ucp.processor_tokenizer": [
         {
           "id": "processor_tokenizer",
-          "version": "2026-01-11",
+          "version": "{{ ucp_version }}",
           "spec": "https://example.com/specs/payments/processor_tokenizer-payment",
-          "schema": "https://ucp.dev/schemas/payments/delegate-payment.json",
+          "schema": "https://example.com/schemas/payments/delegate-payment.json",
           "available_instruments": [
             {"type": "card", "constraints": {"brands": ["visa", "mastercard"]}}
           ]
@@ -574,17 +644,23 @@ for a session:
 1. **Compute intersection**: For each business capability, include it in the
     result if a platform capability with the same `name` exists.
 
-2. **Prune orphaned extensions**: Remove any capability where `extends` is
+2. **Select version**: For each capability in the intersection, compute the
+    set of version strings present in **both** the business and platform
+    arrays. If the set is non-empty, select the **highest** version
+    (latest date). If the set is empty (no mutual version), **exclude** the
+    capability from the intersection.
+
+3. **Prune orphaned extensions**: Remove any capability where `extends` is
     set but **none** of its parent capabilities are in the intersection.
     - For single-parent extensions (`extends: "string"`): parent must be present
     - For multi-parent extensions (`extends: ["a", "b"]`): at least one parent
         must be present
 
-3. **Repeat pruning**: Continue step 2 until no more capabilities are removed
+4. **Repeat pruning**: Continue step 3 until no more capabilities are removed
     (handles transitive extension chains).
 
-The result is the set of capabilities both parties support, with extension
-dependencies satisfied.
+The result is the set of capabilities both parties support at mutually
+compatible versions, with extension dependencies satisfied.
 
 #### Error Handling
 
@@ -596,10 +672,13 @@ UCP negotiation can fail in two ways:
 2. **Negotiation failure**: The provided profile is valid but capability
    intersection is empty or versions are incompatible.
 
-These failure types require different handling:
+Discovery failures are transport errors — the required inputs could
+not be retrieved or were malformed. Negotiation failures are business
+outcomes — the handler executed on the provided inputs and reported
+the result in the UCP response:
 
-- **Discovery failure** → transport error with optional `continue_url`
-- **Negotiation failure** → UCP response with optional `continue_url`
+- **Discovery or version failure** → transport error with optional `continue_url`
+- **Capability negotiation failure** → UCP response with optional `continue_url`
 
 ##### Error Codes
 
@@ -610,8 +689,8 @@ These failure types require different handling:
 | `invalid_profile_url`       | Profile URL is malformed, missing, or unresolvable   | 400  | -32001 |
 | `profile_unreachable`       | Resolved URL but fetch failed (timeout, non-2xx)     | 424  | -32001 |
 | `profile_malformed`         | Fetched content is not valid JSON or violates schema | 422  | -32001 |
+| `version_unsupported`       | Platform's protocol version not supported            | 422  | -32001 |
 | `capabilities_incompatible` | No compatible capabilities in intersection           | 200  | result |
-| `version_unsupported`       | Platform's UCP version is not supported              | 200  | result |
 
 **Signature Errors:**
 
@@ -670,7 +749,20 @@ task through the standard web interface.
     }
     ```
 
-    **Negotiation Failure (200):**
+    **Version Unsupported (422):**
+
+    ```http
+    HTTP/1.1 422 Unprocessable Content
+    Content-Type: application/json
+
+    {
+      "code": "version_unsupported",
+      "content": "Protocol version 2026-01-12 is not supported. This business supports versions 2026-01-11 and 2026-01-23.",
+      "continue_url": "https://merchant.com/cart"
+    }
+    ```
+
+    **Capabilities Incompatible (200):**
 
     ```http
     HTTP/1.1 200 OK
@@ -678,7 +770,8 @@ task through the standard web interface.
 
     {
       "ucp": {
-        "version": "2026-01-11",
+        "version": "{{ ucp_version }}",
+        "status": "error",
         "capabilities": {}
       },
       "messages": [
@@ -686,7 +779,7 @@ task through the standard web interface.
           "type": "error",
           "code": "version_unsupported",
           "content": "UCP version 2024-01-01 is not supported",
-          "severity": "requires_buyer_input"
+          "severity": "unrecoverable"
         }
       ],
       "continue_url": "https://merchant.com"
@@ -730,7 +823,25 @@ task through the standard web interface.
     }
     ```
 
-    **Negotiation Failure (JSON-RPC result):**
+    **Version Unsupported (JSON-RPC error):**
+
+    ```json
+    {
+      "jsonrpc": "2.0",
+      "id": 1,
+      "error": {
+        "code": -32001,
+        "message": "Protocol version not supported",
+        "data": {
+          "code": "version_unsupported",
+          "content": "Protocol version 2026-01-12 is not supported. This business supports versions 2026-01-11 and 2026-01-23.",
+          "continue_url": "https://merchant.com/cart"
+        }
+      }
+    }
+    ```
+
+    **Capabilities Incompatible (JSON-RPC result):**
 
     ```json
     {
@@ -739,15 +850,15 @@ task through the standard web interface.
       "result": {
         "structuredContent": {
           "ucp": {
-            "version": "2026-01-11",
-            "capabilities": {}
+            "version": "{{ ucp_version }}",
+            "status": "error"
           },
           "messages": [
             {
               "type": "error",
               "code": "version_unsupported",
               "content": "UCP version 2024-01-01 is not supported",
-              "severity": "requires_buyer_input"
+              "severity": "unrecoverable"
             }
           ],
           "continue_url": "https://merchant.com"
@@ -800,18 +911,18 @@ The `capabilities` registry in responses indicates active capabilities:
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "{{ ucp_version }}",
     "capabilities": {
       "dev.ucp.shopping.checkout": [
-        {"version": "2026-01-11"}
+        {"version": "{{ ucp_version }}"}
       ],
       "dev.ucp.shopping.fulfillment": [
-        {"version": "2026-01-11"}
+        {"version": "{{ ucp_version }}"}
       ]
     },
     "payment_handlers": {
       "com.example.processor_tokenizer": [
-        {"id": "processor_tokenizer", "version": "2026-01-11", "available_instruments": [{"type": "card"}]}
+        {"id": "processor_tokenizer", "version": "{{ ucp_version }}", "available_instruments": [{"type": "card"}]}
       ]
     }
   },
@@ -1117,12 +1228,12 @@ an encrypted payment token.
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "{{ ucp_version }}",
     "payment_handlers": {
       "com.google.pay": [
         {
           "id": "8c9202bd-63cc-4241-8d24-d57ce69ea31c",
-          "version": "2026-01-11",
+          "version": "{{ ucp_version }}",
           "config": {
             "api_version": 2,
             "api_version_minor": 0,
@@ -1154,7 +1265,7 @@ an encrypted payment token.
       "dev.shopify.shop_pay": [
         {
           "id": "shop_pay_1234",
-          "version": "2026-01-11",
+          "version": "{{ ucp_version }}",
           "available_instruments": [
             {"type": "shop_pay"}
           ],
@@ -1232,7 +1343,7 @@ request a challenge.
       "com.example.tokenizer": [
         {
           "id": "merchant_tokenizer",
-          "version": "2026-01-11",
+          "version": "{{ ucp_version }}",
           "spec": "https://example.com/specs/tokenizer",
           "schema": "https://example.com/schemas/tokenizer.json",
           "available_instruments": [
@@ -1317,9 +1428,9 @@ session token, the agent generates cryptographic mandates.
       "dev.ucp.ap2_mandate_compatible_handlers": [
         {
           "id": "ap2_234352",
-          "version": "2026-01-11",
-          "spec": "https://ucp.dev/specs/ap2-handler",
-          "schema": "https://ucp.dev/schemas/ap2-handler.json",
+          "version": "{{ ucp_version }}",
+          "spec": "https://example.com/specs/ap2-handler",
+          "schema": "https://example.com/schemas/ap2-handler.json",
           "available_instruments": [
             {"type": "ap2_mandate"}
           ]
@@ -1526,7 +1637,7 @@ MCP servers:
   "result": {
     "structuredContent": {
       "checkout": {
-        "ucp": {"version": "2026-01-11", "capabilities": {...}},
+        "ucp": {"version": "{{ ucp_version }}", "capabilities": {...}},
         "id": "checkout_abc123",
         "status": "incomplete",
         ...
@@ -1556,11 +1667,12 @@ Initiation comes through a `continue_url` that is returned by the business.
 
 UCP defines a set of standard capabilities:
 
-| Capability Name      | ID (URI)                                       | Description                                                                                                  |
-| :------------------- | :--------------------------------------------- | :----------------------------------------------------------------------------------------------------------- |
-| **Checkout**         | `{{ ucp_url }}/schemas/shopping/checkout.json` | Facilitates the creation and management of checkout sessions, including cart management and tax calculation. |
-| **Identity Linking** | -                                              | Enables platforms to obtain authorization via OAuth 2.0 to perform actions on a user's behalf.               |
-| **Order**            | `{{ ucp_url }}/schemas/shopping/order.json`    | Allows businesses to push asynchronous updates about an order's lifecycle (shipping, delivery, returns).     |
+| Capability Name      | ID (URI)                                                              | Description                                                                                                  |
+| :------------------- | :-------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------- |
+| **Cart**.            | [schemas/shopping/cart.json](site:schemas/shopping/cart.json)         | Enables basket building before purchase intent is established.                                               |
+| **Checkout**         | [schemas/shopping/checkout.json](site:schemas/shopping/checkout.json) | Facilitates the creation and management of checkout sessions, including cart management and tax calculation. |
+| **Identity Linking** | -                                                                     | Enables platforms to obtain authorization via OAuth 2.0 to perform actions on a user's behalf.               |
+| **Order**            | [schemas/shopping/order.json](site:schemas/shopping/order.json)       | Allows businesses to push asynchronous updates about an order's lifecycle (shipping, delivery, returns).     |
 
 ### Definition & Extensions
 
@@ -1617,7 +1729,7 @@ Both businesses and platforms declare a single version in their profiles:
     ```json
     {
       "ucp": {
-        "version": "2026-01-11",
+        "version": "{{ ucp_version }}",
         "services": { ... },
         "capabilities": { ... },
         "payment_handlers": { ... }
@@ -1630,7 +1742,7 @@ Both businesses and platforms declare a single version in their profiles:
     ```json
     {
       "ucp": {
-        "version": "2026-01-11",
+        "version": "{{ ucp_version }}",
         "services": { ... },
         "capabilities": { ... },
         "payment_handlers": { ... }
@@ -1642,23 +1754,85 @@ Both businesses and platforms declare a single version in their profiles:
 
 ![High-level resolution flow sequence diagram](site:specification/images/ucp-discovery-negotiation.png)
 
-Businesses **MUST** validate the platform's version and determine compatibility:
+Version compatibility operates at two levels: the **protocol version**
+and **capability versions**. The protocol version (`ucp.version`)
+governs core protocol mechanisms — discovery, negotiation flow,
+transport bindings, and signature requirements. Capability versions
+govern the semantics of each feature independently, as defined in
+[Independent Component Versioning](#independent-component-versioning).
 
-1. Platform declares version via profile referenced in request
+#### Protocol Version
+
+The `version` field declares the business's current protocol version.
+The profile at `/.well-known/ucp` describes the capabilities, services,
+and payment handlers available at that version.
+
+Businesses that support older protocol versions **SHOULD** declare a
+`supported_versions` object mapping each older version to a profile
+URI. Each URI points to a complete, self-contained profile for that
+version — including its own capabilities, services, payment handlers,
+and signing keys. When `supported_versions` is omitted, only
+`version` is supported.
+
+```json
+{
+  "ucp": {
+    "version": "2026-01-23",
+    "supported_versions": {
+      "2026-01-11": "https://business.example.com/.well-known/ucp/2026-01-11"
+    }
+  }
+}
+```
+
+##### Initial Service and Capability Discovery
+
+Platforms discover a business's capabilities through the following flow:
+
+1. Platform fetches `/.well-known/ucp` — this is the current version
+    profile.
+2. If the platform's protocol version matches `version`: use this
+    profile directly. Proceed to capability negotiation.
+3. If the platform's protocol version is a key in
+    `supported_versions`: fetch the profile at the mapped URI. This
+    profile describes the capabilities available at that protocol
+    version. Proceed to capability negotiation.
+4. Otherwise: the business does not support the platform's protocol
+    version. Platforms **SHOULD NOT** send requests with an incompatible
+    version; businesses **MUST** respond with a `version_unsupported`
+    error.
+
+Version-specific profiles are leaf documents — they describe exactly
+one protocol version and **MUST NOT** contain a `supported_versions`
+field.
+
+##### Request-Time Validation
+
+Businesses **MUST** validate the platform's protocol version on
+every request:
+
+1. Platform declares the protocol version it uses via the
+    `version` field in the profile referenced in the request.
 2. Business validates:
-    - If platform version ≤ business version: Business **MUST**
-        process the request
-    - If platform version > business version: Business **MUST** return
-        `version_unsupported` error
-3. Businesses **MUST** include the version used for processing in every
-    response.
+    - If the platform's `version` matches the business's `version`
+        or is a key in `supported_versions`: the request **MAY**
+        proceed to capability negotiation using the matching
+        version of the business profile.
+    - Otherwise: Business **MUST** return a `version_unsupported`
+        error.
+3. If capability negotiation yields no mutually supported version
+    for a capability required by the requested operation, the
+    business **MUST** return a `capabilities_incompatible` error
+    (see [Error Handling](#error-handling)).
+4. Businesses **MUST** include the negotiated protocol version in
+    every response.
 
 Response with version confirmation:
 
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "{{ ucp_version }}",
     "capabilities": { ... },
     "payment_handlers": { ... }
   },
@@ -1668,19 +1842,34 @@ Response with version confirmation:
 }
 ```
 
-Version unsupported error:
+Version unsupported error — no resource is created:
 
 ```json
 {
-  "status": "requires_escalation",
+  "ucp": { "version": "2026-01-11", "status": "error" },
   "messages": [{
     "type": "error",
     "code": "version_unsupported",
     "content": "Version 2026-01-12 is not supported. This business implements version 2026-01-11.",
-    "severity": "requires_buyer_input"
-  }]
+    "severity": "unrecoverable"
+  }],
+  "continue_url": "https://merchant.com/"
 }
 ```
+
+#### Capability Versions
+
+Capability versions are negotiated independently of the protocol
+version. Each capability in the profile is an array. Multiple entries
+for the same capability, each with a different `version`, advertise
+support for multiple versions of that capability. The capability
+intersection algorithm considers only capability versions supported
+by both parties.
+
+Businesses **MUST** include only capabilities compatible with the
+negotiated protocol version in their response. A capability that
+depends on features introduced in a newer protocol version **MUST
+NOT** be included when processing at an older protocol version.
 
 ### Backwards Compatibility
 

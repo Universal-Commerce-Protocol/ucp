@@ -118,13 +118,17 @@ platform receives messages indicating what's needed to progress.
 
 The `messages` array contains errors, warnings, and informational messages
 about the checkout state. Error messages include a `severity` field that
-declares **who resolves the error**:
+reflects the resource state and recommended action. When `ucp.status`
+is `"success"`, a resource is returned and severity indicates the
+recommended action. When `ucp.status` is `"error"`, no valid resource
+exists — severity is `unrecoverable`:
 
-| Severity                | Meaning                                       | Platform Action               |
-| :---------------------- | :-------------------------------------------- | :---------------------------- |
-| `recoverable`           | Platform can fix via API                      | Resolve using Update Checkout |
-| `requires_buyer_input`  | Business requires input not available via API | Hand off via `continue_url`   |
-| `requires_buyer_review` | Buyer review and authorization is required    | Hand off via `continue_url`   |
+| Severity                | Meaning                                          | Platform Action                                                   |
+| :---------------------- | :----------------------------------------------- | :---------------------------------------------------------------- |
+| `recoverable`           | Platform can resolve by modifying inputs via API | Update resource and retry                                         |
+| `requires_buyer_input`  | Business requires input not available via API    | Hand off via `continue_url`                                       |
+| `requires_buyer_review` | Buyer review and authorization is required       | Hand off via `continue_url`                                       |
+| `unrecoverable`         | No resource exists to act on                     | Retry with new resource or inputs, or hand off via `continue_url` |
 
 Errors with `requires_*` severity contribute to `status: requires_escalation`.
 Both result in buyer handoff, but represent different checkout states.
@@ -134,6 +138,31 @@ requires information their API doesn't support collecting programmatically.
 * `requires_buyer_review` means the checkout is **complete** — but policy,
 regulatory, or entitlement rules require buyer authorization before order
 placement (e.g., high-value order approval, first-purchase policy).
+
+When the business cannot create a new resource or the requested resource
+no longer exists, the response contains `ucp.status: "error"` with
+`messages` describing the failure — no resource is included in the
+response body. Error responses MUST use `severity: "unrecoverable"`.
+For example, a business may reject a create checkout request where all
+items are unavailable:
+
+```json
+{
+  "ucp": { "version": "2026-01-11", "status": "error" },
+  "messages": [
+    {
+      "type": "error",
+      "code": "out_of_stock",
+      "content": "All requested items are currently out of stock",
+      "severity": "unrecoverable"
+    }
+  ],
+  "continue_url": "https://merchant.com/"
+}
+```
+
+See [REST](checkout-rest.md#create-checkout) and
+[MCP](checkout-mcp.md#create_checkout) binding examples.
 
 #### Error Processing Algorithm
 
@@ -174,7 +203,13 @@ Businesses **SHOULD** surface such messages as early as possible, and platforms
 Example error processing algorithm:
 
 ```text
-GIVEN checkout with messages array
+GIVEN response with messages array
+
+IF ucp.status = "error"
+  -- No resource exists; severity is unrecoverable
+  RETRY with new resource or inputs, or hand off via continue_url
+  RETURN
+
 FILTER errors FROM messages WHERE type = "error"
 
 PARTITION errors INTO
@@ -284,13 +319,14 @@ platform can prefill checkout state when initiating a buy-now flow.
 * Logic handling the checkout sessions **MUST** be deterministic.
 * **MUST** provide `continue_url` when returning `status` =
     `requires_escalation`.
-* **MUST** include at least one message with `severity: escalation` when
-    returning `status` = `requires_escalation`.
+* **MUST** include at least one message with `severity` of
+    `requires_buyer_input` or `requires_buyer_review` when returning
+    `status` = `requires_escalation`.
 * **SHOULD** provide `continue_url` in all non-terminal checkout responses.
 * After a checkout session reaches the state "completed", it is considered
     immutable.
 
-## Capability Schema Definition
+## Capability Schema Definition <span id="checkout"></span>
 
 {{ schema_fields('checkout_resp', 'checkout') }}
 
@@ -383,10 +419,12 @@ defined below:
 
 ### Context
 
-Context signals are provisional hints. Businesses SHOULD use these values when
-authoritative data (e.g. address) is absent, and MAY ignore unsupported values
-without returning errors. This differs from authoritative selections which
-require explicit validation and error feedback.
+Context signals are provisional—not authoritative data. Businesses SHOULD use
+these values when verified inputs (e.g., shipping address) are absent, and MAY
+ignore or down-rank them if inconsistent with higher-confidence signals
+(authenticated account, risk detection) or regulatory constraints (export
+controls). Eligibility and policy enforcement MUST occur at checkout time using
+binding transaction data.
 
 {{ schema_fields('context', 'checkout') }}
 
@@ -404,7 +442,7 @@ require explicit validation and error feedback.
 
 {{ schema_fields('types/item_update_req', 'checkout') }}
 
-#### Item Response
+#### Item
 
 {{ schema_fields('types/item_resp', 'checkout') }}
 
@@ -418,7 +456,7 @@ require explicit validation and error feedback.
 
 {{ schema_fields('types/line_item_update_req', 'checkout') }}
 
-#### Line Item Response
+#### Line Item
 
 {{ schema_fields('types/line_item_resp', 'checkout') }}
 
@@ -451,6 +489,10 @@ field or omitting them.
 
 {{ schema_fields('types/message_error', 'checkout') }}
 
+#### Error Code
+
+{{ schema_fields('types/error_code', 'checkout') }}
+
 ### Message Info
 
 {{ schema_fields('types/message_info', 'checkout') }}
@@ -463,9 +505,9 @@ field or omitting them.
 
 {{ schema_fields('payment', 'checkout') }}
 
-### Payment Instrument
+#### Selected Payment Instrument
 
-{{ schema_fields('payment_instrument', 'checkout') }}
+{{ extension_schema_fields('types/payment_instrument.json#/$defs/selected_payment_instrument', 'checkout') }}
 
 ### Payment Credential
 
@@ -481,14 +523,18 @@ field or omitting them.
 
 ### Total
 
-#### Total Response
+#### Total
 
 {{ schema_fields('types/total_resp', 'checkout') }}
 
-### UCP Response Checkout
+### UCP Response Checkout {: #ucp-response-checkout-schema }
 
 {{ extension_schema_fields('ucp.json#/$defs/response_checkout_schema', 'checkout') }}
 
 ### Order Confirmation
 
 {{ schema_fields('order_confirmation', 'checkout') }}
+
+### Error Response <span id="error-response"></span>
+
+{{ schema_fields('types/error_response', 'checkout') }}

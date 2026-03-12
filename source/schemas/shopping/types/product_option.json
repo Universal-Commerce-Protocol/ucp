@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/product_option.json",
+  "title": "Product Option",
+  "description": "A product option such as size, color, or material.",
+  "type": "object",
+  "required": [
+    "name",
+    "values"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Option name (e.g., 'Size', 'Color')."
+    },
+    "values": {
+      "type": "array",
+      "items": {
+        "$ref": "option_value.json"
+      },
+      "minItems": 1,
+      "description": "Available values for this option."
+    }
+  }
+}

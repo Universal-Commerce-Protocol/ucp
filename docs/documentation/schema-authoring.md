@@ -159,17 +159,17 @@ by `name` rather than arrays of objects with `name` fields.
 ```json
 {
   "capabilities": {
-    "dev.ucp.shopping.checkout": [{"version": "2026-01-11"}],
-    "dev.ucp.shopping.fulfillment": [{"version": "2026-01-11"}]
+    "dev.ucp.shopping.checkout": [{"version": "{{ ucp_version }}"}],
+    "dev.ucp.shopping.fulfillment": [{"version": "{{ ucp_version }}"}]
   },
   "services": {
     "dev.ucp.shopping": [
-      {"version": "2026-01-11", "transport": "rest"},
-      {"version": "2026-01-11", "transport": "mcp"}
+      {"version": "{{ ucp_version }}", "transport": "rest"},
+      {"version": "{{ ucp_version }}", "transport": "mcp"}
     ]
   },
   "payment_handlers": {
-    "com.google.pay": [{"id": "gpay_1234", "version": "2026-01-11", "available_instruments": [{"type": "google_pay_card"}]}]
+    "com.google.pay": [{"id": "gpay_1234", "version": "{{ ucp_version }}", "available_instruments": [{"type": "google_pay_card"}]}]
   }
 }
 ```
@@ -205,9 +205,9 @@ Each entity type defines **three variants** for different contexts:
 ```json
 {
   "dev.ucp.shopping.fulfillment": [{
-    "version": "2026-01-11",
-    "spec": "https://ucp.dev/specification/fulfillment",
-    "schema": "https://ucp.dev/schemas/shopping/fulfillment.json",
+    "version": "{{ ucp_version }}",
+    "spec": "https://ucp.dev/{{ ucp_version }}/specification/fulfillment",
+    "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json",
     "config": {
       "supports_multi_group": true
     }
@@ -220,7 +220,7 @@ Each entity type defines **three variants** for different contexts:
 ```json
 {
   "dev.ucp.shopping.fulfillment": [{
-    "version": "2026-01-11",
+    "version": "{{ ucp_version }}",
     "config": {
       "allows_multi_destination": {"shipping": true}
     }
@@ -234,7 +234,7 @@ Each entity type defines **three variants** for different contexts:
 {
   "ucp": {
     "capabilities": {
-      "dev.ucp.shopping.fulfillment": [{"version": "2026-01-11"}]
+      "dev.ucp.shopping.fulfillment": [{"version": "{{ ucp_version }}"}]
     }
   }
 }
@@ -255,6 +255,31 @@ Define all three in your schema's `$defs`:
   }
 }
 ```
+
+## String Vocabularies vs Enums
+
+Prefer **open string vocabularies** with documented well-known values over closed
+`enum` arrays. Enums are a one-way door: adding a new value is a breaking change
+for strict validators, and removing one breaks existing producers.
+
+```json
+// PREFER: open vocabulary — extensible without schema changes
+"type": {
+  "type": "string",
+  "description": "Media type. Well-known values: `image`, `video`, `model_3d`."
+}
+
+// AVOID: closed enum — adding `audio` requires a schema version bump
+"type": {
+  "type": "string",
+  "enum": ["image", "video", "model_3d"]
+}
+```
+
+**Use `enum` only for provably closed sets** where new values would represent a
+fundamental protocol change (e.g., `checkout.status: open | completed | expired`).
+If the set might grow as new use cases emerge, use an open string with well-known
+values documented in the `description`.
 
 ## Versioning Strategy
 
@@ -285,9 +310,9 @@ A capability schema defines both payload structure and declaration variants:
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/schemas/shopping/checkout.json",
+  "$id": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/checkout.json",
   "name": "dev.ucp.shopping.checkout",
-  "version": "2026-01-11",
+  "version": "{{ ucp_version }}",
   "title": "Checkout",
   "description": "Base checkout schema. Extensions compose via allOf.",
 
