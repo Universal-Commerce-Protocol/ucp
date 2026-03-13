@@ -55,5 +55,6 @@ repos:
     hooks:
       - id: prettier
         name: prettier-css
-        types: [css]  # Only run on CSS files
-        # If you want it to run on EVERYTHING (JS, JSON, MD), remove the 'types' line.
+        # Only run on CSS files
+        types: [css]
+        # To run on everything (JS, JSON, MD), remove the 'types' line.
