@@ -56,8 +56,7 @@
         "create": "optional",
         "update": "optional",
         "complete": "omit"
-      },
-      "ucp_response": "omit"
+      }
     },
     "signals": {
       "$ref": "types/signals.json",
@@ -66,8 +65,7 @@
         "create": "optional",
         "update": "optional",
         "complete": "optional"
-      },
-      "ucp_response": "omit"
+      }
     },
     "status": {
       "type": "string",
