@@ -393,7 +393,7 @@ zero-downtime key rotation procedures.
 
 ### Total
 
-{{ schema_fields('types/total_resp', 'order') }}
+{{ schema_fields('types/total_line_resp', 'order') }}
 
 ### UCP Response Order Schema <span id="ucp"></span> {: #ucp-response-order-schema }
 

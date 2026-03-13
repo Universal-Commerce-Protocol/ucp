@@ -82,10 +82,7 @@
       }
     },
     "totals": {
-      "type": "array",
-      "items": {
-        "$ref": "types/total.json"
-      },
+      "$ref": "types/totals.json",
       "description": "Different cart totals.",
       "ucp_request": "omit"
     },

@@ -43,7 +43,7 @@
     "totals": {
       "type": "array",
       "items": {
-        "$ref": "total.json"
+        "$ref": "total_line.json"
       },
       "description": "Fulfillment option totals breakdown.",
       "ucp_request": "omit"

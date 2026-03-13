@@ -29,7 +29,7 @@
     "totals": {
       "type": "array",
       "items": {
-        "$ref": "total.json"
+        "$ref": "total_line.json"
       },
       "description": "Line item totals breakdown.",
       "ucp_request": "omit"
