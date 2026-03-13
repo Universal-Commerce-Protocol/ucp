@@ -966,6 +966,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#signals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Signals
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#fulfillment-option" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2676,6 +2687,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#signals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Signals
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#fulfillment-option" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3392,6 +3414,18 @@ redirect to the checkout UI or renders the checkout page directly.</p>
 <td style="text-align: left;">Representation of the buyer.</td>
 </tr>
 <tr>
+<td style="text-align: left;">context</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#context">Context</a></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Provisional buyer signals for relevance and localization—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data. Context SHOULD be non-identifying and can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context.</td>
+</tr>
+<tr>
+<td style="text-align: left;">signals</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#signals">Signals</a></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
+</tr>
+<tr>
 <td style="text-align: left;">status</td>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
@@ -3515,6 +3549,18 @@ product data (price/title etc.) provided by the business through the feeds
 <td style="text-align: left;">Provisional buyer signals for relevance and localization—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data. Context SHOULD be non-identifying and can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context.</td>
 </tr>
 <tr>
+<td style="text-align: left;">signals</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#signals">Signals</a></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
+</tr>
+<tr>
+<td style="text-align: left;">risk_signals</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Deprecated. Use signals instead. Will be removed in the next version.</td>
+</tr>
+<tr>
 <td style="text-align: left;">payment</td>
 <td style="text-align: left;"><a href="/draft/specification/checkout/#payment">Payment</a></td>
 <td style="text-align: left;">No</td>
@@ -3600,6 +3646,18 @@ will replace the existing checkout session state on the business side.</p>
 <td style="text-align: left;">Provisional buyer signals for relevance and localization—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data. Context SHOULD be non-identifying and can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context.</td>
 </tr>
 <tr>
+<td style="text-align: left;">signals</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#signals">Signals</a></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
+</tr>
+<tr>
+<td style="text-align: left;">risk_signals</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Deprecated. Use signals instead. Will be removed in the next version.</td>
+</tr>
+<tr>
 <td style="text-align: left;">payment</td>
 <td style="text-align: left;"><a href="/draft/specification/checkout/#payment">Payment</a></td>
 <td style="text-align: left;">No</td>
@@ -3638,16 +3696,22 @@ as the order, and its associated items, moves through the supply chain.</p>
 <td style="text-align: left;">The unique identifier of the checkout session.Defined in path.</td>
 </tr>
 <tr>
-<td style="text-align: left;">payment</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#payment">Payment</a></td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Payment configuration containing handlers.</td>
+<td style="text-align: left;">signals</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#signals">Signals</a></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
 </tr>
 <tr>
 <td style="text-align: left;">risk_signals</td>
 <td style="text-align: left;">object</td>
 <td style="text-align: left;">No</td>
-<td style="text-align: left;">Key-value pairs of risk signals.</td>
+<td style="text-align: left;">Deprecated. Use signals instead. Will be removed in the next version.</td>
+</tr>
+<tr>
+<td style="text-align: left;">payment</td>
+<td style="text-align: left;"><a href="/draft/specification/checkout/#payment">Payment</a></td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Payment configuration containing handlers.</td>
 </tr>
 </tbody>
 </table>
@@ -3779,6 +3843,38 @@ binding transaction data.</p>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Preferred currency (ISO 4217, e.g., 'EUR', 'USD'). Businesses determine presentment currency from context and authoritative signals; this hint MAY inform selection in multi-currency markets. Also serves as the denomination for price filter values — platforms SHOULD include this field when sending price filters. Response prices include explicit currency confirming the resolution.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="signals">Signals<a class="headerlink" href="#signals" title="Permanent link">&para;</a></h3>
+<p>Environment data provided by the platform to support authorization
+and abuse prevention. Unlike <code>context</code> (buyer-asserted preferences) and <code>buyer</code>
+(self-reported identity), signal values MUST NOT be buyer-asserted claims —
+platforms provide signals based on direct observation or by relaying
+independently verifiable third-party attestations. See
+<a href="../overview/#signals">Signals</a> for details and privacy
+requirements.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">dev.ucp.buyer_ip</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Client's IP address (IPv4 or IPv6).</td>
+</tr>
+<tr>
+<td style="text-align: left;">dev.ucp.user_agent</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Client's HTTP User-Agent header or equivalent.</td>
 </tr>
 </tbody>
 </table>

@@ -69,6 +69,13 @@
         "update": "optional"
       }
     },
+    "signals": {
+      "$ref": "https://ucp.dev/draft/schemas/shopping/types/signals.json",
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional"
+      }
+    },
     "buyer": {
       "$ref": "https://ucp.dev/draft/schemas/shopping/types/buyer.json",
       "description": "Optional buyer information for personalized estimates.",

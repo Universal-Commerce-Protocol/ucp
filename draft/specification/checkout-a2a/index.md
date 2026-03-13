@@ -165,7 +165,7 @@ Examples:
 
 ### Checkout Completion
 
-When a user is ready to make a payment, `payment` must be submitted to the business agent to complete the checkout process. `payment` is a structured data type specified as part of UCP. When processing a payment to complete the checkout, `payment` must be submitted to the business agent as a `DataPart` with attribute name `a2a.ucp.checkout.payment`. Any associated risk signals should be sent with attribute name `a2a.ucp.checkout.risk_signals`.
+When a user is ready to make a payment, `payment` must be submitted to the business agent to complete the checkout process. `payment` is a structured data type specified as part of UCP. When processing a payment to complete the checkout, `payment` must be submitted to the business agent as a `DataPart` with attribute name `a2a.ucp.checkout.payment`. Any associated signals should be sent with attribute name `a2a.ucp.checkout.signals`.
 
 Upon completion of the checkout process, the business agent must return the checkout object containing an `order` attribute with `id` and `permalink_url`.
 
@@ -186,7 +186,10 @@ Upon completion of the checkout process, the business agent must return the chec
           "a2a.ucp.checkout.payment": {
             ...paymentObject
           },
-          "a2a.ucp.checkout.risk_signals":{...content}
+          "a2a.ucp.checkout.signals": {
+            "dev.ucp.buyer_ip": "203.0.113.42",
+            "dev.ucp.user_agent": "Mozilla/5.0 ..."
+          }
         }
       }
     ],

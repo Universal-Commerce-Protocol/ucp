@@ -1181,6 +1181,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#signals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Signals
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#total" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2236,6 +2247,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#signals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Signals
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#total" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2494,6 +2516,12 @@ SHOULD be linked for the duration of the checkout.</p>
 <td style="text-align: left;"><a href="/draft/specification/reference/#context">Context</a></td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Buyer signals for localization (country, region, postal_code). Merchant uses for pricing, availability, currency. Falls back to geo-IP if omitted.</td>
+</tr>
+<tr>
+<td style="text-align: left;">signals</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#signals">Signals</a></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
 </tr>
 <tr>
 <td style="text-align: left;">buyer</td>
@@ -2891,6 +2919,35 @@ consistent data structures when converting a cart to a checkout session.</p>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Preferred currency (ISO 4217, e.g., 'EUR', 'USD'). Businesses determine presentment currency from context and authoritative signals; this hint MAY inform selection in multi-currency markets. Also serves as the denomination for price filter values — platforms SHOULD include this field when sending price filters. Response prices include explicit currency confirming the resolution.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="signals">Signals<a class="headerlink" href="#signals" title="Permanent link">&para;</a></h3>
+<p>Environment data provided by the platform to support authorization
+and abuse prevention. Signal values MUST NOT be buyer-asserted claims. See
+<a href="../overview/#signals">Signals</a> for details and privacy
+requirements.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">dev.ucp.buyer_ip</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Client's IP address (IPv4 or IPv6).</td>
+</tr>
+<tr>
+<td style="text-align: left;">dev.ucp.user_agent</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Client's HTTP User-Agent header or equivalent.</td>
 </tr>
 </tbody>
 </table>

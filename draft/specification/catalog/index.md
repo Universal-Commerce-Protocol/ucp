@@ -45,6 +45,15 @@ Businesses determine market assignment—including currency—based on context s
 | language        | string | No       | Preferred language for content. Use IETF BCP 47 language tags (e.g., 'en', 'fr-CA', 'zh-Hans'). For REST, equivalent to Accept-Language header—platforms SHOULD fall back to Accept-Language when this field is absent; when provided, overrides Accept-Language. Businesses MAY return content in a different language if unavailable.                                                       |
 | currency        | string | No       | Preferred currency (ISO 4217, e.g., 'EUR', 'USD'). Businesses determine presentment currency from context and authoritative signals; this hint MAY inform selection in multi-currency markets. Also serves as the denomination for price filter values — platforms SHOULD include this field when sending price filters. Response prices include explicit currency confirming the resolution. |
 
+### Signals
+
+Environment data provided by the platform to support authorization and abuse prevention. Signal values MUST NOT be buyer-asserted claims. See [Signals](https://ucp.dev/draft/specification/overview/#signals) for details and privacy requirements.
+
+| Name               | Type   | Required | Description                                    |
+| ------------------ | ------ | -------- | ---------------------------------------------- |
+| dev.ucp.buyer_ip   | string | No       | Client's IP address (IPv4 or IPv6).            |
+| dev.ucp.user_agent | string | No       | Client's HTTP User-Agent header or equivalent. |
+
 ### Product
 
 A catalog item representing a sellable item with one or more purchasable variants.

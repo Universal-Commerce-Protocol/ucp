@@ -46,6 +46,9 @@
         },
         "context": {
           "$ref": "https://ucp.dev/draft/schemas/shopping/types/context.json"
+        },
+        "signals": {
+          "$ref": "https://ucp.dev/draft/schemas/shopping/types/signals.json"
         }
       }
     },
