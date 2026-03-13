@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/balance_redemption.json",
+  "title": "Balance Redemption",
+  "description": "The membership balance to be redeemed.",
+  "type": "object",
+  "required": ["amount"],
+  "properties": {
+    "amount": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "The amount of available balance to be redeemed."
+    },
+    "applies_on": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "JSONPaths to the discount target representing the redemption (e.g. `$.discounts.applied[0]`).",
+      "ucp_request": "omit"
+    }
+  }
+}

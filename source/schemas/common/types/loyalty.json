@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/loyalty.json",
+  "title": "Loyalty",
+  "description": "Container for loyalty memberships info.",
+  "type": "object",
+  "properties": {
+    "memberships": {
+      "type": "array",
+      "items": { "$ref": "loyalty_membership.json" },
+      "description": "List of memberships that the business offers or associated with."
+    },
+    "activated_memberships": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "List of memberships that the customer is activated with, identified by the `id` of the Loyalty Membership object."
+    }
+  }
+}
