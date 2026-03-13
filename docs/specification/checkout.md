@@ -266,6 +266,14 @@ the effects of accepted claims. At completion, accepted claims that remain
 unverified **MUST** result in `type: "error"` with
 `code: "eligibility_invalid"` (see below).
 
+**Eligibility message codes:**
+
+| Type      | Code                       | When                                               |
+| --------- | -------------------------- | -------------------------------------------------- |
+| `warning` | `eligibility_not_accepted` | Claim not recognized or not applicable             |
+| `info`    | `eligibility_accepted`     | Effect of an accepted claim                        |
+| `error`   | `eligibility_invalid`      | Accepted claim could not be verified at completion |
+
 A claim is resolved when it is either **verified** or **rescinded**:
 
 * **Verified**: The Business confirms the claim against a proof provided at
