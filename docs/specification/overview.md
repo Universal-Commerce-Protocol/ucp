@@ -1534,7 +1534,7 @@ UCP supports fraud prevention through [Signals](#signals) and the
 payment architecture:
 
 - Platforms provide transaction environment [signals](#signals) (IP, user
-    agent) on cart and checkout requests
+    agent) on catalog, cart, and checkout requests
 - Businesses can require additional fields in handler configurations (e.g.,
     3DS requirements)
 - Payment credential providers can perform risk assessment during credential
@@ -1674,7 +1674,7 @@ payment data to minimize business and platform liability.
 
 ### Signals
 
-Businesses require transaction environment data for authorization, rate
+Businesses require environment data for authorization, rate
 limiting, and abuse prevention. Signal values **MUST NOT** be buyer-asserted
 claims — platforms provide signals based on direct observation (e.g.,
 connection IP, user agent) or by relaying independently verifiable

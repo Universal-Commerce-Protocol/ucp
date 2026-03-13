@@ -71,7 +71,6 @@
     },
     "signals": {
       "$ref": "types/signals.json",
-      "description": "Transaction environment data provided by the platform to support authorization decisions and abuse prevention.",
       "ucp_request": {
         "create": "optional",
         "update": "optional"

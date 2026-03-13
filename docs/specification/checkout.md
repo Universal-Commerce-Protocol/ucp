@@ -430,7 +430,7 @@ binding transaction data.
 
 ### Signals
 
-Transaction environment data provided by the platform to support authorization
+Environment data provided by the platform to support authorization
 and abuse prevention. Unlike `context` (buyer-asserted preferences) and `buyer`
 (self-reported identity), signal values MUST NOT be buyer-asserted claims —
 platforms provide signals based on direct observation or by relaying

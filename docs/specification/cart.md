@@ -213,7 +213,7 @@ consistent data structures when converting a cart to a checkout session.
 
 ### Signals
 
-Transaction environment data provided by the platform to support authorization
+Environment data provided by the platform to support authorization
 and abuse prevention. Signal values MUST NOT be buyer-asserted claims. See
 [Signals](overview.md#signals) for details and privacy
 requirements.

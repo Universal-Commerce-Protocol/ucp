@@ -71,6 +71,14 @@ explicit currency codes confirming the resolution.
 
 {{ schema_fields('types/context', 'catalog') }}
 
+### Signals
+
+Environment data provided by the platform to support authorization
+and abuse prevention. Signal values MUST NOT be buyer-asserted claims. See
+[Signals](../overview.md#signals) for details and privacy requirements.
+
+{{ schema_fields('types/signals', 'catalog') }}
+
 ### Product
 
 A catalog item representing a sellable item with one or more purchasable variants.
