@@ -326,7 +326,7 @@ image: assets/banner.png
   {
     "ucp": { ... },
     "id": "order_123456789",
-    "checkout_id": "chk_123456789",
+    "checkouts": [{ "id": "chk_123456789", "created_at": "..." }],
     "permalink_url": ...,
     "line_items": [ ... ],
     "fulfillment": {
@@ -367,8 +367,8 @@ image: assets/banner.png
         "type": "refund",
         "occurred_at": "2026-01-12T14:30:00Z",
         "status": "completed",
-        "line_items": [{ "id": "li_1", "quantity": 1 }],
-        "amount": 26550,
+        "line_items": [{ "id": "li_1", "quantity": -1 }],
+        "totals": [{ "type": "total", "amount": -26550 }],
         "description": "Defective item"
       }
     ],

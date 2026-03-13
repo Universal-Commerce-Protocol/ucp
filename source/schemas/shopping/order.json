@@ -3,7 +3,7 @@
   "$id": "https://ucp.dev/schemas/shopping/order.json",
   "name": "dev.ucp.shopping.order",
   "title": "Order",
-  "description": "Order schema with immutable line items, buyer-facing fulfillment expectations, and append-only event logs.",
+  "description": "Order schema with line items, buyer-facing fulfillment expectations, and event logs.",
   "$defs": {
     "platform_schema": {
       "title": "Platform Order Schema",
@@ -25,7 +25,7 @@
   "required": [
     "ucp",
     "id",
-    "checkout_id",
+    "checkouts",
     "permalink_url",
     "line_items",
     "fulfillment",
@@ -39,9 +39,25 @@
       "type": "string",
       "description": "Unique order identifier."
     },
-    "checkout_id": {
-      "type": "string",
-      "description": "Associated checkout ID for reconciliation."
+    "checkouts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "created_at"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier of the checkout session."
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "RFC 3339 timestamp when this checkout session was created."
+          }
+        }
+      },
+      "description": "Associated checkout sessions. Orders reference one or more checkouts—order edits and exchanges create additional checkout sessions against the same order."
     },
     "permalink_url": {
       "type": "string",
@@ -53,7 +69,7 @@
       "items": {
         "$ref": "types/order_line_item.json"
       },
-      "description": "Immutable line items — source of truth for what was ordered."
+      "description": "Line items representing what was purchased — can change post-order via edits or exchanges."
     },
     "fulfillment": {
       "type": "object",
@@ -80,7 +96,7 @@
       "items": {
         "$ref": "types/adjustment.json"
       },
-      "description": "Append-only event log of money movements (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment."
+      "description": "Post-order events (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment."
     },
     "currency": {
       "type": "string",
