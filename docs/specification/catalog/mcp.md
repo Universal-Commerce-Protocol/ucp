@@ -29,27 +29,27 @@ Businesses advertise MCP transport availability through their UCP profile at
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "{{ ucp_version }}",
     "services": {
       "dev.ucp.shopping": {
-        "version": "2026-01-11",
-        "spec": "https://ucp.dev/specification/overview",
+        "version": "{{ ucp_version }}",
+        "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview",
         "mcp": {
-          "schema": "https://ucp.dev/services/shopping/mcp.openrpc.json",
+          "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/mcp.openrpc.json",
           "endpoint": "https://business.example.com/ucp/mcp"
         }
       }
     },
     "capabilities": {
       "dev.ucp.shopping.catalog.search": [{
-        "version": "2026-01-11",
-        "spec": "https://ucp.dev/specification/catalog/search",
-        "schema": "https://ucp.dev/schemas/shopping/catalog_search.json"
+        "version": "{{ ucp_version }}",
+        "spec": "https://ucp.dev/{{ ucp_version }}/specification/catalog/search",
+        "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/catalog_search.json"
       }],
       "dev.ucp.shopping.catalog.lookup": [{
-        "version": "2026-01-11",
-        "spec": "https://ucp.dev/specification/catalog/lookup",
-        "schema": "https://ucp.dev/schemas/shopping/catalog_lookup.json"
+        "version": "{{ ucp_version }}",
+        "spec": "https://ucp.dev/{{ ucp_version }}/specification/catalog/lookup",
+        "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/catalog_lookup.json"
       }]
     }
   }
@@ -100,15 +100,19 @@ version compatibility checking and capability negotiation.
 
 Maps to the [Catalog Search](search.md) capability.
 
-#### Request
+#### Search Request
 
-{{ extension_schema_fields('catalog_search.json#/$defs/search_request', 'catalog-mcp') }}
+{{ extension_schema_fields(
+  'catalog_search.json#/$defs/search_request', 'catalog/mcp'
+) }}
 
-#### Response
+### Search Response
 
-{{ extension_schema_fields('catalog_search.json#/$defs/search_response', 'catalog-mcp') }}
+{{ extension_schema_fields(
+  'catalog_search.json#/$defs/search_response', 'catalog/mcp'
+) }}
 
-#### Example
+#### Search Example
 
 === "Request"
 
@@ -156,10 +160,10 @@ Maps to the [Catalog Search](search.md) capability.
       "result": {
         "structuredContent": {
           "ucp": {
-            "version": "2026-01-11",
+            "version": "{{ ucp_version }}",
             "capabilities": {
               "dev.ucp.shopping.catalog.search": [
-                {"version": "2026-01-11"}
+                {"version": "{{ ucp_version }}"}
               ]
             }
           },
@@ -191,7 +195,13 @@ Maps to the [Catalog Search](search.md) capability.
               "options": [
                 {
                   "name": "Size",
-                  "values": [{"label": "8"}, {"label": "9"}, {"label": "10"}, {"label": "11"}, {"label": "12"}]
+                  "values": [
+                    {"label": "8"},
+                    {"label": "9"},
+                    {"label": "10"},
+                    {"label": "11"},
+                    {"label": "12"}
+                  ]
                 }
               ],
               "variants": [
@@ -209,7 +219,10 @@ Maps to the [Catalog Search](search.md) capability.
                   "seller": {
                     "name": "Example Store",
                     "links": [
-                      { "type": "refund_policy", "url": "https://business.example.com/policies/refunds" }
+                      {
+                        "type": "refund_policy",
+                        "url": "https://business.example.com/refunds"
+                      }
                     ]
                   }
                 }
@@ -245,15 +258,19 @@ for supported identifiers, resolution behavior, and client correlation requireme
 
 The `catalog.ids` parameter accepts an array of identifiers and optional context.
 
-#### Request
+#### Lookup Request
 
-{{ extension_schema_fields('catalog_lookup.json#/$defs/lookup_request', 'catalog-mcp') }}
+{{ extension_schema_fields(
+  'catalog_lookup.json#/$defs/lookup_request', 'catalog/mcp'
+) }}
 
-#### Response
+### Lookup Response
 
-{{ extension_schema_fields('catalog_lookup.json#/$defs/lookup_response', 'catalog-mcp') }}
+{{ extension_schema_fields(
+  'catalog_lookup.json#/$defs/lookup_response', 'catalog/mcp'
+) }}
 
-#### Example
+#### Lookup Example
 
 === "Request"
 
@@ -290,10 +307,10 @@ The `catalog.ids` parameter accepts an array of identifiers and optional context
       "result": {
         "structuredContent": {
           "ucp": {
-            "version": "2026-01-11",
+            "version": "{{ ucp_version }}",
             "capabilities": {
               "dev.ucp.shopping.catalog.lookup": [
-                {"version": "2026-01-11"}
+                {"version": "{{ ucp_version }}"}
               ]
             }
           },
@@ -323,7 +340,10 @@ The `catalog.ids` parameter accepts an array of identifiers and optional context
                   "seller": {
                     "name": "Example Store",
                     "links": [
-                      { "type": "refund_policy", "url": "https://business.example.com/policies/refunds" }
+                      {
+                        "type": "refund_policy",
+                        "url": "https://business.example.com/policies/refunds"
+                      }
                     ]
                   }
                 }
@@ -382,10 +402,10 @@ response MAY include informational messages indicating which identifiers were no
   "result": {
     "structuredContent": {
       "ucp": {
-        "version": "2026-01-11",
+        "version": "{{ ucp_version }}",
         "capabilities": {
           "dev.ucp.shopping.catalog.lookup": [
-            {"version": "2026-01-11"}
+            {"version": "{{ ucp_version }}"}
           ]
         }
       },
@@ -451,10 +471,10 @@ not found.
   "result": {
     "structuredContent": {
       "ucp": {
-        "version": "2026-01-11",
+        "version": "{{ ucp_version }}",
         "capabilities": {
           "dev.ucp.shopping.catalog.lookup": [
-            {"version": "2026-01-11"}
+            {"version": "{{ ucp_version }}"}
           ]
         }
       },

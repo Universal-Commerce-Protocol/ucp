@@ -159,9 +159,9 @@ Examples: `refund`, `return`, `credit`, `price_adjustment`, `dispute`,
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "{{ ucp_version }}",
     "capabilities": {
-      "dev.ucp.shopping.order": [{"version": "2026-01-11"}]
+      "dev.ucp.shopping.order": [{"version": "{{ ucp_version }}"}]
     }
   },
   "id": "order_abc123",
@@ -281,7 +281,7 @@ platform's profile and uses it to send order lifecycle events.
 {
   "dev.ucp.shopping.order": [
     {
-      "version": "2026-01-11",
+      "version": "{{ ucp_version }}",
       "config": {
         "webhook_url": "https://platform.example.com/webhooks/ucp/orders"
       }
@@ -379,7 +379,7 @@ zero-downtime key rotation procedures.
 
 ## Entities
 
-### Item Response
+### Item
 
 {{ schema_fields('types/item_resp', 'order') }}
 
@@ -391,10 +391,10 @@ zero-downtime key rotation procedures.
 
 {{ extension_schema_fields('capability.json#/$defs/response_schema', 'order') }}
 
-### Total Response
+### Total
 
 {{ schema_fields('types/total_resp', 'order') }}
 
-### UCP Response Order
+### UCP Response Order Schema <span id="ucp"></span> {: #ucp-response-order-schema }
 
 {{ extension_schema_fields('ucp.json#/$defs/response_order_schema', 'order') }}

@@ -2,7 +2,6 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/shopping/catalog_lookup.json",
   "name": "dev.ucp.shopping.catalog.lookup",
-  "version": "2026-01-11",
   "title": "Catalog Lookup",
   "description": "Product/variant lookup by identifier capability.",
   "type": "object",
