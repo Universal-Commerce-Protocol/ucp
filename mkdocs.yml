@@ -46,6 +46,7 @@ nav:
           - AP2 Mandates Extension: specification/ap2-mandates.md
           - Buyer Consent Extension: specification/buyer-consent.md
           - Discounts Extension: specification/discount.md
+          - Fee Extension: specification/fee.md
           - Fulfillment Extension: specification/fulfillment.md
       - Cart Capability:
           - Overview: specification/cart.md
@@ -221,6 +222,7 @@ plugins:
           - specification/ap2-mandates.md
           - specification/buyer-consent.md
           - specification/discount.md
+          - specification/fee.md
           - specification/fulfillment.md
           - specification/cart.md
           - specification/cart-rest.md

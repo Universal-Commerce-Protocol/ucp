@@ -19,7 +19,7 @@
         "fee",
         "total"
       ],
-      "description": "Type of total categorization.",
+      "description": "Type of total categorization. When the Fee Extension is present, businesses SHOULD include a single aggregated entry with type 'fee' whose amount equals the sum of all fees in the Fee Extension's applied array.",
       "ucp_request": "omit"
     },
     "display_text": {
@@ -29,7 +29,7 @@
     },
     "amount": {
       "$ref": "amount.json",
-      "description": "If type == total, sums subtotal - discount + fulfillment + tax + fee. Should be >= 0. Amount in ISO 4217 minor units.",
+      "description": "If type == total, sums subtotal - discount + fulfillment + tax + fee. When the Fee Extension is present, the fee component is the single aggregated fee total amount. Should be >= 0. Amount in ISO 4217 minor units.",
       "ucp_request": "omit"
     }
   }

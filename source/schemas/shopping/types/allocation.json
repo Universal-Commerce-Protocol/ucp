@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/allocation.json",
+  "title": "Allocation",
+  "description": "Breakdown of how an amount was allocated to a specific target. Used by discounts, fees, and other extensions that distribute amounts across line items or other order components.",
+  "type": "object",
+  "required": [
+    "path",
+    "amount"
+  ],
+  "properties": {
+    "path": {
+      "type": "string",
+      "description": "JSONPath (RFC 9535) expression identifying the allocation target (e.g., '$.line_items[0]', '$.totals.shipping')."
+    },
+    "amount": {
+      "$ref": "amount.json",
+      "description": "Amount allocated to this target in ISO 4217 minor units."
+    }
+  }
+}

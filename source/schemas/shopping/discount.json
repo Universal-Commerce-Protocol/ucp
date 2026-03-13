@@ -6,22 +6,7 @@
   "description": "Extends Cart and Checkout with discount code support, enabling agents to apply promotional, loyalty, referral, and other discount codes.",
   "$defs": {
     "allocation": {
-      "type": "object",
-      "description": "Breakdown of how a discount amount was allocated to a specific target.",
-      "required": [
-        "path",
-        "amount"
-      ],
-      "properties": {
-        "path": {
-          "type": "string",
-          "description": "JSONPath to the allocation target (e.g., '$.line_items[0]', '$.totals.shipping')."
-        },
-        "amount": {
-          "$ref": "types/amount.json",
-          "description": "Amount allocated to this target in ISO 4217 minor units."
-        }
-      }
+      "$ref": "types/allocation.json"
     },
     "applied_discount": {
       "type": "object",
