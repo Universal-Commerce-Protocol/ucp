@@ -11,12 +11,6 @@
       "description": "UCP version in YYYY-MM-DD format."
     },
 
-    "reverse_domain_name": {
-      "type": "string",
-      "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9_]*)+$",
-      "description": "Reverse-domain identifier (e.g., com.google.pay, dev.ucp.shopping.checkout)"
-    },
-
     "version_constraint": {
       "type": "object",
       "description": "Version range requirement with minimum and optional maximum.",
@@ -45,7 +39,7 @@
         "capabilities": {
           "type": "object",
           "description": "Required capability versions, keyed by capability name. Keys must be a subset of the extension's $defs keys.",
-          "propertyNames": { "$ref": "#/$defs/reverse_domain_name" },
+          "propertyNames": { "$ref": "shopping/types/reverse_domain_name.json" },
           "additionalProperties": { "$ref": "#/$defs/version_constraint" }
         }
       },
@@ -98,7 +92,7 @@
         "services": {
           "type": "object",
           "description": "Service registry keyed by reverse-domain name.",
-          "propertyNames": { "$ref": "#/$defs/reverse_domain_name" },
+          "propertyNames": { "$ref": "shopping/types/reverse_domain_name.json" },
           "additionalProperties": {
             "type": "array",
             "items": { "$ref": "service.json#/$defs/base" }
@@ -107,7 +101,7 @@
         "capabilities": {
           "type": "object",
           "description": "Capability registry keyed by reverse-domain name.",
-          "propertyNames": { "$ref": "#/$defs/reverse_domain_name" },
+          "propertyNames": { "$ref": "shopping/types/reverse_domain_name.json" },
           "additionalProperties": {
             "type": "array",
             "items": { "$ref": "capability.json#/$defs/base" }
@@ -116,7 +110,7 @@
         "payment_handlers": {
           "type": "object",
           "description": "Payment handler registry keyed by reverse-domain name.",
-          "propertyNames": { "$ref": "#/$defs/reverse_domain_name" },
+          "propertyNames": { "$ref": "shopping/types/reverse_domain_name.json" },
           "additionalProperties": {
             "type": "array",
             "items": { "$ref": "payment_handler.json#/$defs/base" }
