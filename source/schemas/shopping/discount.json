@@ -64,7 +64,7 @@
         "provisional": {
           "type": "boolean",
           "default": false,
-          "description": "True if this discount requires additional verification. Platforms MUST communicate provisional status to the buyer."
+          "description": "True if this discount requires additional verification."
         },
         "eligibility": {
           "$ref": "types/reverse_domain_name.json",
