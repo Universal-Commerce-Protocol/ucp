@@ -236,7 +236,32 @@
           }
         }
       }
+    },
+
+    {
+      "name": "ec.link.open_request",
+      "summary": "Request link presentation",
+      "description": "The buyer activated a link within checkout. The host MUST present the content to the buyer and respond with a success result, or notify the buyer that the request was rejected and respond with a link_rejected error.",
+      "params": [
+        {
+          "name": "url",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uri",
+            "description": "The URL of the resource to present."
+          }
+        }
+      ],
+      "result": {
+        "name": "linkOpenResult",
+        "schema": {
+          "type": "object",
+          "description": "Acknowledgement that the host handled the link.",
+          "additionalProperties": false
+        }
+      }
     }
   ],
-  "x-delegations": ["payment.instruments_change", "payment.credential"]
+  "x-delegations": ["payment.instruments_change", "payment.credential", "link.open"]
 }
