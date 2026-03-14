@@ -28,15 +28,76 @@ This linkage is foundational for commerce experiences, such as accessing
 loyalty benefits, utilizing personalized offers, managing wishlists, and
 executing authenticated checkouts.
 
-**This specification leverages
-[OAuth 2.0](https://datatracker.ietf.org/doc/html/rfc6749){ target="_blank" }** as the mechanism
-for securely linking a user's platform account with their business account.
+**This specification implements a Mechanism Registry pattern**, allowing platforms and businesses to negotiate the authentication mechanism dynamically. While [OAuth 2.0](https://datatracker.ietf.org/doc/html/rfc6749){ target="_blank" } is the primary recommended mechanism, the design natively supports future extensibility securely.
 
-## General guidelines
+## Mechanism Registry Pattern
 
-(In addition to the overarching guidelines)
+The Identity Linking capability configuration acts as a **registry** of supported authentication mechanisms. Platforms and businesses discover and negotiate the mechanism exactly like other UCP capabilities.
 
-### For platforms
+### UCP Capability Declaration
+
+Businesses **MUST** declare the supported mechanisms in the capability `config` using the `supported_mechanisms` array. Each mechanism must dictate its `type` using an open string vocabulary (e.g., `oauth2`, `verifiable_credential`, `oidc`) and provide the necessary resolution endpoints (like `issuer`).
+
+```json
+{
+  "dev.ucp.common.identity_linking": [
+    {
+      "version": "2026-03-14",
+      "config": {
+        "supported_mechanisms": [
+          {
+            "type": "oauth2",
+            "issuer": "https://auth.merchant.example.com"
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+Platforms **MUST** select the mechanism they support from the `supported_mechanisms` array to proceed with identity linking.
+
+## Capability-Driven Scope Negotiation (Least Privilege)
+
+To maintain the **Principle of Least Privilege**, authorization scopes are **NOT** hardcoded or monolithically mandated within the identity linking capability.
+
+Instead, **authorization scopes are dynamically derived from the final intersection of negotiated capabilities**.
+
+1. **Schema Declaration:** Each individual capability schema explicitly defines its own required identity scopes (e.g., `dev.ucp.shopping.checkout` declares `ucp:scopes:checkout_session`).
+2. **Dynamic Derivation:** During UCP Discovery, when the platform computes the intersection of supported capabilities between itself and the business, it extracts the required scopes from **only** the successfully negotiated capabilities.
+3. **Authorization:** The platform initiates the connection requesting **only** the derived scopes. If a capability (e.g., `order`) is excluded from the active capability set, its respective scopes **MUST NOT** be requested by the platform.
+
+### Scope Structure & Mapping
+
+The scope complexity should be hidden in the consent screen shown to the user: they shouldn't see one row for each action, but rather a general one, for example "Allow \[platform\] to manage checkout sessions". A requested scope granting access to a capability must grant access to all operations strictly associated with the capability. 
+
+Example capability-to-scope mapping based on UCP schemas:
+
+Resources       | Operation                  | Scope Action
+:-------------- | :------------------------- | :----------------------------
+CheckoutSession | Get, Create, Update, Delete, Cancel, Complete | `ucp:scopes:checkout_session`
+
+## Supported Mechanisms
+
+### OAuth 2.0 (`"type": "oauth2"`)
+
+When the negotiated mechanism type is `oauth2`, platforms and businesses **MUST** adhere to the following standard parameters. 
+
+#### Discovery Bridging
+When a platform encounters `"type": "oauth2"`, it **MUST** parse the `issuer` string provided in the config and seamlessly execute an [RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414){target="_blank"} discovery fetch by appending `/.well-known/oauth-authorization-server` to the issuer.
+
+Example metadata retrieved via RFC 8414:
+```json
+{
+  "issuer": "https://auth.merchant.example.com",
+  "authorization_endpoint": "https://auth.merchant.example.com/oauth2/authorize",
+  "token_endpoint": "https://auth.merchant.example.com/oauth2/token",
+  "revocation_endpoint": "https://auth.merchant.example.com/oauth2/revoke"
+}
+```
+
+#### For platforms
 
 * **MUST** authenticate using their `client_id` and `client_secret`
     ([RFC 6749 2.3.1](https://datatracker.ietf.org/doc/html/rfc6749#section-2.3.1){target="_blank"})
@@ -53,10 +114,7 @@ for securely linking a user's platform account with their business account.
     as the primary linking mechanism.
 * **SHOULD** include a unique, unguessable state parameter in the
     authorization request to prevent Cross-Site Request Forgery (CSRF)
-    ([RFC 6749 10.12](https://datatracker.ietf.org/doc/html/rfc6749#section-10.12){target="_blank"})
-    (part of
-    [OAuth 2.1 draft](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-14#name-preventing-csrf-attacks){target="_blank"})
-    .
+    ([RFC 6749 10.12](https://datatracker.ietf.org/doc/html/rfc6749#section-10.12){target="_blank"}).
 * Revocation and security events
     * **SHOULD** call the business's revocation endpoint
         ([RFC 7009](https://datatracker.ietf.org/doc/html/rfc7009){target="_blank"}) when a user
@@ -66,96 +124,41 @@ for securely linking a user's platform account with their business account.
         to handle asynchronous account updates, unlinking events, and
         cross-account protection.
 
-### For businesses
+#### For businesses
 
 * **MUST** implement OAuth 2.0
     ([RFC 6749](https://datatracker.ietf.org/doc/html/rfc6749))
 * **MUST** adhere to [RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414) to
     declare the location of their OAuth 2.0 endpoints
     (`/.well-known/oauth-authorization-server`)
-    * **SHOULD** implement
-        [RFC 9728](https://datatracker.ietf.org/doc/html/rfc9728/) (HTTP
-        Resource Metadata) to allow platforms to discover the Authorization
-        Server associated with specific resources.
-    * **SHOULD** fill in `scopes_supported` as part of
-        [RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414).
 * **MUST** enforce Client Authentication at the Token Endpoint.
 * **MUST** provide an account creation flow if the user does not already have
     an account.
-* **MUST** support standard UCP scopes, as defined in the Scopes section,
-    granting the tokens permission to all associated Operations for a given
-    resource.
-* Additional permissions **MAY** be granted beyond those explicitly requested,
-    provided that the requested scopes are, at minimum, included.
-* The platform and business **MAY** define additional custom scopes beyond the
-    minimum scope requirements.
+* **MUST** support dynamically requested UCP scopes mapped strictly to the capabilities actively negotiated in the session.
 * Revocation and security events
     * **MUST** implement standard Token Revocation as defined in
         [RFC 7009](https://datatracker.ietf.org/doc/html/rfc7009).
     * **MUST** revoke the specified token and **SHOULD** recursively revoke
-        all associated tokens (e.g., revoking a `refresh_token` **MUST** also
-        immediately revoke all active `access_token`s issued from it).
-    * **MUST** support revocation requests authenticated with the same client
-        credentials used for the token endpoint.
+        all associated tokens.
     * **SHOULD** support
         [OpenID RISC Profile 1.0](https://openid.net/specs/openid-risc-1_0-final.html)
-        to enable Cross-Account Protection and securely signal revocation or
-        account state changes initiated by the business side.
-        ([See Cross-Account protection](https://developers.google.com/identity/account-linking/unlinking#cross-account_protection_risc))
+        to enable Cross-Account Protection.
 
-## Scopes
+## End-to-End Workflow & Example
 
-We'd ask users to authorize the platform to have access to all the scopes that
-could be required for UCP, regardless of whether the business supports them.
+### Scenario: An AI Shopping Agent Checking Out
 
-### Structure
-
-The scope complexity should be hidden in the consent screen shown to the user:
-they shouldn't see one row for each action, but rather a general one, for
-example "Allow \[platform\] to manage checkout sessions".
-
-### Mapping between resources, actions and capabilities
-
-Resources       | Operation                  | Scope Action
-:-------------- | :------------------------- | :----------------------------
-CheckoutSession | Get                        | `ucp:scopes:checkout_session`
-CheckoutSession | Create                     | `ucp:scopes:checkout_session`
-CheckoutSession | Update                     | `ucp:scopes:checkout_session`
-CheckoutSession | Delete                     | `ucp:scopes:checkout_session`
-CheckoutSession | Cancel                     | `ucp:scopes:checkout_session`
-CheckoutSession | Complete                   | `ucp:scopes:checkout_session`
-
-A scope covering a capability must grant access to all operations associated to
-the capability. For example, ucp:scopes:checkout\_session must grant all of:
-Get, Create, Update, Delete, Cancel, Complete.
-
-## Examples
-
-### Authorization server metadata
-
-Example of [metadata](https://datatracker.ietf.org/doc/html/rfc8414#section-2){target="_blank"}
-supposed to be hosted in /.well-known/oauth-authorization-server as per
-[RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414){target="_blank"}:
-
-```json
-{
-  "issuer": "https://merchant.example.com",
-  "authorization_endpoint": "https://merchant.example.com/oauth2/authorize",
-  "token_endpoint": "https://merchant.example.com/oauth2/token",
-  "revocation_endpoint": "https://merchant.example.com/oauth2/revoke",
-  "scopes_supported": [
-    "ucp:scopes:checkout_session",
-  ],
-  "response_types_supported": [
-    "code"
-  ],
-  "grant_types_supported": [
-    "authorization_code",
-    "refresh_token"
-  ],
-  "token_endpoint_auth_methods_supported": [
-    "client_secret_basic"
-  ],
-  "service_documentation": "https://merchant.example.com/docs/oauth2"
-}
-```
+1. **Profile Discovery & Capability Negotiation**: The agent fetches the merchant's `/.well-known/ucp` profile. The agent intersects its own profile with the business's and successfully negotiates `dev.ucp.shopping.checkout` and `dev.ucp.common.identity_linking`. If the business supported `dev.ucp.shopping.order`, but the agent did not, it is excluded.
+2. **Schema Fetch & Scope Derivation**: The agent parses the schema logic for `dev.ucp.shopping.checkout` and derives that the required scope is strictly `ucp:scopes:checkout_session`. `ucp:scopes:order_management` is strictly omitted. 
+3. **Identity Mechanism Execution**: Because `identity_linking` matched and defined mechanism `type: oauth2` with issuer `https://auth.merchant.example.com`, the agent executes standard OAuth discovery by appending `/.well-known/oauth-authorization-server` to the issuer string.
+4. **User Consent & Authorization**: The agent generates a consent URL to prompt the user (or invokes the authorization flow directly in the GUI), using the dynamically derived scopes.
+   ```http
+   GET https://auth.merchant.example.com/oauth2/authorize
+     ?response_type=code
+     &client_id=agent_client_123
+     &redirect_uri=https://agent.example.com/callback
+     &scope=ucp:scopes:checkout_session
+     &state=xyz123
+   ```
+   *The user is prompted to consent **only** to "Manage Checkout Sessions".*
+5. **Authorized UCP Execution**: The platform securely exchanges the authorization code for an `access_token` bound only to checkout and successfully utilizes the UCP REST APIs via `Authorization: Bearer <access_token>`.
