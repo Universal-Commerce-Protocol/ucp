@@ -2,7 +2,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { compile } = require('json-schema-to-typescript');
 
-const SOURCE_ROOT = path.resolve(__dirname, 'spec');
+const SOURCE_ROOT = path.resolve(__dirname, 'source');
 const OUTPUT_FILE = path.resolve(__dirname, './generated/schema-types.ts');
 const WRAPPER_NAME = 'SCHEMA_WRAPPER';
 
