@@ -48,7 +48,7 @@
 
     "mechanism": {
       "type": "object",
-      "description": "Base definition for any authentication mechanism. The 'type' field discriminates between known mechanism schemas (e.g., oauth2). Unknown types pass through with only the base requirement, enabling forward-compatible extensibility.",
+      "description": "Base definition for any authentication mechanism. The 'type' field discriminates between known mechanism schemas (e.g., oauth2). Unknown types pass through with only the base requirement, enabling forward-compatible extensibility. Note: this open base schema does not enforce field requirements for known types — use $defs/oauth2 directly to validate an oauth2 mechanism object explicitly.",
       "required": ["type"],
       "properties": {
         "type": {

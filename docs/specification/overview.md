@@ -685,7 +685,7 @@ for a session:
     (handles transitive extension chains and chained scope dependencies).
 
 5. **Derive Scopes (Final Pass)**: If `dev.ucp.common.identity_linking` is
-    present in the negotiated capabilities, scopes
+    present in the negotiated capabilities, the authorization scope set
     **MUST ONLY** be derived from the finalized intersection list *after* all
     pruning loops have stabilized. Capabilities excluded during pruning MUST NOT
     contribute to the derived authorization scopes. If the final derived scope
