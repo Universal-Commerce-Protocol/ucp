@@ -104,7 +104,7 @@ intersection of negotiated capabilities**.
    the derived scopes. If a capability (e.g., `order`) is excluded from the
    active capability set, its respective scopes **MUST NOT** be requested by the
    platform. If the final derived scope list is completely empty, the platform
-   **MUST** abort the identity linking process, as there are no secured resources
+   **SHOULD** abort the identity linking process, as there are no secured resources
    to authorize.
 
 ### Scope Structure & Mapping
@@ -239,6 +239,9 @@ Example metadata retrieved via RFC 8414:
 - **MUST** adhere to [RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414)
   to declare the location of their OAuth 2.0 endpoints
   (`/.well-known/oauth-authorization-server`)
+- **SHOULD** populate `scopes_supported` in their RFC 8414 metadata to allow
+  platforms to detect scope mismatches early, before initiating the authorization
+  flow.
 - **MUST** enforce Client Authentication at the Token Endpoint.
 - **MUST** enforce exact string matching for the `redirect_uri` parameter during
   the authorization request to prevent open redirects and token theft.

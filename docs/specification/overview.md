@@ -684,8 +684,8 @@ for a session:
 4. **Repeat pruning**: Continue step 3 until no more capabilities are removed
     (handles transitive extension chains and chained scope dependencies).
 
-5. **Derive Scopes (Final Pass)**: If the negotiated capabilities include
-    authorization mechanisms (e.g., `dev.ucp.common.identity_linking`), scopes
+5. **Derive Scopes (Final Pass)**: If `dev.ucp.common.identity_linking` is
+    present in the negotiated capabilities, scopes
     **MUST ONLY** be derived from the finalized intersection list *after* all
     pruning loops have stabilized. Capabilities excluded during pruning MUST NOT
     contribute to the derived authorization scopes. If the final derived scope

@@ -47,7 +47,16 @@
     },
 
     "mechanism": {
-      "oneOf": [{ "$ref": "#/$defs/oauth2" }]
+      "type": "object",
+      "description": "Base definition for any authentication mechanism. The 'type' field discriminates between known mechanism schemas (e.g., oauth2). Unknown types pass through with only the base requirement, enabling forward-compatible extensibility.",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "The mechanism type discriminator. Known values: 'oauth2'. Specific mechanism schemas constrain this to a constant value."
+        }
+      },
+      "additionalProperties": true
     },
 
     "oauth2": {
