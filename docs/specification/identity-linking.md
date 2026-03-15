@@ -66,8 +66,24 @@ provide the necessary resolution endpoints (like `issuer`).
 }
 ```
 
-Platforms **MUST** select the mechanism they support from the
-`supported_mechanisms` array to proceed with identity linking.
+### Mechanism Selection Algorithm
+
+The `supported_mechanisms` array is **ordered by the business's preference**
+(index 0 = highest priority). Platforms **MUST** use the following algorithm to
+select a mechanism:
+
+1. Iterate the `supported_mechanisms` array from index 0 (first element).
+2. For each entry, check whether the platform supports the declared `type`.
+3. Select the **first** entry whose `type` the platform supports and proceed
+   with that mechanism.
+4. If no entry in the array has a `type` the platform supports, the platform
+   **MUST** abort the identity linking process. The platform **MUST NOT**
+   attempt a partial or fallback linking flow.
+
+If the platform supports multiple `type` values that appear in the array, the
+business's ordering takes precedence — the platform **MUST** use whichever
+supported type appears first in the array, regardless of the platform's own
+internal preference.
 
 ## Capability-Driven Scope Negotiation (Least Privilege)
 
@@ -79,7 +95,7 @@ intersection of negotiated capabilities**.
 
 1. **Schema Declaration:** Each individual capability schema explicitly defines
    its own required identity scopes (e.g., `dev.ucp.shopping.checkout` declares
-   `ucp:scopes:checkout_session`).
+   `dev.ucp.shopping.scopes.checkout_session`).
 2. **Dynamic Derivation:** During UCP Discovery, when the platform computes the
    intersection of supported capabilities between itself and the business, it
    extracts the required scopes from **only** the successfully negotiated
@@ -99,11 +115,21 @@ example "Allow \[platform\] to manage checkout sessions". A requested scope
 granting access to a capability must grant access to all operations strictly
 associated with the capability.
 
+### Scope Naming Convention
+
+Scopes **MUST** use **reverse DNS dot notation**, consistent with UCP capability
+names, to prevent namespace collisions:
+
+- **UCP-defined scopes:** `dev.ucp.<domain>.scopes.<capability>` (e.g.,
+  `dev.ucp.shopping.scopes.checkout_session`)
+- **Third-party scopes:** `<reverse-dns>.scopes.<capability>` (e.g.,
+  `com.example.loyalty.scopes.points_balance`)
+
 Example capability-to-scope mapping based on UCP schemas:
 
-| Resources       | Operation                                     | Scope Action                  |
-| :-------------- | :-------------------------------------------- | :---------------------------- |
-| CheckoutSession | Get, Create, Update, Delete, Cancel, Complete | `ucp:scopes:checkout_session` |
+| Resources       | Operation                                     | Scope Action                               |
+| :-------------- | :-------------------------------------------- | :----------------------------------------- |
+| CheckoutSession | Get, Create, Update, Delete, Cancel, Complete | `dev.ucp.shopping.scopes.checkout_session` |
 
 ## Supported Mechanisms
 
@@ -127,12 +153,16 @@ discovery URL:
    **MUST NOT** fall back to any other endpoints.
 2. **RFC 8414 Standard Discovery**: If no explicit endpoint is provided, the
    platform **MUST** append `/.well-known/oauth-authorization-server` to the
-   defined `issuer` string and fetch.
-3. **OIDC Fallback (Lowest Priority)**: If the RFC 8414 fetch returns a
-   `404 Not Found`, the platform **MUST** append
+   defined `issuer` string and fetch. If this fetch returns any non-2xx response
+   other than `404 Not Found` (e.g., `500 Internal Server Error`, `503 Service
+   Unavailable`), or if a connection timeout or network error occurs, the
+   platform **MUST** abort the discovery process and **MUST NOT** proceed to the
+   OIDC fallback.
+3. **OIDC Fallback (Lowest Priority)**: If and only if the RFC 8414 fetch
+   returns exactly `404 Not Found`, the platform **MUST** append
    `/.well-known/openid-configuration` to the defined `issuer` string and fetch.
-   If this final fetch also fails, the platform **MUST** abort the identity
-   linking process.
+   If this final fetch returns any non-2xx response or a network error, the
+   platform **MUST** abort the identity linking process.
 
 **Issuer Validation**: Regardless of the discovery method used above, the
 platform **MUST** validate that the `issuer` value returned in the metadata
@@ -156,7 +186,7 @@ Example metadata retrieved via RFC 8414:
     "token_endpoint": "https://auth.merchant.example.com/oauth2/token",
     "revocation_endpoint": "https://auth.merchant.example.com/oauth2/revoke",
     "scopes_supported": [
-        "ucp:scopes:checkout_session"
+        "dev.ucp.shopping.scopes.checkout_session"
     ],
     "response_types_supported": [
         "code"
@@ -277,13 +307,14 @@ The AI Shopping Agent only knows how to perform checkouts. It does NOT yet know 
    `identity_linking.json`). The agent parses the schema logic for
    `dev.ucp.shopping.checkout`, looking for the top-level `"identity_scopes"`
    annotation, and statically derives that the required scope is strictly
-   `ucp:scopes:checkout_session`. `ucp:scopes:order_management` is inherently
-   omitted.
-3. **Identity Mechanism Execution**: Because `identity_linking` matched and
-   defined mechanism `type: oauth2` with issuer
-   `https://auth.merchant.example.com`, the agent executes standard OAuth
-   discovery (appending `/.well-known/oauth-authorization-server` to the issuer string)
-   and validates that the returned `issuer` exactly matches.
+   `dev.ucp.shopping.scopes.checkout_session`. `dev.ucp.shopping.scopes.order_management`
+   is inherently omitted.
+3. **Identity Mechanism Selection & Execution**: The agent applies the
+   Mechanism Selection Algorithm to the business's `supported_mechanisms` array.
+   The first (and only) entry has `type: oauth2`, which the agent supports, so
+   it is selected. The agent executes standard OAuth discovery (appending
+   `/.well-known/oauth-authorization-server` to the issuer string) and validates
+   that the returned `issuer` exactly matches.
 4. **User Consent & Authorization**: The agent generates a consent URL to prompt
    the user (or invokes the authorization flow directly in the GUI), using the
    dynamically derived scopes.
@@ -293,7 +324,7 @@ The AI Shopping Agent only knows how to perform checkouts. It does NOT yet know 
       ?response_type=code
       &client_id=shopping_agent_client_123
       &redirect_uri=https://shoppingagent.com/callback
-      &scope=ucp:scopes:checkout_session
+      &scope=dev.ucp.shopping.scopes.checkout_session
       &state=xyz123
       &code_challenge=code_challenge_123
       &code_challenge_method=S256

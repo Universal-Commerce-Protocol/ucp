@@ -4,7 +4,7 @@
   "name": "dev.ucp.common.identity_linking",
   "version": "{{ ucp_version }}",
   "title": "Identity Linking Capability",
-  "description": "Schema for authenticating and establishing verified connections between platforms and businesses.",
+  "description": "Schema for authenticating and establishing verified connections between platforms and businesses. This schema also defines the 'identity_scopes' annotation convention: any UCP capability schema MAY declare a top-level 'identity_scopes' array listing the OAuth 2.0 scopes required to operate that capability. During UCP discovery, platforms MUST collect identity_scopes from all capabilities in the finalized intersection and derive the authorization scope set from them. Absence of identity_scopes on a capability schema means that capability requires no dedicated authorization scope. The canonical shape of this annotation is defined in $defs/identity_scopes below.",
 
   "$defs": {
     "platform_schema": {
@@ -35,6 +35,18 @@
 
     "response_schema": {
       "allOf": [{ "$ref": "../capability.json#/$defs/response_schema" }]
+    },
+
+    "identity_scopes": {
+      "title": "Identity Scopes Annotation",
+      "description": "A custom UCP annotation placed at the root of a capability schema to declare the OAuth 2.0 scopes required to operate that capability. Scopes MUST use reverse DNS dot notation to prevent namespace collisions (e.g., 'dev.ucp.shopping.scopes.checkout_session' for UCP-defined scopes, 'com.example.scopes.my_capability' for third-party scopes). Platforms collect this annotation from every capability in the finalized negotiated intersection and use the union as the authorization scope set. This annotation is intentionally a plain JSON array so it is ignored by standard JSON Schema validators — it carries semantic meaning only to UCP-aware tooling. Absence of this annotation on a capability schema means that capability requires no dedicated scope.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_\\-]*(\\.[a-zA-Z0-9][a-zA-Z0-9_\\-]*)+$"
+      },
+      "uniqueItems": true,
+      "minItems": 1
     },
 
     "mechanism": {
