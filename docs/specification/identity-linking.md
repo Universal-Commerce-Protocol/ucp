@@ -45,7 +45,8 @@ negotiate the mechanism exactly like other UCP capabilities.
 
 Businesses **MUST** declare the supported mechanisms in the capability `config`
 using the `supported_mechanisms` array. Each mechanism must dictate its `type`
-using an open string vocabulary (e.g., `oauth2`, `verifiable_credential`) and provide the necessary resolution endpoints (like `issuer`).
+using an open string vocabulary (e.g., `oauth2`, `verifiable_credential`) and
+provide the necessary resolution endpoints (like `issuer`).
 
 ```json
 {
@@ -111,11 +112,21 @@ When the negotiated mechanism type is `oauth2`, platforms and businesses
 
 #### Discovery Bridging
 
-When a platform encounters `"type": "oauth2"`, it **MUST** parse the `issuer`
-string provided in the config and seamlessly execute an
-<a href="https://datatracker.ietf.org/doc/html/rfc8414" target="_blank">RFC
-8414</a> discovery fetch by appending `/.well-known/oauth-authorization-server`
-to the issuer.
+When a platform encounters `"type": "oauth2"`, it **MUST** parse the capability
+configuration and securely locate the Authorization Server metadata.
+
+Platforms **MUST** implement the following resolution hierarchy to determine the
+discovery URL:
+
+1. **Explicit Endpoint (Highest Priority)**: If the capability configuration
+   provides a `discovery_endpoint` string, the platform **MUST** fetch metadata
+   directly from that exact URI.
+2. **RFC 8414 Standard Discovery**: If no explicit endpoint is provided, the
+   platform **MUST** append `/.well-known/oauth-authorization-server` to the
+   defined `issuer` string and fetch.
+3. **OIDC Fallback (Lowest Priority)**: If the RFC 8414 fetch returns a
+   `404 Not Found`, the platform **MUST** append
+   `/.well-known/openid-configuration` to the defined `issuer` string and fetch.
 
 Example metadata retrieved via RFC 8414:
 
@@ -209,6 +220,7 @@ Example metadata retrieved via RFC 8414:
     ```
 
     _The user is prompted to consent **only** to "Manage Checkout Sessions"._
+
 5. **Authorized UCP Execution**: The platform securely exchanges the
    authorization code for an `access_token` bound only to checkout and
    successfully utilizes the UCP REST APIs via

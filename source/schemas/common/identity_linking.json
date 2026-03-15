@@ -56,17 +56,29 @@
     },
 
     "mechanism": {
+      "oneOf": [
+        { "$ref": "#/$defs/oauth2" }
+      ]
+    },
+
+    "oauth2": {
       "type": "object",
-      "required": ["type"],
+      "title": "OAuth 2.0 Mechanism",
+      "required": ["type", "issuer"],
       "properties": {
         "type": {
-          "type": "string",
-          "description": "Authentication mechanism type. Well-known values: `oauth2`, `verifiable_credential`."
+          "const": "oauth2",
+          "description": "OAuth 2.0 authentication mechanism."
         },
         "issuer": {
           "type": "string",
           "format": "uri",
-          "description": "The authorization server or credential issuer URL, typically supporting discovery specifications (e.g. RFC 8414 for oauth2)."
+          "description": "The authorization server URL, supporting RFC 8414 discovery."
+        },
+        "discovery_endpoint": {
+          "type": "string",
+          "format": "uri",
+          "description": "Optional explicit URI to the authorization server's metadata (e.g., `/.well-known/openid-configuration`). If omitted, platforms construct discovery paths based on the `issuer`."
         }
       },
       "additionalProperties": true
