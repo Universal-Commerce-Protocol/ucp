@@ -672,14 +672,18 @@ for a session:
     (latest date). If the set is empty (no mutual version), **exclude** the
     capability from the intersection.
 
-3. **Prune orphaned extensions**: Remove any capability where `extends` is
-    set but **none** of its parent capabilities are in the intersection.
-    - For single-parent extensions (`extends: "string"`): parent must be present
-    - For multi-parent extensions (`extends: ["a", "b"]`): at least one parent
-        must be present
+3. **Prune orphaned extensions & unauthorized capabilities**: Remove any capability that lacks its required structural or functional dependencies:
+    - **Structural Dependencies**: Remove any capability where `extends` is
+      set but **none** of its parent capabilities are in the intersection.
+        - For single-parent extensions (`extends: "string"`): parent must be present
+        - For multi-parent extensions (`extends: ["a", "b"]`): at least one parent
+          must be present
+    - **Scope Dependencies**: Remove any capability declaring `identity_scopes`
+      if the intersection does not contain a capability capable of negotiating
+      authorization (e.g., `dev.ucp.common.identity_linking`).
 
 4. **Repeat pruning**: Continue step 3 until no more capabilities are removed
-    (handles transitive extension chains).
+    (handles transitive extension chains and chained scope dependencies).
 
 5. **Derive Scopes (Final Pass)**: If the negotiated capabilities include
     authorization mechanisms (e.g., `dev.ucp.common.identity_linking`), scopes

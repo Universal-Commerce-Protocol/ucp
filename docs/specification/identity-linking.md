@@ -120,13 +120,17 @@ discovery URL:
 
 1. **Explicit Endpoint (Highest Priority)**: If the capability configuration
    provides a `discovery_endpoint` string, the platform **MUST** fetch metadata
-   directly from that exact URI.
+   directly from that exact URI. If this fetch fails, the platform **MUST**
+   abort the discovery process and **MUST NOT** fall back to any other
+   endpoints.
 2. **RFC 8414 Standard Discovery**: If no explicit endpoint is provided, the
    platform **MUST** append `/.well-known/oauth-authorization-server` to the
    defined `issuer` string and fetch.
 3. **OIDC Fallback (Lowest Priority)**: If the RFC 8414 fetch returns a
    `404 Not Found`, the platform **MUST** append
    `/.well-known/openid-configuration` to the defined `issuer` string and fetch.
+   If this final fetch also fails, the platform **MUST** abort the identity
+   linking process.
 
 Example metadata retrieved via RFC 8414:
 
@@ -135,7 +139,17 @@ Example metadata retrieved via RFC 8414:
     "issuer": "https://auth.merchant.example.com",
     "authorization_endpoint": "https://auth.merchant.example.com/oauth2/authorize",
     "token_endpoint": "https://auth.merchant.example.com/oauth2/token",
-    "revocation_endpoint": "https://auth.merchant.example.com/oauth2/revoke"
+    "revocation_endpoint": "https://auth.merchant.example.com/oauth2/revoke",
+    "scopes_supported": [
+        "ucp:scopes:checkout_session"
+    ],
+    "response_types_supported": [
+        "code"
+    ],
+    "grant_types_supported": [
+        "authorization_code",
+        "refresh_token"
+    ]
 }
 ```
 

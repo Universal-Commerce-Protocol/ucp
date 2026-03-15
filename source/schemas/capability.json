@@ -31,7 +31,8 @@
             "identity_scopes": {
               "type": "array",
               "items": {
-                "type": "string"
+                "type": "string",
+                "pattern": "^[a-zA-Z0-9.-]+:scopes:[a-zA-Z0-9_.-]+$"
               },
               "description": "Optional array of OAuth2 scopes required to access this capability. Used for dynamic scope derivation during identity linking."
             }
