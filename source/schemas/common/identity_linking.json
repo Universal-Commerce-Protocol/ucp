@@ -56,9 +56,7 @@
     },
 
     "mechanism": {
-      "oneOf": [
-        { "$ref": "#/$defs/oauth2" }
-      ]
+      "oneOf": [{ "$ref": "#/$defs/oauth2" }]
     },
 
     "oauth2": {

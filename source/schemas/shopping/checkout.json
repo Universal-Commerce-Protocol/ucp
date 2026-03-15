@@ -4,6 +4,9 @@
   "name": "dev.ucp.shopping.checkout",
   "title": "Checkout",
   "description": "Base checkout schema. Extensions compose onto this using allOf.",
+  "identity_scopes": [
+    "ucp:scopes:checkout_session"
+  ],
   "type": "object",
   "required": [
     "ucp",
