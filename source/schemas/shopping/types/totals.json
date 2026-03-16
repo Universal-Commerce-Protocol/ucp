@@ -38,6 +38,14 @@
             "ucp_request": "omit"
           }
         }
+      },
+      {
+        "if": { "properties": { "type": { "enum": ["discount", "items_discount"] } }, "required": ["type"] },
+        "then": { "properties": { "amount": { "exclusiveMaximum": 0 } } }
+      },
+      {
+        "if": { "properties": { "type": { "enum": ["subtotal", "fulfillment", "tax", "fee"] } }, "required": ["type"] },
+        "then": { "properties": { "amount": { "minimum": 0 } } }
       }
     ]
   },

@@ -586,8 +586,11 @@ buyer.
 | `fee`             | +          | Fees and surcharges                            |
 | `total`           | =          | Authoritative grand total (exactly one)        |
 
-The `type` field is an open string. Businesses MAY use values beyond the
-well-known set — the sign on the amount is self-describing.
+The sign convention for well-known types is schema-enforced: subtractive
+types (discount, items_discount) MUST have negative amounts; additive types
+(subtotal, fulfillment, tax, fee) MUST have non-negative amounts. The `type`
+field is an open string — businesses MAY use values beyond the well-known
+set, where the sign on the amount is self-describing.
 
 #### Repeating Types
 
