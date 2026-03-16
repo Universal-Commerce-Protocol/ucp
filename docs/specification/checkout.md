@@ -661,9 +661,10 @@ assert sum(e.amount for e in totals if e.type != "total") == total_entry.amount
 ```
 
 If the computed sum does not match the `type: "total"` entry, the platform
-MUST NOT alter the rendered output — the business's total is authoritative.
-Platforms MAY prevent checkout completion or surface the discrepancy to the
-buyer.
+MUST NOT alter the rendered output — the business's presented totals are
+authoritative for display. However, platforms MUST NOT autonomously complete
+a checkout with mismatched totals. Platforms SHOULD reject the checkout or
+escalate and ask for buyer review via `continue_url`.
 
 #### Well-Known Types
 
