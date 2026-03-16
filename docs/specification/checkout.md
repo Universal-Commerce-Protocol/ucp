@@ -328,7 +328,7 @@ and then resubmitting for completion.
 
 ### Disclosures
 
-Warning messages with `disclosure: true` carry item-anchored notices —
+Warning messages with `disclosure: true` carry notices —
 safety warnings, allergen declarations, compliance content, etc. — that
 **MUST** follow the prescribed rendering contract below. The `disclosure`
 flag signals that the warning **MUST NOT** be treated as a dismissible

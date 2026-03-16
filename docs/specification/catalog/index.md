@@ -156,7 +156,7 @@ Messages communicate business outcomes and provide context:
 | `warning` | Important conditions affecting purchase | `DELAYED_FULFILLMENT`, `FINAL_SALE` |
 | `info` | Additional context without issues | `PROMOTIONAL_PRICING`, `LIMITED_AVAILABILITY` |
 
-Warnings with `disclosure: true` carry item-anchored notices (e.g., allergen
+Warnings with `disclosure: true` carry notices (e.g., allergen
 declarations, safety warnings) that platforms must not hide or dismiss. See
 [Disclosures](../checkout.md#disclosures) for the full rendering contract.
 
