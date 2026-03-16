@@ -536,14 +536,14 @@ Platforms MUST render all top-level entries in the order provided:
 
 ```python
 for entry in totals:
-    render_line(entry.display_text, entry.amount, entry.effect or default_effect(entry.type))
+    render_line(entry.display_text, entry.amount)
 ```
 
 Platforms MAY render sub-lines as supplementary detail:
 
 ```python
 for entry in totals:
-    render_line(entry.display_text, entry.amount, entry.effect or default_effect(entry.type))
+    render_line(entry.display_text, entry.amount)
     if entry.lines:
         for sub in entry.lines:
             render_detail_line(sub.display_text, sub.amount)
@@ -555,7 +555,8 @@ logic of their own.
 Invariants of `totals[]`:
 
 * Every entry carries a `display_text` and an `amount`.
-* Every entry except `type: "total"` has an `effect`.
+* Amounts are signed integers — negative values are subtractive (e.g.,
+  discounts), positive values are additive. The sign IS the direction.
 * Exactly one `type: "subtotal"` MUST be present.
 * Exactly one `type: "total"` MUST be present.
 
@@ -565,39 +566,28 @@ Platforms MUST NOT substitute their own computed totals for the business's
 values. Platforms MAY verify the provided totals:
 
 ```python
-computed = 0
-for entry in totals:
-    if entry.type == "total":
-        continue
-    effect = entry.effect or default_effect(entry.type)
-    if effect == "add":
-        computed += entry.amount
-    elif effect == "subtract":
-        computed -= entry.amount
-
-assert computed == totals.find(type == "total").amount
+assert sum(e.amount for e in totals if e.type != "total") == total_entry.amount
 ```
 
-If the computed sum of entries does not match the `type: "total"` entry, the
-platform MUST NOT alter the rendered output — the business's total is
-authoritative. Platforms MAY prevent checkout completion or surface the
-discrepancy to the buyer.
+If the computed sum does not match the `type: "total"` entry, the platform
+MUST NOT alter the rendered output — the business's total is authoritative.
+Platforms MAY prevent checkout completion or surface the discrepancy to the
+buyer.
 
 #### Well-Known Types
 
-| Type              | Default `effect` | Meaning                                        |
-| ----------------- | ---------------- | ---------------------------------------------- |
-| `subtotal`        | `add`            | Sum of line item prices                        |
-| `discount`        | `subtract`       | Order or line-item level discount              |
-| `items_discount`  | `subtract`       | Rollup of line-item discounts                  |
-| `fulfillment`     | `add`            | Shipping, delivery, or pickup charges          |
-| `tax`             | `add`            | Tax charges                                    |
-| `fee`             | `add`            | Fees and surcharges                            |
-| `total`           | —                | Authoritative grand total (exactly one)        |
+| Type              | Sign       | Meaning                                        |
+| ----------------- | ---------- | ---------------------------------------------- |
+| `subtotal`        | +          | Sum of line item prices                        |
+| `discount`        | −          | Order or line-item level discount              |
+| `items_discount`  | −          | Rollup of line-item discounts                  |
+| `fulfillment`     | +          | Shipping, delivery, or pickup charges          |
+| `tax`             | +          | Tax charges                                    |
+| `fee`             | +          | Fees and surcharges                            |
+| `total`           | =          | Authoritative grand total (exactly one)        |
 
-Businesses MAY use `type` values beyond the well-known set. Types outside
-the well-known set MUST include an explicit `effect` field. If `effect` is
-included on a well-known type, it MUST match the default above.
+The `type` field is an open string. Businesses MAY use values beyond the
+well-known set — the sign on the amount is self-describing.
 
 #### Repeating Types
 
@@ -622,11 +612,11 @@ when provided.
 
 ```json
 "totals": [
-  { "type": "subtotal",    "display_text": "Subtotal",      "amount": 5750 },
-  { "type": "fulfillment", "display_text": "Shipping",      "amount": 899 },
-  { "type": "tax",         "display_text": "Federal Tax",   "amount": 332 },
-  { "type": "tax",         "display_text": "State Tax",     "amount": 465 },
-  { "type": "total",       "display_text": "Total",         "amount": 7446 }
+  { "type": "subtotal",    "display_text": "Subtotal",    "amount": 5750 },
+  { "type": "fulfillment", "display_text": "Shipping",    "amount": 899 },
+  { "type": "tax",         "display_text": "Federal Tax", "amount": 332 },
+  { "type": "tax",         "display_text": "State Tax",   "amount": 465 },
+  { "type": "total",       "display_text": "Total",       "amount": 7446 }
 ]
 ```
 
@@ -647,15 +637,15 @@ when provided.
 ]
 ```
 
-**Account credit — custom type with explicit `effect`:**
+**Discount and account credit — negative amounts:**
 
 ```json
 "totals": [
-  { "type": "subtotal",     "display_text": "Subtotal",     "amount": 10000 },
-  { "type": "tax",          "display_text": "Tax",          "amount": 800 },
-  { "type": "account_credit", "display_text": "Account Credit", "amount": 2500,
-    "effect": "subtract" },
-  { "type": "total",        "display_text": "Amount Due",   "amount": 8300 }
+  { "type": "subtotal",       "display_text": "Subtotal",       "amount": 10000 },
+  { "type": "discount",       "display_text": "Summer Sale",    "amount": -1500 },
+  { "type": "tax",            "display_text": "Tax",            "amount": 680 },
+  { "type": "account_credit", "display_text": "Account Credit", "amount": -2500 },
+  { "type": "total",          "display_text": "Amount Due",     "amount": 6680 }
 ]
 ```
 

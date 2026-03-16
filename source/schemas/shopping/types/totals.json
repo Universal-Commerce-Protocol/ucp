@@ -15,15 +15,6 @@
           "display_text"
         ],
         "properties": {
-          "effect": {
-            "type": "string",
-            "enum": [
-              "add",
-              "subtract"
-            ],
-            "description": "Sign convention for this entry. Well-known types have implicit defaults (see specification); unknown types MUST include this field.",
-            "ucp_request": "omit"
-          },
           "lines": {
             "type": "array",
             "items": {
@@ -38,7 +29,7 @@
                   "description": "Human-readable label for this sub-line."
                 },
                 "amount": {
-                  "$ref": "amount.json"
+                  "$ref": "signed_amount.json"
                 }
               },
               "description": "Sub-line entry. Additional metadata MAY be included."
