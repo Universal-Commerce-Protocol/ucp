@@ -405,7 +405,7 @@ warning on a line item:
   "messages": [
     {
       "type": "error",
-      "code": "missing",
+      "code": "field_required",
       "path": "$.buyer.email",
       "content": "Buyer email is required",
       "severity": "recoverable"
