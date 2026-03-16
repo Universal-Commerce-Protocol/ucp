@@ -354,7 +354,7 @@ over regular warnings.
 
 * **MUST** set `disclosure: true` when the warning content must be displayed
   alongside a specific item and must not be hidden or auto-dismissed.
-* **MUST** use the `path` field to associate disclosures with the
+* **SHOULD** use the `path` field to associate disclosures with the
   relevant component in the response.
 * **SHOULD** provide a `code` that identifies the disclosure category
   (e.g., `prop65`, `allergens`, `energy_label`).
