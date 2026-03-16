@@ -363,6 +363,16 @@ over regular warnings.
 * **SHOULD** provide `url` when a reference link is available for the
   buyer to learn more.
 
+#### Disclosure vs Acknowledgment
+
+A warning with `disclosure: true` is a presentation mechanism — it
+controls how the warning is rendered, not whether the checkout can
+proceed. When affirmative buyer acknowledgment or authorization is also
+required, the business **MAY** combine the disclosure with the escalation
+mechanisms described in the
+[Checkout Status Lifecycle](#checkout-status-lifecycle) to ensure the
+appropriate buyer input is obtained.
+
 #### Jurisdiction and Applicability
 
 It is the business's responsibility to determine which disclosures apply
@@ -416,9 +426,10 @@ warning on a line item:
 ```
 
 The platform resolves the recoverable error programmatically while rendering
-the allergen disclosure in proximity to the referenced line item. A platform
-that does not recognize `disclosure: true` still renders this as a regular
-warning — the buyer sees the content either way.
+the allergen disclosure in proximity to the referenced line item. Platforms
+that cannot honor the disclosure rendering contract **MUST** escalate to
+merchant UI via `continue_url` rather than silently downgrading to a
+regular warning.
 
 ## Continue URL
 
