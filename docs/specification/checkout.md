@@ -326,6 +326,100 @@ payment instrument, or by removing the claim from `context.eligibility` to
 renegotiate the checkout (obtaining updated pricing, availability, etc.)
 and then resubmitting for completion.
 
+### Disclosures
+
+Warning messages with `disclosure: true` carry item-anchored notices —
+safety warnings, allergen declarations, compliance content, etc. — that
+**MUST** follow the prescribed rendering contract below. The `disclosure`
+flag signals that the warning **MUST NOT** be treated as a dismissible
+notice.
+
+#### Platform Requirements
+
+When a warning has `disclosure: true`:
+
+* **MUST** display the warning `content` to the buyer.
+* **MUST** display the warning in proximity to the component referenced by
+  `path`, preserving the association between the disclosure and its subject.
+  When `path` is omitted, the disclosure applies to the response as a whole.
+* **MUST NOT** hide, collapse, or auto-dismiss the warning.
+* **MUST** render `image_url` when present (e.g., warning symbol,
+  energy class label).
+* **SHOULD** render `url` as a navigable reference link when present.
+
+Warnings with `disclosure: true` **SHOULD** be given rendering priority
+over regular warnings.
+
+#### Business Requirements
+
+* **MUST** set `disclosure: true` when the warning content must be displayed
+  alongside a specific item and must not be hidden or auto-dismissed.
+* **MUST** use the `path` field to associate disclosures with the
+  relevant component in the response.
+* **SHOULD** provide a `code` that identifies the disclosure category
+  (e.g., `prop65`, `allergens`, `energy_label`).
+* **SHOULD** provide `image_url` when the disclosure has an associated
+  visual element (e.g., warning symbol, energy class label).
+* **SHOULD** provide `url` when a reference link is available for the
+  buyer to learn more.
+
+#### Jurisdiction and Applicability
+
+It is the business's responsibility to determine which disclosures apply
+to a given session and return only those that are relevant. Businesses
+**SHOULD** use buyer-provided data (`context` and other inputs) and
+product attributes to resolve jurisdiction-specific requirements.
+Platforms do not affect or resolve disclosure applicability — they render
+what they receive from the business.
+
+#### Example
+
+A checkout response containing both a recoverable error and a disclosure
+warning on a line item:
+
+```json
+{
+  "ucp": { "version": "{{ ucp_version }}", "status": "success" },
+  "id": "chk_abc123",
+  "status": "incomplete",
+  "currency": "USD",
+  "line_items": [
+    {
+      "id": "li_1",
+      "item": { "id": "item_456", "title": "Artisan Nut Butter Collection", "image_url": "https://merchant.com/nut-butter.jpg" },
+      "quantity": 1,
+      "totals": [{ "type": "subtotal", "amount": 1299 }]
+    }
+  ],
+  "totals": [{ "type": "total", "amount": 1299 }],
+  "messages": [
+    {
+      "type": "error",
+      "code": "missing",
+      "path": "$.buyer.email",
+      "content": "Buyer email is required",
+      "severity": "recoverable"
+    },
+    {
+      "type": "warning",
+      "code": "allergens",
+      "path": "$.line_items[0]",
+      "content": "**Contains: tree nuts.** Produced in a facility that also processes peanuts, milk, and soy.",
+      "content_type": "markdown",
+      "disclosure": true,
+      "image_url": "https://merchant.com/allergen-tree-nuts.svg",
+      "url": "https://merchant.com/allergen-info"
+    }
+  ],
+  "links": []
+}
+```
+
+The platform resolves the recoverable error programmatically while rendering
+the allergen disclosure in proximity to the referenced line item. A platform
+that does not recognize `disclosure: true` still renders this as a regular
+warning — the buyer sees the content either way.
+
 ## Continue URL
 
 The `continue_url` field enables checkout handoff from platform to business UI,

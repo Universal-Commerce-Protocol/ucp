@@ -153,8 +153,12 @@ Messages communicate business outcomes and provide context:
 | Type | When to Use | Example Codes |
 | :--- | :--- | :--- |
 | `error` | Business-level errors | `NOT_FOUND`, `OUT_OF_STOCK`, `REGION_RESTRICTED` |
-| `warning` | Important conditions affecting purchase | `DELAYED_FULFILLMENT`, `FINAL_SALE`, `AGE_RESTRICTED` |
+| `warning` | Important conditions affecting purchase | `DELAYED_FULFILLMENT`, `FINAL_SALE` |
 | `info` | Additional context without issues | `PROMOTIONAL_PRICING`, `LIMITED_AVAILABILITY` |
+
+Warnings with `disclosure: true` carry item-anchored notices (e.g., allergen
+declarations, safety warnings) that platforms must not hide or dismiss. See
+[Disclosures](../checkout.md#disclosures) for the full rendering contract.
 
 **Note**: All catalog errors use `severity: "recoverable"` - agents handle them programmatically (retry, inform user, show alternatives).
 
@@ -249,6 +253,54 @@ identifiers were not found.
 
 Agents correlate results using the `inputs` array on each variant. See
 [Client Correlation](lookup.md#client-correlation).
+
+#### Product Disclosure
+
+When a product requires a disclosure (e.g., allergen notice, safety warning),
+return it as a warning with `disclosure: true`. The `path` field targets the
+relevant component in the response — when it targets a product, the
+disclosure applies to all of its variants.
+
+```json
+{
+  "ucp": {...},
+  "products": [
+    {
+      "id": "prod_nut_butter",
+      "title": "Artisan Nut Butter Collection",
+      "variants": [
+        {
+          "id": "var_almond",
+          "title": "Almond Butter",
+          "price": { "amount": 1299, "currency": "USD" },
+          "availability": { "available": true }
+        },
+        {
+          "id": "var_cashew",
+          "title": "Cashew Butter",
+          "price": { "amount": 1499, "currency": "USD" },
+          "availability": { "available": true }
+        }
+      ]
+    }
+  ],
+  "messages": [
+    {
+      "type": "warning",
+      "code": "allergens",
+      "path": "$.products[0]",
+      "content": "**Contains: tree nuts.** Produced in a facility that also processes peanuts, milk, and soy.",
+      "content_type": "markdown",
+      "disclosure": true,
+      "image_url": "https://merchant.com/allergen-tree-nuts.svg",
+      "url": "https://merchant.com/allergen-info"
+    }
+  ]
+}
+```
+
+See [Disclosures](../checkout.md#disclosures) for the full rendering
+contract.
 
 ## Transport Bindings
 

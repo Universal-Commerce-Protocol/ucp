@@ -34,6 +34,21 @@
       ],
       "default": "plain",
       "description": "Content format, default = plain."
+    },
+    "disclosure": {
+      "type": "boolean",
+      "default": false,
+      "description": "When true, this warning carries a disclosure that MUST be displayed in proximity to the referenced component and MUST NOT be hidden or auto-dismissed."
+    },
+    "image_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL to a required visual element (e.g., warning symbol, energy class label)."
+    },
+    "url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Reference URL for more information (e.g., regulatory site, registry entry, policy page)."
     }
   }
 }
