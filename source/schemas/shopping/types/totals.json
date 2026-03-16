@@ -7,7 +7,7 @@
   "items": {
     "allOf": [
       {
-        "$ref": "total_line.json"
+        "$ref": "total.json"
       },
       {
         "type": "object",

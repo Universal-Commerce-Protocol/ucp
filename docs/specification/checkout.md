@@ -612,7 +612,7 @@ field or omitting them.
 
 ### Total {: #totals }
 
-{{ schema_fields('types/total_line_resp', 'checkout') }}
+{{ schema_fields('types/total_resp', 'checkout') }}
 
 #### Rendering Contract
 

@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/schemas/shopping/types/total_line.json",
-  "title": "Total Line",
+  "$id": "https://ucp.dev/schemas/shopping/types/total.json",
+  "title": "Total",
   "description": "A cost breakdown entry with a category, amount, and optional display text.",
   "type": "object",
   "required": [

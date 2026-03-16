@@ -39,7 +39,7 @@
     "totals": {
       "type": "array",
       "items": {
-        "$ref": "total_line.json"
+        "$ref": "total.json"
       },
       "description": "Line item totals breakdown."
     },
