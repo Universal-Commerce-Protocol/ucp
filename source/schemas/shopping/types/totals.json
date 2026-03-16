@@ -15,6 +15,9 @@
           "display_text"
         ],
         "properties": {
+          "amount": {
+            "$ref": "signed_amount.json"
+          },
           "lines": {
             "type": "array",
             "items": {
