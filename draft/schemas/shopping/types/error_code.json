@@ -8,6 +8,7 @@
     "out_of_stock",
     "item_unavailable",
     "address_undeliverable",
-    "payment_failed"
+    "payment_failed",
+    "eligibility_invalid"
   ]
 }

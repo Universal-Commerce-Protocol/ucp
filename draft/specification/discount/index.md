@@ -52,15 +52,17 @@ When this capability is active, cart and/or checkout are extended with a `discou
 
 ### Applied Discount
 
-| Name        | Type          | Required | Description                                                                                                                      |
-| ----------- | ------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| code        | string        | No       | The discount code. Omitted for automatic discounts.                                                                              |
-| title       | string        | **Yes**  | Human-readable discount name (e.g., 'Summer Sale 20% Off').                                                                      |
-| amount      | integer       | **Yes**  | Total discount amount in ISO 4217 minor units.                                                                                   |
-| automatic   | boolean       | No       | True if applied automatically by merchant rules (no code required).                                                              |
-| method      | string        | No       | Allocation method. 'each' = applied independently per item. 'across' = split proportionally by value. **Enum:** `each`, `across` |
-| priority    | integer       | No       | Stacking order for discount calculation. Lower numbers applied first (1 = first).                                                |
-| allocations | Array[object] | No       | Breakdown of where this discount was allocated. Sum of allocation amounts equals total amount.                                   |
+| Name        | Type          | Required | Description                                                                                                                                                                        |
+| ----------- | ------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| code        | string        | No       | The discount code. Omitted for automatic discounts.                                                                                                                                |
+| title       | string        | **Yes**  | Human-readable discount name (e.g., 'Summer Sale 20% Off').                                                                                                                        |
+| amount      | integer       | **Yes**  | Total discount amount in ISO 4217 minor units.                                                                                                                                     |
+| automatic   | boolean       | No       | True if applied automatically by merchant rules (no code required).                                                                                                                |
+| method      | string        | No       | Allocation method. 'each' = applied independently per item. 'across' = split proportionally by value. **Enum:** `each`, `across`                                                   |
+| priority    | integer       | No       | Stacking order for discount calculation. Lower numbers applied first (1 = first).                                                                                                  |
+| provisional | boolean       | No       | True if this discount requires additional verification.                                                                                                                            |
+| eligibility | string        | No       | The eligibility claim accepted by the Business for this discount. Corresponds to a value from context.eligibility. Omitted for code-based and non-eligibility automatic discounts. |
+| allocations | Array[object] | No       | Breakdown of where this discount was allocated. Sum of allocation amounts equals total amount.                                                                                     |
 
 ### Allocation
 
@@ -164,6 +166,78 @@ Businesses may apply discounts automatically based on cart contents, customer se
 - Applied without platform action
 - Cannot be removed by the platform
 - Surfaced for transparency (platform can explain to user why discount was applied)
+
+## Eligibility Claims
+
+Eligibility claims are buyer claims about eligible benefits (see [Context](https://ucp.dev/draft/specification/checkout/#context)) such as loyalty membership, payment instrument perks, and similar. When the discount extension is active, Businesses that choose to accept eligibility claims **MUST** surface their effect on pricing as provisional discounts in the `applied` array. Platforms **MUST** display provisional discounts to the buyer.
+
+### Discount Behavior
+
+Platforms send buyer claims via `context.eligibility` on cart or checkout requests (see [Context](https://ucp.dev/draft/specification/checkout/#context)). When a Business recognizes a claim and it affects pricing, it **MUST** surface a corresponding provisional discount in the `discounts.applied` array. This gives the Platform structured attribution to display to the buyer.
+
+Eligibility-triggered discounts use the following fields:
+
+| Field         | Value                      | Purpose                             |
+| ------------- | -------------------------- | ----------------------------------- |
+| `automatic`   | `true`                     | No code required                    |
+| `provisional` | `true`                     | Requires verification at completion |
+| `eligibility` | `"com.example.store_card"` | The accepted claim                  |
+| `code`        | *(omitted)*                | Not code-based                      |
+
+Standard `priority`, `method`, and `allocations` fields apply for stacking with other discounts.
+
+### Verification at Checkout
+
+Discounts from accepted but unverified claims carry `provisional: true`. Provisional discounts remain until the claim is verified, rescinded, or replaced during the session. At checkout completion, all remaining provisional claims **MUST** be resolved (see [Eligibility Verification at Completion](https://ucp.dev/draft/specification/checkout/#eligibility-verification-at-completion)).
+
+### Example: Provisional Discount with Attribution
+
+Building on the store card example from [Eligibility Verification at Completion](https://ucp.dev/draft/specification/checkout/#eligibility-verification-at-completion), the discount extension provides structured attribution. The Platform claims a store card benefit; the Business surfaces the provisional discount with full stacking and allocation details:
+
+```json
+{
+  "context": {
+    "eligibility": ["com.example.store_card"]
+  },
+  "line_items": [
+    {
+      "item": {
+        "id": "prod_shirt",
+        "quantity": 2,
+        "price": 2500
+      }
+    }
+  ]
+}
+```
+
+```json
+{
+  "discounts": {
+    "applied": [
+      {
+        "title": "Store Card 5% Off",
+        "amount": 250,
+        "automatic": true,
+        "provisional": true,
+        "eligibility": "com.example.store_card",
+        "priority": 1,
+        "method": "each",
+        "allocations": [
+          {"path": "$.line_items[0]", "amount": 250}
+        ]
+      }
+    ]
+  },
+  "totals": [
+    {"type": "subtotal", "display_text": "Subtotal", "amount": 5000},
+    {"type": "items_discount", "display_text": "Discounts", "amount": 250},
+    {"type": "total", "display_text": "Total", "amount": 4750}
+  ]
+}
+```
+
+The Platform can now render: "Store Card 5% Off: -$2.50 *(verified at purchase)*" with full confidence in the attribution, amount, and allocation.
 
 ## Impact on Line Items and Totals
 

@@ -4765,6 +4765,12 @@ within the UCP.</p>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Preferred currency (ISO 4217, e.g., 'EUR', 'USD'). Businesses determine presentment currency from context and authoritative signals; this hint MAY inform selection in multi-currency markets. Also serves as the denomination for price filter values — platforms SHOULD include this field when sending price filters. Response prices include explicit currency confirming the resolution.</td>
 </tr>
+<tr>
+<td style="text-align: left;">eligibility</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#reverse-domain-name">Reverse Domain Name</a>]</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Buyer claims about eligible benefits such as loyalty membership, payment instrument perks, and similar. Recognized claims MAY inform the Business response (e.g., member-only product availability, adjusted pricing in catalog, provisional discounts at cart or checkout). Businesses MUST ignore unrecognized values without error. Values MUST use reverse-domain naming (e.g., 'com.example.loyalty_gold', 'org.school.student') and MUST be non-identifying.</td>
+</tr>
 </tbody>
 </table>
 <hr />
@@ -6935,6 +6941,18 @@ within the UCP.</p>
 <td style="text-align: left;">integer</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Stacking order for discount calculation. Lower numbers applied first (1 = first).</td>
+</tr>
+<tr>
+<td style="text-align: left;">provisional</td>
+<td style="text-align: left;">boolean</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">True if this discount requires additional verification.</td>
+</tr>
+<tr>
+<td style="text-align: left;">eligibility</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">The eligibility claim accepted by the Business for this discount. Corresponds to a value from context.eligibility. Omitted for code-based and non-eligibility automatic discounts.</td>
 </tr>
 <tr>
 <td style="text-align: left;">allocations</td>

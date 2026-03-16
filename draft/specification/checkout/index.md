@@ -166,16 +166,65 @@ ELSE IF requires_buyer_review is not empty
 
 Standard errors are standardized error codes that platforms are expected to handle with specific, appropriate UX rather than generic error treatment.
 
-| Code                    | Description                              |
-| ----------------------- | ---------------------------------------- |
-| `out_of_stock`          | Specific item or variant is unavailable  |
-| `item_unavailable`      | Item cannot be purchased (e.g. delisted) |
-| `address_undeliverable` | Cannot deliver to the provided address   |
-| `payment_failed`        | Payment processing failed                |
+| Code                    | Description                                           |
+| ----------------------- | ----------------------------------------------------- |
+| `out_of_stock`          | Specific item or variant is unavailable               |
+| `item_unavailable`      | Item cannot be purchased (e.g. delisted)              |
+| `address_undeliverable` | Cannot deliver to the provided address                |
+| `payment_failed`        | Payment processing failed                             |
+| `eligibility_invalid`   | Eligibility claim could not be verified at completion |
 
 Businesses **SHOULD** mark standard errors with `severity: recoverable` to signal that platforms should provide appropriate UX (out-of-stock messaging, address validation prompts, payment method changes) rather than generic error messages or deferring to checkout completion.
 
 Example: `out_of_stock` requires specific upfront UX, whereas `payment_required` can be handled generically at submission.
+
+#### Eligibility Verification at Completion
+
+Platforms provide `context.eligibility` — buyer claims about eligible benefits such as loyalty membership, payment instrument perks, and similar. These are claims, not verified facts. Businesses **MAY** act on recognized claims during the session (adjusting pricing, granting product access, applying provisional discounts), but all accepted claims **MUST** be resolved before the transaction can complete.
+
+Unrecognized or inapplicable claims **MUST NOT** block the checkout. Businesses **SHOULD** notify the buyer via `messages` with `type: "warning"` when a claim is not accepted, and **MAY** use `type: "info"` to explain the effects of accepted claims. At completion, accepted claims that remain unverified **MUST** result in `type: "error"` with `code: "eligibility_invalid"` (see below).
+
+**Eligibility message codes:**
+
+| Type      | Code                       | When                                               |
+| --------- | -------------------------- | -------------------------------------------------- |
+| `warning` | `eligibility_not_accepted` | Claim not recognized or not applicable             |
+| `info`    | `eligibility_accepted`     | Effect of an accepted claim                        |
+| `error`   | `eligibility_invalid`      | Accepted claim could not be verified at completion |
+
+A claim is resolved when it is either **verified** or **rescinded**:
+
+- **Verified**: The Business confirms the claim against a proof provided at completion time. UCP does not prescribe how verification occurs — proof may come from the payment credential, an identity verification capability, or any other mechanism negotiated between Platform and Business.
+- **Rescinded**: The Platform removes the claim from `context.eligibility` before completion (e.g., buyer changes payment method, withdraws a membership claim). Once removed, the Business recalculates without it.
+
+Businesses **MUST NOT** complete a transaction with unresolved eligibility claims. Unverified claims may result in incorrect pricing or unauthorized access to restricted products.
+
+**When verification fails:**
+
+Verification failure **MUST** only affect the `messages` array. The Business **MUST** return an error in `messages` with `code: "eligibility_invalid"` and `severity: "recoverable"`. Messages **SHOULD** use the `path` field to identify which specific claim(s) could not be verified. The Platform **MAY** then provide valid proof and resubmit, restructure the checkout (e.g., remove ineligible items, update claims), or abandon the attempt.
+
+For example, the Platform claims a store card benefit via `context.eligibility`. The Business applies member pricing during the session. At completion, the payment credential does not match the claimed instrument:
+
+```json
+{
+  "ucp": { "version": "2026-01-11", "status": "success" },
+  "id": "checkout_abc",
+  "status": "ready_for_complete",
+  "line_items": [ "..." ],
+  "totals": [ "..." ],
+  "messages": [
+    {
+      "type": "error",
+      "code": "eligibility_invalid",
+      "severity": "recoverable",
+      "content": "Payment credential does not match the claimed store card benefit.",
+      "path": "$.context.eligibility[0]"
+    }
+  ]
+}
+```
+
+The Platform can resolve this by having the buyer switch to the qualifying payment instrument, or by removing the claim from `context.eligibility` to renegotiate the checkout (obtaining updated pricing, availability, etc.) and then resubmitting for completion.
 
 ## Continue URL
 
@@ -377,14 +426,15 @@ The abstract operations above are bound to specific transport protocols as defin
 
 Context signals are provisional—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data.
 
-| Name            | Type   | Required | Description                                                                                                                                                                                                                                                                                                                                                                                   |
-| --------------- | ------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| address_country | string | No       | The country. Recommended to be in 2-letter ISO 3166-1 alpha-2 format, for example "US". For backward compatibility, a 3-letter ISO 3166-1 alpha-3 country code such as "SGP" or a full country name such as "Singapore" can also be used. Optional hint for market context (currency, availability, pricing)—higher-resolution data (e.g., shipping address) supersedes this value.           |
-| address_region  | string | No       | The region in which the locality is, and which is in the country. For example, California or another appropriate first-level Administrative division. Optional hint for progressive localization—higher-resolution data (e.g., shipping address) supersedes this value.                                                                                                                       |
-| postal_code     | string | No       | The postal code. For example, 94043. Optional hint for regional refinement—higher-resolution data (e.g., shipping address) supersedes this value.                                                                                                                                                                                                                                             |
-| intent          | string | No       | Background context describing buyer's intent (e.g., 'looking for a gift under $50', 'need something durable for outdoor use'). Informs relevance, recommendations, and personalization.                                                                                                                                                                                                       |
-| language        | string | No       | Preferred language for content. Use IETF BCP 47 language tags (e.g., 'en', 'fr-CA', 'zh-Hans'). For REST, equivalent to Accept-Language header—platforms SHOULD fall back to Accept-Language when this field is absent; when provided, overrides Accept-Language. Businesses MAY return content in a different language if unavailable.                                                       |
-| currency        | string | No       | Preferred currency (ISO 4217, e.g., 'EUR', 'USD'). Businesses determine presentment currency from context and authoritative signals; this hint MAY inform selection in multi-currency markets. Also serves as the denomination for price filter values — platforms SHOULD include this field when sending price filters. Response prices include explicit currency confirming the resolution. |
+| Name            | Type                                                                                | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| --------------- | ----------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| address_country | string                                                                              | No       | The country. Recommended to be in 2-letter ISO 3166-1 alpha-2 format, for example "US". For backward compatibility, a 3-letter ISO 3166-1 alpha-3 country code such as "SGP" or a full country name such as "Singapore" can also be used. Optional hint for market context (currency, availability, pricing)—higher-resolution data (e.g., shipping address) supersedes this value.                                                                                |
+| address_region  | string                                                                              | No       | The region in which the locality is, and which is in the country. For example, California or another appropriate first-level Administrative division. Optional hint for progressive localization—higher-resolution data (e.g., shipping address) supersedes this value.                                                                                                                                                                                            |
+| postal_code     | string                                                                              | No       | The postal code. For example, 94043. Optional hint for regional refinement—higher-resolution data (e.g., shipping address) supersedes this value.                                                                                                                                                                                                                                                                                                                  |
+| intent          | string                                                                              | No       | Background context describing buyer's intent (e.g., 'looking for a gift under $50', 'need something durable for outdoor use'). Informs relevance, recommendations, and personalization.                                                                                                                                                                                                                                                                            |
+| language        | string                                                                              | No       | Preferred language for content. Use IETF BCP 47 language tags (e.g., 'en', 'fr-CA', 'zh-Hans'). For REST, equivalent to Accept-Language header—platforms SHOULD fall back to Accept-Language when this field is absent; when provided, overrides Accept-Language. Businesses MAY return content in a different language if unavailable.                                                                                                                            |
+| currency        | string                                                                              | No       | Preferred currency (ISO 4217, e.g., 'EUR', 'USD'). Businesses determine presentment currency from context and authoritative signals; this hint MAY inform selection in multi-currency markets. Also serves as the denomination for price filter values — platforms SHOULD include this field when sending price filters. Response prices include explicit currency confirming the resolution.                                                                      |
+| eligibility     | Array\[[Reverse Domain Name](/draft/specification/reference/#reverse-domain-name)\] | No       | Buyer claims about eligible benefits such as loyalty membership, payment instrument perks, and similar. Recognized claims MAY inform the Business response (e.g., member-only product availability, adjusted pricing in catalog, provisional discounts at cart or checkout). Businesses MUST ignore unrecognized values without error. Values MUST use reverse-domain naming (e.g., 'com.example.loyalty_gold', 'org.school.student') and MUST be non-identifying. |
 
 ### Signals
 

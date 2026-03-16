@@ -2341,16 +2341,65 @@ ELSE IF requires_buyer_review is not empty
 
 Standard errors are standardized error codes that platforms are expected to handle with specific, appropriate UX rather than generic error treatment.
 
-| Code                    | Description                              |
-| ----------------------- | ---------------------------------------- |
-| `out_of_stock`          | Specific item or variant is unavailable  |
-| `item_unavailable`      | Item cannot be purchased (e.g. delisted) |
-| `address_undeliverable` | Cannot deliver to the provided address   |
-| `payment_failed`        | Payment processing failed                |
+| Code                    | Description                                           |
+| ----------------------- | ----------------------------------------------------- |
+| `out_of_stock`          | Specific item or variant is unavailable               |
+| `item_unavailable`      | Item cannot be purchased (e.g. delisted)              |
+| `address_undeliverable` | Cannot deliver to the provided address                |
+| `payment_failed`        | Payment processing failed                             |
+| `eligibility_invalid`   | Eligibility claim could not be verified at completion |
 
 Businesses **SHOULD** mark standard errors with `severity: recoverable` to signal that platforms should provide appropriate UX (out-of-stock messaging, address validation prompts, payment method changes) rather than generic error messages or deferring to checkout completion.
 
 Example: `out_of_stock` requires specific upfront UX, whereas `payment_required` can be handled generically at submission.
+
+#### Eligibility Verification at Completion
+
+Platforms provide `context.eligibility` — buyer claims about eligible benefits such as loyalty membership, payment instrument perks, and similar. These are claims, not verified facts. Businesses **MAY** act on recognized claims during the session (adjusting pricing, granting product access, applying provisional discounts), but all accepted claims **MUST** be resolved before the transaction can complete.
+
+Unrecognized or inapplicable claims **MUST NOT** block the checkout. Businesses **SHOULD** notify the buyer via `messages` with `type: "warning"` when a claim is not accepted, and **MAY** use `type: "info"` to explain the effects of accepted claims. At completion, accepted claims that remain unverified **MUST** result in `type: "error"` with `code: "eligibility_invalid"` (see below).
+
+**Eligibility message codes:**
+
+| Type      | Code                       | When                                               |
+| --------- | -------------------------- | -------------------------------------------------- |
+| `warning` | `eligibility_not_accepted` | Claim not recognized or not applicable             |
+| `info`    | `eligibility_accepted`     | Effect of an accepted claim                        |
+| `error`   | `eligibility_invalid`      | Accepted claim could not be verified at completion |
+
+A claim is resolved when it is either **verified** or **rescinded**:
+
+- **Verified**: The Business confirms the claim against a proof provided at completion time. UCP does not prescribe how verification occurs — proof may come from the payment credential, an identity verification capability, or any other mechanism negotiated between Platform and Business.
+- **Rescinded**: The Platform removes the claim from `context.eligibility` before completion (e.g., buyer changes payment method, withdraws a membership claim). Once removed, the Business recalculates without it.
+
+Businesses **MUST NOT** complete a transaction with unresolved eligibility claims. Unverified claims may result in incorrect pricing or unauthorized access to restricted products.
+
+**When verification fails:**
+
+Verification failure **MUST** only affect the `messages` array. The Business **MUST** return an error in `messages` with `code: "eligibility_invalid"` and `severity: "recoverable"`. Messages **SHOULD** use the `path` field to identify which specific claim(s) could not be verified. The Platform **MAY** then provide valid proof and resubmit, restructure the checkout (e.g., remove ineligible items, update claims), or abandon the attempt.
+
+For example, the Platform claims a store card benefit via `context.eligibility`. The Business applies member pricing during the session. At completion, the payment credential does not match the claimed instrument:
+
+```json
+{
+  "ucp": { "version": "2026-01-11", "status": "success" },
+  "id": "checkout_abc",
+  "status": "ready_for_complete",
+  "line_items": [ "..." ],
+  "totals": [ "..." ],
+  "messages": [
+    {
+      "type": "error",
+      "code": "eligibility_invalid",
+      "severity": "recoverable",
+      "content": "Payment credential does not match the claimed store card benefit.",
+      "path": "$.context.eligibility[0]"
+    }
+  ]
+}
+```
+
+The Platform can resolve this by having the buyer switch to the qualifying payment instrument, or by removing the claim from `context.eligibility` to renegotiate the checkout (obtaining updated pricing, availability, etc.) and then resubmitting for completion.
 
 ## Continue URL
 
@@ -2552,14 +2601,15 @@ The abstract operations above are bound to specific transport protocols as defin
 
 Context signals are provisional—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data.
 
-| Name            | Type   | Required | Description                                                                                                                                                                                                                                                                                                                                                                                   |
-| --------------- | ------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| address_country | string | No       | The country. Recommended to be in 2-letter ISO 3166-1 alpha-2 format, for example "US". For backward compatibility, a 3-letter ISO 3166-1 alpha-3 country code such as "SGP" or a full country name such as "Singapore" can also be used. Optional hint for market context (currency, availability, pricing)—higher-resolution data (e.g., shipping address) supersedes this value.           |
-| address_region  | string | No       | The region in which the locality is, and which is in the country. For example, California or another appropriate first-level Administrative division. Optional hint for progressive localization—higher-resolution data (e.g., shipping address) supersedes this value.                                                                                                                       |
-| postal_code     | string | No       | The postal code. For example, 94043. Optional hint for regional refinement—higher-resolution data (e.g., shipping address) supersedes this value.                                                                                                                                                                                                                                             |
-| intent          | string | No       | Background context describing buyer's intent (e.g., 'looking for a gift under $50', 'need something durable for outdoor use'). Informs relevance, recommendations, and personalization.                                                                                                                                                                                                       |
-| language        | string | No       | Preferred language for content. Use IETF BCP 47 language tags (e.g., 'en', 'fr-CA', 'zh-Hans'). For REST, equivalent to Accept-Language header—platforms SHOULD fall back to Accept-Language when this field is absent; when provided, overrides Accept-Language. Businesses MAY return content in a different language if unavailable.                                                       |
-| currency        | string | No       | Preferred currency (ISO 4217, e.g., 'EUR', 'USD'). Businesses determine presentment currency from context and authoritative signals; this hint MAY inform selection in multi-currency markets. Also serves as the denomination for price filter values — platforms SHOULD include this field when sending price filters. Response prices include explicit currency confirming the resolution. |
+| Name            | Type                                                                                | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| --------------- | ----------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| address_country | string                                                                              | No       | The country. Recommended to be in 2-letter ISO 3166-1 alpha-2 format, for example "US". For backward compatibility, a 3-letter ISO 3166-1 alpha-3 country code such as "SGP" or a full country name such as "Singapore" can also be used. Optional hint for market context (currency, availability, pricing)—higher-resolution data (e.g., shipping address) supersedes this value.                                                                                |
+| address_region  | string                                                                              | No       | The region in which the locality is, and which is in the country. For example, California or another appropriate first-level Administrative division. Optional hint for progressive localization—higher-resolution data (e.g., shipping address) supersedes this value.                                                                                                                                                                                            |
+| postal_code     | string                                                                              | No       | The postal code. For example, 94043. Optional hint for regional refinement—higher-resolution data (e.g., shipping address) supersedes this value.                                                                                                                                                                                                                                                                                                                  |
+| intent          | string                                                                              | No       | Background context describing buyer's intent (e.g., 'looking for a gift under $50', 'need something durable for outdoor use'). Informs relevance, recommendations, and personalization.                                                                                                                                                                                                                                                                            |
+| language        | string                                                                              | No       | Preferred language for content. Use IETF BCP 47 language tags (e.g., 'en', 'fr-CA', 'zh-Hans'). For REST, equivalent to Accept-Language header—platforms SHOULD fall back to Accept-Language when this field is absent; when provided, overrides Accept-Language. Businesses MAY return content in a different language if unavailable.                                                                                                                            |
+| currency        | string                                                                              | No       | Preferred currency (ISO 4217, e.g., 'EUR', 'USD'). Businesses determine presentment currency from context and authoritative signals; this hint MAY inform selection in multi-currency markets. Also serves as the denomination for price filter values — platforms SHOULD include this field when sending price filters. Response prices include explicit currency confirming the resolution.                                                                      |
+| eligibility     | Array\[[Reverse Domain Name](/draft/specification/reference/#reverse-domain-name)\] | No       | Buyer claims about eligible benefits such as loyalty membership, payment instrument perks, and similar. Recognized claims MAY inform the Business response (e.g., member-only product availability, adjusted pricing in catalog, provisional discounts at cart or checkout). Businesses MUST ignore unrecognized values without error. Values MUST use reverse-domain naming (e.g., 'com.example.loyalty_gold', 'org.school.student') and MUST be non-identifying. |
 
 ### Signals
 
@@ -7053,15 +7103,17 @@ When this capability is active, cart and/or checkout are extended with a `discou
 
 ### Applied Discount
 
-| Name        | Type          | Required | Description                                                                                                                      |
-| ----------- | ------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| code        | string        | No       | The discount code. Omitted for automatic discounts.                                                                              |
-| title       | string        | **Yes**  | Human-readable discount name (e.g., 'Summer Sale 20% Off').                                                                      |
-| amount      | integer       | **Yes**  | Total discount amount in ISO 4217 minor units.                                                                                   |
-| automatic   | boolean       | No       | True if applied automatically by merchant rules (no code required).                                                              |
-| method      | string        | No       | Allocation method. 'each' = applied independently per item. 'across' = split proportionally by value. **Enum:** `each`, `across` |
-| priority    | integer       | No       | Stacking order for discount calculation. Lower numbers applied first (1 = first).                                                |
-| allocations | Array[object] | No       | Breakdown of where this discount was allocated. Sum of allocation amounts equals total amount.                                   |
+| Name        | Type          | Required | Description                                                                                                                                                                        |
+| ----------- | ------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| code        | string        | No       | The discount code. Omitted for automatic discounts.                                                                                                                                |
+| title       | string        | **Yes**  | Human-readable discount name (e.g., 'Summer Sale 20% Off').                                                                                                                        |
+| amount      | integer       | **Yes**  | Total discount amount in ISO 4217 minor units.                                                                                                                                     |
+| automatic   | boolean       | No       | True if applied automatically by merchant rules (no code required).                                                                                                                |
+| method      | string        | No       | Allocation method. 'each' = applied independently per item. 'across' = split proportionally by value. **Enum:** `each`, `across`                                                   |
+| priority    | integer       | No       | Stacking order for discount calculation. Lower numbers applied first (1 = first).                                                                                                  |
+| provisional | boolean       | No       | True if this discount requires additional verification.                                                                                                                            |
+| eligibility | string        | No       | The eligibility claim accepted by the Business for this discount. Corresponds to a value from context.eligibility. Omitted for code-based and non-eligibility automatic discounts. |
+| allocations | Array[object] | No       | Breakdown of where this discount was allocated. Sum of allocation amounts equals total amount.                                                                                     |
 
 ### Allocation
 
@@ -7165,6 +7217,78 @@ Businesses may apply discounts automatically based on cart contents, customer se
 - Applied without platform action
 - Cannot be removed by the platform
 - Surfaced for transparency (platform can explain to user why discount was applied)
+
+## Eligibility Claims
+
+Eligibility claims are buyer claims about eligible benefits (see [Context](https://ucp.dev/draft/specification/checkout/#context)) such as loyalty membership, payment instrument perks, and similar. When the discount extension is active, Businesses that choose to accept eligibility claims **MUST** surface their effect on pricing as provisional discounts in the `applied` array. Platforms **MUST** display provisional discounts to the buyer.
+
+### Discount Behavior
+
+Platforms send buyer claims via `context.eligibility` on cart or checkout requests (see [Context](https://ucp.dev/draft/specification/checkout/#context)). When a Business recognizes a claim and it affects pricing, it **MUST** surface a corresponding provisional discount in the `discounts.applied` array. This gives the Platform structured attribution to display to the buyer.
+
+Eligibility-triggered discounts use the following fields:
+
+| Field         | Value                      | Purpose                             |
+| ------------- | -------------------------- | ----------------------------------- |
+| `automatic`   | `true`                     | No code required                    |
+| `provisional` | `true`                     | Requires verification at completion |
+| `eligibility` | `"com.example.store_card"` | The accepted claim                  |
+| `code`        | *(omitted)*                | Not code-based                      |
+
+Standard `priority`, `method`, and `allocations` fields apply for stacking with other discounts.
+
+### Verification at Checkout
+
+Discounts from accepted but unverified claims carry `provisional: true`. Provisional discounts remain until the claim is verified, rescinded, or replaced during the session. At checkout completion, all remaining provisional claims **MUST** be resolved (see [Eligibility Verification at Completion](https://ucp.dev/draft/specification/checkout/#eligibility-verification-at-completion)).
+
+### Example: Provisional Discount with Attribution
+
+Building on the store card example from [Eligibility Verification at Completion](https://ucp.dev/draft/specification/checkout/#eligibility-verification-at-completion), the discount extension provides structured attribution. The Platform claims a store card benefit; the Business surfaces the provisional discount with full stacking and allocation details:
+
+```json
+{
+  "context": {
+    "eligibility": ["com.example.store_card"]
+  },
+  "line_items": [
+    {
+      "item": {
+        "id": "prod_shirt",
+        "quantity": 2,
+        "price": 2500
+      }
+    }
+  ]
+}
+```
+
+```json
+{
+  "discounts": {
+    "applied": [
+      {
+        "title": "Store Card 5% Off",
+        "amount": 250,
+        "automatic": true,
+        "provisional": true,
+        "eligibility": "com.example.store_card",
+        "priority": 1,
+        "method": "each",
+        "allocations": [
+          {"path": "$.line_items[0]", "amount": 250}
+        ]
+      }
+    ]
+  },
+  "totals": [
+    {"type": "subtotal", "display_text": "Subtotal", "amount": 5000},
+    {"type": "items_discount", "display_text": "Discounts", "amount": 250},
+    {"type": "total", "display_text": "Total", "amount": 4750}
+  ]
+}
+```
+
+The Platform can now render: "Store Card 5% Off: -$2.50 *(verified at purchase)*" with full confidence in the attribution, amount, and allocation.
 
 ## Impact on Line Items and Totals
 
@@ -8264,14 +8388,15 @@ Cart reuses the same entity schemas as [Checkout](https://ucp.dev/draft/specific
 
 ### Context
 
-| Name            | Type   | Required | Description                                                                                                                                                                                                                                                                                                                                                                                   |
-| --------------- | ------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| address_country | string | No       | The country. Recommended to be in 2-letter ISO 3166-1 alpha-2 format, for example "US". For backward compatibility, a 3-letter ISO 3166-1 alpha-3 country code such as "SGP" or a full country name such as "Singapore" can also be used. Optional hint for market context (currency, availability, pricing)—higher-resolution data (e.g., shipping address) supersedes this value.           |
-| address_region  | string | No       | The region in which the locality is, and which is in the country. For example, California or another appropriate first-level Administrative division. Optional hint for progressive localization—higher-resolution data (e.g., shipping address) supersedes this value.                                                                                                                       |
-| postal_code     | string | No       | The postal code. For example, 94043. Optional hint for regional refinement—higher-resolution data (e.g., shipping address) supersedes this value.                                                                                                                                                                                                                                             |
-| intent          | string | No       | Background context describing buyer's intent (e.g., 'looking for a gift under $50', 'need something durable for outdoor use'). Informs relevance, recommendations, and personalization.                                                                                                                                                                                                       |
-| language        | string | No       | Preferred language for content. Use IETF BCP 47 language tags (e.g., 'en', 'fr-CA', 'zh-Hans'). For REST, equivalent to Accept-Language header—platforms SHOULD fall back to Accept-Language when this field is absent; when provided, overrides Accept-Language. Businesses MAY return content in a different language if unavailable.                                                       |
-| currency        | string | No       | Preferred currency (ISO 4217, e.g., 'EUR', 'USD'). Businesses determine presentment currency from context and authoritative signals; this hint MAY inform selection in multi-currency markets. Also serves as the denomination for price filter values — platforms SHOULD include this field when sending price filters. Response prices include explicit currency confirming the resolution. |
+| Name            | Type                                                                                | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| --------------- | ----------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| address_country | string                                                                              | No       | The country. Recommended to be in 2-letter ISO 3166-1 alpha-2 format, for example "US". For backward compatibility, a 3-letter ISO 3166-1 alpha-3 country code such as "SGP" or a full country name such as "Singapore" can also be used. Optional hint for market context (currency, availability, pricing)—higher-resolution data (e.g., shipping address) supersedes this value.                                                                                |
+| address_region  | string                                                                              | No       | The region in which the locality is, and which is in the country. For example, California or another appropriate first-level Administrative division. Optional hint for progressive localization—higher-resolution data (e.g., shipping address) supersedes this value.                                                                                                                                                                                            |
+| postal_code     | string                                                                              | No       | The postal code. For example, 94043. Optional hint for regional refinement—higher-resolution data (e.g., shipping address) supersedes this value.                                                                                                                                                                                                                                                                                                                  |
+| intent          | string                                                                              | No       | Background context describing buyer's intent (e.g., 'looking for a gift under $50', 'need something durable for outdoor use'). Informs relevance, recommendations, and personalization.                                                                                                                                                                                                                                                                            |
+| language        | string                                                                              | No       | Preferred language for content. Use IETF BCP 47 language tags (e.g., 'en', 'fr-CA', 'zh-Hans'). For REST, equivalent to Accept-Language header—platforms SHOULD fall back to Accept-Language when this field is absent; when provided, overrides Accept-Language. Businesses MAY return content in a different language if unavailable.                                                                                                                            |
+| currency        | string                                                                              | No       | Preferred currency (ISO 4217, e.g., 'EUR', 'USD'). Businesses determine presentment currency from context and authoritative signals; this hint MAY inform selection in multi-currency markets. Also serves as the denomination for price filter values — platforms SHOULD include this field when sending price filters. Response prices include explicit currency confirming the resolution.                                                                      |
+| eligibility     | Array\[[Reverse Domain Name](/draft/specification/reference/#reverse-domain-name)\] | No       | Buyer claims about eligible benefits such as loyalty membership, payment instrument perks, and similar. Recognized claims MAY inform the Business response (e.g., member-only product availability, adjusted pricing in catalog, provisional discounts at cart or checkout). Businesses MUST ignore unrecognized values without error. Values MUST use reverse-domain naming (e.g., 'com.example.loyalty_gold', 'org.school.student') and MUST be non-identifying. |
 
 ### Signals
 
@@ -9652,6 +9777,8 @@ The Catalog capability allows platforms to search and browse business product ca
 
 Catalog operations return product and variant IDs that can be used directly in checkout `line_items[].item.id`. The variant ID from catalog retrieval should match the item ID expected by checkout.
 
+Catalog responses (pricing, availability, etc.) reflect the Business's current terms for the given request but are not transactional commitments — checkout is authoritative. Responses can be session-specific and **SHOULD NOT** be reused across sessions without re-validation.
+
 ## Shared Entities
 
 ### Context
@@ -9662,14 +9789,17 @@ Context signals are provisional—not authoritative data. Businesses SHOULD use 
 
 Businesses determine market assignment—including currency—based on context signals. Price filter values are denominated in `context.currency`; when the presentment currency differs, businesses SHOULD convert before applying (see [Price Filter](https://ucp.dev/draft/specification/catalog/search/#price-filter)). Response prices include explicit currency codes confirming the resolution.
 
-| Name            | Type   | Required | Description                                                                                                                                                                                                                                                                                                                                                                                   |
-| --------------- | ------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| address_country | string | No       | The country. Recommended to be in 2-letter ISO 3166-1 alpha-2 format, for example "US". For backward compatibility, a 3-letter ISO 3166-1 alpha-3 country code such as "SGP" or a full country name such as "Singapore" can also be used. Optional hint for market context (currency, availability, pricing)—higher-resolution data (e.g., shipping address) supersedes this value.           |
-| address_region  | string | No       | The region in which the locality is, and which is in the country. For example, California or another appropriate first-level Administrative division. Optional hint for progressive localization—higher-resolution data (e.g., shipping address) supersedes this value.                                                                                                                       |
-| postal_code     | string | No       | The postal code. For example, 94043. Optional hint for regional refinement—higher-resolution data (e.g., shipping address) supersedes this value.                                                                                                                                                                                                                                             |
-| intent          | string | No       | Background context describing buyer's intent (e.g., 'looking for a gift under $50', 'need something durable for outdoor use'). Informs relevance, recommendations, and personalization.                                                                                                                                                                                                       |
-| language        | string | No       | Preferred language for content. Use IETF BCP 47 language tags (e.g., 'en', 'fr-CA', 'zh-Hans'). For REST, equivalent to Accept-Language header—platforms SHOULD fall back to Accept-Language when this field is absent; when provided, overrides Accept-Language. Businesses MAY return content in a different language if unavailable.                                                       |
-| currency        | string | No       | Preferred currency (ISO 4217, e.g., 'EUR', 'USD'). Businesses determine presentment currency from context and authoritative signals; this hint MAY inform selection in multi-currency markets. Also serves as the denomination for price filter values — platforms SHOULD include this field when sending price filters. Response prices include explicit currency confirming the resolution. |
+When `context.eligibility` claims are present, Businesses that accept them **MAY** adjust `price` / `list_price` directly for strikethrough display and **MAY** use `messages` with `code: "eligibility_benefit"` to attribute the adjustment to a specific claim.
+
+| Name            | Type                                                                                | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| --------------- | ----------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| address_country | string                                                                              | No       | The country. Recommended to be in 2-letter ISO 3166-1 alpha-2 format, for example "US". For backward compatibility, a 3-letter ISO 3166-1 alpha-3 country code such as "SGP" or a full country name such as "Singapore" can also be used. Optional hint for market context (currency, availability, pricing)—higher-resolution data (e.g., shipping address) supersedes this value.                                                                                |
+| address_region  | string                                                                              | No       | The region in which the locality is, and which is in the country. For example, California or another appropriate first-level Administrative division. Optional hint for progressive localization—higher-resolution data (e.g., shipping address) supersedes this value.                                                                                                                                                                                            |
+| postal_code     | string                                                                              | No       | The postal code. For example, 94043. Optional hint for regional refinement—higher-resolution data (e.g., shipping address) supersedes this value.                                                                                                                                                                                                                                                                                                                  |
+| intent          | string                                                                              | No       | Background context describing buyer's intent (e.g., 'looking for a gift under $50', 'need something durable for outdoor use'). Informs relevance, recommendations, and personalization.                                                                                                                                                                                                                                                                            |
+| language        | string                                                                              | No       | Preferred language for content. Use IETF BCP 47 language tags (e.g., 'en', 'fr-CA', 'zh-Hans'). For REST, equivalent to Accept-Language header—platforms SHOULD fall back to Accept-Language when this field is absent; when provided, overrides Accept-Language. Businesses MAY return content in a different language if unavailable.                                                                                                                            |
+| currency        | string                                                                              | No       | Preferred currency (ISO 4217, e.g., 'EUR', 'USD'). Businesses determine presentment currency from context and authoritative signals; this hint MAY inform selection in multi-currency markets. Also serves as the denomination for price filter values — platforms SHOULD include this field when sending price filters. Response prices include explicit currency confirming the resolution.                                                                      |
+| eligibility     | Array\[[Reverse Domain Name](/draft/specification/reference/#reverse-domain-name)\] | No       | Buyer claims about eligible benefits such as loyalty membership, payment instrument perks, and similar. Recognized claims MAY inform the Business response (e.g., member-only product availability, adjusted pricing in catalog, provisional discounts at cart or checkout). Businesses MUST ignore unrecognized values without error. Values MUST use reverse-domain naming (e.g., 'com.example.loyalty_gold', 'org.school.student') and MUST be non-identifying. |
 
 ### Signals
 
@@ -14077,14 +14207,15 @@ ______________________________________________________________________
 
 ### Context
 
-| Name            | Type   | Required | Description                                                                                                                                                                                                                                                                                                                                                                                   |
-| --------------- | ------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| address_country | string | No       | The country. Recommended to be in 2-letter ISO 3166-1 alpha-2 format, for example "US". For backward compatibility, a 3-letter ISO 3166-1 alpha-3 country code such as "SGP" or a full country name such as "Singapore" can also be used. Optional hint for market context (currency, availability, pricing)—higher-resolution data (e.g., shipping address) supersedes this value.           |
-| address_region  | string | No       | The region in which the locality is, and which is in the country. For example, California or another appropriate first-level Administrative division. Optional hint for progressive localization—higher-resolution data (e.g., shipping address) supersedes this value.                                                                                                                       |
-| postal_code     | string | No       | The postal code. For example, 94043. Optional hint for regional refinement—higher-resolution data (e.g., shipping address) supersedes this value.                                                                                                                                                                                                                                             |
-| intent          | string | No       | Background context describing buyer's intent (e.g., 'looking for a gift under $50', 'need something durable for outdoor use'). Informs relevance, recommendations, and personalization.                                                                                                                                                                                                       |
-| language        | string | No       | Preferred language for content. Use IETF BCP 47 language tags (e.g., 'en', 'fr-CA', 'zh-Hans'). For REST, equivalent to Accept-Language header—platforms SHOULD fall back to Accept-Language when this field is absent; when provided, overrides Accept-Language. Businesses MAY return content in a different language if unavailable.                                                       |
-| currency        | string | No       | Preferred currency (ISO 4217, e.g., 'EUR', 'USD'). Businesses determine presentment currency from context and authoritative signals; this hint MAY inform selection in multi-currency markets. Also serves as the denomination for price filter values — platforms SHOULD include this field when sending price filters. Response prices include explicit currency confirming the resolution. |
+| Name            | Type                                                                                | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| --------------- | ----------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| address_country | string                                                                              | No       | The country. Recommended to be in 2-letter ISO 3166-1 alpha-2 format, for example "US". For backward compatibility, a 3-letter ISO 3166-1 alpha-3 country code such as "SGP" or a full country name such as "Singapore" can also be used. Optional hint for market context (currency, availability, pricing)—higher-resolution data (e.g., shipping address) supersedes this value.                                                                                |
+| address_region  | string                                                                              | No       | The region in which the locality is, and which is in the country. For example, California or another appropriate first-level Administrative division. Optional hint for progressive localization—higher-resolution data (e.g., shipping address) supersedes this value.                                                                                                                                                                                            |
+| postal_code     | string                                                                              | No       | The postal code. For example, 94043. Optional hint for regional refinement—higher-resolution data (e.g., shipping address) supersedes this value.                                                                                                                                                                                                                                                                                                                  |
+| intent          | string                                                                              | No       | Background context describing buyer's intent (e.g., 'looking for a gift under $50', 'need something durable for outdoor use'). Informs relevance, recommendations, and personalization.                                                                                                                                                                                                                                                                            |
+| language        | string                                                                              | No       | Preferred language for content. Use IETF BCP 47 language tags (e.g., 'en', 'fr-CA', 'zh-Hans'). For REST, equivalent to Accept-Language header—platforms SHOULD fall back to Accept-Language when this field is absent; when provided, overrides Accept-Language. Businesses MAY return content in a different language if unavailable.                                                                                                                            |
+| currency        | string                                                                              | No       | Preferred currency (ISO 4217, e.g., 'EUR', 'USD'). Businesses determine presentment currency from context and authoritative signals; this hint MAY inform selection in multi-currency markets. Also serves as the denomination for price filter values — platforms SHOULD include this field when sending price filters. Response prices include explicit currency confirming the resolution.                                                                      |
+| eligibility     | Array\[[Reverse Domain Name](/draft/specification/reference/#reverse-domain-name)\] | No       | Buyer claims about eligible benefits such as loyalty membership, payment instrument perks, and similar. Recognized claims MAY inform the Business response (e.g., member-only product availability, adjusted pricing in catalog, provisional discounts at cart or checkout). Businesses MUST ignore unrecognized values without error. Values MUST use reverse-domain naming (e.g., 'com.example.loyalty_gold', 'org.school.student') and MUST be non-identifying. |
 
 ______________________________________________________________________
 
@@ -14719,15 +14850,17 @@ ______________________________________________________________________
 
 #### Applied Discount
 
-| Name        | Type          | Required | Description                                                                                                                      |
-| ----------- | ------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| code        | string        | No       | The discount code. Omitted for automatic discounts.                                                                              |
-| title       | string        | **Yes**  | Human-readable discount name (e.g., 'Summer Sale 20% Off').                                                                      |
-| amount      | integer       | **Yes**  | Total discount amount in ISO 4217 minor units.                                                                                   |
-| automatic   | boolean       | No       | True if applied automatically by merchant rules (no code required).                                                              |
-| method      | string        | No       | Allocation method. 'each' = applied independently per item. 'across' = split proportionally by value. **Enum:** `each`, `across` |
-| priority    | integer       | No       | Stacking order for discount calculation. Lower numbers applied first (1 = first).                                                |
-| allocations | Array[object] | No       | Breakdown of where this discount was allocated. Sum of allocation amounts equals total amount.                                   |
+| Name        | Type          | Required | Description                                                                                                                                                                        |
+| ----------- | ------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| code        | string        | No       | The discount code. Omitted for automatic discounts.                                                                                                                                |
+| title       | string        | **Yes**  | Human-readable discount name (e.g., 'Summer Sale 20% Off').                                                                                                                        |
+| amount      | integer       | **Yes**  | Total discount amount in ISO 4217 minor units.                                                                                                                                     |
+| automatic   | boolean       | No       | True if applied automatically by merchant rules (no code required).                                                                                                                |
+| method      | string        | No       | Allocation method. 'each' = applied independently per item. 'across' = split proportionally by value. **Enum:** `each`, `across`                                                   |
+| priority    | integer       | No       | Stacking order for discount calculation. Lower numbers applied first (1 = first).                                                                                                  |
+| provisional | boolean       | No       | True if this discount requires additional verification.                                                                                                                            |
+| eligibility | string        | No       | The eligibility claim accepted by the Business for this discount. Corresponds to a value from context.eligibility. Omitted for code-based and non-eligibility automatic discounts. |
+| allocations | Array[object] | No       | Breakdown of where this discount was allocated. Sum of allocation amounts equals total amount.                                                                                     |
 
 #### Discounts Object
 

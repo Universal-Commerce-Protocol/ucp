@@ -2368,6 +2368,10 @@ This enables product discovery before checkout, supporting use cases like:</p>
 <p>Catalog operations return product and variant IDs that can be used directly in
 checkout <code>line_items[].item.id</code>. The variant ID from catalog retrieval should match
 the item ID expected by checkout.</p>
+<p>Catalog responses (pricing, availability, etc.) reflect the Business's current
+terms for the given request but are not transactional commitments — checkout
+is authoritative. Responses can be session-specific and <strong>SHOULD NOT</strong> be
+reused across sessions without re-validation.</p>
 <h2 id="shared-entities">Shared Entities<a class="headerlink" href="#shared-entities" title="Permanent link">&para;</a></h2>
 <h3 id="context">Context<a class="headerlink" href="#context" title="Permanent link">&para;</a></h3>
 <p>Location and market context for catalog operations. All fields are optional
@@ -2384,6 +2388,10 @@ signals. Price filter values are denominated in <code>context.currency</code>; w
 the presentment currency differs, businesses SHOULD convert before applying
 (see <a href="search/#price-filter">Price Filter</a>). Response prices include
 explicit currency codes confirming the resolution.</p>
+<p>When <code>context.eligibility</code> claims are present, Businesses that accept them
+<strong>MAY</strong> adjust <code>price</code> / <code>list_price</code> directly for strikethrough display and
+<strong>MAY</strong> use <code>messages</code> with <code>code: "eligibility_benefit"</code> to attribute the
+adjustment to a specific claim.</p>
 <table>
 <thead>
 <tr>
@@ -2429,6 +2437,12 @@ explicit currency codes confirming the resolution.</p>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Preferred currency (ISO 4217, e.g., 'EUR', 'USD'). Businesses determine presentment currency from context and authoritative signals; this hint MAY inform selection in multi-currency markets. Also serves as the denomination for price filter values — platforms SHOULD include this field when sending price filters. Response prices include explicit currency confirming the resolution.</td>
+</tr>
+<tr>
+<td style="text-align: left;">eligibility</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#reverse-domain-name">Reverse Domain Name</a>]</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Buyer claims about eligible benefits such as loyalty membership, payment instrument perks, and similar. Recognized claims MAY inform the Business response (e.g., member-only product availability, adjusted pricing in catalog, provisional discounts at cart or checkout). Businesses MUST ignore unrecognized values without error. Values MUST use reverse-domain naming (e.g., 'com.example.loyalty_gold', 'org.school.student') and MUST be non-identifying.</td>
 </tr>
 </tbody>
 </table>

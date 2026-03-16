@@ -721,6 +721,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#eligibility-verification-at-completion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Eligibility Verification at Completion
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2442,6 +2453,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#eligibility-verification-at-completion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Eligibility Verification at Completion
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -3305,6 +3327,10 @@ handle with specific, appropriate UX rather than generic error treatment.</p>
 <td style="text-align: left;"><code>payment_failed</code></td>
 <td style="text-align: left;">Payment processing failed</td>
 </tr>
+<tr>
+<td style="text-align: left;"><code>eligibility_invalid</code></td>
+<td style="text-align: left;">Eligibility claim could not be verified at completion</td>
+</tr>
 </tbody>
 </table>
 <p>Businesses <strong>SHOULD</strong> mark standard errors with <code>severity: recoverable</code> to
@@ -3313,6 +3339,91 @@ address validation prompts, payment method changes) rather than generic error
 messages or deferring to checkout completion.</p>
 <p>Example: <code>out_of_stock</code> requires specific upfront UX, whereas
 <code>payment_required</code> can be handled generically at submission.</p>
+<h4 id="eligibility-verification-at-completion">Eligibility Verification at Completion<a class="headerlink" href="#eligibility-verification-at-completion" title="Permanent link">&para;</a></h4>
+<p>Platforms provide <code>context.eligibility</code> — buyer claims about eligible benefits
+such as loyalty membership, payment instrument perks, and similar. These are
+claims, not verified facts. Businesses <strong>MAY</strong> act on recognized claims during
+the session (adjusting pricing, granting product access, applying provisional
+discounts), but all accepted claims <strong>MUST</strong> be resolved before the
+transaction can complete.</p>
+<p>Unrecognized or inapplicable claims <strong>MUST NOT</strong> block the checkout.
+Businesses <strong>SHOULD</strong> notify the buyer via <code>messages</code> with <code>type: "warning"</code>
+when a claim is not accepted, and <strong>MAY</strong> use <code>type: "info"</code> to explain
+the effects of accepted claims. At completion, accepted claims that remain
+unverified <strong>MUST</strong> result in <code>type: "error"</code> with
+<code>code: "eligibility_invalid"</code> (see below).</p>
+<p><strong>Eligibility message codes:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Code</th>
+<th>When</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>warning</code></td>
+<td><code>eligibility_not_accepted</code></td>
+<td>Claim not recognized or not applicable</td>
+</tr>
+<tr>
+<td><code>info</code></td>
+<td><code>eligibility_accepted</code></td>
+<td>Effect of an accepted claim</td>
+</tr>
+<tr>
+<td><code>error</code></td>
+<td><code>eligibility_invalid</code></td>
+<td>Accepted claim could not be verified at completion</td>
+</tr>
+</tbody>
+</table>
+<p>A claim is resolved when it is either <strong>verified</strong> or <strong>rescinded</strong>:</p>
+<ul>
+<li><strong>Verified</strong>: The Business confirms the claim against a proof provided at
+  completion time. UCP does not prescribe how verification occurs — proof
+  may come from the payment credential, an identity verification capability,
+  or any other mechanism negotiated between Platform and Business.</li>
+<li><strong>Rescinded</strong>: The Platform removes the claim from <code>context.eligibility</code>
+  before completion (e.g., buyer changes payment method, withdraws a
+  membership claim). Once removed, the Business recalculates without it.</li>
+</ul>
+<p>Businesses <strong>MUST NOT</strong> complete a transaction with unresolved eligibility
+claims. Unverified claims may result in incorrect pricing or unauthorized
+access to restricted products.</p>
+<p><strong>When verification fails:</strong></p>
+<p>Verification failure <strong>MUST</strong> only affect the <code>messages</code> array. The
+Business <strong>MUST</strong> return an error in <code>messages</code> with
+<code>code: "eligibility_invalid"</code> and <code>severity: "recoverable"</code>. Messages
+<strong>SHOULD</strong> use the <code>path</code> field to identify which specific claim(s) could
+not be verified. The Platform <strong>MAY</strong> then provide valid proof and
+resubmit, restructure the checkout (e.g., remove ineligible items, update
+claims), or abandon the attempt.</p>
+<p>For example, the Platform claims a store card benefit via
+<code>context.eligibility</code>. The Business applies member pricing during the session.
+At completion, the payment credential does not match the claimed instrument:</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p">{</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="nt">&quot;ucp&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-01-11&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;success&quot;</span><span class="w"> </span><span class="p">},</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;checkout_abc&quot;</span><span class="p">,</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">  </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ready_for_complete&quot;</span><span class="p">,</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">  </span><span class="nt">&quot;line_items&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="w"> </span><span class="p">],</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">  </span><span class="nt">&quot;totals&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="w"> </span><span class="p">],</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">  </span><span class="nt">&quot;messages&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">    </span><span class="p">{</span>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;error&quot;</span><span class="p">,</span>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="w">      </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;eligibility_invalid&quot;</span><span class="p">,</span>
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="w">      </span><span class="nt">&quot;severity&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;recoverable&quot;</span><span class="p">,</span>
+</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="w">      </span><span class="nt">&quot;content&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Payment credential does not match the claimed store card benefit.&quot;</span><span class="p">,</span>
+</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="w">      </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;$.context.eligibility[0]&quot;</span>
+</span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-4-15"><a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a><span class="w">  </span><span class="p">]</span>
+</span><span id="__span-4-16"><a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a><span class="p">}</span>
+</span></code></pre></div>
+<p>The Platform can resolve this by having the buyer switch to the qualifying
+payment instrument, or by removing the claim from <code>context.eligibility</code> to
+renegotiate the checkout (obtaining updated pricing, availability, etc.)
+and then resubmitting for completion.</p>
 <h2 id="continue-url">Continue URL<a class="headerlink" href="#continue-url" title="Permanent link">&para;</a></h2>
 <p>The <code>continue_url</code> field enables checkout handoff from platform to business UI,
 allowing the buyer to continue and finalize the checkout session.</p>
@@ -3328,7 +3439,7 @@ checkout state for seamless handoff. Businesses <strong>MAY</strong> implement s
 preservation using either approach:</p>
 <h4 id="server-side-state-recommended">Server-Side State (Recommended)<a class="headerlink" href="#server-side-state-recommended" title="Permanent link">&para;</a></h4>
 <p>An opaque URL backed by server-side checkout state:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>https://business.example.com/checkout-sessions/{checkout_id}
+<div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>https://business.example.com/checkout-sessions/{checkout_id}
 </span></code></pre></div>
 <ul>
 <li>Server maintains checkout state tied to <code>checkout_id</code></li>
@@ -3843,6 +3954,12 @@ binding transaction data.</p>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Preferred currency (ISO 4217, e.g., 'EUR', 'USD'). Businesses determine presentment currency from context and authoritative signals; this hint MAY inform selection in multi-currency markets. Also serves as the denomination for price filter values — platforms SHOULD include this field when sending price filters. Response prices include explicit currency confirming the resolution.</td>
+</tr>
+<tr>
+<td style="text-align: left;">eligibility</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#reverse-domain-name">Reverse Domain Name</a>]</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Buyer claims about eligible benefits such as loyalty membership, payment instrument perks, and similar. Recognized claims MAY inform the Business response (e.g., member-only product availability, adjusted pricing in catalog, provisional discounts at cart or checkout). Businesses MUST ignore unrecognized values without error. Values MUST use reverse-domain naming (e.g., 'com.example.loyalty_gold', 'org.school.student') and MUST be non-identifying.</td>
 </tr>
 </tbody>
 </table>
