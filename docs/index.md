@@ -326,7 +326,7 @@ image: assets/banner.png
   {
     "ucp": { ... },
     "id": "order_123456789",
-    "checkouts": [{ "id": "chk_123456789", "created_at": "..." }],
+    "checkout_id": "chk_123456789",
     "permalink_url": ...,
     "line_items": [ ... ],
     "fulfillment": {

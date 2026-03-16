@@ -31,7 +31,7 @@ Orders have three main components:
 **Line Items** — what was purchased at checkout:
 
 * Includes current quantity counts (total, fulfilled)
-* Can change post-order (e.g. order edits, exchanges)
+* Can change post-order (e.g. order edits, exchanges); **MUST** include all line items that ever existed on the order regardless of edits or alterations
 
 **Fulfillment** — how items get delivered:
 
@@ -124,7 +124,8 @@ Line items reflect what was purchased at checkout and their current state.
 **Status Derivation:**
 
 ```text
-if (fulfilled == total) → "fulfilled"
+if (total == 0) → "removed"
+else if (fulfilled == total) → "fulfilled"
 else if (fulfilled > 0) → "partial"
 else → "processing"
 ```
@@ -170,9 +171,7 @@ Examples: `refund`, `return`, `credit`, `price_adjustment`, `dispute`,
     }
   },
   "id": "order_abc123",
-  "checkouts": [
-    { "id": "checkout_xyz789", "created_at": "2025-01-05T09:00:00Z" }
-  ],
+  "checkout_id": "checkout_xyz789",
   "permalink_url": "https://business.com/orders/abc123",
   "line_items": [
     {

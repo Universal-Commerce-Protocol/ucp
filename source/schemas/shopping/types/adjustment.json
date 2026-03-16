@@ -54,24 +54,21 @@
     "totals": {
       "type": "array",
       "items": {
-        "type": "object",
-        "required": ["type", "amount"],
-        "properties": {
-          "type": {
-            "type": "string",
-            "description": "Type of total (e.g., subtotal, tax, fulfillment, total)."
+        "allOf": [
+          {
+            "$ref": "total.json"
           },
-          "display_text": {
-            "type": "string",
-            "description": "Text to display against the amount."
-          },
-          "amount": {
-            "$ref": "signed_amount.json",
-            "description": "Signed amount in ISO 4217 minor units. Negative for money returned to buyer (refunds, credits), positive for additional charges (exchanges)."
+          {
+            "type": "object",
+            "properties": {
+              "amount": {
+                "$ref": "signed_amount.json"
+              }
+            }
           }
-        }
+        ]
       },
-      "description": "Adjustment totals breakdown."
+      "description": "Adjustment totals breakdown. Signed values - negative for money returned to buyer (refunds, credits), positive for additional charges (exchanges)."
     },
     "description": {
       "type": "string",

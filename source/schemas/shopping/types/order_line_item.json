@@ -26,12 +26,12 @@
         "original": {
           "type": "integer",
           "minimum": 0,
-          "description": "Quantity from the original checkout (earliest created_at). Convenience property—avoids requiring a separate Checkout lookup."
+          "description": "Quantity from the original checkout."
         },
         "total": {
           "type": "integer",
           "minimum": 0,
-          "description": "Current total quantity. May differ from original due to order edits or exchanges."
+          "description": "Current total active quantity. May differ from original due to post-order modifications (e.g., returns or cancellations)."
         },
         "fulfilled": {
           "type": "integer",
@@ -53,9 +53,10 @@
       "enum": [
         "processing",
         "partial",
-        "fulfilled"
+        "fulfilled",
+        "removed"
       ],
-      "description": "Derived status: fulfilled if quantity.fulfilled == quantity.total, partial if quantity.fulfilled > 0, otherwise processing."
+      "description": "Derived status: removed if quantity.total == 0, fulfilled if quantity.fulfilled == quantity.total, partial if quantity.fulfilled > 0, otherwise processing."
     },
     "parent_id": {
       "type": "string",

@@ -25,7 +25,7 @@
   "required": [
     "ucp",
     "id",
-    "checkouts",
+    "checkout_id",
     "permalink_url",
     "line_items",
     "fulfillment",
@@ -39,25 +39,9 @@
       "type": "string",
       "description": "Unique order identifier."
     },
-    "checkouts": {
-      "type": "array",
-      "minItems": 1,
-      "items": {
-        "type": "object",
-        "required": ["id", "created_at"],
-        "properties": {
-          "id": {
-            "type": "string",
-            "description": "Unique identifier of the checkout session."
-          },
-          "created_at": {
-            "type": "string",
-            "format": "date-time",
-            "description": "RFC 3339 timestamp when this checkout session was created."
-          }
-        }
-      },
-      "description": "Associated checkout sessions. Orders reference one or more checkouts—order edits and exchanges create additional checkout sessions against the same order."
+    "checkout_id": {
+      "type": "string",
+      "description": "Associated checkout ID for reconciliation."
     },
     "permalink_url": {
       "type": "string",
