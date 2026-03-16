@@ -69,6 +69,13 @@
         "update": "optional"
       }
     },
+    "signals": {
+      "$ref": "types/signals.json",
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional"
+      }
+    },
     "buyer": {
       "$ref": "types/buyer.json",
       "description": "Optional buyer information for personalized estimates.",

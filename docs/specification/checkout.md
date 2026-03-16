@@ -240,6 +240,7 @@ handle with specific, appropriate UX rather than generic error treatment.
 | `item_unavailable`       | Item cannot be purchased (e.g. delisted)                                   |
 | `address_undeliverable`  | Cannot deliver to the provided address                                     |
 | `payment_failed`         | Payment processing failed                                                  |
+| `eligibility_invalid`    | Eligibility claim could not be verified at completion                      |
 
 Businesses **SHOULD** mark standard errors with `severity: recoverable` to
 signal that platforms should provide appropriate UX (out-of-stock messaging,
@@ -248,6 +249,82 @@ messages or deferring to checkout completion.
 
 Example: `out_of_stock` requires specific upfront UX, whereas
 `payment_required` can be handled generically at submission.
+
+#### Eligibility Verification at Completion
+
+Platforms provide `context.eligibility` — buyer claims about eligible benefits
+such as loyalty membership, payment instrument perks, and similar. These are
+claims, not verified facts. Businesses **MAY** act on recognized claims during
+the session (adjusting pricing, granting product access, applying provisional
+discounts), but all accepted claims **MUST** be resolved before the
+transaction can complete.
+
+Unrecognized or inapplicable claims **MUST NOT** block the checkout.
+Businesses **SHOULD** notify the buyer via `messages` with `type: "warning"`
+when a claim is not accepted, and **MAY** use `type: "info"` to explain
+the effects of accepted claims. At completion, accepted claims that remain
+unverified **MUST** result in `type: "error"` with
+`code: "eligibility_invalid"` (see below).
+
+**Eligibility message codes:**
+
+| Type      | Code                       | When                                               |
+| --------- | -------------------------- | -------------------------------------------------- |
+| `warning` | `eligibility_not_accepted` | Claim not recognized or not applicable             |
+| `info`    | `eligibility_accepted`     | Effect of an accepted claim                        |
+| `error`   | `eligibility_invalid`      | Accepted claim could not be verified at completion |
+
+A claim is resolved when it is either **verified** or **rescinded**:
+
+* **Verified**: The Business confirms the claim against a proof provided at
+  completion time. UCP does not prescribe how verification occurs — proof
+  may come from the payment credential, an identity verification capability,
+  or any other mechanism negotiated between Platform and Business.
+* **Rescinded**: The Platform removes the claim from `context.eligibility`
+  before completion (e.g., buyer changes payment method, withdraws a
+  membership claim). Once removed, the Business recalculates without it.
+
+Businesses **MUST NOT** complete a transaction with unresolved eligibility
+claims. Unverified claims may result in incorrect pricing or unauthorized
+access to restricted products.
+
+**When verification fails:**
+
+Verification failure **MUST** only affect the `messages` array. The
+Business **MUST** return an error in `messages` with
+`code: "eligibility_invalid"` and `severity: "recoverable"`. Messages
+**SHOULD** use the `path` field to identify which specific claim(s) could
+not be verified. The Platform **MAY** then provide valid proof and
+resubmit, restructure the checkout (e.g., remove ineligible items, update
+claims), or abandon the attempt.
+
+For example, the Platform claims a store card benefit via
+`context.eligibility`. The Business applies member pricing during the session.
+At completion, the payment credential does not match the claimed instrument:
+
+```json
+{
+  "ucp": { "version": "2026-01-11", "status": "success" },
+  "id": "checkout_abc",
+  "status": "ready_for_complete",
+  "line_items": [ "..." ],
+  "totals": [ "..." ],
+  "messages": [
+    {
+      "type": "error",
+      "code": "eligibility_invalid",
+      "severity": "recoverable",
+      "content": "Payment credential does not match the claimed store card benefit.",
+      "path": "$.context.eligibility[0]"
+    }
+  ]
+}
+```
+
+The Platform can resolve this by having the buyer switch to the qualifying
+payment instrument, or by removing the claim from `context.eligibility` to
+renegotiate the checkout (obtaining updated pricing, availability, etc.)
+and then resubmitting for completion.
 
 ## Continue URL
 
@@ -427,6 +504,18 @@ controls). Eligibility and policy enforcement MUST occur at checkout time using
 binding transaction data.
 
 {{ schema_fields('context', 'checkout') }}
+
+### Signals
+
+Environment data provided by the platform to support authorization
+and abuse prevention. Unlike `context` (buyer-asserted preferences) and `buyer`
+(self-reported identity), signal values MUST NOT be buyer-asserted claims —
+platforms provide signals based on direct observation or by relaying
+independently verifiable third-party attestations. See
+[Signals](overview.md#signals) for details and privacy
+requirements.
+
+{{ schema_fields('types/signals', 'checkout') }}
 
 ### Fulfillment Option
 

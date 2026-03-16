@@ -48,6 +48,11 @@ Catalog operations return product and variant IDs that can be used directly in
 checkout `line_items[].item.id`. The variant ID from catalog retrieval should match
 the item ID expected by checkout.
 
+Catalog responses (pricing, availability, etc.) reflect the Business's current
+terms for the given request but are not transactional commitments — checkout
+is authoritative. Responses can be session-specific and **SHOULD NOT** be
+reused across sessions without re-validation.
+
 ## Shared Entities
 
 ### Context
@@ -69,7 +74,20 @@ the presentment currency differs, businesses SHOULD convert before applying
 (see [Price Filter](search.md#price-filter)). Response prices include
 explicit currency codes confirming the resolution.
 
+When `context.eligibility` claims are present, Businesses that accept them
+**MAY** adjust `price` / `list_price` directly for strikethrough display and
+**MAY** use `messages` with `code: "eligibility_benefit"` to attribute the
+adjustment to a specific claim.
+
 {{ schema_fields('types/context', 'catalog') }}
+
+### Signals
+
+Environment data provided by the platform to support authorization
+and abuse prevention. Signal values MUST NOT be buyer-asserted claims. See
+[Signals](../overview.md#signals) for details and privacy requirements.
+
+{{ schema_fields('types/signals', 'catalog') }}
 
 ### Product
 

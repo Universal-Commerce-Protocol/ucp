@@ -766,8 +766,9 @@ place to set these expectations via `messages`.
           }
         ]
       },
-      "risk_signals": {
-        //... risk signal related data (device fingerprint / risk token)
+      "signals": {
+        "dev.ucp.buyer_ip": "203.0.113.42",
+        "dev.ucp.user_agent": "Mozilla/5.0 ..."
       }
     }
     ```
