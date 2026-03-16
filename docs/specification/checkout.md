@@ -643,7 +643,9 @@ logic of their own.
 
 Invariants of `totals[]`:
 
-* Every entry carries a `display_text` and an `amount`.
+* Every entry carries a `type` and an `amount`. Platforms SHOULD use
+  `display_text` when provided. Well-known types have default display labels
+  as fallback (see table below); unknown types MUST include `display_text`.
 * Amounts are signed integers — negative values are subtractive (e.g.,
   discounts), positive values are additive. The sign IS the direction.
 * Exactly one `type: "subtotal"` MUST be present.
@@ -665,21 +667,25 @@ buyer.
 
 #### Well-Known Types
 
-| Type              | Sign       | Meaning                                        |
-| ----------------- | ---------- | ---------------------------------------------- |
-| `subtotal`        | +          | Sum of line item prices                        |
-| `discount`        | −          | Order or line-item level discount              |
-| `items_discount`  | −          | Rollup of line-item discounts                  |
-| `fulfillment`     | +          | Shipping, delivery, or pickup charges          |
-| `tax`             | +          | Tax charges                                    |
-| `fee`             | +          | Fees and surcharges                            |
-| `total`           | =          | Authoritative grand total (exactly one)        |
+| Type              | Sign | Default label    | Meaning                                   |
+| ----------------- | ---- | ---------------- | ----------------------------------------- |
+| `subtotal`        | +    | Subtotal         | Sum of line item prices                   |
+| `discount`        | −    | Discount         | Order or line-item level discount         |
+| `items_discount`  | −    | Item Discounts   | Rollup of line-item discounts             |
+| `fulfillment`     | +    | Shipping         | Shipping, delivery, or pickup charges     |
+| `tax`             | +    | Tax              | Tax charges                               |
+| `fee`             | +    | Fee              | Fees and surcharges                       |
+| `total`           | =    | Total            | Authoritative grand total (exactly one)   |
 
-The sign convention for well-known types is schema-enforced: subtractive
-types (discount, items_discount) MUST have negative amounts; additive types
-(subtotal, fulfillment, tax, fee) MUST have non-negative amounts. The `type`
-field is an open string — businesses MAY use values beyond the well-known
-set, where the sign on the amount is self-describing.
+When `display_text` is provided, platforms MUST use it. When omitted on a
+well-known type, platforms SHOULD use the default label above. The sign
+convention for well-known types is schema-enforced: subtractive types
+(discount, items_discount) MUST have negative amounts; additive types
+(subtotal, fulfillment, tax, fee) MUST have non-negative amounts.
+
+The `type` field is an open string — businesses MAY use values beyond the
+well-known set. Unknown types MUST include `display_text` (schema-enforced)
+and the sign on the amount is self-describing.
 
 #### Repeating Types
 

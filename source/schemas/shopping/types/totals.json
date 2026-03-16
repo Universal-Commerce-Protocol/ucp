@@ -11,9 +11,6 @@
       },
       {
         "type": "object",
-        "required": [
-          "display_text"
-        ],
         "properties": {
           "amount": {
             "$ref": "signed_amount.json"
@@ -49,6 +46,15 @@
       {
         "if": { "properties": { "type": { "enum": ["subtotal", "fulfillment", "tax", "fee"] } }, "required": ["type"] },
         "then": { "properties": { "amount": { "minimum": 0 } } }
+      },
+      {
+        "if": {
+          "properties": {
+            "type": { "not": { "enum": ["subtotal", "items_discount", "discount", "fulfillment", "tax", "fee", "total"] } }
+          },
+          "required": ["type"]
+        },
+        "then": { "required": ["display_text"] }
       }
     ]
   },
