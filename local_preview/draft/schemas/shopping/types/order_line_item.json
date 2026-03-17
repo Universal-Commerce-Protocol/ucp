@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/draft/schemas/shopping/types/order_line_item.json",
+  "title": "Order Line Item",
+  "type": "object",
+  "required": [
+    "id",
+    "item",
+    "quantity",
+    "totals",
+    "status"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Line item identifier."
+    },
+    "item": {
+      "$ref": "https://ucp.dev/draft/schemas/shopping/types/item.json",
+      "description": "Product data (id, title, price, image_url)."
+    },
+    "quantity": {
+      "type": "object",
+      "required": [
+        "total",
+        "fulfilled"
+      ],
+      "properties": {
+        "total": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Current total quantity."
+        },
+        "fulfilled": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Quantity fulfilled (sum from fulfillment events)."
+        }
+      },
+      "description": "Quantity tracking. Both total and fulfilled are derived from events."
+    },
+    "totals": {
+      "type": "array",
+      "items": {
+        "$ref": "https://ucp.dev/draft/schemas/shopping/types/total.json"
+      },
+      "description": "Line item totals breakdown."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "processing",
+        "partial",
+        "fulfilled"
+      ],
+      "description": "Derived status: fulfilled if quantity.fulfilled == quantity.total, partial if quantity.fulfilled > 0, otherwise processing."
+    },
+    "parent_id": {
+      "type": "string",
+      "description": "Parent line item identifier for any nested structures."
+    }
+  }
+}

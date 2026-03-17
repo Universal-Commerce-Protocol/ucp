@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/draft/schemas/shopping/types/message_info.json",
+  "title": "Message Info",
+  "type": "object",
+  "required": [
+    "type",
+    "content"
+  ],
+  "properties": {
+    "type": {
+      "type": "string",
+      "const": "info",
+      "description": "Message type discriminator."
+    },
+    "path": {
+      "type": "string",
+      "description": "RFC 9535 JSONPath to the component the message refers to."
+    },
+    "code": {
+      "type": "string",
+      "description": "Info code for programmatic handling."
+    },
+    "content_type": {
+      "type": "string",
+      "enum": [
+        "plain",
+        "markdown"
+      ],
+      "default": "plain",
+      "description": "Content format, default = plain."
+    },
+    "content": {
+      "type": "string",
+      "description": "Human-readable message."
+    }
+  }
+}

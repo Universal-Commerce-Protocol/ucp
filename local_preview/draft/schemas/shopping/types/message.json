@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/draft/schemas/shopping/types/message.json",
+  "title": "Message",
+  "type": "object",
+  "description": "Container for error, warning, or info messages.",
+  "oneOf": [
+    {
+      "$ref": "https://ucp.dev/draft/schemas/shopping/types/message_error.json"
+    },
+    {
+      "$ref": "https://ucp.dev/draft/schemas/shopping/types/message_warning.json"
+    },
+    {
+      "$ref": "https://ucp.dev/draft/schemas/shopping/types/message_info.json"
+    }
+  ]
+}

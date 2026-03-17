@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/draft/schemas/capability.json",
+  "title": "UCP Capability",
+  "description": "Schema for UCP capabilities and extensions. Extensions are capabilities with an 'extends' field. Uses reverse-domain naming for governance.",
+  "$defs": {
+    "base": {
+      "allOf": [
+        {
+          "$ref": "https://ucp.dev/draft/schemas/ucp.json#/$defs/entity"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "extends": {
+              "oneOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9_]*)+$"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9_]*)+$"
+                  },
+                  "minItems": 1
+                }
+              ],
+              "description": "Parent capability(s) this extends. Present for extensions, absent for root capabilities. Use array for multi-parent extensions."
+            }
+          }
+        }
+      ]
+    },
+    "platform_schema": {
+      "title": "Capability (Platform Schema)",
+      "description": "Full capability declaration for platform-level discovery. Includes spec/schema URLs for agent fetching.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
+        },
+        {
+          "required": [
+            "spec",
+            "schema"
+          ]
+        }
+      ]
+    },
+    "business_schema": {
+      "title": "Capability (Business Schema)",
+      "description": "Capability configuration for business/merchant level. May include business-specific config overrides.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
+        }
+      ]
+    },
+    "response_schema": {
+      "title": "Capability (Response Schema)",
+      "description": "Capability reference in responses. Only name/version required to confirm active capabilities.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
+        }
+      ]
+    }
+  }
+}

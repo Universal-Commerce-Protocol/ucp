@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/draft/schemas/shopping/types/retail_location.json",
+  "title": "Retail Location",
+  "description": "A pickup location (retail store, locker, etc.).",
+  "type": "object",
+  "ucp_shared_request": true,
+  "required": [
+    "id",
+    "name"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique location identifier.",
+      "ucp_request": "omit"
+    },
+    "name": {
+      "type": "string",
+      "description": "Location name (e.g., store name)."
+    },
+    "address": {
+      "$ref": "https://ucp.dev/draft/schemas/shopping/types/postal_address.json",
+      "description": "Physical address of the location."
+    }
+  }
+}

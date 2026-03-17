@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/draft/schemas/shopping/types/account_info.json",
+  "title": "Payment Account Info",
+  "type": "object",
+  "description": "Non-sensitive backend identifiers for linking.",
+  "properties": {
+    "payment_account_reference": {
+      "type": "string",
+      "description": "EMVCo PAR. A unique identifier linking a payment card to a specific account, enabling tracking across tokens (Apple Pay, physical card, etc)."
+    }
+  }
+}

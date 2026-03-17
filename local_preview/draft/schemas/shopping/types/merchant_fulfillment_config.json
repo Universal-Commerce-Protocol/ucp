@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/draft/schemas/shopping/types/merchant_fulfillment_config.json",
+  "title": "Merchant Fulfillment Config",
+  "description": "Merchant's fulfillment configuration.",
+  "type": "object",
+  "properties": {
+    "allows_multi_destination": {
+      "type": "object",
+      "description": "Permits multiple destinations per method type.",
+      "properties": {
+        "shipping": {
+          "type": "boolean",
+          "description": "Multiple shipping destinations allowed."
+        },
+        "pickup": {
+          "type": "boolean",
+          "description": "Multiple pickup locations allowed."
+        }
+      },
+      "additionalProperties": false
+    },
+    "allows_method_combinations": {
+      "type": "array",
+      "description": "Allowed method type combinations.",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "enum": [
+            "shipping",
+            "pickup"
+          ]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/draft/schemas/shopping/types/fulfillment_option.json",
+  "title": "Fulfillment Option",
+  "description": "A fulfillment option within a group (e.g., Standard Shipping $5, Express $15).",
+  "type": "object",
+  "ucp_shared_request": true,
+  "required": [
+    "id",
+    "title",
+    "totals"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique fulfillment option identifier.",
+      "ucp_request": "omit"
+    },
+    "title": {
+      "type": "string",
+      "description": "Short label (e.g., 'Express Shipping', 'Curbside Pickup').",
+      "ucp_request": "omit"
+    },
+    "description": {
+      "type": "string",
+      "description": "Complete context for buyer decision (e.g., 'Arrives Dec 12-15 via FedEx').",
+      "ucp_request": "omit"
+    },
+    "carrier": {
+      "type": "string",
+      "description": "Carrier name (for shipping).",
+      "ucp_request": "omit"
+    },
+    "earliest_fulfillment_time": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Earliest fulfillment date.",
+      "ucp_request": "omit"
+    },
+    "latest_fulfillment_time": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Latest fulfillment date.",
+      "ucp_request": "omit"
+    },
+    "totals": {
+      "type": "array",
+      "items": {
+        "$ref": "https://ucp.dev/draft/schemas/shopping/types/total.json"
+      },
+      "description": "Fulfillment option totals breakdown.",
+      "ucp_request": "omit"
+    }
+  }
+}

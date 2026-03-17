@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/draft/schemas/shopping/types/payment_identity.json",
+  "title": "Payment Identity",
+  "description": "Identity of a participant for token binding. The access_token uniquely identifies the participant who tokens should be bound to.",
+  "type": "object",
+  "required": [
+    "access_token"
+  ],
+  "properties": {
+    "access_token": {
+      "type": "string",
+      "description": "Unique identifier for this participant, obtained during onboarding with the tokenizer."
+    }
+  }
+}

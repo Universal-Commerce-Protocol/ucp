@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/draft/schemas/shopping/types/fulfillment_event.json",
+  "title": "Fulfillment Event",
+  "description": "Append-only fulfillment event representing an actual shipment. References line items by ID.",
+  "type": "object",
+  "required": [
+    "id",
+    "occurred_at",
+    "type",
+    "line_items"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Fulfillment event identifier."
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC 3339 timestamp when this fulfillment event occurred."
+    },
+    "type": {
+      "type": "string",
+      "description": "Fulfillment event type. Common values include: processing (preparing to ship), shipped (handed to carrier), in_transit (in delivery network), delivered (received by buyer), failed_attempt (delivery attempt failed), canceled (fulfillment canceled), undeliverable (cannot be delivered), returned_to_sender (returned to merchant)."
+    },
+    "line_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "quantity"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Line item ID reference."
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Quantity fulfilled in this event."
+          }
+        }
+      },
+      "description": "Which line items and quantities are fulfilled in this event."
+    },
+    "tracking_number": {
+      "type": "string",
+      "description": "Carrier tracking number (required if type != processing)."
+    },
+    "tracking_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL to track this shipment (required if type != processing)."
+    },
+    "carrier": {
+      "type": "string",
+      "description": "Carrier name (e.g., 'FedEx', 'USPS')."
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable description of the shipment status or delivery information (e.g., 'Delivered to front door', 'Out for delivery')."
+    }
+  }
+}

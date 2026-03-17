@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/draft/schemas/payment_handler.json",
+  "title": "Payment Handler",
+  "description": "Schema for UCP payment handlers. Handlers define how payment instruments are processed.",
+  "$defs": {
+    "base": {
+      "allOf": [
+        {
+          "$ref": "https://ucp.dev/draft/schemas/ucp.json#/$defs/entity"
+        },
+        {
+          "type": "object",
+          "required": [
+            "id"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "available_instruments": {
+              "type": "array",
+              "items": {
+                "$ref": "https://ucp.dev/draft/schemas/shopping/types/available_payment_instrument.json"
+              },
+              "description": "Instrument types this handler supports, with optional constraints. When absent, every instrument should be considered available.",
+              "minItems": 1
+            }
+          }
+        }
+      ]
+    },
+    "platform_schema": {
+      "title": "Payment Handler (Platform Schema)",
+      "description": "Platform declaration for discovery profiles. May include partial config state required for discovery.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
+        },
+        {
+          "required": [
+            "spec",
+            "schema"
+          ]
+        }
+      ]
+    },
+    "business_schema": {
+      "title": "Payment Handler (Business Schema)",
+      "description": "Business declaration for discovery profiles. May include partial config state required for discovery.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
+        }
+      ]
+    },
+    "response_schema": {
+      "title": "Payment Handler (Response Schema)",
+      "description": "Handler reference in responses. May include full config state for runtime usage of the handler.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
+        }
+      ]
+    }
+  }
+}
