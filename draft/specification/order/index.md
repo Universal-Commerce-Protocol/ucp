@@ -85,7 +85,7 @@ Expectations can be split, merged, or adjusted post-order. For example:
 | fulfillment   | object                                                                             | **Yes**  | Fulfillment data: buyer expectations and what actually happened.                                                                             |
 | adjustments   | Array\[[Adjustment](/draft/specification/reference/#adjustment)\]                  | No       | Append-only event log of money movements (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment. |
 | currency      | string                                                                             | No       | ISO 4217 currency code. MUST match the currency from the originating checkout session.                                                       |
-| totals        | Array\[[Total Response](/draft/specification/reference/#total)\]                   | **Yes**  | Different totals for the order.                                                                                                              |
+| totals        | [Totals](/draft/specification/reference/#totals)                                   | **Yes**  | Different totals for the order.                                                                                                              |
 
 ### Order Line Item
 
@@ -285,7 +285,7 @@ Businesses POST order events to a webhook URL provided by the platform during pa
 | fulfillment   | object                                                                             | **Yes**  | Fulfillment data: buyer expectations and what actually happened.                                                                             |
 | adjustments   | Array\[[Adjustment](/draft/specification/reference/#adjustment)\]                  | No       | Append-only event log of money movements (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment. |
 | currency      | string                                                                             | No       | ISO 4217 currency code. MUST match the currency from the originating checkout session.                                                       |
-| totals        | Array\[[Total](/draft/specification/reference/#total)\]                            | **Yes**  | Different totals for the order.                                                                                                              |
+| totals        | [Totals](/draft/specification/reference/#totals)                                   | **Yes**  | Different totals for the order.                                                                                                              |
 | event_id      | string                                                                             | **Yes**  | Unique event identifier.                                                                                                                     |
 | created_time  | string                                                                             | **Yes**  | Event creation timestamp in RFC 3339 format.                                                                                                 |
 
@@ -433,11 +433,11 @@ See [Message Signatures - Key Rotation](https://ucp.dev/draft/specification/sign
 
 ### Total
 
-| Name         | Type                                             | Required | Description                                                                                                            |
-| ------------ | ------------------------------------------------ | -------- | ---------------------------------------------------------------------------------------------------------------------- |
-| type         | string                                           | **Yes**  | Type of total categorization. **Enum:** `items_discount`, `subtotal`, `discount`, `fulfillment`, `tax`, `fee`, `total` |
-| display_text | string                                           | No       | Text to display against the amount. Should reflect appropriate method (e.g., 'Shipping', 'Delivery').                  |
-| amount       | [Amount](/draft/specification/reference/#amount) | **Yes**  | If type == total, sums subtotal - discount + fulfillment + tax + fee. Should be >= 0. Amount in ISO 4217 minor units.  |
+| Name         | Type                                             | Required | Description                                                                                                                                                                      |
+| ------------ | ------------------------------------------------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type         | string                                           | **Yes**  | Cost category. Well-known values: subtotal, items_discount, discount, fulfillment, tax, fee, total. Businesses MAY use additional values.                                        |
+| display_text | string                                           | No       | Text to display against the amount. Should reflect appropriate method (e.g., 'Shipping', 'Delivery').                                                                            |
+| amount       | [Amount](/draft/specification/reference/#amount) | **Yes**  | Monetary amount in the currency's minor unit as defined by ISO 4217. Refer to the currency's exponent to determine minor-to-major ratio (e.g., 2 for USD, 0 for JPY, 3 for KWD). |
 
 ### UCP Response Order Schema
 

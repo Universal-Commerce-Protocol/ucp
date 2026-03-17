@@ -87,10 +87,7 @@
       "description": "ISO 4217 currency code. MUST match the currency from the originating checkout session."
     },
     "totals": {
-      "type": "array",
-      "items": {
-        "$ref": "https://ucp.dev/draft/schemas/shopping/types/total.json"
-      },
+      "$ref": "https://ucp.dev/draft/schemas/shopping/types/totals.json",
       "description": "Different totals for the order."
     }
   },

@@ -2265,6 +2265,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#signed-amount" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Signed Amount
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#token-credential" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2280,6 +2291,17 @@
     <span class="md-ellipsis">
       
         Total
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#totals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Totals
       
     </span>
   </a>
@@ -3522,6 +3544,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#signed-amount" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Signed Amount
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#token-credential" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3537,6 +3570,17 @@
     <span class="md-ellipsis">
       
         Total
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#totals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Totals
       
     </span>
   </a>
@@ -4125,7 +4169,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/reference/#total">Total</a>]</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#totals">Totals</a></td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Estimated cost breakdown. May be partial if shipping/tax not yet calculable.</td>
 </tr>
@@ -4229,7 +4273,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/reference/#total">Total</a>]</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#totals">Totals</a></td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Different cart totals.</td>
 </tr>
@@ -4333,7 +4377,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/reference/#total">Total</a>]</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#totals">Totals</a></td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Different totals for the order.</td>
 </tr>
@@ -6220,6 +6264,9 @@ within the UCP.</p>
 </tbody>
 </table>
 <hr />
+<h3 id="signed-amount">Signed Amount<a class="headerlink" href="#signed-amount" title="Permanent link">&para;</a></h3>
+<p>Monetary amount in the currency's minor unit as defined by ISO 4217. Refer to the currency's exponent to determine minor-to-major ratio (e.g., 2 for USD, 0 for JPY, 3 for KWD). May be negative — the sign is intrinsic to the value (e.g., discounts are negative, charges are positive).</p>
+<hr />
 <h3 id="token-credential">Token Credential<a class="headerlink" href="#token-credential" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -6267,7 +6314,7 @@ within the UCP.</p>
 <td style="text-align: left;">type</td>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Type of total categorization.<br><strong>Enum:</strong> <code>items_discount</code>, <code>subtotal</code>, <code>discount</code>, <code>fulfillment</code>, <code>tax</code>, <code>fee</code>, <code>total</code></td>
+<td style="text-align: left;">Cost category. Well-known values: subtotal, items_discount, discount, fulfillment, tax, fee, total. Businesses MAY use additional values.</td>
 </tr>
 <tr>
 <td style="text-align: left;">display_text</td>
@@ -6279,7 +6326,33 @@ within the UCP.</p>
 <td style="text-align: left;">amount</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#amount">Amount</a></td>
 <td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">If type == total, sums subtotal - discount + fulfillment + tax + fee. Should be &gt;= 0. Amount in ISO 4217 minor units.</td>
+<td style="text-align: left;">Monetary amount in the currency's minor unit as defined by ISO 4217. Refer to the currency's exponent to determine minor-to-major ratio (e.g., 2 for USD, 0 for JPY, 3 for KWD).</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="totals">Totals<a class="headerlink" href="#totals" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><em>No properties defined.</em></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><em>No properties defined.</em></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
 </tr>
 </tbody>
 </table>
@@ -6626,7 +6699,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[any]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Different cart totals.</td>
 </tr>
@@ -6820,7 +6893,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[any]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Different cart totals.</td>
 </tr>
@@ -7042,7 +7115,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[any]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Estimated cost breakdown. May be partial if shipping/tax not yet calculable.</td>
 </tr>
@@ -7139,7 +7212,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[any]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Different cart totals.</td>
 </tr>
@@ -7453,7 +7526,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[any]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Different cart totals.</td>
 </tr>

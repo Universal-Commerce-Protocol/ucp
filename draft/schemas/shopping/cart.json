@@ -90,10 +90,7 @@
       "ucp_request": "omit"
     },
     "totals": {
-      "type": "array",
-      "items": {
-        "$ref": "https://ucp.dev/draft/schemas/shopping/types/total.json"
-      },
+      "$ref": "https://ucp.dev/draft/schemas/shopping/types/totals.json",
       "description": "Estimated cost breakdown. May be partial if shipping/tax not yet calculable.",
       "ucp_request": "omit"
     },

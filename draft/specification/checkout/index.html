@@ -1249,7 +1249,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#total" class="md-nav__link">
+  <a href="#totals" class="md-nav__link">
     <span class="md-ellipsis">
       
         Total
@@ -1261,10 +1261,65 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#total_1" class="md-nav__link">
+  <a href="#rendering-contract" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Total
+        Rendering Contract
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verification
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#well-known-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Well-Known Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#repeating-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Repeating Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sub-lines-lines" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sub-Lines (lines)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
       
     </span>
   </a>
@@ -2981,7 +3036,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#total" class="md-nav__link">
+  <a href="#totals" class="md-nav__link">
     <span class="md-ellipsis">
       
         Total
@@ -2993,10 +3048,65 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#total_1" class="md-nav__link">
+  <a href="#rendering-contract" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Total
+        Rendering Contract
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verification
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#well-known-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Well-Known Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#repeating-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Repeating Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sub-lines-lines" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sub-Lines (lines)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
       
     </span>
   </a>
@@ -3550,7 +3660,7 @@ redirect to the checkout UI or renders the checkout page directly.</p>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/reference/#total">Total Response</a>]</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#totals">Totals</a></td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Different cart totals.</td>
 </tr>
@@ -4647,8 +4757,7 @@ field or omitting them.</p>
 </tr>
 </tbody>
 </table>
-<h3 id="total">Total<a class="headerlink" href="#total" title="Permanent link">&para;</a></h3>
-<h4 id="total_1">Total<a class="headerlink" href="#total_1" title="Permanent link">&para;</a></h4>
+<h3 id="totals">Total<a class="headerlink" href="#totals" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -4663,7 +4772,7 @@ field or omitting them.</p>
 <td style="text-align: left;">type</td>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Type of total categorization.<br><strong>Enum:</strong> <code>items_discount</code>, <code>subtotal</code>, <code>discount</code>, <code>fulfillment</code>, <code>tax</code>, <code>fee</code>, <code>total</code></td>
+<td style="text-align: left;">Cost category. Well-known values: subtotal, items_discount, discount, fulfillment, tax, fee, total. Businesses MAY use additional values.</td>
 </tr>
 <tr>
 <td style="text-align: left;">display_text</td>
@@ -4675,10 +4784,155 @@ field or omitting them.</p>
 <td style="text-align: left;">amount</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#amount">Amount</a></td>
 <td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">If type == total, sums subtotal - discount + fulfillment + tax + fee. Should be &gt;= 0. Amount in ISO 4217 minor units.</td>
+<td style="text-align: left;">Monetary amount in the currency's minor unit as defined by ISO 4217. Refer to the currency's exponent to determine minor-to-major ratio (e.g., 2 for USD, 0 for JPY, 3 for KWD).</td>
 </tr>
 </tbody>
 </table>
+<h4 id="rendering-contract">Rendering Contract<a class="headerlink" href="#rendering-contract" title="Permanent link">&para;</a></h4>
+<p>Businesses are the authoritative source for presented totals — their content
+and order — because the correct presentation is subject to regional, product,
+and regulatory requirements that the business is obligated to satisfy (e.g.,
+multi-jurisdiction tax itemization, mandatory fee disclosures).</p>
+<p>Platforms MUST render all top-level entries in the order provided:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">totals</span><span class="p">:</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>    <span class="n">render_line</span><span class="p">(</span><span class="n">entry</span><span class="o">.</span><span class="n">display_text</span><span class="p">,</span> <span class="n">entry</span><span class="o">.</span><span class="n">amount</span><span class="p">)</span>
+</span></code></pre></div>
+<p>Platforms MAY render sub-lines as supplementary detail:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">totals</span><span class="p">:</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>    <span class="n">render_line</span><span class="p">(</span><span class="n">entry</span><span class="o">.</span><span class="n">display_text</span><span class="p">,</span> <span class="n">entry</span><span class="o">.</span><span class="n">amount</span><span class="p">)</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>    <span class="k">if</span> <span class="n">entry</span><span class="o">.</span><span class="n">lines</span><span class="p">:</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>        <span class="k">for</span> <span class="n">sub</span> <span class="ow">in</span> <span class="n">entry</span><span class="o">.</span><span class="n">lines</span><span class="p">:</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>            <span class="n">render_detail_line</span><span class="p">(</span><span class="n">sub</span><span class="o">.</span><span class="n">display_text</span><span class="p">,</span> <span class="n">sub</span><span class="o">.</span><span class="n">amount</span><span class="p">)</span>
+</span></code></pre></div>
+<p>Platforms MUST NOT interpret, filter, reorder, aggregate, or apply display
+logic of their own.</p>
+<p>Invariants of <code>totals[]</code>:</p>
+<ul>
+<li>Every entry carries a <code>type</code> and an <code>amount</code>. Platforms SHOULD use
+  <code>display_text</code> when provided. Well-known types have default display labels
+  as fallback (see table below); unknown types MUST include <code>display_text</code>.</li>
+<li>Amounts are signed integers — negative values are subtractive (e.g.,
+  discounts), positive values are additive. The sign IS the direction.</li>
+<li>Exactly one <code>type: "subtotal"</code> MUST be present.</li>
+<li>Exactly one <code>type: "total"</code> MUST be present.</li>
+</ul>
+<h4 id="verification">Verification<a class="headerlink" href="#verification" title="Permanent link">&para;</a></h4>
+<p>Platforms MUST NOT substitute their own computed totals for the business's
+values. Platforms MAY verify the provided totals:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="k">assert</span> <span class="nb">sum</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">amount</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">totals</span> <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">type</span> <span class="o">!=</span> <span class="s2">&quot;total&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="n">total_entry</span><span class="o">.</span><span class="n">amount</span>
+</span></code></pre></div>
+<p>If the computed sum does not match the <code>type: "total"</code> entry, the platform
+MUST NOT alter the rendered output — the business's presented totals are
+authoritative for display. However, platforms MUST NOT autonomously complete
+a checkout with mismatched totals. Platforms SHOULD reject the checkout or
+escalate and ask for buyer review via <code>continue_url</code>.</p>
+<h4 id="well-known-types">Well-Known Types<a class="headerlink" href="#well-known-types" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Sign</th>
+<th>Default label</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>subtotal</code></td>
+<td>+</td>
+<td>Subtotal</td>
+<td>Sum of line item prices</td>
+</tr>
+<tr>
+<td><code>discount</code></td>
+<td>−</td>
+<td>Discount</td>
+<td>Order or line-item level discount</td>
+</tr>
+<tr>
+<td><code>items_discount</code></td>
+<td>−</td>
+<td>Item Discounts</td>
+<td>Rollup of line-item discounts</td>
+</tr>
+<tr>
+<td><code>fulfillment</code></td>
+<td>+</td>
+<td>Shipping</td>
+<td>Shipping, delivery, or pickup charges</td>
+</tr>
+<tr>
+<td><code>tax</code></td>
+<td>+</td>
+<td>Tax</td>
+<td>Tax charges</td>
+</tr>
+<tr>
+<td><code>fee</code></td>
+<td>+</td>
+<td>Fee</td>
+<td>Fees and surcharges</td>
+</tr>
+<tr>
+<td><code>total</code></td>
+<td>=</td>
+<td>Total</td>
+<td>Authoritative grand total (exactly one)</td>
+</tr>
+</tbody>
+</table>
+<p>When <code>display_text</code> is provided, platforms MUST use it. When omitted on a
+well-known type, platforms SHOULD use the default label above. The sign
+convention for well-known types is schema-enforced: subtractive types
+(discount, items_discount) MUST have negative amounts; additive types
+(subtotal, fulfillment, tax, fee) MUST have non-negative amounts.</p>
+<p>The <code>type</code> field is an open string — businesses MAY use values beyond the
+well-known set. Unknown types MUST include <code>display_text</code> (schema-enforced)
+and the sign on the amount is self-describing.</p>
+<h4 id="repeating-types">Repeating Types<a class="headerlink" href="#repeating-types" title="Permanent link">&para;</a></h4>
+<p>All types except <code>subtotal</code> and <code>total</code> MAY appear multiple times —
+for example, multi-jurisdiction tax lines or itemized fees.</p>
+<h4 id="sub-lines-lines">Sub-Lines (<code>lines</code>)<a class="headerlink" href="#sub-lines-lines" title="Permanent link">&para;</a></h4>
+<p>Each top-level entry MAY include a <code>lines</code> array. Sub-lines share the same
+base shape as top-level entries — <code>display_text</code> and <code>amount</code> — providing an
+itemized breakdown under the parent.</p>
+<p><strong>Invariant:</strong> <code>sum(lines[].amount)</code> MUST equal the parent entry's <code>amount</code>.</p>
+<p>The business controls what MUST be rendered (top-level entries) versus what
+MAY be optionally surfaced (sub-lines). Platforms SHOULD render sub-lines
+when provided.</p>
+<h4 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h4>
+<p><strong>Split tax, itemized at top-level:</strong></p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="nt">&quot;totals&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;subtotal&quot;</span><span class="p">,</span><span class="w">    </span><span class="nt">&quot;display_text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Subtotal&quot;</span><span class="p">,</span><span class="w">    </span><span class="nt">&quot;amount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5750</span><span class="w"> </span><span class="p">},</span>
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;fulfillment&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;display_text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Shipping&quot;</span><span class="p">,</span><span class="w">    </span><span class="nt">&quot;amount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">899</span><span class="w"> </span><span class="p">},</span>
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;tax&quot;</span><span class="p">,</span><span class="w">         </span><span class="nt">&quot;display_text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Federal Tax&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;amount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">332</span><span class="w"> </span><span class="p">},</span>
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;tax&quot;</span><span class="p">,</span><span class="w">         </span><span class="nt">&quot;display_text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;State Tax&quot;</span><span class="p">,</span><span class="w">   </span><span class="nt">&quot;amount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">465</span><span class="w"> </span><span class="p">},</span>
+</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;total&quot;</span><span class="p">,</span><span class="w">       </span><span class="nt">&quot;display_text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Total&quot;</span><span class="p">,</span><span class="w">       </span><span class="nt">&quot;amount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">7446</span><span class="w"> </span><span class="p">}</span>
+</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="p">]</span>
+</span></code></pre></div>
+<p><strong>Collapsed fees with optional breakdown:</strong></p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="nt">&quot;totals&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;subtotal&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;display_text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Subtotal&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;amount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4999</span><span class="w"> </span><span class="p">},</span>
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="w">  </span><span class="p">{</span>
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;fee&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;display_text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Fees&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;amount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">549</span><span class="p">,</span>
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="w">    </span><span class="nt">&quot;lines&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;display_text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Service Fee&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;amount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">399</span><span class="w"> </span><span class="p">},</span>
+</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;display_text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Recycling Fee&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;amount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">150</span><span class="w"> </span><span class="p">}</span>
+</span><span id="__span-10-8"><a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a><span class="w">    </span><span class="p">]</span>
+</span><span id="__span-10-9"><a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a><span class="w">  </span><span class="p">},</span>
+</span><span id="__span-10-10"><a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;tax&quot;</span><span class="p">,</span><span class="w">   </span><span class="nt">&quot;display_text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Tax&quot;</span><span class="p">,</span><span class="w">   </span><span class="nt">&quot;amount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">444</span><span class="w"> </span><span class="p">},</span>
+</span><span id="__span-10-11"><a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;total&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;display_text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Total&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;amount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5992</span><span class="w"> </span><span class="p">}</span>
+</span><span id="__span-10-12"><a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a><span class="p">]</span>
+</span></code></pre></div>
+<p><strong>Discount and account credit — negative amounts:</strong></p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="nt">&quot;totals&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;subtotal&quot;</span><span class="p">,</span><span class="w">       </span><span class="nt">&quot;display_text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Subtotal&quot;</span><span class="p">,</span><span class="w">       </span><span class="nt">&quot;amount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10000</span><span class="w"> </span><span class="p">},</span>
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;discount&quot;</span><span class="p">,</span><span class="w">       </span><span class="nt">&quot;display_text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Summer Sale&quot;</span><span class="p">,</span><span class="w">    </span><span class="nt">&quot;amount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">-1500</span><span class="w"> </span><span class="p">},</span>
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;tax&quot;</span><span class="p">,</span><span class="w">            </span><span class="nt">&quot;display_text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Tax&quot;</span><span class="p">,</span><span class="w">            </span><span class="nt">&quot;amount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">680</span><span class="w"> </span><span class="p">},</span>
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;account_credit&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;display_text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Account Credit&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;amount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">-2500</span><span class="w"> </span><span class="p">},</span>
+</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;total&quot;</span><span class="p">,</span><span class="w">          </span><span class="nt">&quot;display_text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Amount Due&quot;</span><span class="p">,</span><span class="w">     </span><span class="nt">&quot;amount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">6680</span><span class="w"> </span><span class="p">}</span>
+</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="p">]</span>
+</span></code></pre></div>
 <h3 id="ucp-response-checkout-schema">UCP Response Checkout<a class="headerlink" href="#ucp-response-checkout-schema" title="Permanent link">&para;</a></h3>
 <table>
 <thead>

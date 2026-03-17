@@ -111,10 +111,7 @@
       }
     },
     "totals": {
-      "type": "array",
-      "items": {
-        "$ref": "https://ucp.dev/draft/schemas/shopping/types/total.json"
-      },
+      "$ref": "https://ucp.dev/draft/schemas/shopping/types/totals.json",
       "description": "Different cart totals.",
       "ucp_request": "omit"
     },
