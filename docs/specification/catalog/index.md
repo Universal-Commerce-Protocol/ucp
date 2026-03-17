@@ -156,9 +156,10 @@ Messages communicate business outcomes and provide context:
 | `warning` | Important conditions affecting purchase | `DELAYED_FULFILLMENT`, `FINAL_SALE` |
 | `info` | Additional context without issues | `PROMOTIONAL_PRICING`, `LIMITED_AVAILABILITY` |
 
-Warnings with `disclosure: true` carry notices (e.g., allergen
+Warnings with `presentation: "disclosure"` carry notices (e.g., allergen
 declarations, safety warnings) that platforms must not hide or dismiss. See
-[Disclosures](../checkout.md#disclosures) for the full rendering contract.
+[Warning Presentation](../checkout.md#warning-presentation) for the full
+rendering contract.
 
 **Note**: All catalog errors use `severity: "recoverable"` - agents handle them programmatically (retry, inform user, show alternatives).
 
@@ -257,7 +258,7 @@ Agents correlate results using the `inputs` array on each variant. See
 #### Product Disclosure
 
 When a product requires a disclosure (e.g., allergen notice, safety warning),
-return it as a warning with `disclosure: true`. The `path` field targets the
+return it as a warning with `presentation: "disclosure"`. The `path` field targets the
 relevant component in the response — when it targets a product, the
 disclosure applies to all of its variants.
 
@@ -291,7 +292,7 @@ disclosure applies to all of its variants.
       "path": "$.products[0]",
       "content": "**Contains: tree nuts.** Produced in a facility that also processes peanuts, milk, and soy.",
       "content_type": "markdown",
-      "disclosure": true,
+      "presentation": "disclosure",
       "image_url": "https://merchant.com/allergen-tree-nuts.svg",
       "url": "https://merchant.com/allergen-info"
     }
@@ -299,8 +300,8 @@ disclosure applies to all of its variants.
 }
 ```
 
-See [Disclosures](../checkout.md#disclosures) for the full rendering
-contract.
+See [Warning Presentation](../checkout.md#warning-presentation) for the
+full rendering contract.
 
 ## Transport Bindings
 

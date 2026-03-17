@@ -35,10 +35,10 @@
       "default": "plain",
       "description": "Content format, default = plain."
     },
-    "disclosure": {
-      "type": "boolean",
-      "default": false,
-      "description": "When true, this warning carries a disclosure that MUST be displayed in proximity to the referenced component and MUST NOT be hidden or auto-dismissed."
+    "presentation": {
+      "type": "string",
+      "default": "notice",
+      "description": "Rendering contract for this warning. 'notice' (default): platform MUST display, MAY dismiss. 'disclosure': platform MUST display in proximity to the path-referenced component, MUST NOT hide or auto-dismiss. See specification for full contract."
     },
     "image_url": {
       "type": "string",

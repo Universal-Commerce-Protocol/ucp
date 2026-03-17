@@ -326,34 +326,57 @@ payment instrument, or by removing the claim from `context.eligibility` to
 renegotiate the checkout (obtaining updated pricing, availability, etc.)
 and then resubmitting for completion.
 
-### Disclosures
+### Warning Presentation
 
-Warning messages with `disclosure: true` carry notices —
-safety warnings, allergen declarations, compliance content, etc. — that
-**MUST** follow the prescribed rendering contract below. The `disclosure`
-flag signals that the warning **MUST NOT** be treated as a dismissible
-notice.
+The `presentation` field on warning messages controls the rendering
+contract the platform **MUST** follow. When omitted, it defaults to
+`"notice"`.
 
-#### Platform Requirements
+| | `notice` (default) | `disclosure` |
+| :--- | :--- | :--- |
+| Display content | **MUST** | **MUST** |
+| Proximity to `path` | **MAY** | **MUST** |
+| Dismissible | **MAY** | **MUST NOT** |
+| Render `image_url` | **MAY** | **MUST** |
+| Render `url` | **MAY** | **SHOULD** |
+| Escalate if cannot honor | — | **MUST** via `continue_url` |
 
-When a warning has `disclosure: true`:
+#### `notice` (default)
+
+The default rendering contract for warnings. Platforms **MUST** display
+the warning content to the buyer. Platforms **MAY** render notices in a
+banner, tray, or toast, and **MAY** allow the buyer to dismiss them.
+
+#### `disclosure`
+
+Warnings with `presentation: "disclosure"` carry notices — safety
+warnings, allergen declarations, compliance content, etc. — that
+**MUST** follow the prescribed rendering contract below.
+
+**Platform requirements:**
 
 * **MUST** display the warning `content` to the buyer.
-* **MUST** display the warning in proximity to the component referenced by
-  `path`, preserving the association between the disclosure and its subject.
-  When `path` is omitted, the disclosure applies to the response as a whole.
+* **MUST** display the warning in proximity to the component referenced
+  by `path`, preserving the association between the disclosure and its
+  subject. When `path` is omitted, the disclosure applies to the response
+  as a whole.
 * **MUST NOT** hide, collapse, or auto-dismiss the warning.
 * **MUST** render `image_url` when present (e.g., warning symbol,
   energy class label).
 * **SHOULD** render `url` as a navigable reference link when present.
 
-Warnings with `disclosure: true` **SHOULD** be given rendering priority
-over regular warnings.
+Warnings with `presentation: "disclosure"` **SHOULD** be given rendering
+priority over notices.
 
-#### Business Requirements
+Platforms that cannot honor the disclosure rendering contract **MUST**
+escalate to merchant UI via `continue_url` rather than silently
+downgrading to a notice.
 
-* **MUST** set `disclosure: true` when the warning content must be displayed
-  alongside a specific item and must not be hidden or auto-dismissed.
+**Business requirements:**
+
+* **MUST** set `presentation: "disclosure"` when the warning content must
+  be displayed alongside a specific component and must not be hidden or
+  auto-dismissed.
 * **SHOULD** use the `path` field to associate disclosures with the
   relevant component in the response.
 * **SHOULD** provide a `code` that identifies the disclosure category
@@ -363,13 +386,12 @@ over regular warnings.
 * **SHOULD** provide `url` when a reference link is available for the
   buyer to learn more.
 
-#### Disclosure vs Acknowledgment
+#### Disclosure and Acknowledgment
 
-A warning with `disclosure: true` is a presentation mechanism — it
-controls how the warning is rendered, not whether the checkout can
-proceed. When affirmative buyer acknowledgment or authorization is also
-required, the business **MAY** combine the disclosure with the escalation
-mechanisms described in the
+The `presentation` field controls how the warning is rendered, not
+whether the checkout can proceed. When affirmative buyer acknowledgment
+or authorization is also required, the business **MAY** combine the
+disclosure with the escalation mechanisms described in the
 [Checkout Status Lifecycle](#checkout-status-lifecycle) to ensure the
 appropriate buyer input is obtained.
 
@@ -416,7 +438,7 @@ warning on a line item:
       "path": "$.line_items[0]",
       "content": "**Contains: tree nuts.** Produced in a facility that also processes peanuts, milk, and soy.",
       "content_type": "markdown",
-      "disclosure": true,
+      "presentation": "disclosure",
       "image_url": "https://merchant.com/allergen-tree-nuts.svg",
       "url": "https://merchant.com/allergen-info"
     }
@@ -425,11 +447,9 @@ warning on a line item:
 }
 ```
 
-The platform resolves the recoverable error programmatically while rendering
-the allergen disclosure in proximity to the referenced line item. Platforms
-that cannot honor the disclosure rendering contract **MUST** escalate to
-merchant UI via `continue_url` rather than silently downgrading to a
-regular warning.
+The platform resolves the recoverable error programmatically while
+rendering the allergen disclosure in proximity to the referenced line
+item.
 
 ## Continue URL
 
