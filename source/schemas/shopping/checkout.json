@@ -56,6 +56,29 @@
         "create": "optional",
         "update": "optional",
         "complete": "omit"
+      }
+    },
+    "signals": {
+      "$ref": "types/signals.json",
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional",
+        "complete": "optional"
+      }
+    },
+    "risk_signals": {
+      "type": "object",
+      "description": "Deprecated. Use signals instead. Will be removed in the next version.",
+      "deprecated": true,
+      "additionalProperties": true,
+      "ucp_request": {
+        "complete": {
+          "transition": {
+            "from": "optional",
+            "to": "omit",
+            "description": "Replaced by signals. Will be removed in the next version."
+          }
+        }
       },
       "ucp_response": "omit"
     },

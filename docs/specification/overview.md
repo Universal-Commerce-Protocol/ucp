@@ -1192,26 +1192,6 @@ and cart context, then returns the resolved result. Platforms **MUST** treat the
 the [Payment Handler Guide](payment-handler-guide.md#resolving-available_instruments)
 for the full resolution semantics.
 
-### Risk Signals
-
-To aid in fraud assessment, the Platform **MAY** include additional risk signals
-in the `complete` call, providing the Business with more context about the
-transaction's legitimacy. The structure and content of these risk signals are
-not strictly defined by this specification, allowing flexibility based on the
-agreement between the Platform and Business or specific payment handler
-requirements.
-
-**Example (Flexible Structure):**
-
-```json
-{
-  "risk_signals": {
-    "session_id": "abc_123_xyz",
-    "score": 0.95,
-  }
-}
-```
-
 ### Implementation Scenarios
 
 The following scenarios illustrate how different payment handlers and
@@ -1321,8 +1301,9 @@ POST /checkout-sessions/{id}/complete
       }
     ]
   },
-  "risk_signals": {
-      // ...
+  "signals": {
+    "dev.ucp.buyer_ip": "203.0.113.42",
+    "dev.ucp.user_agent": "Mozilla/5.0 ..."
   }
 }
 ```
@@ -1386,8 +1367,9 @@ POST /checkout-sessions/{id}/complete
       }
     ]
   },
-  "risk_signals": {
-    // ... host could send risk_signals here
+  "signals": {
+    "dev.ucp.buyer_ip": "203.0.113.42",
+    "dev.ucp.user_agent": "Mozilla/5.0 ..."
   }
 }
 ```
@@ -1464,9 +1446,9 @@ POST /checkout-sessions/{id}/complete
       }
     ]
   },
-  "risk_signals": {
-    "session_id": "abc_123_xyz",
-    "score": 0.95
+  "signals": {
+    "dev.ucp.buyer_ip": "203.0.113.42",
+    "com.example.risk_score": 0.95
   },
   "ap2": {
     "checkout_mandate": "eyJhbGciOiJ...", // Signed proof of checkout terms
@@ -1548,19 +1530,17 @@ certified and handle:
 
 ### Fraud Prevention Integration
 
-While UCP does not define fraud prevention APIs, the payment architecture
-supports fraud signal integration:
+UCP supports fraud prevention through [Signals](#signals) and the
+payment architecture:
 
+- Platforms provide transaction environment [signals](#signals) (IP, user
+    agent) on catalog, cart, and checkout requests
 - Businesses can require additional fields in handler configurations (e.g.,
     3DS requirements)
-- Platforms can submit device fingerprints and session data alongside credentials
 - Payment credential providers can perform risk assessment during credential
     acquisition
 - Businesses can reject high-risk transactions and request additional
-    verification
-
-Future extensions **MAY** standardize fraud signal schemas, but the current
-architecture allows flexible integration with existing fraud prevention systems.
+    verification via signal feedback
 
 ### Payment Architecture Extensions
 
@@ -1691,6 +1671,65 @@ All UCP communication **MUST** occur over **HTTPS**.
 Sensitive data (such as Payment Credentials or PII) **MUST** be handled
 according to PCI-DSS and GDPR guidelines. UCP encourages the use of tokenized
 payment data to minimize business and platform liability.
+
+### Signals
+
+Businesses require environment data for authorization, rate
+limiting, and abuse prevention. Signal values **MUST NOT** be buyer-asserted
+claims — platforms provide signals based on direct observation (e.g.,
+connection IP, user agent) or by relaying independently verifiable
+third-party attestations, such as cryptographically signed results from an
+external verifier that the business can validate against the provider's
+published key set.
+
+All signal keys **MUST** use reverse-domain naming to ensure provenance and
+prevent collisions when multiple extensions contribute to the shared namespace.
+Well-known signals use the `dev.ucp` namespace (e.g., `dev.ucp.buyer_ip`);
+extension signals use their own namespace (e.g., `com.example.device_id`).
+
+```json
+{
+  "signals": {
+    "dev.ucp.buyer_ip": "203.0.113.42",
+    "dev.ucp.user_agent": "Mozilla/5.0 ...",
+    "com.example.attestation": {
+      "provider_jwks": "https://example.com/.well-known/jwks.json",
+      "kid": "example-key-2026-01",
+      "payload": { "id": "att-7c3e9f", "pass": true, "...": "..." },
+      "sig": "base64url..."
+    }
+  }
+}
+```
+
+Signal fields may contain personally identifiable information
+(PII). Platforms **SHOULD** include only signals relevant to the current
+transaction. Businesses **SHOULD NOT** persist signal data beyond the
+operational needs of the transaction (e.g., order finalization, fraud review).
+
+Businesses **MAY** use messages with code `signal` to request additional
+data. The `path` field identifies the requested signal; the message `type`
+determines enforcement. An `error` blocks status progression until the
+signal is provided; an `info` is advisory and non-blocking.
+
+```json
+{
+  "messages": [
+    {
+      "type": "error",
+      "code": "signal",
+      "path": "$.signals['dev.ucp.buyer_ip']",
+      "content": "Buyer IP is required to proceed."
+    },
+    {
+      "type": "info",
+      "code": "signal",
+      "path": "$.signals['dev.ucp.user_agent']",
+      "content": "Providing user agent may improve checkout outcomes."
+    }
+  ]
+}
+```
 
 ### Transaction Integrity and Non-Repudiation
 

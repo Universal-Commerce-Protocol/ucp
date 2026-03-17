@@ -36,6 +36,9 @@
         },
         "context": {
           "$ref": "types/context.json"
+        },
+        "signals": {
+          "$ref": "types/signals.json"
         }
       }
     },

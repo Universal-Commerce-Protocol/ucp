@@ -303,8 +303,8 @@ Content-Type: application/json
       }
     ]
   },
-  "risk_signals": {
-    // risk signal objects here
+  "signals": {
+    // Platform-observed signals (buyer connection and device)
   }
 }
 ```
