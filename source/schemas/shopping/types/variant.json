@@ -1,0 +1,167 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/variant.json",
+  "title": "Variant",
+  "description": "A purchasable variant of a product with specific option selections.",
+  "type": "object",
+  "required": [
+    "id",
+    "title",
+    "description",
+    "price"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Global ID (GID) uniquely identifying this variant. Used as item.id in checkout."
+    },
+    "sku": {
+      "type": "string",
+      "description": "Business-assigned identifier for inventory and fulfillment."
+    },
+    "barcodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["type", "value"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Barcode standard. Well-known values: UPC, EAN, ISBN, GTIN, JAN."
+          },
+          "value": {
+            "type": "string",
+            "description": "Barcode value."
+          }
+        }
+      },
+      "description": "Industry-standard product identifiers for cross-reference and correlation."
+    },
+    "handle": {
+      "type": "string",
+      "description": "URL-safe variant handle/slug."
+    },
+    "title": {
+      "type": "string",
+      "description": "Variant display title (e.g., 'Blue / Large')."
+    },
+    "description": {
+      "$ref": "description.json",
+      "description": "Variant description in one or more formats."
+    },
+    "url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Canonical variant page URL."
+    },
+    "categories": {
+      "type": "array",
+      "items": {
+        "$ref": "category.json"
+      },
+      "description": "Variant categories with optional taxonomy identifiers."
+    },
+    "price": {
+      "$ref": "price.json",
+      "description": "Current selling price."
+    },
+    "list_price": {
+      "$ref": "price.json",
+      "description": "List price before discounts (for strikethrough display)."
+    },
+    "unit_price": {
+      "type": "object",
+      "description": "Price per standard unit of measurement. MAY be omitted when unit pricing does not apply.",
+      "required": ["amount", "currency", "measure", "reference"],
+      "properties": {
+        "amount": {
+          "$ref": "amount.json",
+          "description": "Unit price in ISO 4217 minor units. Business MUST return precomputed unit price value: (variant.price / measure.value) * reference.value."
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$",
+          "description": "ISO 4217 currency code."
+        },
+        "measure": {
+          "type": "object",
+          "description": "Product quantity in packaging (e.g., 750ml bottle).",
+          "required": ["value", "unit"],
+          "properties": {
+            "value": { "type": "number", "description": "Package quantity." },
+            "unit": { "type": "string", "description": "Unit of measurement." }
+          }
+        },
+        "reference": {
+          "type": "object",
+          "description": "Denominator for unit price display (e.g., per 100ml, per 1kg).",
+          "required": ["value", "unit"],
+          "properties": {
+            "value": { "type": "integer", "description": "Reference quantity." },
+            "unit": { "type": "string", "description": "Unit of measurement." }
+          }
+        }
+      }
+    },
+    "availability": {
+      "type": "object",
+      "description": "Variant availability for purchase.",
+      "properties": {
+        "available": {
+          "type": "boolean",
+          "description": "Whether this variant can be purchased. See status for fulfillment details."
+        },
+        "status": {
+          "type": "string",
+          "description": "Qualifies available with fulfillment state. Well-known values: `in_stock`, `backorder`, `preorder`, `out_of_stock`, `discontinued`."
+        }
+      }
+    },
+    "selected_options": {
+      "type": "array",
+      "items": {
+        "$ref": "selected_option.json"
+      },
+      "description": "Option selections that define this variant."
+    },
+    "media": {
+      "type": "array",
+      "items": {
+        "$ref": "media.json"
+      },
+      "description": "Variant media (images, videos, 3D models). First item is the featured media for listings."
+    },
+    "rating": {
+      "$ref": "rating.json",
+      "description": "Variant rating."
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Variant tags for categorization and search."
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Business-defined custom data extending the standard variant model."
+    },
+    "seller": {
+      "type": "object",
+      "description": "Optional seller context for this variant.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Seller display name."
+        },
+        "links": {
+          "type": "array",
+          "items": {
+            "$ref": "link.json"
+          },
+          "description": "Seller policy and information links."
+        }
+      }
+    }
+  }
+}

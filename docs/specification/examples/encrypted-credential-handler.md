@@ -59,33 +59,33 @@ Compliance requirements vary by credential type.
 ### Pattern Flow
 
 ```text
-┌─────────────────┐                              ┌────────────┐
-│  Platform       │                              │  Business  │
-│                 │                              │            │
-└────────┬────────┘                              └──────┬─────┘
-         │                                              │
-         │  1. Business registers public key (out-of-band)
-         │<─────────────────────────────────────────────│
-         │                                              │
-         │  2. Confirmation                             │
-         │─────────────────────────────────────────────>│
-         │                                              │
-         │  3. GET ucp.payment_handlers                 │
-         │─────────────────────────────────────────────>│
-         │                                              │
-         │  4. Handler with business identity           │
-         │<─────────────────────────────────────────────│
-         │                                              │
-         │  5. Platform's vaulting service encrypts     │
-         │     credential with business's key           │
-         │                                              │
-         │  6. POST checkout with EncryptedCredential   │
-         │─────────────────────────────────────────────>│
-         │                                              │
-         │       (Business decrypts locally)            │
-         │                                              │
-         │  7. Checkout complete                        │
-         │<─────────────────────────────────────────────│
++-----------------+                              +------------+
+|  Platform       |                              |  Business  |
+|                 |                              |            |
++--------+--------+                              +------+-----+
+         |                                              |
+         |  1. Business registers public key (out-of-band)
+         |<---------------------------------------------|
+         |                                              |
+         |  2. Confirmation                             |
+         |--------------------------------------------->|
+         |                                              |
+         |  3. GET ucp.payment_handlers                 |
+         |--------------------------------------------->|
+         |                                              |
+         |  4. Handler with business identity           |
+         |<---------------------------------------------|
+         |                                              |
+         |  5. Platform's vaulting service encrypts     |
+         |     credential with business's key           |
+         |                                              |
+         |  6. POST checkout with EncryptedCredential   |
+         |--------------------------------------------->|
+         |                                              |
+         |       (Business decrypts locally)            |
+         |                                              |
+         |  7. Checkout complete                        |
+         |<---------------------------------------------|
 ```
 
 ---
@@ -121,7 +121,7 @@ Businesses advertise the platform's handler. The `business_id` field identifies
 the business, which the platform uses to look up the correct public key for
 encryption.
 
-The only supported instrument schema is [CardPaymentInstrument](https://ucp.dev/schemas/shopping/types/card_payment_instrument.json), the only supported checkout credential schema is `EncryptedCredential`, and the only supported source credential schema is [CardCredential](https://ucp.dev/schemas/shopping/types/card_credential.json).
+The only supported instrument schema is [CardPaymentInstrument](site:schemas/shopping/types/card_payment_instrument.json), the only supported checkout credential schema is `EncryptedCredential`, and the only supported source credential schema is [CardCredential](site:schemas/shopping/types/card_credential.json).
 
 **Note:** The `EncryptedCredential` shape would be formally defined in the handler's schema (referenced via the `schema` field in the handler declaration).
 
@@ -144,14 +144,22 @@ have their own compliance requirements.
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "{{ ucp_version }}",
     "payment_handlers": {
       "com.example.platform_encrypted": [
         {
           "id": "platform_encrypted",
-          "version": "2026-01-11",
+          "version": "{{ ucp_version }}",
           "spec": "https://platform.example.com/ucp/encrypted-handler.json",
           "schema": "https://platform.example.com/ucp/encrypted-handler/schema.json",
+          "available_instruments": [
+            {
+              "type": "card",
+              "constraints": {
+                "brands": ["visa", "mastercard"]
+              }
+            }
+          ],
           "config": {
             "environment": "production",
             "business_id": "merchant_abc123",
@@ -179,6 +187,16 @@ The response config includes information about the encryption used.
 
 ```json
 {
+  "id": "platform_encrypted",
+  "version": "{{ ucp_version }}",
+  "available_instruments": [
+    {
+      "type": "card",
+      "constraints": {
+        "brands": ["visa", "mastercard"]
+      }
+    }
+  ],
   "config": {
     "environment": "production",
     "business_id": "merchant_abc123",
@@ -236,14 +254,22 @@ registry using `platform_config`.
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "{{ ucp_version }}",
     "payment_handlers": {
       "com.example.platform_encrypted": [
         {
           "id": "platform_encrypted",
-          "version": "2026-01-11",
+          "version": "{{ ucp_version }}",
           "spec": "https://platform.example.com/ucp/encrypted-handler.json",
           "schema": "https://platform.example.com/ucp/encrypted-handler/schema.json",
+          "available_instruments": [
+            {
+              "type": "card",
+              "constraints": {
+                "brands": ["visa", "mastercard", "amex", "discover"]
+              }
+            }
+          ],
           "config": {
             "environment": "production",
             "platform_id": "platform_abc123",
@@ -302,8 +328,9 @@ Content-Type: application/json
       }
     ]
   },
-  "risk_signals": {
-    // ... the key value pair for potential risk signal data
+  "signals": {
+    "dev.ucp.buyer_ip": "203.0.113.42",
+    "dev.ucp.user_agent": "Mozilla/5.0 ..."
   }
 }
 ```
@@ -327,5 +354,5 @@ Content-Type: application/json
 
 ## References
 
-* **Identity Schema:** `https://ucp.dev/schemas/shopping/types/payment_identity.json`
-* **Instrument Schema:** `https://ucp.dev/schemas/shopping/types/card_payment_instrument.json`
+* **Identity Schema:** [schemas/shopping/types/payment_identity.json](site:schemas/shopping/types/payment_identity.json)
+* **Instrument Schema:** [schemas/shopping/types/card_payment_instrument.json](site:schemas/shopping/types/card_payment_instrument.json)

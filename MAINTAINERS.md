@@ -26,6 +26,7 @@ design of the protocol.
 <!-- cSpell:ignore Najim Naga Malepati Venu Vemula -->
 | Name | Company |
 | :--- | :--- |
+| Aaron Glazer | Shopify |
 | Amit Handa | Google |
 | Anurag Sinha | Google |
 | Chris Sauve | Shopify |
@@ -33,7 +34,6 @@ design of the protocol.
 | Drew Olson | Google |
 | Ilya Grigorik | Shopify |
 | Imran Hoosain | Etsy |
-| Lee Richmond | Shopify |
 | Maxime Najim | Target |
 | Naga Malepati | Wayfair |
 | Venu Vemula | Google |

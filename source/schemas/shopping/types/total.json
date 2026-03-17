@@ -2,6 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/shopping/types/total.json",
   "title": "Total",
+  "description": "A cost breakdown entry with a category, amount, and optional display text.",
   "type": "object",
   "required": [
     "type",
@@ -10,16 +11,7 @@
   "properties": {
     "type": {
       "type": "string",
-      "enum": [
-        "items_discount",
-        "subtotal",
-        "discount",
-        "fulfillment",
-        "tax",
-        "fee",
-        "total"
-      ],
-      "description": "Type of total categorization.",
+      "description": "Cost category. Well-known values: subtotal, items_discount, discount, fulfillment, tax, fee, total. Businesses MAY use additional values.",
       "ucp_request": "omit"
     },
     "display_text": {
@@ -28,9 +20,7 @@
       "ucp_request": "omit"
     },
     "amount": {
-      "type": "integer",
-      "description": "If type == total, sums subtotal - discount + fulfillment + tax + fee. Should be >= 0. Amount in minor (cents) currency units.",
-      "minimum": 0,
+      "$ref": "amount.json",
       "ucp_request": "omit"
     }
   }

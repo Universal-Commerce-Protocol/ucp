@@ -39,7 +39,7 @@ Businesses advertise consent support in their profile:
   "capabilities": {
     "dev.ucp.shopping.buyer_consent": [
       {
-        "version": "2026-01-11",
+        "version": "{{ ucp_version }}",
         "extends": "dev.ucp.shopping.checkout"
       }
     ]
@@ -59,7 +59,7 @@ The consent extension extends the **buyer object** within checkout:
 
 ### Consent Object
 
-{{ extension_schema_fields('buyer_consent_resp.json#/$defs/consent', 'buyer-consent') }}
+{{ extension_schema_fields('buyer_consent.json#/$defs/consent', 'buyer-consent') }}
 
 ## Usage
 

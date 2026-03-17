@@ -60,30 +60,30 @@ happens internally within the Processor's secure environment.
 ### Pattern Flow
 
 ```text
-┌────────────┐                         ┌───────────────────────────────────┐
-│  Platform  │                         │       Tokenizer / Processor       │
-│ (Collector)│                         │      (Business or PSP)            │
-└─────┬──────┘                         └─────────────────┬─────────────────┘
-      │                                                  │
-      │  1. GET ucp.payment_handlers                     │
-      │─────────────────────────────────────────────────>│
-      │                                                  │
-      │  2. Handler Config (URL + Identity)              │
-      │<─────────────────────────────────────────────────│
-      │                                                  │
-      │  3. POST /tokenize (Credential + Identity)       │
-      │─────────────────────────────────────────────────>│
-      │                                                  │
-      │  4. Token                                        │
-      │<─────────────────────────────────────────────────│
-      │                                                  │
-      │  5. POST checkout with TokenCredential           │
-      │─────────────────────────────────────────────────>│
-      │                                                  │
-      │        (Internal Resolution: Token -> Info)      │
-      │                                                  │
-      │  6. Payment Result                               │
-      │<─────────────────────────────────────────────────│
++------------+                         +-----------------------------------+
+|  Platform  |                         |       Tokenizer / Processor       |
+| (Collector)|                         |      (Business or PSP)            |
++-----+------+                         +-----------------+-----------------+
+      |                                                  |
+      |  1. GET ucp.payment_handlers                     |
+      |------------------------------------------------->|
+      |                                                  |
+      |  2. Handler Config (URL + Identity)              |
+      |<-------------------------------------------------|
+      |                                                  |
+      |  3. POST /tokenize (Credential + Identity)       |
+      |------------------------------------------------->|
+      |                                                  |
+      |  4. Token                                        |
+      |<-------------------------------------------------|
+      |                                                  |
+      |  5. POST checkout with TokenCredential           |
+      |------------------------------------------------->|
+      |                                                  |
+      |        (Internal Resolution: Token -> Info)      |
+      |                                                  |
+      |  6. Payment Result                               |
+      |<-------------------------------------------------|
 ```
 
 ---
@@ -110,14 +110,22 @@ The handler's specification (referenced via the `spec` field) documents the
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "{{ ucp_version }}",
     "payment_handlers": {
       "com.example.processor_tokenizer": [
         {
           "id": "processor_tokenizer",
-          "version": "2026-01-11",
+          "version": "{{ ucp_version }}",
           "spec": "https://example.com/ucp/processor-tokenizer.json",
           "schema": "https://example.com/ucp/processor-tokenizer/schema.json",
+          "available_instruments": [
+            {
+              "type": "card",
+              "constraints": {
+                "brands": ["visa", "mastercard", "amex"]
+              }
+            }
+          ],
           "config": {
             "environment": "production",
             "business_id": "merchant_xyz789"
@@ -133,20 +141,28 @@ The handler's specification (referenced via the `spec` field) documents the
 
 The response config includes runtime information about what's available for this checkout.
 
-| Field                | Type   | Required | Description                                  |
-| :------------------- | :----- | :------- | :------------------------------------------- |
-| `environment`        | string | Yes      | API environment used for this checkout       |
-| `business_id`        | string | Yes      | Business identifier                          |
-| `supported_networks` | array  | No       | Card networks supported for this transaction |
+| Field         | Type   | Required | Description                            |
+| :------------ | :----- | :------- | :------------------------------------- |
+| `environment` | string | Yes      | API environment used for this checkout |
+| `business_id` | string | Yes      | Business identifier                    |
 
 #### Example Response Config
 
 ```json
 {
+  "id": "processor_tokenizer",
+  "version": "{{ ucp_version }}",
+  "available_instruments": [
+    {
+      "type": "card",
+      "constraints": {
+        "brands": ["visa", "mastercard", "amex"]
+      }
+    }
+  ],
   "config": {
     "environment": "production",
-    "business_id": "merchant_xyz789",
-    "supported_networks": ["visa", "mastercard", "amex"]
+    "business_id": "merchant_xyz789"
   }
 }
 ```
@@ -184,7 +200,10 @@ business's configuration.
       "com.example.processor_tokenizer": [
         {
           "id": "processor_tokenizer",
-          "version": "2026-01-11",
+          "version": "{{ ucp_version }}",
+          "available_instruments": [
+            {"type": "card", "constraints": {"brands": ["visa", "mastercard", "amex"]}}
+          ],
           "config": {
             "environment": "production",
             "business_id": "merchant_xyz789"

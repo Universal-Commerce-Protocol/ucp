@@ -17,7 +17,6 @@
 # Cart Capability
 
 * **Capability Name:** `dev.ucp.shopping.cart`
-* **Version:** `DRAFT`
 
 ## Overview
 
@@ -86,7 +85,7 @@ SHOULD be linked for the duration of the checkout.
 
 * **After checkout completion** — Business MAY clear the cart based on TTL,
     completion of the checkout, or other business logic. Subsequent operations
-    on a cleared cart ID return `NOT_FOUND`; the platform can start a new
+    on a cleared cart ID return `not_found`; the platform can start a new
     session with `create_cart`.
 
 ## Guidelines
@@ -96,7 +95,7 @@ SHOULD be linked for the duration of the checkout.
 * **MAY** use carts for pre-purchase exploration and session persistence.
 * **SHOULD** convert cart to checkout when user expresses purchase intent.
 * **MAY** display `continue_url` for handoff to business UI.
-* **SHOULD** handle `NOT_FOUND` gracefully when cart expires or is canceled.
+* **SHOULD** handle `not_found` gracefully when cart expires or is canceled.
 
 ### Business
 
@@ -129,12 +128,32 @@ The Cart capability defines the following logical operations.
 Creates a new cart session with line items and optional buyer/context
 information for localized pricing estimates.
 
+When **all** requested items are unavailable, the business MAY return an
+error response instead of creating a cart resource. `ucp.status` is the
+primary discriminator; the absence of `id` is a consistent secondary
+indicator:
+
+```json
+{
+  "ucp": { "version": "2026-01-15", "status": "error" },
+  "messages": [
+    {
+      "type": "error",
+      "code": "out_of_stock",
+      "content": "All requested items are currently out of stock",
+      "severity": "unrecoverable"
+    }
+  ],
+  "continue_url": "https://merchant.com/"
+}
+```
+
 * [REST Binding](cart-rest.md#create-cart)
 * [MCP Binding](cart-mcp.md#create_cart)
 
 ### Get Cart
 
-Retrieves the latest state of a cart session. Returns `NOT_FOUND` if the cart
+Retrieves the latest state of a cart session. Returns `not_found` if the cart
 does not exist, has expired, or was canceled.
 
 * [REST Binding](cart-rest.md#get-cart)
@@ -152,7 +171,7 @@ state on the business side.
 ### Cancel Cart
 
 Cancels a cart session. Business MUST return the cart state before deletion.
-Subsequent operations for this cart ID SHOULD return `NOT_FOUND`.
+Subsequent operations for this cart ID SHOULD return `not_found`.
 
 * [REST Binding](cart-rest.md#cancel-cart)
 * [MCP Binding](cart-mcp.md#cancel_cart)
@@ -162,19 +181,27 @@ Subsequent operations for this cart ID SHOULD return `NOT_FOUND`.
 Cart reuses the same entity schemas as [Checkout](checkout.md). This ensures
 consistent data structures when converting a cart to a checkout session.
 
+### UCP Response Cart {: #ucp-response-cart-schema }
+
+{{ extension_schema_fields('ucp.json#/$defs/response_cart_schema', 'cart') }}
+
 ### Line Item
 
 #### Line Item Create Request
 
-{{ schema_fields('types/line_item.create_req', 'checkout') }}
+{{ schema_fields('types/line_item_create_req', 'checkout') }}
 
 #### Line Item Update Request
 
-{{ schema_fields('types/line_item.update_req', 'checkout') }}
+{{ schema_fields('types/line_item_update_req', 'checkout') }}
 
-#### Line Item Response
+#### Line Item
 
-{{ schema_fields('types/line_item_resp', 'checkout') }}
+{{ schema_fields('types/line_item_resp', 'cart') }}
+
+#### Item
+
+{{ schema_fields('types/item_resp', 'cart') }}
 
 ### Buyer
 
@@ -184,7 +211,20 @@ consistent data structures when converting a cart to a checkout session.
 
 {{ schema_fields('context', 'checkout') }}
 
+### Signals
+
+Environment data provided by the platform to support authorization
+and abuse prevention. Signal values MUST NOT be buyer-asserted claims. See
+[Signals](overview.md#signals) for details and privacy
+requirements.
+
+{{ schema_fields('types/signals', 'checkout') }}
+
 ### Total
+
+The same totals contract applies to cart and checkout. See
+[Checkout Totals](checkout.md#totals) for the rendering contract, accounting
+identity, well-known types, repeating types, and sub-line semantics.
 
 {{ schema_fields('types/total_resp', 'checkout') }}
 
