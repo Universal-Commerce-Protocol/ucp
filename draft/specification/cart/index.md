@@ -266,13 +266,16 @@ This object MUST be one of the following types: [Message Error](/draft/specifica
 
 #### Message Warning
 
-| Name         | Type   | Required | Description                                                                                                                           |
-| ------------ | ------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| type         | string | **Yes**  | **Constant = warning**. Message type discriminator.                                                                                   |
-| path         | string | No       | JSONPath (RFC 9535) to related field (e.g., $.line_items[0]).                                                                         |
-| code         | string | **Yes**  | Warning code. Machine-readable identifier for the warning type (e.g., final_sale, prop65, fulfillment_changed, age_restricted, etc.). |
-| content      | string | **Yes**  | Human-readable warning message that MUST be displayed.                                                                                |
-| content_type | string | No       | Content format, default = plain. **Enum:** `plain`, `markdown`                                                                        |
+| Name         | Type   | Required | Description                                                                                                                                                                                                                                         |
+| ------------ | ------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type         | string | **Yes**  | **Constant = warning**. Message type discriminator.                                                                                                                                                                                                 |
+| path         | string | No       | JSONPath (RFC 9535) to related field (e.g., $.line_items[0]).                                                                                                                                                                                       |
+| code         | string | **Yes**  | Warning code. Machine-readable identifier for the warning type (e.g., final_sale, prop65, fulfillment_changed, age_restricted, etc.).                                                                                                               |
+| content      | string | **Yes**  | Human-readable warning message that MUST be displayed.                                                                                                                                                                                              |
+| content_type | string | No       | Content format, default = plain. **Enum:** `plain`, `markdown`                                                                                                                                                                                      |
+| presentation | string | No       | Rendering contract for this warning. 'notice' (default): platform MUST display, MAY dismiss. 'disclosure': platform MUST display in proximity to the path-referenced component, MUST NOT hide or auto-dismiss. See specification for full contract. |
+| image_url    | string | No       | URL to a required visual element (e.g., warning symbol, energy class label).                                                                                                                                                                        |
+| url          | string | No       | Reference URL for more information (e.g., regulatory site, registry entry, policy page).                                                                                                                                                            |
 
 ### Link
 
