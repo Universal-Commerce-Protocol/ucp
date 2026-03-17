@@ -144,6 +144,9 @@ jobs:
           cp -r site/* .
           rm -rf site
 
+          # Add redirects for all specification files
+          ln -s latest/specification specification
+
           # Commit and push
           git add .
           git commit -m "Deploy root site from main" --allow-empty
