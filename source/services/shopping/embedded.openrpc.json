@@ -239,9 +239,9 @@
     },
 
     {
-      "name": "ec.link.open_request",
-      "summary": "Request link presentation",
-      "description": "The buyer activated a link within checkout. The host MUST present the content to the buyer and respond with a success result, or notify the buyer that the request was rejected and respond with a link_rejected error.",
+      "name": "ec.window.open_request",
+      "summary": "Request window open",
+      "description": "The buyer activated a link within checkout. The host MUST present the content to the buyer and respond with a success result, or respond with a window_rejected error if host policy prevented the navigation.",
       "params": [
         {
           "name": "url",
@@ -254,14 +254,13 @@
         }
       ],
       "result": {
-        "name": "linkOpenResult",
+        "name": "windowOpenResult",
         "schema": {
           "type": "object",
-          "description": "Acknowledgement that the host handled the link.",
-          "additionalProperties": false
+          "description": "Acknowledgement that the host handled the request."
         }
       }
     }
   ],
-  "x-delegations": ["payment.instruments_change", "payment.credential", "link.open"]
+  "x-delegations": ["payment.instruments_change", "payment.credential", "window.open"]
 }
