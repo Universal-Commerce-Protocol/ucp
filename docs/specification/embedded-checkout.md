@@ -334,7 +334,7 @@ The Embedded Checkout determines which delegations to honor based on:
 The Embedded Checkout **MUST** indicate accepted delegations in the `ec.ready`
 request via the `delegate` field (see [`ec.ready`](#ecready)). If a
 requested delegation is not accepted, the Embedded Checkout **MUST** handle that
-domain using its own UI.
+action using its own UI.
 
 #### Binding Requirements
 
@@ -1307,7 +1307,7 @@ to send `ec.window.open_request` when the buyer activates a link. When delegated
 - **MUST** present the content to the buyer for every approved request
     (e.g., in a modal, new tab, or similar)
 - **MUST** respond with a JSON-RPC success result when the request was
-    processed, or a `window_rejected` error if host policy prevented
+    processed, or a `window_open_rejected` error if host policy prevented
     the navigation
 - **MAY** notify the buyer if the request was rejected
 
@@ -1315,10 +1315,10 @@ By accepting `window.open` delegation, the host assumes responsibility for
 handling the buyer's link interactions. The Embedded Checkout **MUST NOT**
 present its own UI for the link.
 
-> **Extracting link context:** The `ec.window.open_request` payload contains
-> only the URL. Hosts that need richer context (e.g., link type or label)
-> **MAY** cross-reference the requested URL against the `checkout.links` array
-> from the checkout session to obtain additional metadata.
+The `ec.window.open_request` payload contains only the URL. Hosts that need
+richer context (e.g., link type or label) **MAY** cross-reference the requested
+URL against the `checkout.links` array from the checkout session to obtain
+additional metadata.
 
 ### Window Message API Reference
 
@@ -1365,7 +1365,7 @@ Requests the host to handle a link activated by the buyer within the checkout.
     "jsonrpc": "2.0",
     "id": "window_1",
     "error": {
-        "code": "window_rejected",
+        "code": "window_open_rejected",
         "message": "Window open rejected by host."
     }
 }
@@ -1388,7 +1388,7 @@ where possible.
 | `not_supported_error` | The requested payment method is not supported by the host.                                                                                     |
 | `invalid_state_error` | Handshake was attempted out of order.                                                                                                          |
 | `not_allowed_error`   | The request was missing valid User Activation (see [Prevention of Unsolicited Payment Requests](#prevention-of-unsolicited-payment-requests)). |
-| `window_rejected`     | Host policy prevented the navigation. The host **MAY** notify the buyer that their request was rejected.                                       |
+| `window_open_rejected`     | Host policy prevented the navigation. The host **MAY** notify the buyer that their request was rejected.                                       |
 
 ### Security for Web-Based Hosts
 

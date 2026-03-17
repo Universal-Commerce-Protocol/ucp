@@ -241,7 +241,7 @@
     {
       "name": "ec.window.open_request",
       "summary": "Request window open",
-      "description": "The buyer activated a link within checkout. The host MUST present the content to the buyer and respond with a success result, or respond with a window_rejected error if host policy prevented the navigation.",
+      "description": "The buyer activated a link within checkout. The host MUST present the content to the buyer and respond with a success result, or respond with a window_open_rejected error if host policy prevented the navigation.",
       "params": [
         {
           "name": "url",
