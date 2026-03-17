@@ -80,6 +80,9 @@ When this capability is active, cart and/or checkout are extended with a
 ## Allocation Details
 
 The `applied` array explains how discounts were calculated and distributed.
+The `applied[].amount` describes the magnitude of the applied discount (always
+positive); the corresponding `totals[]` entry amount represents its signed
+effect on the receipt (negative for discounts).
 
 ### Allocation Method
 
