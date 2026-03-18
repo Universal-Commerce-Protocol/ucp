@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
- /* Ensure headings in documentation are black */
+/* Ensure headings in documentation are black */
 .md-typeset h1,
 .md-typeset h2,
 .md-typeset h3,
@@ -37,14 +37,16 @@ a[target="_blank"]::after {
   background-color: currentColor;
 
   /* The icon shape */
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M14 3v2h3.59l-9.83 9.83 1.41 1.41 9.83-9.83V10h2V3m-2 16H5V5h7V3H5c-1.11 0-2 .89-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2v7z'/%3E%3C/svg%3E") no-repeat center;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M14 3v2h3.59l-9.83 9.83 1.41 1.41 9.83-9.83V10h2V3m-2 16H5V5h7V3H5c-1.11 0-2 .89-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2v7z'/%3E%3C/svg%3E") no-repeat center;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M14 3v2h3.59l-9.83 9.83 1.41 1.41 9.83-9.83V10h2V3m-2 16H5V5h7V3H5c-1.11 0-2 .89-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2v7z'/%3E%3C/svg%3E")
+    no-repeat center;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M14 3v2h3.59l-9.83 9.83 1.41 1.41 9.83-9.83V10h2V3m-2 16H5V5h7V3H5c-1.11 0-2 .89-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2v7z'/%3E%3C/svg%3E")
+    no-repeat center;
 }
 
 /* --- HEADER & BASE --- */
 .md-header {
   background-color: #ffffff;
-  border-bottom: 0.05rem solid rgba(0,0,0,0.1);
+  border-bottom: 0.05rem solid rgba(0, 0, 0, 0.1);
   color: #202124;
 }
 
@@ -58,7 +60,7 @@ a[target="_blank"]::after {
 }
 
 form.md-search__form {
-  background-color: rgba(0,0,0,0.05);
+  background-color: rgba(0, 0, 0, 0.05);
   border-radius: 4px;
 }
 
@@ -70,7 +72,7 @@ form.md-search__form {
 }
 
 .landing-page h2 {
-  font-size: 2.0rem;
+  font-size: 2rem;
   font-weight: 450;
   color: #202124;
   margin: 0 auto 36px 0;
@@ -97,7 +99,7 @@ form.md-search__form {
 }
 
 .hero-content h1 {
-  font-size: 3.0rem;
+  font-size: 3rem;
   line-height: 1.12;
   font-weight: 450;
   color: #202124;
@@ -305,8 +307,12 @@ p.hero-description {
 
 /* The Animation Loop */
 @keyframes partnerScroll {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
 }
 
 /* Mobile Tweak */
@@ -367,7 +373,7 @@ p.hero-description {
 .tab-btn.active {
   background-color: #202124;
   color: #fff;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 /* Content Area */
@@ -392,8 +398,14 @@ p.hero-description {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Left Column: Text */
@@ -408,8 +420,8 @@ p.hero-description {
 }
 
 .icon-placeholder img {
-    height: 64px;
-    width: auto;
+  height: 64px;
+  width: auto;
 }
 
 .pane-eyebrow {
@@ -431,7 +443,6 @@ p.hero-description {
   margin-bottom: 24px;
   text-align: left;
 }
-
 
 .pane-visuals {
   flex: 2;
@@ -455,7 +466,7 @@ p.hero-description {
   height: 520px;
   object-fit: contain;
   border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   background-color: #fff;
   display: block;
 }
@@ -517,7 +528,6 @@ p.hero-description {
 
 /* --- MOBILE RESPONSIVENESS (< 960px) --- */
 @media screen and (max-width: 960px) {
-
   /* Hero */
   .hero-wrapper {
     flex-direction: column;
@@ -570,8 +580,8 @@ p.hero-description {
 
   /* Make sure code block is visible on mobile */
   .code-block-placeholder {
-      display: flex;
-      max-width: 100%;
+    display: flex;
+    max-width: 100%;
   }
 }
 
@@ -779,5 +789,18 @@ p.hero-description {
   color: #5f6368;
   font-weight: 400;
   letter-spacing: -0.5px;
-  font-family: 'Google Sans', sans-serif;
+  font-family: "Google Sans", sans-serif;
+}
+
+/* Prevent the site title and version selector from being hidden on scroll */
+[class~="md-header__title"] [class~="md-header__topic"]:first-child {
+  opacity: 1 !important;
+  transform: none !important;
+  z-index: 1 !important;
+  pointer-events: auto !important;
+}
+
+/* Hide the page title that replaces the site title on scroll */
+[class~="md-header__title"] [class~="md-header__topic"]:nth-child(2) {
+  display: none !important;
 }
