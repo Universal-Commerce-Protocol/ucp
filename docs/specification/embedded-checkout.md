@@ -1302,8 +1302,9 @@ to send `ec.window.open_request` when the buyer activates a link. When delegated
 
 **Host responsibilities**:
 
-- **SHOULD** validate the requested URL against host security policies
-    (e.g., verifying origins)
+- **MUST** validate that the requested URL uses the `https` scheme
+- **SHOULD** apply additional host security policies (e.g., verifying
+    origins)
 - **MUST** present the content to the buyer for every approved request
     (e.g., in a modal, new tab, or similar)
 - **MUST** respond with a JSON-RPC success result when the request was
