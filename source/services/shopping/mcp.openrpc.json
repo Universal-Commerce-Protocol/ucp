@@ -316,6 +316,27 @@
         "name": "response",
         "schema": {"$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/lookup_response"}
       }
+    },
+    {
+      "name": "get_order",
+      "summary": "Get order",
+      "description": "Get the current state of an order. Returns the full order entity as a current-state snapshot.",
+      "params": [
+        {
+          "name": "meta",
+          "required": true,
+          "schema": {"$ref": "#/components/schemas/meta"}
+        },
+        {
+          "name": "id",
+          "required": true,
+          "schema": {"type": "string", "description": "The unique identifier of the order."}
+        }
+      ],
+      "result": {
+        "name": "order",
+        "schema": {"$ref": "../../schemas/shopping/order.json"}
+      }
     }
   ]
 }
