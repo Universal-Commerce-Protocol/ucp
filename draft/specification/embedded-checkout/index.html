@@ -1418,6 +1418,62 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#window-extension" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Window Extension
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Window Extension">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#window-overview-host-choice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Window Overview &amp; Host Choice
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#window-message-api-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Window Message API Reference
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Window Message API Reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ecwindowopen_request" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ec.window.open_request
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#security-error-handling" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3262,6 +3318,62 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#window-extension" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Window Extension
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Window Extension">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#window-overview-host-choice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Window Overview &amp; Host Choice
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#window-message-api-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Window Message API Reference
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Window Message API Reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ecwindowopen_request" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ec.window.open_request
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#security-error-handling" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3671,7 +3783,7 @@ indicate ECP availability and allowed delegations for a specific session.</p>
 </span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">                    </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;draft&quot;</span><span class="p">,</span>
 </span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">                    </span><span class="nt">&quot;transport&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;embedded&quot;</span><span class="p">,</span>
 </span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">                    </span><span class="nt">&quot;config&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w">                        </span><span class="nt">&quot;delegate&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;payment.credential&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;fulfillment.address_change&quot;</span><span class="p">]</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w">                        </span><span class="nt">&quot;delegate&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;payment.credential&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;fulfillment.address_change&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;window.open&quot;</span><span class="p">]</span>
 </span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="w">                    </span><span class="p">}</span>
 </span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="w">                </span><span class="p">}</span>
 </span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="w">            </span><span class="p">]</span>
@@ -3778,11 +3890,15 @@ message following a consistent pattern: <code>ec.{delegation}_request</code></p>
 <td><code>fulfillment.address_change</code></td>
 <td><code>ec.fulfillment.address_change_request</code></td>
 </tr>
+<tr>
+<td><code>window.open</code></td>
+<td><code>ec.window.open_request</code></td>
+</tr>
 </tbody>
 </table>
 <p>Extensions define their own delegation identifiers; see each extension's
 specification for available options.</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>?ec_version=2026-01-11&amp;ec_delegate=payment.instruments_change,payment.credential,fulfillment.address_change
+<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>?ec_version=2026-01-11&amp;ec_delegate=payment.instruments_change,payment.credential,fulfillment.address_change,window.open
 </span></code></pre></div>
 <h4 id="color-scheme">Color Scheme<a class="headerlink" href="#color-scheme" title="Permanent link">&para;</a></h4>
 <p>The optional <code>ec_color_scheme</code> parameter allows the host to specify which color
@@ -3858,7 +3974,7 @@ approved hosts based on business policy.</p>
 <p>The Embedded Checkout <strong>MUST</strong> indicate accepted delegations in the <code>ec.ready</code>
 request via the <code>delegate</code> field (see <a href="#ecready"><code>ec.ready</code></a>). If a
 requested delegation is not accepted, the Embedded Checkout <strong>MUST</strong> handle that
-capability using its own UI.</p>
+action using its own UI.</p>
 <h4 id="binding-requirements">Binding Requirements<a class="headerlink" href="#binding-requirements" title="Permanent link">&para;</a></h4>
 <p><strong>Once delegation is accepted</strong>, both parties enter a binding contract:</p>
 <p><strong>Embedded Checkout responsibilities:</strong></p>
@@ -3876,7 +3992,7 @@ capability using its own UI.</p>
 </ol>
 <h4 id="333-delegation-flow">3.3.3 Delegation Flow<a class="headerlink" href="#333-delegation-flow" title="Permanent link">&para;</a></h4>
 <ol>
-<li><strong>Request</strong>: Embedded Checkout sends an <code>ec.{capability}.{action}_request</code>
+<li><strong>Request</strong>: Embedded Checkout sends an <code>ec.{domain}.{action}_request</code>
     message with current state (includes <code>id</code>)</li>
 <li><strong>Native UI</strong>: Host presents native UI for the delegated action</li>
 <li><strong>Response</strong>: host sends back a JSON-RPC response with matching <code>id</code> and
@@ -3884,9 +4000,10 @@ capability using its own UI.</p>
 <li><strong>Update</strong>: Embedded Checkout updates its state and may send subsequent
     change notifications</li>
 </ol>
-<p>See <a href="#payment-extension">Payment Extension</a> and
-<a href="#fulfillment-extension">Fulfillment Extension</a> for
-capability-specific delegation details.</p>
+<p>See <a href="#payment-extension">Payment Extension</a>,
+<a href="#fulfillment-extension">Fulfillment Extension</a>, and
+<a href="#window-extension">Window Extension</a> for
+domain-specific delegation details.</p>
 <h3 id="navigation-constraints">Navigation Constraints<a class="headerlink" href="#navigation-constraints" title="Permanent link">&para;</a></h3>
 <p>When checkout is rendered in embedded mode, the implementation <strong>SHOULD</strong>
 prevent off-checkout navigation to maintain a focused checkout experience.
@@ -4017,14 +4134,15 @@ all implementations. All messages are sent from Embedded Checkout to host.</p>
 <p>Extensions <strong>MAY</strong> extend the Embedded protocol by defining additional messages.
 Extension messages <strong>MUST</strong> follow the naming convention:</p>
 <ul>
-<li><strong>Notifications</strong>: <code>ec.{capability}.change</code> — state change notifications (no
+<li><strong>Notifications</strong>: <code>ec.{domain}.change</code> — state change notifications (no
     <code>id</code>)</li>
-<li><strong>Delegation requests</strong>: <code>ec.{capability}.{action}_request</code> — requires
+<li><strong>Delegation requests</strong>: <code>ec.{domain}.{action}_request</code> — requires
     response (has <code>id</code>)</li>
 </ul>
 <p>Where:</p>
 <ul>
-<li><code>{capability}</code> matches the capability identifier from discovery</li>
+<li><code>{domain}</code> matches the domain identifier from discovery (e.g., <code>payment</code>,
+    <code>fulfillment</code>, <code>window</code>)</li>
 <li><code>{action}</code> describes the specific action being delegated (e.g.,
     <code>instruments_change</code>, <code>address_change</code>)</li>
 <li><code>_request</code> suffix signals this is a delegation point requiring a response</li>
@@ -4065,7 +4183,7 @@ actions.</p>
 </span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ready_1&quot;</span><span class="p">,</span>
 </span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="w">    </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ec.ready&quot;</span><span class="p">,</span>
 </span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="w">    </span><span class="nt">&quot;params&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="w">        </span><span class="nt">&quot;delegate&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;payment.credential&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;fulfillment.address_change&quot;</span><span class="p">]</span>
+</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="w">        </span><span class="nt">&quot;delegate&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;payment.credential&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;fulfillment.address_change&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;window.open&quot;</span><span class="p">]</span>
 </span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="w">    </span><span class="p">}</span>
 </span><span id="__span-11-8"><a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a><span class="p">}</span>
 </span></code></pre></div>
@@ -4786,6 +4904,89 @@ rather than attempting to merge the new data with existing state.</p>
 </tr>
 </tbody>
 </table>
+<h2 id="window-extension">Window Extension<a class="headerlink" href="#window-extension" title="Permanent link">&para;</a></h2>
+<p>The window extension defines how the Embedded Checkout notifies the host when
+the buyer activates a link presented by the business. When a checkout URL
+includes <code>ec_delegate=window.open</code>, the host <strong>MUST</strong> handle every
+<code>ec.window.open_request</code> and acknowledge the request.</p>
+<p>This is distinct from
+<a href="#navigation-constraints">Navigation Constraints</a>, which the Embedded Checkout
+enforces unconditionally to prevent navigation to unrelated pages.</p>
+<h3 id="window-overview-host-choice">Window Overview &amp; Host Choice<a class="headerlink" href="#window-overview-host-choice" title="Permanent link">&para;</a></h3>
+<p>Window delegation allows for two different patterns:</p>
+<p><strong>Option A: Host Delegates to Embedded Checkout</strong> The host does NOT include
+<code>window.open</code> in <code>ec_delegate</code>. The Embedded Checkout handles link presentation
+using its own inline UI. This is the standard, non-delegated flow.</p>
+<p><strong>Option B: Host Takes Control</strong> The host includes
+<code>ec_delegate=window.open</code> in the Checkout URL, informing the Embedded Checkout
+to send <code>ec.window.open_request</code> when the buyer activates a link. When delegated:</p>
+<p><strong>Embedded Checkout responsibilities</strong>:</p>
+<ul>
+<li><strong>MUST</strong> send <code>ec.window.open_request</code> when the buyer activates a link
+    presented by the business</li>
+</ul>
+<p><strong>Host responsibilities</strong>:</p>
+<ul>
+<li><strong>MUST</strong> validate that the requested URL uses the <code>https</code> scheme</li>
+<li><strong>SHOULD</strong> apply additional host security policies (e.g., verifying
+    origins)</li>
+<li><strong>MUST</strong> present the content to the buyer for every approved request
+    (e.g., in a modal, new tab, or similar)</li>
+<li><strong>MUST</strong> respond with a JSON-RPC success result when the request was
+    processed, or a <code>window_open_rejected_error</code> error if host policy prevented
+    the navigation</li>
+<li><strong>MAY</strong> notify the buyer if the request was rejected</li>
+</ul>
+<p>By accepting <code>window.open</code> delegation, the host assumes responsibility for
+handling the buyer's link interactions. The Embedded Checkout <strong>MUST NOT</strong>
+present its own UI for the link.</p>
+<p>The <code>ec.window.open_request</code> payload contains only the URL. Hosts that need
+richer context (e.g., link type or label) <strong>MAY</strong> cross-reference the requested
+URL against the <code>checkout.links</code> array from the checkout session to obtain
+additional metadata.</p>
+<h3 id="window-message-api-reference">Window Message API Reference<a class="headerlink" href="#window-message-api-reference" title="Permanent link">&para;</a></h3>
+<h4 id="ecwindowopen_request"><code>ec.window.open_request</code><a class="headerlink" href="#ecwindowopen_request" title="Permanent link">&para;</a></h4>
+<p>Requests the host to handle a link activated by the buyer within the checkout.</p>
+<ul>
+<li><strong>Direction:</strong> Embedded Checkout → Host</li>
+<li><strong>Type:</strong> Request</li>
+<li><strong>Payload:</strong><ul>
+<li><code>url</code> (string, uri, <strong>REQUIRED</strong>): The URL of the resource to present.</li>
+</ul>
+</li>
+</ul>
+<p><strong>Example Message:</strong></p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-31-1"><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a><span class="p">{</span>
+</span><span id="__span-31-2"><a id="__codelineno-31-2" name="__codelineno-31-2" href="#__codelineno-31-2"></a><span class="w">    </span><span class="nt">&quot;jsonrpc&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2.0&quot;</span><span class="p">,</span>
+</span><span id="__span-31-3"><a id="__codelineno-31-3" name="__codelineno-31-3" href="#__codelineno-31-3"></a><span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;window_1&quot;</span><span class="p">,</span>
+</span><span id="__span-31-4"><a id="__codelineno-31-4" name="__codelineno-31-4" href="#__codelineno-31-4"></a><span class="w">    </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ec.window.open_request&quot;</span><span class="p">,</span>
+</span><span id="__span-31-5"><a id="__codelineno-31-5" name="__codelineno-31-5" href="#__codelineno-31-5"></a><span class="w">    </span><span class="nt">&quot;params&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-31-6"><a id="__codelineno-31-6" name="__codelineno-31-6" href="#__codelineno-31-6"></a><span class="w">        </span><span class="nt">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://merchant.com/privacy-policy&quot;</span>
+</span><span id="__span-31-7"><a id="__codelineno-31-7" name="__codelineno-31-7" href="#__codelineno-31-7"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-31-8"><a id="__codelineno-31-8" name="__codelineno-31-8" href="#__codelineno-31-8"></a><span class="p">}</span>
+</span></code></pre></div>
+<ul>
+<li><strong>Direction:</strong> Host → Embedded Checkout</li>
+<li><strong>Type:</strong> Response</li>
+<li><strong>Payload:</strong> Empty object (<code>{}</code>).</li>
+</ul>
+<p><strong>Example Success Response:</strong></p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-32-1"><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a><span class="p">{</span>
+</span><span id="__span-32-2"><a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a><span class="w">    </span><span class="nt">&quot;jsonrpc&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2.0&quot;</span><span class="p">,</span>
+</span><span id="__span-32-3"><a id="__codelineno-32-3" name="__codelineno-32-3" href="#__codelineno-32-3"></a><span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;window_1&quot;</span><span class="p">,</span>
+</span><span id="__span-32-4"><a id="__codelineno-32-4" name="__codelineno-32-4" href="#__codelineno-32-4"></a><span class="w">    </span><span class="nt">&quot;result&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
+</span><span id="__span-32-5"><a id="__codelineno-32-5" name="__codelineno-32-5" href="#__codelineno-32-5"></a><span class="p">}</span>
+</span></code></pre></div>
+<p><strong>Example Error Response:</strong></p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-33-1"><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a><span class="p">{</span>
+</span><span id="__span-33-2"><a id="__codelineno-33-2" name="__codelineno-33-2" href="#__codelineno-33-2"></a><span class="w">    </span><span class="nt">&quot;jsonrpc&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2.0&quot;</span><span class="p">,</span>
+</span><span id="__span-33-3"><a id="__codelineno-33-3" name="__codelineno-33-3" href="#__codelineno-33-3"></a><span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;window_1&quot;</span><span class="p">,</span>
+</span><span id="__span-33-4"><a id="__codelineno-33-4" name="__codelineno-33-4" href="#__codelineno-33-4"></a><span class="w">    </span><span class="nt">&quot;error&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-33-5"><a id="__codelineno-33-5" name="__codelineno-33-5" href="#__codelineno-33-5"></a><span class="w">        </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;window_open_rejected_error&quot;</span><span class="p">,</span>
+</span><span id="__span-33-6"><a id="__codelineno-33-6" name="__codelineno-33-6" href="#__codelineno-33-6"></a><span class="w">        </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Window open rejected by host.&quot;</span>
+</span><span id="__span-33-7"><a id="__codelineno-33-7" name="__codelineno-33-7" href="#__codelineno-33-7"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-33-8"><a id="__codelineno-33-8" name="__codelineno-33-8" href="#__codelineno-33-8"></a><span class="p">}</span>
+</span></code></pre></div>
 <h2 id="security-error-handling">Security &amp; Error Handling<a class="headerlink" href="#security-error-handling" title="Permanent link">&para;</a></h2>
 <h3 id="error-codes">Error Codes<a class="headerlink" href="#error-codes" title="Permanent link">&para;</a></h3>
 <p>Responses to delegation request messages from the
@@ -4820,6 +5021,10 @@ where possible.</p>
 <tr>
 <td style="text-align: left;"><code>not_allowed_error</code></td>
 <td style="text-align: left;">The request was missing valid User Activation (see <a href="#prevention-of-unsolicited-payment-requests">Prevention of Unsolicited Payment Requests</a>).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>window_open_rejected_error</code></td>
+<td style="text-align: left;">Host policy prevented the navigation. The host <strong>MAY</strong> notify the buyer that their request was rejected.</td>
 </tr>
 </tbody>
 </table>
@@ -4862,14 +5067,14 @@ directives:</p>
 <p>All business iframes <strong>MUST</strong> be sandboxed to restrict their capabilities. The
 following sandbox attributes <strong>SHOULD</strong> be applied, but a host and business
 <strong>MAY</strong> negotiate additional capabilities:</p>
-<div class="language-html highlight"><pre><span></span><code><span id="__span-31-1"><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a><span class="p">&lt;</span><span class="nt">iframe</span> <span class="na">sandbox</span><span class="o">=</span><span class="s">&quot;allow-scripts allow-forms allow-same-origin&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">iframe</span><span class="p">&gt;</span>
+<div class="language-html highlight"><pre><span></span><code><span id="__span-34-1"><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a><span class="p">&lt;</span><span class="nt">iframe</span> <span class="na">sandbox</span><span class="o">=</span><span class="s">&quot;allow-scripts allow-forms allow-same-origin&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">iframe</span><span class="p">&gt;</span>
 </span></code></pre></div>
 <h4 id="credentialless-iframes">Credentialless Iframes<a class="headerlink" href="#credentialless-iframes" title="Permanent link">&para;</a></h4>
 <p>Hosts <strong>SHOULD</strong> use the <code>credentialless</code> attribute on the iframe to load it in
 a new, ephemeral context. This prevents the business from correlating user
 activity across contexts or accessing existing sessions, protecting user
 privacy.</p>
-<div class="language-html highlight"><pre><span></span><code><span id="__span-32-1"><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a><span class="p">&lt;</span><span class="nt">iframe</span> <span class="na">credentialless</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;https://business.example.com/checkout&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">iframe</span><span class="p">&gt;</span>
+<div class="language-html highlight"><pre><span></span><code><span id="__span-35-1"><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a><span class="p">&lt;</span><span class="nt">iframe</span> <span class="na">credentialless</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;https://business.example.com/checkout&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">iframe</span><span class="p">&gt;</span>
 </span></code></pre></div>
 <h4 id="strict-origin-validation">Strict Origin Validation<a class="headerlink" href="#strict-origin-validation" title="Permanent link">&para;</a></h4>
 <p>Enforce strict validation of the <code>origin</code> for all <code>postMessage</code> communications
