@@ -105,4 +105,5 @@ worktree
 yaml
 zapatillas
 yml
+jwks
 keyid

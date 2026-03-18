@@ -112,16 +112,6 @@ export DOCS_MODE=spec
 export UCP_BUILD_VERSION="draft"
 mike deploy draft
 
-LATEST_VERSION=$(echo "$RELEASE_BRANCHES" | sed 's/release\///' | sort -r | head -n 1)
-
-if [ -n "$LATEST_VERSION" ]; then
-	echo "Aliasing 'latest' to $LATEST_VERSION"
-	mike alias "$LATEST_VERSION" latest --update-aliases
-else
-	echo "No release found, aliasing latest to draft"
-	mike alias draft latest --update-aliases
-fi
-
 echo ">>> Building Root Site"
 # Build root site FIRST so we establish the base (index.html, etc.)
 # Run in sub-shell or unset variable to be safe, though later steps don't use it
