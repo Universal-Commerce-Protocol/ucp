@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/inapplicable_discount.json",
+  "title": "Inapplicable Discount",
+  "description": "A submitted discount code that could not be applied, with a structured rejection reason.",
+  "type": "object",
+  "required": ["code", "reason", "content"],
+  "properties": {
+    "code": {
+      "type": "string",
+      "description": "The discount code that was rejected."
+    },
+    "reason": {
+      "$ref": "error_code.json",
+      "description": "Machine-readable rejection reason. SHOULD use standard discount error codes: discount_code_expired, discount_code_invalid, discount_code_already_applied, discount_code_combination_disallowed, discount_code_user_not_logged_in, discount_code_user_ineligible."
+    },
+    "content": {
+      "type": "string",
+      "description": "Human-readable rejection explanation (e.g., \"Code 'SUMMER20' expired on December 1st\")."
+    }
+  }
+}
