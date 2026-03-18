@@ -1307,7 +1307,7 @@ to send `ec.window.open_request` when the buyer activates a link. When delegated
 - **MUST** present the content to the buyer for every approved request
     (e.g., in a modal, new tab, or similar)
 - **MUST** respond with a JSON-RPC success result when the request was
-    processed, or a `window_open_rejected` error if host policy prevented
+    processed, or a `window_open_rejected_error` error if host policy prevented
     the navigation
 - **MAY** notify the buyer if the request was rejected
 
@@ -1365,7 +1365,7 @@ Requests the host to handle a link activated by the buyer within the checkout.
     "jsonrpc": "2.0",
     "id": "window_1",
     "error": {
-        "code": "window_open_rejected",
+        "code": "window_open_rejected_error",
         "message": "Window open rejected by host."
     }
 }
@@ -1381,14 +1381,14 @@ error codes mapped to
 **[W3C DOMException](https://webidl.spec.whatwg.org/#idl-DOMException)** names
 where possible.
 
-| Code                   | Description                                                                                                                                    |
-| :--------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------- |
-| `abort_error`          | The user cancelled the interaction (e.g., closed the sheet).                                                                                   |
-| `security_error`       | The host origin validation failed.                                                                                                             |
-| `not_supported_error`  | The requested payment method is not supported by the host.                                                                                     |
-| `invalid_state_error`  | Handshake was attempted out of order.                                                                                                          |
-| `not_allowed_error`    | The request was missing valid User Activation (see [Prevention of Unsolicited Payment Requests](#prevention-of-unsolicited-payment-requests)). |
-| `window_open_rejected` | Host policy prevented the navigation. The host **MAY** notify the buyer that their request was rejected.                                       |
+| Code                         | Description                                                                                                                                    |
+| :--------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------- |
+| `abort_error`                | The user cancelled the interaction (e.g., closed the sheet).                                                                                   |
+| `security_error`             | The host origin validation failed.                                                                                                             |
+| `not_supported_error`        | The requested payment method is not supported by the host.                                                                                     |
+| `invalid_state_error`        | Handshake was attempted out of order.                                                                                                          |
+| `not_allowed_error`          | The request was missing valid User Activation (see [Prevention of Unsolicited Payment Requests](#prevention-of-unsolicited-payment-requests)). |
+| `window_open_rejected_error` | Host policy prevented the navigation. The host **MAY** notify the buyer that their request was rejected.                                       |
 
 ### Security for Web-Based Hosts
 
