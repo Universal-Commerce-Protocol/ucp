@@ -100,10 +100,11 @@ intersection of negotiated capabilities**.
    intersection of supported capabilities between itself and the business, it
    extracts the required scopes from **only** the successfully negotiated
    capabilities.
-3. **Authorization:** The platform initiates the connection requesting **only**
-   the derived scopes. If a capability (e.g., `order`) is excluded from the
-   active capability set, its respective scopes **MUST NOT** be requested by the
-   platform. If the final derived scope list is completely empty, the platform
+3. **Authorization:** The platform initiates the connection requesting **exactly**
+   the derived scopes — the union of `identity_scopes` from all capabilities in
+   the finalized intersection. If a capability (e.g., `order`) is excluded from
+   the active capability set, its respective scopes **MUST NOT** be requested by
+   the platform. If the final derived scope list is completely empty, the platform
    **SHOULD** abort the identity linking process, as there are no secured resources
    to authorize.
 
@@ -128,6 +129,9 @@ names, to prevent namespace collisions:
   `dev.ucp.shopping.scopes.checkout_session`)
 - **Third-party scopes:** `<reverse-dns>.scopes.<capability>` (e.g.,
   `com.example.loyalty.scopes.points_balance`)
+
+This format strictly adheres to the scope token syntax defined in
+[RFC 6749 Section 3.3](https://datatracker.ietf.org/doc/html/rfc6749#section-3.3).
 
 Example capability-to-scope mapping based on UCP schemas:
 
@@ -169,14 +173,18 @@ discovery URL:
    platform **MUST** abort the identity linking process.
 
 **Issuer Validation**: Regardless of the discovery method used above, the
-platform **MUST** validate that the `issuer` value returned in the metadata
-exactly matches the `issuer` string defined in the capability configuration.
+platform **MUST** perform an exact string comparison between the `issuer` value
+returned in the metadata and the `issuer` string defined in the capability
+configuration, as required by
+[RFC 8414 Section 3.3](https://datatracker.ietf.org/doc/html/rfc8414#section-3.3).
+No normalization (e.g., trailing slash stripping) is permitted — the comparison
+**MUST** be an exact string comparison.
 
-*Issuer Normalization*: To prevent brittle integrations, the platform **MUST**
-normalize both the locally configured `issuer` and the remotely returned `issuer`
-by stripping any trailing slashes (`/`) before performing the exact string match
-comparison (i.e., `https://auth.example.com` and `https://auth.example.com/`
-**MUST** be evaluated as identical).
+Businesses **MUST** ensure the `issuer` string declared in their UCP capability
+configuration exactly matches both the `issuer` field in their authorization
+server metadata and the `iss` claim in any issued JWT access tokens. This
+guarantees that standard JWT validation libraries, which perform exact string
+equality on `iss`, will succeed without modification.
 
 Failure to validate the issuer exposes the integration to Mix-Up Attacks and
 **MUST** result in an aborted linking process.
@@ -243,7 +251,7 @@ Example metadata retrieved via RFC 8414:
 - **MUST** adhere to [RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414)
   to declare the location of their OAuth 2.0 endpoints
   (`/.well-known/oauth-authorization-server`)
-- **SHOULD** populate `scopes_supported` in their RFC 8414 metadata to allow
+- **MUST** populate `scopes_supported` in their RFC 8414 metadata to allow
   platforms to detect scope mismatches early, before initiating the authorization
   flow.
 - **MUST** enforce Client Authentication at the Token Endpoint.
@@ -321,8 +329,7 @@ The AI Shopping Agent only knows how to perform checkouts. It does NOT yet know 
    The first (and only) entry has `type: oauth2`, which the agent supports, so
    it is selected. The agent executes standard OAuth discovery (appending
    `/.well-known/oauth-authorization-server` to the issuer string) and validates
-   that the returned `issuer` exactly matches after normalization (trailing slash
-   stripping).
+   that the returned `issuer` is an exact string match to the configured value.
 4. **User Consent & Authorization**: The agent generates a consent URL to prompt
    the user (or invokes the authorization flow directly in the GUI), using the
    dynamically derived scopes.
