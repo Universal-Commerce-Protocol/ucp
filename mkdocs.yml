@@ -142,8 +142,8 @@ theme:
     # - navigation.expand
     - navigation.footer
     # - navigation.indexes
-    - navigation.instant
-    - navigation.instant.progress
+    # - navigation.instant
+    # - navigation.instant.progress
     # - navigation.path
     - navigation.top
     - navigation.tracking
