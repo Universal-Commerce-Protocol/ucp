@@ -145,6 +145,7 @@ jobs:
           rm -rf site
 
           # Add redirects for all specification files
+          rm -rf specification
           ln -s latest/specification specification
 
           # Commit and push
