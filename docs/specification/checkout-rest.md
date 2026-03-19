@@ -85,17 +85,17 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
 
     {
       "ucp": {
-        "version": "2026-01-11",
+        "version": "{{ ucp_version }}",
         "capabilities": {
           "dev.ucp.shopping.checkout": [
-            {"version": "2026-01-11"}
+            {"version": "{{ ucp_version }}"}
           ]
         },
         "payment_handlers": {
           "com.shopify.shop_pay": [
             {
               "id": "shop_pay_1234",
-              "version": "2026-01-11",
+              "version": "{{ ucp_version }}",
               "available_instruments": [
                 {"type": "shop_pay"}
               ],
@@ -169,6 +169,28 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
     }
     ```
 
+=== "Error Response"
+
+    All items out of stock — no checkout resource is created:
+
+    ```json
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+
+    {
+      "ucp": { "version": "2026-01-11", "status": "error" },
+      "messages": [
+        {
+          "type": "error",
+          "code": "out_of_stock",
+          "content": "All requested items are currently out of stock",
+          "severity": "unrecoverable"
+        }
+      ],
+      "continue_url": "https://merchant.com/"
+    }
+    ```
+
 ### Update Checkout
 
 #### Update Buyer Info
@@ -213,17 +235,17 @@ so clients must include all previously set fields they wish to retain.
 
     {
       "ucp": {
-        "version": "2026-01-11",
+        "version": "{{ ucp_version }}",
         "capabilities": {
           "dev.ucp.shopping.checkout": [
-            {"version": "2026-01-11"}
+            {"version": "{{ ucp_version }}"}
           ]
         },
         "payment_handlers": {
           "com.shopify.shop_pay": [
             {
               "id": "shop_pay_1234",
-              "version": "2026-01-11",
+              "version": "{{ ucp_version }}",
               "available_instruments": [
                 {"type": "shop_pay"}
               ],
@@ -360,17 +382,17 @@ type & addresses.
 
     {
       "ucp": {
-        "version": "2026-01-11",
+        "version": "{{ ucp_version }}",
         "capabilities": {
           "dev.ucp.shopping.checkout": [
-            {"version": "2026-01-11"}
+            {"version": "{{ ucp_version }}"}
           ]
         },
         "payment_handlers": {
           "com.google.pay": [
             {
               "id": "gpay_1234",
-              "version": "2026-01-11",
+              "version": "{{ ucp_version }}",
               "config": {
                 "allowed_payment_methods": [
                   {
@@ -572,17 +594,17 @@ Follow-up calls after initial `fulfillment` data to update selection.
 
     {
       "ucp": {
-        "version": "2026-01-11",
+        "version": "{{ ucp_version }}",
         "capabilities": {
           "dev.ucp.shopping.checkout": [
-            {"version": "2026-01-11"}
+            {"version": "{{ ucp_version }}"}
           ]
         },
         "payment_handlers": {
           "com.shopify.shop_pay": [
             {
               "id": "shop_pay_1234",
-              "version": "2026-01-11",
+              "version": "{{ ucp_version }}",
               "available_instruments": [
                 {"type": "shop_pay"}
               ],
@@ -744,8 +766,9 @@ place to set these expectations via `messages`.
           }
         ]
       },
-      "risk_signals": {
-        //... risk signal related data (device fingerprint / risk token)
+      "signals": {
+        "dev.ucp.buyer_ip": "203.0.113.42",
+        "dev.ucp.user_agent": "Mozilla/5.0 ..."
       }
     }
     ```
@@ -758,17 +781,17 @@ place to set these expectations via `messages`.
 
     {
       "ucp": {
-        "version": "2026-01-11",
+        "version": "{{ ucp_version }}",
         "capabilities": {
           "dev.ucp.shopping.checkout": [
-            {"version": "2026-01-11"}
+            {"version": "{{ ucp_version }}"}
           ]
         },
         "payment_handlers": {
           "com.google.pay": [
             {
               "id": "gpay_1234",
-              "version": "2026-01-11",
+              "version": "{{ ucp_version }}",
               "config": {
                 "allowed_payment_methods": [
                   {
@@ -919,17 +942,17 @@ place to set these expectations via `messages`.
 
     {
       "ucp": {
-        "version": "2026-01-11",
+        "version": "{{ ucp_version }}",
         "capabilities": {
           "dev.ucp.shopping.checkout": [
-            {"version": "2026-01-11"}
+            {"version": "{{ ucp_version }}"}
           ]
         },
         "payment_handlers": {
           "com.shopify.shop_pay": [
             {
               "id": "shop_pay_1234",
-              "version": "2026-01-11",
+              "version": "{{ ucp_version }}",
               "available_instruments": [
                 {"type": "shop_pay"}
               ],
@@ -1074,17 +1097,17 @@ place to set these expectations via `messages`.
 
     {
       "ucp": {
-        "version": "2026-01-11",
+        "version": "{{ ucp_version }}",
         "capabilities": {
           "dev.ucp.shopping.checkout": [
-            {"version": "2026-01-11"}
+            {"version": "{{ ucp_version }}"}
           ]
         },
         "payment_handlers": {
           "com.google.pay": [
             {
               "id": "gpay_1234",
-              "version": "2026-01-11",
+              "version": "{{ ucp_version }}",
               "config": {
                 "allowed_payment_methods": [
                   {
@@ -1268,9 +1291,9 @@ with HTTP 200 and the UCP envelope containing `messages`:
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "{{ ucp_version }}",
     "capabilities": {
-      "dev.ucp.shopping.checkout": [{"version": "2026-01-11"}]
+      "dev.ucp.shopping.checkout": [{"version": "{{ ucp_version }}"}]
     }
   },
   "id": "checkout_abc123",
@@ -1291,6 +1314,24 @@ with HTTP 200 and the UCP envelope containing `messages`:
     }
   ],
   "continue_url": "https://merchant.com/checkout/checkout_abc123"
+}
+```
+
+For `create_checkout`, when all items unavailable and no checkout can be created, returns
+HTTP 200 and the UCP envelope containing `messages`
+
+```json
+{
+  "ucp": { "version": "2026-01-11", "status": "error" },
+  "messages": [
+    {
+      "type": "error",
+      "code": "item_unavailable",
+      "content": "All items are not available for purchase",
+      "severity": "unrecoverable"
+    }
+  ],
+  "continue_url": "https://merchant.com/"
 }
 ```
 

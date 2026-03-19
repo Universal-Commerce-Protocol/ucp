@@ -2,7 +2,6 @@
   "openapi": "3.1.0",
   "info": {
     "title": "UCP Shopping Service",
-    "version": "2026-01-11",
     "description": "Canonical REST interface for UCP Shopping service. Schema references are logical pointers - actual payload shape is determined by negotiated capabilities.\n\n**Endpoint Resolution:** This spec defines operations only. The base URL MUST be obtained from the merchant's discovery profile at `/.well-known/ucp` under `services[\"dev.ucp.shopping\"][transport=rest].endpoint`. The `{endpoint}` server variable below is a placeholder for tooling compatibility."
   },
   "servers": [
@@ -89,7 +88,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/checkout"
+                  "$ref": "#/components/schemas/checkout_response"
                 }
               }
             }
@@ -157,7 +156,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/checkout"
+                  "$ref": "#/components/schemas/checkout_response"
                 }
               }
             }
@@ -234,7 +233,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/checkout"
+                  "$ref": "#/components/schemas/checkout_response"
                 }
               }
             }
@@ -295,22 +294,7 @@
           "required": true,
           "content": {
             "application/json": {
-              "schema": {
-                "allOf": [
-                  { "$ref": "#/components/schemas/checkout" },
-                  {
-                    "title": "Risk Signals",
-                    "description": "Optional risk signals for fraud detection.",
-                    "type": "object",
-                    "properties": {
-                      "risk_signals": {
-                        "type": "object",
-                        "description": "Key-value pairs of risk signals."
-                      }
-                    }
-                  }
-                ]
-              }
+              "schema": { "$ref": "#/components/schemas/checkout" }
             }
           }
         },
@@ -330,7 +314,7 @@
             },
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/checkout" }
+                "schema": { "$ref": "#/components/schemas/checkout_response" }
               }
             }
           }
@@ -403,7 +387,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/checkout"
+                  "$ref": "#/components/schemas/checkout_response"
                 }
               }
             }
@@ -448,7 +432,7 @@
             },
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/cart" }
+                "schema": { "$ref": "#/components/schemas/cart_response" }
               }
             }
           }
@@ -486,12 +470,9 @@
             },
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/cart" }
+                "schema": { "$ref": "#/components/schemas/cart_response" }
               }
             }
-          },
-          "404": {
-            "description": "Cart not found (cancelled, expired, or never existed)"
           }
         }
       },
@@ -532,7 +513,7 @@
             },
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/cart" }
+                "schema": { "$ref": "#/components/schemas/cart_response" }
               }
             }
           }
@@ -572,7 +553,95 @@
             },
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/cart" }
+                "schema": { "$ref": "#/components/schemas/cart_response" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/search": {
+      "post": {
+        "operationId": "search_catalog",
+        "summary": "Search Catalog",
+        "description": "Search for products in the business's catalog.",
+        "parameters": [
+          { "$ref": "#/components/parameters/authorization" },
+          { "$ref": "#/components/parameters/x_api_key" },
+          { "$ref": "#/components/parameters/signature" },
+          { "$ref": "#/components/parameters/signature_input" },
+          { "$ref": "#/components/parameters/content_digest" },
+          { "$ref": "#/components/parameters/request_id" },
+          { "$ref": "#/components/parameters/user_agent" },
+          { "$ref": "#/components/parameters/ucp_agent" },
+          { "$ref": "#/components/parameters/content_type" },
+          { "$ref": "#/components/parameters/accept" },
+          { "$ref": "#/components/parameters/accept_language" },
+          { "$ref": "#/components/parameters/accept_encoding" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/catalog_search_request" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Search results",
+            "headers": {
+              "Signature": { "$ref": "#/components/headers/signature" },
+              "Signature-Input": { "$ref": "#/components/headers/signature_input" },
+              "Content-Digest": { "$ref": "#/components/headers/content_digest" }
+            },
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/catalog_search_response" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/lookup": {
+      "post": {
+        "operationId": "lookup_catalog",
+        "summary": "Batch Lookup Catalog Items",
+        "description": "Lookup one or more products by ID with explicit market context. Supports batch lookups of multiple items in a single request.",
+        "parameters": [
+          { "$ref": "#/components/parameters/authorization" },
+          { "$ref": "#/components/parameters/x_api_key" },
+          { "$ref": "#/components/parameters/signature" },
+          { "$ref": "#/components/parameters/signature_input" },
+          { "$ref": "#/components/parameters/content_digest" },
+          { "$ref": "#/components/parameters/request_id" },
+          { "$ref": "#/components/parameters/user_agent" },
+          { "$ref": "#/components/parameters/ucp_agent" },
+          { "$ref": "#/components/parameters/content_type" },
+          { "$ref": "#/components/parameters/accept" },
+          { "$ref": "#/components/parameters/accept_language" },
+          { "$ref": "#/components/parameters/accept_encoding" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/catalog_lookup_request" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Lookup result",
+            "headers": {
+              "Signature": { "$ref": "#/components/headers/signature" },
+              "Signature-Input": { "$ref": "#/components/headers/signature_input" },
+              "Content-Digest": { "$ref": "#/components/headers/content_digest" }
+            },
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/catalog_lookup_response" }
               }
             }
           }
@@ -808,8 +877,20 @@
       "checkout": {
         "$ref": "../../schemas/shopping/checkout.json"
       },
+      "checkout_response": {
+        "oneOf": [
+          { "$ref": "../../schemas/shopping/checkout.json" },
+          { "$ref": "../../schemas/shopping/types/error_response.json" }
+        ]
+      },
       "cart": {
         "$ref": "../../schemas/shopping/cart.json"
+      },
+      "cart_response": {
+        "oneOf": [
+          { "$ref": "../../schemas/shopping/cart.json" },
+          { "$ref": "../../schemas/shopping/types/error_response.json" }
+        ]
       },
       "order": {
         "$ref": "../../schemas/shopping/order.json"
@@ -819,6 +900,18 @@
       },
       "ucp": {
         "$ref": "../../schemas/ucp.json"
+      },
+      "catalog_search_request": {
+        "$ref": "../../schemas/shopping/catalog_search.json#/$defs/search_request"
+      },
+      "catalog_search_response": {
+        "$ref": "../../schemas/shopping/catalog_search.json#/$defs/search_response"
+      },
+      "catalog_lookup_request": {
+        "$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/lookup_request"
+      },
+      "catalog_lookup_response": {
+        "$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/lookup_response"
       }
     }
   }

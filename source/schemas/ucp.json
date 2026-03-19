@@ -11,10 +11,39 @@
       "description": "UCP version in YYYY-MM-DD format."
     },
 
-    "reverse_domain_name": {
-      "type": "string",
-      "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9_]*)+$",
-      "description": "Reverse-domain identifier (e.g., com.google.pay, dev.ucp.shopping.checkout)"
+    "version_constraint": {
+      "type": "object",
+      "description": "Version range requirement with minimum and optional maximum.",
+      "properties": {
+        "min": {
+          "$ref": "#/$defs/version",
+          "description": "Minimum required version (inclusive)."
+        },
+        "max": {
+          "$ref": "#/$defs/version",
+          "description": "Maximum compatible version (inclusive). When absent, no upper bound."
+        }
+      },
+      "required": ["min"],
+      "additionalProperties": true
+    },
+
+    "requires": {
+      "type": "object",
+      "description": "Version requirements for extension schemas. Declares minimum (and optionally maximum) protocol and capability versions needed for correct operation.",
+      "properties": {
+        "protocol": {
+          "$ref": "#/$defs/version_constraint",
+          "description": "Required protocol version."
+        },
+        "capabilities": {
+          "type": "object",
+          "description": "Required capability versions, keyed by capability name. Keys must be a subset of the extension's $defs keys.",
+          "propertyNames": { "$ref": "shopping/types/reverse_domain_name.json" },
+          "additionalProperties": { "$ref": "#/$defs/version_constraint" }
+        }
+      },
+      "additionalProperties": true
     },
 
     "entity": {
@@ -54,10 +83,16 @@
       "required": ["version"],
       "properties": {
         "version": { "$ref": "#/$defs/version" },
+        "status": {
+          "type": "string",
+          "enum": ["success", "error"],
+          "default": "success",
+          "description": "Application-level status of the UCP operation."
+        },
         "services": {
           "type": "object",
           "description": "Service registry keyed by reverse-domain name.",
-          "propertyNames": { "$ref": "#/$defs/reverse_domain_name" },
+          "propertyNames": { "$ref": "shopping/types/reverse_domain_name.json" },
           "additionalProperties": {
             "type": "array",
             "items": { "$ref": "service.json#/$defs/base" }
@@ -66,7 +101,7 @@
         "capabilities": {
           "type": "object",
           "description": "Capability registry keyed by reverse-domain name.",
-          "propertyNames": { "$ref": "#/$defs/reverse_domain_name" },
+          "propertyNames": { "$ref": "shopping/types/reverse_domain_name.json" },
           "additionalProperties": {
             "type": "array",
             "items": { "$ref": "capability.json#/$defs/base" }
@@ -75,7 +110,7 @@
         "payment_handlers": {
           "type": "object",
           "description": "Payment handler registry keyed by reverse-domain name.",
-          "propertyNames": { "$ref": "#/$defs/reverse_domain_name" },
+          "propertyNames": { "$ref": "shopping/types/reverse_domain_name.json" },
           "additionalProperties": {
             "type": "array",
             "items": { "$ref": "payment_handler.json#/$defs/base" }
@@ -122,6 +157,15 @@
         {
           "required": ["services", "payment_handlers"],
           "properties": {
+            "supported_versions": {
+              "type": "object",
+              "description": "Previous protocol versions this business supports, mapped to profile URIs. Businesses that support older protocol versions SHOULD advertise each version and link to its profile. Each URI points to a complete, self-contained profile for that version. When omitted, only `version` is supported.",
+              "propertyNames": { "$ref": "#/$defs/version" },
+              "additionalProperties": {
+                "type": "string",
+                "format": "uri"
+              }
+            },
             "services": {
               "additionalProperties": {
                 "items": { "$ref": "service.json#/$defs/business_schema" }
@@ -194,6 +238,23 @@
     "response_cart_schema": {
       "title": "UCP Cart Response Schema",
       "description": "UCP metadata for cart responses. No payment handlers needed pre-checkout.",
+      "allOf": [
+        { "$ref": "#/$defs/base" },
+        {
+          "properties": {
+            "capabilities": {
+              "additionalProperties": {
+                "items": { "$ref": "capability.json#/$defs/response_schema" }
+              }
+            }
+          }
+        }
+      ]
+    },
+
+    "response_catalog_schema": {
+      "title": "UCP Catalog Response Schema",
+      "description": "UCP metadata for catalog responses.",
       "allOf": [
         { "$ref": "#/$defs/base" },
         {

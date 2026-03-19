@@ -60,35 +60,35 @@ method.
 
 {{ schema_fields('types/fulfillment_resp', 'fulfillment') }}
 
-#### Fulfillment Method Response
+#### Fulfillment Method
 
 {{ schema_fields('types/fulfillment_method_resp', 'fulfillment') }}
 
-#### Fulfillment Destination Response
+#### Fulfillment Destination
 
 {{ schema_fields('types/fulfillment_destination_resp', 'fulfillment') }}
 
-#### Shipping Destination Response
+#### Shipping Destination
 
 {{ schema_fields('types/shipping_destination_resp', 'fulfillment') }}
 
-#### Retail Location Response
+#### Retail Location
 
 {{ schema_fields('types/retail_location_resp', 'fulfillment') }}
 
-#### Fulfillment Group Response
+#### Fulfillment Group
 
 {{ schema_fields('types/fulfillment_group_resp', 'fulfillment') }}
 
-#### Fulfillment Option Response
+#### Fulfillment Option
 
 {{ schema_fields('types/fulfillment_option_resp', 'fulfillment') }}
 
-#### Fulfillment Available Method Response
+#### Fulfillment Available Method
 
 {{ schema_fields('types/fulfillment_available_method_resp', 'fulfillment') }}
 
-#### Total Response
+#### Total
 
 {{ schema_fields('types/total_resp', 'fulfillment') }}
 
@@ -282,10 +282,10 @@ within each method.
 
 ```json
 // Default: single group per method
-{ "dev.ucp.shopping.fulfillment": [{"version": "2026-01-11"}] }
+{ "dev.ucp.shopping.fulfillment": [{"version": "{{ ucp_version }}"}] }
 
 // Opt-in: business MAY return multiple groups per method
-{ "dev.ucp.shopping.fulfillment": [{"version": "2026-01-11", "config": { "supports_multi_group": true }}] }
+{ "dev.ucp.shopping.fulfillment": [{"version": "{{ ucp_version }}", "config": { "supports_multi_group": true }}] }
 ```
 
 ### Business Profile
@@ -300,7 +300,7 @@ Businesses declare what fulfillment configurations they support using
   "capabilities": {
     "dev.ucp.shopping.fulfillment": [
       {
-        "version": "2026-01-11",
+        "version": "{{ ucp_version }}",
         "config": {
           "allows_multi_destination": {
             "shipping": true

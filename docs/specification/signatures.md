@@ -25,7 +25,7 @@ This specification defines how to sign and verify UCP messages using
 [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421) HTTP Message Signatures.
 For UCP's identity model, supported authentication mechanisms, and key
 discovery protocol, see
-[Identity & Authentication](overview.md#identity--authentication).
+[Identity & Authentication](overview.md#identity-authentication).
 
 HTTP Message Signatures protect against:
 
