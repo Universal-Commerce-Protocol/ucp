@@ -287,7 +287,7 @@ image: assets/banner.png
     "token_endpoint": "https://example.com/oauth2/token",
     "revocation_endpoint": "https://example.com/oauth2/revoke",
     "scopes_supported": [
-      "ucp:scopes:checkout_session",
+      "dev.ucp.shopping.scopes.checkout_session"
     ],
     "response_types_supported": [
       "code"
