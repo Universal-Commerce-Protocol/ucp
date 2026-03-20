@@ -252,7 +252,31 @@
           }
         }
       }
+    },
+
+    {
+      "name": "ec.window.open_request",
+      "summary": "Request window open",
+      "description": "The buyer activated a link within checkout. The host MUST present the content to the buyer and respond with a success result, or respond with a window_open_rejected_error error if host policy prevented the navigation.",
+      "params": [
+        {
+          "name": "url",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uri",
+            "description": "The URL of the resource to present."
+          }
+        }
+      ],
+      "result": {
+        "name": "windowOpenResult",
+        "schema": {
+          "type": "object",
+          "description": "Acknowledgement that the host handled the request."
+        }
+      }
     }
   ],
-  "x-delegations": ["payment.instruments_change", "payment.credential"]
+  "x-delegations": ["payment.instruments_change", "payment.credential", "window.open"]
 }
