@@ -29,6 +29,7 @@
     "permalink_url",
     "line_items",
     "fulfillment",
+    "currency",
     "totals"
   ],
   "properties": {
