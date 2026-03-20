@@ -2,7 +2,6 @@
   "openrpc": "1.3.2",
   "info": {
     "title": "UCP Shopping Embedded Protocol",
-    "version": "2026-01-11",
     "description": "Embedded Protocol (EP) methods for the UCP shopping service. Methods are sent from Merchant to Host via postMessage using JSON-RPC 2.0. Method prefixes indicate capability scope: ec.* (checkout). Future capabilities may define additional prefixes (e.g., eo.* for order). Schema references are logical pointers - actual payload shape is determined by negotiated capabilities.\n\nEmbedded Protocol is a client-to-client postMessage interface, so there is no endpoint URL to access this API. Platforms detect merchant support for this protocol based on the presence of `services[\"dev.ucp.shopping\"][transport=embedded]` in discovery responses."
   },
   "servers": [],
@@ -237,7 +236,31 @@
           }
         }
       }
+    },
+
+    {
+      "name": "ec.window.open_request",
+      "summary": "Request window open",
+      "description": "The buyer activated a link within checkout. The host MUST present the content to the buyer and respond with a success result, or respond with a window_open_rejected_error error if host policy prevented the navigation.",
+      "params": [
+        {
+          "name": "url",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uri",
+            "description": "The URL of the resource to present."
+          }
+        }
+      ],
+      "result": {
+        "name": "windowOpenResult",
+        "schema": {
+          "type": "object",
+          "description": "Acknowledgement that the host handled the request."
+        }
+      }
     }
   ],
-  "x-delegations": ["payment.instruments_change", "payment.credential"]
+  "x-delegations": ["payment.instruments_change", "payment.credential", "window.open"]
 }

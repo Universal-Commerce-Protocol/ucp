@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/totals.json",
+  "title": "Totals",
+  "description": "Pricing breakdown provided by the business. MUST contain exactly one subtotal and one total entry. Detail types (tax, fee, discount, fulfillment) may appear multiple times for itemization. Platforms MUST render all entries in order using display_text and amount.",
+  "type": "array",
+  "items": {
+    "allOf": [
+      {
+        "$ref": "total.json"
+      },
+      {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "$ref": "signed_amount.json"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "display_text",
+                "amount"
+              ],
+              "properties": {
+                "display_text": {
+                  "type": "string",
+                  "description": "Human-readable label for this sub-line."
+                },
+                "amount": {
+                  "$ref": "signed_amount.json"
+                }
+              },
+              "description": "Sub-line entry. Additional metadata MAY be included."
+            },
+            "description": "Optional itemized breakdown. The parent entry is always rendered; lines are supplementary. Sum of line amounts MUST equal the parent entry amount.",
+            "ucp_request": "omit"
+          }
+        }
+      },
+      {
+        "if": { "properties": { "type": { "enum": ["discount", "items_discount"] } }, "required": ["type"] },
+        "then": { "properties": { "amount": { "exclusiveMaximum": 0 } } }
+      },
+      {
+        "if": { "properties": { "type": { "enum": ["subtotal", "fulfillment", "tax", "fee"] } }, "required": ["type"] },
+        "then": { "properties": { "amount": { "minimum": 0 } } }
+      },
+      {
+        "if": {
+          "properties": {
+            "type": { "not": { "enum": ["subtotal", "items_discount", "discount", "fulfillment", "tax", "fee", "total"] } }
+          },
+          "required": ["type"]
+        },
+        "then": { "required": ["display_text"] }
+      }
+    ]
+  },
+  "allOf": [
+    {
+      "contains": { "properties": { "type": { "const": "subtotal" } }, "required": ["type"] },
+      "minContains": 1,
+      "maxContains": 1
+    },
+    {
+      "contains": { "properties": { "type": { "const": "total" } }, "required": ["type"] },
+      "minContains": 1,
+      "maxContains": 1
+    }
+  ]
+}

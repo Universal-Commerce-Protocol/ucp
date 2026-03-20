@@ -4,6 +4,10 @@
   "name": "dev.ucp.shopping.checkout",
   "title": "Checkout",
   "description": "Base checkout schema. Extensions compose onto this using allOf.",
+  "$comment": "identity_scopes is a UCP annotation processed by UCP-aware tooling during capability negotiation. Its canonical definition and processing rules are specified in the identity_linking capability schema.",
+  "identity_scopes": [
+    "dev.ucp.shopping.scopes.checkout_session"
+  ],
   "type": "object",
   "required": [
     "ucp",
@@ -56,6 +60,29 @@
         "create": "optional",
         "update": "optional",
         "complete": "omit"
+      }
+    },
+    "signals": {
+      "$ref": "types/signals.json",
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional",
+        "complete": "optional"
+      }
+    },
+    "risk_signals": {
+      "type": "object",
+      "description": "Deprecated. Use signals instead. Will be removed in the next version.",
+      "deprecated": true,
+      "additionalProperties": true,
+      "ucp_request": {
+        "complete": {
+          "transition": {
+            "from": "optional",
+            "to": "omit",
+            "description": "Replaced by signals. Will be removed in the next version."
+          }
+        }
       },
       "ucp_response": "omit"
     },
@@ -82,10 +109,7 @@
       }
     },
     "totals": {
-      "type": "array",
-      "items": {
-        "$ref": "types/total.json"
-      },
+      "$ref": "types/totals.json",
       "description": "Different cart totals.",
       "ucp_request": "omit"
     },

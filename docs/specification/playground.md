@@ -466,24 +466,24 @@ const UcpData = {
   capabilities: {
     "dev.ucp.shopping.checkout": [
       {
-        version: "2026-01-23",
-        spec: "https://ucp.dev/2026-01-23/specification/checkout",
-        schema: "https://ucp.dev/2026-01-23/schemas/shopping/checkout.json"
+        version: "{{ ucp_version }}",
+        spec: "https://ucp.dev/{{ ucp_version }}/specification/checkout",
+        schema: "https://ucp.dev/{{ ucp_version }}/schemas/shopping/checkout.json"
       }
     ],
     "dev.ucp.shopping.order": [
       {
-        version: "2026-01-23",
-        spec: "https://ucp.dev/2026-01-23/specification/order",
-        schema: "https://ucp.dev/2026-01-23/schemas/shopping/order.json"
+        version: "{{ ucp_version }}",
+        spec: "https://ucp.dev/{{ ucp_version }}/specification/order",
+        schema: "https://ucp.dev/{{ ucp_version }}/schemas/shopping/order.json"
       }
     ],
     "dev.ucp.shopping.fulfillment": [
       {
         extends: "dev.ucp.shopping.checkout",
-        version: "2026-01-23",
-        spec: "https://ucp.dev/2026-01-23/specification/fulfillment",
-        schema: "https://ucp.dev/2026-01-23/schemas/shopping/fulfillment.json",
+        version: "{{ ucp_version }}",
+        spec: "https://ucp.dev/{{ ucp_version }}/specification/fulfillment",
+        schema: "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json",
         config: {
           allows_multi_destination: {
             shipping: false,
@@ -499,25 +499,25 @@ const UcpData = {
     "dev.ucp.shopping.discount": [
       {
         extends: "dev.ucp.shopping.checkout",
-        version: "2026-01-23",
-        spec: "https://ucp.dev/2026-01-23/specification/discount",
-        schema: "https://ucp.dev/2026-01-23/schemas/shopping/discount.json"
+        version: "{{ ucp_version }}",
+        spec: "https://ucp.dev/{{ ucp_version }}/specification/discount",
+        schema: "https://ucp.dev/{{ ucp_version }}/schemas/shopping/discount.json"
       }
     ],
     "dev.ucp.shopping.buyer_consent": [
       {
         extends: "dev.ucp.shopping.checkout",
-        version: "2026-01-23",
-        spec: "https://ucp.dev/2026-01-23/specification/buyer-consent",
-        schema: "https://ucp.dev/2026-01-23/schemas/shopping/buyer_consent.json"
+        version: "{{ ucp_version }}",
+        spec: "https://ucp.dev/{{ ucp_version }}/specification/buyer-consent",
+        schema: "https://ucp.dev/{{ ucp_version }}/schemas/shopping/buyer_consent.json"
       }
     ],
     "dev.ucp.shopping.ap2_mandates": [
       {
         extends: "dev.ucp.shopping.checkout",
-        version: "2026-01-23",
-        spec: "https://ucp.dev/2026-01-23/specification/ap2-mandates",
-        schema: "https://ucp.dev/2026-01-23/schemas/shopping/ap2_mandate.json"
+        version: "{{ ucp_version }}",
+        spec: "https://ucp.dev/{{ ucp_version }}/specification/ap2-mandates",
+        schema: "https://ucp.dev/{{ ucp_version }}/schemas/shopping/ap2_mandate.json"
       }
     ]
   },

@@ -19,8 +19,8 @@
 ## Overview
 
 Discount extension allows businesses to indicate that they support discount
-codes on checkout sessions, and specifies how the discount codes are to be
-shared between the platform and the business.
+codes on cart and checkout sessions, and specifies how the discount codes are
+to be shared between the platform and the business.
 
 **Key features:**
 
@@ -31,23 +31,24 @@ shared between the platform and the business.
 
 **Dependencies:**
 
-- Checkout Capability
+- Cart Capability or Checkout Capability
 
 ## Discovery
 
-Businesses advertise discount support in their profile:
+Businesses advertise discount support in their profile. The capability can
+extend cart, checkout, or both:
 
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "{{ ucp_version }}",
     "capabilities": {
       "dev.ucp.shopping.discount": [
         {
-          "version": "2026-01-11",
-          "extends": "dev.ucp.shopping.checkout",
-          "spec": "https://ucp.dev/specification/discount",
-          "schema": "https://ucp.dev/schemas/shopping/discount.json"
+          "version": "{{ ucp_version }}",
+          "extends": ["dev.ucp.shopping.cart", "dev.ucp.shopping.checkout"],
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/discount",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/discount.json"
         }
       ]
     }
@@ -55,9 +56,14 @@ Businesses advertise discount support in their profile:
 }
 ```
 
+Businesses MAY advertise discount support for cart only, checkout only, or
+both. Platforms SHOULD check which resources are extended before submitting
+discount codes.
+
 ## Schema
 
-When this capability is active, checkout is extended with a `discounts` object.
+When this capability is active, cart and/or checkout are extended with a
+`discounts` object.
 
 ### Discounts Object
 
@@ -74,6 +80,9 @@ When this capability is active, checkout is extended with a `discounts` object.
 ## Allocation Details
 
 The `applied` array explains how discounts were calculated and distributed.
+The `applied[].amount` describes the magnitude of the applied discount (always
+positive); the corresponding `totals[]` entry amount represents its signed
+effect on the receipt (negative for discounts).
 
 ### Allocation Method
 
@@ -116,7 +125,8 @@ each line item, even when multiple discounts stack.
 
 ## Operations
 
-Discount codes are submitted via standard checkout create/update operations.
+Discount codes are submitted via standard cart or checkout create/update
+operations. The same semantics apply to both resources.
 
 **Request behavior:**
 
@@ -129,6 +139,12 @@ Discount codes are submitted via standard checkout create/update operations.
 - `discounts.applied` contains all active discounts (code-based + automatic)
 - Rejected codes communicated via `messages[]` (see below)
 - Discount amounts reflected in `totals[]` and `line_items[].discount`
+
+**Cart-to-checkout continuity:** When a cart is converted to a checkout via the
+cart capability's `cart_id` field, businesses MUST carry forward any discount
+codes that were applied to the cart. Codes that are no longer valid at checkout
+time (e.g., expired, ineligible) SHOULD be communicated via `messages[]` using
+standard rejection codes.
 
 ## Rejected Codes
 
@@ -175,10 +191,105 @@ segment, or promotional rules:
 - Cannot be removed by the platform
 - Surfaced for transparency (platform can explain to user why discount was applied)
 
+## Eligibility Claims
+
+Eligibility claims are buyer claims about eligible benefits (see
+[Context](checkout.md#context)) such as loyalty membership, payment instrument
+perks, and similar. When the discount extension is active, Businesses that
+choose to accept eligibility claims **MUST** surface their effect on pricing
+as provisional discounts in the `applied` array. Platforms **MUST** display
+provisional discounts to the buyer.
+
+### Discount Behavior
+
+Platforms send buyer claims via `context.eligibility` on cart or checkout
+requests (see [Context](checkout.md#context)). When a Business recognizes a
+claim and it affects pricing, it **MUST** surface a corresponding provisional
+discount in the `discounts.applied` array. This gives the Platform structured
+attribution to display to the buyer.
+
+Eligibility-triggered discounts use the following fields:
+
+| Field         | Value                      | Purpose                                 |
+| ------------- | -------------------------- | --------------------------------------- |
+| `automatic`   | `true`                     | No code required                        |
+| `provisional` | `true`                     | Requires verification at completion     |
+| `eligibility` | `"com.example.store_card"` | The accepted claim                      |
+| `code`        | *(omitted)*                | Not code-based                          |
+
+Standard `priority`, `method`, and `allocations` fields apply for stacking with
+other discounts.
+
+### Verification at Checkout
+
+Discounts from accepted but unverified claims carry `provisional: true`.
+Provisional discounts remain until the claim is verified, rescinded, or
+replaced during the session. At checkout completion, all remaining provisional
+claims **MUST** be resolved (see
+[Eligibility Verification at Completion](checkout.md#eligibility-verification-at-completion)).
+
+### Example: Provisional Discount with Attribution
+
+Building on the store card example from
+[Eligibility Verification at Completion](checkout.md#eligibility-verification-at-completion),
+the discount extension provides structured attribution. The Platform claims a
+store card benefit; the Business surfaces the provisional discount with full
+stacking and allocation details:
+
+=== "Request"
+
+    ```json
+    {
+      "context": {
+        "eligibility": ["com.example.store_card"]
+      },
+      "line_items": [
+        {
+          "item": {
+            "id": "prod_shirt",
+            "quantity": 2,
+            "price": 2500
+          }
+        }
+      ]
+    }
+    ```
+
+=== "Response"
+
+    ```json
+    {
+      "discounts": {
+        "applied": [
+          {
+            "title": "Store Card 5% Off",
+            "amount": 250,
+            "automatic": true,
+            "provisional": true,
+            "eligibility": "com.example.store_card",
+            "priority": 1,
+            "method": "each",
+            "allocations": [
+              {"path": "$.line_items[0]", "amount": 250}
+            ]
+          }
+        ]
+      },
+      "totals": [
+        {"type": "subtotal", "display_text": "Subtotal", "amount": 5000},
+        {"type": "items_discount", "display_text": "Discounts", "amount": -250},
+        {"type": "total", "display_text": "Total", "amount": 4750}
+      ]
+    }
+    ```
+
+The Platform can now render: "Store Card 5% Off: -$2.50 *(verified at
+purchase)*" with full confidence in the attribution, amount, and allocation.
+
 ## Impact on Line Items and Totals
 
-Applied discounts are reflected in the core checkout fields using two distinct
-total types:
+Applied discounts are reflected in the core cart or checkout fields using two
+distinct total types:
 
 | Total Type       | When to Use                                               |
 | ---------------- | --------------------------------------------------------- |
@@ -206,105 +317,175 @@ subtractive (e.g., "-$13.99").
 
 ## Examples
 
+### Cart with discount codes
+
+Discount codes applied during cart exploration. The cart response includes
+estimated discount amounts, giving the buyer visibility into savings before
+proceeding to checkout.
+
+=== "Request"
+
+    ```json
+    {
+      "line_items": [
+        {
+          "item": {
+            "id": "prod_1",
+            "quantity": 2,
+            "title": "T-Shirt",
+            "price": 2000
+          }
+        }
+      ],
+      "discounts": {
+        "codes": ["SUMMER20"]
+      }
+    }
+    ```
+
+=== "Response"
+
+    ```json
+    {
+      "id": "cart_abc123",
+      "line_items": [
+        {
+          "id": "li_1",
+          "item": {
+            "id": "prod_1",
+            "quantity": 2,
+            "title": "T-Shirt",
+            "price": 2000
+          },
+          "totals": [
+            {"type": "subtotal", "amount": 4000},
+            {"type": "items_discount", "amount": -800},
+            {"type": "total", "amount": 3200}
+          ]
+        }
+      ],
+      "discounts": {
+        "codes": ["SUMMER20"],
+        "applied": [
+          {
+            "code": "SUMMER20",
+            "title": "Summer Sale 20% Off",
+            "amount": 800,
+            "method": "each",
+            "allocations": [
+              {"path": "$.line_items[0]", "amount": 800}
+            ]
+          }
+        ]
+      },
+      "currency": "USD",
+      "totals": [
+        {"type": "subtotal", "display_text": "Subtotal", "amount": 4000},
+        {"type": "items_discount", "display_text": "Item Discounts", "amount": -800},
+        {"type": "total", "display_text": "Estimated Total", "amount": 3200}
+      ]
+    }
+    ```
+
 ### Order-level discount
 
 A flat discount applied to the order total. No allocations—the discount applies
 to the order as a whole and uses `type: "discount"` in totals.
 
-**Request:**
+=== "Request"
 
-```json
-{
-  "discounts": {
-    "codes": ["SAVE10"]
-  }
-}
-```
-
-**Response:**
-
-```json
-{
-  "discounts": {
-    "codes": ["SAVE10"],
-    "applied": [
-      {
-        "code": "SAVE10",
-        "title": "$10 Off Your Order",
-        "amount": 1000
+    ```json
+    {
+      "discounts": {
+        "codes": ["SAVE10"]
       }
-    ]
-  },
-  "totals": [
-    {"type": "subtotal", "display_text": "Subtotal", "amount": 5000},
-    {"type": "discount", "display_text": "Order Discount", "amount": 1000},
-    {"type": "total", "display_text": "Total", "amount": 4000}
-  ]
-}
-```
+    }
+    ```
+
+=== "Response"
+
+    ```json
+    {
+      "discounts": {
+        "codes": ["SAVE10"],
+        "applied": [
+          {
+            "code": "SAVE10",
+            "title": "$10 Off Your Order",
+            "amount": 1000
+          }
+        ]
+      },
+      "totals": [
+        {"type": "subtotal", "display_text": "Subtotal", "amount": 5000},
+        {"type": "discount", "display_text": "Order Discount", "amount": -1000},
+        {"type": "total", "display_text": "Total", "amount": 4000}
+      ]
+    }
+    ```
 
 ### Mixed discounts (item + order level)
 
 This example shows both discount types: a per-item discount (20% off) allocated
 to line items, and an automatic shipping discount at the order level.
 
-**Request:**
+=== "Request"
 
-```json
-{
-  "discounts": {
-    "codes": ["SUMMER20"]
-  }
-}
-```
-
-**Response:**
-
-```json
-{
-  "line_items": [
+    ```json
     {
-      "id": "li_1",
-      "item": {
-        "id": "prod_1",
-        "quantity": 2,
-        "title": "T-Shirt",
-        "price": 2000
-      },
-      "totals": [
-        {"type": "subtotal", "amount": 4000},
-        {"type": "items_discount", "amount": 800},
-        {"type": "total", "amount": 3200}
-      ]
+      "discounts": {
+        "codes": ["SUMMER20"]
+      }
     }
-  ],
-  "discounts": {
-    "codes": ["SUMMER20"],
-    "applied": [
-      {
-        "code": "SUMMER20",
-        "title": "Summer Sale 20% Off",
-        "amount": 800,
-        "allocations": [
-          {"path": "$.line_items[0]", "amount": 800}
+    ```
+
+=== "Response"
+
+    ```json
+    {
+      "line_items": [
+        {
+          "id": "li_1",
+          "item": {
+            "id": "prod_1",
+            "quantity": 2,
+            "title": "T-Shirt",
+            "price": 2000
+          },
+          "totals": [
+            {"type": "subtotal", "amount": 4000},
+            {"type": "items_discount", "amount": -800},
+            {"type": "total", "amount": 3200}
+          ]
+        }
+      ],
+      "discounts": {
+        "codes": ["SUMMER20"],
+        "applied": [
+          {
+            "code": "SUMMER20",
+            "title": "Summer Sale 20% Off",
+            "amount": 800,
+            "allocations": [
+              {"path": "$.line_items[0]", "amount": 800}
+            ]
+          },
+          {
+            "title": "Free shipping on orders over $30",
+            "amount": 599,
+            "automatic": true
+          }
         ]
       },
-      {
-        "title": "Free shipping on orders over $30",
-        "amount": 599,
-        "automatic": true
-      }
-    ]
-  },
-  "totals": [
-    {"type": "subtotal", "display_text": "Subtotal", "amount": 4000},
-    {"type": "items_discount", "display_text": "Item Discounts", "amount": 800},
-    {"type": "discount", "display_text": "Order Discounts", "amount": 599},
-    {"type": "fulfillment", "display_text": "Shipping", "amount": 0},
-    {"type": "total", "display_text": "Total", "amount": 2601}
-  ]
-}
-```
+      "totals": [
+        {"type": "subtotal", "display_text": "Subtotal", "amount": 4000},
+        {"type": "items_discount", "display_text": "Item Discounts", "amount": -800},
+        {"type": "discount", "display_text": "Order Discounts", "amount": -599},
+        {"type": "fulfillment", "display_text": "Shipping", "amount": 0},
+        {"type": "total", "display_text": "Total", "amount": 2601}
+      ]
+    }
+    ```
 
 ### Rejected discount code
 
@@ -312,114 +493,114 @@ When a discount code cannot be applied, the rejection is communicated via the
 `messages[]` array. The code still appears in `discounts.codes` (echoed back)
 but not in `discounts.applied`.
 
-**Request:**
+=== "Request"
 
-```json
-{
-  "discounts": {
-    "codes": ["SAVE10", "EXPIRED50"]
-  }
-}
-```
-
-**Response:**
-
-```json
-{
-  "discounts": {
-    "codes": ["SAVE10", "EXPIRED50"],
-    "applied": [
-      {
-        "code": "SAVE10",
-        "title": "$10 Off Your Order",
-        "amount": 1000
-      }
-    ]
-  },
-  "totals": [
-    {"type": "subtotal", "display_text": "Subtotal", "amount": 5000},
-    {"type": "discount", "display_text": "Order Discount", "amount": 1000},
-    {"type": "total", "display_text": "Total", "amount": 4000}
-  ],
-  "messages": [
+    ```json
     {
-      "type": "warning",
-      "code": "discount_code_expired",
-      "path": "$.discounts.codes[1]",
-      "content": "Code 'EXPIRED50' expired on December 1st"
+      "discounts": {
+        "codes": ["SAVE10", "EXPIRED50"]
+      }
     }
-  ]
-}
-```
+    ```
+
+=== "Response"
+
+    ```json
+    {
+      "discounts": {
+        "codes": ["SAVE10", "EXPIRED50"],
+        "applied": [
+          {
+            "code": "SAVE10",
+            "title": "$10 Off Your Order",
+            "amount": 1000
+          }
+        ]
+      },
+      "totals": [
+        {"type": "subtotal", "display_text": "Subtotal", "amount": 5000},
+        {"type": "discount", "display_text": "Order Discount", "amount": -1000},
+        {"type": "total", "display_text": "Total", "amount": 4000}
+      ],
+      "messages": [
+        {
+          "type": "warning",
+          "code": "discount_code_expired",
+          "path": "$.discounts.codes[1]",
+          "content": "Code 'EXPIRED50' expired on December 1st"
+        }
+      ]
+    }
+    ```
 
 ### Stacked discounts with allocations
 
 Multiple discounts applied with full allocation breakdown:
 
-**Response:**
+=== "Response"
 
-```json
-{
-  "line_items": [
+    ```json
     {
-      "id": "li_1",
-      "item": {
-        "title": "T-Shirt",
-        "price": 6000
+      "line_items": [
+        {
+          "id": "li_1",
+          "item": {
+            "title": "T-Shirt",
+            "price": 6000
+          },
+          "totals": [
+            {"type": "subtotal", "amount": 6000},
+            {"type": "items_discount", "amount": -1500},
+            {"type": "total", "amount": 4500}
+          ]
+        },
+        {
+          "id": "li_2",
+          "item": {
+            "title": "Socks",
+            "price": 4000
+          },
+          "totals": [
+            {"type": "subtotal", "amount": 4000},
+            {"type": "items_discount", "amount": -1000},
+            {"type": "total", "amount": 3000}
+          ]
+        }
+      ],
+      "discounts": {
+        "codes": ["SUMMER20", "LOYALTY5"],
+        "applied": [
+          {
+            "code": "SUMMER20",
+            "title": "Summer Sale 20% Off",
+            "amount": 2000,
+            "method": "each",
+            "priority": 1,
+            "allocations": [
+              {"path": "$.line_items[0]", "amount": 1200},
+              {"path": "$.line_items[1]", "amount": 800}
+            ]
+          },
+          {
+            "code": "LOYALTY5",
+            "title": "$5 Loyalty Reward",
+            "amount": 500,
+            "method": "across",
+            "priority": 2,
+            "allocations": [
+              {"path": "$.line_items[0]", "amount": 300},
+              {"path": "$.line_items[1]", "amount": 200}
+            ]
+          }
+        ]
       },
       "totals": [
-        {"type": "subtotal", "amount": 6000},
-        {"type": "items_discount", "amount": 1500},
-        {"type": "total", "amount": 4500}
-      ]
-    },
-    {
-      "id": "li_2",
-      "item": {
-        "title": "Socks",
-        "price": 4000
-      },
-      "totals": [
-        {"type": "subtotal", "amount": 4000},
-        {"type": "items_discount", "amount": 1000},
-        {"type": "total", "amount": 3000}
+        {"type": "subtotal", "display_text": "Subtotal", "amount": 10000},
+        {"type": "items_discount", "display_text": "Item Discounts", "amount": -2500},
+        {"type": "total", "display_text": "Total", "amount": 7500}
       ]
     }
-  ],
-  "discounts": {
-    "codes": ["SUMMER20", "LOYALTY5"],
-    "applied": [
-      {
-        "code": "SUMMER20",
-        "title": "Summer Sale 20% Off",
-        "amount": 2000,
-        "method": "each",
-        "priority": 1,
-        "allocations": [
-          {"path": "$.line_items[0]", "amount": 1200},
-          {"path": "$.line_items[1]", "amount": 800}
-        ]
-      },
-      {
-        "code": "LOYALTY5",
-        "title": "$5 Loyalty Reward",
-        "amount": 500,
-        "method": "across",
-        "priority": 2,
-        "allocations": [
-          {"path": "$.line_items[0]", "amount": 300},
-          {"path": "$.line_items[1]", "amount": 200}
-        ]
-      }
-    ]
-  },
-  "totals": [
-    {"type": "subtotal", "display_text": "Subtotal", "amount": 10000},
-    {"type": "items_discount", "display_text": "Item Discounts", "amount": 2500},
-    {"type": "total", "display_text": "Total", "amount": 7500}
-  ]
-}
-```
+    ```
 
 With this data, an agent can explain:
 > "Your T-Shirt ($60) got $12 off from the 20% summer sale, plus $3 from your

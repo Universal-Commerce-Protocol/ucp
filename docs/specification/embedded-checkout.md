@@ -95,21 +95,21 @@ profile, they declare support for the Embedded Checkout Protocol.
     "services": {
         "dev.ucp.shopping": [
             {
-                "version": "2026-01-11",
+                "version": "{{ ucp_version }}",
                 "transport": "rest",
-                "schema": "https://ucp.dev/services/shopping/openapi.json",
+                "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/rest.openapi.json",
                 "endpoint": "https://merchant.example.com/ucp/v1"
             },
             {
-                "version": "2026-01-11",
+                "version": "{{ ucp_version }}",
                 "transport": "mcp",
-                "schema": "https://ucp.dev/services/shopping/mcp.openrpc.json",
+                "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/mcp.openrpc.json",
                 "endpoint": "https://merchant.example.com/ucp/mcp"
             },
             {
-                "version": "2026-01-11",
+                "version": "{{ ucp_version }}",
                 "transport": "embedded",
-                "schema": "https://ucp.dev/services/shopping/embedded.openrpc.json"
+                "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/embedded.openrpc.json"
             }
         ]
     }
@@ -134,14 +134,14 @@ indicate ECP availability and allowed delegations for a specific session.
     "status": "open",
     "continue_url": "https://merchant.example.com/checkout/abc123",
     "ucp": {
-        "version": "2026-01-11",
+        "version": "{{ ucp_version }}",
         "services": {
             "dev.ucp.shopping": [
                 {
-                    "version": "2026-01-11",
+                    "version": "{{ ucp_version }}",
                     "transport": "embedded",
                     "config": {
-                        "delegate": ["payment.credential", "fulfillment.address_change"]
+                        "delegate": ["payment.credential", "fulfillment.address_change", "window.open"]
                     }
                 }
             ]
@@ -250,12 +250,13 @@ message following a consistent pattern: `ec.{delegation}_request`
 | `payment.instruments_change` | `ec.payment.instruments_change_request` |
 | `payment.credential`         | `ec.payment.credential_request`         |
 | `fulfillment.address_change` | `ec.fulfillment.address_change_request` |
+| `window.open`                | `ec.window.open_request`                |
 
 Extensions define their own delegation identifiers; see each extension's
 specification for available options.
 
 ```text
-?ec_version=2026-01-11&ec_delegate=payment.instruments_change,payment.credential,fulfillment.address_change
+?ec_version=2026-01-11&ec_delegate=payment.instruments_change,payment.credential,fulfillment.address_change,window.open
 ```
 
 #### Color Scheme
@@ -333,7 +334,7 @@ The Embedded Checkout determines which delegations to honor based on:
 The Embedded Checkout **MUST** indicate accepted delegations in the `ec.ready`
 request via the `delegate` field (see [`ec.ready`](#ecready)). If a
 requested delegation is not accepted, the Embedded Checkout **MUST** handle that
-capability using its own UI.
+action using its own UI.
 
 #### Binding Requirements
 
@@ -354,7 +355,7 @@ capability using its own UI.
 
 #### 3.3.3 Delegation Flow
 
-1. **Request**: Embedded Checkout sends an `ec.{capability}.{action}_request`
+1. **Request**: Embedded Checkout sends an `ec.{domain}.{action}_request`
     message with current state (includes `id`)
 2. **Native UI**: Host presents native UI for the delegated action
 3. **Response**: host sends back a JSON-RPC response with matching `id` and
@@ -362,9 +363,10 @@ capability using its own UI.
 4. **Update**: Embedded Checkout updates its state and may send subsequent
     change notifications
 
-See [Payment Extension](#payment-extension) and
-[Fulfillment Extension](#fulfillment-extension) for
-capability-specific delegation details.
+See [Payment Extension](#payment-extension),
+[Fulfillment Extension](#fulfillment-extension), and
+[Window Extension](#window-extension) for
+domain-specific delegation details.
 
 ### Navigation Constraints
 
@@ -501,14 +503,15 @@ all implementations. All messages are sent from Embedded Checkout to host.
 Extensions **MAY** extend the Embedded protocol by defining additional messages.
 Extension messages **MUST** follow the naming convention:
 
-- **Notifications**: `ec.{capability}.change` — state change notifications (no
+- **Notifications**: `ec.{domain}.change` — state change notifications (no
     `id`)
-- **Delegation requests**: `ec.{capability}.{action}_request` — requires
+- **Delegation requests**: `ec.{domain}.{action}_request` — requires
     response (has `id`)
 
 Where:
 
-- `{capability}` matches the capability identifier from discovery
+- `{domain}` matches the domain identifier from discovery (e.g., `payment`,
+    `fulfillment`, `window`)
 - `{action}` describes the specific action being delegated (e.g.,
     `instruments_change`, `address_change`)
 - `_request` suffix signals this is a delegation point requiring a response
@@ -554,7 +557,7 @@ actions.
     "id": "ready_1",
     "method": "ec.ready",
     "params": {
-        "delegate": ["payment.credential", "fulfillment.address_change"]
+        "delegate": ["payment.credential", "fulfillment.address_change", "window.open"]
     }
 }
 ```
@@ -1265,7 +1268,109 @@ rather than attempting to merge the new data with existing state.
 The address object uses the UCP
 [PostalAddress](site:specification/checkout/#postal-address) format:
 
+### Postal Address
+
 {{ schema_fields('postal_address', 'embedded-checkout') }}
+
+## Window Extension
+
+The window extension defines how the Embedded Checkout notifies the host when
+the buyer activates a link presented by the business. When a checkout URL
+includes `ec_delegate=window.open`, the host **MUST** handle every
+`ec.window.open_request` and acknowledge the request.
+
+This is distinct from
+[Navigation Constraints](#navigation-constraints), which the Embedded Checkout
+enforces unconditionally to prevent navigation to unrelated pages.
+
+### Window Overview & Host Choice
+
+Window delegation allows for two different patterns:
+
+**Option A: Host Delegates to Embedded Checkout** The host does NOT include
+`window.open` in `ec_delegate`. The Embedded Checkout handles link presentation
+using its own inline UI. This is the standard, non-delegated flow.
+
+**Option B: Host Takes Control** The host includes
+`ec_delegate=window.open` in the Checkout URL, informing the Embedded Checkout
+to send `ec.window.open_request` when the buyer activates a link. When delegated:
+
+**Embedded Checkout responsibilities**:
+
+- **MUST** send `ec.window.open_request` when the buyer activates a link
+    presented by the business
+
+**Host responsibilities**:
+
+- **MUST** validate that the requested URL uses the `https` scheme
+- **SHOULD** apply additional host security policies (e.g., verifying
+    origins)
+- **MUST** present the content to the buyer for every approved request
+    (e.g., in a modal, new tab, or similar)
+- **MUST** respond with a JSON-RPC success result when the request was
+    processed, or a `window_open_rejected_error` error if host policy prevented
+    the navigation
+- **MAY** notify the buyer if the request was rejected
+
+By accepting `window.open` delegation, the host assumes responsibility for
+handling the buyer's link interactions. The Embedded Checkout **MUST NOT**
+present its own UI for the link.
+
+The `ec.window.open_request` payload contains only the URL. Hosts that need
+richer context (e.g., link type or label) **MAY** cross-reference the requested
+URL against the `checkout.links` array from the checkout session to obtain
+additional metadata.
+
+### Window Message API Reference
+
+#### `ec.window.open_request`
+
+Requests the host to handle a link activated by the buyer within the checkout.
+
+- **Direction:** Embedded Checkout → Host
+- **Type:** Request
+- **Payload:**
+    - `url` (string, uri, **REQUIRED**): The URL of the resource to present.
+
+**Example Message:**
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": "window_1",
+    "method": "ec.window.open_request",
+    "params": {
+        "url": "https://merchant.com/privacy-policy"
+    }
+}
+```
+
+- **Direction:** Host → Embedded Checkout
+- **Type:** Response
+- **Payload:** Empty object (`{}`).
+
+**Example Success Response:**
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": "window_1",
+    "result": {}
+}
+```
+
+**Example Error Response:**
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": "window_1",
+    "error": {
+        "code": "window_open_rejected_error",
+        "message": "Window open rejected by host."
+    }
+}
+```
 
 ## Security & Error Handling
 
@@ -1277,13 +1382,14 @@ error codes mapped to
 **[W3C DOMException](https://webidl.spec.whatwg.org/#idl-DOMException)** names
 where possible.
 
-| Code                  | Description                                                                                                                                    |
-| :-------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------- |
-| `abort_error`         | The user cancelled the interaction (e.g., closed the sheet).                                                                                   |
-| `security_error`      | The host origin validation failed.                                                                                                             |
-| `not_supported_error` | The requested payment method is not supported by the host.                                                                                     |
-| `invalid_state_error` | Handshake was attempted out of order.                                                                                                          |
-| `not_allowed_error`   | The request was missing valid User Activation (see [Prevention of Unsolicited Payment Requests](#prevention-of-unsolicited-payment-requests)). |
+| Code                         | Description                                                                                                                                    |
+| :--------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------- |
+| `abort_error`                | The user cancelled the interaction (e.g., closed the sheet).                                                                                   |
+| `security_error`             | The host origin validation failed.                                                                                                             |
+| `not_supported_error`        | The requested payment method is not supported by the host.                                                                                     |
+| `invalid_state_error`        | Handshake was attempted out of order.                                                                                                          |
+| `not_allowed_error`          | The request was missing valid User Activation (see [Prevention of Unsolicited Payment Requests](#prevention-of-unsolicited-payment-requests)). |
+| `window_open_rejected_error` | Host policy prevented the navigation. The host **MAY** notify the buyer that their request was rejected.                                       |
 
 ### Security for Web-Based Hosts
 
@@ -1382,10 +1488,30 @@ account, or wallet credential) available to the buyer.
 
 {{ schema_fields('payment_instrument', 'embedded-checkout') }}
 
-### Payment Handler Response
+#### Selected Payment Instrument
+
+{{ extension_schema_fields('types/payment_instrument.json#/$defs/selected_payment_instrument', 'embedded-checkout') }}
+
+### Card Payment Instrument
+
+{{ schema_fields('types/card_payment_instrument', 'embedded-checkout') }}
+
+### Payment Credential
+
+{{ schema_fields('types/payment_credential', 'embedded-checkout') }}
+
+### Token Credential
+
+{{ schema_fields('types/token_credential_resp', 'embedded-checkout') }}
+
+### Card Credential
+
+{{ schema_fields('types/card_credential', 'embedded-checkout') }}
+
+### Payment Handler
 
 Represents the processor or wallet provider responsible for authenticating and
 processing a specific payment instrument (e.g., Google Pay, Stripe, or a Bank
 App).
 
-{{ schema_fields('payment_handler_resp', 'embedded-checkout') }}
+{{ extension_schema_fields('payment_handler.json#/$defs/response_schema', 'embedded-checkout') }}

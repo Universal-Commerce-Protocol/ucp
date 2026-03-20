@@ -118,13 +118,17 @@ platform receives messages indicating what's needed to progress.
 
 The `messages` array contains errors, warnings, and informational messages
 about the checkout state. Error messages include a `severity` field that
-declares **who resolves the error**:
+reflects the resource state and recommended action. When `ucp.status`
+is `"success"`, a resource is returned and severity indicates the
+recommended action. When `ucp.status` is `"error"`, no valid resource
+exists — severity is `unrecoverable`:
 
-| Severity                | Meaning                                       | Platform Action               |
-| :---------------------- | :-------------------------------------------- | :---------------------------- |
-| `recoverable`           | Platform can fix via API                      | Resolve using Update Checkout |
-| `requires_buyer_input`  | Business requires input not available via API | Hand off via `continue_url`   |
-| `requires_buyer_review` | Buyer review and authorization is required    | Hand off via `continue_url`   |
+| Severity                | Meaning                                          | Platform Action                                                   |
+| :---------------------- | :----------------------------------------------- | :---------------------------------------------------------------- |
+| `recoverable`           | Platform can resolve by modifying inputs via API | Update resource and retry                                         |
+| `requires_buyer_input`  | Business requires input not available via API    | Hand off via `continue_url`                                       |
+| `requires_buyer_review` | Buyer review and authorization is required       | Hand off via `continue_url`                                       |
+| `unrecoverable`         | No resource exists to act on                     | Retry with new resource or inputs, or hand off via `continue_url` |
 
 Errors with `requires_*` severity contribute to `status: requires_escalation`.
 Both result in buyer handoff, but represent different checkout states.
@@ -134,6 +138,31 @@ requires information their API doesn't support collecting programmatically.
 * `requires_buyer_review` means the checkout is **complete** — but policy,
 regulatory, or entitlement rules require buyer authorization before order
 placement (e.g., high-value order approval, first-purchase policy).
+
+When the business cannot create a new resource or the requested resource
+no longer exists, the response contains `ucp.status: "error"` with
+`messages` describing the failure — no resource is included in the
+response body. Error responses MUST use `severity: "unrecoverable"`.
+For example, a business may reject a create checkout request where all
+items are unavailable:
+
+```json
+{
+  "ucp": { "version": "2026-01-11", "status": "error" },
+  "messages": [
+    {
+      "type": "error",
+      "code": "out_of_stock",
+      "content": "All requested items are currently out of stock",
+      "severity": "unrecoverable"
+    }
+  ],
+  "continue_url": "https://merchant.com/"
+}
+```
+
+See [REST](checkout-rest.md#create-checkout) and
+[MCP](checkout-mcp.md#create_checkout) binding examples.
 
 #### Error Processing Algorithm
 
@@ -174,7 +203,13 @@ Businesses **SHOULD** surface such messages as early as possible, and platforms
 Example error processing algorithm:
 
 ```text
-GIVEN checkout with messages array
+GIVEN response with messages array
+
+IF ucp.status = "error"
+  -- No resource exists; severity is unrecoverable
+  RETRY with new resource or inputs, or hand off via continue_url
+  RETURN
+
 FILTER errors FROM messages WHERE type = "error"
 
 PARTITION errors INTO
@@ -205,6 +240,7 @@ handle with specific, appropriate UX rather than generic error treatment.
 | `item_unavailable`       | Item cannot be purchased (e.g. delisted)                                   |
 | `address_undeliverable`  | Cannot deliver to the provided address                                     |
 | `payment_failed`         | Payment processing failed                                                  |
+| `eligibility_invalid`    | Eligibility claim could not be verified at completion                      |
 
 Businesses **SHOULD** mark standard errors with `severity: recoverable` to
 signal that platforms should provide appropriate UX (out-of-stock messaging,
@@ -213,6 +249,207 @@ messages or deferring to checkout completion.
 
 Example: `out_of_stock` requires specific upfront UX, whereas
 `payment_required` can be handled generically at submission.
+
+#### Eligibility Verification at Completion
+
+Platforms provide `context.eligibility` — buyer claims about eligible benefits
+such as loyalty membership, payment instrument perks, and similar. These are
+claims, not verified facts. Businesses **MAY** act on recognized claims during
+the session (adjusting pricing, granting product access, applying provisional
+discounts), but all accepted claims **MUST** be resolved before the
+transaction can complete.
+
+Unrecognized or inapplicable claims **MUST NOT** block the checkout.
+Businesses **SHOULD** notify the buyer via `messages` with `type: "warning"`
+when a claim is not accepted, and **MAY** use `type: "info"` to explain
+the effects of accepted claims. At completion, accepted claims that remain
+unverified **MUST** result in `type: "error"` with
+`code: "eligibility_invalid"` (see below).
+
+**Eligibility message codes:**
+
+| Type      | Code                       | When                                               |
+| --------- | -------------------------- | -------------------------------------------------- |
+| `warning` | `eligibility_not_accepted` | Claim not recognized or not applicable             |
+| `info`    | `eligibility_accepted`     | Effect of an accepted claim                        |
+| `error`   | `eligibility_invalid`      | Accepted claim could not be verified at completion |
+
+A claim is resolved when it is either **verified** or **rescinded**:
+
+* **Verified**: The Business confirms the claim against a proof provided at
+  completion time. UCP does not prescribe how verification occurs — proof
+  may come from the payment credential, an identity verification capability,
+  or any other mechanism negotiated between Platform and Business.
+* **Rescinded**: The Platform removes the claim from `context.eligibility`
+  before completion (e.g., buyer changes payment method, withdraws a
+  membership claim). Once removed, the Business recalculates without it.
+
+Businesses **MUST NOT** complete a transaction with unresolved eligibility
+claims. Unverified claims may result in incorrect pricing or unauthorized
+access to restricted products.
+
+**When verification fails:**
+
+Verification failure **MUST** only affect the `messages` array. The
+Business **MUST** return an error in `messages` with
+`code: "eligibility_invalid"` and `severity: "recoverable"`. Messages
+**SHOULD** use the `path` field to identify which specific claim(s) could
+not be verified. The Platform **MAY** then provide valid proof and
+resubmit, restructure the checkout (e.g., remove ineligible items, update
+claims), or abandon the attempt.
+
+For example, the Platform claims a store card benefit via
+`context.eligibility`. The Business applies member pricing during the session.
+At completion, the payment credential does not match the claimed instrument:
+
+```json
+{
+  "ucp": { "version": "2026-01-11", "status": "success" },
+  "id": "checkout_abc",
+  "status": "ready_for_complete",
+  "line_items": [ "..." ],
+  "totals": [ "..." ],
+  "messages": [
+    {
+      "type": "error",
+      "code": "eligibility_invalid",
+      "severity": "recoverable",
+      "content": "Payment credential does not match the claimed store card benefit.",
+      "path": "$.context.eligibility[0]"
+    }
+  ]
+}
+```
+
+The Platform can resolve this by having the buyer switch to the qualifying
+payment instrument, or by removing the claim from `context.eligibility` to
+renegotiate the checkout (obtaining updated pricing, availability, etc.)
+and then resubmitting for completion.
+
+### Warning Presentation
+
+The `presentation` field on warning messages controls the rendering
+contract the platform **MUST** follow. When omitted, it defaults to
+`"notice"`.
+
+| | `notice` (default) | `disclosure` |
+| :--- | :--- | :--- |
+| Display content | **MUST** | **MUST** |
+| Proximity to `path` | **MAY** | **MUST** |
+| Dismissible | **MAY** | **MUST NOT** |
+| Render `image_url` | **MAY** | **MUST** |
+| Render `url` | **MAY** | **SHOULD** |
+| Escalate if cannot honor | — | **MUST** via `continue_url` |
+
+#### `notice` (default)
+
+The default rendering contract for warnings. Platforms **MUST** display
+the warning content to the buyer. Platforms **MAY** render notices in a
+banner, tray, or toast, and **MAY** allow the buyer to dismiss them.
+
+#### `disclosure`
+
+Warnings with `presentation: "disclosure"` carry notices — safety
+warnings, allergen declarations, compliance content, etc. — that
+**MUST** follow the prescribed rendering contract below.
+
+**Platform requirements:**
+
+* **MUST** display the warning `content` to the buyer.
+* **MUST** display the warning in proximity to the component referenced
+  by `path`, preserving the association between the disclosure and its
+  subject. When `path` is omitted, the disclosure applies to the response
+  as a whole.
+* **MUST NOT** hide, collapse, or auto-dismiss the warning.
+* **MUST** render `image_url` when present (e.g., warning symbol,
+  energy class label).
+* **SHOULD** render `url` as a navigable reference link when present.
+
+Warnings with `presentation: "disclosure"` **SHOULD** be given rendering
+priority over notices.
+
+Platforms that cannot honor the disclosure rendering contract **MUST**
+escalate to merchant UI via `continue_url` rather than silently
+downgrading to a notice.
+
+**Business requirements:**
+
+* **MUST** set `presentation: "disclosure"` when the warning content must
+  be displayed alongside a specific component and must not be hidden or
+  auto-dismissed.
+* **SHOULD** use the `path` field to associate disclosures with the
+  relevant component in the response.
+* **SHOULD** provide a `code` that identifies the disclosure category
+  (e.g., `prop65`, `allergens`, `energy_label`).
+* **SHOULD** provide `image_url` when the disclosure has an associated
+  visual element (e.g., warning symbol, energy class label).
+* **SHOULD** provide `url` when a reference link is available for the
+  buyer to learn more.
+
+#### Disclosure and Acknowledgment
+
+The `presentation` field controls how the warning is rendered, not
+whether the checkout can proceed. When affirmative buyer acknowledgment
+or authorization is also required, the business **MAY** combine the
+disclosure with the escalation mechanisms described in the
+[Checkout Status Lifecycle](#checkout-status-lifecycle) to ensure the
+appropriate buyer input is obtained.
+
+#### Jurisdiction and Applicability
+
+It is the business's responsibility to determine which disclosures apply
+to a given session and return only those that are relevant. Businesses
+**SHOULD** use buyer-provided data (`context` and other inputs) and
+product attributes to resolve jurisdiction-specific requirements.
+Platforms do not affect or resolve disclosure applicability — they render
+what they receive from the business.
+
+#### Example
+
+A checkout response containing both a recoverable error and a disclosure
+warning on a line item:
+
+```json
+{
+  "ucp": { "version": "{{ ucp_version }}", "status": "success" },
+  "id": "chk_abc123",
+  "status": "incomplete",
+  "currency": "USD",
+  "line_items": [
+    {
+      "id": "li_1",
+      "item": { "id": "item_456", "title": "Artisan Nut Butter Collection", "image_url": "https://merchant.com/nut-butter.jpg" },
+      "quantity": 1,
+      "totals": [{ "type": "subtotal", "amount": 1299 }]
+    }
+  ],
+  "totals": [{ "type": "total", "amount": 1299 }],
+  "messages": [
+    {
+      "type": "error",
+      "code": "field_required",
+      "path": "$.buyer.email",
+      "content": "Buyer email is required",
+      "severity": "recoverable"
+    },
+    {
+      "type": "warning",
+      "code": "allergens",
+      "path": "$.line_items[0]",
+      "content": "**Contains: tree nuts.** Produced in a facility that also processes peanuts, milk, and soy.",
+      "content_type": "markdown",
+      "presentation": "disclosure",
+      "image_url": "https://merchant.com/allergen-tree-nuts.svg",
+      "url": "https://merchant.com/allergen-info"
+    }
+  ],
+  "links": []
+}
+```
+
+The platform resolves the recoverable error programmatically while
+rendering the allergen disclosure in proximity to the referenced line
+item.
 
 ## Continue URL
 
@@ -284,13 +521,14 @@ platform can prefill checkout state when initiating a buy-now flow.
 * Logic handling the checkout sessions **MUST** be deterministic.
 * **MUST** provide `continue_url` when returning `status` =
     `requires_escalation`.
-* **MUST** include at least one message with `severity: escalation` when
-    returning `status` = `requires_escalation`.
+* **MUST** include at least one message with `severity` of
+    `requires_buyer_input` or `requires_buyer_review` when returning
+    `status` = `requires_escalation`.
 * **SHOULD** provide `continue_url` in all non-terminal checkout responses.
 * After a checkout session reaches the state "completed", it is considered
     immutable.
 
-## Capability Schema Definition
+## Capability Schema Definition <span id="checkout"></span>
 
 {{ schema_fields('checkout_resp', 'checkout') }}
 
@@ -383,12 +621,26 @@ defined below:
 
 ### Context
 
-Context signals are provisional hints. Businesses SHOULD use these values when
-authoritative data (e.g. address) is absent, and MAY ignore unsupported values
-without returning errors. This differs from authoritative selections which
-require explicit validation and error feedback.
+Context signals are provisional—not authoritative data. Businesses SHOULD use
+these values when verified inputs (e.g., shipping address) are absent, and MAY
+ignore or down-rank them if inconsistent with higher-confidence signals
+(authenticated account, risk detection) or regulatory constraints (export
+controls). Eligibility and policy enforcement MUST occur at checkout time using
+binding transaction data.
 
 {{ schema_fields('context', 'checkout') }}
+
+### Signals
+
+Environment data provided by the platform to support authorization
+and abuse prevention. Unlike `context` (buyer-asserted preferences) and `buyer`
+(self-reported identity), signal values MUST NOT be buyer-asserted claims —
+platforms provide signals based on direct observation or by relaying
+independently verifiable third-party attestations. See
+[Signals](overview.md#signals) for details and privacy
+requirements.
+
+{{ schema_fields('types/signals', 'checkout') }}
 
 ### Fulfillment Option
 
@@ -404,7 +656,7 @@ require explicit validation and error feedback.
 
 {{ schema_fields('types/item_update_req', 'checkout') }}
 
-#### Item Response
+#### Item
 
 {{ schema_fields('types/item_resp', 'checkout') }}
 
@@ -418,7 +670,7 @@ require explicit validation and error feedback.
 
 {{ schema_fields('types/line_item_update_req', 'checkout') }}
 
-#### Line Item Response
+#### Line Item
 
 {{ schema_fields('types/line_item_resp', 'checkout') }}
 
@@ -451,6 +703,10 @@ field or omitting them.
 
 {{ schema_fields('types/message_error', 'checkout') }}
 
+#### Error Code
+
+{{ schema_fields('types/error_code', 'checkout') }}
+
 ### Message Info
 
 {{ schema_fields('types/message_info', 'checkout') }}
@@ -463,9 +719,9 @@ field or omitting them.
 
 {{ schema_fields('payment', 'checkout') }}
 
-### Payment Instrument
+#### Selected Payment Instrument
 
-{{ schema_fields('payment_instrument', 'checkout') }}
+{{ extension_schema_fields('types/payment_instrument.json#/$defs/selected_payment_instrument', 'checkout') }}
 
 ### Payment Credential
 
@@ -479,16 +735,152 @@ field or omitting them.
 
 {{ extension_schema_fields('capability.json#/$defs/response_schema', 'checkout') }}
 
-### Total
-
-#### Total Response
+### Total {: #totals }
 
 {{ schema_fields('types/total_resp', 'checkout') }}
 
-### UCP Response Checkout
+#### Rendering Contract
+
+Businesses are the authoritative source for presented totals — their content
+and order — because the correct presentation is subject to regional, product,
+and regulatory requirements that the business is obligated to satisfy (e.g.,
+multi-jurisdiction tax itemization, mandatory fee disclosures).
+
+Platforms MUST render all top-level entries in the order provided:
+
+```python
+for entry in totals:
+    render_line(entry.display_text, entry.amount)
+```
+
+Platforms MAY render sub-lines as supplementary detail:
+
+```python
+for entry in totals:
+    render_line(entry.display_text, entry.amount)
+    if entry.lines:
+        for sub in entry.lines:
+            render_detail_line(sub.display_text, sub.amount)
+```
+
+Platforms MUST NOT interpret, filter, reorder, aggregate, or apply display
+logic of their own.
+
+Invariants of `totals[]`:
+
+* Every entry carries a `type` and an `amount`. Platforms SHOULD use
+  `display_text` when provided. Well-known types have default display labels
+  as fallback (see table below); unknown types MUST include `display_text`.
+* Amounts are signed integers — negative values are subtractive (e.g.,
+  discounts), positive values are additive. The sign IS the direction.
+* Exactly one `type: "subtotal"` MUST be present.
+* Exactly one `type: "total"` MUST be present.
+
+#### Verification
+
+Platforms MUST NOT substitute their own computed totals for the business's
+values. Platforms MAY verify the provided totals:
+
+```python
+assert sum(e.amount for e in totals if e.type != "total") == total_entry.amount
+```
+
+If the computed sum does not match the `type: "total"` entry, the platform
+MUST NOT alter the rendered output — the business's presented totals are
+authoritative for display. However, platforms MUST NOT autonomously complete
+a checkout with mismatched totals. Platforms SHOULD reject the checkout or
+escalate and ask for buyer review via `continue_url`.
+
+#### Well-Known Types
+
+| Type              | Sign | Default label    | Meaning                                   |
+| ----------------- | ---- | ---------------- | ----------------------------------------- |
+| `subtotal`        | +    | Subtotal         | Sum of line item prices                   |
+| `discount`        | −    | Discount         | Order or line-item level discount         |
+| `items_discount`  | −    | Item Discounts   | Rollup of line-item discounts             |
+| `fulfillment`     | +    | Shipping         | Shipping, delivery, or pickup charges     |
+| `tax`             | +    | Tax              | Tax charges                               |
+| `fee`             | +    | Fee              | Fees and surcharges                       |
+| `total`           | =    | Total            | Authoritative grand total (exactly one)   |
+
+When `display_text` is provided, platforms MUST use it. When omitted on a
+well-known type, platforms SHOULD use the default label above. The sign
+convention for well-known types is schema-enforced: subtractive types
+(discount, items_discount) MUST have negative amounts; additive types
+(subtotal, fulfillment, tax, fee) MUST have non-negative amounts.
+
+The `type` field is an open string — businesses MAY use values beyond the
+well-known set. Unknown types MUST include `display_text` (schema-enforced)
+and the sign on the amount is self-describing.
+
+#### Repeating Types
+
+All types except `subtotal` and `total` MAY appear multiple times —
+for example, multi-jurisdiction tax lines or itemized fees.
+
+#### Sub-Lines (`lines`)
+
+Each top-level entry MAY include a `lines` array. Sub-lines share the same
+base shape as top-level entries — `display_text` and `amount` — providing an
+itemized breakdown under the parent.
+
+**Invariant:** `sum(lines[].amount)` MUST equal the parent entry's `amount`.
+
+The business controls what MUST be rendered (top-level entries) versus what
+MAY be optionally surfaced (sub-lines). Platforms SHOULD render sub-lines
+when provided.
+
+#### Examples
+
+**Split tax, itemized at top-level:**
+
+```json
+"totals": [
+  { "type": "subtotal",    "display_text": "Subtotal",    "amount": 5750 },
+  { "type": "fulfillment", "display_text": "Shipping",    "amount": 899 },
+  { "type": "tax",         "display_text": "Federal Tax", "amount": 332 },
+  { "type": "tax",         "display_text": "State Tax",   "amount": 465 },
+  { "type": "total",       "display_text": "Total",       "amount": 7446 }
+]
+```
+
+**Collapsed fees with optional breakdown:**
+
+```json
+"totals": [
+  { "type": "subtotal", "display_text": "Subtotal", "amount": 4999 },
+  {
+    "type": "fee", "display_text": "Fees", "amount": 549,
+    "lines": [
+      { "display_text": "Service Fee", "amount": 399 },
+      { "display_text": "Recycling Fee", "amount": 150 }
+    ]
+  },
+  { "type": "tax",   "display_text": "Tax",   "amount": 444 },
+  { "type": "total", "display_text": "Total", "amount": 5992 }
+]
+```
+
+**Discount and account credit — negative amounts:**
+
+```json
+"totals": [
+  { "type": "subtotal",       "display_text": "Subtotal",       "amount": 10000 },
+  { "type": "discount",       "display_text": "Summer Sale",    "amount": -1500 },
+  { "type": "tax",            "display_text": "Tax",            "amount": 680 },
+  { "type": "account_credit", "display_text": "Account Credit", "amount": -2500 },
+  { "type": "total",          "display_text": "Amount Due",     "amount": 6680 }
+]
+```
+
+### UCP Response Checkout {: #ucp-response-checkout-schema }
 
 {{ extension_schema_fields('ucp.json#/$defs/response_checkout_schema', 'checkout') }}
 
 ### Order Confirmation
 
 {{ schema_fields('order_confirmation', 'checkout') }}
+
+### Error Response <span id="error-response"></span>
+
+{{ schema_fields('types/error_response', 'checkout') }}
