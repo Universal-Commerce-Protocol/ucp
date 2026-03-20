@@ -105,5 +105,6 @@ worktree
 yaml
 zapatillas
 yml
+EDITMSG
 jwks
 keyid
