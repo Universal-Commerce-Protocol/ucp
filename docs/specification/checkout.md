@@ -642,10 +642,6 @@ requirements.
 
 {{ schema_fields('types/signals', 'checkout') }}
 
-### Fulfillment Option
-
-{{ extension_schema_fields('fulfillment.json#/$defs/fulfillment_option', 'checkout') }}
-
 ### Item
 
 #### Item Create Request
