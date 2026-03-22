@@ -414,7 +414,7 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
 }
 ```
 
-The `ucp` object contains protocol metadata: version, services, capabilities, and payment handlers. The `signing_keys` array contains public keys (JWK format) used to verify signatures on webhooks and other authenticated messages from the business. See [Key Discovery](#key-discovery) for key lookup and resolution, and [Message Signatures](https://ucp.dev/draft/specification/signatures/index.md) for signing mechanics.
+The `ucp` object contains protocol metadata: version, services, capabilities, and payment handlers. The `signing_keys` array contains public keys (JWK format) used to verify signatures on webhooks and other authenticated messages from the business. See [Key Discovery](#key-discovery) for key lookup and resolution, and [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md) for signing mechanics.
 
 Businesses that support older protocol versions **SHOULD** include a `supported_versions` object mapping each older version to a version-specific profile URI. See [Protocol Version](#protocol-version) for details.
 
@@ -627,7 +627,7 @@ Discovery failures are transport errors — the required inputs could not be ret
 | `digest_mismatch`       | Body digest doesn't match `Content-Digest` header | 400  | -32600 |
 | `algorithm_unsupported` | Signature algorithm not supported                 | 400  | -32600 |
 
-See [Message Signatures](https://ucp.dev/draft/specification/signatures/index.md) for signature verification details.
+See [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md) for signature verification details.
 
 **Protocol Errors:**
 
@@ -884,11 +884,11 @@ Businesses **SHOULD** authenticate platforms to prevent impersonation and ensure
 - **API Keys** — Pre-shared secrets exchanged out-of-band
 - **OAuth 2.0** — Client credentials or other OAuth flows
 - **mTLS** — Mutual TLS with client certificates
-- **HTTP Message Signatures** — Cryptographic signatures per [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421) (see [Message Signatures](https://ucp.dev/draft/specification/signatures/index.md) for full specification)
+- **HTTP Message Signatures** — Cryptographic signatures per [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421) (see [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md) for full specification)
 
 HTTP Message Signatures enable permissionless onboarding — businesses can verify platforms by their advertised public keys without negotiating shared secrets. The other mechanisms require prior credential exchange and imply a pre-established relationship.
 
-Business-to-platform webhooks **MUST** be signed. See [Message Signatures — When Signatures Apply](https://ucp.dev/draft/specification/signatures/#when-signatures-apply).
+Business-to-platform webhooks **MUST** be signed. See [Message Signatures — When Signatures Apply](http://ucp.dev/draft/specification/signatures/#when-signatures-apply).
 
 #### Identity Binding
 
@@ -908,7 +908,7 @@ Both parties publish public keys in the `signing_keys` array of their UCP profil
 1. Extract `keyid` from `Signature-Input` and match to `kid` in `signing_keys[]`
 1. Verify signature using the corresponding public key
 
-For key format (JWK), supported algorithms, key rotation procedures, and complete signing/verification mechanics, see [Message Signatures](https://ucp.dev/draft/specification/signatures/index.md).
+For key format (JWK), supported algorithms, key rotation procedures, and complete signing/verification mechanics, see [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md).
 
 ### Profile Requirements
 
@@ -964,7 +964,7 @@ The payment architecture is built on a "Trust-by-Design" philosophy. It assumes 
 
 For scenarios requiring cryptographic proof of user authorization (e.g., autonomous AI agents), UCP supports the **AP2 Mandates Extension** (`dev.ucp.shopping.ap2_mandate`). This optional extension provides non-repudiable authorization through verifiable digital credentials.
 
-See [Transaction Integrity](#transaction-integrity-and-non-repudiation) and [AP2 Mandates Extension](https://ucp.dev/draft/specification/ap2-mandates/index.md) for details on when and how to use this extension.
+See [Transaction Integrity](#transaction-integrity-and-non-repudiation) and [AP2 Mandates Extension](http://ucp.dev/draft/specification/ap2-mandates/index.md) for details on when and how to use this extension.
 
 #### Credential Flow & PCI Scope
 
@@ -1005,7 +1005,7 @@ Payment handlers allow for a variety of different payment instruments and token-
 
 **Dynamic Filtering:** Businesses **MUST** filter the `handlers` list based on the context of the cart (e.g., removing "Buy Now Pay Later" for subscription items, or filtering regional methods based on shipping address).
 
-**Available Instrument Resolution:** Within each active handler, both the platform and the business independently advertise `available_instruments` — the set of instrument types and constraints each party supports. The business is responsible for resolving these into an authoritative value in the checkout response. The platform's declaration (from its profile) signals what it can handle; the business intersects that with its own `business_schema` declaration and cart context, then returns the resolved result. Platforms **MUST** treat the `available_instruments` in the response as authoritative for that checkout. See the [Payment Handler Guide](https://ucp.dev/draft/specification/payment-handler-guide/#resolving-available_instruments) for the full resolution semantics.
+**Available Instrument Resolution:** Within each active handler, both the platform and the business independently advertise `available_instruments` — the set of instrument types and constraints each party supports. The business is responsible for resolving these into an authoritative value in the checkout response. The platform's declaration (from its profile) signals what it can handle; the business intersects that with its own `business_schema` declaration and cart context, then returns the resolved result. Platforms **MUST** treat the `available_instruments` in the response as authoritative for that checkout. See the [Payment Handler Guide](http://ucp.dev/draft/specification/payment-handler-guide/#resolving-available_instruments) for the full resolution semantics.
 
 ### Implementation Scenarios
 
@@ -1298,7 +1298,7 @@ Payment credential providers (PSPs, wallets) are typically PCI-DSS Level 1 certi
 1. Implement idempotency for payment processing (prevent double-charges)
 1. Log payment events without logging credentials
 1. Set appropriate credential timeouts
-1. For autonomous commerce scenarios requiring cryptographic proof, consider supporting the `dev.ucp.shopping.ap2_mandate` extension (see [AP2 Mandates Extension](https://ucp.dev/draft/specification/ap2-mandates/index.md))
+1. For autonomous commerce scenarios requiring cryptographic proof, consider supporting the `dev.ucp.shopping.ap2_mandate` extension (see [AP2 Mandates Extension](http://ucp.dev/draft/specification/ap2-mandates/index.md))
 
 **For Platforms:**
 
@@ -1307,7 +1307,7 @@ Payment credential providers (PSPs, wallets) are typically PCI-DSS Level 1 certi
 1. Implement timeout handling for credential acquisition
 1. Clear credentials from memory after submission
 1. Handle credential expiration gracefully (re-acquire if needed)
-1. For autonomous agents, consider using the `dev.ucp.shopping.ap2_mandate` extension for cryptographic proof of authorization (see [AP2 Mandates Extension](https://ucp.dev/draft/specification/ap2-mandates/index.md))
+1. For autonomous agents, consider using the `dev.ucp.shopping.ap2_mandate` extension for cryptographic proof of authorization (see [AP2 Mandates Extension](http://ucp.dev/draft/specification/ap2-mandates/index.md))
 
 **For Payment Credential Providers:**
 
@@ -1330,8 +1330,8 @@ UCP supports fraud prevention through [Signals](#signals) and the payment archit
 
 The core payment architecture described above can be extended for specialized use cases:
 
-- **AP2 Mandates Extension** (`dev.ucp.shopping.ap2_mandate`): Adds cryptographic proof of user authorization for autonomous commerce scenarios where non-repudiable evidence is required. See [AP2 Mandates Extension](https://ucp.dev/draft/specification/ap2-mandates/index.md).
-- **Custom Handler Types**: Payment credential providers can define custom handlers to support new payment instruments. See [Payment Handler Guide](https://ucp.dev/draft/specification/payment-handler-guide/index.md) for details.
+- **AP2 Mandates Extension** (`dev.ucp.shopping.ap2_mandate`): Adds cryptographic proof of user authorization for autonomous commerce scenarios where non-repudiable evidence is required. See [AP2 Mandates Extension](http://ucp.dev/draft/specification/ap2-mandates/index.md).
+- **Custom Handler Types**: Payment credential providers can define custom handlers to support new payment instruments. See [Payment Handler Guide](http://ucp.dev/draft/specification/payment-handler-guide/index.md) for details.
 
 The extension model ensures the core architecture remains simple while supporting advanced security and compliance requirements when needed.
 
@@ -1486,7 +1486,7 @@ For scenarios requiring cryptographic proof of authorization (e.g., autonomous a
 
 This mechanism provides strong, end-to-end cryptographic assurances about transaction details and participant consent, significantly reducing risks of tampering and disputes.
 
-See [AP2 Mandates Extension](https://ucp.dev/draft/specification/ap2-mandates/index.md) for complete specification, implementation guide, and examples.
+See [AP2 Mandates Extension](http://ucp.dev/draft/specification/ap2-mandates/index.md) for complete specification, implementation guide, and examples.
 
 ## Versioning
 
@@ -1669,7 +1669,7 @@ This specification defines how UCP messages are cryptographically signed to ensu
 
 ## Overview
 
-This specification defines how to sign and verify UCP messages using [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421) HTTP Message Signatures. For UCP's identity model, supported authentication mechanisms, and key discovery protocol, see [Identity & Authentication](https://ucp.dev/draft/specification/overview/#identity-authentication).
+This specification defines how to sign and verify UCP messages using [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421) HTTP Message Signatures. For UCP's identity model, supported authentication mechanisms, and key discovery protocol, see [Identity & Authentication](http://ucp.dev/draft/specification/overview/#identity-authentication).
 
 HTTP Message Signatures protect against:
 
@@ -1768,7 +1768,7 @@ Public keys **MUST** be represented using **JSON Web Key (JWK)** format as defin
 
 ### Key Discovery
 
-Public keys are published in the `signing_keys` array of the party's UCP profile at `/.well-known/ucp`. For the complete key discovery protocol, profile trust model, and profile fetch requirements, see [Identity & Authentication — Key Discovery](https://ucp.dev/draft/specification/overview/#key-discovery).
+Public keys are published in the `signing_keys` array of the party's UCP profile at `/.well-known/ucp`. For the complete key discovery protocol, profile trust model, and profile fetch requirements, see [Identity & Authentication — Key Discovery](http://ucp.dev/draft/specification/overview/#key-discovery).
 
 ### Key Rotation
 
@@ -1805,7 +1805,7 @@ For HTTP REST transport, UCP uses [RFC 9421 (HTTP Message Signatures)](https://w
 
 \* Required when request/response has a body
 
-`Content-Digest` follows [RFC 9530](https://www.rfc-editor.org/rfc/rfc9530) and hashes the raw body bytes. This binds the message body to the signature without requiring JSON canonicalization. Implementations **MUST** use `sha-256`. For durable artifacts requiring canonicalization, see [AP2 Mandates - Canonicalization](https://ucp.dev/draft/specification/ap2-mandates/#canonicalization).
+`Content-Digest` follows [RFC 9530](https://www.rfc-editor.org/rfc/rfc9530) and hashes the raw body bytes. This binds the message body to the signature without requiring JSON canonicalization. Implementations **MUST** use `sha-256`. For durable artifacts requiring canonicalization, see [AP2 Mandates - Canonicalization](http://ucp.dev/draft/specification/ap2-mandates/#canonicalization).
 
 **Intermediary Warning:** Proxies, API gateways, and other intermediaries **MUST NOT** re-serialize JSON bodies, as this would invalidate the signature. The `Content-Digest` is computed over raw bytes; any modification breaks verification.
 
@@ -2141,7 +2141,7 @@ The JSON-RPC message is the HTTP body. `Content-Digest` binds it to the signatur
 
 ## Error Handling
 
-Signature verification errors use standard UCP error codes. See [Error Handling](https://ucp.dev/draft/specification/overview/#error-handling) in the specification overview for the complete error code registry and transport bindings.
+Signature verification errors use standard UCP error codes. See [Error Handling](http://ucp.dev/draft/specification/overview/#error-handling) in the specification overview for the complete error code registry and transport bindings.
 
 **Signature-specific errors:**
 
@@ -2302,7 +2302,7 @@ When the business cannot create a new resource or the requested resource no long
 }
 ```
 
-See [REST](https://ucp.dev/draft/specification/checkout-rest/#create-checkout) and [MCP](https://ucp.dev/draft/specification/checkout-mcp/#create_checkout) binding examples.
+See [REST](http://ucp.dev/draft/specification/checkout-rest/#create-checkout) and [MCP](http://ucp.dev/draft/specification/checkout-mcp/#create_checkout) binding examples.
 
 #### Error Processing Algorithm
 
@@ -2548,7 +2548,7 @@ https://business.example.com/checkout-sessions/{checkout_id}
 
 A stateless URL that encodes checkout state directly, allowing reconstruction without server-side persistence. Businesses **SHOULD** implement support for this format to facilitate checkout handoff and accelerated entry—for example, a platform can prefill checkout state when initiating a buy-now flow.
 
-> **Note:** Checkout permalinks are a REST-specific construct that extends the [REST transport binding](https://ucp.dev/draft/specification/checkout-rest/index.md). Accessing a permalink returns a redirect to the checkout UI or renders the checkout page directly.
+> **Note:** Checkout permalinks are a REST-specific construct that extends the [REST transport binding](http://ucp.dev/draft/specification/checkout-rest/index.md). Accessing a permalink returns a redirect to the checkout UI or renders the checkout page directly.
 
 ## Guidelines
 
@@ -2700,10 +2700,10 @@ This object MUST be one of the following types: [Checkout](/draft/specification/
 
 The abstract operations above are bound to specific transport protocols as defined below:
 
-- [REST Binding](https://ucp.dev/draft/specification/checkout-rest/index.md): RESTful API mapping using standard HTTP verbs and JSON payloads.
-- [MCP Binding](https://ucp.dev/draft/specification/checkout-mcp/index.md): Model Context Protocol mapping for agentic interaction.
-- [A2A Binding](https://ucp.dev/draft/specification/checkout-a2a/index.md): Agent-to-Agent Protocol mapping for agentic interactions.
-- [Embedded Checkout Binding](https://ucp.dev/draft/specification/embedded-checkout/index.md): JSON-RPC for powering embedded checkout.
+- [REST Binding](http://ucp.dev/draft/specification/checkout-rest/index.md): RESTful API mapping using standard HTTP verbs and JSON payloads.
+- [MCP Binding](http://ucp.dev/draft/specification/checkout-mcp/index.md): Model Context Protocol mapping for agentic interaction.
+- [A2A Binding](http://ucp.dev/draft/specification/checkout-a2a/index.md): Agent-to-Agent Protocol mapping for agentic interactions.
+- [Embedded Checkout Binding](http://ucp.dev/draft/specification/embedded-checkout/index.md): JSON-RPC for powering embedded checkout.
 
 ## Entities
 
@@ -2732,7 +2732,7 @@ Context signals are provisional—not authoritative data. Businesses SHOULD use 
 
 ### Signals
 
-Environment data provided by the platform to support authorization and abuse prevention. Unlike `context` (buyer-asserted preferences) and `buyer` (self-reported identity), signal values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or by relaying independently verifiable third-party attestations. See [Signals](https://ucp.dev/draft/specification/overview/#signals) for details and privacy requirements.
+Environment data provided by the platform to support authorization and abuse prevention. Unlike `context` (buyer-asserted preferences) and `buyer` (self-reported identity), signal values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or by relaying independently verifiable third-party attestations. See [Signals](http://ucp.dev/draft/specification/overview/#signals) for details and privacy requirements.
 
 | Name               | Type   | Required | Description                                    |
 | ------------------ | ------ | -------- | ---------------------------------------------- |
@@ -3064,7 +3064,7 @@ The business controls what MUST be rendered (top-level entries) versus what MAY 
 
 # Checkout Capability - REST Binding
 
-This document specifies the REST binding for the [Checkout Capability](https://ucp.dev/draft/specification/checkout/index.md).
+This document specifies the REST binding for the [Checkout Capability](http://ucp.dev/draft/specification/checkout/index.md).
 
 ## Protocol Fundamentals
 
@@ -3085,13 +3085,13 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
 ## Operations
 
-| Operation                                                                            | Method | Endpoint                           | Description                |
-| ------------------------------------------------------------------------------------ | ------ | ---------------------------------- | -------------------------- |
-| [Create Checkout](https://ucp.dev/draft/specification/checkout/#create-checkout)     | `POST` | `/checkout-sessions`               | Create a checkout session. |
-| [Get Checkout](https://ucp.dev/draft/specification/checkout/#get-checkout)           | `GET`  | `/checkout-sessions/{id}`          | Get a checkout session.    |
-| [Update Checkout](https://ucp.dev/draft/specification/checkout/#update-checkout)     | `PUT`  | `/checkout-sessions/{id}`          | Update a checkout session. |
-| [Complete Checkout](https://ucp.dev/draft/specification/checkout/#complete-checkout) | `POST` | `/checkout-sessions/{id}/complete` | Place the order.           |
-| [Cancel Checkout](https://ucp.dev/draft/specification/checkout/#cancel-checkout)     | `POST` | `/checkout-sessions/{id}/cancel`   | Cancel a checkout session. |
+| Operation                                                                           | Method | Endpoint                           | Description                |
+| ----------------------------------------------------------------------------------- | ------ | ---------------------------------- | -------------------------- |
+| [Create Checkout](http://ucp.dev/draft/specification/checkout/#create-checkout)     | `POST` | `/checkout-sessions`               | Create a checkout session. |
+| [Get Checkout](http://ucp.dev/draft/specification/checkout/#get-checkout)           | `GET`  | `/checkout-sessions/{id}`          | Get a checkout session.    |
+| [Update Checkout](http://ucp.dev/draft/specification/checkout/#update-checkout)     | `PUT`  | `/checkout-sessions/{id}`          | Update a checkout session. |
+| [Complete Checkout](http://ucp.dev/draft/specification/checkout/#complete-checkout) | `POST` | `/checkout-sessions/{id}/complete` | Place the order.           |
+| [Cancel Checkout](http://ucp.dev/draft/specification/checkout/#cancel-checkout)     | `POST` | `/checkout-sessions/{id}/cancel`   | Cancel a checkout session. |
 
 ## Examples
 
@@ -4292,7 +4292,7 @@ UCP uses standard HTTP status codes to indicate the success or failure of an API
 
 ### Error Responses
 
-See the [Core Specification](https://ucp.dev/draft/specification/overview/#error-handling) for the complete error code registry and transport binding examples.
+See the [Core Specification](http://ucp.dev/draft/specification/overview/#error-handling) for the complete error code registry and transport binding examples.
 
 - **Protocol errors**: Return appropriate HTTP status code (401, 403, 409, 429, 503) with JSON body containing `code` and `content`.
 - **Business outcomes**: Return HTTP 200 with UCP envelope and `messages` array.
@@ -4349,7 +4349,7 @@ For `create_checkout`, when all items unavailable and no checkout can be created
 
 ## Message Signing
 
-Platforms **MAY** choose among authentication mechanisms (API keys, OAuth, mTLS, HTTP Message Signatures). When using HTTP Message Signatures, checkout operations follow the [Message Signatures](https://ucp.dev/draft/specification/signatures/index.md) specification.
+Platforms **MAY** choose among authentication mechanisms (API keys, OAuth, mTLS, HTTP Message Signatures). When using HTTP Message Signatures, checkout operations follow the [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md) specification.
 
 ### Request Signing
 
@@ -4378,7 +4378,7 @@ Signature: sig1=:MEUCIQDTxNq8h7LGHpvVZQp1iHkFp9+3N8Mxk2zH1wK4YuVN8w...:
 {"line_items":[{"item":{"id":"item_123"},"quantity":2}]}
 ```
 
-See [Message Signatures - REST Request Signing](https://ucp.dev/draft/specification/signatures/#rest-request-signing) for the complete signing algorithm.
+See [Message Signatures - REST Request Signing](http://ucp.dev/draft/specification/signatures/#rest-request-signing) for the complete signing algorithm.
 
 ### Response Signing
 
@@ -4402,7 +4402,7 @@ Signature: sig1=:MFQCIH7kL9nM2oP5qR8sT1uV4wX6yZaB3cD...:
 {"id":"chk_123","status":"completed","order":{"id":"ord_456"}}
 ```
 
-See [Message Signatures - REST Response Signing](https://ucp.dev/draft/specification/signatures/#rest-response-signing) for the complete signing algorithm.
+See [Message Signatures - REST Response Signing](http://ucp.dev/draft/specification/signatures/#rest-response-signing) for the complete signing algorithm.
 
 ## Security Considerations
 
@@ -4420,7 +4420,7 @@ Businesses **MAY** require authentication for some operations while leaving othe
 
 # Checkout Capability - MCP Binding
 
-This document specifies the Model Context Protocol (MCP) binding for the [Checkout Capability](https://ucp.dev/draft/specification/checkout/index.md).
+This document specifies the Model Context Protocol (MCP) binding for the [Checkout Capability](http://ucp.dev/draft/specification/checkout/index.md).
 
 ## Protocol Fundamentals
 
@@ -4502,7 +4502,7 @@ MCP clients **MUST** include a `meta` object in every request containing protoco
 }
 ```
 
-The `meta["ucp-agent"]` field is **required** on all requests to enable [capability negotiation](https://ucp.dev/draft/specification/overview/#negotiation-protocol). The `complete_checkout` and `cancel_checkout` operations also require `meta["idempotency-key"]` for retry safety. Platforms **MAY** include additional metadata fields.
+The `meta["ucp-agent"]` field is **required** on all requests to enable [capability negotiation](http://ucp.dev/draft/specification/overview/#negotiation-protocol). The `complete_checkout` and `cancel_checkout` operations also require `meta["idempotency-key"]` for retry safety. Platforms **MAY** include additional metadata fields.
 
 ## Tools
 
@@ -4516,30 +4516,30 @@ MCP tools separate resource identification from payload data:
 - **Responses:** All responses include `checkout.id` as part of the full resource state.
 - **Create:** The `create_checkout` operation does not require an `id` in the request, and the response includes the newly assigned `checkout.id`.
 
-| Tool                | Operation                                                                            | Description                |
-| ------------------- | ------------------------------------------------------------------------------------ | -------------------------- |
-| `create_checkout`   | [Create Checkout](https://ucp.dev/draft/specification/checkout/#create-checkout)     | Create a checkout session. |
-| `get_checkout`      | [Get Checkout](https://ucp.dev/draft/specification/checkout/#get-checkout)           | Get a checkout session.    |
-| `update_checkout`   | [Update Checkout](https://ucp.dev/draft/specification/checkout/#update-checkout)     | Update a checkout session. |
-| `complete_checkout` | [Complete Checkout](https://ucp.dev/draft/specification/checkout/#complete-checkout) | Place the order.           |
-| `cancel_checkout`   | [Cancel Checkout](https://ucp.dev/draft/specification/checkout/#cancel-checkout)     | Cancel a checkout session. |
+| Tool                | Operation                                                                           | Description                |
+| ------------------- | ----------------------------------------------------------------------------------- | -------------------------- |
+| `create_checkout`   | [Create Checkout](http://ucp.dev/draft/specification/checkout/#create-checkout)     | Create a checkout session. |
+| `get_checkout`      | [Get Checkout](http://ucp.dev/draft/specification/checkout/#get-checkout)           | Get a checkout session.    |
+| `update_checkout`   | [Update Checkout](http://ucp.dev/draft/specification/checkout/#update-checkout)     | Update a checkout session. |
+| `complete_checkout` | [Complete Checkout](http://ucp.dev/draft/specification/checkout/#complete-checkout) | Place the order.           |
+| `cancel_checkout`   | [Cancel Checkout](http://ucp.dev/draft/specification/checkout/#cancel-checkout)     | Cancel a checkout session. |
 
 ### `create_checkout`
 
-Maps to the [Create Checkout](https://ucp.dev/draft/specification/checkout/#create-checkout) operation.
+Maps to the [Create Checkout](http://ucp.dev/draft/specification/checkout/#create-checkout) operation.
 
 #### Input Schema
 
-- `checkout` ([Checkout](https://ucp.dev/draft/specification/checkout/#create-checkout)): **Required**. Contains the initial checkout session data and optional extensions.
+- `checkout` ([Checkout](http://ucp.dev/draft/specification/checkout/#create-checkout)): **Required**. Contains the initial checkout session data and optional extensions.
   - Extensions (Optional):
-    - `dev.ucp.shopping.buyer_consent`: [Buyer Consent](https://ucp.dev/draft/specification/buyer-consent/index.md)
-    - `dev.ucp.shopping.fulfillment`: [Fulfillment](https://ucp.dev/draft/specification/fulfillment/index.md)
-    - `dev.ucp.shopping.discount`: [Discount](https://ucp.dev/draft/specification/discount/index.md)
-    - `dev.ucp.shopping.ap2_mandate`: [AP2 Mandates](https://ucp.dev/draft/specification/ap2-mandates/index.md)
+    - `dev.ucp.shopping.buyer_consent`: [Buyer Consent](http://ucp.dev/draft/specification/buyer-consent/index.md)
+    - `dev.ucp.shopping.fulfillment`: [Fulfillment](http://ucp.dev/draft/specification/fulfillment/index.md)
+    - `dev.ucp.shopping.discount`: [Discount](http://ucp.dev/draft/specification/discount/index.md)
+    - `dev.ucp.shopping.ap2_mandate`: [AP2 Mandates](http://ucp.dev/draft/specification/ap2-mandates/index.md)
 
 #### Output Schema
 
-- [Checkout](https://ucp.dev/draft/specification/checkout/#create-checkout) object.
+- [Checkout](http://ucp.dev/draft/specification/checkout/#create-checkout) object.
 
 #### Example
 
@@ -4757,7 +4757,7 @@ All items out of stock — no checkout resource is created:
 
 ### `get_checkout`
 
-Maps to the [Get Checkout](https://ucp.dev/draft/specification/checkout/#get-checkout) operation.
+Maps to the [Get Checkout](http://ucp.dev/draft/specification/checkout/#get-checkout) operation.
 
 #### Input Schema
 
@@ -4765,25 +4765,25 @@ Maps to the [Get Checkout](https://ucp.dev/draft/specification/checkout/#get-che
 
 #### Output Schema
 
-- [Checkout](https://ucp.dev/draft/specification/checkout/#get-checkout) object.
+- [Checkout](http://ucp.dev/draft/specification/checkout/#get-checkout) object.
 
 ### `update_checkout`
 
-Maps to the [Update Checkout](https://ucp.dev/draft/specification/checkout/#update-checkout) operation.
+Maps to the [Update Checkout](http://ucp.dev/draft/specification/checkout/#update-checkout) operation.
 
 #### Input Schema
 
 - `id` (String): **Required**. The ID of the checkout session to update.
-- `checkout` ([Checkout](https://ucp.dev/draft/specification/checkout/#update-checkout)): **Required**. Contains the updated checkout session data.
+- `checkout` ([Checkout](http://ucp.dev/draft/specification/checkout/#update-checkout)): **Required**. Contains the updated checkout session data.
   - Extensions (Optional):
-    - `dev.ucp.shopping.buyer_consent`: [Buyer Consent](https://ucp.dev/draft/specification/buyer-consent/index.md)
-    - `dev.ucp.shopping.fulfillment`: [Fulfillment](https://ucp.dev/draft/specification/fulfillment/index.md)
-    - `dev.ucp.shopping.discount`: [Discount](https://ucp.dev/draft/specification/discount/index.md)
-    - `dev.ucp.shopping.ap2_mandate`: [AP2 Mandates](https://ucp.dev/draft/specification/ap2-mandates/index.md)
+    - `dev.ucp.shopping.buyer_consent`: [Buyer Consent](http://ucp.dev/draft/specification/buyer-consent/index.md)
+    - `dev.ucp.shopping.fulfillment`: [Fulfillment](http://ucp.dev/draft/specification/fulfillment/index.md)
+    - `dev.ucp.shopping.discount`: [Discount](http://ucp.dev/draft/specification/discount/index.md)
+    - `dev.ucp.shopping.ap2_mandate`: [AP2 Mandates](http://ucp.dev/draft/specification/ap2-mandates/index.md)
 
 #### Output Schema
 
-- [Checkout](https://ucp.dev/draft/specification/checkout/#update-checkout) object.
+- [Checkout](http://ucp.dev/draft/specification/checkout/#update-checkout) object.
 
 #### Example
 
@@ -4974,7 +4974,7 @@ Maps to the [Update Checkout](https://ucp.dev/draft/specification/checkout/#upda
 
 ### `complete_checkout`
 
-Maps to the [Complete Checkout](https://ucp.dev/draft/specification/checkout/#complete-checkout) operation.
+Maps to the [Complete Checkout](http://ucp.dev/draft/specification/checkout/#complete-checkout) operation.
 
 #### Input Schema
 
@@ -4982,15 +4982,15 @@ Maps to the [Complete Checkout](https://ucp.dev/draft/specification/checkout/#co
   - `ucp-agent` (Object): **Required**. Platform agent identification.
   - `idempotency-key` (String, UUID): **Required**. Unique key for retry safety.
 - `id` (String): **Required**. The ID of the checkout session.
-- `checkout` ([Checkout](https://ucp.dev/draft/specification/checkout/#complete-checkout)): **Required**. Contains payment credentials and other finalization data to execute the transaction.
+- `checkout` ([Checkout](http://ucp.dev/draft/specification/checkout/#complete-checkout)): **Required**. Contains payment credentials and other finalization data to execute the transaction.
 
 #### Output Schema
 
-- [Checkout](https://ucp.dev/draft/specification/checkout/#complete-checkout) object, containing a partial `order` that holds only `id` and `permalink_url`.
+- [Checkout](http://ucp.dev/draft/specification/checkout/#complete-checkout) object, containing a partial `order` that holds only `id` and `permalink_url`.
 
 ### `cancel_checkout`
 
-Maps to the [Cancel Checkout](https://ucp.dev/draft/specification/checkout/#cancel-checkout) operation.
+Maps to the [Cancel Checkout](http://ucp.dev/draft/specification/checkout/#cancel-checkout) operation.
 
 #### Input Schema
 
@@ -5001,11 +5001,11 @@ Maps to the [Cancel Checkout](https://ucp.dev/draft/specification/checkout/#canc
 
 #### Output Schema
 
-- [Checkout](https://ucp.dev/draft/specification/checkout/#cancel-checkout) object with `status: canceled`.
+- [Checkout](http://ucp.dev/draft/specification/checkout/#cancel-checkout) object with `status: canceled`.
 
 ## Error Handling
 
-UCP distinguishes between protocol errors and business outcomes. See the [Core Specification](https://ucp.dev/draft/specification/overview/#error-handling) for the complete error code registry and transport binding examples.
+UCP distinguishes between protocol errors and business outcomes. See the [Core Specification](http://ucp.dev/draft/specification/overview/#error-handling) for the complete error code registry and transport binding examples.
 
 - **Protocol errors**: Transport-level failures (authentication, rate limiting, unavailability) that prevent request processing. Returned as JSON-RPC `error` with code `-32000` (or `-32001` for discovery errors).
 - **Business outcomes**: Application-level results from successful request processing, returned as JSON-RPC `result` with UCP envelope and `messages`.
@@ -5083,7 +5083,7 @@ For `create_checkout`, when all items unavailable and no checkout can be created
 
 ## Message Signing
 
-Platforms **SHOULD** authenticate agents when using MCP transport. When using HTTP Message Signatures, all checkout operations follow the [Message Signatures](https://ucp.dev/draft/specification/signatures/index.md) specification.
+Platforms **SHOULD** authenticate agents when using MCP transport. When using HTTP Message Signatures, all checkout operations follow the [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md) specification.
 
 ### Request Signing
 
@@ -5116,7 +5116,7 @@ Signature: sig1=:MEUCIQDXyK9N3p5Rt...:
 
 The `Content-Digest` binds the JSON-RPC body to the signature. No JSON canonicalization is required.
 
-See [Message Signatures - MCP Transport](https://ucp.dev/draft/specification/signatures/#mcp-transport) for details.
+See [Message Signatures - MCP Transport](http://ucp.dev/draft/specification/signatures/#mcp-transport) for details.
 
 ### Response Signing
 
@@ -5140,7 +5140,7 @@ Signature: sig1=:MFQCIH7kL9nM2oP5qR8sT1uV4wX6yZaB3cD...:
 {"jsonrpc":"2.0","id":1,"result":{"content":[{"type":"text","text":"..."}],"structuredContent":{"checkout":{"id":"checkout_abc123","status":"completed"}}}}
 ```
 
-See [Message Signatures - REST Response Signing](https://ucp.dev/draft/specification/signatures/#rest-response-signing) for the signing algorithm (identical for MCP over HTTP).
+See [Message Signatures - REST Response Signing](http://ucp.dev/draft/specification/signatures/#rest-response-signing) for the signing algorithm (identical for MCP over HTTP).
 
 ## Conformance
 
@@ -5148,14 +5148,14 @@ A conforming MCP transport implementation **MUST**:
 
 1. Implement JSON-RPC 2.0 protocol correctly.
 1. Provide all core checkout tools defined in this specification.
-1. Return errors per the [Core Specification](https://ucp.dev/draft/specification/overview/#error-handling).
+1. Return errors per the [Core Specification](http://ucp.dev/draft/specification/overview/#error-handling).
 1. Return business outcomes as JSON-RPC `result` with UCP envelope and `messages` array.
 1. Validate tool inputs against UCP schemas.
 1. Support HTTP transport with streaming.
 
 A conforming implementation **SHOULD**:
 
-1. Authenticate agents using one of the supported mechanisms (API keys, OAuth, mTLS, or HTTP Message Signatures per [Message Signatures](https://ucp.dev/draft/specification/signatures/index.md)).
+1. Authenticate agents using one of the supported mechanisms (API keys, OAuth, mTLS, or HTTP Message Signatures per [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md)).
 1. Verify authentication on incoming requests before processing.
 
 ## Implementation
@@ -5212,7 +5212,7 @@ Implementers **MUST** expose this as an MCP `tools/call` endpoint:
 
 # Checkout Capability - A2A Binding
 
-This document specifies the Agent2Agent Protocol (A2A) binding for [Checkout Capability](https://ucp.dev/draft/specification/checkout/index.md).
+This document specifies the Agent2Agent Protocol (A2A) binding for [Checkout Capability](http://ucp.dev/draft/specification/checkout/index.md).
 
 ## Transport Discovery
 
@@ -5467,7 +5467,7 @@ When AP2 mandates extension is enabled, the business agent must create a detache
 }
 ```
 
-When the user confirms the payment on a platform, the user signed checkout and payment mandate objects must be sent as `DataPart`s to the business agent for completing checkout. The `payment` which includes the payment mandate must be submitted as part of a `DataPart` with attribute name `a2a.ucp.checkout.payment`. Signed checkout mandate must be specified in the `DataPart` as `ap2.checkout_mandate`. The `token` attribute of `payment` contains the payment mandate. Refer to [AP2 Mandates Extension](https://ucp.dev/draft/specification/ap2-mandates/index.md) documentation for more details about verification and processing of the mandates to complete the checkout.
+When the user confirms the payment on a platform, the user signed checkout and payment mandate objects must be sent as `DataPart`s to the business agent for completing checkout. The `payment` which includes the payment mandate must be submitted as part of a `DataPart` with attribute name `a2a.ucp.checkout.payment`. Signed checkout mandate must be specified in the `DataPart` as `ap2.checkout_mandate`. The `token` attribute of `payment` contains the payment mandate. Refer to [AP2 Mandates Extension](http://ucp.dev/draft/specification/ap2-mandates/index.md) documentation for more details about verification and processing of the mandates to complete the checkout.
 
 ### Request format
 
@@ -6936,14 +6936,14 @@ If a public key cannot be resolved, or if the signature is invalid, the business
 
 ## Cryptographic Requirements
 
-This extension uses the cryptographic primitives defined in the [Message Signatures](https://ucp.dev/draft/specification/signatures/index.md) specification:
+This extension uses the cryptographic primitives defined in the [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md) specification:
 
 - **Algorithms:** ES256 (required), ES384, ES512
 - **Canonicalization:** JCS ([RFC 8785](https://datatracker.ietf.org/doc/html/rfc8785))
 - **Key Format:** JWK ([RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517))
-- **Key Discovery:** `signing_keys[]` in `/.well-known/ucp` (see [Key Discovery](https://ucp.dev/draft/specification/overview/#key-discovery))
+- **Key Discovery:** `signing_keys[]` in `/.well-known/ucp` (see [Key Discovery](http://ucp.dev/draft/specification/overview/#key-discovery))
 
-See [Message Signatures](https://ucp.dev/draft/specification/signatures/index.md) for complete details on algorithms, key format, and key rotation.
+See [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md) for complete details on algorithms, key format, and key rotation.
 
 ### Business Authorization
 
@@ -7534,11 +7534,11 @@ Businesses may apply discounts automatically based on cart contents, customer se
 
 ## Eligibility Claims
 
-Eligibility claims are buyer claims about eligible benefits (see [Context](https://ucp.dev/draft/specification/checkout/#context)) such as loyalty membership, payment instrument perks, and similar. When the discount extension is active, Businesses that choose to accept eligibility claims **MUST** surface their effect on pricing as provisional discounts in the `applied` array. Platforms **MUST** display provisional discounts to the buyer.
+Eligibility claims are buyer claims about eligible benefits (see [Context](http://ucp.dev/draft/specification/checkout/#context)) such as loyalty membership, payment instrument perks, and similar. When the discount extension is active, Businesses that choose to accept eligibility claims **MUST** surface their effect on pricing as provisional discounts in the `applied` array. Platforms **MUST** display provisional discounts to the buyer.
 
 ### Discount Behavior
 
-Platforms send buyer claims via `context.eligibility` on cart or checkout requests (see [Context](https://ucp.dev/draft/specification/checkout/#context)). When a Business recognizes a claim and it affects pricing, it **MUST** surface a corresponding provisional discount in the `discounts.applied` array. This gives the Platform structured attribution to display to the buyer.
+Platforms send buyer claims via `context.eligibility` on cart or checkout requests (see [Context](http://ucp.dev/draft/specification/checkout/#context)). When a Business recognizes a claim and it affects pricing, it **MUST** surface a corresponding provisional discount in the `discounts.applied` array. This gives the Platform structured attribution to display to the buyer.
 
 Eligibility-triggered discounts use the following fields:
 
@@ -7553,11 +7553,11 @@ Standard `priority`, `method`, and `allocations` fields apply for stacking with 
 
 ### Verification at Checkout
 
-Discounts from accepted but unverified claims carry `provisional: true`. Provisional discounts remain until the claim is verified, rescinded, or replaced during the session. At checkout completion, all remaining provisional claims **MUST** be resolved (see [Eligibility Verification at Completion](https://ucp.dev/draft/specification/checkout/#eligibility-verification-at-completion)).
+Discounts from accepted but unverified claims carry `provisional: true`. Provisional discounts remain until the claim is verified, rescinded, or replaced during the session. At checkout completion, all remaining provisional claims **MUST** be resolved (see [Eligibility Verification at Completion](http://ucp.dev/draft/specification/checkout/#eligibility-verification-at-completion)).
 
 ### Example: Provisional Discount with Attribution
 
-Building on the store card example from [Eligibility Verification at Completion](https://ucp.dev/draft/specification/checkout/#eligibility-verification-at-completion), the discount extension provides structured attribution. The Platform claims a store card benefit; the Business surfaces the provisional discount with full stacking and allocation details:
+Building on the store card example from [Eligibility Verification at Completion](http://ucp.dev/draft/specification/checkout/#eligibility-verification-at-completion), the discount extension provides structured attribution. The Platform claims a store card benefit; the Business surfaces the provisional discount with full stacking and allocation details:
 
 ```json
 {
@@ -8498,7 +8498,7 @@ Shirt ships to mom (US), pants ship to grandma (Hong Kong). Two methods of the s
 
 ## Overview
 
-The Cart capability enables basket building without the complexity of checkout. While [Checkout](https://ucp.dev/draft/specification/checkout/index.md) manages payment handlers, status lifecycle, and order finalization, cart provides a lightweight CRUD interface for item collection before purchase intent is established.
+The Cart capability enables basket building without the complexity of checkout. While [Checkout](http://ucp.dev/draft/specification/checkout/index.md) manages payment handlers, status lifecycle, and order finalization, cart provides a lightweight CRUD interface for item collection before purchase intent is established.
 
 **When to use Cart vs Checkout:**
 
@@ -8615,33 +8615,33 @@ When **all** requested items are unavailable, the business MAY return an error r
 }
 ```
 
-- [REST Binding](https://ucp.dev/draft/specification/cart-rest/#create-cart)
-- [MCP Binding](https://ucp.dev/draft/specification/cart-mcp/#create_cart)
+- [REST Binding](http://ucp.dev/draft/specification/cart-rest/#create-cart)
+- [MCP Binding](http://ucp.dev/draft/specification/cart-mcp/#create_cart)
 
 ### Get Cart
 
 Retrieves the latest state of a cart session. Returns `not_found` if the cart does not exist, has expired, or was canceled.
 
-- [REST Binding](https://ucp.dev/draft/specification/cart-rest/#get-cart)
-- [MCP Binding](https://ucp.dev/draft/specification/cart-mcp/#get_cart)
+- [REST Binding](http://ucp.dev/draft/specification/cart-rest/#get-cart)
+- [MCP Binding](http://ucp.dev/draft/specification/cart-mcp/#get_cart)
 
 ### Update Cart
 
 Performs a full replacement of the cart session. The platform **MUST** send the entire cart resource. The provided resource replaces the existing cart state on the business side.
 
-- [REST Binding](https://ucp.dev/draft/specification/cart-rest/#update-cart)
-- [MCP Binding](https://ucp.dev/draft/specification/cart-mcp/#update_cart)
+- [REST Binding](http://ucp.dev/draft/specification/cart-rest/#update-cart)
+- [MCP Binding](http://ucp.dev/draft/specification/cart-mcp/#update_cart)
 
 ### Cancel Cart
 
 Cancels a cart session. Business MUST return the cart state before deletion. Subsequent operations for this cart ID SHOULD return `not_found`.
 
-- [REST Binding](https://ucp.dev/draft/specification/cart-rest/#cancel-cart)
-- [MCP Binding](https://ucp.dev/draft/specification/cart-mcp/#cancel_cart)
+- [REST Binding](http://ucp.dev/draft/specification/cart-rest/#cancel-cart)
+- [MCP Binding](http://ucp.dev/draft/specification/cart-mcp/#cancel_cart)
 
 ## Entities
 
-Cart reuses the same entity schemas as [Checkout](https://ucp.dev/draft/specification/checkout/index.md). This ensures consistent data structures when converting a cart to a checkout session.
+Cart reuses the same entity schemas as [Checkout](http://ucp.dev/draft/specification/checkout/index.md). This ensures consistent data structures when converting a cart to a checkout session.
 
 ### UCP Response Cart
 
@@ -8714,7 +8714,7 @@ Cart reuses the same entity schemas as [Checkout](https://ucp.dev/draft/specific
 
 ### Signals
 
-Environment data provided by the platform to support authorization and abuse prevention. Signal values MUST NOT be buyer-asserted claims. See [Signals](https://ucp.dev/draft/specification/overview/#signals) for details and privacy requirements.
+Environment data provided by the platform to support authorization and abuse prevention. Signal values MUST NOT be buyer-asserted claims. See [Signals](http://ucp.dev/draft/specification/overview/#signals) for details and privacy requirements.
 
 | Name               | Type   | Required | Description                                    |
 | ------------------ | ------ | -------- | ---------------------------------------------- |
@@ -8723,7 +8723,7 @@ Environment data provided by the platform to support authorization and abuse pre
 
 ### Total
 
-The same totals contract applies to cart and checkout. See [Checkout Totals](https://ucp.dev/draft/specification/checkout/#totals) for the rendering contract, accounting identity, well-known types, repeating types, and sub-line semantics.
+The same totals contract applies to cart and checkout. See [Checkout Totals](http://ucp.dev/draft/specification/checkout/#totals) for the rendering contract, accounting identity, well-known types, repeating types, and sub-line semantics.
 
 | Name         | Type                                             | Required | Description                                                                                                                                                                      |
 | ------------ | ------------------------------------------------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -8781,7 +8781,7 @@ This object MUST be one of the following types: [Message Error](/draft/specifica
 
 # Cart Capability - REST Binding
 
-This document specifies the REST binding for the [Cart Capability](https://ucp.dev/draft/specification/cart/index.md).
+This document specifies the REST binding for the [Cart Capability](http://ucp.dev/draft/specification/cart/index.md).
 
 ## Protocol Fundamentals
 
@@ -9333,7 +9333,7 @@ The following headers are defined for the HTTP binding and apply to all operatio
 
 ### Error Responses
 
-See the [Core Specification](https://ucp.dev/draft/specification/overview/#error-handling) for the complete error code registry and transport binding examples.
+See the [Core Specification](http://ucp.dev/draft/specification/overview/#error-handling) for the complete error code registry and transport binding examples.
 
 - **Protocol errors**: Return appropriate HTTP status code (401, 403, 409, 429, 503) with JSON body containing `code` and `content`.
 - **Business outcomes**: Return HTTP 200 with UCP envelope and `messages` array.
@@ -9378,7 +9378,7 @@ Businesses **MAY** require authentication for some operations while leaving othe
 
 # Cart Capability - MCP Binding
 
-This document specifies the Model Context Protocol (MCP) binding for the [Cart Capability](https://ucp.dev/draft/specification/cart/index.md).
+This document specifies the Model Context Protocol (MCP) binding for the [Cart Capability](http://ucp.dev/draft/specification/cart/index.md).
 
 ## Protocol Fundamentals
 
@@ -9441,7 +9441,7 @@ MCP clients **MUST** include a `meta` object in every request containing protoco
 }
 ```
 
-The `meta["ucp-agent"]` field is **required** on all requests to enable [capability negotiation](https://ucp.dev/draft/specification/overview/#negotiation-protocol). Platforms **MAY** include additional metadata fields.
+The `meta["ucp-agent"]` field is **required** on all requests to enable [capability negotiation](http://ucp.dev/draft/specification/overview/#negotiation-protocol). Platforms **MAY** include additional metadata fields.
 
 ## Tools
 
@@ -9455,16 +9455,16 @@ MCP tools separate resource identification from payload data:
 - **Responses:** All responses include `cart.id` as part of the full resource state.
 - **Create:** The `create_cart` operation does not require an `id` in the request, and the response includes the newly assigned `cart.id`.
 
-| Tool          | Operation                                                            | Description            |
-| ------------- | -------------------------------------------------------------------- | ---------------------- |
-| `create_cart` | [Create Cart](https://ucp.dev/draft/specification/cart/#create-cart) | Create a cart session. |
-| `get_cart`    | [Get Cart](https://ucp.dev/draft/specification/cart/#get-cart)       | Get a cart session.    |
-| `update_cart` | [Update Cart](https://ucp.dev/draft/specification/cart/#update-cart) | Update a cart session. |
-| `cancel_cart` | [Cancel Cart](https://ucp.dev/draft/specification/cart/#cancel-cart) | Cancel a cart session. |
+| Tool          | Operation                                                           | Description            |
+| ------------- | ------------------------------------------------------------------- | ---------------------- |
+| `create_cart` | [Create Cart](http://ucp.dev/draft/specification/cart/#create-cart) | Create a cart session. |
+| `get_cart`    | [Get Cart](http://ucp.dev/draft/specification/cart/#get-cart)       | Get a cart session.    |
+| `update_cart` | [Update Cart](http://ucp.dev/draft/specification/cart/#update-cart) | Update a cart session. |
+| `cancel_cart` | [Cancel Cart](http://ucp.dev/draft/specification/cart/#cancel-cart) | Cancel a cart session. |
 
 ### `create_cart`
 
-Maps to the [Create Cart](https://ucp.dev/draft/specification/cart/#create-cart) operation.
+Maps to the [Create Cart](http://ucp.dev/draft/specification/cart/#create-cart) operation.
 
 #### Input Schema
 
@@ -9616,7 +9616,7 @@ All items out of stock — no cart resource is created:
 
 ### `get_cart`
 
-Maps to the [Get Cart](https://ucp.dev/draft/specification/cart/#get-cart) operation.
+Maps to the [Get Cart](http://ucp.dev/draft/specification/cart/#get-cart) operation.
 
 #### Input Schema
 
@@ -9760,7 +9760,7 @@ Maps to the [Get Cart](https://ucp.dev/draft/specification/cart/#get-cart) opera
 
 ### `update_cart`
 
-Maps to the [Update Cart](https://ucp.dev/draft/specification/cart/#update-cart) operation.
+Maps to the [Update Cart](http://ucp.dev/draft/specification/cart/#update-cart) operation.
 
 #### Input Schema
 
@@ -9909,7 +9909,7 @@ Maps to the [Update Cart](https://ucp.dev/draft/specification/cart/#update-cart)
 
 ### `cancel_cart`
 
-Maps to the [Cancel Cart](https://ucp.dev/draft/specification/cart/#cancel-cart) operation.
+Maps to the [Cancel Cart](http://ucp.dev/draft/specification/cart/#cancel-cart) operation.
 
 #### Input Schema
 
@@ -10016,7 +10016,7 @@ Maps to the [Cancel Cart](https://ucp.dev/draft/specification/cart/#cancel-cart)
 
 ## Error Handling
 
-UCP distinguishes between protocol errors and business outcomes. See the [Core Specification](https://ucp.dev/draft/specification/overview/#error-handling) for the complete error code registry and transport binding examples.
+UCP distinguishes between protocol errors and business outcomes. See the [Core Specification](http://ucp.dev/draft/specification/overview/#error-handling) for the complete error code registry and transport binding examples.
 
 - **Protocol errors**: Transport-level failures (authentication, rate limiting, unavailability) that prevent request processing. Returned as JSON-RPC `error` with code `-32000` (or `-32001` for discovery errors).
 - **Business outcomes**: Application-level results from successful request processing, returned as JSON-RPC `result` with UCP envelope and `messages`.
@@ -10062,7 +10062,7 @@ A conforming MCP transport implementation **MUST**:
 
 1. Implement JSON-RPC 2.0 protocol correctly.
 1. Provide all core cart tools defined in this specification.
-1. Return errors per the [Core Specification](https://ucp.dev/draft/specification/overview/#error-handling).
+1. Return errors per the [Core Specification](http://ucp.dev/draft/specification/overview/#error-handling).
 1. Return business outcomes as JSON-RPC `result` with UCP envelope and `messages` array.
 1. Validate tool inputs against UCP schemas.
 1. Support HTTP transport with streaming.
@@ -10081,10 +10081,10 @@ The Catalog capability allows platforms to search and browse business product ca
 
 ## Capabilities
 
-| Capability                                                                                       | Description                                       |
-| ------------------------------------------------------------------------------------------------ | ------------------------------------------------- |
-| [`dev.ucp.shopping.catalog.search`](https://ucp.dev/draft/specification/catalog/search/index.md) | Search for products using query text and filters. |
-| [`dev.ucp.shopping.catalog.lookup`](https://ucp.dev/draft/specification/catalog/lookup/index.md) | Retrieve products or variants by identifier.      |
+| Capability                                                                                      | Description                                       |
+| ----------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| [`dev.ucp.shopping.catalog.search`](http://ucp.dev/draft/specification/catalog/search/index.md) | Search for products using query text and filters. |
+| [`dev.ucp.shopping.catalog.lookup`](http://ucp.dev/draft/specification/catalog/lookup/index.md) | Retrieve products or variants by identifier.      |
 
 ## Key Concepts
 
@@ -10106,7 +10106,7 @@ Location and market context for catalog operations. All fields are optional hint
 
 Context signals are provisional—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data.
 
-Businesses determine market assignment—including currency—based on context signals. Price filter values are denominated in `context.currency`; when the presentment currency differs, businesses SHOULD convert before applying (see [Price Filter](https://ucp.dev/draft/specification/catalog/search/#price-filter)). Response prices include explicit currency codes confirming the resolution.
+Businesses determine market assignment—including currency—based on context signals. Price filter values are denominated in `context.currency`; when the presentment currency differs, businesses SHOULD convert before applying (see [Price Filter](http://ucp.dev/draft/specification/catalog/search/#price-filter)). Response prices include explicit currency codes confirming the resolution.
 
 When `context.eligibility` claims are present, Businesses that accept them **MAY** adjust `price` / `list_price` directly for strikethrough display and **MAY** use `messages` with `code: "eligibility_benefit"` to attribute the adjustment to a specific claim.
 
@@ -10122,7 +10122,7 @@ When `context.eligibility` claims are present, Businesses that accept them **MAY
 
 ### Signals
 
-Environment data provided by the platform to support authorization and abuse prevention. Signal values MUST NOT be buyer-asserted claims. See [Signals](https://ucp.dev/draft/specification/overview/#signals) for details and privacy requirements.
+Environment data provided by the platform to support authorization and abuse prevention. Signal values MUST NOT be buyer-asserted claims. See [Signals](http://ucp.dev/draft/specification/overview/#signals) for details and privacy requirements.
 
 | Name               | Type   | Required | Description                                    |
 | ------------------ | ------ | -------- | ---------------------------------------------- |
@@ -10156,7 +10156,7 @@ A catalog item representing a sellable item with one or more purchasable variant
 
 A purchasable item with specific option selections, price, and availability.
 
-In lookup responses, each variant carries an `inputs` array for correlation: which request identifiers resolved to this variant, and whether the match was `exact` or `featured` (server-selected). See [Client Correlation](https://ucp.dev/draft/specification/catalog/lookup/#client-correlation) for details.
+In lookup responses, each variant carries an `inputs` array for correlation: which request identifiers resolved to this variant, and whether the match was `exact` or `featured` (server-selected). See [Client Correlation](http://ucp.dev/draft/specification/catalog/lookup/#client-correlation) for details.
 
 `media` is an ordered array. Businesses SHOULD return the featured variant image as the first element. Platforms SHOULD treat the first element as featured.
 
@@ -10248,7 +10248,7 @@ Messages communicate business outcomes and provide context:
 | `warning` | Important conditions affecting purchase | `DELAYED_FULFILLMENT`, `FINAL_SALE`              |
 | `info`    | Additional context without issues       | `PROMOTIONAL_PRICING`, `LIMITED_AVAILABILITY`    |
 
-Warnings with `presentation: "disclosure"` carry notices (e.g., allergen declarations, safety warnings) that platforms must not hide or dismiss. See [Warning Presentation](https://ucp.dev/draft/specification/checkout/#warning-presentation) for the full rendering contract.
+Warnings with `presentation: "disclosure"` carry notices (e.g., allergen declarations, safety warnings) that platforms must not hide or dismiss. See [Warning Presentation](http://ucp.dev/draft/specification/checkout/#warning-presentation) for the full rendering contract.
 
 **Note**: All catalog errors use `severity: "recoverable"` - agents handle them programmatically (retry, inform user, show alternatives).
 
@@ -10359,7 +10359,7 @@ When requested identifiers don't exist, return success with the found products (
 }
 ```
 
-Agents correlate results using the `inputs` array on each variant. See [Client Correlation](https://ucp.dev/draft/specification/catalog/lookup/#client-correlation).
+Agents correlate results using the `inputs` array on each variant. See [Client Correlation](http://ucp.dev/draft/specification/catalog/lookup/#client-correlation).
 
 #### Product Disclosure
 
@@ -10403,14 +10403,14 @@ When a product requires a disclosure (e.g., allergen notice, safety warning), re
 }
 ```
 
-See [Warning Presentation](https://ucp.dev/draft/specification/checkout/#warning-presentation) for the full rendering contract.
+See [Warning Presentation](http://ucp.dev/draft/specification/checkout/#warning-presentation) for the full rendering contract.
 
 ## Transport Bindings
 
 The capabilities above are bound to specific transport protocols:
 
-- [REST Binding](https://ucp.dev/draft/specification/catalog/rest/index.md): RESTful API mapping.
-- [MCP Binding](https://ucp.dev/draft/specification/catalog/mcp/index.md): Model Context Protocol mapping via JSON-RPC.
+- [REST Binding](http://ucp.dev/draft/specification/catalog/rest/index.md): RESTful API mapping.
+- [MCP Binding](http://ucp.dev/draft/specification/catalog/mcp/index.md): Model Context Protocol mapping via JSON-RPC.
 
 # Catalog Search Capability
 
@@ -10490,8 +10490,8 @@ The `limit` parameter is a requested page size, not a guaranteed count. Implemen
 
 ## Transport Bindings
 
-- [REST Binding](https://ucp.dev/draft/specification/catalog/rest/#post-catalogsearch): `POST /catalog/search`
-- [MCP Binding](https://ucp.dev/draft/specification/catalog/mcp/#search_catalog): `search_catalog` tool
+- [REST Binding](http://ucp.dev/draft/specification/catalog/rest/#post-catalogsearch): `POST /catalog/search`
+- [MCP Binding](http://ucp.dev/draft/specification/catalog/mcp/#search_catalog): `search_catalog` tool
 
 # Catalog Lookup Capability
 
@@ -10551,12 +10551,12 @@ Implementations SHOULD accept at least 10 identifiers per request. Implementatio
 
 ## Transport Bindings
 
-- [REST Binding](https://ucp.dev/draft/specification/catalog/rest/#post-cataloglookup): `POST /catalog/lookup`
-- [MCP Binding](https://ucp.dev/draft/specification/catalog/mcp/#lookup_catalog): `lookup_catalog` tool
+- [REST Binding](http://ucp.dev/draft/specification/catalog/rest/#post-cataloglookup): `POST /catalog/lookup`
+- [MCP Binding](http://ucp.dev/draft/specification/catalog/mcp/#lookup_catalog): `lookup_catalog` tool
 
 # Catalog - REST Binding
 
-This document specifies the HTTP/REST binding for the [Catalog Capability](https://ucp.dev/draft/specification/catalog/index.md).
+This document specifies the HTTP/REST binding for the [Catalog Capability](http://ucp.dev/draft/specification/catalog/index.md).
 
 ## Protocol Fundamentals
 
@@ -10596,14 +10596,14 @@ Businesses advertise REST transport availability through their UCP profile at `/
 
 ## Endpoints
 
-| Endpoint          | Method | Capability                                                            | Description                        |
-| ----------------- | ------ | --------------------------------------------------------------------- | ---------------------------------- |
-| `/catalog/search` | POST   | [Search](https://ucp.dev/draft/specification/catalog/search/index.md) | Search for products.               |
-| `/catalog/lookup` | POST   | [Lookup](https://ucp.dev/draft/specification/catalog/lookup/index.md) | Lookup one or more products by ID. |
+| Endpoint          | Method | Capability                                                           | Description                        |
+| ----------------- | ------ | -------------------------------------------------------------------- | ---------------------------------- |
+| `/catalog/search` | POST   | [Search](http://ucp.dev/draft/specification/catalog/search/index.md) | Search for products.               |
+| `/catalog/lookup` | POST   | [Lookup](http://ucp.dev/draft/specification/catalog/lookup/index.md) | Lookup one or more products by ID. |
 
 ### `POST /catalog/search`
 
-Maps to the [Catalog Search](https://ucp.dev/draft/specification/catalog/search/index.md) capability.
+Maps to the [Catalog Search](http://ucp.dev/draft/specification/catalog/search/index.md) capability.
 
 **Inputs**
 
@@ -10740,7 +10740,7 @@ Maps to the [Catalog Search](https://ucp.dev/draft/specification/catalog/search/
 
 ### `POST /catalog/lookup`
 
-Maps to the [Catalog Lookup](https://ucp.dev/draft/specification/catalog/lookup/index.md) capability. See capability documentation for supported identifiers, resolution behavior, and client correlation requirements.
+Maps to the [Catalog Lookup](http://ucp.dev/draft/specification/catalog/lookup/index.md) capability. See capability documentation for supported identifiers, resolution behavior, and client correlation requirements.
 
 The request body contains an array of identifiers and optional context that applies to all lookups in the batch.
 
@@ -10903,7 +10903,7 @@ Use HTTP status codes for protocol-level issues that prevent request processing:
 
 ### Business Outcomes
 
-All application-level outcomes return HTTP 200 with the UCP envelope and optional `messages` array. See [Catalog Overview](https://ucp.dev/draft/specification/catalog/#messages-and-error-handling) for message semantics and common scenarios.
+All application-level outcomes return HTTP 200 with the UCP envelope and optional `messages` array. See [Catalog Overview](http://ucp.dev/draft/specification/catalog/#messages-and-error-handling) for message semantics and common scenarios.
 
 #### Example: All Products Not Found
 
@@ -10954,7 +10954,7 @@ Business outcomes use the standard HTTP 200 status with messages in the response
 
 A conforming REST transport implementation **MUST**:
 
-1. Implement endpoints for each catalog capability advertised in the business's UCP profile, per their respective capability requirements ([Search](https://ucp.dev/draft/specification/catalog/search/index.md), [Lookup](https://ucp.dev/draft/specification/catalog/lookup/index.md)). Each capability may be adopted independently.
+1. Implement endpoints for each catalog capability advertised in the business's UCP profile, per their respective capability requirements ([Search](http://ucp.dev/draft/specification/catalog/search/index.md), [Lookup](http://ucp.dev/draft/specification/catalog/lookup/index.md)). Each capability may be adopted independently.
 1. Return products with valid `Price` objects (amount + currency).
 1. Support cursor-based pagination with default limit of 10.
 1. Return HTTP 200 for lookup requests; unknown identifiers result in fewer products returned (MAY include informational `not_found` messages).
@@ -10962,7 +10962,7 @@ A conforming REST transport implementation **MUST**:
 
 # Catalog - MCP Binding
 
-This document specifies the Model Context Protocol (MCP) binding for the [Catalog Capability](https://ucp.dev/draft/specification/catalog/index.md).
+This document specifies the Model Context Protocol (MCP) binding for the [Catalog Capability](http://ucp.dev/draft/specification/catalog/index.md).
 
 ## Protocol Fundamentals
 
@@ -11033,14 +11033,14 @@ The `meta["ucp-agent"]` field is **required** on all requests to enable version 
 
 ## Tools
 
-| Tool             | Capability                                                            | Description                                            |
-| ---------------- | --------------------------------------------------------------------- | ------------------------------------------------------ |
-| `search_catalog` | [Search](https://ucp.dev/draft/specification/catalog/search/index.md) | Search for products.                                   |
-| `lookup_catalog` | [Lookup](https://ucp.dev/draft/specification/catalog/lookup/index.md) | Lookup one or more products or variants by identifier. |
+| Tool             | Capability                                                           | Description                                            |
+| ---------------- | -------------------------------------------------------------------- | ------------------------------------------------------ |
+| `search_catalog` | [Search](http://ucp.dev/draft/specification/catalog/search/index.md) | Search for products.                                   |
+| `lookup_catalog` | [Lookup](http://ucp.dev/draft/specification/catalog/lookup/index.md) | Lookup one or more products or variants by identifier. |
 
 ### `search_catalog`
 
-Maps to the [Catalog Search](https://ucp.dev/draft/specification/catalog/search/index.md) capability.
+Maps to the [Catalog Search](http://ucp.dev/draft/specification/catalog/search/index.md) capability.
 
 #### Search Request
 
@@ -11198,7 +11198,7 @@ Maps to the [Catalog Search](https://ucp.dev/draft/specification/catalog/search/
 
 ### `lookup_catalog`
 
-Maps to the [Catalog Lookup](https://ucp.dev/draft/specification/catalog/lookup/index.md) capability. See capability documentation for supported identifiers, resolution behavior, and client correlation requirements.
+Maps to the [Catalog Lookup](http://ucp.dev/draft/specification/catalog/lookup/index.md) capability. See capability documentation for supported identifiers, resolution behavior, and client correlation requirements.
 
 The `catalog.ids` parameter accepts an array of identifiers and optional context.
 
@@ -11397,7 +11397,7 @@ Use JSON-RPC 2.0 error codes for protocol-level issues that prevent request proc
 
 ### Business Outcomes
 
-All application-level outcomes return a successful JSON-RPC result with the UCP envelope and optional `messages` array. See [Catalog Overview](https://ucp.dev/draft/specification/catalog/#messages-and-error-handling) for message semantics and common scenarios.
+All application-level outcomes return a successful JSON-RPC result with the UCP envelope and optional `messages` array. See [Catalog Overview](http://ucp.dev/draft/specification/catalog/#messages-and-error-handling) for message semantics and common scenarios.
 
 #### Example: All Products Not Found
 
@@ -11437,7 +11437,7 @@ Business outcomes use the JSON-RPC `result` field with messages in the response 
 A conforming MCP transport implementation **MUST**:
 
 1. Implement JSON-RPC 2.0 protocol correctly.
-1. Implement tools for each catalog capability advertised in the business's UCP profile, per their respective capability requirements ([Search](https://ucp.dev/draft/specification/catalog/search/index.md), [Lookup](https://ucp.dev/draft/specification/catalog/lookup/index.md)). Each capability may be adopted independently.
+1. Implement tools for each catalog capability advertised in the business's UCP profile, per their respective capability requirements ([Search](http://ucp.dev/draft/specification/catalog/search/index.md), [Lookup](http://ucp.dev/draft/specification/catalog/lookup/index.md)). Each capability may be adopted independently.
 1. Use JSON-RPC errors for transport issues; use `messages` array for business outcomes.
 1. Return successful result for lookup requests; unknown identifiers result in fewer products returned (MAY include informational `not_found` messages).
 1. Validate tool inputs against UCP schemas.
@@ -11768,7 +11768,7 @@ The platform provides its webhook URL in the order capability's `config` field d
 
 ### Webhook Signature Verification
 
-Webhook payloads **MUST** be signed by the business and verified by the platform to ensure authenticity and integrity. Signatures follow the [Message Signatures](https://ucp.dev/draft/specification/signatures/index.md) specification using the REST binding (RFC 9421).
+Webhook payloads **MUST** be signed by the business and verified by the platform to ensure authenticity and integrity. Signatures follow the [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md) specification using the REST binding (RFC 9421).
 
 **Required Headers:**
 
@@ -11800,7 +11800,7 @@ Signature: sig1=:MEUCIQDTxNq8h7LGHpvVZQp1iHkFp9+3N8Mxk2zH1wK4YuVN8w...:
 1. Sign using a key from `signing_keys` in the business's UCP profile
 1. Set `Signature-Input` and `Signature` headers
 
-See [Message Signatures - REST Request Signing](https://ucp.dev/draft/specification/signatures/#rest-request-signing) for complete algorithm.
+See [Message Signatures - REST Request Signing](http://ucp.dev/draft/specification/signatures/#rest-request-signing) for complete algorithm.
 
 #### Verification (Platform)
 
@@ -11812,7 +11812,7 @@ See [Message Signatures - REST Request Signing](https://ucp.dev/draft/specificat
 1. Verify `Content-Digest` matches SHA-256 of raw body
 1. Reconstruct signature base and verify signature
 
-See [Message Signatures - REST Request Verification](https://ucp.dev/draft/specification/signatures/#rest-request-verification) for complete algorithm.
+See [Message Signatures - REST Request Verification](http://ucp.dev/draft/specification/signatures/#rest-request-verification) for complete algorithm.
 
 **Authorization** (order ownership):
 
@@ -11826,7 +11826,7 @@ This prevents a malicious business from sending fake events for another business
 
 #### Key Rotation
 
-See [Message Signatures - Key Rotation](https://ucp.dev/draft/specification/signatures/#key-rotation) for zero-downtime key rotation procedures.
+See [Message Signatures - Key Rotation](http://ucp.dev/draft/specification/signatures/#key-rotation) for zero-downtime key rotation procedures.
 
 ## Guidelines
 
@@ -11838,7 +11838,7 @@ See [Message Signatures - Key Rotation](https://ucp.dev/draft/specification/sign
 **Business:**
 
 - **MUST** include `UCP-Agent` header with profile URL for signer identification
-- **MUST** sign all webhook payloads per the [Message Signatures](https://ucp.dev/draft/specification/signatures/index.md) specification using RFC 9421 headers (`Signature`, `Signature-Input`, `Content-Digest`).
+- **MUST** sign all webhook payloads per the [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md) specification using RFC 9421 headers (`Signature`, `Signature-Input`, `Content-Digest`).
 - **MUST** send "Order created" event with fully populated order entity
 - **MUST** send full order entity on updates (not incremental deltas)
 - **MUST** retry failed webhook deliveries
@@ -12800,7 +12800,7 @@ ______________________________________________________________________
 
 Handler specifications **SHOULD** use the standard template structure. Sections marked **[REQUIRED]** **MUST** be present; sections marked **[CONDITIONAL]** are required only when applicable.
 
-**→ [Payment Handler Template](https://ucp.dev/draft/specification/payment-handler-template/index.md)**
+**→ [Payment Handler Template](http://ucp.dev/draft/specification/payment-handler-template/index.md)**
 
 ## Conformance Checklist for Spec Authors
 
@@ -12892,17 +12892,17 @@ Follow these guidelines to create high-quality, maintainable handler specificati
 
 ### Maintainability
 
-| Practice                        | Description                                                                                                                                      |
-| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Host schemas at stable URLs** | Schema URLs should not change; use versioned paths if needed.                                                                                    |
-| **Fail gracefully**             | Define clear error responses for common failure scenarios.                                                                                       |
-| **Link to examples**            | Reference existing handler specs and the [Tokenization Guide](https://ucp.dev/draft/specification/tokenization-guide/index.md) for common flows. |
+| Practice                        | Description                                                                                                                                     |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Host schemas at stable URLs** | Schema URLs should not change; use versioned paths if needed.                                                                                   |
+| **Fail gracefully**             | Define clear error responses for common failure scenarios.                                                                                      |
+| **Link to examples**            | Reference existing handler specs and the [Tokenization Guide](http://ucp.dev/draft/specification/tokenization-guide/index.md) for common flows. |
 
 ______________________________________________________________________
 
 ## See Also
 
-- **[Tokenization Guide](https://ucp.dev/draft/specification/tokenization-guide/index.md)** — Guide for building tokenization payment handlers
+- **[Tokenization Guide](http://ucp.dev/draft/specification/tokenization-guide/index.md)** — Guide for building tokenization payment handlers
 - **[Google Pay Handler](https://developers.google.com/merchant/ucp/guides/google-pay-payment-handler)** — Handler for Google Pay integration
 - **[Shop Pay Handler](https://shopify.dev/docs/agents/checkout/shop-pay-handler)** — Handler for Shop Pay integration
 
@@ -12985,7 +12985,7 @@ Businesses advertise support for this handler in their UCP profile's `payment_ha
 
 **Schema URL:** `{schema_url}`
 
-The handler schema defines three config variants for different contexts. See [Payment Handler Guide: Defining the Schema](https://ucp.dev/draft/specification/payment-handler-guide/#defining-the-schema) for the full pattern.
+The handler schema defines three config variants for different contexts. See [Payment Handler Guide: Defining the Schema](http://ucp.dev/draft/specification/payment-handler-guide/#defining-the-schema) for the full pattern.
 
 | Config Variant    | Context            | Purpose                             |
 | ----------------- | ------------------ | ----------------------------------- |
@@ -13235,11 +13235,11 @@ This guide is for **implementers building tokenization payment handlers**. It de
 
 We offer a range of examples to utilize forms of tokenization in UCP:
 
-| Example                                                                                                            | Use Case                                            |
-| ------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------- |
-| [Processor Tokenizer](https://ucp.dev/draft/specification/examples/processor-tokenizer-payment-handler/index.md)   | Business or PSP runs tokenization and processing    |
-| [Platform Tokenizer](https://ucp.dev/draft/specification/examples/platform-tokenizer-payment-handler/index.md)     | Platform tokenizes credentials for businesses/PSPs  |
-| [Encrypted Credential Handler](https://ucp.dev/draft/specification/examples/encrypted-credential-handler/index.md) | Platform encrypts credentials instead of tokenizing |
+| Example                                                                                                           | Use Case                                            |
+| ----------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| [Processor Tokenizer](http://ucp.dev/draft/specification/examples/processor-tokenizer-payment-handler/index.md)   | Business or PSP runs tokenization and processing    |
+| [Platform Tokenizer](http://ucp.dev/draft/specification/examples/platform-tokenizer-payment-handler/index.md)     | Platform tokenizes credentials for businesses/PSPs  |
+| [Encrypted Credential Handler](http://ucp.dev/draft/specification/examples/encrypted-credential-handler/index.md) | Platform encrypts credentials instead of tokenizing |
 
 ______________________________________________________________________
 
@@ -13468,8 +13468,8 @@ ______________________________________________________________________
 
 ## See Also
 
-- **[Encrypted Credential Handler](https://ucp.dev/draft/specification/examples/encrypted-credential-handler/index.md)** — Alternative pattern using encryption instead of tokenize/detokenize round-trips
-- **[AP2 Mandates Extension](https://ucp.dev/draft/specification/ap2-mandates/index.md)** — Add cryptographic proof of checkout agreement for PSP verification
+- **[Encrypted Credential Handler](http://ucp.dev/draft/specification/examples/encrypted-credential-handler/index.md)** — Alternative pattern using encryption instead of tokenize/detokenize round-trips
+- **[AP2 Mandates Extension](http://ucp.dev/draft/specification/ap2-mandates/index.md)** — Add cryptographic proof of checkout agreement for PSP verification
 
 # Processor Tokenizer Payment Handler
 
@@ -14183,7 +14183,7 @@ ______________________________________________________________________
 
 ## References
 
-- **Pattern:** [Tokenization Payment Handler](https://ucp.dev/draft/specification/payment-handler-guide/index.md)
+- **Pattern:** [Tokenization Payment Handler](http://ucp.dev/draft/specification/payment-handler-guide/index.md)
 - **API Pattern:** [handlers/tokenization/openapi.json](/draft/handlers/tokenization/openapi.json)
 - **Identity Schema:** [schemas/shopping/types/payment_identity.json](/draft/schemas/shopping/types/payment_identity.json)
 

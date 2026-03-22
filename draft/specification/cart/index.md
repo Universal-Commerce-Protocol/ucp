@@ -4,7 +4,7 @@
 
 ## Overview
 
-The Cart capability enables basket building without the complexity of checkout. While [Checkout](https://ucp.dev/draft/specification/checkout/index.md) manages payment handlers, status lifecycle, and order finalization, cart provides a lightweight CRUD interface for item collection before purchase intent is established.
+The Cart capability enables basket building without the complexity of checkout. While [Checkout](http://ucp.dev/draft/specification/checkout/index.md) manages payment handlers, status lifecycle, and order finalization, cart provides a lightweight CRUD interface for item collection before purchase intent is established.
 
 **When to use Cart vs Checkout:**
 
@@ -121,33 +121,33 @@ When **all** requested items are unavailable, the business MAY return an error r
 }
 ```
 
-- [REST Binding](https://ucp.dev/draft/specification/cart-rest/#create-cart)
-- [MCP Binding](https://ucp.dev/draft/specification/cart-mcp/#create_cart)
+- [REST Binding](http://ucp.dev/draft/specification/cart-rest/#create-cart)
+- [MCP Binding](http://ucp.dev/draft/specification/cart-mcp/#create_cart)
 
 ### Get Cart
 
 Retrieves the latest state of a cart session. Returns `not_found` if the cart does not exist, has expired, or was canceled.
 
-- [REST Binding](https://ucp.dev/draft/specification/cart-rest/#get-cart)
-- [MCP Binding](https://ucp.dev/draft/specification/cart-mcp/#get_cart)
+- [REST Binding](http://ucp.dev/draft/specification/cart-rest/#get-cart)
+- [MCP Binding](http://ucp.dev/draft/specification/cart-mcp/#get_cart)
 
 ### Update Cart
 
 Performs a full replacement of the cart session. The platform **MUST** send the entire cart resource. The provided resource replaces the existing cart state on the business side.
 
-- [REST Binding](https://ucp.dev/draft/specification/cart-rest/#update-cart)
-- [MCP Binding](https://ucp.dev/draft/specification/cart-mcp/#update_cart)
+- [REST Binding](http://ucp.dev/draft/specification/cart-rest/#update-cart)
+- [MCP Binding](http://ucp.dev/draft/specification/cart-mcp/#update_cart)
 
 ### Cancel Cart
 
 Cancels a cart session. Business MUST return the cart state before deletion. Subsequent operations for this cart ID SHOULD return `not_found`.
 
-- [REST Binding](https://ucp.dev/draft/specification/cart-rest/#cancel-cart)
-- [MCP Binding](https://ucp.dev/draft/specification/cart-mcp/#cancel_cart)
+- [REST Binding](http://ucp.dev/draft/specification/cart-rest/#cancel-cart)
+- [MCP Binding](http://ucp.dev/draft/specification/cart-mcp/#cancel_cart)
 
 ## Entities
 
-Cart reuses the same entity schemas as [Checkout](https://ucp.dev/draft/specification/checkout/index.md). This ensures consistent data structures when converting a cart to a checkout session.
+Cart reuses the same entity schemas as [Checkout](http://ucp.dev/draft/specification/checkout/index.md). This ensures consistent data structures when converting a cart to a checkout session.
 
 ### UCP Response Cart
 
@@ -220,7 +220,7 @@ Cart reuses the same entity schemas as [Checkout](https://ucp.dev/draft/specific
 
 ### Signals
 
-Environment data provided by the platform to support authorization and abuse prevention. Signal values MUST NOT be buyer-asserted claims. See [Signals](https://ucp.dev/draft/specification/overview/#signals) for details and privacy requirements.
+Environment data provided by the platform to support authorization and abuse prevention. Signal values MUST NOT be buyer-asserted claims. See [Signals](http://ucp.dev/draft/specification/overview/#signals) for details and privacy requirements.
 
 | Name               | Type   | Required | Description                                    |
 | ------------------ | ------ | -------- | ---------------------------------------------- |
@@ -229,7 +229,7 @@ Environment data provided by the platform to support authorization and abuse pre
 
 ### Total
 
-The same totals contract applies to cart and checkout. See [Checkout Totals](https://ucp.dev/draft/specification/checkout/#totals) for the rendering contract, accounting identity, well-known types, repeating types, and sub-line semantics.
+The same totals contract applies to cart and checkout. See [Checkout Totals](http://ucp.dev/draft/specification/checkout/#totals) for the rendering contract, accounting identity, well-known types, repeating types, and sub-line semantics.
 
 | Name         | Type                                             | Required | Description                                                                                                                                                                      |
 | ------------ | ------------------------------------------------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

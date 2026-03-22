@@ -76,5 +76,5 @@ The `limit` parameter is a requested page size, not a guaranteed count. Implemen
 
 ## Transport Bindings
 
-- [REST Binding](https://ucp.dev/draft/specification/catalog/rest/#post-catalogsearch): `POST /catalog/search`
-- [MCP Binding](https://ucp.dev/draft/specification/catalog/mcp/#search_catalog): `search_catalog` tool
+- [REST Binding](http://ucp.dev/draft/specification/catalog/rest/#post-catalogsearch): `POST /catalog/search`
+- [MCP Binding](http://ucp.dev/draft/specification/catalog/mcp/#search_catalog): `search_catalog` tool

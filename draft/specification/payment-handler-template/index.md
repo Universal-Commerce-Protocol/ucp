@@ -77,7 +77,7 @@ Businesses advertise support for this handler in their UCP profile's `payment_ha
 
 **Schema URL:** `{schema_url}`
 
-The handler schema defines three config variants for different contexts. See [Payment Handler Guide: Defining the Schema](https://ucp.dev/draft/specification/payment-handler-guide/#defining-the-schema) for the full pattern.
+The handler schema defines three config variants for different contexts. See [Payment Handler Guide: Defining the Schema](http://ucp.dev/draft/specification/payment-handler-guide/#defining-the-schema) for the full pattern.
 
 | Config Variant    | Context            | Purpose                             |
 | ----------------- | ------------------ | ----------------------------------- |

@@ -438,6 +438,6 @@ ______________________________________________________________________
 
 ## References
 
-- **Pattern:** [Tokenization Payment Handler](https://ucp.dev/draft/specification/payment-handler-guide/index.md)
+- **Pattern:** [Tokenization Payment Handler](http://ucp.dev/draft/specification/payment-handler-guide/index.md)
 - **API Pattern:** [handlers/tokenization/openapi.json](/draft/handlers/tokenization/openapi.json)
 - **Identity Schema:** [schemas/shopping/types/payment_identity.json](/draft/schemas/shopping/types/payment_identity.json)

@@ -1,6 +1,6 @@
 # Cart Capability - REST Binding
 
-This document specifies the REST binding for the [Cart Capability](https://ucp.dev/draft/specification/cart/index.md).
+This document specifies the REST binding for the [Cart Capability](http://ucp.dev/draft/specification/cart/index.md).
 
 ## Protocol Fundamentals
 
@@ -552,7 +552,7 @@ The following headers are defined for the HTTP binding and apply to all operatio
 
 ### Error Responses
 
-See the [Core Specification](https://ucp.dev/draft/specification/overview/#error-handling) for the complete error code registry and transport binding examples.
+See the [Core Specification](http://ucp.dev/draft/specification/overview/#error-handling) for the complete error code registry and transport binding examples.
 
 - **Protocol errors**: Return appropriate HTTP status code (401, 403, 409, 429, 503) with JSON body containing `code` and `content`.
 - **Business outcomes**: Return HTTP 200 with UCP envelope and `messages` array.

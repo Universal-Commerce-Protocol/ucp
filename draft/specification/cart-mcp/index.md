@@ -1,6 +1,6 @@
 # Cart Capability - MCP Binding
 
-This document specifies the Model Context Protocol (MCP) binding for the [Cart Capability](https://ucp.dev/draft/specification/cart/index.md).
+This document specifies the Model Context Protocol (MCP) binding for the [Cart Capability](http://ucp.dev/draft/specification/cart/index.md).
 
 ## Protocol Fundamentals
 
@@ -63,7 +63,7 @@ MCP clients **MUST** include a `meta` object in every request containing protoco
 }
 ```
 
-The `meta["ucp-agent"]` field is **required** on all requests to enable [capability negotiation](https://ucp.dev/draft/specification/overview/#negotiation-protocol). Platforms **MAY** include additional metadata fields.
+The `meta["ucp-agent"]` field is **required** on all requests to enable [capability negotiation](http://ucp.dev/draft/specification/overview/#negotiation-protocol). Platforms **MAY** include additional metadata fields.
 
 ## Tools
 
@@ -77,16 +77,16 @@ MCP tools separate resource identification from payload data:
 - **Responses:** All responses include `cart.id` as part of the full resource state.
 - **Create:** The `create_cart` operation does not require an `id` in the request, and the response includes the newly assigned `cart.id`.
 
-| Tool          | Operation                                                            | Description            |
-| ------------- | -------------------------------------------------------------------- | ---------------------- |
-| `create_cart` | [Create Cart](https://ucp.dev/draft/specification/cart/#create-cart) | Create a cart session. |
-| `get_cart`    | [Get Cart](https://ucp.dev/draft/specification/cart/#get-cart)       | Get a cart session.    |
-| `update_cart` | [Update Cart](https://ucp.dev/draft/specification/cart/#update-cart) | Update a cart session. |
-| `cancel_cart` | [Cancel Cart](https://ucp.dev/draft/specification/cart/#cancel-cart) | Cancel a cart session. |
+| Tool          | Operation                                                           | Description            |
+| ------------- | ------------------------------------------------------------------- | ---------------------- |
+| `create_cart` | [Create Cart](http://ucp.dev/draft/specification/cart/#create-cart) | Create a cart session. |
+| `get_cart`    | [Get Cart](http://ucp.dev/draft/specification/cart/#get-cart)       | Get a cart session.    |
+| `update_cart` | [Update Cart](http://ucp.dev/draft/specification/cart/#update-cart) | Update a cart session. |
+| `cancel_cart` | [Cancel Cart](http://ucp.dev/draft/specification/cart/#cancel-cart) | Cancel a cart session. |
 
 ### `create_cart`
 
-Maps to the [Create Cart](https://ucp.dev/draft/specification/cart/#create-cart) operation.
+Maps to the [Create Cart](http://ucp.dev/draft/specification/cart/#create-cart) operation.
 
 #### Input Schema
 
@@ -238,7 +238,7 @@ All items out of stock — no cart resource is created:
 
 ### `get_cart`
 
-Maps to the [Get Cart](https://ucp.dev/draft/specification/cart/#get-cart) operation.
+Maps to the [Get Cart](http://ucp.dev/draft/specification/cart/#get-cart) operation.
 
 #### Input Schema
 
@@ -382,7 +382,7 @@ Maps to the [Get Cart](https://ucp.dev/draft/specification/cart/#get-cart) opera
 
 ### `update_cart`
 
-Maps to the [Update Cart](https://ucp.dev/draft/specification/cart/#update-cart) operation.
+Maps to the [Update Cart](http://ucp.dev/draft/specification/cart/#update-cart) operation.
 
 #### Input Schema
 
@@ -531,7 +531,7 @@ Maps to the [Update Cart](https://ucp.dev/draft/specification/cart/#update-cart)
 
 ### `cancel_cart`
 
-Maps to the [Cancel Cart](https://ucp.dev/draft/specification/cart/#cancel-cart) operation.
+Maps to the [Cancel Cart](http://ucp.dev/draft/specification/cart/#cancel-cart) operation.
 
 #### Input Schema
 
@@ -638,7 +638,7 @@ Maps to the [Cancel Cart](https://ucp.dev/draft/specification/cart/#cancel-cart)
 
 ## Error Handling
 
-UCP distinguishes between protocol errors and business outcomes. See the [Core Specification](https://ucp.dev/draft/specification/overview/#error-handling) for the complete error code registry and transport binding examples.
+UCP distinguishes between protocol errors and business outcomes. See the [Core Specification](http://ucp.dev/draft/specification/overview/#error-handling) for the complete error code registry and transport binding examples.
 
 - **Protocol errors**: Transport-level failures (authentication, rate limiting, unavailability) that prevent request processing. Returned as JSON-RPC `error` with code `-32000` (or `-32001` for discovery errors).
 - **Business outcomes**: Application-level results from successful request processing, returned as JSON-RPC `result` with UCP envelope and `messages`.
@@ -684,7 +684,7 @@ A conforming MCP transport implementation **MUST**:
 
 1. Implement JSON-RPC 2.0 protocol correctly.
 1. Provide all core cart tools defined in this specification.
-1. Return errors per the [Core Specification](https://ucp.dev/draft/specification/overview/#error-handling).
+1. Return errors per the [Core Specification](http://ucp.dev/draft/specification/overview/#error-handling).
 1. Return business outcomes as JSON-RPC `result` with UCP envelope and `messages` array.
 1. Validate tool inputs against UCP schemas.
 1. Support HTTP transport with streaming.

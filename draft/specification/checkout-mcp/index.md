@@ -1,6 +1,6 @@
 # Checkout Capability - MCP Binding
 
-This document specifies the Model Context Protocol (MCP) binding for the [Checkout Capability](https://ucp.dev/draft/specification/checkout/index.md).
+This document specifies the Model Context Protocol (MCP) binding for the [Checkout Capability](http://ucp.dev/draft/specification/checkout/index.md).
 
 ## Protocol Fundamentals
 
@@ -82,7 +82,7 @@ MCP clients **MUST** include a `meta` object in every request containing protoco
 }
 ```
 
-The `meta["ucp-agent"]` field is **required** on all requests to enable [capability negotiation](https://ucp.dev/draft/specification/overview/#negotiation-protocol). The `complete_checkout` and `cancel_checkout` operations also require `meta["idempotency-key"]` for retry safety. Platforms **MAY** include additional metadata fields.
+The `meta["ucp-agent"]` field is **required** on all requests to enable [capability negotiation](http://ucp.dev/draft/specification/overview/#negotiation-protocol). The `complete_checkout` and `cancel_checkout` operations also require `meta["idempotency-key"]` for retry safety. Platforms **MAY** include additional metadata fields.
 
 ## Tools
 
@@ -96,30 +96,30 @@ MCP tools separate resource identification from payload data:
 - **Responses:** All responses include `checkout.id` as part of the full resource state.
 - **Create:** The `create_checkout` operation does not require an `id` in the request, and the response includes the newly assigned `checkout.id`.
 
-| Tool                | Operation                                                                            | Description                |
-| ------------------- | ------------------------------------------------------------------------------------ | -------------------------- |
-| `create_checkout`   | [Create Checkout](https://ucp.dev/draft/specification/checkout/#create-checkout)     | Create a checkout session. |
-| `get_checkout`      | [Get Checkout](https://ucp.dev/draft/specification/checkout/#get-checkout)           | Get a checkout session.    |
-| `update_checkout`   | [Update Checkout](https://ucp.dev/draft/specification/checkout/#update-checkout)     | Update a checkout session. |
-| `complete_checkout` | [Complete Checkout](https://ucp.dev/draft/specification/checkout/#complete-checkout) | Place the order.           |
-| `cancel_checkout`   | [Cancel Checkout](https://ucp.dev/draft/specification/checkout/#cancel-checkout)     | Cancel a checkout session. |
+| Tool                | Operation                                                                           | Description                |
+| ------------------- | ----------------------------------------------------------------------------------- | -------------------------- |
+| `create_checkout`   | [Create Checkout](http://ucp.dev/draft/specification/checkout/#create-checkout)     | Create a checkout session. |
+| `get_checkout`      | [Get Checkout](http://ucp.dev/draft/specification/checkout/#get-checkout)           | Get a checkout session.    |
+| `update_checkout`   | [Update Checkout](http://ucp.dev/draft/specification/checkout/#update-checkout)     | Update a checkout session. |
+| `complete_checkout` | [Complete Checkout](http://ucp.dev/draft/specification/checkout/#complete-checkout) | Place the order.           |
+| `cancel_checkout`   | [Cancel Checkout](http://ucp.dev/draft/specification/checkout/#cancel-checkout)     | Cancel a checkout session. |
 
 ### `create_checkout`
 
-Maps to the [Create Checkout](https://ucp.dev/draft/specification/checkout/#create-checkout) operation.
+Maps to the [Create Checkout](http://ucp.dev/draft/specification/checkout/#create-checkout) operation.
 
 #### Input Schema
 
-- `checkout` ([Checkout](https://ucp.dev/draft/specification/checkout/#create-checkout)): **Required**. Contains the initial checkout session data and optional extensions.
+- `checkout` ([Checkout](http://ucp.dev/draft/specification/checkout/#create-checkout)): **Required**. Contains the initial checkout session data and optional extensions.
   - Extensions (Optional):
-    - `dev.ucp.shopping.buyer_consent`: [Buyer Consent](https://ucp.dev/draft/specification/buyer-consent/index.md)
-    - `dev.ucp.shopping.fulfillment`: [Fulfillment](https://ucp.dev/draft/specification/fulfillment/index.md)
-    - `dev.ucp.shopping.discount`: [Discount](https://ucp.dev/draft/specification/discount/index.md)
-    - `dev.ucp.shopping.ap2_mandate`: [AP2 Mandates](https://ucp.dev/draft/specification/ap2-mandates/index.md)
+    - `dev.ucp.shopping.buyer_consent`: [Buyer Consent](http://ucp.dev/draft/specification/buyer-consent/index.md)
+    - `dev.ucp.shopping.fulfillment`: [Fulfillment](http://ucp.dev/draft/specification/fulfillment/index.md)
+    - `dev.ucp.shopping.discount`: [Discount](http://ucp.dev/draft/specification/discount/index.md)
+    - `dev.ucp.shopping.ap2_mandate`: [AP2 Mandates](http://ucp.dev/draft/specification/ap2-mandates/index.md)
 
 #### Output Schema
 
-- [Checkout](https://ucp.dev/draft/specification/checkout/#create-checkout) object.
+- [Checkout](http://ucp.dev/draft/specification/checkout/#create-checkout) object.
 
 #### Example
 
@@ -337,7 +337,7 @@ All items out of stock — no checkout resource is created:
 
 ### `get_checkout`
 
-Maps to the [Get Checkout](https://ucp.dev/draft/specification/checkout/#get-checkout) operation.
+Maps to the [Get Checkout](http://ucp.dev/draft/specification/checkout/#get-checkout) operation.
 
 #### Input Schema
 
@@ -345,25 +345,25 @@ Maps to the [Get Checkout](https://ucp.dev/draft/specification/checkout/#get-che
 
 #### Output Schema
 
-- [Checkout](https://ucp.dev/draft/specification/checkout/#get-checkout) object.
+- [Checkout](http://ucp.dev/draft/specification/checkout/#get-checkout) object.
 
 ### `update_checkout`
 
-Maps to the [Update Checkout](https://ucp.dev/draft/specification/checkout/#update-checkout) operation.
+Maps to the [Update Checkout](http://ucp.dev/draft/specification/checkout/#update-checkout) operation.
 
 #### Input Schema
 
 - `id` (String): **Required**. The ID of the checkout session to update.
-- `checkout` ([Checkout](https://ucp.dev/draft/specification/checkout/#update-checkout)): **Required**. Contains the updated checkout session data.
+- `checkout` ([Checkout](http://ucp.dev/draft/specification/checkout/#update-checkout)): **Required**. Contains the updated checkout session data.
   - Extensions (Optional):
-    - `dev.ucp.shopping.buyer_consent`: [Buyer Consent](https://ucp.dev/draft/specification/buyer-consent/index.md)
-    - `dev.ucp.shopping.fulfillment`: [Fulfillment](https://ucp.dev/draft/specification/fulfillment/index.md)
-    - `dev.ucp.shopping.discount`: [Discount](https://ucp.dev/draft/specification/discount/index.md)
-    - `dev.ucp.shopping.ap2_mandate`: [AP2 Mandates](https://ucp.dev/draft/specification/ap2-mandates/index.md)
+    - `dev.ucp.shopping.buyer_consent`: [Buyer Consent](http://ucp.dev/draft/specification/buyer-consent/index.md)
+    - `dev.ucp.shopping.fulfillment`: [Fulfillment](http://ucp.dev/draft/specification/fulfillment/index.md)
+    - `dev.ucp.shopping.discount`: [Discount](http://ucp.dev/draft/specification/discount/index.md)
+    - `dev.ucp.shopping.ap2_mandate`: [AP2 Mandates](http://ucp.dev/draft/specification/ap2-mandates/index.md)
 
 #### Output Schema
 
-- [Checkout](https://ucp.dev/draft/specification/checkout/#update-checkout) object.
+- [Checkout](http://ucp.dev/draft/specification/checkout/#update-checkout) object.
 
 #### Example
 
@@ -554,7 +554,7 @@ Maps to the [Update Checkout](https://ucp.dev/draft/specification/checkout/#upda
 
 ### `complete_checkout`
 
-Maps to the [Complete Checkout](https://ucp.dev/draft/specification/checkout/#complete-checkout) operation.
+Maps to the [Complete Checkout](http://ucp.dev/draft/specification/checkout/#complete-checkout) operation.
 
 #### Input Schema
 
@@ -562,15 +562,15 @@ Maps to the [Complete Checkout](https://ucp.dev/draft/specification/checkout/#co
   - `ucp-agent` (Object): **Required**. Platform agent identification.
   - `idempotency-key` (String, UUID): **Required**. Unique key for retry safety.
 - `id` (String): **Required**. The ID of the checkout session.
-- `checkout` ([Checkout](https://ucp.dev/draft/specification/checkout/#complete-checkout)): **Required**. Contains payment credentials and other finalization data to execute the transaction.
+- `checkout` ([Checkout](http://ucp.dev/draft/specification/checkout/#complete-checkout)): **Required**. Contains payment credentials and other finalization data to execute the transaction.
 
 #### Output Schema
 
-- [Checkout](https://ucp.dev/draft/specification/checkout/#complete-checkout) object, containing a partial `order` that holds only `id` and `permalink_url`.
+- [Checkout](http://ucp.dev/draft/specification/checkout/#complete-checkout) object, containing a partial `order` that holds only `id` and `permalink_url`.
 
 ### `cancel_checkout`
 
-Maps to the [Cancel Checkout](https://ucp.dev/draft/specification/checkout/#cancel-checkout) operation.
+Maps to the [Cancel Checkout](http://ucp.dev/draft/specification/checkout/#cancel-checkout) operation.
 
 #### Input Schema
 
@@ -581,11 +581,11 @@ Maps to the [Cancel Checkout](https://ucp.dev/draft/specification/checkout/#canc
 
 #### Output Schema
 
-- [Checkout](https://ucp.dev/draft/specification/checkout/#cancel-checkout) object with `status: canceled`.
+- [Checkout](http://ucp.dev/draft/specification/checkout/#cancel-checkout) object with `status: canceled`.
 
 ## Error Handling
 
-UCP distinguishes between protocol errors and business outcomes. See the [Core Specification](https://ucp.dev/draft/specification/overview/#error-handling) for the complete error code registry and transport binding examples.
+UCP distinguishes between protocol errors and business outcomes. See the [Core Specification](http://ucp.dev/draft/specification/overview/#error-handling) for the complete error code registry and transport binding examples.
 
 - **Protocol errors**: Transport-level failures (authentication, rate limiting, unavailability) that prevent request processing. Returned as JSON-RPC `error` with code `-32000` (or `-32001` for discovery errors).
 - **Business outcomes**: Application-level results from successful request processing, returned as JSON-RPC `result` with UCP envelope and `messages`.
@@ -663,7 +663,7 @@ For `create_checkout`, when all items unavailable and no checkout can be created
 
 ## Message Signing
 
-Platforms **SHOULD** authenticate agents when using MCP transport. When using HTTP Message Signatures, all checkout operations follow the [Message Signatures](https://ucp.dev/draft/specification/signatures/index.md) specification.
+Platforms **SHOULD** authenticate agents when using MCP transport. When using HTTP Message Signatures, all checkout operations follow the [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md) specification.
 
 ### Request Signing
 
@@ -696,7 +696,7 @@ Signature: sig1=:MEUCIQDXyK9N3p5Rt...:
 
 The `Content-Digest` binds the JSON-RPC body to the signature. No JSON canonicalization is required.
 
-See [Message Signatures - MCP Transport](https://ucp.dev/draft/specification/signatures/#mcp-transport) for details.
+See [Message Signatures - MCP Transport](http://ucp.dev/draft/specification/signatures/#mcp-transport) for details.
 
 ### Response Signing
 
@@ -720,7 +720,7 @@ Signature: sig1=:MFQCIH7kL9nM2oP5qR8sT1uV4wX6yZaB3cD...:
 {"jsonrpc":"2.0","id":1,"result":{"content":[{"type":"text","text":"..."}],"structuredContent":{"checkout":{"id":"checkout_abc123","status":"completed"}}}}
 ```
 
-See [Message Signatures - REST Response Signing](https://ucp.dev/draft/specification/signatures/#rest-response-signing) for the signing algorithm (identical for MCP over HTTP).
+See [Message Signatures - REST Response Signing](http://ucp.dev/draft/specification/signatures/#rest-response-signing) for the signing algorithm (identical for MCP over HTTP).
 
 ## Conformance
 
@@ -728,14 +728,14 @@ A conforming MCP transport implementation **MUST**:
 
 1. Implement JSON-RPC 2.0 protocol correctly.
 1. Provide all core checkout tools defined in this specification.
-1. Return errors per the [Core Specification](https://ucp.dev/draft/specification/overview/#error-handling).
+1. Return errors per the [Core Specification](http://ucp.dev/draft/specification/overview/#error-handling).
 1. Return business outcomes as JSON-RPC `result` with UCP envelope and `messages` array.
 1. Validate tool inputs against UCP schemas.
 1. Support HTTP transport with streaming.
 
 A conforming implementation **SHOULD**:
 
-1. Authenticate agents using one of the supported mechanisms (API keys, OAuth, mTLS, or HTTP Message Signatures per [Message Signatures](https://ucp.dev/draft/specification/signatures/index.md)).
+1. Authenticate agents using one of the supported mechanisms (API keys, OAuth, mTLS, or HTTP Message Signatures per [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md)).
 1. Verify authentication on incoming requests before processing.
 
 ## Implementation

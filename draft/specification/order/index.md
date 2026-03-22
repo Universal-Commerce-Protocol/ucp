@@ -320,7 +320,7 @@ The platform provides its webhook URL in the order capability's `config` field d
 
 ### Webhook Signature Verification
 
-Webhook payloads **MUST** be signed by the business and verified by the platform to ensure authenticity and integrity. Signatures follow the [Message Signatures](https://ucp.dev/draft/specification/signatures/index.md) specification using the REST binding (RFC 9421).
+Webhook payloads **MUST** be signed by the business and verified by the platform to ensure authenticity and integrity. Signatures follow the [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md) specification using the REST binding (RFC 9421).
 
 **Required Headers:**
 
@@ -352,7 +352,7 @@ Signature: sig1=:MEUCIQDTxNq8h7LGHpvVZQp1iHkFp9+3N8Mxk2zH1wK4YuVN8w...:
 1. Sign using a key from `signing_keys` in the business's UCP profile
 1. Set `Signature-Input` and `Signature` headers
 
-See [Message Signatures - REST Request Signing](https://ucp.dev/draft/specification/signatures/#rest-request-signing) for complete algorithm.
+See [Message Signatures - REST Request Signing](http://ucp.dev/draft/specification/signatures/#rest-request-signing) for complete algorithm.
 
 #### Verification (Platform)
 
@@ -364,7 +364,7 @@ See [Message Signatures - REST Request Signing](https://ucp.dev/draft/specificat
 1. Verify `Content-Digest` matches SHA-256 of raw body
 1. Reconstruct signature base and verify signature
 
-See [Message Signatures - REST Request Verification](https://ucp.dev/draft/specification/signatures/#rest-request-verification) for complete algorithm.
+See [Message Signatures - REST Request Verification](http://ucp.dev/draft/specification/signatures/#rest-request-verification) for complete algorithm.
 
 **Authorization** (order ownership):
 
@@ -378,7 +378,7 @@ This prevents a malicious business from sending fake events for another business
 
 #### Key Rotation
 
-See [Message Signatures - Key Rotation](https://ucp.dev/draft/specification/signatures/#key-rotation) for zero-downtime key rotation procedures.
+See [Message Signatures - Key Rotation](http://ucp.dev/draft/specification/signatures/#key-rotation) for zero-downtime key rotation procedures.
 
 ## Guidelines
 
@@ -390,7 +390,7 @@ See [Message Signatures - Key Rotation](https://ucp.dev/draft/specification/sign
 **Business:**
 
 - **MUST** include `UCP-Agent` header with profile URL for signer identification
-- **MUST** sign all webhook payloads per the [Message Signatures](https://ucp.dev/draft/specification/signatures/index.md) specification using RFC 9421 headers (`Signature`, `Signature-Input`, `Content-Digest`).
+- **MUST** sign all webhook payloads per the [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md) specification using RFC 9421 headers (`Signature`, `Signature-Input`, `Content-Digest`).
 - **MUST** send "Order created" event with fully populated order entity
 - **MUST** send full order entity on updates (not incremental deltas)
 - **MUST** retry failed webhook deliveries

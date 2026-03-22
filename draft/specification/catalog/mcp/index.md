@@ -1,6 +1,6 @@
 # Catalog - MCP Binding
 
-This document specifies the Model Context Protocol (MCP) binding for the [Catalog Capability](https://ucp.dev/draft/specification/catalog/index.md).
+This document specifies the Model Context Protocol (MCP) binding for the [Catalog Capability](http://ucp.dev/draft/specification/catalog/index.md).
 
 ## Protocol Fundamentals
 
@@ -71,14 +71,14 @@ The `meta["ucp-agent"]` field is **required** on all requests to enable version 
 
 ## Tools
 
-| Tool             | Capability                                                            | Description                                            |
-| ---------------- | --------------------------------------------------------------------- | ------------------------------------------------------ |
-| `search_catalog` | [Search](https://ucp.dev/draft/specification/catalog/search/index.md) | Search for products.                                   |
-| `lookup_catalog` | [Lookup](https://ucp.dev/draft/specification/catalog/lookup/index.md) | Lookup one or more products or variants by identifier. |
+| Tool             | Capability                                                           | Description                                            |
+| ---------------- | -------------------------------------------------------------------- | ------------------------------------------------------ |
+| `search_catalog` | [Search](http://ucp.dev/draft/specification/catalog/search/index.md) | Search for products.                                   |
+| `lookup_catalog` | [Lookup](http://ucp.dev/draft/specification/catalog/lookup/index.md) | Lookup one or more products or variants by identifier. |
 
 ### `search_catalog`
 
-Maps to the [Catalog Search](https://ucp.dev/draft/specification/catalog/search/index.md) capability.
+Maps to the [Catalog Search](http://ucp.dev/draft/specification/catalog/search/index.md) capability.
 
 #### Search Request
 
@@ -236,7 +236,7 @@ Maps to the [Catalog Search](https://ucp.dev/draft/specification/catalog/search/
 
 ### `lookup_catalog`
 
-Maps to the [Catalog Lookup](https://ucp.dev/draft/specification/catalog/lookup/index.md) capability. See capability documentation for supported identifiers, resolution behavior, and client correlation requirements.
+Maps to the [Catalog Lookup](http://ucp.dev/draft/specification/catalog/lookup/index.md) capability. See capability documentation for supported identifiers, resolution behavior, and client correlation requirements.
 
 The `catalog.ids` parameter accepts an array of identifiers and optional context.
 
@@ -435,7 +435,7 @@ Use JSON-RPC 2.0 error codes for protocol-level issues that prevent request proc
 
 ### Business Outcomes
 
-All application-level outcomes return a successful JSON-RPC result with the UCP envelope and optional `messages` array. See [Catalog Overview](https://ucp.dev/draft/specification/catalog/#messages-and-error-handling) for message semantics and common scenarios.
+All application-level outcomes return a successful JSON-RPC result with the UCP envelope and optional `messages` array. See [Catalog Overview](http://ucp.dev/draft/specification/catalog/#messages-and-error-handling) for message semantics and common scenarios.
 
 #### Example: All Products Not Found
 
@@ -475,7 +475,7 @@ Business outcomes use the JSON-RPC `result` field with messages in the response 
 A conforming MCP transport implementation **MUST**:
 
 1. Implement JSON-RPC 2.0 protocol correctly.
-1. Implement tools for each catalog capability advertised in the business's UCP profile, per their respective capability requirements ([Search](https://ucp.dev/draft/specification/catalog/search/index.md), [Lookup](https://ucp.dev/draft/specification/catalog/lookup/index.md)). Each capability may be adopted independently.
+1. Implement tools for each catalog capability advertised in the business's UCP profile, per their respective capability requirements ([Search](http://ucp.dev/draft/specification/catalog/search/index.md), [Lookup](http://ucp.dev/draft/specification/catalog/lookup/index.md)). Each capability may be adopted independently.
 1. Use JSON-RPC errors for transport issues; use `messages` array for business outcomes.
 1. Return successful result for lookup requests; unknown identifiers result in fewer products returned (MAY include informational `not_found` messages).
 1. Validate tool inputs against UCP schemas.

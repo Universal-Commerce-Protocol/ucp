@@ -407,7 +407,7 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
 }
 ```
 
-The `ucp` object contains protocol metadata: version, services, capabilities, and payment handlers. The `signing_keys` array contains public keys (JWK format) used to verify signatures on webhooks and other authenticated messages from the business. See [Key Discovery](#key-discovery) for key lookup and resolution, and [Message Signatures](https://ucp.dev/draft/specification/signatures/index.md) for signing mechanics.
+The `ucp` object contains protocol metadata: version, services, capabilities, and payment handlers. The `signing_keys` array contains public keys (JWK format) used to verify signatures on webhooks and other authenticated messages from the business. See [Key Discovery](#key-discovery) for key lookup and resolution, and [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md) for signing mechanics.
 
 Businesses that support older protocol versions **SHOULD** include a `supported_versions` object mapping each older version to a version-specific profile URI. See [Protocol Version](#protocol-version) for details.
 
@@ -620,7 +620,7 @@ Discovery failures are transport errors — the required inputs could not be ret
 | `digest_mismatch`       | Body digest doesn't match `Content-Digest` header | 400  | -32600 |
 | `algorithm_unsupported` | Signature algorithm not supported                 | 400  | -32600 |
 
-See [Message Signatures](https://ucp.dev/draft/specification/signatures/index.md) for signature verification details.
+See [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md) for signature verification details.
 
 **Protocol Errors:**
 
@@ -877,11 +877,11 @@ Businesses **SHOULD** authenticate platforms to prevent impersonation and ensure
 - **API Keys** — Pre-shared secrets exchanged out-of-band
 - **OAuth 2.0** — Client credentials or other OAuth flows
 - **mTLS** — Mutual TLS with client certificates
-- **HTTP Message Signatures** — Cryptographic signatures per [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421) (see [Message Signatures](https://ucp.dev/draft/specification/signatures/index.md) for full specification)
+- **HTTP Message Signatures** — Cryptographic signatures per [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421) (see [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md) for full specification)
 
 HTTP Message Signatures enable permissionless onboarding — businesses can verify platforms by their advertised public keys without negotiating shared secrets. The other mechanisms require prior credential exchange and imply a pre-established relationship.
 
-Business-to-platform webhooks **MUST** be signed. See [Message Signatures — When Signatures Apply](https://ucp.dev/draft/specification/signatures/#when-signatures-apply).
+Business-to-platform webhooks **MUST** be signed. See [Message Signatures — When Signatures Apply](http://ucp.dev/draft/specification/signatures/#when-signatures-apply).
 
 #### Identity Binding
 
@@ -901,7 +901,7 @@ Both parties publish public keys in the `signing_keys` array of their UCP profil
 1. Extract `keyid` from `Signature-Input` and match to `kid` in `signing_keys[]`
 1. Verify signature using the corresponding public key
 
-For key format (JWK), supported algorithms, key rotation procedures, and complete signing/verification mechanics, see [Message Signatures](https://ucp.dev/draft/specification/signatures/index.md).
+For key format (JWK), supported algorithms, key rotation procedures, and complete signing/verification mechanics, see [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md).
 
 ### Profile Requirements
 
@@ -957,7 +957,7 @@ The payment architecture is built on a "Trust-by-Design" philosophy. It assumes 
 
 For scenarios requiring cryptographic proof of user authorization (e.g., autonomous AI agents), UCP supports the **AP2 Mandates Extension** (`dev.ucp.shopping.ap2_mandate`). This optional extension provides non-repudiable authorization through verifiable digital credentials.
 
-See [Transaction Integrity](#transaction-integrity-and-non-repudiation) and [AP2 Mandates Extension](https://ucp.dev/draft/specification/ap2-mandates/index.md) for details on when and how to use this extension.
+See [Transaction Integrity](#transaction-integrity-and-non-repudiation) and [AP2 Mandates Extension](http://ucp.dev/draft/specification/ap2-mandates/index.md) for details on when and how to use this extension.
 
 #### Credential Flow & PCI Scope
 
@@ -998,7 +998,7 @@ Payment handlers allow for a variety of different payment instruments and token-
 
 **Dynamic Filtering:** Businesses **MUST** filter the `handlers` list based on the context of the cart (e.g., removing "Buy Now Pay Later" for subscription items, or filtering regional methods based on shipping address).
 
-**Available Instrument Resolution:** Within each active handler, both the platform and the business independently advertise `available_instruments` — the set of instrument types and constraints each party supports. The business is responsible for resolving these into an authoritative value in the checkout response. The platform's declaration (from its profile) signals what it can handle; the business intersects that with its own `business_schema` declaration and cart context, then returns the resolved result. Platforms **MUST** treat the `available_instruments` in the response as authoritative for that checkout. See the [Payment Handler Guide](https://ucp.dev/draft/specification/payment-handler-guide/#resolving-available_instruments) for the full resolution semantics.
+**Available Instrument Resolution:** Within each active handler, both the platform and the business independently advertise `available_instruments` — the set of instrument types and constraints each party supports. The business is responsible for resolving these into an authoritative value in the checkout response. The platform's declaration (from its profile) signals what it can handle; the business intersects that with its own `business_schema` declaration and cart context, then returns the resolved result. Platforms **MUST** treat the `available_instruments` in the response as authoritative for that checkout. See the [Payment Handler Guide](http://ucp.dev/draft/specification/payment-handler-guide/#resolving-available_instruments) for the full resolution semantics.
 
 ### Implementation Scenarios
 
@@ -1291,7 +1291,7 @@ Payment credential providers (PSPs, wallets) are typically PCI-DSS Level 1 certi
 1. Implement idempotency for payment processing (prevent double-charges)
 1. Log payment events without logging credentials
 1. Set appropriate credential timeouts
-1. For autonomous commerce scenarios requiring cryptographic proof, consider supporting the `dev.ucp.shopping.ap2_mandate` extension (see [AP2 Mandates Extension](https://ucp.dev/draft/specification/ap2-mandates/index.md))
+1. For autonomous commerce scenarios requiring cryptographic proof, consider supporting the `dev.ucp.shopping.ap2_mandate` extension (see [AP2 Mandates Extension](http://ucp.dev/draft/specification/ap2-mandates/index.md))
 
 **For Platforms:**
 
@@ -1300,7 +1300,7 @@ Payment credential providers (PSPs, wallets) are typically PCI-DSS Level 1 certi
 1. Implement timeout handling for credential acquisition
 1. Clear credentials from memory after submission
 1. Handle credential expiration gracefully (re-acquire if needed)
-1. For autonomous agents, consider using the `dev.ucp.shopping.ap2_mandate` extension for cryptographic proof of authorization (see [AP2 Mandates Extension](https://ucp.dev/draft/specification/ap2-mandates/index.md))
+1. For autonomous agents, consider using the `dev.ucp.shopping.ap2_mandate` extension for cryptographic proof of authorization (see [AP2 Mandates Extension](http://ucp.dev/draft/specification/ap2-mandates/index.md))
 
 **For Payment Credential Providers:**
 
@@ -1323,8 +1323,8 @@ UCP supports fraud prevention through [Signals](#signals) and the payment archit
 
 The core payment architecture described above can be extended for specialized use cases:
 
-- **AP2 Mandates Extension** (`dev.ucp.shopping.ap2_mandate`): Adds cryptographic proof of user authorization for autonomous commerce scenarios where non-repudiable evidence is required. See [AP2 Mandates Extension](https://ucp.dev/draft/specification/ap2-mandates/index.md).
-- **Custom Handler Types**: Payment credential providers can define custom handlers to support new payment instruments. See [Payment Handler Guide](https://ucp.dev/draft/specification/payment-handler-guide/index.md) for details.
+- **AP2 Mandates Extension** (`dev.ucp.shopping.ap2_mandate`): Adds cryptographic proof of user authorization for autonomous commerce scenarios where non-repudiable evidence is required. See [AP2 Mandates Extension](http://ucp.dev/draft/specification/ap2-mandates/index.md).
+- **Custom Handler Types**: Payment credential providers can define custom handlers to support new payment instruments. See [Payment Handler Guide](http://ucp.dev/draft/specification/payment-handler-guide/index.md) for details.
 
 The extension model ensures the core architecture remains simple while supporting advanced security and compliance requirements when needed.
 
@@ -1479,7 +1479,7 @@ For scenarios requiring cryptographic proof of authorization (e.g., autonomous a
 
 This mechanism provides strong, end-to-end cryptographic assurances about transaction details and participant consent, significantly reducing risks of tampering and disputes.
 
-See [AP2 Mandates Extension](https://ucp.dev/draft/specification/ap2-mandates/index.md) for complete specification, implementation guide, and examples.
+See [AP2 Mandates Extension](http://ucp.dev/draft/specification/ap2-mandates/index.md) for complete specification, implementation guide, and examples.
 
 ## Versioning
 

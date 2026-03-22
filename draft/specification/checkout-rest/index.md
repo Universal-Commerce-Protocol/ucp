@@ -1,6 +1,6 @@
 # Checkout Capability - REST Binding
 
-This document specifies the REST binding for the [Checkout Capability](https://ucp.dev/draft/specification/checkout/index.md).
+This document specifies the REST binding for the [Checkout Capability](http://ucp.dev/draft/specification/checkout/index.md).
 
 ## Protocol Fundamentals
 
@@ -21,13 +21,13 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
 ## Operations
 
-| Operation                                                                            | Method | Endpoint                           | Description                |
-| ------------------------------------------------------------------------------------ | ------ | ---------------------------------- | -------------------------- |
-| [Create Checkout](https://ucp.dev/draft/specification/checkout/#create-checkout)     | `POST` | `/checkout-sessions`               | Create a checkout session. |
-| [Get Checkout](https://ucp.dev/draft/specification/checkout/#get-checkout)           | `GET`  | `/checkout-sessions/{id}`          | Get a checkout session.    |
-| [Update Checkout](https://ucp.dev/draft/specification/checkout/#update-checkout)     | `PUT`  | `/checkout-sessions/{id}`          | Update a checkout session. |
-| [Complete Checkout](https://ucp.dev/draft/specification/checkout/#complete-checkout) | `POST` | `/checkout-sessions/{id}/complete` | Place the order.           |
-| [Cancel Checkout](https://ucp.dev/draft/specification/checkout/#cancel-checkout)     | `POST` | `/checkout-sessions/{id}/cancel`   | Cancel a checkout session. |
+| Operation                                                                           | Method | Endpoint                           | Description                |
+| ----------------------------------------------------------------------------------- | ------ | ---------------------------------- | -------------------------- |
+| [Create Checkout](http://ucp.dev/draft/specification/checkout/#create-checkout)     | `POST` | `/checkout-sessions`               | Create a checkout session. |
+| [Get Checkout](http://ucp.dev/draft/specification/checkout/#get-checkout)           | `GET`  | `/checkout-sessions/{id}`          | Get a checkout session.    |
+| [Update Checkout](http://ucp.dev/draft/specification/checkout/#update-checkout)     | `PUT`  | `/checkout-sessions/{id}`          | Update a checkout session. |
+| [Complete Checkout](http://ucp.dev/draft/specification/checkout/#complete-checkout) | `POST` | `/checkout-sessions/{id}/complete` | Place the order.           |
+| [Cancel Checkout](http://ucp.dev/draft/specification/checkout/#cancel-checkout)     | `POST` | `/checkout-sessions/{id}/cancel`   | Cancel a checkout session. |
 
 ## Examples
 
@@ -1228,7 +1228,7 @@ UCP uses standard HTTP status codes to indicate the success or failure of an API
 
 ### Error Responses
 
-See the [Core Specification](https://ucp.dev/draft/specification/overview/#error-handling) for the complete error code registry and transport binding examples.
+See the [Core Specification](http://ucp.dev/draft/specification/overview/#error-handling) for the complete error code registry and transport binding examples.
 
 - **Protocol errors**: Return appropriate HTTP status code (401, 403, 409, 429, 503) with JSON body containing `code` and `content`.
 - **Business outcomes**: Return HTTP 200 with UCP envelope and `messages` array.
@@ -1285,7 +1285,7 @@ For `create_checkout`, when all items unavailable and no checkout can be created
 
 ## Message Signing
 
-Platforms **MAY** choose among authentication mechanisms (API keys, OAuth, mTLS, HTTP Message Signatures). When using HTTP Message Signatures, checkout operations follow the [Message Signatures](https://ucp.dev/draft/specification/signatures/index.md) specification.
+Platforms **MAY** choose among authentication mechanisms (API keys, OAuth, mTLS, HTTP Message Signatures). When using HTTP Message Signatures, checkout operations follow the [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md) specification.
 
 ### Request Signing
 
@@ -1314,7 +1314,7 @@ Signature: sig1=:MEUCIQDTxNq8h7LGHpvVZQp1iHkFp9+3N8Mxk2zH1wK4YuVN8w...:
 {"line_items":[{"item":{"id":"item_123"},"quantity":2}]}
 ```
 
-See [Message Signatures - REST Request Signing](https://ucp.dev/draft/specification/signatures/#rest-request-signing) for the complete signing algorithm.
+See [Message Signatures - REST Request Signing](http://ucp.dev/draft/specification/signatures/#rest-request-signing) for the complete signing algorithm.
 
 ### Response Signing
 
@@ -1338,7 +1338,7 @@ Signature: sig1=:MFQCIH7kL9nM2oP5qR8sT1uV4wX6yZaB3cD...:
 {"id":"chk_123","status":"completed","order":{"id":"ord_456"}}
 ```
 
-See [Message Signatures - REST Response Signing](https://ucp.dev/draft/specification/signatures/#rest-response-signing) for the complete signing algorithm.
+See [Message Signatures - REST Response Signing](http://ucp.dev/draft/specification/signatures/#rest-response-signing) for the complete signing algorithm.
 
 ## Security Considerations
 

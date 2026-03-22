@@ -101,7 +101,7 @@ When the business cannot create a new resource or the requested resource no long
 }
 ```
 
-See [REST](https://ucp.dev/draft/specification/checkout-rest/#create-checkout) and [MCP](https://ucp.dev/draft/specification/checkout-mcp/#create_checkout) binding examples.
+See [REST](http://ucp.dev/draft/specification/checkout-rest/#create-checkout) and [MCP](http://ucp.dev/draft/specification/checkout-mcp/#create_checkout) binding examples.
 
 #### Error Processing Algorithm
 
@@ -347,7 +347,7 @@ https://business.example.com/checkout-sessions/{checkout_id}
 
 A stateless URL that encodes checkout state directly, allowing reconstruction without server-side persistence. Businesses **SHOULD** implement support for this format to facilitate checkout handoff and accelerated entry—for example, a platform can prefill checkout state when initiating a buy-now flow.
 
-> **Note:** Checkout permalinks are a REST-specific construct that extends the [REST transport binding](https://ucp.dev/draft/specification/checkout-rest/index.md). Accessing a permalink returns a redirect to the checkout UI or renders the checkout page directly.
+> **Note:** Checkout permalinks are a REST-specific construct that extends the [REST transport binding](http://ucp.dev/draft/specification/checkout-rest/index.md). Accessing a permalink returns a redirect to the checkout UI or renders the checkout page directly.
 
 ## Guidelines
 
@@ -499,10 +499,10 @@ This object MUST be one of the following types: [Checkout](/draft/specification/
 
 The abstract operations above are bound to specific transport protocols as defined below:
 
-- [REST Binding](https://ucp.dev/draft/specification/checkout-rest/index.md): RESTful API mapping using standard HTTP verbs and JSON payloads.
-- [MCP Binding](https://ucp.dev/draft/specification/checkout-mcp/index.md): Model Context Protocol mapping for agentic interaction.
-- [A2A Binding](https://ucp.dev/draft/specification/checkout-a2a/index.md): Agent-to-Agent Protocol mapping for agentic interactions.
-- [Embedded Checkout Binding](https://ucp.dev/draft/specification/embedded-checkout/index.md): JSON-RPC for powering embedded checkout.
+- [REST Binding](http://ucp.dev/draft/specification/checkout-rest/index.md): RESTful API mapping using standard HTTP verbs and JSON payloads.
+- [MCP Binding](http://ucp.dev/draft/specification/checkout-mcp/index.md): Model Context Protocol mapping for agentic interaction.
+- [A2A Binding](http://ucp.dev/draft/specification/checkout-a2a/index.md): Agent-to-Agent Protocol mapping for agentic interactions.
+- [Embedded Checkout Binding](http://ucp.dev/draft/specification/embedded-checkout/index.md): JSON-RPC for powering embedded checkout.
 
 ## Entities
 
@@ -531,7 +531,7 @@ Context signals are provisional—not authoritative data. Businesses SHOULD use 
 
 ### Signals
 
-Environment data provided by the platform to support authorization and abuse prevention. Unlike `context` (buyer-asserted preferences) and `buyer` (self-reported identity), signal values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or by relaying independently verifiable third-party attestations. See [Signals](https://ucp.dev/draft/specification/overview/#signals) for details and privacy requirements.
+Environment data provided by the platform to support authorization and abuse prevention. Unlike `context` (buyer-asserted preferences) and `buyer` (self-reported identity), signal values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or by relaying independently verifiable third-party attestations. See [Signals](http://ucp.dev/draft/specification/overview/#signals) for details and privacy requirements.
 
 | Name               | Type   | Required | Description                                    |
 | ------------------ | ------ | -------- | ---------------------------------------------- |

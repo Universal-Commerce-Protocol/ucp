@@ -81,14 +81,14 @@ If a public key cannot be resolved, or if the signature is invalid, the business
 
 ## Cryptographic Requirements
 
-This extension uses the cryptographic primitives defined in the [Message Signatures](https://ucp.dev/draft/specification/signatures/index.md) specification:
+This extension uses the cryptographic primitives defined in the [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md) specification:
 
 - **Algorithms:** ES256 (required), ES384, ES512
 - **Canonicalization:** JCS ([RFC 8785](https://datatracker.ietf.org/doc/html/rfc8785))
 - **Key Format:** JWK ([RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517))
-- **Key Discovery:** `signing_keys[]` in `/.well-known/ucp` (see [Key Discovery](https://ucp.dev/draft/specification/overview/#key-discovery))
+- **Key Discovery:** `signing_keys[]` in `/.well-known/ucp` (see [Key Discovery](http://ucp.dev/draft/specification/overview/#key-discovery))
 
-See [Message Signatures](https://ucp.dev/draft/specification/signatures/index.md) for complete details on algorithms, key format, and key rotation.
+See [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md) for complete details on algorithms, key format, and key rotation.
 
 ### Business Authorization
 

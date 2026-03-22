@@ -11,10 +11,10 @@ The Catalog capability allows platforms to search and browse business product ca
 
 ## Capabilities
 
-| Capability                                                                                       | Description                                       |
-| ------------------------------------------------------------------------------------------------ | ------------------------------------------------- |
-| [`dev.ucp.shopping.catalog.search`](https://ucp.dev/draft/specification/catalog/search/index.md) | Search for products using query text and filters. |
-| [`dev.ucp.shopping.catalog.lookup`](https://ucp.dev/draft/specification/catalog/lookup/index.md) | Retrieve products or variants by identifier.      |
+| Capability                                                                                      | Description                                       |
+| ----------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| [`dev.ucp.shopping.catalog.search`](http://ucp.dev/draft/specification/catalog/search/index.md) | Search for products using query text and filters. |
+| [`dev.ucp.shopping.catalog.lookup`](http://ucp.dev/draft/specification/catalog/lookup/index.md) | Retrieve products or variants by identifier.      |
 
 ## Key Concepts
 
@@ -36,7 +36,7 @@ Location and market context for catalog operations. All fields are optional hint
 
 Context signals are provisional—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data.
 
-Businesses determine market assignment—including currency—based on context signals. Price filter values are denominated in `context.currency`; when the presentment currency differs, businesses SHOULD convert before applying (see [Price Filter](https://ucp.dev/draft/specification/catalog/search/#price-filter)). Response prices include explicit currency codes confirming the resolution.
+Businesses determine market assignment—including currency—based on context signals. Price filter values are denominated in `context.currency`; when the presentment currency differs, businesses SHOULD convert before applying (see [Price Filter](http://ucp.dev/draft/specification/catalog/search/#price-filter)). Response prices include explicit currency codes confirming the resolution.
 
 When `context.eligibility` claims are present, Businesses that accept them **MAY** adjust `price` / `list_price` directly for strikethrough display and **MAY** use `messages` with `code: "eligibility_benefit"` to attribute the adjustment to a specific claim.
 
@@ -52,7 +52,7 @@ When `context.eligibility` claims are present, Businesses that accept them **MAY
 
 ### Signals
 
-Environment data provided by the platform to support authorization and abuse prevention. Signal values MUST NOT be buyer-asserted claims. See [Signals](https://ucp.dev/draft/specification/overview/#signals) for details and privacy requirements.
+Environment data provided by the platform to support authorization and abuse prevention. Signal values MUST NOT be buyer-asserted claims. See [Signals](http://ucp.dev/draft/specification/overview/#signals) for details and privacy requirements.
 
 | Name               | Type   | Required | Description                                    |
 | ------------------ | ------ | -------- | ---------------------------------------------- |
@@ -86,7 +86,7 @@ A catalog item representing a sellable item with one or more purchasable variant
 
 A purchasable item with specific option selections, price, and availability.
 
-In lookup responses, each variant carries an `inputs` array for correlation: which request identifiers resolved to this variant, and whether the match was `exact` or `featured` (server-selected). See [Client Correlation](https://ucp.dev/draft/specification/catalog/lookup/#client-correlation) for details.
+In lookup responses, each variant carries an `inputs` array for correlation: which request identifiers resolved to this variant, and whether the match was `exact` or `featured` (server-selected). See [Client Correlation](http://ucp.dev/draft/specification/catalog/lookup/#client-correlation) for details.
 
 `media` is an ordered array. Businesses SHOULD return the featured variant image as the first element. Platforms SHOULD treat the first element as featured.
 
@@ -178,7 +178,7 @@ Messages communicate business outcomes and provide context:
 | `warning` | Important conditions affecting purchase | `DELAYED_FULFILLMENT`, `FINAL_SALE`              |
 | `info`    | Additional context without issues       | `PROMOTIONAL_PRICING`, `LIMITED_AVAILABILITY`    |
 
-Warnings with `presentation: "disclosure"` carry notices (e.g., allergen declarations, safety warnings) that platforms must not hide or dismiss. See [Warning Presentation](https://ucp.dev/draft/specification/checkout/#warning-presentation) for the full rendering contract.
+Warnings with `presentation: "disclosure"` carry notices (e.g., allergen declarations, safety warnings) that platforms must not hide or dismiss. See [Warning Presentation](http://ucp.dev/draft/specification/checkout/#warning-presentation) for the full rendering contract.
 
 **Note**: All catalog errors use `severity: "recoverable"` - agents handle them programmatically (retry, inform user, show alternatives).
 
@@ -289,7 +289,7 @@ When requested identifiers don't exist, return success with the found products (
 }
 ```
 
-Agents correlate results using the `inputs` array on each variant. See [Client Correlation](https://ucp.dev/draft/specification/catalog/lookup/#client-correlation).
+Agents correlate results using the `inputs` array on each variant. See [Client Correlation](http://ucp.dev/draft/specification/catalog/lookup/#client-correlation).
 
 #### Product Disclosure
 
@@ -333,11 +333,11 @@ When a product requires a disclosure (e.g., allergen notice, safety warning), re
 }
 ```
 
-See [Warning Presentation](https://ucp.dev/draft/specification/checkout/#warning-presentation) for the full rendering contract.
+See [Warning Presentation](http://ucp.dev/draft/specification/checkout/#warning-presentation) for the full rendering contract.
 
 ## Transport Bindings
 
 The capabilities above are bound to specific transport protocols:
 
-- [REST Binding](https://ucp.dev/draft/specification/catalog/rest/index.md): RESTful API mapping.
-- [MCP Binding](https://ucp.dev/draft/specification/catalog/mcp/index.md): Model Context Protocol mapping via JSON-RPC.
+- [REST Binding](http://ucp.dev/draft/specification/catalog/rest/index.md): RESTful API mapping.
+- [MCP Binding](http://ucp.dev/draft/specification/catalog/mcp/index.md): Model Context Protocol mapping via JSON-RPC.

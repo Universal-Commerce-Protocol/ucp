@@ -56,5 +56,5 @@ Implementations SHOULD accept at least 10 identifiers per request. Implementatio
 
 ## Transport Bindings
 
-- [REST Binding](https://ucp.dev/draft/specification/catalog/rest/#post-cataloglookup): `POST /catalog/lookup`
-- [MCP Binding](https://ucp.dev/draft/specification/catalog/mcp/#lookup_catalog): `lookup_catalog` tool
+- [REST Binding](http://ucp.dev/draft/specification/catalog/rest/#post-cataloglookup): `POST /catalog/lookup`
+- [MCP Binding](http://ucp.dev/draft/specification/catalog/mcp/#lookup_catalog): `lookup_catalog` tool
