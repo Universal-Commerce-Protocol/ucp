@@ -278,6 +278,70 @@ Capabilities outside `dev.ucp.*` version fully independently:
 
 Vendor schemas follow the same self-describing requirements.
 
+## Extensibility and Forward Compatibility
+
+When designing schemas, you must account for how older clients will validate newer payloads. In serialization formats
+like Protobuf, adding a new field or enum value is generally a safe, forward-compatible change.
+
+Because modern code generators (e.g. [Quicktype](https://quicktype.io/)) translate JSON Schemas into strictly typed
+classes (e.g., Go structs or Java Enums), certain schema constraints will cause deserialization errors on older clients
+as the protocol evolves.  Avoiding such changes helps minimize the need to up-version the protocol.
+
+### Open Enumerations
+
+If a field's list of values might expand in the future (e.g., adding a `"refunded"` status or a new payment method),
+**do not use `enum`**.
+
+Instead, define a standard `string`, document the requirement to ignore unknown values in the `description`, and use
+`examples` to convey current expected values to code generators. Avoid complex "Open Set" validation patterns
+(e.g., combining `anyOf` with `const`), as they frequently confuse client-side code generators and make schemas
+difficult to read.
+
+```json
+"cancellation_reason": {
+  "type": "string",
+  "description": "Reason for order cancellation. Clients MUST tolerate and ignore unknown values.",
+  "examples": ["customer_requested", "inventory_shortage", "fraud_suspected"]
+}
+```
+
+### Closed Enumerations
+
+Use strict `enum` or `const` only for permanently fixed domains or when unknown values are inherently unsupported.
+Reserve  them for cases where adding a new value inherently requires integrators to update their code (e.g., protocol
+versions, strict type discriminators, or days of the week).
+
+```json
+"status": {
+  "type": "string",
+  "enum": ["open", "completed", "expired"],
+  "description": "Lifecycle state. This domain is strictly bounded; unknown states represent a breakdown in the state machine and MUST be rejected."
+}
+```
+
+### Open Objects (`additionalProperties`)
+
+Marking an object as closed preemptively prevents any future non-breaking additions to the schema. In a distributed
+protocol, what would otherwise be a backward-compatible field addition (e.g., adding a "gift_message" field to an order)
+becomes a breaking change for any client validating against a closed schema.
+
+By default, JSON Schema is open and ignores unknown properties. Authors should leave this keyword omitted except in rare
+circumstances: polymorphic discriminators (where strictness prevents oneOf validation ambiguity), security-critical
+payloads (where unknown fields may indicate tampering), or protocol envelopes (where strictness is useful to catch
+typos in core metadata like the `ucp` block).
+
+**Anti-Pattern (Prevents adding new fields without a reversion):**
+
+```json
+"totals": {
+  "type": "object",
+  "properties": {
+    "subtotal": {"type": "integer"}
+  },
+  "additionalProperties": false
+}
+```
+
 ## Complete Example: Capability Schema
 
 A capability schema defines both payload structure and declaration variants:
