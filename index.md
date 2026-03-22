@@ -8,7 +8,7 @@ UCP defines building blocks for agentic commerce—from discovering and buying t
 
 Protocol overview, core concepts, and design principles
 
-[Read the docs](https://ucp.dev/latest/specification/overview/index.md)
+[Read the docs](http://ucp.dev/latest/specification/overview/index.md)
 
 ### Implement
 
@@ -68,7 +68,7 @@ SEE IT IN ACTION
 
 Support complex cart logic, dynamic pricing, tax calculations, and more across millions of businesses through unified checkout sessions.
 
-[Learn more](https://ucp.dev/latest/specification/checkout-rest/index.md)
+[Learn more](http://ucp.dev/latest/specification/checkout-rest/index.md)
 
 ```json
 {
@@ -141,7 +141,7 @@ SEE IT IN ACTION
 
 OAuth 2.0 standard enables agents to maintain secure, authorized relationships without sharing credentials.
 
-[Learn more](https://ucp.dev/latest/specification/identity-linking/index.md)
+[Learn more](http://ucp.dev/latest/specification/identity-linking/index.md)
 
 ```json
 Sample of /.well-known/oauth-authorization-server
@@ -174,7 +174,7 @@ SEE IT IN ACTION
 
 From purchase confirmation to delivery. Real-time webhooks power status updates, shipment tracking, and return processing across every channel.
 
-[Learn more](https://ucp.dev/latest/specification/order/index.md)
+[Learn more](http://ucp.dev/latest/specification/order/index.md)
 
 ```json
 {
@@ -234,13 +234,13 @@ From purchase confirmation to delivery. Real-time webhooks power status updates,
 
 Integrate and negotiate directly with a seller's checkout API to power native UI and workflows for your platform.
 
-[See how it works](https://ucp.dev/latest/specification/checkout-rest/index.md)
+[See how it works](http://ucp.dev/latest/specification/checkout-rest/index.md)
 
 ### Embed business checkout
 
 Embed and render business checkout UI to support complex checkout flows, with advanced capabilities like bidirectional communication, and payment and shipping address delegation.
 
-[Learn more](https://ucp.dev/latest/specification/embedded-checkout/index.md)
+[Learn more](http://ucp.dev/latest/specification/embedded-checkout/index.md)
 
 ## Designed for the entire commerce ecosystem
 
@@ -248,7 +248,7 @@ Embed and render business checkout UI to support complex checkout flows, with ad
 
 Build the future of commerce on an open foundation. Join our community in evolving an open-source standard designed for the next generation of digital commerce.
 
-[View the technical spec](https://ucp.dev/latest/specification/overview/index.md)
+[View the technical spec](http://ucp.dev/latest/specification/overview/index.md)
 
 ### For Businesses
 
@@ -260,13 +260,13 @@ UCP empowers retailers to meet customers wherever they are—AI assistants, shop
 
 Simplify business onboarding with standardized APIs and provide your audience with an integrated shopping experience. Compatible with MCP, A2A, and existing agent frameworks.
 
-[Learn more about UCP core concepts](https://ucp.dev/documentation/core-concepts/index.md)
+[Learn more about UCP core concepts](http://ucp.dev/documentation/core-concepts/index.md)
 
 ### For Payment Providers
 
 Universal payments that are provable—every authorization backed by cryptographic proof of user consent. Open, modular payment handler design enables open interoperability and choice of payment methods.
 
-[Learn more about UCP and AP2](https://ucp.dev/documentation/ucp-and-ap2/index.md)
+[Learn more about UCP and AP2](http://ucp.dev/documentation/ucp-and-ap2/index.md)
 
 ## Endorsed across the ecosystem
 
@@ -396,7 +396,7 @@ The complete technical specification, documentation, and reference implementatio
 
 Download and run our code samples
 
-### [Experiment](https://ucp.dev/latest/specification/playground/index.md)
+### [Experiment](http://ucp.dev/latest/specification/playground/index.md)
 
 Experiment with the protocol and its different agent roles
 

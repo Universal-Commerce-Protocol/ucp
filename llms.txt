@@ -5,10 +5,10 @@
 
 ## Overview
 
-- [Home](https://ucp.dev/index.md)
-- [Core Concepts](https://ucp.dev/documentation/core-concepts/index.md)
-- [UCP and AP2](https://ucp.dev/documentation/ucp-and-ap2/index.md)
-- [Roadmap](https://ucp.dev/documentation/roadmap/index.md)
-- [Schema Authoring](https://ucp.dev/documentation/schema-authoring/index.md)
-- [Versioning](https://ucp.dev/versioning/index.md)
+- [Home](http://ucp.dev/index.md)
+- [Core Concepts](http://ucp.dev/documentation/core-concepts/index.md)
+- [UCP and AP2](http://ucp.dev/documentation/ucp-and-ap2/index.md)
+- [Roadmap](http://ucp.dev/documentation/roadmap/index.md)
+- [Schema Authoring](http://ucp.dev/documentation/schema-authoring/index.md)
+- [Versioning](http://ucp.dev/versioning/index.md)
 
