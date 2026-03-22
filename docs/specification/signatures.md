@@ -108,13 +108,14 @@ defined in [RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517).
 | :---- | :----- | :------- | :--------------------------------------- |
 | `kid` | string | Yes      | Key ID (referenced in signatures)        |
 | `kty` | string | Yes      | Key type (`EC` for elliptic curve)       |
-| `crv` | string | Yes*     | Curve name (`P-256`, `P-384`)            |
-| `x`   | string | Yes*     | X coordinate (base64url encoded)         |
-| `y`   | string | Yes*     | Y coordinate (base64url encoded)         |
+| `crv` | string | Yes<sup><code>*</code></sup> | Curve name (`P-256`, `P-384`)            |
+| `x`   | string | Yes<sup><code>*</code></sup> | X coordinate (base64url encoded)         |
+| `y`   | string | Yes<sup><code>*</code></sup> | Y coordinate (base64url encoded)         |
 | `use` | string | No       | Key usage (`sig` for signing)            |
 | `alg` | string | No       | Algorithm (`ES256`, `ES384`)             |
 
-\* Required for EC keys
+<sup><code>*</code></sup> Required
+ for EC keys
 
 **Example:**
 
@@ -169,9 +170,10 @@ For HTTP REST transport, UCP uses
 | :---------------- | :--------------- | :------- | :------------------------------------ |
 | `Signature-Input` | Request/Response | Yes      | Describes signed components           |
 | `Signature`       | Request/Response | Yes      | Contains signature value              |
-| `Content-Digest`  | Request/Response | Cond.*   | SHA-256 hash of request/response body |
+| `Content-Digest`  | Request/Response | Cond.<sup><code>*</code></sup> | SHA-256 hash of request/response body |
 
-\* Required when request/response has a body
+<sup><code>*</code></sup> Required
+ when request/response has a body
 
 `Content-Digest` follows [RFC 9530](https://www.rfc-editor.org/rfc/rfc9530) and
 hashes the raw body bytes. This binds the message body to the signature without
@@ -193,16 +195,18 @@ verification.
 | `@method`         | Yes       | HTTP method (GET, POST, etc.)          |
 | `@authority`      | Yes       | Target host (prevents cross-host relay)|
 | `@path`           | Yes       | Request path                           |
-| `@query`          | Cond.\*   | Query string (if present)              |
-| `ucp-agent`       | Cond.\**  | Profile URL (binds identity)           |
-| `idempotency-key` | Cond.\*** | Idempotency header (state-changing)    |
-| `content-digest`  | Cond.†    | Body digest (if body present)          |
-| `content-type`    | Cond.†    | Content-Type (if body present)         |
+| `@query`          | Cond.<sup>*</sup>   | Query string (if present)              |
+| `ucp-agent`       | Cond.<sup>**</sup>  | Profile URL (binds identity)           |
+| `idempotency-key` | Cond.<sup>***</sup> | Idempotency header (state-changing)    |
+| `content-digest`  | Cond.<sup>†</sup>    | Body digest (if body present)          |
+| `content-type`    | Cond.<sup>†</sup>   | Content-Type (if body present)         |
 
-\* Required if request has query parameters
-\** Required if `UCP-Agent` header is present
-\*** Required for POST, PUT, DELETE, PATCH
-† Required if request has a body
+<div style="font-size: 0.85em; line-height: 1.5; margin-top: 10px;">
+<sup>*</sup> Required if request has query parameters<br>
+<sup>**</sup> Required if <code>UCP-Agent</code> header is present<br>
+<sup>***</sup> Required for POST, PUT, DELETE, PATCH<br>
+<sup>†</sup> Required if request has a body
+</div>
 
 **Signature Generation:**
 
@@ -286,10 +290,11 @@ Response signatures use `@status` instead of `@method`:
 | Component        | Required | Description                       |
 | :--------------- | :------- | :-------------------------------- |
 | `@status`        | Yes      | HTTP status code (200, 201, etc.) |
-| `content-digest` | Cond.*   | Body digest (if body present)     |
-| `content-type`   | Cond.*   | Content-Type (if body present)    |
+| `content-digest` | Cond.<sup><code>*</code></sup>   | Body digest (if body present)     |
+| `content-type`   | Cond.<sup><code>*</code></sup>   | Content-Type (if body present)    |
 
-\* Required if response has a body
+<sup><code>*</code></sup> Required
+ if response has a body
 
 **Complete Response Example:**
 
