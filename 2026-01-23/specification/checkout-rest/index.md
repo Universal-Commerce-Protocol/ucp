@@ -1,6 +1,6 @@
 # Checkout Capability - REST Binding
 
-This document specifies the REST binding for the [Checkout Capability](https://ucp.dev/2026-01-23/specification/checkout/index.md).
+This document specifies the REST binding for the [Checkout Capability](http://ucp.dev/2026-01-23/specification/checkout/index.md).
 
 ## Protocol Fundamentals
 
@@ -21,13 +21,13 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
 ## Operations
 
-| Operation                                                                                 | Method | Endpoint                           | Description                |
-| ----------------------------------------------------------------------------------------- | ------ | ---------------------------------- | -------------------------- |
-| [Create Checkout](https://ucp.dev/2026-01-23/specification/checkout/#create-checkout)     | `POST` | `/checkout-sessions`               | Create a checkout session. |
-| [Get Checkout](https://ucp.dev/2026-01-23/specification/checkout/#get-checkout)           | `GET`  | `/checkout-sessions/{id}`          | Get a checkout session.    |
-| [Update Checkout](https://ucp.dev/2026-01-23/specification/checkout/#update-checkout)     | `PUT`  | `/checkout-sessions/{id}`          | Update a checkout session. |
-| [Complete Checkout](https://ucp.dev/2026-01-23/specification/checkout/#complete-checkout) | `POST` | `/checkout-sessions/{id}/complete` | Place the order.           |
-| [Cancel Checkout](https://ucp.dev/2026-01-23/specification/checkout/#cancel-checkout)     | `POST` | `/checkout-sessions/{id}/cancel`   | Cancel a checkout session. |
+| Operation                                                                                | Method | Endpoint                           | Description                |
+| ---------------------------------------------------------------------------------------- | ------ | ---------------------------------- | -------------------------- |
+| [Create Checkout](http://ucp.dev/2026-01-23/specification/checkout/#create-checkout)     | `POST` | `/checkout-sessions`               | Create a checkout session. |
+| [Get Checkout](http://ucp.dev/2026-01-23/specification/checkout/#get-checkout)           | `GET`  | `/checkout-sessions/{id}`          | Get a checkout session.    |
+| [Update Checkout](http://ucp.dev/2026-01-23/specification/checkout/#update-checkout)     | `PUT`  | `/checkout-sessions/{id}`          | Update a checkout session. |
+| [Complete Checkout](http://ucp.dev/2026-01-23/specification/checkout/#complete-checkout) | `POST` | `/checkout-sessions/{id}/complete` | Place the order.           |
+| [Cancel Checkout](http://ucp.dev/2026-01-23/specification/checkout/#cancel-checkout)     | `POST` | `/checkout-sessions/{id}/cancel`   | Cancel a checkout session. |
 
 ## Examples
 

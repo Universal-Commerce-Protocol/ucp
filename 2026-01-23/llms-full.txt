@@ -521,7 +521,7 @@ The payment architecture is built on a "Trust-by-Design" philosophy. It assumes 
 
 For scenarios requiring cryptographic proof of user authorization (e.g., autonomous AI agents), UCP supports the **AP2 Mandates Extension** (`dev.ucp.shopping.ap2_mandate`). This optional extension provides non-repudiable authorization through verifiable digital credentials.
 
-See [Transaction Integrity](#transaction-integrity-and-non-repudiation) and [AP2 Mandates Extension](https://ucp.dev/2026-01-23/specification/ap2-mandates/index.md) for details on when and how to use this extension.
+See [Transaction Integrity](#transaction-integrity-and-non-repudiation) and [AP2 Mandates Extension](http://ucp.dev/2026-01-23/specification/ap2-mandates/index.md) for details on when and how to use this extension.
 
 #### Credential Flow & PCI Scope
 
@@ -852,7 +852,7 @@ Payment credential providers (PSPs, wallets) are typically PCI-DSS Level 1 certi
 1. Implement idempotency for payment processing (prevent double-charges)
 1. Log payment events without logging credentials
 1. Set appropriate credential timeouts
-1. For autonomous commerce scenarios requiring cryptographic proof, consider supporting the `dev.ucp.shopping.ap2_mandate` extension (see [AP2 Mandates Extension](https://ucp.dev/2026-01-23/specification/ap2-mandates/index.md))
+1. For autonomous commerce scenarios requiring cryptographic proof, consider supporting the `dev.ucp.shopping.ap2_mandate` extension (see [AP2 Mandates Extension](http://ucp.dev/2026-01-23/specification/ap2-mandates/index.md))
 
 **For Platforms:**
 
@@ -861,7 +861,7 @@ Payment credential providers (PSPs, wallets) are typically PCI-DSS Level 1 certi
 1. Implement timeout handling for credential acquisition
 1. Clear credentials from memory after submission
 1. Handle credential expiration gracefully (re-acquire if needed)
-1. For autonomous agents, consider using the `dev.ucp.shopping.ap2_mandate` extension for cryptographic proof of authorization (see [AP2 Mandates Extension](https://ucp.dev/2026-01-23/specification/ap2-mandates/index.md))
+1. For autonomous agents, consider using the `dev.ucp.shopping.ap2_mandate` extension for cryptographic proof of authorization (see [AP2 Mandates Extension](http://ucp.dev/2026-01-23/specification/ap2-mandates/index.md))
 
 **For Payment Credential Providers:**
 
@@ -886,8 +886,8 @@ Future extensions **MAY** standardize fraud signal schemas, but the current arch
 
 The core payment architecture described above can be extended for specialized use cases:
 
-- **AP2 Mandates Extension** (`dev.ucp.shopping.ap2_mandate`): Adds cryptographic proof of user authorization for autonomous commerce scenarios where non-repudiable evidence is required. See [AP2 Mandates Extension](https://ucp.dev/2026-01-23/specification/ap2-mandates/index.md).
-- **Custom Handler Types**: Payment credential providers can define custom handlers to support new payment instruments. See [Payment Handler Guide](https://ucp.dev/2026-01-23/specification/payment-handler-guide/index.md) for details.
+- **AP2 Mandates Extension** (`dev.ucp.shopping.ap2_mandate`): Adds cryptographic proof of user authorization for autonomous commerce scenarios where non-repudiable evidence is required. See [AP2 Mandates Extension](http://ucp.dev/2026-01-23/specification/ap2-mandates/index.md).
+- **Custom Handler Types**: Payment credential providers can define custom handlers to support new payment instruments. See [Payment Handler Guide](http://ucp.dev/2026-01-23/specification/payment-handler-guide/index.md) for details.
 
 The extension model ensures the core architecture remains simple while supporting advanced security and compliance requirements when needed.
 
@@ -955,7 +955,7 @@ For scenarios requiring cryptographic proof of authorization (e.g., autonomous a
 
 This mechanism provides strong, end-to-end cryptographic assurances about transaction details and participant consent, significantly reducing risks of tampering and disputes.
 
-See [AP2 Mandates Extension](https://ucp.dev/2026-01-23/specification/ap2-mandates/index.md) for complete specification, implementation guide, and examples.
+See [AP2 Mandates Extension](http://ucp.dev/2026-01-23/specification/ap2-mandates/index.md) for complete specification, implementation guide, and examples.
 
 ## Versioning
 
@@ -1260,7 +1260,7 @@ https://business.example.com/checkout-sessions/{checkout_id}
 
 A stateless URL that encodes checkout state directly, allowing reconstruction without server-side persistence. Businesses **SHOULD** implement support for this format to facilitate checkout handoff and accelerated entry—for example, a platform can prefill checkout state when initiating a buy-now flow.
 
-> **Note:** Checkout permalinks are a REST-specific construct that extends the [REST transport binding](https://ucp.dev/2026-01-23/specification/checkout-rest/index.md). Accessing a permalink returns a redirect to the checkout UI or renders the checkout page directly.
+> **Note:** Checkout permalinks are a REST-specific construct that extends the [REST transport binding](http://ucp.dev/2026-01-23/specification/checkout-rest/index.md). Accessing a permalink returns a redirect to the checkout UI or renders the checkout page directly.
 
 ## Guidelines
 
@@ -1475,10 +1475,10 @@ This operation will be used to cancel a checkout session, if it can be canceled.
 
 The abstract operations above are bound to specific transport protocols as defined below:
 
-- [REST Binding](https://ucp.dev/2026-01-23/specification/checkout-rest/index.md): RESTful API mapping using standard HTTP verbs and JSON payloads.
-- [MCP Binding](https://ucp.dev/2026-01-23/specification/checkout-mcp/index.md): Model Context Protocol mapping for agentic interaction.
-- [A2A Binding](https://ucp.dev/2026-01-23/specification/checkout-a2a/index.md): Agent-to-Agent Protocol mapping for agentic interactions.
-- [Embedded Checkout Binding](https://ucp.dev/2026-01-23/specification/embedded-checkout/index.md): JSON-RPC for powering embedded checkout.
+- [REST Binding](http://ucp.dev/2026-01-23/specification/checkout-rest/index.md): RESTful API mapping using standard HTTP verbs and JSON payloads.
+- [MCP Binding](http://ucp.dev/2026-01-23/specification/checkout-mcp/index.md): Model Context Protocol mapping for agentic interaction.
+- [A2A Binding](http://ucp.dev/2026-01-23/specification/checkout-a2a/index.md): Agent-to-Agent Protocol mapping for agentic interactions.
+- [Embedded Checkout Binding](http://ucp.dev/2026-01-23/specification/embedded-checkout/index.md): JSON-RPC for powering embedded checkout.
 
 ## Entities
 
@@ -1712,7 +1712,7 @@ This object MUST be one of the following types: [Message Error](/2026-01-23/spec
 
 # Checkout Capability - REST Binding
 
-This document specifies the REST binding for the [Checkout Capability](https://ucp.dev/2026-01-23/specification/checkout/index.md).
+This document specifies the REST binding for the [Checkout Capability](http://ucp.dev/2026-01-23/specification/checkout/index.md).
 
 ## Protocol Fundamentals
 
@@ -1733,13 +1733,13 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
 ## Operations
 
-| Operation                                                                                 | Method | Endpoint                           | Description                |
-| ----------------------------------------------------------------------------------------- | ------ | ---------------------------------- | -------------------------- |
-| [Create Checkout](https://ucp.dev/2026-01-23/specification/checkout/#create-checkout)     | `POST` | `/checkout-sessions`               | Create a checkout session. |
-| [Get Checkout](https://ucp.dev/2026-01-23/specification/checkout/#get-checkout)           | `GET`  | `/checkout-sessions/{id}`          | Get a checkout session.    |
-| [Update Checkout](https://ucp.dev/2026-01-23/specification/checkout/#update-checkout)     | `PUT`  | `/checkout-sessions/{id}`          | Update a checkout session. |
-| [Complete Checkout](https://ucp.dev/2026-01-23/specification/checkout/#complete-checkout) | `POST` | `/checkout-sessions/{id}/complete` | Place the order.           |
-| [Cancel Checkout](https://ucp.dev/2026-01-23/specification/checkout/#cancel-checkout)     | `POST` | `/checkout-sessions/{id}/cancel`   | Cancel a checkout session. |
+| Operation                                                                                | Method | Endpoint                           | Description                |
+| ---------------------------------------------------------------------------------------- | ------ | ---------------------------------- | -------------------------- |
+| [Create Checkout](http://ucp.dev/2026-01-23/specification/checkout/#create-checkout)     | `POST` | `/checkout-sessions`               | Create a checkout session. |
+| [Get Checkout](http://ucp.dev/2026-01-23/specification/checkout/#get-checkout)           | `GET`  | `/checkout-sessions/{id}`          | Get a checkout session.    |
+| [Update Checkout](http://ucp.dev/2026-01-23/specification/checkout/#update-checkout)     | `PUT`  | `/checkout-sessions/{id}`          | Update a checkout session. |
+| [Complete Checkout](http://ucp.dev/2026-01-23/specification/checkout/#complete-checkout) | `POST` | `/checkout-sessions/{id}/complete` | Place the order.           |
+| [Cancel Checkout](http://ucp.dev/2026-01-23/specification/checkout/#cancel-checkout)     | `POST` | `/checkout-sessions/{id}/cancel`   | Cancel a checkout session. |
 
 ## Examples
 
@@ -2934,7 +2934,7 @@ Businesses **MAY** require authentication for some operations while leaving othe
 
 # Checkout Capability - MCP Binding
 
-This document specifies the Model Context Protocol (MCP) binding for the [Checkout Capability](https://ucp.dev/2026-01-23/specification/checkout/index.md).
+This document specifies the Model Context Protocol (MCP) binding for the [Checkout Capability](http://ucp.dev/2026-01-23/specification/checkout/index.md).
 
 ## Protocol Fundamentals
 
@@ -3013,7 +3013,7 @@ MCP clients **MUST** include a `meta` object in every request containing protoco
 }
 ```
 
-The `meta["ucp-agent"]` field is **required** on all requests to enable [capability negotiation](https://ucp.dev/2026-01-23/specification/overview/#negotiation-protocol). The `complete_checkout` and `cancel_checkout` operations also require `meta["idempotency-key"]` for retry safety. Platforms **MAY** include additional metadata fields.
+The `meta["ucp-agent"]` field is **required** on all requests to enable [capability negotiation](http://ucp.dev/2026-01-23/specification/overview/#negotiation-protocol). The `complete_checkout` and `cancel_checkout` operations also require `meta["idempotency-key"]` for retry safety. Platforms **MAY** include additional metadata fields.
 
 ## Tools
 
@@ -3027,30 +3027,30 @@ MCP tools separate resource identification from payload data:
 - **Responses:** All responses include `checkout.id` as part of the full resource state.
 - **Create:** The `create_checkout` operation does not require an `id` in the request, and the response includes the newly assigned `checkout.id`.
 
-| Tool                | Operation                                                                                 | Description                |
-| ------------------- | ----------------------------------------------------------------------------------------- | -------------------------- |
-| `create_checkout`   | [Create Checkout](https://ucp.dev/2026-01-23/specification/checkout/#create-checkout)     | Create a checkout session. |
-| `get_checkout`      | [Get Checkout](https://ucp.dev/2026-01-23/specification/checkout/#get-checkout)           | Get a checkout session.    |
-| `update_checkout`   | [Update Checkout](https://ucp.dev/2026-01-23/specification/checkout/#update-checkout)     | Update a checkout session. |
-| `complete_checkout` | [Complete Checkout](https://ucp.dev/2026-01-23/specification/checkout/#complete-checkout) | Place the order.           |
-| `cancel_checkout`   | [Cancel Checkout](https://ucp.dev/2026-01-23/specification/checkout/#cancel-checkout)     | Cancel a checkout session. |
+| Tool                | Operation                                                                                | Description                |
+| ------------------- | ---------------------------------------------------------------------------------------- | -------------------------- |
+| `create_checkout`   | [Create Checkout](http://ucp.dev/2026-01-23/specification/checkout/#create-checkout)     | Create a checkout session. |
+| `get_checkout`      | [Get Checkout](http://ucp.dev/2026-01-23/specification/checkout/#get-checkout)           | Get a checkout session.    |
+| `update_checkout`   | [Update Checkout](http://ucp.dev/2026-01-23/specification/checkout/#update-checkout)     | Update a checkout session. |
+| `complete_checkout` | [Complete Checkout](http://ucp.dev/2026-01-23/specification/checkout/#complete-checkout) | Place the order.           |
+| `cancel_checkout`   | [Cancel Checkout](http://ucp.dev/2026-01-23/specification/checkout/#cancel-checkout)     | Cancel a checkout session. |
 
 ### `create_checkout`
 
-Maps to the [Create Checkout](https://ucp.dev/2026-01-23/specification/checkout/#create-checkout) operation.
+Maps to the [Create Checkout](http://ucp.dev/2026-01-23/specification/checkout/#create-checkout) operation.
 
 #### Input Schema
 
-- `checkout` ([Checkout](https://ucp.dev/2026-01-23/specification/checkout/#create-checkout)): **Required**. Contains the initial checkout session data and optional extensions.
+- `checkout` ([Checkout](http://ucp.dev/2026-01-23/specification/checkout/#create-checkout)): **Required**. Contains the initial checkout session data and optional extensions.
   - Extensions (Optional):
-    - `dev.ucp.shopping.buyer_consent`: [Buyer Consent](https://ucp.dev/2026-01-23/specification/buyer-consent/index.md)
-    - `dev.ucp.shopping.fulfillment`: [Fulfillment](https://ucp.dev/2026-01-23/specification/fulfillment/index.md)
-    - `dev.ucp.shopping.discount`: [Discount](https://ucp.dev/2026-01-23/specification/discount/index.md)
-    - `dev.ucp.shopping.ap2_mandate`: [AP2 Mandates](https://ucp.dev/2026-01-23/specification/ap2-mandates/index.md)
+    - `dev.ucp.shopping.buyer_consent`: [Buyer Consent](http://ucp.dev/2026-01-23/specification/buyer-consent/index.md)
+    - `dev.ucp.shopping.fulfillment`: [Fulfillment](http://ucp.dev/2026-01-23/specification/fulfillment/index.md)
+    - `dev.ucp.shopping.discount`: [Discount](http://ucp.dev/2026-01-23/specification/discount/index.md)
+    - `dev.ucp.shopping.ap2_mandate`: [AP2 Mandates](http://ucp.dev/2026-01-23/specification/ap2-mandates/index.md)
 
 #### Output Schema
 
-- [Checkout](https://ucp.dev/2026-01-23/specification/checkout/#create-checkout) object.
+- [Checkout](http://ucp.dev/2026-01-23/specification/checkout/#create-checkout) object.
 
 #### Example
 
@@ -3229,7 +3229,7 @@ Maps to the [Create Checkout](https://ucp.dev/2026-01-23/specification/checkout/
 
 ### `get_checkout`
 
-Maps to the [Get Checkout](https://ucp.dev/2026-01-23/specification/checkout/#get-checkout) operation.
+Maps to the [Get Checkout](http://ucp.dev/2026-01-23/specification/checkout/#get-checkout) operation.
 
 #### Input Schema
 
@@ -3237,25 +3237,25 @@ Maps to the [Get Checkout](https://ucp.dev/2026-01-23/specification/checkout/#ge
 
 #### Output Schema
 
-- [Checkout](https://ucp.dev/2026-01-23/specification/checkout/#get-checkout) object.
+- [Checkout](http://ucp.dev/2026-01-23/specification/checkout/#get-checkout) object.
 
 ### `update_checkout`
 
-Maps to the [Update Checkout](https://ucp.dev/2026-01-23/specification/checkout/#update-checkout) operation.
+Maps to the [Update Checkout](http://ucp.dev/2026-01-23/specification/checkout/#update-checkout) operation.
 
 #### Input Schema
 
 - `id` (String): **Required**. The ID of the checkout session to update.
-- `checkout` ([Checkout](https://ucp.dev/2026-01-23/specification/checkout/#update-checkout)): **Required**. Contains the updated checkout session data.
+- `checkout` ([Checkout](http://ucp.dev/2026-01-23/specification/checkout/#update-checkout)): **Required**. Contains the updated checkout session data.
   - Extensions (Optional):
-    - `dev.ucp.shopping.buyer_consent`: [Buyer Consent](https://ucp.dev/2026-01-23/specification/buyer-consent/index.md)
-    - `dev.ucp.shopping.fulfillment`: [Fulfillment](https://ucp.dev/2026-01-23/specification/fulfillment/index.md)
-    - `dev.ucp.shopping.discount`: [Discount](https://ucp.dev/2026-01-23/specification/discount/index.md)
-    - `dev.ucp.shopping.ap2_mandate`: [AP2 Mandates](https://ucp.dev/2026-01-23/specification/ap2-mandates/index.md)
+    - `dev.ucp.shopping.buyer_consent`: [Buyer Consent](http://ucp.dev/2026-01-23/specification/buyer-consent/index.md)
+    - `dev.ucp.shopping.fulfillment`: [Fulfillment](http://ucp.dev/2026-01-23/specification/fulfillment/index.md)
+    - `dev.ucp.shopping.discount`: [Discount](http://ucp.dev/2026-01-23/specification/discount/index.md)
+    - `dev.ucp.shopping.ap2_mandate`: [AP2 Mandates](http://ucp.dev/2026-01-23/specification/ap2-mandates/index.md)
 
 #### Output Schema
 
-- [Checkout](https://ucp.dev/2026-01-23/specification/checkout/#update-checkout) object.
+- [Checkout](http://ucp.dev/2026-01-23/specification/checkout/#update-checkout) object.
 
 #### Example
 
@@ -3433,7 +3433,7 @@ Maps to the [Update Checkout](https://ucp.dev/2026-01-23/specification/checkout/
 
 ### `complete_checkout`
 
-Maps to the [Complete Checkout](https://ucp.dev/2026-01-23/specification/checkout/#complete-checkout) operation.
+Maps to the [Complete Checkout](http://ucp.dev/2026-01-23/specification/checkout/#complete-checkout) operation.
 
 #### Input Schema
 
@@ -3441,15 +3441,15 @@ Maps to the [Complete Checkout](https://ucp.dev/2026-01-23/specification/checkou
   - `ucp-agent` (Object): **Required**. Platform agent identification.
   - `idempotency-key` (String, UUID): **Required**. Unique key for retry safety.
 - `id` (String): **Required**. The ID of the checkout session.
-- `checkout` ([Checkout](https://ucp.dev/2026-01-23/specification/checkout/#complete-checkout)): **Required**. Contains payment credentials and other finalization data to execute the transaction.
+- `checkout` ([Checkout](http://ucp.dev/2026-01-23/specification/checkout/#complete-checkout)): **Required**. Contains payment credentials and other finalization data to execute the transaction.
 
 #### Output Schema
 
-- [Checkout](https://ucp.dev/2026-01-23/specification/checkout/#complete-checkout) object, containing a partial `order` that holds only `id` and `permalink_url`.
+- [Checkout](http://ucp.dev/2026-01-23/specification/checkout/#complete-checkout) object, containing a partial `order` that holds only `id` and `permalink_url`.
 
 ### `cancel_checkout`
 
-Maps to the [Cancel Checkout](https://ucp.dev/2026-01-23/specification/checkout/#cancel-checkout) operation.
+Maps to the [Cancel Checkout](http://ucp.dev/2026-01-23/specification/checkout/#cancel-checkout) operation.
 
 #### Input Schema
 
@@ -3460,11 +3460,11 @@ Maps to the [Cancel Checkout](https://ucp.dev/2026-01-23/specification/checkout/
 
 #### Output Schema
 
-- [Checkout](https://ucp.dev/2026-01-23/specification/checkout/#cancel-checkout) object with `status: canceled`.
+- [Checkout](http://ucp.dev/2026-01-23/specification/checkout/#cancel-checkout) object with `status: canceled`.
 
 ## Error Handling
 
-Error responses follow JSON-RPC 2.0 format while using the UCP error structure defined in the [Core Specification](https://ucp.dev/2026-01-23/specification/overview/index.md). The UCP error object is embedded in the JSON-RPC error's `data` field:
+Error responses follow JSON-RPC 2.0 format while using the UCP error structure defined in the [Core Specification](http://ucp.dev/2026-01-23/specification/overview/index.md). The UCP error object is embedded in the JSON-RPC error's `data` field:
 
 ```json
 {
@@ -3554,7 +3554,7 @@ Implementers **MUST** expose this as an MCP `tools/call` endpoint:
 
 # Checkout Capability - A2A Binding
 
-This document specifies the Agent2Agent Protocol (A2A) binding for [Checkout Capability](https://ucp.dev/2026-01-23/specification/checkout/index.md).
+This document specifies the Agent2Agent Protocol (A2A) binding for [Checkout Capability](http://ucp.dev/2026-01-23/specification/checkout/index.md).
 
 ## Transport Discovery
 
@@ -3806,7 +3806,7 @@ When AP2 mandates extension is enabled, the business agent must create a detache
 }
 ```
 
-When the user confirms the payment on a platform, the user signed checkout and payment mandate objects must be sent as `DataPart`s to the business agent for completing checkout. The `payment` which includes the payment mandate must be submitted as part of a `DataPart` with attribute name `a2a.ucp.checkout.payment`. Signed checkout mandate must be specified in the `DataPart` as `ap2.checkout_mandate`. The `token` attribute of `payment.instruments[*].credential` contains the payment mandate. Refer to [AP2 Mandates Extension](https://ucp.dev/2026-01-23/specification/ap2-mandates/index.md) documentation for more details about verification and processing of the mandates to complete the checkout.
+When the user confirms the payment on a platform, the user signed checkout and payment mandate objects must be sent as `DataPart`s to the business agent for completing checkout. The `payment` which includes the payment mandate must be submitted as part of a `DataPart` with attribute name `a2a.ucp.checkout.payment`. Signed checkout mandate must be specified in the `DataPart` as `ap2.checkout_mandate`. The `token` attribute of `payment.instruments[*].credential` contains the payment mandate. Refer to [AP2 Mandates Extension](http://ucp.dev/2026-01-23/specification/ap2-mandates/index.md) documentation for more details about verification and processing of the mandates to complete the checkout.
 
 **Request format:**
 
@@ -7694,7 +7694,7 @@ ______________________________________________________________________
 
 Handler specifications **SHOULD** use the standard template structure. Sections marked **[REQUIRED]** **MUST** be present; sections marked **[CONDITIONAL]** are required only when applicable.
 
-**→ [Payment Handler Template](https://ucp.dev/2026-01-23/specification/payment-handler-template/index.md)**
+**→ [Payment Handler Template](http://ucp.dev/2026-01-23/specification/payment-handler-template/index.md)**
 
 ## Conformance Checklist for Spec Authors
 
@@ -7786,17 +7786,17 @@ Follow these guidelines to create high-quality, maintainable handler specificati
 
 ### Maintainability
 
-| Practice                        | Description                                                                                                                                           |
-| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Host schemas at stable URLs** | Schema URLs should not change; use versioned paths if needed.                                                                                         |
-| **Fail gracefully**             | Define clear error responses for common failure scenarios.                                                                                            |
-| **Link to examples**            | Reference existing handler specs and the [Tokenization Guide](https://ucp.dev/2026-01-23/specification/tokenization-guide/index.md) for common flows. |
+| Practice                        | Description                                                                                                                                          |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Host schemas at stable URLs** | Schema URLs should not change; use versioned paths if needed.                                                                                        |
+| **Fail gracefully**             | Define clear error responses for common failure scenarios.                                                                                           |
+| **Link to examples**            | Reference existing handler specs and the [Tokenization Guide](http://ucp.dev/2026-01-23/specification/tokenization-guide/index.md) for common flows. |
 
 ______________________________________________________________________
 
 ## See Also
 
-- **[Tokenization Guide](https://ucp.dev/2026-01-23/specification/tokenization-guide/index.md)** — Guide for building tokenization payment handlers
+- **[Tokenization Guide](http://ucp.dev/2026-01-23/specification/tokenization-guide/index.md)** — Guide for building tokenization payment handlers
 - **[Google Pay Handler](https://developers.google.com/merchant/ucp/guides/google-pay-payment-handler)** — Handler for Google Pay integration
 - **[Shop Pay Handler](https://shopify.dev/docs/agents/checkout/shop-pay-handler)** — Handler for Shop Pay integration
 
@@ -7879,7 +7879,7 @@ Businesses advertise support for this handler in their UCP profile's `payment_ha
 
 **Schema URL:** `{schema_url}`
 
-The handler schema defines three config variants for different contexts. See [Payment Handler Guide: Defining the Schema](https://ucp.dev/2026-01-23/specification/payment-handler-guide/#defining-the-schema) for the full pattern.
+The handler schema defines three config variants for different contexts. See [Payment Handler Guide: Defining the Schema](http://ucp.dev/2026-01-23/specification/payment-handler-guide/#defining-the-schema) for the full pattern.
 
 | Config Variant    | Context            | Purpose                             |
 | ----------------- | ------------------ | ----------------------------------- |
@@ -8110,11 +8110,11 @@ This guide is for **implementers building tokenization payment handlers**. It de
 
 We offer a range of examples to utilize forms of tokenization in UCP:
 
-| Example                                                                                                                 | Use Case                                            |
-| ----------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
-| [Processor Tokenizer](https://ucp.dev/2026-01-23/specification/examples/processor-tokenizer-payment-handler/index.md)   | Business or PSP runs tokenization and processing    |
-| [Platform Tokenizer](https://ucp.dev/2026-01-23/specification/examples/platform-tokenizer-payment-handler/index.md)     | Platform tokenizes credentials for businesses/PSPs  |
-| [Encrypted Credential Handler](https://ucp.dev/2026-01-23/specification/examples/encrypted-credential-handler/index.md) | Platform encrypts credentials instead of tokenizing |
+| Example                                                                                                                | Use Case                                            |
+| ---------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| [Processor Tokenizer](http://ucp.dev/2026-01-23/specification/examples/processor-tokenizer-payment-handler/index.md)   | Business or PSP runs tokenization and processing    |
+| [Platform Tokenizer](http://ucp.dev/2026-01-23/specification/examples/platform-tokenizer-payment-handler/index.md)     | Platform tokenizes credentials for businesses/PSPs  |
+| [Encrypted Credential Handler](http://ucp.dev/2026-01-23/specification/examples/encrypted-credential-handler/index.md) | Platform encrypts credentials instead of tokenizing |
 
 ______________________________________________________________________
 
@@ -8343,8 +8343,8 @@ ______________________________________________________________________
 
 ## See Also
 
-- **[Encrypted Credential Handler](https://ucp.dev/2026-01-23/specification/examples/encrypted-credential-handler/index.md)** — Alternative pattern using encryption instead of tokenize/detokenize round-trips
-- **[AP2 Mandates Extension](https://ucp.dev/2026-01-23/specification/ap2-mandates/index.md)** — Add cryptographic proof of checkout agreement for PSP verification
+- **[Encrypted Credential Handler](http://ucp.dev/2026-01-23/specification/examples/encrypted-credential-handler/index.md)** — Alternative pattern using encryption instead of tokenize/detokenize round-trips
+- **[AP2 Mandates Extension](http://ucp.dev/2026-01-23/specification/ap2-mandates/index.md)** — Add cryptographic proof of checkout agreement for PSP verification
 
 # Processor Tokenizer Payment Handler
 
@@ -9011,7 +9011,7 @@ ______________________________________________________________________
 
 ## References
 
-- **Pattern:** [Tokenization Payment Handler](https://ucp.dev/2026-01-23/specification/payment-handler-guide/index.md)
+- **Pattern:** [Tokenization Payment Handler](http://ucp.dev/2026-01-23/specification/payment-handler-guide/index.md)
 - **API Pattern:** `https://ucp.dev/2026-01-23/handlers/tokenization/openapi.json`
 - **Identity Schema:** `https://ucp.dev/2026-01-23/schemas/shopping/types/payment_identity.json`
 

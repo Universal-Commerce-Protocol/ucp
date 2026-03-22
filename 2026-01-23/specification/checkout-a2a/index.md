@@ -1,6 +1,6 @@
 # Checkout Capability - A2A Binding
 
-This document specifies the Agent2Agent Protocol (A2A) binding for [Checkout Capability](https://ucp.dev/2026-01-23/specification/checkout/index.md).
+This document specifies the Agent2Agent Protocol (A2A) binding for [Checkout Capability](http://ucp.dev/2026-01-23/specification/checkout/index.md).
 
 ## Transport Discovery
 
@@ -252,7 +252,7 @@ When AP2 mandates extension is enabled, the business agent must create a detache
 }
 ```
 
-When the user confirms the payment on a platform, the user signed checkout and payment mandate objects must be sent as `DataPart`s to the business agent for completing checkout. The `payment` which includes the payment mandate must be submitted as part of a `DataPart` with attribute name `a2a.ucp.checkout.payment`. Signed checkout mandate must be specified in the `DataPart` as `ap2.checkout_mandate`. The `token` attribute of `payment.instruments[*].credential` contains the payment mandate. Refer to [AP2 Mandates Extension](https://ucp.dev/2026-01-23/specification/ap2-mandates/index.md) documentation for more details about verification and processing of the mandates to complete the checkout.
+When the user confirms the payment on a platform, the user signed checkout and payment mandate objects must be sent as `DataPart`s to the business agent for completing checkout. The `payment` which includes the payment mandate must be submitted as part of a `DataPart` with attribute name `a2a.ucp.checkout.payment`. Signed checkout mandate must be specified in the `DataPart` as `ap2.checkout_mandate`. The `token` attribute of `payment.instruments[*].credential` contains the payment mandate. Refer to [AP2 Mandates Extension](http://ucp.dev/2026-01-23/specification/ap2-mandates/index.md) documentation for more details about verification and processing of the mandates to complete the checkout.
 
 **Request format:**
 

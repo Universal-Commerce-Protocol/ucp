@@ -166,7 +166,7 @@ https://business.example.com/checkout-sessions/{checkout_id}
 
 A stateless URL that encodes checkout state directly, allowing reconstruction without server-side persistence. Businesses **SHOULD** implement support for this format to facilitate checkout handoff and accelerated entry—for example, a platform can prefill checkout state when initiating a buy-now flow.
 
-> **Note:** Checkout permalinks are a REST-specific construct that extends the [REST transport binding](https://ucp.dev/2026-01-23/specification/checkout-rest/index.md). Accessing a permalink returns a redirect to the checkout UI or renders the checkout page directly.
+> **Note:** Checkout permalinks are a REST-specific construct that extends the [REST transport binding](http://ucp.dev/2026-01-23/specification/checkout-rest/index.md). Accessing a permalink returns a redirect to the checkout UI or renders the checkout page directly.
 
 ## Guidelines
 
@@ -381,10 +381,10 @@ This operation will be used to cancel a checkout session, if it can be canceled.
 
 The abstract operations above are bound to specific transport protocols as defined below:
 
-- [REST Binding](https://ucp.dev/2026-01-23/specification/checkout-rest/index.md): RESTful API mapping using standard HTTP verbs and JSON payloads.
-- [MCP Binding](https://ucp.dev/2026-01-23/specification/checkout-mcp/index.md): Model Context Protocol mapping for agentic interaction.
-- [A2A Binding](https://ucp.dev/2026-01-23/specification/checkout-a2a/index.md): Agent-to-Agent Protocol mapping for agentic interactions.
-- [Embedded Checkout Binding](https://ucp.dev/2026-01-23/specification/embedded-checkout/index.md): JSON-RPC for powering embedded checkout.
+- [REST Binding](http://ucp.dev/2026-01-23/specification/checkout-rest/index.md): RESTful API mapping using standard HTTP verbs and JSON payloads.
+- [MCP Binding](http://ucp.dev/2026-01-23/specification/checkout-mcp/index.md): Model Context Protocol mapping for agentic interaction.
+- [A2A Binding](http://ucp.dev/2026-01-23/specification/checkout-a2a/index.md): Agent-to-Agent Protocol mapping for agentic interactions.
+- [Embedded Checkout Binding](http://ucp.dev/2026-01-23/specification/embedded-checkout/index.md): JSON-RPC for powering embedded checkout.
 
 ## Entities
 

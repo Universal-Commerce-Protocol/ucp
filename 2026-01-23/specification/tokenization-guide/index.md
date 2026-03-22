@@ -10,11 +10,11 @@ This guide is for **implementers building tokenization payment handlers**. It de
 
 We offer a range of examples to utilize forms of tokenization in UCP:
 
-| Example                                                                                                                 | Use Case                                            |
-| ----------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
-| [Processor Tokenizer](https://ucp.dev/2026-01-23/specification/examples/processor-tokenizer-payment-handler/index.md)   | Business or PSP runs tokenization and processing    |
-| [Platform Tokenizer](https://ucp.dev/2026-01-23/specification/examples/platform-tokenizer-payment-handler/index.md)     | Platform tokenizes credentials for businesses/PSPs  |
-| [Encrypted Credential Handler](https://ucp.dev/2026-01-23/specification/examples/encrypted-credential-handler/index.md) | Platform encrypts credentials instead of tokenizing |
+| Example                                                                                                                | Use Case                                            |
+| ---------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| [Processor Tokenizer](http://ucp.dev/2026-01-23/specification/examples/processor-tokenizer-payment-handler/index.md)   | Business or PSP runs tokenization and processing    |
+| [Platform Tokenizer](http://ucp.dev/2026-01-23/specification/examples/platform-tokenizer-payment-handler/index.md)     | Platform tokenizes credentials for businesses/PSPs  |
+| [Encrypted Credential Handler](http://ucp.dev/2026-01-23/specification/examples/encrypted-credential-handler/index.md) | Platform encrypts credentials instead of tokenizing |
 
 ______________________________________________________________________
 
@@ -243,5 +243,5 @@ ______________________________________________________________________
 
 ## See Also
 
-- **[Encrypted Credential Handler](https://ucp.dev/2026-01-23/specification/examples/encrypted-credential-handler/index.md)** — Alternative pattern using encryption instead of tokenize/detokenize round-trips
-- **[AP2 Mandates Extension](https://ucp.dev/2026-01-23/specification/ap2-mandates/index.md)** — Add cryptographic proof of checkout agreement for PSP verification
+- **[Encrypted Credential Handler](http://ucp.dev/2026-01-23/specification/examples/encrypted-credential-handler/index.md)** — Alternative pattern using encryption instead of tokenize/detokenize round-trips
+- **[AP2 Mandates Extension](http://ucp.dev/2026-01-23/specification/ap2-mandates/index.md)** — Add cryptographic proof of checkout agreement for PSP verification

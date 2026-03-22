@@ -410,6 +410,6 @@ ______________________________________________________________________
 
 ## References
 
-- **Pattern:** [Tokenization Payment Handler](https://ucp.dev/2026-01-23/specification/payment-handler-guide/index.md)
+- **Pattern:** [Tokenization Payment Handler](http://ucp.dev/2026-01-23/specification/payment-handler-guide/index.md)
 - **API Pattern:** `https://ucp.dev/2026-01-23/handlers/tokenization/openapi.json`
 - **Identity Schema:** `https://ucp.dev/2026-01-23/schemas/shopping/types/payment_identity.json`
