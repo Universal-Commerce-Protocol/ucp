@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/{{ ucp_version }}/schemas/common/identity_linking.json",
   "name": "dev.ucp.common.identity_linking",
-  "version": "2026-03-22",
+  "version": "2026-03-23",
   "title": "Identity Linking Capability",
   "description": "Schema for authenticating and establishing verified connections between platforms and businesses.",
   "$comment": "This schema also owns the 'identity_scopes' annotation convention. Any UCP capability schema MAY declare a top-level 'identity_scopes' array listing the OAuth 2.0 scopes required to operate that capability. During UCP discovery, platforms MUST collect identity_scopes from all capabilities in the finalized intersection and use the union as the authorization scope set. Absence of identity_scopes means the capability requires no dedicated scope. The canonical shape and pattern for this annotation is defined in $defs/identity_scopes.",
