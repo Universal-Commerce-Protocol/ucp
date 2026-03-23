@@ -1,0 +1,40 @@
+name: 'Setup Docs Build Environment'
+description: 'Installs dependencies needed to build the UCP documentation'
+runs:
+  using: "composite"
+  steps:
+    - name: Install system dependencies
+      shell: bash
+      run: sudo apt-get update && sudo apt-get install -y libcairo2-dev libfreetype6-dev libffi-dev libjpeg-dev libpng-dev libz-dev
+    
+    - name: Install uv
+      uses: astral-sh/setup-uv@v7
+      with:
+        enable-cache: true
+    
+    - name: Install documentation dependencies
+      shell: bash
+      run: uv sync
+
+    - name: Get latest ucp-schema version
+      id: get-version
+      shell: bash
+      run: |
+        VERSION=$(curl -s https://crates.io/api/v1/crates/ucp-schema | jq -r '.crate.max_version')
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+    - name: Cache ucp-schema binary
+      id: cache-ucp-schema
+      uses: actions/cache@v4
+      with:
+        path: ~/.cargo/bin/ucp-schema
+        key: ${{ runner.os }}-ucp-schema-${{ steps.get-version.outputs.version }}
+
+    - name: Install ucp-schema
+      if: steps.cache-ucp-schema.outputs.cache-hit != 'true'
+      shell: bash
+      run: cargo install ucp-schema
+
+    - name: Add cargo to PATH
+      shell: bash
+      run: echo "$HOME/.cargo/bin" >> $GITHUB_PATH
