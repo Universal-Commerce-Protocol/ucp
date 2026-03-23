@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/card_network_token_instrument.json",
+  "title": "Card Network Token Payment Instrument",
+  "description": "A card network token payment instrument. Extends card_payment_instrument with network token credential.",
+  "$defs": {
+    "available_card_network_token_instrument": {
+      "title": "Available Card Network Token Instrument",
+      "description": "Declares card network token instrument availability with card-specific constraints.",
+      "allOf": [
+        { "$ref": "card_payment_instrument.json#/$defs/available_card_payment_instrument" },
+        {
+          "type": "object",
+          "properties": {
+            "type": { "const": "card_network_token" }
+          }
+        }
+      ]
+    }
+  },
+  "allOf": [
+    { "$ref": "card_payment_instrument.json" },
+    {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "const": "card_network_token",
+          "description": "Indicates this is a card network token payment instrument."
+        },
+        "credential": {
+          "$ref": "card_network_token_credential.json"
+        }
+      }
+    }
+  ]
+}
