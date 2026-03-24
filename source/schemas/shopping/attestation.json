@@ -3,7 +3,7 @@
   "$id": "https://ucp.dev/schemas/shopping/attestation.json",
   "name": "dev.ucp.shopping.attestation",
   "title": "Attestation Extension",
-  "description": "Extends Cart and Checkout with cryptographic attestation for eligibility claims. Enables offline verification of non-instrument claims via signed proofs.",
+  "description": "Extends Cart and Checkout with cryptographic attestation for eligibility claims. Enables offline verification of non-instrument claims via signed proofs. Implementation note: payload MUST be treated as opaque and passed through without JSON re-serialization or key reordering — any transformation will break signature verification.",
 
   "$defs": {
     "attestation_object": {
@@ -39,7 +39,7 @@
         "expires_at": {
           "type": "string",
           "format": "date-time",
-          "description": "Timestamp after which the attestation is no longer valid. Lives outside payload because it is not covered by the signature — the Business checks this independently."
+          "description": "RFC 3339 timestamp after which the attestation is no longer valid. Lives outside payload because it is not covered by the signature — the Business checks this independently."
         }
       },
       "required": ["provider_jwks", "kid", "payload", "sig", "expires_at"]
