@@ -66,11 +66,8 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
       "line_items": [
         {
           "item": {
-            "id": "item_123",
-            "title": "Red T-Shirt",
-            "price": 2500
+            "id": "item_123"
           },
-          "id": "li_1",
           "quantity": 2
         }
       ]
@@ -191,9 +188,7 @@ so clients must include all previously set fields they wish to retain.
       "line_items": [
         {
           "item": {
-            "id": "item_123",
-            "title": "Red T-Shirt",
-            "price": 2500
+            "id": "item_123"
           },
           "id": "li_1",
           "quantity": 2
@@ -319,9 +314,7 @@ type & addresses.
       "line_items": [
         {
           "item": {
-            "id": "item_123",
-            "title": "Red T-Shirt",
-            "price": 2500
+            "id": "item_123"
           },
           "id": "li_1",
           "quantity": 2
@@ -521,9 +514,7 @@ Follow-up calls after initial `fulfillment` data to update selection.
       "line_items": [
         {
           "item": {
-            "id": "item_123",
-            "title": "Red T-Shirt",
-            "price": 2500
+            "id": "item_123"
           },
           "id": "li_1",
           "quantity": 2,
