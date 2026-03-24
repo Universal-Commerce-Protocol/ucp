@@ -42,11 +42,8 @@ Content-Type: application/json
   "line_items": [
     {
       "item": {
-        "id": "item_123",
-        "title": "Red T-Shirt",
-        "price": 2500
+        "id": "item_123"
       },
-      "id": "li_1",
       "quantity": 2
     }
   ]
@@ -161,9 +158,7 @@ Content-Type: application/json
   "line_items": [
     {
       "item": {
-        "id": "item_123",
-        "title": "Red T-Shirt",
-        "price": 2500
+        "id": "item_123"
       },
       "id": "li_1",
       "quantity": 2
@@ -283,9 +278,7 @@ Content-Type: application/json
   "line_items": [
     {
       "item": {
-        "id": "item_123",
-        "title": "Red T-Shirt",
-        "price": 2500
+        "id": "item_123"
       },
       "id": "li_1",
       "quantity": 2
@@ -481,9 +474,7 @@ Content-Type: application/json
   "line_items": [
     {
       "item": {
-        "id": "item_123",
-        "title": "Red T-Shirt",
-        "price": 2500
+        "id": "item_123"
       },
       "id": "li_1",
       "quantity": 2,
