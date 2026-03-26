@@ -11,6 +11,14 @@
       "description": "UCP version in YYYY-MM-DD format."
     },
 
+    "declared_version": {
+      "oneOf": [
+        { "$ref": "#/$defs/version" },
+        { "const": "draft", "description": "In-development version, not yet assigned a date." }
+      ],
+      "description": "A UCP version as declared in a response — either a dated release (YYYY-MM-DD) or \"draft\" for the pre-release working version."
+    },
+
     "version_constraint": {
       "type": "object",
       "description": "Version range requirement with minimum and optional maximum.",
@@ -52,8 +60,8 @@
       "required": ["version"],
       "properties": {
         "version": {
-          "$ref": "#/$defs/version",
-          "description": "Entity version in YYYY-MM-DD format."
+          "$ref": "#/$defs/declared_version",
+          "description": "Entity version — a dated release (YYYY-MM-DD) or \"draft\" for entities in pre-release. Entities developed outside of UCP (e.g. payment handlers) may use \"draft\" to signal a pre-release implementation."
         },
         "spec": {
           "type": "string",
@@ -82,7 +90,7 @@
       "type": "object",
       "required": ["version"],
       "properties": {
-        "version": { "$ref": "#/$defs/version" },
+        "version": { "$ref": "#/$defs/declared_version" },
         "status": {
           "type": "string",
           "enum": ["success", "error"],
