@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/upi_intent_instrument.json",
+  "title": "UPI Intent Payment Instrument",
+  "description": "Payment instrument for UPI Intent deep link payments. UPI (Unified Payments Interface) is India's real-time payment system operating via NPCI infrastructure. The device operating system determines which UPI apps are available to the buyer via implicit intent resolution — platforms MUST NOT hardcode or filter app choices per NPCI mandate.",
+
+  "$defs": {
+    "available_upi_intent_instrument": {
+      "title": "Available UPI Intent Instrument",
+      "description": "Declares availability of UPI Intent payment. No app-level constraints apply — NPCI mandates generic implicit intent support.",
+      "allOf": [
+        { "$ref": "available_payment_instrument.json" },
+        {
+          "type": "object",
+          "properties": {
+            "type": { "const": "upi_intent" }
+          }
+        }
+      ]
+    }
+  },
+
+  "allOf": [
+    { "$ref": "payment_instrument.json" }
+  ],
+  "type": "object",
+  "required": ["id", "handler_id", "type"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Unique identifier for this instrument instance, assigned by the business."
+    },
+    "handler_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The id of the payment handler that produced this instrument. Must match a handler id in the checkout response's payment.handlers array."
+    },
+    "type": {
+      "const": "upi_intent",
+      "description": "Discriminator value identifying this as a UPI Intent instrument."
+    },
+    "display_name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "description": "Human-readable label for display in platform UI. May be localized (e.g., 'Pay via UPI', 'UPI से भुगतान करें')."
+    },
+    "display_logo": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https://",
+      "description": "HTTPS URL to the UPI logo for display in platform UI."
+    },
+    "credential": {
+      "$ref": "upi_intent_credential.json",
+      "description": "Transaction-specific credential containing the NPCI-compliant intent URI. Populated by the business in the Complete Checkout response. Not present in Create Checkout responses."
+    }
+  },
+  "additionalProperties": false
+}
