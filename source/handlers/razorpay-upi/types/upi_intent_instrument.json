@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://razorpay.com/ucp/handlers/upi/types/upi_intent_instrument.json",
+  "title": "UPI Intent Payment Instrument",
+  "description": "Payment instrument for the UPI Intent flow via Razorpay. The buyer selects a UPI app, the platform deep-links using a upi:// intent URL, and the buyer authorizes the payment in their UPI app. The resulting Razorpay payment proof is submitted as the credential.",
+
+  "$defs": {
+    "available_upi_intent_instrument": {
+      "title": "Available UPI Intent Instrument",
+      "description": "Declares support for UPI Intent flow in handler available_instruments.",
+      "allOf": [
+        { "$ref": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/types/available_payment_instrument.json" }
+      ],
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "upi_intent"
+        },
+        "constraints": {
+          "type": "object",
+          "description": "Optional constraints for UPI Intent.",
+          "properties": {
+            "upi_apps": {
+              "type": "array",
+              "description": "Restrict to specific UPI apps (e.g., ['gpay', 'phonepe', 'paytm', 'bhim']). If absent, all apps supported by Razorpay are eligible.",
+              "items": { "type": "string" },
+              "uniqueItems": true,
+              "minItems": 1
+            }
+          },
+          "additionalProperties": false
+        }
+      }
+    }
+  },
+
+  "allOf": [
+    { "$ref": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/types/payment_instrument.json" }
+  ],
+  "type": "object",
+  "required": ["type"],
+  "properties": {
+    "type": {
+      "const": "upi_intent",
+      "description": "Instrument type discriminator. Always 'upi_intent' for this handler."
+    },
+    "credential": {
+      "$ref": "razorpay_payment_credential.json",
+      "description": "Razorpay payment proof from the SDK callback after the buyer authorizes payment in their UPI app."
+    },
+    "display": {
+      "type": "object",
+      "description": "Display information about the UPI payment for rendering in order history and receipts.",
+      "properties": {
+        "upi_app": {
+          "type": "string",
+          "description": "Identifier of the UPI app the buyer used (e.g., 'gpay', 'phonepe', 'paytm', 'bhim')."
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable description shown in order summary (e.g., 'UPI — Google Pay')."
+        }
+      }
+    }
+  }
+}

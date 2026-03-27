@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://razorpay.com/ucp/handlers/upi/types/business_config.json",
+  "title": "Razorpay UPI Business Config",
+  "description": "Business-level configuration for the com.razorpay.upi payment handler (UPI Intent flow). Declared in the business's UCP profile at /.well-known/ucp.",
+  "type": "object",
+  "required": ["environment", "key_id"],
+  "properties": {
+    "environment": {
+      "type": "string",
+      "enum": ["sandbox", "production"],
+      "description": "Razorpay API environment. Use 'sandbox' for test mode (key_id starts with rzp_test_), 'production' for live mode (key_id starts with rzp_live_)."
+    },
+    "key_id": {
+      "type": "string",
+      "description": "Razorpay public API key (rzp_test_* or rzp_live_*). Safe to advertise in the UCP profile. The key_secret MUST remain on the business backend and MUST NOT be included here.",
+      "pattern": "^rzp_(test|live)_[A-Za-z0-9]+$"
+    },
+    "merchant_name": {
+      "type": "string",
+      "description": "Business display name shown to the buyer during the UPI payment flow."
+    }
+  },
+  "additionalProperties": false
+}

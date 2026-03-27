@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://razorpay.com/ucp/handlers/upi/types/platform_config.json",
+  "title": "Razorpay UPI Platform Config",
+  "description": "Platform-level configuration for the com.razorpay.upi payment handler (UPI Intent flow). Declared in the platform's UCP profile.",
+  "type": "object",
+  "properties": {
+    "upi_apps": {
+      "type": "array",
+      "description": "UPI apps the platform is capable of deep-linking to (e.g., ['gpay', 'phonepe', 'paytm', 'bhim']). If absent, the platform supports all apps that Razorpay provides intent URLs for.",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    }
+  },
+  "additionalProperties": false
+}
