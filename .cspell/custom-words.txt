@@ -107,3 +107,13 @@ zapatillas
 yml
 jwks
 keyid
+Netbanking
+netbanking
+Razorpay
+razorpay
+NPCI
+npci
+paise
+prefill
+prefilled
+callback
