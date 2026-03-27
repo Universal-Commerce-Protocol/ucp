@@ -67,6 +67,7 @@ nav:
               - Processor Tokenizer: specification/examples/processor-tokenizer-payment-handler.md
               - Platform Tokenizer: specification/examples/platform-tokenizer-payment-handler.md
               - Encrypted Credential: specification/examples/encrypted-credential-handler.md
+              - Hosted Checkout (Razorpay Magic Checkout): specification/examples/hosted-checkout-payment-handler.md
       - Signatures: specification/signatures.md
       - Reference: specification/reference.md
       - Playground: specification/playground.md

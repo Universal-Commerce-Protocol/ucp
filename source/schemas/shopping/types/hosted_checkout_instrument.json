@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/hosted_checkout_instrument.json",
+  "title": "Hosted Checkout Payment Instrument",
+  "description": "A payment instrument for redirect-based hosted checkout flows where the payment provider controls the entire payment experience — including payment method selection, address capture, and authorization — via an escalation to a provider-hosted UI. The platform's sole responsibility is redirecting the buyer to the `continue_url` and polling the checkout session for completion. No platform-side credential handling or SDK integration is required.",
+  "$defs": {
+    "available_hosted_checkout_instrument": {
+      "title": "Available Hosted Checkout Instrument",
+      "description": "Declares hosted checkout instrument availability. No constraints are supported; the provider determines eligibility within its hosted UI.",
+      "allOf": [
+        { "$ref": "available_payment_instrument.json" },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "hosted_checkout"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "allOf": [
+    { "$ref": "payment_instrument.json" },
+    {
+      "type": "object",
+      "required": ["id", "handler_id", "type"],
+      "properties": {
+        "type": {
+          "const": "hosted_checkout",
+          "description": "Discriminator identifying this as a hosted checkout instrument. Platforms MUST treat this as a signal that the payment flow will be completed via escalation — no token or card credential will be produced."
+        },
+        "display_name": {
+          "type": "string",
+          "maxLength": 50,
+          "description": "Human-readable name of the hosted checkout provider for display in platform UI (e.g., 'Razorpay Magic Checkout', 'Shop Pay', 'Klarna'). Provided by the business; SHOULD reflect the provider's official product name."
+        },
+        "display_logo": {
+          "type": "string",
+          "format": "uri",
+          "description": "HTTPS URI to the provider's logo for display in platform UI. MUST use HTTPS. Provided by the business.",
+          "examples": [
+            "https://cdn.razorpay.com/logos/magic-checkout.svg"
+          ]
+        },
+        "credential": {
+          "$ref": "hosted_checkout_credential.json",
+          "description": "Session reference credential populated in the Complete Checkout response. Contains a correlation identifier for the provider session; this is NOT a payment token. Absent until the business processes a Complete Checkout request."
+        }
+      }
+    }
+  ]
+}
