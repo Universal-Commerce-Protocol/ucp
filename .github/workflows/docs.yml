@@ -35,13 +35,101 @@ on:
       - "source/**"
 
 jobs:
-  build_and_deploy:
+  lint:
     runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - uses: ./.github/actions/setup-build-env
+
+      - name: Lint YAML files
+        run: uv run yamllint -c .github/linters/.yamllint.yml .
+
+      - name: Check for changed files in source
+        id: source_files_changed
+        uses: tj-actions/changed-files@v46
+        with:
+          files: source/**
+
+      - name: Lint source schemas
+        if: steps.source_files_changed.outputs.any_changed == 'true' || github.event_name == 'workflow_dispatch'
+        run: ucp-schema lint source/
+
+  build_and_verify_main:
+    needs: lint
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.event.pull_request.base.ref == 'main'
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git Credentials
+        run: |
+          git config --global user.name github-actions[bot]
+          git config --global user.email 41898282+github-actions[bot]@users.noreply.github.com
+
+      - uses: ./.github/actions/setup-build-env
+
+      - name: Configure Site URL
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PAGES_URL=$(gh api "repos/${{ github.repository }}/pages" --jq '.html_url' 2>/dev/null || true)
+          if [ -z "$PAGES_URL" ]; then PAGES_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"; fi
+          if [[ "$PAGES_URL" != */ ]]; then PAGES_URL="${PAGES_URL}/"; fi
+          echo "SITE_URL=$PAGES_URL" >> $GITHUB_ENV
+          echo "SPEC_URL=${PAGES_URL}latest/specification/overview/" >> $GITHUB_ENV
+
+      - name: Build and Verify Documentation Site (Main/PR)
+        run: |
+          bash scripts/build_local.sh --main-only
+          uv run python scripts/check_links.py local_preview
+
+  build_and_verify_release:
+    needs: lint
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/heads/release/') || startsWith(github.event.pull_request.base.ref, 'release/')
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git Credentials
+        run: |
+          git config --global user.name github-actions[bot]
+          git config --global user.email 41898282+github-actions[bot]@users.noreply.github.com
+
+      - uses: ./.github/actions/setup-build-env
+
+      - name: Configure Site URL
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PAGES_URL=$(gh api "repos/${{ github.repository }}/pages" --jq '.html_url' 2>/dev/null || true)
+          if [ -z "$PAGES_URL" ]; then PAGES_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"; fi
+          if [[ "$PAGES_URL" != */ ]]; then PAGES_URL="${PAGES_URL}/"; fi
+          echo "SITE_URL=$PAGES_URL" >> $GITHUB_ENV
+          echo "SPEC_URL=${PAGES_URL}latest/specification/overview/" >> $GITHUB_ENV
+
+      - name: Build and Verify Specification Docs (Release Branches)
+        run: |
+          export DOCS_MODE=spec
+          uv run mkdocs build --strict
+          uv run python scripts/check_links.py site
+
+  deploy_main:
+    needs: build_and_verify_main
+    runs-on: ubuntu-latest
+    if: contains(fromJson('["push", "workflow_dispatch"]'), github.event_name) && github.ref == 'refs/heads/main'
     permissions:
       contents: write
-      actions: read
       pages: read
-
     steps:
       - name: Checkout Code
         uses: actions/checkout@v5
@@ -54,95 +142,38 @@ jobs:
           git config --global user.name github-actions[bot]
           git config --global user.email 41898282+github-actions[bot]@users.noreply.github.com
 
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libcairo2-dev libfreetype6-dev libffi-dev libjpeg-dev libpng-dev libz-dev
-
-      - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@v7
-
-      - name: Install documentation dependencies
-        run: uv sync
-
-      - name: Lint YAML files
-        run: uv run yamllint -c .github/linters/.yamllint.yml .
-
-      - name: Check for changed files in source
-        id: source_files_changed
-        uses: tj-actions/changed-files@v46
-        with:
-          files: source/**
-
-      - name: Install ucp-schema for runtime resolution
-        run: |
-          cargo install ucp-schema
-          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-
-      - name: Lint source schemas
-        if: steps.source_files_changed.outputs.any_changed == 'true'
-        run: ucp-schema lint source/
-
-      - name: Create folders for JSON publishing
-        run: |
-          mkdir -p site/schemas
-          mkdir -p site/services
-          mkdir -p site/handlers
-          mkdir -p site/discovery
+      - uses: ./.github/actions/setup-build-env
 
       - name: Configure Site URL
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Fetch the Pages URL. Fails safely if not enabled.
           PAGES_URL=$(gh api "repos/${{ github.repository }}/pages" --jq '.html_url' 2>/dev/null || true)
-
-          if [ -z "$PAGES_URL" ]; then
-            echo "Pages URL not detected. Falling back to default structure."
-            PAGES_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"
-          fi
-
-          # Ensure trailing slash
-          if [[ "$PAGES_URL" != */ ]]; then
-            PAGES_URL="${PAGES_URL}/"
-          fi
-
-          echo "Set SITE_URL to $PAGES_URL"
+          if [ -z "$PAGES_URL" ]; then PAGES_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"; fi
+          if [[ "$PAGES_URL" != */ ]]; then PAGES_URL="${PAGES_URL}/"; fi
           echo "SITE_URL=$PAGES_URL" >> $GITHUB_ENV
-
-      - name: Build and Verify Documentation Site (Main/PR)
-        if: github.ref == 'refs/heads/main' || github.event.pull_request.base.ref == 'main'
-        run: |
-          # Create a full local preview (including mike logic) for validation
-          bash scripts/build_local.sh --main-only
-          uv run python scripts/check_links.py local_preview
-
-      - name: Build and Verify Specification Docs (Release Branches)
-        if: startsWith(github.ref, 'refs/heads/release/') || startsWith(github.event.pull_request.base.ref, 'release/')
-        run: |
-          export DOCS_MODE=spec
-          uv run mkdocs build --strict
-          uv run python scripts/check_links.py site
+          echo "SPEC_URL=${PAGES_URL}latest/specification/overview/" >> $GITHUB_ENV
 
       - name: Deploy development version from main branch
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
-          # 1. Deploy Specification Site using mike (DOCS_MODE=spec)
           export DOCS_MODE=spec
           uv run mike deploy --push draft
 
-          # 2. Build Root Site (DOCS_MODE=root)
           export DOCS_MODE=root
           uv run mkdocs build --strict
 
-          # 3. Deploy Root Site to gh-pages root
-          # Fetch and checkout gh-pages
-          git fetch origin gh-pages
-          git checkout gh-pages
+          # Checkout gh-pages into a separate directory to avoid overwriting the workspace
+          # and causing GitHub Actions post-run hooks to fail (as they need .github/actions)
+          git clone --branch gh-pages "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" gh-pages-branch
+          cd gh-pages-branch
+
+          # Remove existing root files except versions and git metadata
+          git ls-files | grep -vE "^(\.nojekyll|draft|latest|[0-9]{4}-[0-9]{2}-[0-9]{2}|versions\.json|\.git)" | xargs -r rm -f
+          find . -maxdepth 1 -type d -empty -not -path "./.git*" -delete
 
           # Copy build artifacts to root
-          cp -r site/* .
-          rm -rf site
+          cp -r ../site/* .
+          rm -rf ../site
 
           # Add redirects for all specification files
           rm -rf specification
@@ -153,41 +184,70 @@ jobs:
           git commit -m "Deploy root site from main" --allow-empty
           git push origin gh-pages
 
+  deploy_release:
+    needs: build_and_verify_release
+    runs-on: ubuntu-latest
+    if: contains(fromJson('["push", "workflow_dispatch"]'), github.event_name) && startsWith(github.ref, 'refs/heads/release/')
+    permissions:
+      contents: write
+      pages: read
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Configure Git Credentials
+        run: |
+          git config --global user.name github-actions[bot]
+          git config --global user.email 41898282+github-actions[bot]@users.noreply.github.com
+
+      - uses: ./.github/actions/setup-build-env
+
+      - name: Configure Site URL
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PAGES_URL=$(gh api "repos/${{ github.repository }}/pages" --jq '.html_url' 2>/dev/null || true)
+          if [ -z "$PAGES_URL" ]; then PAGES_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"; fi
+          if [[ "$PAGES_URL" != */ ]]; then PAGES_URL="${PAGES_URL}/"; fi
+          echo "SITE_URL=$PAGES_URL" >> $GITHUB_ENV
+          echo "SPEC_URL=${PAGES_URL}latest/specification/overview/" >> $GITHUB_ENV
+
       - name: Deploy release version
-        if: startsWith(github.ref, 'refs/heads/release/')
         run: |
           export DOCS_MODE=spec
-          # Extract the date (e.g., release/2026-01-11 -> 2026-01-11)
           VERSION_NAME=${GITHUB_REF#refs/heads/release/}
-
-          # Fetch all release branches to determine if this is the latest
           git fetch origin "+refs/heads/release/*:refs/remotes/origin/release/*"
-          
-          # Find the highest version number among all release branches
           LATEST_VERSION=$(git branch -r --list "origin/release/*" | sed 's|origin/release/||' | sort -V | tail -n 1 | tr -d ' ')
 
-          echo "Deploying version: $VERSION_NAME"
-          echo "Latest detected version: $LATEST_VERSION"
-
           if [ "$VERSION_NAME" = "$LATEST_VERSION" ]; then
-            echo "This is the latest version. Updating 'latest' alias."
             uv run mike deploy --push --update-aliases "$VERSION_NAME" latest
           else
-            echo "This is NOT the latest version. Deploying without updating 'latest' alias."
             uv run mike deploy --push "$VERSION_NAME"
           fi
 
+  create_release:
+    needs: deploy_release
+    runs-on: ubuntu-latest
+    if: contains(fromJson('["push", "workflow_dispatch"]'), github.event_name) && startsWith(github.ref, 'refs/heads/release/')
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
       - name: Create GitHub Release and Tag
-        if: startsWith(github.ref, 'refs/heads/release/')
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           VERSION_DATE=${GITHUB_REF#refs/heads/release/}
           TAG_NAME="v$VERSION_DATE"
 
-          # Create Release (This implicitly creates the git tag)
-          # The '|| true' ensures the workflow doesn't fail if you
-          # push updates to this branch later (re-running the build).
           gh release create "$TAG_NAME" \
             --title "Release $TAG_NAME" \
             --generate-notes \
