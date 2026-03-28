@@ -131,6 +131,22 @@
     },
 
     {
+      "name": "ec.totals.change",
+      "summary": "Checkout totals changed",
+      "description": "Merchant notifies host that checkout.totals has changed. Covers all total line updates including taxes, fees, discounts, and fulfillment costs. For changes that also affect a specific domain (e.g., fulfillment cost update), this message MUST be sent after the domain-specific change message (e.g., ec.fulfillment.change).",
+      "params": [
+        {
+          "name": "checkout",
+          "required": true,
+          "schema": {
+            "$ref": "../../schemas/shopping/checkout.json",
+            "description": "Current checkout state with updated totals."
+          }
+        }
+      ]
+    },
+
+    {
       "name": "ec.payment.change",
       "summary": "Payment state changed",
       "description": "Merchant notifies host that checkout.payment has changed (instrument selected, status updated).",

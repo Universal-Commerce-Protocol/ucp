@@ -9,7 +9,6 @@
 /generated/               @Universal-Commerce-Protocol/devops-maintainers @Universal-Commerce-Protocol/maintainers @Universal-Commerce-Protocol/tech-council @Universal-Commerce-Protocol/governance-council
 /hooks.py                 @Universal-Commerce-Protocol/devops-maintainers @Universal-Commerce-Protocol/maintainers @Universal-Commerce-Protocol/tech-council @Universal-Commerce-Protocol/governance-council
 /main.py                  @Universal-Commerce-Protocol/devops-maintainers @Universal-Commerce-Protocol/maintainers @Universal-Commerce-Protocol/tech-council @Universal-Commerce-Protocol/governance-council
-/generate_ts_schema_types.js @Universal-Commerce-Protocol/devops-maintainers @Universal-Commerce-Protocol/maintainers @Universal-Commerce-Protocol/tech-council @Universal-Commerce-Protocol/governance-council
 /.cspell/                 @Universal-Commerce-Protocol/devops-maintainers @Universal-Commerce-Protocol/maintainers @Universal-Commerce-Protocol/tech-council @Universal-Commerce-Protocol/governance-council
 /.cspell.json             @Universal-Commerce-Protocol/devops-maintainers @Universal-Commerce-Protocol/maintainers @Universal-Commerce-Protocol/tech-council @Universal-Commerce-Protocol/governance-council
 /.pre-commit-config.yaml  @Universal-Commerce-Protocol/devops-maintainers @Universal-Commerce-Protocol/maintainers @Universal-Commerce-Protocol/tech-council @Universal-Commerce-Protocol/governance-council
