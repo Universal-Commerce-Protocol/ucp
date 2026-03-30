@@ -410,6 +410,38 @@ status.
 
 ## Platform Integration
 
+### Handler Configuration
+
+Platforms advertise `com.razorpay.magic_checkout` support in their UCP profile
+to signal that they can handle the `hosted_checkout` instrument type.
+
+**Example — Platform Handler Declaration:**
+
+```json
+{
+  "ucp": {
+    "version": "2026-01-27",
+    "payment_handlers": {
+      "com.razorpay.magic_checkout": [
+        {
+          "id": "platform_razorpay_magic_checkout",
+          "version": "2026-01-27",
+          "spec": "https://razorpay.com/ucp/handlers/magic_checkout/2026-01-27/",
+          "schema": "https://razorpay.com/ucp/handlers/magic_checkout/2026-01-27/schemas/config.json",
+          "available_instruments": [
+            { "type": "hosted_checkout" }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+
+> **Note:** This declaration signals to businesses that the platform can perform
+> the redirect-based escalation flow. No SDK or credential registration is
+> required — the platform only needs to support HTTP redirects and polling.
+
 ### Prerequisites
 
 Platforms require no special registration or SDK to support this handler.
