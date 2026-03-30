@@ -17,7 +17,7 @@
 # Hosted Checkout Payment Handler
 
 * **Handler Name:** `com.razorpay.magic_checkout`
-* **Version:** `2026-01-27`
+* **Version:** `2026-01-23`
 * **Pattern:** Hosted Checkout (Redirect-Based Escalation)
 
 ## Introduction
@@ -32,9 +32,9 @@ This contrasts with credential-based handlers (e.g., `com.google.pay`,
 `dev.shopify.shop_pay`) where the platform acquires a payment token prior to
 calling Complete Checkout.
 
-The `com.razorpay.magic_checkout` handler is used here as a concrete, production
+The `com.razorpay.magic_checkout` handler is used here as a concrete, production ready
 example of this pattern. Any provider operating a hosted checkout solution
-(PayPal, Klarna, Shop Pay in redirect mode) can implement this same pattern using
+(Eg. Razorpay, PayPal, Klarna, Shop Pay in redirect mode) can implement this same pattern using
 the `hosted_checkout` instrument and credential types introduced in this
 contribution.
 
@@ -62,6 +62,7 @@ Use the hosted checkout pattern when:
 
 ### Key Benefits of `com.razorpay.magic_checkout`
 
+- **Faster GTM:** 1000s of Merchants already use Razorpay's Magic Checkout Offering and can be enabled for UCP this pattern in almost no time (compared to native checkout which will require substiantial changes at both Merchant and Platform Level)
 - **Complete hosted solution:** Handles payment collection, address capture, and
   method selection in a single Razorpay-owned UI.
 - **Full India payment coverage:** UPI, Cards (Debit/Credit), Netbanking, Wallets,
@@ -86,13 +87,13 @@ Three participants interact within this handler's payment flow:
 
 | Participant | Role | Prerequisites |
 | :--- | :--- | :--- |
-| **Business** | Advertises handler config, creates Razorpay orders, processes webhook events, and updates the checkout session to `completed`. | Razorpay account, API credentials, webhook configured. See [Prerequisites](#prerequisites). |
+| **Business** | Is the MoR(Merchant Of Record) advertises handler config, creates Razorpay orders, processes webhook events, and updates the checkout session to `completed`. | Razorpay account, API credentials, webhook configured. See [Prerequisites](#prerequisites). |
 | **Platform** | Discovers the handler, calls Complete Checkout, redirects buyer to `continue_url`, and polls for checkout completion. | None — no SDK or special registration required. |
 | **Razorpay** | Hosts the Magic Checkout UI, processes payment via the selected payment rail, and delivers a signed webhook event on success. | N/A (third party) |
 
 > **Note on Terminology:** This specification refers to merchants as
 > **"businesses"** in alignment with UCP conventions. Razorpay API fields
-> retain `merchant_*` naming (e.g., `merchant_id`).
+> retain `merchant_*` naming (e.g., `key_id`).
 
 ### Flow Overview
 
@@ -177,22 +178,22 @@ Businesses advertise Magic Checkout support by including this handler in the
 #### Configuration Schema
 
 * **Schema URL:**
-  `https://razorpay.com/ucp/handlers/magic_checkout/2026-01-27/schemas/config.json`
+  `https://razorpay.com/ucp/handlers/magic_checkout/2026-01-23/schemas/config.json`
 
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://razorpay.com/ucp/handlers/magic_checkout/2026-01-27/schemas/config.json",
+  "$id": "https://razorpay.com/ucp/handlers/magic_checkout/2026-01-23/schemas/config.json",
   "title": "Razorpay Magic Checkout Handler Configuration",
   "type": "object",
-  "required": ["environment", "merchant_id", "merchant_name"],
+  "required": ["environment", "key_id", "merchant_name"],
   "properties": {
     "environment": {
       "type": "string",
       "enum": ["sandbox", "production"],
       "description": "Target Razorpay environment."
     },
-    "merchant_id": {
+    "key_id": {
       "type": "string",
       "pattern": "^rzp_(test_|live_)?[a-zA-Z0-9]+$",
       "description": "Razorpay key_id. Used by the platform to identify the merchant in Razorpay's system."
@@ -215,24 +216,24 @@ Checkout request. It advertises handler availability and pre-populates a
 ```json
 {
   "ucp": {
-    "version": "2026-01-27",
+    "version": "2026-01-23",
     "capabilities": {
-      "dev.ucp.shopping.checkout": [{ "version": "2026-01-27" }]
+      "dev.ucp.shopping.checkout": [{ "version": "2026-01-23" }]
     },
     "payment_handlers": {
       "com.razorpay.magic_checkout": [
         {
           "id": "razorpay_magic_001",
-          "version": "2026-01-27",
-          "spec": "https://razorpay.com/ucp/handlers/magic_checkout/2026-01-27/",
-          "config_schema": "https://razorpay.com/ucp/handlers/magic_checkout/2026-01-27/schemas/config.json",
+          "version": "2026-01-23",
+          "spec": "https://razorpay.com/ucp/handlers/magic_checkout/2026-01-23/",
+          "config_schema": "https://razorpay.com/ucp/handlers/magic_checkout/2026-01-23/schemas/config.json",
           "instrument_schemas": [
             "https://ucp.dev/schemas/shopping/types/hosted_checkout_instrument.json"
           ],
           "config": {
             "environment": "production",
-            "merchant_id": "rzp_live_abc123xyz",
-            "merchant_name": "BigBasket"
+            "key_id": "rzp_live_abc123xyz",
+            "merchant_name": "ExampleMerchant"
           }
         }
       ]
@@ -240,54 +241,6 @@ Checkout request. It advertises handler availability and pre-populates a
   }
 }
 ```
-
-### Instrument Schema
-
-This handler uses the
-[`hosted_checkout_instrument`](https://ucp.dev/schemas/shopping/types/hosted_checkout_instrument.json)
-instrument type. The business **MUST** pre-populate a `hosted_checkout` instrument
-in the Create Checkout response. The platform cannot construct this instrument
-itself — it originates from the business after Razorpay session setup.
-
-Key fields:
-
-| Field | Required | Description |
-| :--- | :--- | :--- |
-| `id` | Yes | Platform-scoped instrument instance ID |
-| `handler_id` | Yes | Must match the `id` in the handler declaration (e.g., `razorpay_magic_001`) |
-| `type` | Yes | Must be `"hosted_checkout"` |
-| `display_name` | Recommended | Provider name for platform UI (e.g., `"Razorpay Magic Checkout"`) |
-| `display_logo` | Recommended | HTTPS URI to provider logo |
-| `credential` | Response only | Populated in the Complete Checkout response; absent on Create |
-
-### Credential Schema
-
-The
-[`hosted_checkout_credential`](https://ucp.dev/schemas/shopping/types/hosted_checkout_credential.json)
-is a **reference-only** credential populated when the business returns
-`requires_escalation`. It contains no payment data and confers no payment
-authority.
-
-```json
-{
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Hosted Checkout Credential",
-  "type": "object",
-  "required": ["type"],
-  "properties": {
-    "type": { "const": "hosted_checkout" },
-    "session_id": {
-      "type": "string",
-      "minLength": 1,
-      "description": "Razorpay Order ID for webhook-to-session correlation (e.g., 'order_xyz789')"
-    }
-  }
-}
-```
-
-> Unlike `card_credential` or `token_credential`, the `hosted_checkout_credential`
-> carries no sensitive payment data. The platform **MUST NOT** attempt to use
-> `session_id` as a payment instrument.
 
 ### Payment Processing Protocol
 
@@ -340,7 +293,7 @@ redirect URLs under `url[*]`.
 
 | Query Parameter | Source | Description |
 | :--- | :--- | :--- |
-| `checkout[key]` | `config.merchant_id` | Business's public Razorpay key |
+| `checkout[key]` | `config.key_id` | Business's public Razorpay key |
 | `checkout[order_id]` | Razorpay Order `id` | Created in Step 1 |
 | `url[callback]` | Platform-provided callback URL | **Required.** POST destination after payment. Maps to `return_url` in the credential. |
 | `url[cancel]` | Platform-provided cancel URL | Optional. Redirect destination on buyer cancellation. Maps to `cancel_url` in the credential. |
@@ -383,7 +336,7 @@ with the Razorpay Order ID for correlation.
       "type": "info",
       "code": "payment_in_progress",
       "content": "Buyer is completing payment in Razorpay Magic Checkout",
-      "severity": "escalation"
+      "severity": "requires_buyer_input"
     }
   ],
   "payment": {
@@ -600,7 +553,7 @@ incomplete ──(fulfillment resolved)──> ready_for_complete
 
 | Code | Cause | Resolution |
 | :--- | :--- | :--- |
-| `invalid_handler_config` | `merchant_id` invalid or inactive | Verify Razorpay key_id and account status |
+| `invalid_handler_config` | `key_id` invalid or inactive | Verify Razorpay key_id and account status |
 | `handler_not_available` | Magic Checkout not enabled | Enable in Razorpay Dashboard settings |
 
 ### Checkout Errors
@@ -666,7 +619,7 @@ expires. The platform continues polling; no platform-side retry logic is needed.
 
 | Resource | URL |
 | :--- | :--- |
-| Handler specification | `https://razorpay.com/ucp/handlers/magic_checkout/2026-01-27/` |
+| Handler specification | `https://razorpay.com/ucp/handlers/magic_checkout/2026-01-23/` |
 | Razorpay Orders API | `https://razorpay.com/docs/api/orders` |
 | Magic Checkout docs | `https://razorpay.com/docs/payments/magic-checkout` |
 | Razorpay Webhooks | `https://razorpay.com/docs/webhooks` |
