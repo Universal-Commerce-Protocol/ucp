@@ -432,6 +432,66 @@ The platform reads the Create Checkout response and identifies the
 > flow. No SDK invocation or token acquisition is required. Proceed directly to
 > Complete Checkout.
 
+**Sample Platform Handler (TypeScript):**
+
+```typescript
+interface HostedCheckoutInstrument {
+  id: string;
+  handler_id: string;
+  type: "hosted_checkout";
+  display_name?: string;
+  display_logo?: string;
+  credential?: {
+    type: "hosted_checkout";
+    session_id?: string;
+  };
+}
+
+interface CheckoutResponse {
+  id: string;
+  status: string;
+  payment?: {
+    handlers?: Record<string, unknown[]>;
+    instruments?: Array<{ id: string; type: string; handler_id: string; [key: string]: unknown }>;
+  };
+  continue_url?: string;
+}
+
+function discoverHostedCheckoutInstrument(
+  checkoutResponse: CheckoutResponse
+): HostedCheckoutInstrument | null {
+  const instruments = checkoutResponse.payment?.instruments ?? [];
+
+  const instrument = instruments.find(
+    (inst) => inst.type === "hosted_checkout"
+  );
+
+  if (!instrument) {
+    return null;
+  }
+
+  // Verify the corresponding handler is advertised
+  const handlerId = instrument.handler_id;
+  const handlers = checkoutResponse.payment?.handlers ?? {};
+  if (!handlers[handlerId]) {
+    console.warn(`Handler ${handlerId} not found in payment handlers`);
+    return null;
+  }
+
+  return instrument as HostedCheckoutInstrument;
+}
+
+// Usage
+const instrument = discoverHostedCheckoutInstrument(checkoutResponse);
+if (instrument) {
+  // Proceed to Step 2: Complete Checkout
+  await completeCheckout(checkoutResponse.id, instrument.id);
+} else {
+  // Fall back to another payment method
+  handleNoSupportedInstrument(checkoutResponse);
+}
+```
+
 #### Step 2: Complete Checkout
 
 Submit the Complete Checkout request referencing the hosted checkout instrument.
