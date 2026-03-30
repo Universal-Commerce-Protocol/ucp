@@ -97,43 +97,42 @@ Three participants interact within this handler's payment flow:
 ### Flow Overview
 
 ```text
-+------------+          +-----------+          +-----------+           +----------+
-| AI Platform|          | Business  |          |  Razorpay |           |  Buyer   |
-| (Gemini/   |          |  (UCP +   |          |   API +   |           |          |
-|  ChatGPT)  |          | Razorpay) |          | Magic UI  |           |          |
-+-----+------+          +-----+-----+          +-----+-----+           +----+-----+
-      |                       |                      |                       |
-      |  1. Create Checkout   |                      |                       |
-      |---------------------->|                      |                       |
-      |                       |                      |                       |
-      |  2. {status:incomplete,                      |                       |
-      |     payment:{handlers,|                      |                       |
-      |     instruments}}     |                      |                       |
-      |<----------------------|                      |                       |
-      |                       |                      |                       |
-      |  3. Complete Checkout |                      |                       |
-      |  (instrument ref)     |                      |                       |
-      |---------------------->|                      |                       |
-      |                       |  4. POST /v1/orders  |                       |
-      |                       |--------------------->|                       |
-      |                       |  5. {order_id}       |                       |
-      |                       |<---------------------|                       |
-      |                       |                      |                       |
-      |  6. {status:requires_ |                      |                       |
-      |     escalation,       |                      |                       |
-      |     continue_url}     |                      |                       |
-      |<----------------------|                      |                       |
-      |                       |                      |                       |
-      |  7. Redirect buyer -->|                      |   8. Complete payment |
-      |-----------------------------------------------------+-------------->|
-      |                       |                      |<----------------------|
-      |                       |  9. Webhook (signed) |                       |
-      |                       |<---------------------|                       |
-      |                       |                      |                       |
-      | 10. Poll GET /checkout|                      |                       |
-      |---------------------->|                      |                       |
-      | 11. {status:completed}|                      |                       |
-      |<----------------------|                      |                       |
++------------+          +-----------+          +-----------+          
+|  Platform  |          | Business  |          |  Razorpay |          
++-----+------+          +-----+-----+          +-----+-----+          
+      |                       |                      |                
+      |  1. Create Checkout   |                      |                
+      |---------------------->|                      |                
+      |                       |                      |                
+      |  2. {status:incomplete,                      |                
+      |     payment:{handlers,|                      |          
+      |     instruments}}     |                      |          
+      |<----------------------|                      |          
+      |                       |                      |          
+      |  3. Complete Checkout |                      |          
+      |  (instrument ref)     |                      |          
+      |---------------------->|                      |          
+      |                       |  4. POST /v1/orders  |          
+      |                       |--------------------->|          
+      |                       |  5. {order_id}       |          
+      |                       |<---------------------|          
+      |                       |                      |          
+      |  6. {status:requires_ |                      |          
+      |     escalation,       |                      |          
+      |     continue_url}     |                      |          
+      |<----------------------|                      |          
+      |                       |                      |          
+      |  7. Redirect buyer    |  8. Buyer completes  |
+      |  to continue_url      |         payment      |
+      |--------------------------------------------->|
+      |                       |                      |
+      |                       |  9. Webhook (signed) |
+      |                       |<---------------------|
+      |                       |                      |
+      | 10. Poll GET /checkout|                      |
+      |---------------------->|                      |
+      | 11. {status:completed}|                      |
+      |<----------------------|                      |
 ```
 
 ---
@@ -151,10 +150,11 @@ following:
 2. **Obtain API credentials:** Generate a live `key_id` and `key_secret` from
    the Razorpay Dashboard under Settings → API Keys.
 3. **Enable Magic Checkout:** Activate the Magic Checkout feature from your
-   Razorpay Dashboard settings.
+   Razorpay Dashboard settings. See the
+   [Magic Checkout Web Integration Guide](https://razorpay.com/docs/payments/magic-checkout/web/)
+   for setup instructions.
 4. **Configure a webhook endpoint:** Set up a publicly accessible HTTPS webhook
-   URL in the Razorpay Dashboard. Subscribe at minimum to `payment.captured` and
-   `order.paid` events. Note the `webhook_secret` — required for signature
+   URL in the Razorpay Dashboard. Note the `webhook_secret` — required for signature
    verification.
 
 **Prerequisites Output:**
@@ -296,7 +296,7 @@ following steps:
 
 #### Step 1: Create a Razorpay Order
 
-Call the Razorpay Orders API. The `notes` field **MUST** include the UCP
+Call the Razorpay Orders API. The `notes` field **SHOULD** include the UCP
 `checkout_id` to enable webhook-to-session correlation.
 
 **Request:**
@@ -335,16 +335,13 @@ Content-Type: application/json
 #### Step 2: Construct the Magic Checkout URL
 
 Build the `continue_url` for the Razorpay hosted checkout endpoint. Parameters
-use **PHP nested array notation** — checkout options under `checkout[*]` and
+use **Nested array notation** — checkout options under `checkout[*]` and
 redirect URLs under `url[*]`.
 
 | Query Parameter | Source | Description |
 | :--- | :--- | :--- |
 | `checkout[key]` | `config.merchant_id` | Business's public Razorpay key |
 | `checkout[order_id]` | Razorpay Order `id` | Created in Step 1 |
-| `checkout[prefill][name]` | `checkout.buyer.name` | Prefills buyer name in the hosted UI |
-| `checkout[prefill][email]` | `checkout.buyer.email` | Prefills buyer email |
-| `checkout[prefill][contact]` | `checkout.buyer.phone` | Prefills buyer phone (E.164 format) |
 | `url[callback]` | Platform-provided callback URL | **Required.** POST destination after payment. Maps to `return_url` in the credential. |
 | `url[cancel]` | Platform-provided cancel URL | Optional. Redirect destination on buyer cancellation. Maps to `cancel_url` in the credential. |
 
@@ -358,9 +355,6 @@ redirect URLs under `url[*]`.
 https://api.razorpay.com/v1/checkout/hosted?
   checkout[key]=rzp_live_abc123xyz&
   checkout[order_id]=order_xyz789&
-  checkout[prefill][name]=Rohit+Sharma&
-  checkout[prefill][email]=rohit%40example.com&
-  checkout[prefill][contact]=%2B919876543210&
   url[callback]=https%3A%2F%2Fplatform.example.com%2Fpayment%2Fcallback&
   url[cancel]=https%3A%2F%2Fplatform.example.com%2Fpayment%2Fcancelled
 ```
