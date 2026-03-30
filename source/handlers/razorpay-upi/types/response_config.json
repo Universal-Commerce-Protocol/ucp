@@ -2,24 +2,14 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://razorpay.com/ucp/handlers/upi/types/response_config.json",
   "title": "Razorpay UPI Response Config",
-  "description": "Runtime handler configuration returned in checkout responses for the UPI Intent flow. The business MUST create a Razorpay Order before responding and include the resulting razorpay_order_id here. This config provides everything the platform needs to initiate the UPI Intent payment via the Razorpay SDK.",
+  "description": "Runtime handler configuration returned in the checkout response for com.razorpay.upi. After the platform submits Complete Checkout with a upi_intent instrument (no credential), the business creates a Razorpay payment order and returns the intent_uri credential in the escalation response. This config provides only what the platform needs for display before escalation.",
   "type": "object",
-  "required": ["environment", "key_id", "razorpay_order_id"],
+  "required": ["environment"],
   "properties": {
     "environment": {
       "type": "string",
       "enum": ["sandbox", "production"],
       "description": "Razorpay API environment for this checkout."
-    },
-    "key_id": {
-      "type": "string",
-      "description": "Razorpay public API key for SDK initialization.",
-      "pattern": "^rzp_(test|live)_[A-Za-z0-9]+$"
-    },
-    "razorpay_order_id": {
-      "type": "string",
-      "description": "Razorpay Order ID created by the business for this checkout (e.g., order_Abcdef1234). Acts as the binding identifier — the payment credential MUST reference this order ID, and the business MUST verify the match during processing to prevent replay attacks.",
-      "pattern": "^order_[A-Za-z0-9]+$"
     },
     "merchant_name": {
       "type": "string",

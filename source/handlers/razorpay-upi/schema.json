@@ -2,15 +2,11 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://razorpay.com/ucp/handlers/upi/schema.json",
   "title": "Razorpay UPI Handler Schema",
-  "description": "Schema for the com.razorpay.upi payment handler. Supports UPI Intent (deep-link to UPI apps) via the Razorpay payment gateway. The buyer selects a UPI app, authorizes the payment, and the resulting cryptographic proof is submitted at checkout.",
+  "description": "Schema for the com.razorpay.upi payment handler (UPI Intent flow). The platform submits Complete Checkout with a upi_intent instrument and no credential. The business calls Razorpay, creates an order and payment, then returns requires_escalation with a upi_intent_credential (intent_uri + optional QR). The platform executes the deep link natively; the business confirms via webhook.",
   "name": "com.razorpay.upi",
   "version": "{{ ucp_version }}",
 
   "$defs": {
-    "razorpay_payment_credential": {
-      "$ref": "types/razorpay_payment_credential.json"
-    },
-
     "upi_intent_instrument": {
       "$ref": "types/upi_intent_instrument.json"
     },
@@ -24,7 +20,7 @@
 
       "platform_schema": {
         "title": "Razorpay UPI (Platform)",
-        "description": "Platform-level handler declaration for discovery. Declares which UPI apps the platform can deep-link to.",
+        "description": "Platform-level handler declaration for discovery.",
         "allOf": [
           {
             "$ref": "https://ucp.dev/{{ ucp_version }}/schemas/payment_handler.json#/$defs/platform_schema"
@@ -43,7 +39,7 @@
 
       "business_schema": {
         "title": "Razorpay UPI (Business)",
-        "description": "Business-level handler declaration for discovery at /.well-known/ucp. Declares Razorpay key_id and environment.",
+        "description": "Business-level handler declaration for discovery at /.well-known/ucp.",
         "allOf": [
           {
             "$ref": "https://ucp.dev/{{ ucp_version }}/schemas/payment_handler.json#/$defs/business_schema"
@@ -62,7 +58,7 @@
 
       "response_schema": {
         "title": "Razorpay UPI (Response)",
-        "description": "Runtime handler configuration in checkout responses. Includes the Razorpay Order ID created by the business for this checkout, which the platform uses to initialize the Razorpay SDK and drive the UPI Intent flow.",
+        "description": "Runtime handler configuration in checkout responses.",
         "allOf": [
           {
             "$ref": "https://ucp.dev/{{ ucp_version }}/schemas/payment_handler.json#/$defs/response_schema"
@@ -72,7 +68,7 @@
             "properties": {
               "config": {
                 "$ref": "types/response_config.json",
-                "description": "Runtime configuration including razorpay_order_id."
+                "description": "Runtime configuration for this handler."
               }
             }
           }
