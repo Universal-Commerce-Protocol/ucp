@@ -29,12 +29,15 @@ from typing import Any
 # Base directories for schema resolution
 OPENAPI_DIR = Path("source/services/shopping")
 SHOPPING_SCHEMAS_DIR = Path("source/schemas/shopping")
+COMMON_SCHEMAS_DIR = Path("source/schemas/common")
 UCP_SCHEMA_PATH = Path("source/schemas/ucp.json")
 SCHEMAS_DIRS = [
   Path("source/handlers/google_pay"),
   Path("source/schemas"),
   SHOPPING_SCHEMAS_DIR,
   SHOPPING_SCHEMAS_DIR / "types",
+  COMMON_SCHEMAS_DIR,
+  COMMON_SCHEMAS_DIR / "types",
 ]
 
 # Cache for resolved schemas to avoid repeated subprocess calls

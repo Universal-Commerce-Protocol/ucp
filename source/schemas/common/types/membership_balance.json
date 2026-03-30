@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/membership_balance.json",
+  "title": "Membership Balance",
+  "description": "The overall balance information of the membership.",
+  "type": "object",
+  "required": ["available"],
+  "properties": {
+    "available": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "The amount of available/usable balance."
+    },
+    "pending": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "The amount of pending balance."
+    },
+    "lifetime_earned": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "The amount of balance accumulated since the membership enrollment time."
+    },
+    "lifetime_redeemed": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "The amount of balance used since the membership enrollment time."
+    },
+    "expiring": {
+      "type": "array",
+      "items": {
+        "$ref": "expiring_balance.json"
+      },
+      "description": "List of balances that are expiring."
+    }
+  }
+}
