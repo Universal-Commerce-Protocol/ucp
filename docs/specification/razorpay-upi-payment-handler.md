@@ -66,7 +66,7 @@ checkout `completed`. The platform polls to confirm.
 
 | Participant  | Role                                                                                                                                       | Prerequisites                                                   |
 | :----------- | :----------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------- |
-| **Business** | Receives Complete Checkout, creates Razorpay order + payment, returns `intent_uri` credential, confirms payment via webhook, marks complete. | Yes — Razorpay account, `key_id`, `key_secret`.                  |
+| **Business** | Receives Complete Checkout, creates Razorpay order + payment, returns `intent_uri` credential, confirms payment via webhook, marks complete. Business is the MoR (Merchant of Record) | Yes — Razorpay account, `key_id`, `key_secret`.                  |
 | **Platform** | Submits Complete Checkout with `upi_intent` instrument, receives escalation with credential, executes deep link, polls for completion.      | No Razorpay account needed — only `upi://` deep-link capability. |
 | **Razorpay** | Creates payment order, generates NPCI-compliant intent URI, routes UPI transaction via NPCI, notifies business via webhook.                | N/A — third-party PSP; business onboards via Razorpay dashboard. |
 
@@ -97,11 +97,13 @@ checkout `completed`. The platform polls to confirm.
       |                               |------------------------------->|
       |                               |  7. POST /v1/payments          |
       |                               |------------------------------->|
-      |                               |  8. { intent_uri, tr }        |
-      |  9. requires_escalation       |<-------------------------------|
-      |  code: requires_buyer_        |                                |
-      |    authentication             |                                |
-      |  credential: { intent_uri,   |                                |
+      |                               |  8. { intent_uri }             |
+      |  9. step:requires_escalation  |<-------------------------------|
+      |   code: requires_buyer_       |                                |
+      |   authentication              |                                |
+      |   severity: requires_buyer_   |                                |
+      |   review                      |                                |
+      |  credential: { intent_uri,    |                                |
       |    qr_code_data, expires_at } |                                |
       |  continue_url: https://...    |                                |
       |<------------------------------|                                |
@@ -164,11 +166,11 @@ Businesses advertise support for this handler in their UCP profile's
 
 **Schema URL:** `https://razorpay.com/ucp/handlers/upi/schema.json`
 
-| Config Variant    | Context              | Key Fields                          |
-| :---------------- | :------------------- | :---------------------------------- |
-| `business_config` | Business discovery   | `key_id`, `environment`, `merchant_name` |
-| `platform_config` | Platform discovery   | `upi_apps` (optional)               |
-| `response_config` | Checkout responses   | `environment`, `merchant_name`      |
+| Config Variant    | Context              | Key Fields                                        |
+| :---------------- | :------------------- | :------------------------------------------------ |
+| `business_config` | Business discovery   | `key_id`, `environment`, `merchant_name`          |
+| `platform_config` | Platform discovery   | `environment`, `upi_apps` (optional)              |
+| `response_config` | Checkout responses   | `environment`, `merchant_name`                    |
 
 #### Business Config Fields
 
@@ -177,6 +179,14 @@ Businesses advertise support for this handler in their UCP profile's
 | `environment`   | string | Yes      | `sandbox` or `production`                                       |
 | `key_id`        | string | Yes      | Public Razorpay API key                                         |
 | `merchant_name` | string | No       | Display name shown to the buyer during payment                  |
+| `currency`      | string | No       | Currency accepted by this handler. Defaults to `INR` — UPI only supports INR |
+
+#### Platform Config Fields
+
+| Field           | Type   | Required | Description                                                                              |
+| :-------------- | :----- | :------- | :--------------------------------------------------------------------------------------- |
+| `environment`   | string | Yes      | `sandbox` or `production` — must match the business config environment                   |
+| `upi_apps`      | array  | No       | UPI apps the platform can deep-link to. If absent, all Razorpay-supported apps are used |
 
 #### Response Config Fields
 
@@ -194,7 +204,7 @@ Businesses advertise support for this handler in their UCP profile's
     "payment_handlers": {
       "com.razorpay.upi": [
         {
-          "id": "razorpay_upi_live",
+          "id": "razorpay_upi_intent",
           "version": "{{ ucp_version }}",
           "spec": "https://razorpay.com/ucp/handlers/upi",
           "schema": "https://razorpay.com/ucp/handlers/upi/schema.json",
@@ -267,7 +277,7 @@ instrument and no credential, it **MUST**:
          "type": "error",
          "code": "requires_buyer_authentication",
          "severity": "requires_buyer_review",
-         "content": "Buyer must authorize this payment via UPI",
+         "content": "Buyer must authorize this payment via UPI App",
          "path": "$.payment.instruments[0]"
        }
      ],
@@ -275,12 +285,12 @@ instrument and no credential, it **MUST**:
        "instruments": [
          {
            "id": "instr_1",
-           "handler_id": "razorpay_upi_live",
+           "handler_id": "razorpay_upi_intent",
            "type": "upi_intent",
            "selected": true,
            "display": {
              "name": "Pay via UPI",
-             "logo": "https://razorpay.com/assets/upi-logo.png"
+             "logo": "https://upload.wikimedia.org/wikipedia/commons/f/fa/UPI-Logo.png"
            },
            "credential": {
              "type": "upi_intent",
@@ -344,7 +354,11 @@ Platforms advertise UPI Intent support in their UCP profile.
           "schema": "https://razorpay.com/ucp/handlers/upi/schema.json",
           "available_instruments": [
             { "type": "upi_intent" }
-          ]
+          ],
+          "config": {
+            "environment": "production",
+            "upi_apps": ["gpay", "phonepe", "paytm", "bhim"]
+          }
         }
       ]
     }
@@ -378,7 +392,7 @@ The platform creates or fetches the checkout session. The business returns
     "payment_handlers": {
       "com.razorpay.upi": [
         {
-          "id": "razorpay_upi_live",
+          "id": "razorpay_upi_intent",
           "version": "{{ ucp_version }}",
           "available_instruments": [{ "type": "upi_intent" }],
           "config": {
@@ -407,7 +421,7 @@ Content-Type: application/json
     "instruments": [
       {
         "id": "instr_1",
-        "handler_id": "razorpay_upi_live",
+        "handler_id": "razorpay_upi_intent",
         "type": "upi_intent",
         "display": {
           "name": "Pay via UPI"
@@ -420,8 +434,8 @@ Content-Type: application/json
 
 #### Step 4: Handle Escalation Response
 
-The business responds with `requires_escalation` and
-`requires_buyer_authentication`. The credential contains the `intent_uri`.
+The business responds with `requires_escalation` status and
+`requires_buyer_authentication` error code with severity as `requires_buyer_review`. The credential contains the `intent_uri`.
 
 The platform checks the error code and whether it implements the handler:
 
@@ -430,7 +444,7 @@ const response = await completeCheckout(checkoutId, instrument);
 
 if (response.status === "requires_escalation") {
   const authError = response.messages.find(
-    m => m.code === "requires_buyer_authentication"
+    m => m.code === "requires_buyer_authentication" && m.severity === "requires_buyer_review"
   );
   const instrument = response.payment?.instruments?.[0];
   const credential = instrument?.credential;
@@ -514,6 +528,7 @@ Razorpay provides a full sandbox environment for end-to-end testing.
 1. Toggle to **Test Mode** in the [Razorpay Dashboard](https://dashboard.razorpay.com).
 2. From *Settings → API Keys*, generate test keys (`rzp_test_*`).
 3. Use `environment: "sandbox"` in the business config.
+4. Use `environment: "sandbox"` in the platform config.
 
 ### Sandbox Behavior
 
@@ -523,6 +538,7 @@ In test mode, Razorpay generates real-format `intent_uri` values and
 ### End-to-End Test Checklist
 
 - [ ] Business profile at `/.well-known/ucp` declares `com.razorpay.upi` with `rzp_test_*` key and `environment: "sandbox"`.
+- [ ] Platform profile declares `com.razorpay.upi` with `environment: "sandbox"`.
 - [ ] Platform submits Complete Checkout with `upi_intent` instrument and no `credential`.
 - [ ] Business creates Razorpay order via `POST /v1/orders` in test mode.
 - [ ] Business returns `requires_escalation` with `requires_buyer_authentication` + `upi_intent_credential`.

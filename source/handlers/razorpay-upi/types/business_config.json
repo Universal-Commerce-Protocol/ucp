@@ -19,6 +19,11 @@
     "merchant_name": {
       "type": "string",
       "description": "Business display name shown to the buyer during the UPI payment flow."
+    },
+    "currency": {
+      "type": "string",
+      "description": "Currency accepted by this handler. Defaults to 'INR' — UPI only supports INR transactions.",
+      "default": "INR"
     }
   },
   "additionalProperties": false
