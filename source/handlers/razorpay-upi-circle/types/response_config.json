@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://razorpay.com/ucp/handlers/upi-circle/types/response_config.json",
+  "title": "Razorpay UPI Circle Response Config",
+  "description": "Runtime handler configuration returned in the checkout response for com.razorpay.upi.circle.",
+  "type": "object",
+  "required": ["environment"],
+  "properties": {
+    "environment": {
+      "type": "string",
+      "enum": ["sandbox", "production"],
+      "description": "Razorpay API environment for this checkout."
+    },
+    "merchant_name": {
+      "type": "string",
+      "description": "Business display name shown to the buyer during UPI Circle payment."
+    }
+  },
+  "additionalProperties": false
+}

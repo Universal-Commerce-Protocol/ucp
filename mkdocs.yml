@@ -63,6 +63,7 @@ nav:
           - Guide: specification/payment-handler-guide.md
           - Template: specification/payment-handler-template.md
           - Tokenization Guide: specification/tokenization-guide.md
+          - Razorpay UPI Circle: specification/razorpay-upi-circle-payment-handler.md
           - Examples:
               - Processor Tokenizer: specification/examples/processor-tokenizer-payment-handler.md
               - Platform Tokenizer: specification/examples/platform-tokenizer-payment-handler.md
@@ -240,5 +241,6 @@ plugins:
           - specification/examples/processor-tokenizer-payment-handler.md
           - specification/examples/platform-tokenizer-payment-handler.md
           - specification/examples/encrypted-credential-handler.md
+          - specification/razorpay-upi-circle-payment-handler.md
           - specification/reference.md
           - specification/playground.md

@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/upi_circle_instrument.json",
+  "title": "UPI Circle Payment Instrument",
+  "description": "Payment instrument for delegated UPI payments via UPI Circle (NPCI delegation framework). The buyer has pre-authorized the platform to initiate payments on their behalf within configurable per-transaction and monthly limits, without requiring per-transaction MPIN authentication. Analogous to a card-on-file for India's UPI payment rail.",
+  "allOf": [
+    {
+      "$ref": "payment_instrument.json"
+    },
+    {
+      "type": "object",
+      "required": ["type", "delegate_id"],
+      "properties": {
+        "type": {
+          "const": "upi_circle",
+          "description": "Discriminator identifying this as a UPI Circle (delegated UPI) payment instrument."
+        },
+        "delegate_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Persistent identifier for the buyer's active UPI Circle delegation mandate. Obtained during one-time delegation setup with the platform's UPI TSP (e.g., Razorpay AI Commerce TSP). This reference is used to fetch a per-transaction cryptogram before Complete Checkout."
+        },
+        "display": {
+          "type": "object",
+          "description": "Display information for rendering this UPI Circle instrument in platform UI.",
+          "properties": {
+            "name": {
+              "type": "string",
+              "maxLength": 100,
+              "description": "Human-readable label for platform UI (e.g., 'UPI Autopay', 'Delegated UPI')."
+            },
+            "logo": {
+              "type": "string",
+              "format": "uri",
+              "description": "HTTPS URI to the UPI logo for display in platform UI."
+            },
+            "delegator_name": {
+              "type": "string",
+              "maxLength": 100,
+              "description": "Display name of the buyer who authorized the delegation mandate (e.g., 'Rohit S.')."
+            },
+            "masked_vpa": {
+              "type": "string",
+              "description": "Partially masked VPA (Virtual Payment Address) of the delegating buyer for display purposes (e.g., 'roh***@icici'). Must not expose the full VPA."
+            }
+          }
+        }
+      }
+    }
+  ]
+}

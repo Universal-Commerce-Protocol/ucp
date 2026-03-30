@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://razorpay.com/ucp/handlers/upi-circle/types/platform_config.json",
+  "title": "Razorpay UPI Circle Platform Config",
+  "description": "Platform-level configuration for the com.razorpay.upi.circle payment handler. Declared in the platform's UCP profile.",
+  "type": "object",
+  "properties": {},
+  "additionalProperties": false
+}
