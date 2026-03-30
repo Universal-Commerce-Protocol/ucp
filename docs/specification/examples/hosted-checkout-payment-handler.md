@@ -410,6 +410,18 @@ status.
 
 ## Platform Integration
 
+### Prerequisites
+
+Platforms require no special registration or SDK to support this handler.
+
+Platforms **MUST** be capable of:
+
+1. Detecting `type: "hosted_checkout"` instruments in checkout responses.
+2. Calling `POST /checkout-sessions/{id}/complete` with the instrument reference.
+3. Handling `requires_escalation` status by redirecting the buyer to `continue_url`.
+4. Polling `GET /checkout-sessions/{id}` until status transitions to `completed`.
+
+
 ### Handler Configuration
 
 Platforms advertise `com.razorpay.magic_checkout` support in their UCP profile
@@ -420,14 +432,14 @@ to signal that they can handle the `hosted_checkout` instrument type.
 ```json
 {
   "ucp": {
-    "version": "2026-01-27",
+    "version": "2026-01-23",
     "payment_handlers": {
       "com.razorpay.magic_checkout": [
         {
           "id": "platform_razorpay_magic_checkout",
-          "version": "2026-01-27",
-          "spec": "https://razorpay.com/ucp/handlers/magic_checkout/2026-01-27/",
-          "schema": "https://razorpay.com/ucp/handlers/magic_checkout/2026-01-27/schemas/config.json",
+          "version": "2026-01-23",
+          "spec": "https://razorpay.com/ucp/handlers/magic_checkout/2026-01-23/",
+          "schema": "https://razorpay.com/ucp/handlers/magic_checkout/2026-01-23/schemas/config.json",
           "available_instruments": [
             { "type": "hosted_checkout" }
           ]
@@ -442,16 +454,6 @@ to signal that they can handle the `hosted_checkout` instrument type.
 > the redirect-based escalation flow. No SDK or credential registration is
 > required — the platform only needs to support HTTP redirects and polling.
 
-### Prerequisites
-
-Platforms require no special registration or SDK to support this handler.
-
-Platforms **MUST** be capable of:
-
-1. Detecting `type: "hosted_checkout"` instruments in checkout responses.
-2. Calling `POST /checkout-sessions/{id}/complete` with the instrument reference.
-3. Handling `requires_escalation` status by redirecting the buyer to `continue_url`.
-4. Polling `GET /checkout-sessions/{id}` until status transitions to `completed`.
 
 ### Payment Protocol
 
@@ -464,65 +466,6 @@ The platform reads the Create Checkout response and identifies the
 > flow. No SDK invocation or token acquisition is required. Proceed directly to
 > Complete Checkout.
 
-**Sample Platform Handler (TypeScript):**
-
-```typescript
-interface HostedCheckoutInstrument {
-  id: string;
-  handler_id: string;
-  type: "hosted_checkout";
-  display_name?: string;
-  display_logo?: string;
-  credential?: {
-    type: "hosted_checkout";
-    session_id?: string;
-  };
-}
-
-interface CheckoutResponse {
-  id: string;
-  status: string;
-  payment?: {
-    handlers?: Record<string, unknown[]>;
-    instruments?: Array<{ id: string; type: string; handler_id: string; [key: string]: unknown }>;
-  };
-  continue_url?: string;
-}
-
-function discoverHostedCheckoutInstrument(
-  checkoutResponse: CheckoutResponse
-): HostedCheckoutInstrument | null {
-  const instruments = checkoutResponse.payment?.instruments ?? [];
-
-  const instrument = instruments.find(
-    (inst) => inst.type === "hosted_checkout"
-  );
-
-  if (!instrument) {
-    return null;
-  }
-
-  // Verify the corresponding handler is advertised
-  const handlerId = instrument.handler_id;
-  const handlers = checkoutResponse.payment?.handlers ?? {};
-  if (!handlers[handlerId]) {
-    console.warn(`Handler ${handlerId} not found in payment handlers`);
-    return null;
-  }
-
-  return instrument as HostedCheckoutInstrument;
-}
-
-// Usage
-const instrument = discoverHostedCheckoutInstrument(checkoutResponse);
-if (instrument) {
-  // Proceed to Step 2: Complete Checkout
-  await completeCheckout(checkoutResponse.id, instrument.id);
-} else {
-  // Fall back to another payment method
-  handleNoSupportedInstrument(checkoutResponse);
-}
-```
 
 #### Step 2: Complete Checkout
 
@@ -614,27 +557,26 @@ is finalized.
 ## Status Transitions
 
 ```text
-                              ┌──────────────────────────────────────┐
-                              │          Standard UCP States         │
-                              └──────────────────────────────────────┘
+                              ┌─────────────────────────────────────────────────────────┐
+                              │          Standard UCP Flow For Hosted Checkout          │
+                              └─────────────────────────────────────────────────────────┘
 
-incomplete ──(fulfillment resolved)──> ready_for_complete
-                                              │
-                                   (POST /complete)
-                                              │
-                                              ▼
-                                  complete_in_progress
-                                              │
-                               (Razorpay order created)
-                                              │
-                                              ▼
-                               requires_escalation ◄──── (buyer retries payment)
-                                              │
-                                   (webhook received +
-                                    checkout updated)
-                                              │
-                                              ▼
-                                          completed
+                                incomplete ──(fulfillment resolved)──> ready_for_complete
+                                                          │
+                                                  (POST /complete)
+                                                          │
+                                                          ▼
+                                                  payment_in_progress
+                                                          │
+                                                (Razorpay order created)
+                                                          │
+                                                          ▼
+                                    requires_escalation ◄──── (buyer retries payment)
+                                                          │
+                                        (webhook received + checkout updated)
+                                                          │
+                                                          ▼
+                                                      completed
 ```
 
 ---
