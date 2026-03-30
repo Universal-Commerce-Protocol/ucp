@@ -723,20 +723,6 @@ field or omitting them.
 
 {{ extension_schema_fields('types/payment_instrument.json#/$defs/selected_payment_instrument', 'checkout') }}
 
-#### Well-Known Instrument Types
-
-The `type` field on a payment instrument uses well-known values that signal
-the expected acquisition flow to platforms:
-
-| Type | Flow | Notes |
-| :--- | :--- | :---- |
-| `card`, `tokenized_card` | Credential-based — platform acquires a payment token via the handler's SDK/API. | |
-| `hosted_checkout` | Redirect-based — buyer completes payment in a provider-controlled UI via `requires_escalation` + `continue_url`. Platforms **SHOULD NOT** attempt credential acquisition for this type. | Schema: [`hosted_checkout_instrument.json`](site:schemas/shopping/types/hosted_checkout_instrument.json) |
-
-Handlers **MAY** define additional handler-specific type values. When a platform
-encounters an unknown type, it **MUST** follow the handler's specification for
-instrument acquisition rather than assuming a credential-exchange flow.
-
 ### Payment Credential
 
 {{ schema_fields('payment_credential', 'checkout') }}

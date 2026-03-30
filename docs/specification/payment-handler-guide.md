@@ -494,16 +494,15 @@ Each variant has its own config schema tailored to its context:
 
 **Base Instrument Schemas:**
 
-| Schema                                                                                                               | Description                                                      |
-| :------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------- |
-| [`payment_instrument.json`](site:schemas/shopping/types/payment_instrument.json)                                     | Base: id, handler_id, type, billing_address, credential, display |
-| [`card_payment_instrument.json`](site:schemas/shopping/types/card_payment_instrument.json)                           | Extends base with display: brand, last_digits, expiry, card art  |
-| [`hosted_checkout_instrument.json`](site:schemas/shopping/types/hosted_checkout_instrument.json)                     | Redirect-based flow; no credential acquisition. Resolves via `requires_escalation` + `continue_url`. |
+| Schema                                                                                     | Description                                                      |
+| :----------------------------------------------------------------------------------------- | :--------------------------------------------------------------- |
+| [`payment_instrument.json`](site:schemas/shopping/types/payment_instrument.json)           | Base: id, handler_id, type, billing_address, credential, display |
+| [`card_payment_instrument.json`](site:schemas/shopping/types/card_payment_instrument.json) | Extends base with display: brand, last_digits, expiry, card art  |
 
-UCP provides base schemas for universal payment instruments like `card` and
-`hosted_checkout`. Spec authors **MAY** extend any of the base instruments to
-add handler-specific display data or customize the credential reference.
-Handlers **MAY** define multiple instrument types for different payment flows.
+UCP provides base schemas for universal payment instruments like `card`. Spec
+authors **MAY** extend any of the base instruments to add handler-specific
+display data or customize the credential reference. Handlers **MAY** define
+multiple instrument types for different payment flows.
 
 **Available Instrument Schemas:**
 
@@ -717,32 +716,6 @@ instrument acquisition. Instead, the specification **SHOULD** clearly document:
 - How to create an effective credential binding to the specific checkout and
   business for usage, which is critical for security, based on the available
   `config` and `checkout`.
-
-#### Hosted Checkout (Escalation) Pattern
-
-Some handlers delegate the entire payment flow to an external hosted UI. In
-this pattern, the platform does **not** perform instrument acquisition:
-
-1. The business advertises a `hosted_checkout` instrument in the checkout
-   response (instrument `type: "hosted_checkout"`).
-2. The platform recognizes this type and skips credential acquisition entirely.
-3. The platform calls Complete Checkout referencing the instrument (no
-   credential data is submitted).
-4. The business returns `status: "requires_escalation"` with a `continue_url`
-   pointing to the hosted payment page — standard UCP escalation.
-5. The buyer completes payment in the hosted UI. The business updates the
-   checkout to `completed`.
-6. The platform polls `GET /checkout-sessions/{id}` and receives the completed
-   checkout with order details.
-
-Steps 4–6 follow the existing UCP escalation mechanism. No SDK integration or
-credential handling is required from the platform beyond recognizing
-`type: "hosted_checkout"`.
-
-See [`hosted_checkout_instrument.json`](site:schemas/shopping/types/hosted_checkout_instrument.json)
-and [`hosted_checkout_credential.json`](site:schemas/shopping/types/hosted_checkout_credential.json),
-and the [Hosted Checkout (Razorpay)](examples/hosted-checkout-payment-handler.md) example handler
-for a complete reference implementation.
 
 ### Processing
 
