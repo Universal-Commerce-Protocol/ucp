@@ -43,7 +43,10 @@
     "totals": {
       "type": "array",
       "items": {
-        "$ref": "total.json"
+        "allOf": [
+          { "$ref": "total.json" },
+          { "properties": { "amount": { "minimum": 0 } } }
+        ]
       },
       "description": "Fulfillment option totals breakdown.",
       "ucp_request": "omit"
