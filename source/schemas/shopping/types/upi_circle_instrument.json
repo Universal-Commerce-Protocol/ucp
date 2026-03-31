@@ -2,18 +2,23 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/shopping/types/upi_circle_instrument.json",
   "title": "UPI Circle Payment Instrument",
-  "description": "Payment instrument for UPI Circle (delegated) payments. Extends the base payment instrument for secondary users who pay via a UPI Circle delegation from a primary account holder's bank account. Unlike UPI Intent (where no credential is submitted and an intent URI is returned), UPI Circle requires the secondary user's delegate VPA as an input credential. The buyer authenticates via biometrics or PSP app PIN — no bank MPIN is required from the secondary user.",
+  "description": "Payment instrument for delegated UPI payments. The buyer has pre-authorized the platform to initiate payments within configured limits via a UPI delegation mandate. No per-transaction buyer interaction is required — the platform fetches a one-time cryptogram from the PSP's AI Commerce TSP and submits it in Complete Checkout. This instrument follows the standard credential-before-Complete-Checkout pattern (same as com.google.pay and dev.shopify.shop_pay).",
   "allOf": [
     {
       "$ref": "payment_instrument.json"
     },
     {
       "type": "object",
-      "required": ["type"],
+      "required": ["type", "delegate_id"],
       "properties": {
         "type": {
           "const": "upi_circle",
-          "description": "Discriminator for UPI Circle instrument."
+          "description": "Discriminator for UPI Circle (delegated UPI) instrument."
+        },
+        "delegate_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Persistent identifier for the buyer's delegation mandate, obtained during one-time delegation setup with the PSP's AI Commerce TSP. Analogous to a card vault token — it references saved delegation credentials. Used by the platform to fetch a one-time cryptogram before each transaction."
         },
         "display": {
           "type": "object",
@@ -22,17 +27,21 @@
             "name": {
               "type": "string",
               "maxLength": 100,
-              "description": "Human-readable name for platform UI (e.g., 'Pay via UPI Circle')."
+              "description": "Human-readable name for platform UI (e.g., 'UPI Autopay', 'Delegated UPI')."
             },
             "logo": {
               "type": "string",
               "format": "uri",
               "description": "HTTPS URL to UPI logo for platform UI."
             },
-            "description": {
+            "delegator_name": {
               "type": "string",
-              "maxLength": 255,
-              "description": "Optional description shown to the buyer (e.g., 'Pay using your linked UPI Circle account')."
+              "maxLength": 100,
+              "description": "Display name of the buyer who authorized the delegation mandate (e.g., 'Rohit S.')."
+            },
+            "masked_vpa": {
+              "type": "string",
+              "description": "Masked VPA of the delegator for display purposes (e.g., 'roh***@icici'). The full VPA is internal UPI routing — only the masked form should be surfaced in UI."
             }
           }
         }

@@ -2,42 +2,14 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://razorpay.com/ucp/handlers/upi-circle/types/platform_config.json",
   "title": "Razorpay UPI Circle Platform Config",
-  "description": "Platform-level configuration for the com.razorpay.upi.circle payment handler. Declared in the platform's UCP profile. Unlike UPI Intent (which requires deep-link capability), UPI Circle requires the platform to collect the buyer's delegate VPA and display a pending authorization screen while the buyer authenticates in their PSP app.",
+  "description": "Platform-level configuration for the com.razorpay.upi.circle payment handler. Unlike UPI Intent (which requires deep-link capability), UPI Circle requires the platform to hold a valid delegate_id and integrate with Razorpay AI Commerce TSP to fetch one-time cryptograms before each Complete Checkout.",
   "type": "object",
   "required": ["environment"],
   "properties": {
     "environment": {
       "type": "string",
-      "enum": ["sandbox", "production"],
-      "description": "Razorpay API environment. Must match the business config environment ('sandbox' for test mode, 'production' for live mode)."
-    },
-    "vpa_input": {
-      "type": "object",
-      "description": "Configuration for the delegate VPA input field shown to the buyer.",
-      "properties": {
-        "placeholder": {
-          "type": "string",
-          "description": "Placeholder text for the VPA input (e.g., 'Enter your UPI ID'). Defaults to 'Enter UPI Circle ID (e.g. name@upi)'."
-        },
-        "label": {
-          "type": "string",
-          "description": "Label for the VPA input field (e.g., 'UPI Circle ID'). Defaults to 'UPI Circle ID'."
-        }
-      },
-      "additionalProperties": false
-    },
-    "poll_interval_ms": {
-      "type": "integer",
-      "description": "How often (in milliseconds) the platform polls for checkout completion after submitting the VPA. Defaults to 3000 (3 seconds). Minimum 2000.",
-      "minimum": 2000,
-      "default": 3000
-    },
-    "poll_timeout_ms": {
-      "type": "integer",
-      "description": "Maximum time (in milliseconds) the platform will poll before falling back to continue_url. Defaults to 300000 (5 minutes) to account for partial delegation approval time.",
-      "minimum": 30000,
-      "default": 300000
+      "enum": ["test", "production"],
+      "description": "Razorpay API environment. Must match the business config environment."
     }
-  },
-  "additionalProperties": false
+  }
 }
