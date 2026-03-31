@@ -17,15 +17,6 @@
         "enum": ["light", "dark"]
       },
       "description": "Color schemes the business supports. Hosts use ec_color_scheme query parameter to request a scheme from this list."
-    },
-    "capabilities": {
-      "type": "object",
-      "description": "Capability registry keyed by reverse-domain name. Used to further negotiate which capabilities are supported by embedded transport binding.",
-      "propertyNames": { "$ref": "#/$defs/reverse_domain_name" },
-      "additionalProperties": {
-        "type": "array",
-        "items": { "$ref": "capability.json#/$defs/base" }
-      }
     }
   }
 }

@@ -55,38 +55,26 @@ the `embedded` transport in their `/.well-known/ucp` profile, all cart
     "services": {
         "dev.ucp.shopping": [
             {
-                "version": "2026-01-23",
+                "version": "{{ ucp_version }}",
                 "transport": "rest",
                 "schema": "https://ucp.dev/services/shopping/openapi.json",
                 "endpoint": "https://merchant.example.com/ucp/v1"
             },
             {
-                "version": "2026-01-23",
+                "version": "{{ ucp_version }}",
                 "transport": "mcp",
                 "schema": "https://ucp.dev/services/shopping/mcp.openrpc.json",
                 "endpoint": "https://merchant.example.com/ucp/mcp"
             },
             {
-                "version": "2026-01-23",
+                "version": "{{ ucp_version }}",
                 "transport": "embedded",
-                "schema": "https://ucp.dev/services/shopping/embedded.openrpc.json",
-                "config": {
-                    "capabilities": {
-                        "dev.ucp.shopping.cart": [{"version": "2026-01-23"}],
-                        "dev.ucp.shopping.checkout":  [{"version": "2026-01-23"}]
-                    }
-                }
+                "schema": "https://ucp.dev/services/shopping/embedded.openrpc.json"
             }
         ]
     }
 }
 ```
-
-When `embedded` is present in the service definition:
-
-- Cart capability **MUST** be present in its `config` object to denote ECaP's true availability
-- All `continue_url` values returned by that business support ECaP
-- ECaP version matches the service's UCP version
 
 When `embedded` is absent from the service definition, the business only
 supports redirect-based cart continuation via `continue_url`.
@@ -95,7 +83,7 @@ supports redirect-based cart continuation via `continue_url`.
 
 Service-level discovery declares that a business supports ECaP, but does not
 guarantee that business will enable it for every cart session. Businesses **MUST** include
-an embedded service binding with `config.capabilities` in cart responses to
+an embedded service binding with `config.delegate` in cart responses to
 indicate ECaP availability and allowed delegations for a specific session.
 
 **Cart Response Example:**
@@ -105,17 +93,14 @@ indicate ECaP availability and allowed delegations for a specific session.
     "id": "cart_123",
     "continue_url": "https://merchant.example.com/cart/cart123",
     "ucp": {
-        "version": "2026-01-23",
+        "version": "{{ ucp_version }}",
         "services": {
             "dev.ucp.shopping": [
                 {
-                    "version": "2026-01-23",
+                    "version": "{{ ucp_version }}",
                     "transport": "embedded",
                     "config": {
-                        "delegate": [],
-                        "capabilities": {
-                            "dev.ucp.shopping.cart": [{"version": "2026-01-23"}],
-                        }
+                        "delegate": []
                     }
                 }
             ]
@@ -143,7 +128,8 @@ Note: All query parameter values must be properly URL-encoded per RFC 3986.
 
 Before loading the embedded context, the host **SHOULD**:
 
-1. Optionally complete authentication mechanisms (i.e. identity linking)
+1. Check `config.delegate` in the response for available delegations
+2. Optionally complete authentication mechanisms (i.e. identity linking)
    if required by the business
 
 To initiate the session, the host **MUST** augment the `continue_url` with ECaP
@@ -161,6 +147,9 @@ parameters from business-specific query parameters:
 - `ect_delegate` (string, **OPTIONAL**): Comma-delimited list of delegations
     the host wants to handle. **MAY** be empty if no delegations are needed.
     **SHOULD** be a subset of `config.delegate` from the embedded service binding.
+- `ect_color_scheme` (string, **OPTIONAL**): The color scheme preference for
+    the cart UI. Valid values: `light`, `dark`. When not provided, the
+    Embedded Cart follows system preference.
 
 ## Transport & Messaging
 
