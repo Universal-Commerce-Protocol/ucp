@@ -10,6 +10,12 @@
     "item_unavailable",
     "address_undeliverable",
     "payment_failed",
-    "eligibility_invalid"
+    "eligibility_invalid",
+    "abort_error",
+    "security_error",
+    "not_supported_error",
+    "invalid_state_error",
+    "not_allowed_error",
+    "window_open_rejected_error"
   ]
 }
