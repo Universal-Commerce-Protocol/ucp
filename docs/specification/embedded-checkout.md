@@ -683,14 +683,14 @@ authorization to be provided by the host before the session continues.
 ```
 
 The `ec.auth` message is a request, which means that host
-**MUST** respond to exchange the authorization.
+**MUST** respond to exchange the authorization. The host **MUST** respond with either an error,
+or the authorization data requested by Embedded Checkout.
 
 - **Direction:** host → Embedded Checkout
 - **Type:** Response
 - **Result Payload:**
-    - `authorization` (string, **REQUIRED**): The requested authorization data,
+    - `credential` (string, **REQUIRED**): The requested authorization data,
     can be in the form of an OAuth token, JWT, API keys, etc.
-    - `checkout` (object, **REQUIRED**): An optional checkout holding the last known state to the host.
 
 **Example Message:**
 
@@ -699,7 +699,20 @@ The `ec.auth` message is a request, which means that host
     "jsonrpc": "2.0",
     "id": "auth_1",
     "result": {
-        "authorization": "fake_identity_linking_oauth_token"
+        "credential": "fake_identity_linking_oauth_token"
+    }
+}
+```
+
+**Example Error Message:**
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": "auth_1",
+    "error": {
+        "code": "internal_error",
+        "message": "Something went wrong when fetching the required authorization data."
     }
 }
 ```

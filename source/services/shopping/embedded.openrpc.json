@@ -57,25 +57,25 @@
       "params": [
         {
           "name": "type",
-          "description": "The type of authorization business is requesting from the host.",
+          "description": "The type of authorization data business is requesting from the host.",
           "type": "string",
-          "enum": ["api_key", "oauth"]
+          "examples": [
+            "oauth",
+            "api_key",
+            "jwt"
+          ]
         }
       ],
       "result": {
         "name": "authResult",
         "schema": {
           "type": "object",
-          "description": "Auth response from host containing the requested authorization and optional checkout state.",
-          "required": ["authorization"],
+          "description": "Auth response from host containing the requested authorization data.",
+          "required": ["credential"],
           "properties": {
-            "authorization": {
+            "credential": {
               "type": "string",
               "description": "Requested authorization. Some common examples include API key and OAuth token."
-            },
-            "cart": {
-              "$ref": "../../schemas/shopping/checkout.json",
-              "description": "Optional checkout state known to the host."
             }
           }
         }
@@ -361,25 +361,25 @@
       "params": [
         {
           "name": "type",
-          "description": "The type of authorization business is requesting from the host.",
+          "description": "The type of authorization data business is requesting from the host.",
           "type": "string",
-          "enum": ["api_key", "oauth", "jwt"]
+          "examples": [
+            "oauth",
+            "api_key",
+            "jwt"
+          ]
         }
       ],
       "result": {
         "name": "authResult",
         "schema": {
           "type": "object",
-          "description": "Auth response from host containing the requested authorization and optional cart state.",
-          "required": ["authorization"],
+          "description": "Auth response from host containing the requested authorization data.",
+          "required": ["credential"],
           "properties": {
-            "authorization": {
+            "credential": {
               "type": "string",
               "description": "Requested authorization. Some common examples include API key and OAuth token."
-            },
-            "cart": {
-              "$ref": "../../schemas/shopping/cart.json",
-              "description": "Optional cart state known to the host."
             }
           }
         }
@@ -419,45 +419,6 @@
     },
 
     {
-      "name": "ect.line_items.change_request",
-      "summary": "Request line item change validation",
-      "description": "Business notifies host that cart.line_items has changed (item added, removed, quantity updated) and requests host to validate change request.",
-      "params": [
-        {
-          "name": "cart",
-          "required": true,
-          "schema": {
-            "$ref": "../../schemas/shopping/cart.json",
-            "description": "Current cart state with updated line items."
-          }
-        }
-      ],
-      "result": {
-        "name": "changeResult",
-        "schema": {
-          "type": "object",
-          "description": "Cart state after line item update validation.",
-          "required": ["cart"],
-          "properties": {
-            "cart": {
-              "type": "object",
-              "description": "Partial cart update with line items.",
-              "properties": {
-                "line_items": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "types/line_item.json"
-                  },
-                  "description": "Cart line items after passing host validations."
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-
-    {
       "name": "ect.line_items.change",
       "summary": "Line items changed",
       "description": "Business notifies host that cart.line_items has changed (item added, removed, quantity updated).",
@@ -484,22 +445,6 @@
           "schema": {
             "$ref": "../../schemas/shopping/cart.json",
             "description": "Current cart state with updated buyer."
-          }
-        }
-      ]
-    },
-
-    {
-      "name": "ect.context.change",
-      "summary": "Buyer context changed",
-      "description": "Business notifies host that cart.context (localization signals) has changed.",
-      "params": [
-        {
-          "name": "cart",
-          "required": true,
-          "schema": {
-            "$ref": "../../schemas/shopping/cart.json",
-            "description": "Current cart state with updated context."
           }
         }
       ]

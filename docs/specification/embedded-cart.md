@@ -127,7 +127,7 @@ indicate ECaP availability and allowed delegations for a specific session.
 }
 ```
 
-### Loading an Embedded Checkout URL
+### Loading an Embedded Cart URL
 
 When a host receives a cart response with a `continue_url` from a business
 that advertises ECaP support, it **MAY** initiate an ECaP session by loading the
@@ -351,10 +351,10 @@ channel.
 
 Embedded cart **MAY** request authorization from the host in the following scenarios:
 
-1. Initial handshake: When `ect_auth` URL param is neither sufficient nor applicable due
+1. **Initial handshake**: When `ect_auth` URL param is neither sufficient nor applicable due
 to additional considerations, business can request for authorization to be exchanged
 through this mechanism before the session starts.
-2. Reauth: Certain authentication methods (i.e. OAuth token) have strict expiration timestamps.
+2. **Reauth**: Certain authentication methods (i.e. OAuth token) have strict expiration timestamps.
 If a session lasted longer than the allowed duration, business can request for a refreshed
 authorization to be provided by the host before the session continues.
 
@@ -377,14 +377,14 @@ authorization to be provided by the host before the session continues.
 ```
 
 The `ect.auth` message is a request, which means that host
-**MUST** respond to exchange the authorization.
+**MUST** respond to exchange the authorization. The host **MUST** respond with either an error,
+or the authorization data requested by Embedded Cart.
 
 - **Direction:** host → Embedded Cart
 - **Type:** Response
 - **Result Payload:**
-    - `authorization` (string, **REQUIRED**): The requested authorization data,
+    - `credential` (string, **REQUIRED**): The requested authorization data,
     can be in the form of an OAuth token, JWT, API keys, etc.
-    - `cart` (object, **REQUIRED**): An optional cart holding the last known state to the host.
 
 **Example Message:**
 
@@ -393,7 +393,20 @@ The `ect.auth` message is a request, which means that host
     "jsonrpc": "2.0",
     "id": "auth_1",
     "result": {
-        "authorization": "fake_identity_linking_oauth_token"
+        "credential": "fake_identity_linking_oauth_token"
+    }
+}
+```
+
+**Example Error Message:**
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": "auth_1",
+    "error": {
+        "code": "internal_error",
+        "message": "Something went wrong when fetching the required authorization data."
     }
 }
 ```
@@ -441,7 +454,7 @@ capabilities during discovery, host **MAY** proceed to initiate a checkout sessi
 completed cart.
 
 - **Direction:** Embedded Cart → host
-- **Type:** Request
+- **Type:** Notification
 - **Payload:**
     - `cart` (object, **REQUIRED**): The latest state of the cart, using the same structure
         as the `cart` object in UCP responses.
@@ -546,10 +559,11 @@ informational notices about the cart state.
 ```json
 {
     "jsonrpc": "2.0",
-    "method": "ec.messages.change",
+    "method": "ect.messages.change",
     "params": {
         "cart": {
             "id": "cart_123",
+            // The entire cart object is provided, including any updated messages
             "messages": [
                 {
                     "type": "error",
@@ -613,7 +627,7 @@ activity across contexts or accessing existing sessions, protecting user
 privacy.
 
 ```html
-<iframe credentialless src="https://business.example.com/checkout"></iframe>
+<iframe credentialless src="https://business.example.com/cart"></iframe>
 ```
 
 #### Strict Origin Validation
