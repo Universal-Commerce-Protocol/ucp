@@ -108,6 +108,29 @@
         }
       }
     },
+    "ancillary_group": {
+      "type": "object",
+      "description": "Metadata for a set of mutually exclusive ancillary suggestions sharing the same group_id (section title, description, optional scope).",
+      "required": ["id"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Identifier; MUST match group_id on each suggestion in this group. MUST be unique among ancillaries.groups."
+        },
+        "title": {
+          "type": "string",
+          "description": "Short label for the group (e.g. 'Choose coverage'). Displayed when presenting the radio-style options."
+        },
+        "description": {
+          "type": "string",
+          "description": "Longer context for the buyer (e.g. differences between tiers). Optional."
+        },
+        "for": {
+          "type": "string",
+          "description": "When set, every suggestion with this group_id MUST use the same line item id in for. Omitted for checkout-scoped groups where suggestions also omit for."
+        }
+      }
+    },
     "ancillary_suggestion": {
       "type": "object",
       "description": "A suggested ancillary item offered by the business.",
@@ -128,7 +151,7 @@
             "suggested",
             "required"
           ],
-          "description": "Relationship type. 'complementary' = directly related to a line item (e.g., cables for phone). 'suggested' = general upsell recommendation. 'required' = legally or functionally required addition."
+          "description": "Relationship type. 'complementary' = directly related to a line item (e.g., cables for phone). 'suggested' = general upsell recommendation. 'required' = this ancillary SKU is mandatory (must be applied); not the same as 'pick one from a group' (see group_id)."
         },
         "category": {
           "type": "string",
@@ -145,7 +168,7 @@
         },
         "group_id": {
           "type": "string",
-          "description": "Groups mutually exclusive product alternatives. Each grouped ancillary is a distinct SKU with its own price—only one can be selected. Use for warranty tiers, insurance levels, or service packages where each option is a separate product. Platform should present as radio-style selection."
+          "description": "Join key to ancillaries.groups[].id for mutually exclusive product alternatives. Each option is a distinct SKU with its own price; at most one applied ancillary per group_id. When ancillaries.groups is present, this id MUST appear there. See specification invariants for for alignment within a group."
         },
         "description": {
           "type": "string",
@@ -197,7 +220,7 @@
             "suggested",
             "required"
           ],
-          "description": "Relationship type. Matches the type from the original suggestion."
+          "description": "Relationship type. Matches the type from the original suggestion. 'required' means this SKU was mandatory as a standalone ancillary, not 'one of a radio group'."
         },
         "category": {
           "type": "string",
@@ -210,7 +233,7 @@
         },
         "group_id": {
           "type": "string",
-          "description": "Group identifier for mutually exclusive alternatives. Enables UI to show 'You selected X, other options were Y, Z' by matching with suggested ancillaries sharing the same group_id."
+          "description": "Group identifier for mutually exclusive alternatives. MUST NOT duplicate among applied ancillaries for a checkout (at most one applied ancillary per group_id). Enables matching prior suggestions when groups metadata is still present."
         },
         "description": {
           "type": "string",
@@ -262,6 +285,15 @@
         "title": {
           "type": "string",
           "description": "Optional header text for ancillary suggestions (e.g., 'Protect your purchase' or 'Complete your setup').",
+          "ucp_request": "omit"
+        },
+        "groups": {
+          "type": "array",
+          "readOnly": true,
+          "items": {
+            "$ref": "#/$defs/ancillary_group"
+          },
+          "description": "Metadata for mutually exclusive suggestion groups (title, description). When suggested is returned and any entry has group_id, groups MUST list every distinct group_id with matching ids (see specification invariants). When suggested is omitted or no suggestion uses group_id, groups MAY be omitted (e.g. final checkout payloads).",
           "ucp_request": "omit"
         },
         "suggested": {

@@ -67,6 +67,10 @@ object.
 
 {{ extension_schema_fields('ancillaries.json#/$defs/ancillaries_object', 'ancillaries') }}
 
+### Ancillary Group
+
+{{ extension_schema_fields('ancillaries.json#/$defs/ancillary_group', 'ancillaries') }}
+
 ### Ancillary Suggestion
 
 {{ extension_schema_fields('ancillaries.json#/$defs/ancillary_suggestion', 'ancillaries') }}
@@ -97,11 +101,15 @@ buyer expectations:
 The `type` field indicates the relationship between the ancillary and the
 checkout:
 
-| Type            | Description                                      | Use Case                           |
-| --------------- | ------------------------------------------------ | ---------------------------------- |
-| `complementary` | Directly related to a specific line item         | Charging cable for a phone         |
-| `suggested`     | General recommendation for the checkout          | "Customers also bought" items      |
-| `required`      | Legally or functionally required for a line item | Recycling fee, mandatory insurance |
+| Type            | Description                                   | Use Case                                     |
+| --------------- | --------------------------------------------- | -------------------------------------------- |
+| `complementary` | Directly related to a specific line item      | Charging cable for a phone                   |
+| `suggested`     | General recommendation for the checkout       | "Customers also bought" items                |
+| `required`      | Mandatory ancillary SKU (must be applied)     | Recycling fee, mandatory insurance line item |
+
+`required` applies to **that SKU** (it must be applied). It does not mean “pick
+one” from a mutually exclusive set; use **`group_id`** for tiered / radio-style
+options.
 
 ## Input Handling
 
@@ -136,6 +144,39 @@ Each grouped ancillary is a distinct SKU with its own price, title, and details.
 Platforms **SHOULD** present grouped ancillaries as a radio-style selection
 where only one can be chosen.
 
+Use **`ancillaries.groups`** to supply **group-level metadata** (`title`, `description`)
+for the UI. Each object’s **`id`** is the canonical key; suggestions reference it
+via **`group_id`**.
+
+**Display order:** Platforms **SHOULD** order group sections by the **first
+appearance** of each distinct `group_id` in **`ancillaries.suggested`** (array
+order). The order of objects inside **`groups`** is not authoritative.
+
+**Invariants (when `suggested` is returned and any entry has `group_id`):**
+
+1. **Join key:** Every **`group_id`** on a suggestion **MUST** equal **`id`** of
+   exactly one entry in **`ancillaries.groups`**.
+2. **No orphan groups:** Every **`ancillaries.groups[n].id`** **MUST** appear as
+   **`group_id`** on at least one suggestion in **`suggested`**.
+3. **Unique group ids:** **`ancillaries.groups[].id`** values **MUST** be unique.
+4. **Scope (`for`):** For any fixed **`group_id`**, every suggestion with that
+   **`group_id`** **MUST** have the same **`for`** value (including all omitted,
+   for checkout-scoped groups). If a group object includes **`for`**, it **MUST**
+   match that same value on every suggestion in the group.
+5. **Applied exclusivity:** **`ancillaries.applied`** **MUST NOT** contain two
+   entries with the same **`group_id`** (mutually exclusive; at most one applied
+   ancillary per group).
+
+**Final responses:** **`groups`** (and **`suggested`**) **MAY** be omitted when
+the business does not return suggestions (e.g. some completed checkout
+payloads). **`group_id`** on **`applied`** remains for correlating what was
+chosen.
+
+**Switching option:** The buyer selects a different SKU in the same group by
+submitting a replacement **`ancillaries.items`** set that drops the previous
+ancillary for that group and adds the new one (see replacement semantics
+below).
+
 **When to use `group_id`:**
 
 - Each option is a **separate product** with its own SKU and price
@@ -161,7 +202,10 @@ Ancillaries are submitted via standard checkout create/update operations.
 **Request behavior:**
 
 - **Replacement semantics**: Submitting `ancillaries.items` replaces any
-  previously added ancillaries
+  previously added ancillaries. To **change the selected option** inside a
+  **`group_id`** set, the platform submits a new `items` list that **does not**
+  include the prior ancillary for that group and **does** include the newly
+  chosen SKU (same `for` / quantities as required by the suggestion).
 - **Clear ancillaries**: Send empty array `"ancillaries": { "items": [] }` to
   remove all non-automatic ancillaries
 - **Input required**: Include `input` field when adding ancillaries with
@@ -174,6 +218,9 @@ Ancillaries are submitted via standard checkout create/update operations.
 **Response behavior:**
 
 - `ancillaries.suggested` contains available suggestions
+- `ancillaries.groups` contains metadata for each exclusivity group when
+  suggestions use `group_id`; it **MAY** be absent when `suggested` is not
+  returned
 - `ancillaries.applied` contains all active ancillaries (user-submitted and
   automatic)
 - Applied ancillaries also appear in the checkout's `line_items` array
@@ -245,7 +292,8 @@ Applied ancillaries include key metadata from the original suggestion (`type`,
 `group_id`, `terms_url`) enabling platforms to:
 
 - Show the applied ancillary alongside its alternatives (matching `group_id`
-  between `applied` and `suggested`)
+  between `applied` and `suggested`, and group headings from `groups` when
+  present)
 - Display relevant terms links without re-querying suggestions
 - Provide context about the relationship type (complementary, suggested,
   required)
@@ -279,6 +327,14 @@ Insurance plans protect specific products. Multiple tiers can be offered using
     ],
     "ancillaries": {
         "title": "Protect your new device",
+        "groups": [
+            {
+                "id": "insurance_phone",
+                "for": "li_1",
+                "title": "Choose device protection",
+                "description": "Pick one plan. Coverage and price differ by tier."
+            }
+        ],
         "suggested": [
             {
                 "item": {
@@ -380,6 +436,10 @@ Insurance plans protect specific products. Multiple tiers can be offered using
     ]
 }
 ```
+
+In this response, `groups` and `suggested` are omitted (allowed when suggestions
+are not returned); `group_id` on `applied` still records which exclusivity set
+the buyer chose.
 
 ### Complementary Products (Peripherals)
 
