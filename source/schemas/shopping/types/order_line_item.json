@@ -56,7 +56,7 @@
         "fulfilled",
         "removed"
       ],
-      "description": "Derived status: removed if quantity.total == 0, fulfilled if quantity.fulfilled == quantity.total, partial if quantity.fulfilled > 0, otherwise processing."
+      "description": "Derived status: removed if quantity.total == 0, fulfilled if quantity.total > 0 and quantity.fulfilled == quantity.total, partial if quantity.total > 0 and quantity.fulfilled > 0, otherwise processing."
     },
     "parent_id": {
       "type": "string",
