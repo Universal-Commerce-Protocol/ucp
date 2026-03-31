@@ -103,7 +103,7 @@ The handler's specification (referenced via the `spec` field) documents the
 | Field         | Type   | Required | Description                                 |
 | :------------ | :----- | :------- | :------------------------------------------ |
 | `environment` | string | Yes      | API environment (`sandbox` or `production`) |
-| `business_id` | string | Yes      | Business identifier with the processor      |
+| `merchant_id` | string | Yes      | Business identifier with the processor      |
 
 #### Example Business Handler Declaration
 
@@ -128,7 +128,7 @@ The handler's specification (referenced via the `spec` field) documents the
           ],
           "config": {
             "environment": "production",
-            "business_id": "merchant_xyz789"
+            "merchant_id": "merchant_xyz789"
           }
         }
       ]
@@ -144,7 +144,7 @@ The response config includes runtime information about what's available for this
 | Field         | Type   | Required | Description                            |
 | :------------ | :----- | :------- | :------------------------------------- |
 | `environment` | string | Yes      | API environment used for this checkout |
-| `business_id` | string | Yes      | Business identifier                    |
+| `merchant_id` | string | Yes      | Business identifier                    |
 
 #### Example Response Config
 
@@ -162,7 +162,7 @@ The response config includes runtime information about what's available for this
   ],
   "config": {
     "environment": "production",
-    "business_id": "merchant_xyz789"
+    "merchant_id": "merchant_xyz789"
   }
 }
 ```
@@ -206,7 +206,7 @@ business's configuration.
           ],
           "config": {
             "environment": "production",
-            "business_id": "merchant_xyz789"
+            "merchant_id": "merchant_xyz789"
           }
         }
       ]

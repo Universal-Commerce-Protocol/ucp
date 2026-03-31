@@ -1,19 +1,30 @@
-{
+
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://razorpay.com/ucp/handlers/upi-circle/types/business_config.json",
-  "title": "Razorpay UPI Circle Business Config",
-  "description": "Business-level configuration for the com.razorpay.upi.circle payment handler. Declared in the business's UCP profile. Unlike UPI Intent, no merchant VPA is required here — payee VPA is resolved by Razorpay PSP at payment processing time using the delegate_id and cryptogram.",
+  "$id": "https://razorpay.com/ucp/handlers/upi/types/business_config.json",
+  "title": "Razorpay UPI Business Config",
+  "description": "Business-level configuration for the com.razorpay.upi_circle payment handler (UPI Circle flow). Declared in the business's UCP profile at /.well-known/ucp.",
   "type": "object",
-  "required": ["business_id", "environment"],
+  "required": ["environment", "key_id"],
   "properties": {
-    "business_id": {
-      "type": "string",
-      "description": "Razorpay account identifier (MID) for the business. Used by Razorpay PSP to route the delegated debit to the correct merchant."
-    },
     "environment": {
       "type": "string",
-      "enum": ["test", "production"],
-      "description": "Razorpay API environment. Use 'test' for sandbox testing, 'production' for live payments."
+      "enum": ["sandbox", "production"],
+      "description": "Razorpay API environment. Use 'sandbox' for test mode (key_id starts with rzp_test_), 'production' for live mode (key_id starts with rzp_live_)."
+    },
+    "key_id": {
+      "type": "string",
+      "description": "Razorpay public API key (rzp_test_* or rzp_live_*). Safe to advertise in the UCP profile. The key_secret MUST remain on the business backend and MUST NOT be included here.",
+      "pattern": "^rzp_(test|live)_[A-Za-z0-9]+$"
+    },
+    "merchant_name": {
+      "type": "string",
+      "description": "Business display name shown to the buyer during the UPI payment flow."
+    },
+    "currency": {
+      "type": "string",
+      "description": "Currency accepted by this handler. Defaults to 'INR' — UPI only supports INR transactions.",
+      "default": "INR"
     }
-  }
+  },
+  "additionalProperties": false
 }

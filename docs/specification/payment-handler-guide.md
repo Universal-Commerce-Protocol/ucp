@@ -88,7 +88,7 @@ platform), but **MAY** define additional participants with specific roles.
 
 **Note on Terminology:**: While this guide refers to the participant as the
 **"Business"**, technical schema fields may retain the standard industry
-nomenclature **`merchant_*`** (e.g., `merchant_id`, `merchant_name`).
+nomenclature **`key_*`** (e.g., `merchant_id`, `merchant_name`).
 Specifications **MUST** explicitly document these field mappings.
 
 **Standard Participants:**
@@ -229,7 +229,7 @@ and typically includes different configuration:
   ],
   "config": {
     "environment": "production",
-    "business_id": "business_xyz_789"
+    "merchant_id": "business_xyz_789"
   }
 }
 ```
@@ -274,7 +274,7 @@ and typically includes different configuration:
   "config": {
     "api_version": 2,
     "environment": "production",
-    "business_id": "business_xyz_789"
+    "merchant_id": "business_xyz_789"
   }
 }
 ```
@@ -428,7 +428,7 @@ Each variant has its own config schema tailored to its context:
       "enum": ["sandbox", "production"],
       "default": "production"
     },
-    "business_id": {
+    "merchant_id": {
       "type": "string",
       "description": "Business identifier for this handler."
     }
@@ -472,7 +472,7 @@ Each variant has its own config schema tailored to its context:
       "type": "string",
       "enum": ["sandbox", "production"]
     },
-    "business_id": {
+    "merchant_id": {
       "type": "string",
       "description": "Business identifier for this handler."
     },
