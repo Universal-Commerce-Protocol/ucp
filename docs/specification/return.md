@@ -25,7 +25,7 @@ By exposing the return policy natively in the UCP schema, AI agents and platform
 This extension adds a `return_policies` field to Checkout containing:
 
 * `return_policies[]` — conditions governed by the merchant for specific items.
-    * `return_window_type` — the category of return window (finite, lifetime, final sale, etc.)
+    * `window_type` — the category of return window (finite, lifetime, final sale, etc.)
     * `return_days` — the number of days in the window.
     * `methods[]` — permitted physical methods (in-store, by-mail, etc.)
         * `fee` — the cost structure for that specific method.
@@ -34,14 +34,14 @@ This extension adds a `return_policies` field to Checkout containing:
 
 * `return_policies[0]` Standard Apparel
     * `line_item_ids` 👕👖
-    * `return_window_type` = `finite_window` 🗓️ 30 Days
+    * `window_type` = `finite_window` 🗓️ 30 Days
     * `methods[0]` In-Store 🏬
         * `fee` = `free` ✅
     * `methods[1]` By Mail 📦
         * `fee` = `fixed_fee` $5.00 💸
 * `return_policies[1]` Final Sale
     * `line_item_ids` ⌚
-    * `return_window_type` = `final_sale` 🚫
+    * `window_type` = `final_sale` 🚫
     * `exchanges_allowed` = `false`
 
 ## Schema
@@ -80,7 +80,7 @@ Return policies are designed for proactive disclosures by the merchant. Platform
 
 ### Business Responsibilities
 
-**For `return_window_type`:**
+**For `window_type`:**
 
 * **MUST** accurately reflect the merchant's legal and commercial policy.
 * **MUST** provide `return_days` if the type is `finite_window`.
@@ -110,7 +110,7 @@ In this example, apparel items have a standard window, while a custom item is fi
     {
       "id": "rp_apparel",
       "line_item_ids": ["shirt", "pants"],
-      "return_window_type": "finite_window",
+      "window_type": "finite_window",
       "return_days": 30,
       "exchanges_allowed": true,
       "methods": [
@@ -134,7 +134,7 @@ In this example, apparel items have a standard window, while a custom item is fi
     {
       "id": "rp_final_sale",
       "line_item_ids": ["custom_engraved_watch"],
-      "return_window_type": "final_sale",
+      "window_type": "final_sale",
       "exchanges_allowed": false
     }
   ]

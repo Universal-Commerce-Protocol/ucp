@@ -4,7 +4,7 @@
   "title": "Return Policy",
   "description": "Conditions, methods, timelines, and costs associated with returning physical items.",
   "type": "object",
-  "required": ["id", "line_item_ids", "return_window_type"],
+  "required": ["id", "line_item_ids", "window_type"],
   "properties": {
     "id": {
       "type": "string",
@@ -12,10 +12,12 @@
     },
     "line_item_ids": {
       "type": "array",
-      "items": { "type": "string" },
+      "items": {
+        "type": "string"
+      },
       "description": "Line items governed by this return policy, allowing distinct policies per item."
     },
-    "return_window_type": {
+    "window_type": {
       "type": "string",
       "enum": ["lifetime", "no_returns", "final_sale", "finite_window"],
       "description": "The type of return window."
