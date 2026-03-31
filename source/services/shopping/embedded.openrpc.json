@@ -131,6 +131,22 @@
     },
 
     {
+      "name": "ec.totals.change",
+      "summary": "Checkout totals changed",
+      "description": "Merchant notifies host that checkout.totals has changed. Covers all total line updates including taxes, fees, discounts, and fulfillment costs. For changes that also affect a specific domain (e.g., fulfillment cost update), this message MUST be sent after the domain-specific change message (e.g., ec.fulfillment.change).",
+      "params": [
+        {
+          "name": "checkout",
+          "required": true,
+          "schema": {
+            "$ref": "../../schemas/shopping/checkout.json",
+            "description": "Current checkout state with updated totals."
+          }
+        }
+      ]
+    },
+
+    {
       "name": "ec.payment.change",
       "summary": "Payment state changed",
       "description": "Merchant notifies host that checkout.payment has changed (instrument selected, status updated).",
@@ -236,7 +252,31 @@
           }
         }
       }
+    },
+
+    {
+      "name": "ec.window.open_request",
+      "summary": "Request window open",
+      "description": "The buyer activated a link within checkout. The host MUST present the content to the buyer and respond with a success result, or respond with a window_open_rejected_error error if host policy prevented the navigation.",
+      "params": [
+        {
+          "name": "url",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uri",
+            "description": "The URL of the resource to present."
+          }
+        }
+      ],
+      "result": {
+        "name": "windowOpenResult",
+        "schema": {
+          "type": "object",
+          "description": "Acknowledgement that the host handled the request."
+        }
+      }
     }
   ],
-  "x-delegations": ["payment.instruments_change", "payment.credential"]
+  "x-delegations": ["payment.instruments_change", "payment.credential", "window.open"]
 }

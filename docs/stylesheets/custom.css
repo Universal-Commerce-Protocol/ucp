@@ -822,3 +822,16 @@ p.hero-description {
   letter-spacing: -0.5px;
   font-family: "Google Sans", sans-serif;
 }
+
+/* Prevent the site title and version selector from being hidden on scroll */
+[class~="md-header__title"] [class~="md-header__topic"]:first-child {
+  opacity: 1 !important;
+  transform: none !important;
+  z-index: 1 !important;
+  pointer-events: auto !important;
+}
+
+/* Hide the page title that replaces the site title on scroll */
+[class~="md-header__title"] [class~="md-header__topic"]:nth-child(2) {
+  display: none !important;
+}

@@ -48,6 +48,11 @@ Catalog operations return product and variant IDs that can be used directly in
 checkout `line_items[].item.id`. The variant ID from catalog retrieval should match
 the item ID expected by checkout.
 
+Catalog responses (pricing, availability, etc.) reflect the Business's current
+terms for the given request but are not transactional commitments — checkout
+is authoritative. Responses can be session-specific and **SHOULD NOT** be
+reused across sessions without re-validation.
+
 ## Shared Entities
 
 ### Context
@@ -69,7 +74,20 @@ the presentment currency differs, businesses SHOULD convert before applying
 (see [Price Filter](search.md#price-filter)). Response prices include
 explicit currency codes confirming the resolution.
 
+When `context.eligibility` claims are present, Businesses that accept them
+**MAY** adjust `price` / `list_price` directly for strikethrough display and
+**MAY** use `messages` with `code: "eligibility_benefit"` to attribute the
+adjustment to a specific claim.
+
 {{ schema_fields('types/context', 'catalog') }}
+
+### Signals
+
+Environment data provided by the platform to support authorization
+and abuse prevention. Signal values MUST NOT be buyer-asserted claims. See
+[Signals](../overview.md#signals) for details and privacy requirements.
+
+{{ schema_fields('types/signals', 'catalog') }}
 
 ### Product
 
@@ -135,8 +153,13 @@ Messages communicate business outcomes and provide context:
 | Type | When to Use | Example Codes |
 | :--- | :--- | :--- |
 | `error` | Business-level errors | `NOT_FOUND`, `OUT_OF_STOCK`, `REGION_RESTRICTED` |
-| `warning` | Important conditions affecting purchase | `DELAYED_FULFILLMENT`, `FINAL_SALE`, `AGE_RESTRICTED` |
+| `warning` | Important conditions affecting purchase | `DELAYED_FULFILLMENT`, `FINAL_SALE` |
 | `info` | Additional context without issues | `PROMOTIONAL_PRICING`, `LIMITED_AVAILABILITY` |
+
+Warnings with `presentation: "disclosure"` carry notices (e.g., allergen
+declarations, safety warnings) that platforms must not hide or dismiss. See
+[Warning Presentation](../checkout.md#warning-presentation) for the full
+rendering contract.
 
 **Note**: All catalog errors use `severity: "recoverable"` - agents handle them programmatically (retry, inform user, show alternatives).
 
@@ -231,6 +254,54 @@ identifiers were not found.
 
 Agents correlate results using the `inputs` array on each variant. See
 [Client Correlation](lookup.md#client-correlation).
+
+#### Product Disclosure
+
+When a product requires a disclosure (e.g., allergen notice, safety warning),
+return it as a warning with `presentation: "disclosure"`. The `path` field targets the
+relevant component in the response — when it targets a product, the
+disclosure applies to all of its variants.
+
+```json
+{
+  "ucp": {...},
+  "products": [
+    {
+      "id": "prod_nut_butter",
+      "title": "Artisan Nut Butter Collection",
+      "variants": [
+        {
+          "id": "var_almond",
+          "title": "Almond Butter",
+          "price": { "amount": 1299, "currency": "USD" },
+          "availability": { "available": true }
+        },
+        {
+          "id": "var_cashew",
+          "title": "Cashew Butter",
+          "price": { "amount": 1499, "currency": "USD" },
+          "availability": { "available": true }
+        }
+      ]
+    }
+  ],
+  "messages": [
+    {
+      "type": "warning",
+      "code": "allergens",
+      "path": "$.products[0]",
+      "content": "**Contains: tree nuts.** Produced in a facility that also processes peanuts, milk, and soy.",
+      "content_type": "markdown",
+      "presentation": "disclosure",
+      "image_url": "https://merchant.com/allergen-tree-nuts.svg",
+      "url": "https://merchant.com/allergen-info"
+    }
+  ]
+}
+```
+
+See [Warning Presentation](../checkout.md#warning-presentation) for the
+full rendering contract.
 
 ## Transport Bindings
 

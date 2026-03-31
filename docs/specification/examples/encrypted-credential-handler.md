@@ -328,8 +328,9 @@ Content-Type: application/json
       }
     ]
   },
-  "risk_signals": {
-    // ... the key value pair for potential risk signal data
+  "signals": {
+    "dev.ucp.buyer_ip": "203.0.113.42",
+    "dev.ucp.user_agent": "Mozilla/5.0 ..."
   }
 }
 ```

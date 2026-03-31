@@ -34,6 +34,21 @@
       ],
       "default": "plain",
       "description": "Content format, default = plain."
+    },
+    "presentation": {
+      "type": "string",
+      "default": "notice",
+      "description": "Rendering contract for this warning. 'notice' (default): platform MUST display, MAY dismiss. 'disclosure': platform MUST display in proximity to the path-referenced component, MUST NOT hide or auto-dismiss. See specification for full contract."
+    },
+    "image_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL to a required visual element (e.g., warning symbol, energy class label)."
+    },
+    "url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Reference URL for more information (e.g., regulatory site, registry entry, policy page)."
     }
   }
 }

@@ -417,6 +417,21 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
           "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/discount.json",
           "extends": "dev.ucp.shopping.checkout"
         }
+      ],
+      "dev.ucp.common.identity_linking": [
+        {
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/identity-linking",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/common/identity_linking.json",
+          "config": {
+            "supported_mechanisms": [
+              {
+                "type": "oauth2",
+                "issuer": "https://auth.merchant.example.com"
+              }
+            ]
+          }
+        }
       ]
     },
     "payment_handlers": {
@@ -517,6 +532,13 @@ example:
           "config": {
             "webhook_url": "https://platform.example.com/webhooks/ucp/orders"
           }
+        }
+      ],
+      "dev.ucp.common.identity_linking": [
+        {
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/identity-linking",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/common/identity_linking.json"
         }
       ]
     },
@@ -650,14 +672,25 @@ for a session:
     (latest date). If the set is empty (no mutual version), **exclude** the
     capability from the intersection.
 
-3. **Prune orphaned extensions**: Remove any capability where `extends` is
-    set but **none** of its parent capabilities are in the intersection.
-    - For single-parent extensions (`extends: "string"`): parent must be present
-    - For multi-parent extensions (`extends: ["a", "b"]`): at least one parent
-        must be present
+3. **Prune orphaned extensions & unauthorized capabilities**: Remove any capability that lacks its required structural or functional dependencies:
+    - **Structural Dependencies**: Remove any capability where `extends` is
+      set but **none** of its parent capabilities are in the intersection.
+        - For single-parent extensions (`extends: "string"`): parent must be present
+        - For multi-parent extensions (`extends: ["a", "b"]`): at least one parent
+          must be present
+    - **Scope Dependencies**: Remove any capability declaring `identity_scopes`
+      if `dev.ucp.common.identity_linking` is not present in the intersection.
 
 4. **Repeat pruning**: Continue step 3 until no more capabilities are removed
-    (handles transitive extension chains).
+    (handles transitive extension chains and chained scope dependencies).
+
+5. **Derive Scopes (Final Pass)**: If `dev.ucp.common.identity_linking` is
+    present in the negotiated capabilities, the authorization scope set
+    **MUST ONLY** be derived from the finalized intersection list *after* all
+    pruning loops have stabilized. Capabilities excluded during pruning MUST NOT
+    contribute to the derived authorization scopes. If the final derived scope
+    list is mathematically empty (no active capabilities request scopes), the
+    agent **SHOULD** abort the identity linking process.
 
 The result is the set of capabilities both parties support at mutually
 compatible versions, with extension dependencies satisfied.
@@ -1192,26 +1225,6 @@ and cart context, then returns the resolved result. Platforms **MUST** treat the
 the [Payment Handler Guide](payment-handler-guide.md#resolving-available_instruments)
 for the full resolution semantics.
 
-### Risk Signals
-
-To aid in fraud assessment, the Platform **MAY** include additional risk signals
-in the `complete` call, providing the Business with more context about the
-transaction's legitimacy. The structure and content of these risk signals are
-not strictly defined by this specification, allowing flexibility based on the
-agreement between the Platform and Business or specific payment handler
-requirements.
-
-**Example (Flexible Structure):**
-
-```json
-{
-  "risk_signals": {
-    "session_id": "abc_123_xyz",
-    "score": 0.95,
-  }
-}
-```
-
 ### Implementation Scenarios
 
 The following scenarios illustrate how different payment handlers and
@@ -1321,8 +1334,9 @@ POST /checkout-sessions/{id}/complete
       }
     ]
   },
-  "risk_signals": {
-      // ...
+  "signals": {
+    "dev.ucp.buyer_ip": "203.0.113.42",
+    "dev.ucp.user_agent": "Mozilla/5.0 ..."
   }
 }
 ```
@@ -1386,8 +1400,9 @@ POST /checkout-sessions/{id}/complete
       }
     ]
   },
-  "risk_signals": {
-    // ... host could send risk_signals here
+  "signals": {
+    "dev.ucp.buyer_ip": "203.0.113.42",
+    "dev.ucp.user_agent": "Mozilla/5.0 ..."
   }
 }
 ```
@@ -1464,9 +1479,9 @@ POST /checkout-sessions/{id}/complete
       }
     ]
   },
-  "risk_signals": {
-    "session_id": "abc_123_xyz",
-    "score": 0.95
+  "signals": {
+    "dev.ucp.buyer_ip": "203.0.113.42",
+    "com.example.risk_score": 0.95
   },
   "ap2": {
     "checkout_mandate": "eyJhbGciOiJ...", // Signed proof of checkout terms
@@ -1548,19 +1563,17 @@ certified and handle:
 
 ### Fraud Prevention Integration
 
-While UCP does not define fraud prevention APIs, the payment architecture
-supports fraud signal integration:
+UCP supports fraud prevention through [Signals](#signals) and the
+payment architecture:
 
+- Platforms provide transaction environment [signals](#signals) (IP, user
+    agent) on catalog, cart, and checkout requests
 - Businesses can require additional fields in handler configurations (e.g.,
     3DS requirements)
-- Platforms can submit device fingerprints and session data alongside credentials
 - Payment credential providers can perform risk assessment during credential
     acquisition
 - Businesses can reject high-risk transactions and request additional
-    verification
-
-Future extensions **MAY** standardize fraud signal schemas, but the current
-architecture allows flexible integration with existing fraud prevention systems.
+    verification via signal feedback
 
 ### Payment Architecture Extensions
 
@@ -1691,6 +1704,65 @@ All UCP communication **MUST** occur over **HTTPS**.
 Sensitive data (such as Payment Credentials or PII) **MUST** be handled
 according to PCI-DSS and GDPR guidelines. UCP encourages the use of tokenized
 payment data to minimize business and platform liability.
+
+### Signals
+
+Businesses require environment data for authorization, rate
+limiting, and abuse prevention. Signal values **MUST NOT** be buyer-asserted
+claims — platforms provide signals based on direct observation (e.g.,
+connection IP, user agent) or by relaying independently verifiable
+third-party attestations, such as cryptographically signed results from an
+external verifier that the business can validate against the provider's
+published key set.
+
+All signal keys **MUST** use reverse-domain naming to ensure provenance and
+prevent collisions when multiple extensions contribute to the shared namespace.
+Well-known signals use the `dev.ucp` namespace (e.g., `dev.ucp.buyer_ip`);
+extension signals use their own namespace (e.g., `com.example.device_id`).
+
+```json
+{
+  "signals": {
+    "dev.ucp.buyer_ip": "203.0.113.42",
+    "dev.ucp.user_agent": "Mozilla/5.0 ...",
+    "com.example.attestation": {
+      "provider_jwks": "https://example.com/.well-known/jwks.json",
+      "kid": "example-key-2026-01",
+      "payload": { "id": "att-7c3e9f", "pass": true, "...": "..." },
+      "sig": "base64url..."
+    }
+  }
+}
+```
+
+Signal fields may contain personally identifiable information
+(PII). Platforms **SHOULD** include only signals relevant to the current
+transaction. Businesses **SHOULD NOT** persist signal data beyond the
+operational needs of the transaction (e.g., order finalization, fraud review).
+
+Businesses **MAY** use messages with code `signal` to request additional
+data. The `path` field identifies the requested signal; the message `type`
+determines enforcement. An `error` blocks status progression until the
+signal is provided; an `info` is advisory and non-blocking.
+
+```json
+{
+  "messages": [
+    {
+      "type": "error",
+      "code": "signal",
+      "path": "$.signals['dev.ucp.buyer_ip']",
+      "content": "Buyer IP is required to proceed."
+    },
+    {
+      "type": "info",
+      "code": "signal",
+      "path": "$.signals['dev.ucp.user_agent']",
+      "content": "Providing user agent may improve checkout outcomes."
+    }
+  ]
+}
+```
 
 ### Transaction Integrity and Non-Repudiation
 

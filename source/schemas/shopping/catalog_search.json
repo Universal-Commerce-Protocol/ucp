@@ -16,6 +16,9 @@
         "context": {
           "$ref": "types/context.json"
         },
+        "signals": {
+          "$ref": "types/signals.json"
+        },
         "filters": {
           "$ref": "types/search_filters.json"
         },

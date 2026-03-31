@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/{{ ucp_version }}/schemas/common/identity_linking.json",
+  "name": "dev.ucp.common.identity_linking",
+  "version": "{{ ucp_version }}",
+  "title": "Identity Linking Capability",
+  "description": "Schema for authenticating and establishing verified connections between platforms and businesses.",
+  "$comment": "This schema also owns the 'identity_scopes' annotation convention. Any UCP capability schema MAY declare a top-level 'identity_scopes' array listing the OAuth 2.0 scopes required to operate that capability. During UCP discovery, platforms MUST collect identity_scopes from all capabilities in the finalized intersection and use the union as the authorization scope set. Absence of identity_scopes means the capability requires no dedicated scope. The canonical shape and pattern for this annotation is defined in $defs/identity_scopes.",
+
+  "$defs": {
+    "platform_schema": {
+      "allOf": [{ "$ref": "../capability.json#/$defs/platform_schema" }]
+    },
+
+    "business_schema": {
+      "allOf": [
+        { "$ref": "../capability.json#/$defs/business_schema" },
+        {
+          "type": "object",
+          "properties": {
+            "config": {
+              "type": "object",
+              "properties": {
+                "supported_mechanisms": {
+                  "type": "array",
+                  "items": { "$ref": "#/$defs/mechanism" },
+                  "minItems": 1
+                }
+              },
+              "required": ["supported_mechanisms"]
+            }
+          },
+          "required": ["config"]
+        }
+      ]
+    },
+
+    "identity_scopes": {
+      "title": "Identity Scopes Annotation",
+      "description": "A custom UCP annotation placed at the root of a capability schema to declare the OAuth 2.0 scopes required to operate that capability. Scopes MUST use reverse DNS dot notation to prevent namespace collisions (e.g., 'dev.ucp.shopping.scopes.checkout_session' for UCP-defined scopes, 'com.example.scopes.my_capability' for third-party scopes). Platforms collect this annotation from every capability in the finalized negotiated intersection and use the union as the authorization scope set. This annotation is intentionally a plain JSON array so it is ignored by standard JSON Schema validators — it carries semantic meaning only to UCP-aware tooling. Absence of this annotation on a capability schema means that capability requires no dedicated scope.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_\\-]*(\\.[a-zA-Z0-9][a-zA-Z0-9_\\-]*)*\\.scopes\\.[a-zA-Z0-9][a-zA-Z0-9_\\-]*(\\.[a-zA-Z0-9][a-zA-Z0-9_\\-]*)*$"
+      },
+      "uniqueItems": true,
+      "minItems": 1
+    },
+
+    "mechanism": {
+      "type": "object",
+      "description": "Base definition for any authentication mechanism. The 'type' field discriminates between known mechanism schemas (e.g., oauth2). Unknown types pass through with only the base requirement, enabling forward-compatible extensibility. Note: this open base schema does not enforce field requirements for known types — use $defs/oauth2 directly to validate an oauth2 mechanism object explicitly.",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "The mechanism type discriminator. Known values: 'oauth2'. Specific mechanism schemas constrain this to a constant value."
+        }
+      },
+      "additionalProperties": true
+    },
+
+    "oauth2": {
+      "type": "object",
+      "title": "OAuth 2.0 Mechanism",
+      "required": ["type", "issuer"],
+      "properties": {
+        "type": {
+          "const": "oauth2",
+          "description": "OAuth 2.0 authentication mechanism."
+        },
+        "issuer": {
+          "type": "string",
+          "format": "uri",
+          "description": "The authorization server URL, supporting RFC 8414 discovery."
+        },
+        "discovery_endpoint": {
+          "type": "string",
+          "format": "uri",
+          "description": "Optional explicit URI to the authorization server's metadata (e.g., `https://auth.merchant.example.com/.well-known/openid-configuration`). If omitted, platforms construct discovery paths based on the `issuer`."
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}
