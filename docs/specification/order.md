@@ -31,7 +31,8 @@ Orders have three main components:
 **Line Items** — what was purchased at checkout:
 
 * Includes current quantity counts (total, fulfilled)
-* Can change post-order (e.g. order edits, exchanges); **MUST** include all line items that ever existed on the order regardless of edits or alterations
+* Can change post-order (e.g. order edits, exchanges); **MUST** include all
+  line items that ever existed on the order regardless of edits or alterations
 
 **Fulfillment** — how items get delivered:
 
@@ -43,7 +44,9 @@ Orders have three main components:
 * Typically money movements (refunds, returns, credits, disputes, cancellations)
 * Can be any post-order change
 * Can happen before, during, or after fulfillment
-* Businesses SHOULD append new entries rather than mutating existing ones; append-only ledger is preferred. Businesses that do not maintain adjustment history MAY perform in-place updates of existing entries
+* Businesses SHOULD append new entries rather than mutating existing ones;
+  append-only ledger is preferred. Businesses that do not maintain adjustment
+  history MAY perform in-place updates of existing entries
   (e.g. a single `return` adjustment can transition from `pending` to `completed`)
 
 ## Data Model
