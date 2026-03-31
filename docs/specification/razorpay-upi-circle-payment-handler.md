@@ -29,14 +29,14 @@ behalf within configurable limits, without per-transaction MPIN authentication.
 This handler follows the **standard credential-before-Complete-Checkout
 pattern** — the same architecture as `com.google.pay` and
 `dev.shopify.shop_pay`: the platform fetches a one-time cryptogram from
-Razorpay AI Commerce TSP, sends it in Complete Checkout, and the business
-processes it straight to `completed`. No escalation, no app switch, no buyer
-interaction at payment time.
+Razorpay, sends it in Complete Checkout, and the business processes it
+straight to `completed`. No escalation, no app switch, no buyer interaction
+at payment time.
 
 > **Note:** This handler requires a **one-time delegation setup** between the
-> buyer, the AI Platform, and Razorpay AI Commerce TSP. This setup happens
-> outside UCP as a bilateral integration — analogous to a buyer saving a card
-> on ChatGPT. See [Delegation Setup](#delegation-setup-outside-ucp).
+> buyer, the Platform, and Razorpay. This setup happens outside UCP as a
+> bilateral integration — analogous to a buyer saving a card on ChatGPT.
+> See [Delegation Setup](#delegation-setup-outside-ucp).
 
 ### UPI Circle vs UPI Intent — Architecture Comparison
 
@@ -75,25 +75,25 @@ interaction at payment time.
 
 | Participant                 | Role                                                                                         | Prerequisites                                                       |
 | :-------------------------- | :------------------------------------------------------------------------------------------- | :------------------------------------------------------------------ |
-| **Business**                | Advertises handler configuration; processes cryptogram via Razorpay PSP; responds `completed`| Yes — Razorpay account with KYC, webhook endpoint (HTTPS, TLS 1.2+)|
-| **Platform**                | Discovers handler; fetches cryptogram from TSP; submits in Complete Checkout; polls if async  | Yes — Razorpay AI Commerce TSP integration, active `delegate_id`    |
-| **PSP (Razorpay)**          | Processes delegated debit via NPCI using mandate UMN; fires webhook to business              | N/A — infrastructure provider                                       |
-| **Razorpay AI Commerce TSP**| Issues one-time cryptograms for established delegation mandates                              | N/A — credential provider (analogous to Google Pay API or Stripe SPT)|
+| **Business**                         | Advertises handler configuration; processes cryptogram via Razorpay; responds `completed`  | Yes — Razorpay account with KYC, webhook endpoint (HTTPS, TLS 1.2+)         |
+| **Platform**                         | Discovers handler; fetches cryptogram from Razorpay; submits in Complete Checkout          | Yes — Razorpay API integration, active `delegate_id`                         |
+| **Razorpay (PSP)**                   | Processes delegated debit via NPCI using mandate UMN; fires webhook to business            | N/A — payment infrastructure                                                 |
+| **Razorpay (Credential Provider)**   | Issues one-time cryptograms for established delegation mandates                            | N/A — credential infrastructure (analogous to Google Pay token API)          |
 
 ---
 
 ## Delegation Setup (Outside UCP)
 
 Before any payment can occur, the buyer must establish a delegation mandate.
-This is a **one-time bilateral integration** between the AI Platform and
-Razorpay AI Commerce TSP — it is **not part of UCP**, just as saving a card on
-ChatGPT is not part of the checkout protocol.
+This is a **one-time bilateral integration** between the Platform and Razorpay
+— it is **not part of UCP**, just as saving a card on ChatGPT is not part of
+the checkout protocol.
 
 ### Setup Flow
 
 ```
 +------------+               +---------------------------+          +-----------+
-|  Platform  |               | Razorpay AI Commerce TSP  |          | Buyer UPI |
+|  Platform  |               |          Razorpay         |          | Buyer UPI |
 +-----+------+               +-------------+-------------+          |   App     |
       |                                    |                         +-----+-----+
       |                                    |                               |
@@ -137,17 +137,17 @@ ChatGPT is not part of the checkout protocol.
 
 ### Setup API Reference
 
-| API                                             | Method | Purpose                                       |
-| :---------------------------------------------- | :----- | :-------------------------------------------- |
-| `/v1/upi/ai-tpap/customers/generate_otp`        | POST   | Send OTP to buyer's mobile                    |
-| `/v1/upi/ai-tpap/customers/{cust_id}/otp_submit`| POST   | Verify OTP; receive intent link / QR for delegation |
-| `/v1/upi/ai-tpap/delegate/{delegate_id}`        | GET    | Poll delegation status until `linked`         |
+| Operation                          | Method | Purpose                                             |
+| :--------------------------------- | :----- | :-------------------------------------------------- |
+| Generate OTP                       | POST   | Send OTP to buyer's mobile                          |
+| Submit OTP                         | POST   | Verify OTP; receive intent link / QR for delegation |
+| Poll delegation status             | GET    | Poll until `delegate_id` reaches `status: linked`   |
 
 **Output:** `delegate_id` — persistent mandate reference. All subsequent
 payments use this ID to fetch cryptograms.
 
-> Detailed API specifications are maintained separately. See
-> [Razorpay AI Commerce TSP API Docs](https://razorpay.com/docs/ucp/ai-tpap/).
+> Exact API paths are published in Razorpay's documentation. Refer to the
+> Razorpay developer docs for the current endpoint reference.
 
 ---
 
@@ -156,9 +156,9 @@ payments use this ID to fetch cryptograms.
 ### Flow Diagram
 
 ```
-+------------+       +---------------------------+     +------------------+     +------------+
-|  Platform  |       | Razorpay AI Commerce TSP  |     |    Business      |     |  Razorpay  |
-+-----+------+       +-------------+-------------+     +--------+---------+     +------+-----+
++------------+       +---------------------------+     +------------------+     +------------------+
+|  Platform  |       |  Razorpay (Cred. Provider)|     |    Business      |     | Razorpay (PSP)   |
++-----+------+       +-------------+-------------+     +--------+---------+     +--------+---------+
       |                            |                            |                      |
   ════╪════════════════════════════╪════════════════════════════╪══════════════════════╪════
   PRE-CONDITION: Delegation setup completed out-of-band.
@@ -259,8 +259,6 @@ Before advertising this handler, businesses **MUST** complete:
 
 #### Handler Schema
 
-**Schema URL:** `https://razorpay.com/ucp/upi_circle/2026-03-26/schemas/config.json`
-
 | Config Variant    | Context              | Key Fields                  |
 | :---------------- | :------------------- | :-------------------------- |
 | `business_config` | Business discovery   | `business_id`, `environment`|
@@ -284,12 +282,7 @@ Before advertising this handler, businesses **MUST** complete:
       "com.razorpay.upi.circle": [
         {
           "id": "razorpay_upi_circle_primary",
-          "version": "2026-03-26",
-          "spec": "https://razorpay.com/ucp/upi_circle/2026-03-26/",
-          "config_schema": "https://razorpay.com/ucp/upi_circle/2026-03-26/schemas/config.json",
-          "instrument_schemas": [
-            "https://razorpay.com/ucp/upi_circle/2026-03-26/schemas/upi_circle_instrument.json"
-          ],
+          "name": "com.razorpay.upi.circle",
           "config": {
             "business_id": "acc_KN2V9oR1g9n0qH",
             "environment": "production"
@@ -384,10 +377,9 @@ def verify_razorpay_webhook(body: bytes, signature: str, webhook_secret: str) ->
 Before handling `com.razorpay.upi.circle` payments, platforms **MUST**:
 
 1. **Complete delegation setup** — Buyer must have an active delegation mandate
-   via Razorpay AI Commerce TSP. Platform must hold a valid `delegate_id` with
-   `status: linked`.
-2. **Integrate with Razorpay AI Commerce TSP** — Ability to call
-   `POST /delegate/{delegate_id}/token_transactional_data` to fetch cryptograms.
+   via Razorpay. Platform must hold a valid `delegate_id` with `status: linked`.
+2. **Integrate with Razorpay** — Ability to call Razorpay's cryptogram issuance
+   API to fetch a one-time cryptogram per transaction.
 3. **Implement status polling** — Poll `GET /checkout-sessions/{id}` if the
    business processes asynchronously and returns `status: complete_in_progress`.
 
@@ -413,14 +405,14 @@ from the Create Checkout response.
 }
 ```
 
-#### Step 2: Fetch Cryptogram from TSP
+#### Step 2: Fetch Cryptogram from Razorpay
 
-Call Razorpay AI Commerce TSP to get a one-time cryptogram for the buyer's
-delegation. This **MUST** be done immediately before submitting Complete
-Checkout — cryptograms are single-use and time-limited.
+Call Razorpay's cryptogram issuance API to get a one-time cryptogram for the
+buyer's delegation. This **MUST** be done immediately before submitting
+Complete Checkout — cryptograms are single-use and time-limited.
 
 ```http
-POST /v1/upi/ai-tpap/delegate/{delegate_id}/token_transactional_data
+POST /v1/upi/delegate/{delegate_id}/cryptogram
 Authorization: Basic base64(key_id:key_secret)
 Content-Type: application/json
 
@@ -428,6 +420,9 @@ Content-Type: application/json
   "delegate_id": "c894aa29a7da69"
 }
 ```
+
+> Exact API path subject to change. Refer to Razorpay developer documentation
+> for the current endpoint.
 
 **Response:**
 
@@ -554,14 +549,15 @@ When the business submits a `upi_circle` instrument with a
 4. **Receives NPCI response** — SUCCESS, FAILURE, or PENDING.
 5. **Sends webhook to business** — `payment.authorized` or `payment.failed`.
 
-### Razorpay AI Commerce TSP: Cryptogram Issuance
+### Razorpay as Credential Provider: Cryptogram Issuance
 
-The TSP acts as the credential provider — analogous to Google Pay's token API
-or Stripe's Shared Payment Token (SPT) API:
+Razorpay acts as the **Credential Provider** — analogous to Google Pay's token
+API or Stripe's Shared Payment Token (SPT) API. The cryptogram issuance
+operation accepts a `delegate_id` and returns a single-use cryptogram:
 
-| API                                                       | Method | Purpose                              |
-| :-------------------------------------------------------- | :----- | :----------------------------------- |
-| `POST /delegate/{delegate_id}/token_transactional_data`   | POST   | Issue a one-time cryptogram          |
+| Operation                    | Method | Purpose                     |
+| :--------------------------- | :----- | :--------------------------- |
+| Cryptogram issuance          | POST   | Issue a one-time cryptogram  |
 
 **Response:**
 
@@ -648,7 +644,7 @@ The cryptogram is:
 - [ ] `delegate_id` required on instrument; `cryptogram` required on credential.
 - [ ] Business profile at `/.well-known/ucp` declares `com.razorpay.upi.circle` with correct `business_id` and `environment`.
 - [ ] Platform completes delegation setup and holds a `delegate_id` with `status: linked`.
-- [ ] Platform calls TSP to fetch cryptogram immediately before Complete Checkout.
+- [ ] Platform calls Razorpay to fetch cryptogram immediately before Complete Checkout.
 - [ ] Platform does **not** reuse a cryptogram across two transactions.
 - [ ] Platform checks `expires_at` before submitting and fetches a fresh cryptogram if needed.
 - [ ] Business processes cryptogram and responds `status: completed` — no escalation.
@@ -665,11 +661,7 @@ The cryptogram is:
 
 | Resource                         | URL                                                                                    |
 | :------------------------------- | :------------------------------------------------------------------------------------- |
-| Handler Spec                     | `https://razorpay.com/ucp/upi_circle/2026-03-26/`                                     |
-| Config Schema                    | `https://razorpay.com/ucp/upi_circle/2026-03-26/schemas/config.json`                  |
-| Instrument Schema                | `https://razorpay.com/ucp/upi_circle/2026-03-26/schemas/upi_circle_instrument.json`   |
-| Credential Schema                | `https://razorpay.com/ucp/upi_circle/2026-03-26/schemas/upi_circle_credential.json`   |
-| Razorpay AI Commerce TSP API     | `https://razorpay.com/docs/ucp/ai-tpap/`                                              |
+| Razorpay Developer Docs          | `https://razorpay.com/docs/`                                                           |
 | UCP Checkout Specification       | [checkout.md](checkout.md)                                                             |
 | UCP Payment Handler Guide        | [payment-handler-guide.md](payment-handler-guide.md)                                  |
 | UCP Payment Handler Template     | [payment-handler-template.md](payment-handler-template.md)                            |

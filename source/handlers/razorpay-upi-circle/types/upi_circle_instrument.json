@@ -7,7 +7,7 @@
   "$defs": {
     "available_upi_circle_instrument": {
       "title": "Available UPI Circle Instrument",
-      "description": "Declares support for the UPI Circle flow in handler available_instruments. The buyer must have an active delegation mandate (delegate_id with status linked) obtained via Razorpay AI Commerce TSP delegation setup.",
+      "description": "Declares support for the UPI Circle flow in handler available_instruments. The buyer must have an active delegation mandate (delegate_id with status linked) obtained via Razorpay delegation setup.",
       "allOf": [
         { "$ref": "https://ucp.dev/schemas/shopping/types/available_payment_instrument.json" }
       ],

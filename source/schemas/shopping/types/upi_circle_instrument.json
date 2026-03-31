@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/shopping/types/upi_circle_instrument.json",
   "title": "UPI Circle Payment Instrument",
-  "description": "Payment instrument for delegated UPI payments. The buyer has pre-authorized the platform to initiate payments within configured limits via a UPI delegation mandate. No per-transaction buyer interaction is required — the platform fetches a one-time cryptogram from the PSP's AI Commerce TSP and submits it in Complete Checkout. This instrument follows the standard credential-before-Complete-Checkout pattern (same as com.google.pay and dev.shopify.shop_pay).",
+  "description": "Payment instrument for delegated UPI payments. The buyer has pre-authorized the platform to initiate payments within configured limits via a UPI delegation mandate. No per-transaction buyer interaction is required — the platform fetches a one-time cryptogram from Razorpay and submits it in Complete Checkout. This instrument follows the standard credential-before-Complete-Checkout pattern (same as com.google.pay and dev.shopify.shop_pay).",
   "allOf": [
     {
       "$ref": "payment_instrument.json"
@@ -18,7 +18,7 @@
         "delegate_id": {
           "type": "string",
           "minLength": 1,
-          "description": "Persistent identifier for the buyer's delegation mandate, obtained during one-time delegation setup with the PSP's AI Commerce TSP. Analogous to a card vault token — it references saved delegation credentials. Used by the platform to fetch a one-time cryptogram before each transaction."
+          "description": "Persistent identifier for the buyer's delegation mandate, obtained during one-time delegation setup with Razorpay. Analogous to a card vault token — it references saved delegation credentials. Used by the platform to fetch a one-time cryptogram before each transaction."
         },
         "display": {
           "type": "object",

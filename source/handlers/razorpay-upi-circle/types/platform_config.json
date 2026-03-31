@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://razorpay.com/ucp/handlers/upi-circle/types/platform_config.json",
   "title": "Razorpay UPI Circle Platform Config",
-  "description": "Platform-level configuration for the com.razorpay.upi.circle payment handler. Unlike UPI Intent (which requires deep-link capability), UPI Circle requires the platform to hold a valid delegate_id and integrate with Razorpay AI Commerce TSP to fetch one-time cryptograms before each Complete Checkout.",
+  "description": "Platform-level configuration for the com.razorpay.upi.circle payment handler. Unlike UPI Intent (which requires deep-link capability), UPI Circle requires the platform to hold a valid delegate_id and integrate with Razorpay to fetch one-time cryptograms before each Complete Checkout.",
   "type": "object",
   "required": ["environment"],
   "properties": {
