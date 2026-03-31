@@ -38,17 +38,6 @@ at payment time.
 > bilateral integration — analogous to a buyer saving a card on ChatGPT.
 > See [Delegation Setup](#delegation-setup-outside-ucp).
 
-### UPI Circle vs UPI Intent — Architecture Comparison
-
-| Property                        | UPI Intent (`com.razorpay.upi`)         | UPI Circle (`com.razorpay.upi.circle`)           |
-| :------------------------------ | :-------------------------------------- | :----------------------------------------------- |
-| **Per-transaction auth**        | Yes — buyer enters MPIN every time      | No — mandate pre-authorizes within limits         |
-| **Credential acquisition**      | PSP-side (after Complete Checkout)      | Platform-side (before Complete Checkout)          |
-| **UCP architecture fit**        | Requires escalation / protocol amendment| Fits existing architecture — no changes needed   |
-| **Truly agentic**               | No — buyer must interact per payment    | Yes — agent pays autonomously                     |
-| **Buyer experience**            | App switch / QR scan per transaction    | Zero-friction — like card-on-file                 |
-| **UCP pattern analog**          | Custom escalation flow                  | Same as `com.google.pay`, `dev.shopify.shop_pay`  |
-
 ### Key Benefits
 
 * **Truly agentic** — No per-transaction authentication. Agent pays autonomously within mandate limits.
@@ -251,9 +240,8 @@ Before advertising this handler, businesses **MUST** complete:
    * `key_id` / `key_secret` — for webhook signature verification and PSP API calls.
    * `business_id` (`acc_*`) — the Razorpay account MID for handler config.
 
-> **Note:** Unlike UPI Intent, no merchant VPA is needed in the handler config.
-> The payee VPA is resolved by Razorpay PSP at payment time from the
-> `delegate_id` and cryptogram.
+> **Note:** No merchant VPA is needed in the handler config. The payee VPA is
+> resolved by Razorpay at payment time from the `delegate_id` and cryptogram.
 
 ### Handler Configuration
 
@@ -582,8 +570,8 @@ The cryptogram is:
 
 | NPCI / Mandate Error                  | UCP `code`         | `severity`            | Platform Action                                       |
 | :------------------------------------ | :----------------- | :-------------------- | :---------------------------------------------------- |
-| Mandate limit exceeded (per-txn)      | `payment_declined` | `requires_buyer_input`| Lower amount or suggest UPI Intent                    |
-| Mandate limit exceeded (monthly)      | `payment_declined` | `requires_buyer_input`| Wait for limit reset or suggest UPI Intent            |
+| Mandate limit exceeded (per-txn)      | `payment_declined` | `requires_buyer_input`| Lower amount or use a different payment method        |
+| Mandate limit exceeded (monthly)      | `payment_declined` | `requires_buyer_input`| Wait for limit reset or use a different payment method|
 | Mandate expired                       | `payment_declined` | `requires_buyer_input`| Re-initiate delegation setup                          |
 | Mandate delinked (buyer revoked)      | `payment_declined` | `requires_buyer_input`| Re-initiate delegation setup                          |
 | Cryptogram expired                    | `payment_declined` | `recoverable`         | Fetch new cryptogram and retry                        |
@@ -665,7 +653,6 @@ The cryptogram is:
 | UCP Checkout Specification       | [checkout.md](checkout.md)                                                             |
 | UCP Payment Handler Guide        | [payment-handler-guide.md](payment-handler-guide.md)                                  |
 | UCP Payment Handler Template     | [payment-handler-template.md](payment-handler-template.md)                            |
-| UPI Intent Handler (comparison)  | [razorpay-upi-payment-handler.md](razorpay-upi-payment-handler.md)                    |
 | Base `payment_instrument.json`   | `https://ucp.dev/{{ ucp_version }}/schemas/shopping/types/payment_instrument.json`    |
 | Base `payment_credential.json`   | `https://ucp.dev/{{ ucp_version }}/schemas/shopping/types/payment_credential.json`    |
 | NPCI UPI Circle / Delegation     | `https://www.npci.org.in/what-we-do/upi/product-overview`                             |
