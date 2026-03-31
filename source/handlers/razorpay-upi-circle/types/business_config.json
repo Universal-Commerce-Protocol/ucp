@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://razorpay.com/ucp/handlers/upi-circle/types/business_config.json",
+  "title": "Razorpay UPI Circle Business Config",
+  "description": "Business-level configuration for the com.razorpay.upi.circle payment handler. Declared in the business's UCP profile at /.well-known/ucp. UPI Circle enables secondary users to pay from a primary account holder's bank account within NPCI-mandated delegation limits (₹5,000 per transaction, ₹15,000 per month).",
+  "type": "object",
+  "required": ["environment", "key_id"],
+  "properties": {
+    "environment": {
+      "type": "string",
+      "enum": ["sandbox", "production"],
+      "description": "Razorpay API environment. Use 'sandbox' for test mode (key_id starts with rzp_test_), 'production' for live mode (key_id starts with rzp_live_)."
+    },
+    "key_id": {
+      "type": "string",
+      "description": "Razorpay public API key (rzp_test_* or rzp_live_*). Safe to advertise in the UCP profile. The key_secret MUST remain on the business backend and MUST NOT be included here.",
+      "pattern": "^rzp_(test|live)_[A-Za-z0-9]+$"
+    },
+    "merchant_name": {
+      "type": "string",
+      "description": "Business display name shown to the buyer during the UPI Circle payment authorization in the PSP app."
+    },
+    "currency": {
+      "type": "string",
+      "description": "Currency accepted by this handler. Defaults to 'INR' — UPI only supports INR transactions.",
+      "default": "INR"
+    },
+    "max_amount": {
+      "type": "integer",
+      "description": "Maximum transaction amount in paise that this handler will accept. Must not exceed the NPCI UPI Circle per-transaction limit of ₹5,000 (500000 paise). Defaults to 500000 if not specified.",
+      "maximum": 500000,
+      "default": 500000
+    }
+  },
+  "additionalProperties": false
+}

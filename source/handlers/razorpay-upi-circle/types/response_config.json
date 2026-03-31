@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://razorpay.com/ucp/handlers/upi-circle/types/response_config.json",
+  "title": "Razorpay UPI Circle Response Config",
+  "description": "Runtime handler configuration returned in the checkout response for com.razorpay.upi.circle. After the platform submits Complete Checkout with a upi_circle instrument and the buyer's delegate VPA credential, the business submits a collect request to Razorpay and returns requires_escalation. This config provides display context and NPCI limit information the platform needs to render the pending authorization screen.",
+  "type": "object",
+  "required": ["environment"],
+  "properties": {
+    "environment": {
+      "type": "string",
+      "enum": ["sandbox", "production"],
+      "description": "Razorpay API environment for this checkout."
+    },
+    "merchant_name": {
+      "type": "string",
+      "description": "Business display name shown to the buyer during UPI Circle authorization in the PSP app."
+    },
+    "per_txn_limit_paise": {
+      "type": "integer",
+      "description": "Per-transaction limit in paise for UPI Circle payments. NPCI mandates a maximum of ₹5,000 (500000 paise). Informational — the platform may display this to the buyer.",
+      "default": 500000
+    },
+    "monthly_limit_paise": {
+      "type": "integer",
+      "description": "Monthly cumulative limit in paise for UPI Circle payments. NPCI mandates a maximum of ₹15,000 (1500000 paise). Informational — the platform may display this to the buyer.",
+      "default": 1500000
+    }
+  },
+  "additionalProperties": false
+}
