@@ -492,11 +492,11 @@ for `postMessage()` calls — before the `ec.ready` message is sent.
 Core messages are defined by the ECP specification and **MUST** be supported by
 all implementations. All messages are sent from Embedded Checkout to host.
 
-| Category         | Purpose                                                 | Pattern      | Core Messages                                                                        |
-| :--------------- | :------------------------------------------------------ | :----------- | :----------------------------------------------------------------------------------- |
-| **Handshake**    | Establish connection between host and Embedded Checkout | Request      | `ec.ready`                                                                           |
-| **Lifecycle**    | Inform of checkout state transitions                    | Notification | `ec.start`, `ec.complete`                                                            |
-| **State Change** | Inform of checkout field changes                        | Notification | `ec.line_items.change`, `ec.buyer.change`, `ec.payment.change`, `ec.messages.change` |
+| Category         | Purpose                                                 | Pattern      | Core Messages                                                                                            |
+| :--------------- | :------------------------------------------------------ | :----------- | :------------------------------------------------------------------------------------------------------- |
+| **Handshake**    | Establish connection between host and Embedded Checkout | Request      | `ec.ready`                                                                                               |
+| **Lifecycle**    | Inform of checkout state transitions                    | Notification | `ec.start`, `ec.complete`                                                                                |
+| **State Change** | Inform of checkout field changes                        | Notification | `ec.line_items.change`, `ec.buyer.change`, `ec.payment.change`, `ec.messages.change`, `ec.totals.change` |
 
 #### Extension Messages
 
@@ -817,6 +817,61 @@ informational notices about the checkout state.
                     "type": "info",
                     "code": "free_shipping",
                     "content": "Free shipping applied!"
+                }
+            ]
+            // ...
+        }
+    }
+}
+```
+
+#### `ec.totals.change`
+
+Checkout totals have been updated. This message covers all total line changes
+including taxes, fees, discounts, and fulfillment costs — many of which have no
+other domain-specific change message. Businesses **MUST** send this message
+whenever `checkout.totals` changes for any reason.
+
+When a change also triggers a domain-specific message (e.g.,
+`ec.line_items.change`, `ec.buyer.change`, or `ec.payment.change`), the business
+**MUST** send the domain-specific message first, then follow it with
+`ec.totals.change`.
+
+- **Direction:** Embedded Checkout → host
+- **Type:** Notification
+- **Payload:**
+    - `checkout`: The latest state of the checkout
+
+**Example Message:**
+
+```json
+{
+    "jsonrpc": "2.0",
+    "method": "ec.totals.change",
+    "params": {
+        "checkout": {
+            "id": "checkout_123",
+            // The entire checkout object is provided, including the updated totals
+            "totals": [
+                {
+                    "type": "subtotal",
+                    "display_text": "Subtotal",
+                    "amount": 4000
+                },
+                {
+                    "type": "fulfillment",
+                    "display_text": "Shipping",
+                    "amount": 599
+                },
+                {
+                    "type": "tax",
+                    "display_text": "Tax",
+                    "amount": 382
+                },
+                {
+                    "type": "total",
+                    "display_text": "Total",
+                    "amount": 4981
                 }
             ]
             // ...
