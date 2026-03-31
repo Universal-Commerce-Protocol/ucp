@@ -2,7 +2,8 @@
   "openrpc": "1.3.2",
   "info": {
     "title": "UCP Shopping Embedded Protocol",
-    "description": "Embedded Protocol (EP) methods for the UCP shopping service. Methods are sent from Merchant to Host via postMessage using JSON-RPC 2.0. Method prefixes indicate capability scope: ec.* (checkout). Future capabilities may define additional prefixes (e.g., eo.* for order). Schema references are logical pointers - actual payload shape is determined by negotiated capabilities.\n\nEmbedded Protocol is a client-to-client postMessage interface, so there is no endpoint URL to access this API. Platforms detect merchant support for this protocol based on the presence of `services[\"dev.ucp.shopping\"][transport=embedded]` in discovery responses."
+    "version": "2026-01-11",
+    "description": "Embedded Protocol (EP) methods for the UCP shopping service. Methods are sent from Merchant to Host via postMessage using JSON-RPC 2.0. Method prefixes indicate capability scope: ep.{capability} (i.e. ep.checkout). Schema references are logical pointers - actual payload shape is determined by negotiated capabilities.\n\nEmbedded Protocol is a client-to-client postMessage interface, so there is no endpoint URL to access this API. Platforms detect merchant support for this protocol based on the presence of `services[\"dev.ucp.shopping\"][transport=embedded]` in discovery responses."
   },
   "servers": [],
   "methods": [
@@ -311,7 +312,7 @@
     },
 
     {
-      "name": "ect.ready",
+      "name": "ep.cart.ready",
       "summary": "Handshake from business to host",
       "description": "Initiates the Embedded Cart Protocol. Business declares which delegation it supports, host responds with optional channel upgrade and initial cart state.",
       "params": [
@@ -355,7 +356,7 @@
     },
 
     {
-      "name": "ect.auth",
+      "name": "ep.cart.auth",
       "summary": "Authorization exchange between host & business.",
       "description": "Augments Embedded Cart Protocol by doing auth exchanges per business requirement. Can be used by business to request initial authorization during handshake or refresh a previously exchanged authorization.",
       "params": [
@@ -387,7 +388,7 @@
     },
 
     {
-      "name": "ect.start",
+      "name": "ep.cart.start",
       "summary": "Cart visible to buyer",
       "description": "Business notifies host that checkout UI is visible and ready for interaction.",
       "params": [
@@ -403,7 +404,7 @@
     },
 
     {
-      "name": "ect.complete",
+      "name": "ep.cart.complete",
       "summary": "Cart completed successfully",
       "description": "Business notifies host that cart building has completed.",
       "params": [
@@ -419,7 +420,7 @@
     },
 
     {
-      "name": "ect.line_items.change",
+      "name": "ep.cart.line_items.change",
       "summary": "Line items changed",
       "description": "Business notifies host that cart.line_items has changed (item added, removed, quantity updated).",
       "params": [
@@ -435,7 +436,7 @@
     },
 
     {
-      "name": "ect.buyer.change",
+      "name": "ep.cart.buyer.change",
       "summary": "Buyer information changed",
       "description": "Business notifies host that cart.buyer has changed (email, phone, address updated).",
       "params": [
@@ -451,7 +452,7 @@
     },
 
     {
-      "name": "ect.messages.change",
+      "name": "ep.cart.messages.change",
       "summary": "Cart messages changed",
       "description": "Business notifies host that cart.messages has changed. Includes errors, warnings, and info. Host should update UI accordingly.",
       "params": [

@@ -133,21 +133,21 @@ Before loading the embedded context, the host **SHOULD**:
    if required by the business
 
 To initiate the session, the host **MUST** augment the `continue_url` with ECaP
-query parameters using the `ect_` prefix.
+query parameters using the `ep_cart` prefix.
 
 All ECaP parameters are passed via URL query string, not HTTP headers, to ensure
 maximum compatibility across different embedding environments. Parameters use
-the `ect_` prefix to avoid namespace pollution and clearly distinguish ECaP
+the `ep_cart` prefix to avoid namespace pollution and clearly distinguish ECaP
 parameters from business-specific query parameters:
 
-- `ect_version` (string, **REQUIRED**): The UCP version for this session
+- `ep_cart_version` (string, **REQUIRED**): The UCP version for this session
     (format: `YYYY-MM-DD`). Must match the version from service discovery.
-- `ect_auth` (string, **OPTIONAL**): Authentication token in business-defined
+- `ep_cart_auth` (string, **OPTIONAL**): Authentication token in business-defined
     format.
-- `ect_delegate` (string, **OPTIONAL**): Comma-delimited list of delegations
+- `ep_cart_delegate` (string, **OPTIONAL**): Comma-delimited list of delegations
     the host wants to handle. **MAY** be empty if no delegations are needed.
     **SHOULD** be a subset of `config.delegate` from the embedded service binding.
-- `ect_color_scheme` (string, **OPTIONAL**): The color scheme preference for
+- `ep_cart_color_scheme` (string, **OPTIONAL**): The color scheme preference for
     the cart UI. Valid values: `light`, `dark`. When not provided, the
     Embedded Cart follows system preference.
 
@@ -159,7 +159,7 @@ All ECaP messages **MUST** use JSON-RPC 2.0 format
 ([RFC 7159](https://datatracker.ietf.org/doc/html/rfc7159)). Each message **MUST** contain:
 
 - `jsonrpc`: **MUST** be `"2.0"`
-- `method`: The message name (e.g., `"ect.start"`)
+- `method`: The message name (e.g., `"ep.cart.start"`)
 - `params`: Message-specific payload (may be empty object)
 - `id`: (Optional) Present only for requests that expect responses
 
@@ -207,7 +207,7 @@ they **MUST** validate the origin matches the `continue_url` used to start the
 checkout.
 
 Upon validation, the host **MAY** create a `MessageChannel`, and transfer one of
-its ports in the result of the [`ect.ready` response](#ectready). When a host
+its ports in the result of the [`ep.cart.ready` response](#epcartready). When a host
 responds with a `MessagePort`, all subsequent messages **MUST** be sent over
 that channel. Otherwise, the host and business **MUST** continue using
 `postMessage()` between their `window` objects, including origin validation.
@@ -237,7 +237,7 @@ For messages traveling from the host to the Embedded Cart, the host **MUST**
 inject JavaScript in the webview that will call
 `window.EmbeddedCartProtocol.postMessage()` with the JSON RPC message. The
 Embedded Cart **MUST** initialize this global object — and start listening
-for `postMessage()` calls — before the `ect.ready` message is sent.
+for `postMessage()` calls — before the `ep.cart.ready` message is sent.
 
 ## Message API Reference
 
@@ -250,17 +250,17 @@ all implementations.
 
 | Category          | Communication Direction | Purpose                                                                   | Pattern                | Core Messages                                                                             |
 | :---------------- | :---------------------- | :------------------------------------------------------------------------ | :--------------------- | :---------------------------------------------------------------------------------------- |
-| **Handshake**     | Embedded Cart -> Host   | Establish connection between host and Embedded Cart.                      | Request                | `ect.ready`                                                                               |
-| **Authentication**| Embedded Cart -> Host   | Communicate auth data exchanges between Embedded Cart and host.           | Request                | `ect.auth`                                                                                |
-| **Lifecycle**     | Embedded Cart -> Host   | Inform of cart state in Embedded Cart.                                    | Notification           | `ect.start`, `ect.complete`                                                               |
-| **State Change**  | Embedded Cart -> Host   | Inform of cart field changes.                                             | Notification           | `ect.line_items.change`, `ect.buyer.change`, `ect.messages.change`                        |
+| **Handshake**     | Embedded Cart -> Host   | Establish connection between host and Embedded Cart.                      | Request                | `ep.cart.ready`                                                                           |
+| **Authentication**| Embedded Cart -> Host   | Communicate auth data exchanges between Embedded Cart and host.           | Request                | `ep.cart.auth`                                                                            |
+| **Lifecycle**     | Embedded Cart -> Host   | Inform of cart state in Embedded Cart.                                    | Notification           | `ep.cart.start`, `ep.cart.complete`                                                       |
+| **State Change**  | Embedded Cart -> Host   | Inform of cart field changes.                                             | Notification           | `ep.cart.line_items.change`, `ep.cart.buyer.change`, `ep.cart.messages.change`            |
 
 ### Handshake Messages
 
-#### `ect.ready`
+#### `ep.cart.ready`
 
 Upon rendering, the Embedded Cart **MUST** broadcast readiness to the parent
-context using the `ect.ready` message. This message initializes a secure
+context using the `ep.cart.ready` message. This message initializes a secure
 communication channel between the host and Embedded Cart, communicates whether
 or not additional auth exchange is needed, and allows the host to provide
 additional, display-only state for the cart that was not communicated over
@@ -271,9 +271,9 @@ UCP cart actions.
 - **Payload:**
     - `delegate` (array of strings, **REQUIRED**): List of delegation
         identifiers accepted by the Embedded Cart. **MUST** be a subset of
-        both `ect_delegate` (what host requested) and `config.delegate` from the
-        cart response (what business allows). An empty array means no
-        delegations were accepted.
+        both `ep_cart_delegate` (what host requested) and `config.delegate`
+        from the cart response (what business allows). An empty array
+        means no delegations were accepted.
 
 **Example Message (no delegations accepted):**
 
@@ -281,17 +281,17 @@ UCP cart actions.
 {
     "jsonrpc": "2.0",
     "id": "ready_1",
-    "method": "ect.ready",
+    "method": "ep.cart.ready",
     "params": {
         "delegate": []
     }
 }
 ```
 
-The `ect.ready` message is a request, which means that the host **MUST** respond
+The `ep.cart.ready` message is a request, which means that the host **MUST** respond
 to complete the handshake.
 
-- **Direction:** host → Embedded Cart
+- **Direction:** Host → Embedded Cart
 - **Type:** Response
 - **Result Payload:**
     - `upgrade` (object, **OPTIONAL**): An object describing how the Embedded
@@ -329,18 +329,18 @@ on the host's `iframe.contentWindow.postMessage()` call):
 ```
 
 When the host responds with an `upgrade` object, the Embedded Cart **MUST**
-discard any other information in the message, send a new `ect.ready` message
+discard any other information in the message, send a new `ep.cart.ready` message
 over the upgraded communication channel, and wait for a new response. All
 subsequent messages **MUST** be sent only over the upgraded communication
 channel.
 
 ### Authentication
 
-#### `ect.auth`
+#### `ep.cart.auth`
 
 Embedded cart **MAY** request authorization from the host in the following scenarios:
 
-1. **Initial handshake**: When `ect_auth` URL param is neither sufficient nor applicable due
+1. **Initial handshake**: When `ep_cart_auth` URL param is neither sufficient nor applicable due
 to additional considerations, business can request for authorization to be exchanged
 through this mechanism before the session starts.
 2. **Reauth**: Certain authentication methods (i.e. OAuth token) have strict expiration timestamps.
@@ -358,14 +358,14 @@ authorization to be provided by the host before the session continues.
 {
     "jsonrpc": "2.0",
     "id": "auth_1",
-    "method": "ect.auth",
+    "method": "ep.cart.auth",
     "params": {
         "type": "oauth"
     }
 }
 ```
 
-The `ect.auth` message is a request, which means that host
+The `ep.cart.auth` message is a request, which means that host
 **MUST** respond to exchange the authorization. The host **MUST** respond with either an error,
 or the authorization data requested by Embedded Cart.
 
@@ -405,7 +405,7 @@ re-initiate this request with the host again.
 
 ### Lifecycle Messages
 
-#### `ect.start`
+#### `ep.cart.start`
 
 Signals that cart is visible and ready for interaction.
 
@@ -420,7 +420,7 @@ Signals that cart is visible and ready for interaction.
 ```json
 {
     "jsonrpc": "2.0",
-    "method": "ect.start",
+    "method": "ep.cart.start",
     "params": {
         "cart": {
             "id": "cart_123",
@@ -433,7 +433,7 @@ Signals that cart is visible and ready for interaction.
 }
 ```
 
-#### `ect.complete`
+#### `ep.cart.complete`
 
 Indicates completion of cart building process and buyer now is ready to be transitioned to
 the next stage of their purchase journey.
@@ -453,8 +453,7 @@ completed cart.
 ```json
 {
     "jsonrpc": "2.0",
-    "id": "transition_1",
-    "method": "ect.complete",
+    "method": "ep.cart.complete",
     "params": {
         "cart": {
             "id": "cart_123",
@@ -473,7 +472,7 @@ State change messages inform the host of changes that have already occurred
 in the cart interface. These are informational only. The cart has
 already applied the changes and rendered the updated UI.
 
-#### `ect.line_items.change`
+#### `ep.cart.line_items.change`
 
 Line items have been modified (quantity changed, items added/removed) in the
 cart UI.
@@ -488,7 +487,7 @@ cart UI.
 ```json
 {
     "jsonrpc": "2.0",
-    "method": "ect.line_items.change",
+    "method": "ep.cart.line_items.change",
     "params": {
         "cart": {
             "id": "cart_123",
@@ -505,7 +504,7 @@ cart UI.
 }
 ```
 
-#### `ect.buyer.change`
+#### `ep.cart.buyer.change`
 
 Buyer information has been updated in the cart UI.
 
@@ -519,7 +518,7 @@ Buyer information has been updated in the cart UI.
 ```json
 {
     "jsonrpc": "2.0",
-    "method": "ect.buyer.change",
+    "method": "ep.cart.buyer.change",
     "params": {
         "cart": {
             "id": "cart_123",
@@ -533,7 +532,7 @@ Buyer information has been updated in the cart UI.
 }
 ```
 
-#### `ect.messages.change`
+#### `ep.cart.messages.change`
 
 Cart messages have been updated. Messages include errors, warnings, and
 informational notices about the cart state.
@@ -548,7 +547,7 @@ informational notices about the cart state.
 ```json
 {
     "jsonrpc": "2.0",
-    "method": "ect.messages.change",
+    "method": "ep.cart.messages.change",
     "params": {
         "cart": {
             "id": "cart_123",
