@@ -41,7 +41,7 @@
     },
     "label": {
       "type": "string",
-      "description": "Human-readable label for identifying the order."
+      "description": "Human-readable label for identifying the order. MUST only be provided by the business."
     },
     "checkout_id": {
       "type": "string",
