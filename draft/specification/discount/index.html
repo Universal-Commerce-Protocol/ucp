@@ -2506,7 +2506,7 @@ operations. The same semantics apply to both resources.</p>
 <ul>
 <li><code>discounts.applied</code> contains all active discounts (code-based + automatic)</li>
 <li>Rejected codes communicated via <code>messages[]</code> (see below)</li>
-<li>Discount amounts reflected in <code>totals[]</code> and <code>line_items[].discount</code></li>
+<li>Discount amounts reflected in <code>totals[]</code> and <code>line_items[].totals[]</code></li>
 </ul>
 <p><strong>Cart-to-checkout continuity:</strong> When a cart is converted to a checkout via the
 cart capability's <code>cart_id</code> field, businesses MUST carry forward any discount
@@ -2720,21 +2720,21 @@ with allocations to shipping/fees, contribute to <code>discount</code>.</p>
 <tbody>
 <tr>
 <td>Line-item discount</td>
-<td><code>line_items[].discount</code> + <code>items_discount</code></td>
+<td><code>line_items[].totals[type=items_discount]</code></td>
 </tr>
 <tr>
 <td>Order-level discount</td>
-<td><code>totals[]</code> with <code>type: "discount"</code></td>
+<td><code>totals[type=discount]</code></td>
 </tr>
 </tbody>
 </table>
 <p><strong>Invariant:</strong> <code>totals[type=items_discount].amount</code> equals
-<code>sum(line_items[].discount)</code>.</p>
+<code>sum(line_items[].totals[type=items_discount].amount)</code>.</p>
 <p>The <code>discounts.applied</code> array shows <strong>what</strong> was applied. The <code>totals[]</code> and
-<code>line_items[].discount</code> show <strong>where</strong> and <strong>how much</strong>.</p>
-<p><strong>Amount convention:</strong> All discount amounts are positive integers in minor
-currency units. When presenting totals to users, display discount types as
-subtractive (e.g., "-$13.99").</p>
+<code>line_items[].totals[]</code> show <strong>where</strong> and <strong>how much</strong>.</p>
+<p><strong>Amount convention:</strong> Discount amounts in <code>discounts.applied</code> are positive
+integers (the value of the discount). Discount entries in <code>totals[]</code> are
+negative (the effect on the receipt) — the sign is schema-enforced.</p>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
 <h3 id="cart-with-discount-codes">Cart with discount codes<a class="headerlink" href="#cart-with-discount-codes" title="Permanent link">&para;</a></h3>
 <p>Discount codes applied during cart exploration. The cart response includes

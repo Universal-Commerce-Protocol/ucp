@@ -124,7 +124,7 @@ Discount codes are submitted via standard cart or checkout create/update operati
 
 - `discounts.applied` contains all active discounts (code-based + automatic)
 - Rejected codes communicated via `messages[]` (see below)
-- Discount amounts reflected in `totals[]` and `line_items[].discount`
+- Discount amounts reflected in `totals[]` and `line_items[].totals[]`
 
 **Cart-to-checkout continuity:** When a cart is converted to a checkout via the cart capability's `cart_id` field, businesses MUST carry forward any discount codes that were applied to the cart. Codes that are no longer valid at checkout time (e.g., expired, ineligible) SHOULD be communicated via `messages[]` using standard rejection codes.
 
@@ -252,14 +252,14 @@ Applied discounts are reflected in the core cart or checkout fields using two di
 
 | Discount Type        | Where Reflected                            |
 | -------------------- | ------------------------------------------ |
-| Line-item discount   | `line_items[].discount` + `items_discount` |
-| Order-level discount | `totals[]` with `type: "discount"`         |
+| Line-item discount   | `line_items[].totals[type=items_discount]` |
+| Order-level discount | `totals[type=discount]`                    |
 
-**Invariant:** `totals[type=items_discount].amount` equals `sum(line_items[].discount)`.
+**Invariant:** `totals[type=items_discount].amount` equals `sum(line_items[].totals[type=items_discount].amount)`.
 
-The `discounts.applied` array shows **what** was applied. The `totals[]` and `line_items[].discount` show **where** and **how much**.
+The `discounts.applied` array shows **what** was applied. The `totals[]` and `line_items[].totals[]` show **where** and **how much**.
 
-**Amount convention:** All discount amounts are positive integers in minor currency units. When presenting totals to users, display discount types as subtractive (e.g., "-$13.99").
+**Amount convention:** Discount amounts in `discounts.applied` are positive integers (the value of the discount). Discount entries in `totals[]` are negative (the effect on the receipt) — the sign is schema-enforced.
 
 ## Examples
 

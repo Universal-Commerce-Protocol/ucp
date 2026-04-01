@@ -12,9 +12,6 @@
       {
         "type": "object",
         "properties": {
-          "amount": {
-            "$ref": "https://ucp.dev/draft/schemas/shopping/types/signed_amount.json"
-          },
           "lines": {
             "type": "array",
             "items": {
@@ -36,52 +33,6 @@
             },
             "description": "Optional itemized breakdown. The parent entry is always rendered; lines are supplementary. Sum of line amounts MUST equal the parent entry amount.",
             "ucp_request": "omit"
-          }
-        }
-      },
-      {
-        "if": {
-          "properties": {
-            "type": {
-              "enum": [
-                "discount",
-                "items_discount"
-              ]
-            }
-          },
-          "required": [
-            "type"
-          ]
-        },
-        "then": {
-          "properties": {
-            "amount": {
-              "exclusiveMaximum": 0
-            }
-          }
-        }
-      },
-      {
-        "if": {
-          "properties": {
-            "type": {
-              "enum": [
-                "subtotal",
-                "fulfillment",
-                "tax",
-                "fee"
-              ]
-            }
-          },
-          "required": [
-            "type"
-          ]
-        },
-        "then": {
-          "properties": {
-            "amount": {
-              "minimum": 0
-            }
           }
         }
       },

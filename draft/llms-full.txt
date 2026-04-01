@@ -2917,11 +2917,10 @@ Error code identifying the type of error. Standard errors are defined in specifi
 
 ### Total
 
-| Name         | Type                                             | Required | Description                                                                                                                                                                      |
-| ------------ | ------------------------------------------------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| type         | string                                           | **Yes**  | Cost category. Well-known values: subtotal, items_discount, discount, fulfillment, tax, fee, total. Businesses MAY use additional values.                                        |
-| display_text | string                                           | No       | Text to display against the amount. Should reflect appropriate method (e.g., 'Shipping', 'Delivery').                                                                            |
-| amount       | [Amount](/draft/specification/reference/#amount) | **Yes**  | Monetary amount in the currency's minor unit as defined by ISO 4217. Refer to the currency's exponent to determine minor-to-major ratio (e.g., 2 for USD, 0 for JPY, 3 for KWD). |
+| Name                     | Type | Required | Description |
+| ------------------------ | ---- | -------- | ----------- |
+| *No properties defined.* |      |          |             |
+| *No properties defined.* |      |          |             |
 
 #### Rendering Contract
 
@@ -7529,7 +7528,7 @@ Discount codes are submitted via standard cart or checkout create/update operati
 
 - `discounts.applied` contains all active discounts (code-based + automatic)
 - Rejected codes communicated via `messages[]` (see below)
-- Discount amounts reflected in `totals[]` and `line_items[].discount`
+- Discount amounts reflected in `totals[]` and `line_items[].totals[]`
 
 **Cart-to-checkout continuity:** When a cart is converted to a checkout via the cart capability's `cart_id` field, businesses MUST carry forward any discount codes that were applied to the cart. Codes that are no longer valid at checkout time (e.g., expired, ineligible) SHOULD be communicated via `messages[]` using standard rejection codes.
 
@@ -7657,14 +7656,14 @@ Applied discounts are reflected in the core cart or checkout fields using two di
 
 | Discount Type        | Where Reflected                            |
 | -------------------- | ------------------------------------------ |
-| Line-item discount   | `line_items[].discount` + `items_discount` |
-| Order-level discount | `totals[]` with `type: "discount"`         |
+| Line-item discount   | `line_items[].totals[type=items_discount]` |
+| Order-level discount | `totals[type=discount]`                    |
 
-**Invariant:** `totals[type=items_discount].amount` equals `sum(line_items[].discount)`.
+**Invariant:** `totals[type=items_discount].amount` equals `sum(line_items[].totals[type=items_discount].amount)`.
 
-The `discounts.applied` array shows **what** was applied. The `totals[]` and `line_items[].discount` show **where** and **how much**.
+The `discounts.applied` array shows **what** was applied. The `totals[]` and `line_items[].totals[]` show **where** and **how much**.
 
-**Amount convention:** All discount amounts are positive integers in minor currency units. When presenting totals to users, display discount types as subtractive (e.g., "-$13.99").
+**Amount convention:** Discount amounts in `discounts.applied` are positive integers (the value of the discount). Discount entries in `totals[]` are negative (the effect on the receipt) — the sign is schema-enforced.
 
 ## Examples
 
@@ -8051,11 +8050,10 @@ This object MUST be one of the following types: [Shipping Destination](/draft/sp
 
 #### Total
 
-| Name         | Type                                             | Required | Description                                                                                                                                                                      |
-| ------------ | ------------------------------------------------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| type         | string                                           | **Yes**  | Cost category. Well-known values: subtotal, items_discount, discount, fulfillment, tax, fee, total. Businesses MAY use additional values.                                        |
-| display_text | string                                           | No       | Text to display against the amount. Should reflect appropriate method (e.g., 'Shipping', 'Delivery').                                                                            |
-| amount       | [Amount](/draft/specification/reference/#amount) | **Yes**  | Monetary amount in the currency's minor unit as defined by ISO 4217. Refer to the currency's exponent to determine minor-to-major ratio (e.g., 2 for USD, 0 for JPY, 3 for KWD). |
+| Name                     | Type | Required | Description |
+| ------------------------ | ---- | -------- | ----------- |
+| *No properties defined.* |      |          |             |
+| *No properties defined.* |      |          |             |
 
 #### Postal Address
 
@@ -8765,11 +8763,10 @@ Environment data provided by the platform to support authorization and abuse pre
 
 The same totals contract applies to cart and checkout. See [Checkout Totals](http://ucp.dev/draft/specification/checkout/#totals) for the rendering contract, accounting identity, well-known types, repeating types, and sub-line semantics.
 
-| Name         | Type                                             | Required | Description                                                                                                                                                                      |
-| ------------ | ------------------------------------------------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| type         | string                                           | **Yes**  | Cost category. Well-known values: subtotal, items_discount, discount, fulfillment, tax, fee, total. Businesses MAY use additional values.                                        |
-| display_text | string                                           | No       | Text to display against the amount. Should reflect appropriate method (e.g., 'Shipping', 'Delivery').                                                                            |
-| amount       | [Amount](/draft/specification/reference/#amount) | **Yes**  | Monetary amount in the currency's minor unit as defined by ISO 4217. Refer to the currency's exponent to determine minor-to-major ratio (e.g., 2 for USD, 0 for JPY, 3 for KWD). |
+| Name                     | Type | Required | Description |
+| ------------------------ | ---- | -------- | ----------- |
+| *No properties defined.* |      |          |             |
+| *No properties defined.* |      |          |             |
 
 Taxes MAY be included where calculable. Platforms SHOULD assume cart totals are estimates; accurate taxes are computed at checkout.
 
@@ -11921,11 +11918,10 @@ See [Message Signatures - Key Rotation](http://ucp.dev/draft/specification/signa
 
 ### Total
 
-| Name         | Type                                             | Required | Description                                                                                                                                                                      |
-| ------------ | ------------------------------------------------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| type         | string                                           | **Yes**  | Cost category. Well-known values: subtotal, items_discount, discount, fulfillment, tax, fee, total. Businesses MAY use additional values.                                        |
-| display_text | string                                           | No       | Text to display against the amount. Should reflect appropriate method (e.g., 'Shipping', 'Delivery').                                                                            |
-| amount       | [Amount](/draft/specification/reference/#amount) | **Yes**  | Monetary amount in the currency's minor unit as defined by ISO 4217. Refer to the currency's exponent to determine minor-to-major ratio (e.g., 2 for USD, 0 for JPY, 3 for KWD). |
+| Name                     | Type | Required | Description |
+| ------------------------ | ---- | -------- | ----------- |
+| *No properties defined.* |      |          |             |
+| *No properties defined.* |      |          |             |
 
 ### UCP Response Order Schema
 
@@ -15217,11 +15213,10 @@ ______________________________________________________________________
 
 ### Total
 
-| Name         | Type                                             | Required | Description                                                                                                                                                                      |
-| ------------ | ------------------------------------------------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| type         | string                                           | **Yes**  | Cost category. Well-known values: subtotal, items_discount, discount, fulfillment, tax, fee, total. Businesses MAY use additional values.                                        |
-| display_text | string                                           | No       | Text to display against the amount. Should reflect appropriate method (e.g., 'Shipping', 'Delivery').                                                                            |
-| amount       | [Amount](/draft/specification/reference/#amount) | **Yes**  | Monetary amount in the currency's minor unit as defined by ISO 4217. Refer to the currency's exponent to determine minor-to-major ratio (e.g., 2 for USD, 0 for JPY, 3 for KWD). |
+| Name                     | Type | Required | Description |
+| ------------------------ | ---- | -------- | ----------- |
+| *No properties defined.* |      |          |             |
+| *No properties defined.* |      |          |             |
 
 ______________________________________________________________________
 
