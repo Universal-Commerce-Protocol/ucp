@@ -188,7 +188,7 @@ credential type (e.g., PCI DSS for cards).
 | Field         | Type   | Required | Description                                 |
 | :------------ | :----- | :------- | :------------------------------------------ |
 | `environment` | string | Yes      | API environment (`sandbox` or `production`) |
-| `merchant_id` | string | Yes      | Business identifier assigned by platform    |
+| `key_id` | string | Yes      | Business identifier assigned by platform    |
 
 #### Example Business Handler Declaration
 
@@ -213,7 +213,7 @@ credential type (e.g., PCI DSS for cards).
           ],
           "config": {
             "environment": "production",
-            "merchant_id": "business_abc123"
+            "key_id": "business_abc123"
           }
         }
       ]
@@ -229,7 +229,7 @@ The response config includes runtime token lifecycle information.
 | Field               | Type    | Required | Description                   |
 | :------------------ | :------ | :------- | :---------------------------- |
 | `environment`       | string  | Yes      | API environment               |
-| `merchant_id`       | string  | Yes      | Business identifier           |
+| `key_id`       | string  | Yes      | Business identifier           |
 | `token_ttl_seconds` | integer | No       | Token time-to-live in seconds |
 
 #### Example Response Config
@@ -248,7 +248,7 @@ The response config includes runtime token lifecycle information.
   ],
   "config": {
     "environment": "production",
-    "merchant_id": "business_abc123",
+    "key_id": "business_abc123",
     "token_ttl_seconds": 900
   }
 }

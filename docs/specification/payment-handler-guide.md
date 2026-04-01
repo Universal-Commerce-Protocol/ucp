@@ -88,7 +88,7 @@ platform), but **MAY** define additional participants with specific roles.
 
 **Note on Terminology:**: While this guide refers to the participant as the
 **"Business"**, technical schema fields may retain the standard industry
-nomenclature **`key_*`** (e.g., `merchant_id`, `merchant_name`).
+nomenclature **`key_*`** (e.g., `key_id`, `merchant_name`).
 Specifications **MUST** explicitly document these field mappings.
 
 **Standard Participants:**
@@ -142,7 +142,7 @@ document:
 - Prerequisites typically occur out-of-band (portals, contracts, API calls)
 - Multiple participants **MAY** have independent prerequisites
 - The identity from prerequisites typically appears within the handler's
-  `config` object (e.g., as `merchant_id` or similar handler-specific field)
+  `config` object (e.g., as `key_id` or similar handler-specific field)
 - Participants receiving raw credentials (e.g., businesses, PSPs) typically must complete security acknowledgements during onboarding, accepting responsibility for credential handling and compliance
 
 ### Handler Declaration
@@ -229,7 +229,7 @@ and typically includes different configuration:
   ],
   "config": {
     "environment": "production",
-    "merchant_id": "business_xyz_789"
+    "key_id": "rzp_live_ABCD"
   }
 }
 ```
@@ -274,7 +274,7 @@ and typically includes different configuration:
   "config": {
     "api_version": 2,
     "environment": "production",
-    "merchant_id": "business_xyz_789"
+    "key_id": "rzp_live_ABCD"
   }
 }
 ```
@@ -428,7 +428,7 @@ Each variant has its own config schema tailored to its context:
       "enum": ["sandbox", "production"],
       "default": "production"
     },
-    "merchant_id": {
+    "key_id": {
       "type": "string",
       "description": "Business identifier for this handler."
     }
@@ -472,7 +472,7 @@ Each variant has its own config schema tailored to its context:
       "type": "string",
       "enum": ["sandbox", "production"]
     },
-    "merchant_id": {
+    "key_id": {
       "type": "string",
       "description": "Business identifier for this handler."
     },
