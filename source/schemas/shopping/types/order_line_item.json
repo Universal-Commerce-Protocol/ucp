@@ -39,10 +39,7 @@
     "totals": {
       "type": "array",
       "items": {
-        "allOf": [
-          { "$ref": "total.json" },
-          { "properties": { "amount": { "minimum": 0 } } }
-        ]
+        "$ref": "total.json"
       },
       "description": "Line item totals breakdown."
     },
