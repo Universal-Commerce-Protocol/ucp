@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://razorpay.com/ucp/handlers/upi-circle/types/response_config.json",
   "title": "Razorpay UPI Circle Response Config",
-  "description": "Runtime handler configuration returned in the checkout response for com.razorpay.upi.circle. Because this handler follows the credential-before-Complete-Checkout pattern, no per-transaction limits are included here — mandate limits are enforced by NPCI and the buyer's bank at the delegation layer, not at the UCP config layer.",
+  "description": "Runtime handler configuration returned in the checkout response for com.razorpay.upi_circle. Because this handler follows the credential-before-Complete-Checkout pattern, no per-transaction limits are included here — mandate limits are enforced by NPCI and the buyer's bank at the delegation layer, not at the UCP config layer.",
   "type": "object",
   "required": ["environment"],
   "properties": {

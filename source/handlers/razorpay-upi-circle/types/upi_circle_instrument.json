@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://razorpay.com/ucp/handlers/upi-circle/types/upi_circle_instrument.json",
   "title": "Razorpay UPI Circle Instrument",
-  "description": "Handler-level wrapper for the upi_circle instrument type used with com.razorpay.upi.circle. Extends the base UPI Circle instrument schema and defines the available_upi_circle_instrument declaration for use in handler available_instruments.",
+  "description": "Handler-level wrapper for the upi_circle instrument type used with com.razorpay.upi_circle. Extends the base UPI Circle instrument schema and defines the available_upi_circle_instrument declaration for use in handler available_instruments.",
 
   "$defs": {
     "available_upi_circle_instrument": {
