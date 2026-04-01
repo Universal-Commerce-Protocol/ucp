@@ -1287,17 +1287,17 @@ The core object representing the current state of the transaction, including lin
 
 The object returned upon successful completion of a checkout, containing confirmation details.
 
-| Name          | Type                                                                               | Required | Description                                                                                                                                  |
-| ------------- | ---------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| ucp           | [Ucp Response Order Schema](/draft/specification/order/#ucp-response-order-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                      |
-| id            | string                                                                             | **Yes**  | Unique order identifier.                                                                                                                     |
-| checkout_id   | string                                                                             | **Yes**  | Associated checkout ID for reconciliation.                                                                                                   |
-| permalink_url | string                                                                             | **Yes**  | Permalink to access the order on merchant site.                                                                                              |
-| line_items    | Array\[[Order Line Item](/draft/specification/reference/#order-line-item)\]        | **Yes**  | Immutable line items — source of truth for what was ordered.                                                                                 |
-| fulfillment   | object                                                                             | **Yes**  | Fulfillment data: buyer expectations and what actually happened.                                                                             |
-| adjustments   | Array\[[Adjustment](/draft/specification/reference/#adjustment)\]                  | No       | Append-only event log of money movements (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment. |
-| currency      | string                                                                             | No       | ISO 4217 currency code. MUST match the currency from the originating checkout session.                                                       |
-| totals        | [Totals](/draft/specification/reference/#totals)                                   | **Yes**  | Different totals for the order.                                                                                                              |
+| Name          | Type                                                                               | Required | Description                                                                                                             |
+| ------------- | ---------------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------- |
+| ucp           | [Ucp Response Order Schema](/draft/specification/order/#ucp-response-order-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields. |
+| id            | string                                                                             | **Yes**  | Unique order identifier.                                                                                                |
+| checkout_id   | string                                                                             | **Yes**  | Associated checkout ID for reconciliation.                                                                              |
+| permalink_url | string                                                                             | **Yes**  | Permalink to access the order on merchant site.                                                                         |
+| line_items    | Array\[[Order Line Item](/draft/specification/reference/#order-line-item)\]        | **Yes**  | Line items representing what was purchased — can change post-order via edits or exchanges.                              |
+| fulfillment   | object                                                                             | **Yes**  | Fulfillment data: buyer expectations and what actually happened.                                                        |
+| adjustments   | Array\[[Adjustment](/draft/specification/reference/#adjustment)\]                  | No       | Post-order events (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment.   |
+| currency      | string                                                                             | No       | ISO 4217 currency code. MUST match the currency from the originating checkout session.                                  |
+| totals        | [Totals](/draft/specification/reference/#totals)                                   | **Yes**  | Different totals for the order.                                                                                         |
 
 ### Payment
 

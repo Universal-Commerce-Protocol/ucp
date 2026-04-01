@@ -4355,7 +4355,7 @@ within the UCP.</p>
 <td style="text-align: left;">line_items</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#order-line-item">Order Line Item</a>]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Immutable line items — source of truth for what was ordered.</td>
+<td style="text-align: left;">Line items representing what was purchased — can change post-order via edits or exchanges.</td>
 </tr>
 <tr>
 <td style="text-align: left;">fulfillment</td>
@@ -4367,7 +4367,7 @@ within the UCP.</p>
 <td style="text-align: left;">adjustments</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#adjustment">Adjustment</a>]</td>
 <td style="text-align: left;">No</td>
-<td style="text-align: left;">Append-only event log of money movements (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment.</td>
+<td style="text-align: left;">Post-order events (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment.</td>
 </tr>
 <tr>
 <td style="text-align: left;">currency</td>
@@ -4467,10 +4467,10 @@ within the UCP.</p>
 <td style="text-align: left;">Which line items and quantities are affected (optional).</td>
 </tr>
 <tr>
-<td style="text-align: left;">amount</td>
-<td style="text-align: left;"><a href="/draft/specification/reference/#amount">Amount</a></td>
+<td style="text-align: left;">totals</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#total">Total</a>]</td>
 <td style="text-align: left;">No</td>
-<td style="text-align: left;">Amount in ISO 4217 minor units for refunds, credits, or price adjustments.</td>
+<td style="text-align: left;">Adjustment totals breakdown. Signed values - negative for money returned to buyer (refunds, credits), positive for additional charges (exchanges).</td>
 </tr>
 <tr>
 <td style="text-align: left;">description</td>
@@ -5650,7 +5650,7 @@ within the UCP.</p>
 <td style="text-align: left;">quantity</td>
 <td style="text-align: left;">object</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Quantity tracking. Both total and fulfilled are derived from events.</td>
+<td style="text-align: left;">Quantity tracking for the line item.</td>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
@@ -5662,7 +5662,7 @@ within the UCP.</p>
 <td style="text-align: left;">status</td>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Derived status: fulfilled if quantity.fulfilled == quantity.total, partial if quantity.fulfilled &gt; 0, otherwise processing.<br><strong>Enum:</strong> <code>processing</code>, <code>partial</code>, <code>fulfilled</code></td>
+<td style="text-align: left;">Derived status: removed if quantity.total == 0, fulfilled if quantity.total &gt; 0 and quantity.fulfilled == quantity.total, partial if quantity.total &gt; 0 and quantity.fulfilled &gt; 0, otherwise processing.<br><strong>Enum:</strong> <code>processing</code>, <code>partial</code>, <code>fulfilled</code>, <code>removed</code></td>
 </tr>
 <tr>
 <td style="text-align: left;">parent_id</td>

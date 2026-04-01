@@ -5310,7 +5310,7 @@ confirmation details.</p>
 <td style="text-align: left;">line_items</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#order-line-item">Order Line Item</a>]</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Immutable line items — source of truth for what was ordered.</td>
+<td style="text-align: left;">Line items representing what was purchased — can change post-order via edits or exchanges.</td>
 </tr>
 <tr>
 <td style="text-align: left;">fulfillment</td>
@@ -5322,7 +5322,7 @@ confirmation details.</p>
 <td style="text-align: left;">adjustments</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#adjustment">Adjustment</a>]</td>
 <td style="text-align: left;">No</td>
-<td style="text-align: left;">Append-only event log of money movements (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment.</td>
+<td style="text-align: left;">Post-order events (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment.</td>
 </tr>
 <tr>
 <td style="text-align: left;">currency</td>
