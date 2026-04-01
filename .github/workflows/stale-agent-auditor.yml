@@ -64,7 +64,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          uv pip install --system requests google-adk
+          uv pip install --system requests "google-adk>=1.27.4"
 
       - name: Run Stale Agent
         env:
