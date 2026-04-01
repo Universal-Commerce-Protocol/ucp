@@ -3,7 +3,7 @@
   "$id": "https://ucp.dev/schemas/shopping/order.json",
   "name": "dev.ucp.shopping.order",
   "title": "Order",
-  "description": "Order schema with immutable line items, buyer-facing fulfillment expectations, and append-only event logs.",
+  "description": "Order schema with line items, buyer-facing fulfillment expectations, and event logs.",
   "$defs": {
     "platform_schema": {
       "title": "Platform Order Schema",
@@ -53,7 +53,7 @@
       "items": {
         "$ref": "types/order_line_item.json"
       },
-      "description": "Immutable line items — source of truth for what was ordered."
+      "description": "Line items representing what was purchased — can change post-order via edits or exchanges."
     },
     "fulfillment": {
       "type": "object",
@@ -80,7 +80,7 @@
       "items": {
         "$ref": "types/adjustment.json"
       },
-      "description": "Append-only event log of money movements (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment."
+      "description": "Post-order events (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment."
     },
     "currency": {
       "type": "string",
