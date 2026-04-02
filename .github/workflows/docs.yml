@@ -21,10 +21,11 @@ on:
   push:
     branches:
       - main
-      - 'release/**'
+      - "release/**"
   pull_request:
     branches:
       - main
+      - "release/**"
     paths:
       - ".github/workflows/docs.yml"
       - "requirements-docs.txt"
@@ -37,6 +38,12 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-latest
+    # Don't run this workflow if this is a release branch creation event
+    # (event.before SHA is all zeros)
+    if: >-
+      !(github.event_name == 'push' &&
+        startsWith(github.ref, 'refs/heads/release/') &&
+        github.event.before == '0000000000000000000000000000000000000000')
     steps:
       - name: Checkout Code
         uses: actions/checkout@v5
@@ -96,9 +103,8 @@ jobs:
   build_and_verify_release:
     needs: lint
     runs-on: ubuntu-latest
-    # Skip if this is a branch creation event (before SHA is all zeros)
     if: >-
-      (startsWith(github.ref, 'refs/heads/release/') && github.event.before != '0000000000000000000000000000000000000000') ||
+      startsWith(github.ref, 'refs/heads/release/') ||
       startsWith(github.event.pull_request.base.ref, 'release/')
     permissions:
       contents: read
