@@ -495,7 +495,7 @@ all implementations. All messages are sent from Embedded Checkout to host.
 | Category          | Purpose                                                               | Pattern      | Core Messages                                                                                            |
 | :---------------- | :-------------------------------------------------------------------- | :----------- | :------------------------------------------------------------------------------------------------------- |
 | **Handshake**     | Establish connection between host and Embedded Checkout               | Request      | `ec.ready`                                                                                               |
-| **Authentication**| Communicate auth data exchanges between Embedded Checkout and host.   | Request      | `ep.cart.auth`                                                                                           |
+| **Authentication**| Communicate auth data exchanges between Embedded Checkout and host.   | Request      | `ec.auth`                                                                                                |
 | **Lifecycle**     | Inform of checkout state transitions                                  | Notification | `ec.start`, `ec.complete`                                                                                |
 | **State Change**  | Inform of checkout field changes                                      | Notification | `ec.line_items.change`, `ec.buyer.change`, `ec.payment.change`, `ec.messages.change`, `ec.totals.change` |
 
