@@ -447,8 +447,8 @@ For requests (messages with `id`), receivers **MUST** respond with either:
 When the host is a web application, communication starts using `postMessage`
 between the host and Checkout windows. The host **MUST** listen for
 `postMessage` calls from the embedded window, and when a message is received,
-they **MUST** validate the origin matches the `checkout_url` used to start the
-checkout.
+they **MUST** validate the origin matches the `continue_url` used to start the
+embedded checkout.
 
 Upon validation, the host **MAY** create a `MessageChannel`, and transfer one of
 its ports in the result of the [`ec.ready` response](#ecready). When a host
@@ -458,7 +458,7 @@ that channel. Otherwise, the host and business **MUST** continue using
 
 #### Communication Channel for Native Hosts
 
-When the host is a native application, they MUST inject globals into the
+When the host is a native application, they **MUST** inject globals into the
 Embedded Checkout that allows `postMessage` communication between the web and
 native environments. The host **MUST** create at least one of the following
 globals:

@@ -57,19 +57,19 @@ the `embedded` transport in their `/.well-known/ucp` profile, all cart
             {
                 "version": "{{ ucp_version }}",
                 "transport": "rest",
-                "schema": "https://ucp.dev/services/shopping/openapi.json",
+                "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/rest.openapi.json",
                 "endpoint": "https://merchant.example.com/ucp/v1"
             },
             {
                 "version": "{{ ucp_version }}",
                 "transport": "mcp",
-                "schema": "https://ucp.dev/services/shopping/mcp.openrpc.json",
+                "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/mcp.openrpc.json",
                 "endpoint": "https://merchant.example.com/ucp/mcp"
             },
             {
                 "version": "{{ ucp_version }}",
                 "transport": "embedded",
-                "schema": "https://ucp.dev/services/shopping/embedded.openrpc.json"
+                "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/embedded.openrpc.json"
             }
         ]
     }
@@ -204,7 +204,7 @@ When the host is a web application, communication starts using `postMessage`
 between the host and Cart windows. The host **MUST** listen for
 `postMessage` calls from the embedded window, and when a message is received,
 they **MUST** validate the origin matches the `continue_url` used to start the
-checkout.
+embedded cart.
 
 Upon validation, the host **MAY** create a `MessageChannel`, and transfer one of
 its ports in the result of the [`ep.cart.ready` response](#epcartready). When a host
@@ -263,8 +263,7 @@ Upon rendering, the Embedded Cart **MUST** broadcast readiness to the parent
 context using the `ep.cart.ready` message. This message initializes a secure
 communication channel between the host and Embedded Cart, communicates whether
 or not additional auth exchange is needed, and allows the host to provide
-additional, display-only state for the cart that was not communicated over
-UCP cart actions.
+any requested authorization data back to Embedded Cart.
 
 - **Direction:** Embedded Cart → host
 - **Type:** Request
@@ -428,6 +427,7 @@ Signals that cart is visible and ready for interaction.
             "totals": [/* ... */],
             "line_items": [/* ... */],
             "buyer": {/* ... */},
+            // ...other cart fields...
         }
     }
 }
@@ -461,6 +461,7 @@ completed cart by issuing a [create checkout](checkout.md#create-checkout) opera
             "totals": [/* ... */],
             "line_items": [/* ... */],
             "buyer": {/* ... */},
+            // ...other cart fields...
         }
     }
 }
@@ -491,7 +492,7 @@ cart UI.
     "params": {
         "cart": {
             "id": "cart_123",
-            // The entire cart object is provided, including the updated line items and totals
+            // The entire cart object is provided, including the updated line items and estimated totals
             "totals": [
                 /* ... */
             ],
@@ -566,6 +567,21 @@ informational notices about the cart state.
     }
 }
 ```
+
+## Security & Error Handling
+
+### Error Codes
+
+The message responder **SHOULD** use
+error codes mapped to
+**[W3C DOMException](https://webidl.spec.whatwg.org/#idl-DOMException)** names
+where possible.
+
+| Code                         | Description                                                                                                                                    |
+| :--------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------- |
+| `abort_error`                | The user cancelled the interaction (e.g., closed the sheet).                                                                                   |
+| `security_error`             | The host origin validation failed.                                                                                                             |
+| `invalid_state_error`        | Handshake was attempted out of order.                                                                                                          |
 
 ### Security for Web-Based Hosts
 
