@@ -439,8 +439,8 @@ Indicates completion of cart building process and buyer now is ready to be trans
 the next stage of their purchase journey.
 
 This marks the completion of Embedded Cart. If `dev.ucp.shopping.checkout` is part of the negotiated
-capabilities during discovery, host **MAY** proceed to initiate a checkout session based on the
-completed cart.
+capabilities during service discovery, host **MAY** proceed to initiate a checkout session based on the
+completed cart by issuing a [create checkout](checkout.md#create-checkout) operation.
 
 - **Direction:** Embedded Cart → host
 - **Type:** Notification
