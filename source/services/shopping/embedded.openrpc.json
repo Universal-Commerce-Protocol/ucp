@@ -58,13 +58,15 @@
       "params": [
         {
           "name": "type",
-          "description": "The type of authorization data business is requesting from the host.",
-          "type": "string",
-          "examples": [
-            "oauth",
-            "api_key",
-            "jwt"
-          ]
+          "schema": {
+            "type": "string",
+            "description": "The type of authorization data business is requesting from the host.",
+            "examples": [
+              "oauth",
+              "api_key",
+              "jwt"
+            ]
+          }
         }
       ],
       "result": {
@@ -362,13 +364,15 @@
       "params": [
         {
           "name": "type",
-          "description": "The type of authorization data business is requesting from the host.",
-          "type": "string",
-          "examples": [
-            "oauth",
-            "api_key",
-            "jwt"
-          ]
+          "schema": {
+            "type": "string",
+            "description": "The type of authorization data business is requesting from the host.",
+            "examples": [
+              "oauth",
+              "api_key",
+              "jwt"
+            ]
+          }
         }
       ],
       "result": {
@@ -390,7 +394,7 @@
     {
       "name": "ep.cart.start",
       "summary": "Cart visible to buyer",
-      "description": "Business notifies host that checkout UI is visible and ready for interaction.",
+      "description": "Business notifies host that cart UI is visible and ready for interaction.",
       "params": [
         {
           "name": "cart",

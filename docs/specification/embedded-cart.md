@@ -121,7 +121,7 @@ URL in an embedded context.
 **Example:**
 
 ```text
-https://example.com/cart/cart123?ect_version=2026-01-23...
+https://example.com/cart/cart123?ep_version=2026-01-23...
 ```
 
 Note: All query parameter values must be properly URL-encoded per RFC 3986.
@@ -132,15 +132,15 @@ Before loading the embedded context, the host **SHOULD**:
 2. Optionally complete authentication mechanisms (i.e. identity linking)
    if required by the business
 
-To initiate the session, the host **MUST** augment the `continue_url` with ECaP
-query parameters using the `ep_cart` prefix.
+To initiate the session, the host **MUST** augment the `continue_url` with supported
+ECaP query parameters.
 
 All ECaP parameters are passed via URL query string, not HTTP headers, to ensure
-maximum compatibility across different embedding environments. Parameters use
-the `ep_cart` prefix to avoid namespace pollution and clearly distinguish ECaP
+maximum compatibility across different embedding environments. Parameters **SHOULD**
+use the `ep_cart` prefix to avoid namespace pollution and clearly distinguish ECaP
 parameters from business-specific query parameters:
 
-- `ep_cart_version` (string, **REQUIRED**): The UCP version for this session
+- `ep_version` (string, **REQUIRED**): The UCP version for this session
     (format: `YYYY-MM-DD`). Must match the version from service discovery.
 - `ep_cart_auth` (string, **OPTIONAL**): Authentication token in business-defined
     format.
