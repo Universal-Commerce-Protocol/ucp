@@ -192,6 +192,9 @@ parameters from business-specific query parameters:
 
 - `ec_version` (string, **REQUIRED**): The UCP version for this session
     (format: `YYYY-MM-DD`). Must match the version from the checkout response.
+    The version is negotiated at session initialization and **MUST** remain
+    constant for the lifetime of the ECP session — neither party may change
+    the version after the handshake.
 - `ec_auth` (string, **OPTIONAL**): Authentication token in business-defined
     format
 - `ec_delegate` (string, **OPTIONAL**): Comma-delimited list of delegations
@@ -430,8 +433,23 @@ For requests (messages with `id`), receivers **MUST** respond with either:
 
 **Success Response:**
 
+All delegation success results **MUST** include the `ucp` envelope with
+`status: "success"`. The `version` **MUST** echo the `ec_version` negotiated
+during session initialization and confirmed by the host in the `ec.ready`
+response. The version is session-bound: once established during the handshake,
+it **MUST NOT** change for the duration of the ECP session. This provides
+explicit protocol-level confirmation and is the same envelope used by REST and
+MCP transports.
+
 ```json
-{ "jsonrpc": "2.0", "id": "...", "result": {...} }
+{
+  "jsonrpc": "2.0",
+  "id": "...",
+  "result": {
+    "ucp": { "version": "{{ ucp_version }}", "status": "success" },
+    "checkout": { ... }
+  }
+}
 ```
 
 **Error Response:**
@@ -439,6 +457,9 @@ For requests (messages with `id`), receivers **MUST** respond with either:
 ```json
 { "jsonrpc": "2.0", "id": "...", "error": {...} }
 ```
+
+In both cases, `result.ucp.status` serves as the discriminator between success
+and error outcomes — the same pattern used across all UCP transports.
 
 ### Communication Channels
 
@@ -581,6 +602,11 @@ to complete the handshake.
 - **Direction:** host → Embedded Checkout
 - **Type:** Response
 - **Result Payload:**
+    - `ucp` (object, **REQUIRED**): UCP protocol metadata. The `version`
+        confirms the negotiated `ec_version` and `status` **MUST** be
+        `"success"`. This version is session-bound — the host explicitly
+        confirms the protocol version here, and it **MUST NOT** change for
+        the duration of the session.
     - `upgrade` (object, **OPTIONAL**): An object describing how the Embedded
         Checkout should update the communication channel it uses to communicate
         with the host. When present, host **MUST NOT** include `credential`
@@ -604,6 +630,7 @@ to complete the handshake.
     "jsonrpc": "2.0",
     "id": "ready_1",
     "result": {
+        "ucp": { "version": "{{ ucp_version }}", "status": "success" },
         "credential": "fake_identity_linking_oauth_token"
     }
 }
@@ -622,6 +649,7 @@ on the host's `iframe.contentWindow.postMessage()` call):
     "jsonrpc": "2.0",
     "id": "ready_1",
     "result": {
+        "ucp": { "version": "{{ ucp_version }}", "status": "success" },
         "upgrade": {
             "port": "[Transferable MessagePort]"
         }
@@ -647,6 +675,7 @@ information:**
     "jsonrpc": "2.0",
     "id": "ready_1",
     "result": {
+        "ucp": { "version": "{{ ucp_version }}", "status": "success" },
         "checkout": {
             "payment": {
                 // The instrument structure is defined by the handler's instrument schema
@@ -1159,6 +1188,7 @@ existing state.
 - **Direction:** host → Embedded Checkout
 - **Type:** Response
 - **Payload:**
+    - `ucp`: UCP protocol metadata with `status: "success"`
     - `checkout`: The update to apply to the checkout object
 
 **Example Success Response:**
@@ -1168,6 +1198,7 @@ existing state.
     "jsonrpc": "2.0",
     "id": "payment_instruments_change_request_1",
     "result": {
+        "ucp": { "version": "{{ ucp_version }}", "status": "success" },
         "checkout": {
             "payment": {
                 // The instrument structure is defined by the handler's instrument schema
@@ -1254,6 +1285,7 @@ new data with existing state.
 - **Direction:** host → Embedded Checkout
 - **Type:** Response
 - **Payload:**
+    - `ucp`: UCP protocol metadata with `status: "success"`
     - `checkout`: The update to apply to the checkout object
 
 **Example Success Response:**
@@ -1263,6 +1295,7 @@ new data with existing state.
     "jsonrpc": "2.0",
     "id": "payment_credential_request_1",
     "result": {
+        "ucp": { "version": "{{ ucp_version }}", "status": "success" },
         "checkout": {
             "payment": {
                 "instruments": [
@@ -1435,6 +1468,7 @@ rather than attempting to merge the new data with existing state.
 - **Direction:** host → Embedded Checkout
 - **Type:** Response
 - **Payload:**
+    - `ucp`: UCP protocol metadata with `status: "success"`
     - `checkout`: The update to apply to the checkout object
 
 **Example Success Response:**
@@ -1444,6 +1478,7 @@ rather than attempting to merge the new data with existing state.
     "jsonrpc": "2.0",
     "id": "fulfillment_address_change_request_1",
     "result": {
+        "ucp": { "version": "{{ ucp_version }}", "status": "success" },
         "checkout": {
             "fulfillment": {
                 "methods": [
@@ -1564,7 +1599,8 @@ Requests the host to handle a link activated by the buyer within the checkout.
 
 - **Direction:** Host → Embedded Checkout
 - **Type:** Response
-- **Payload:** Empty object (`{}`).
+- **Payload:**
+    - `ucp`: UCP protocol metadata with `status: "success"`
 
 **Example Success Response:**
 
@@ -1572,7 +1608,9 @@ Requests the host to handle a link activated by the buyer within the checkout.
 {
     "jsonrpc": "2.0",
     "id": "window_1",
-    "result": {}
+    "result": {
+        "ucp": { "version": "{{ ucp_version }}", "status": "success" }
+    }
 }
 ```
 
@@ -1582,9 +1620,16 @@ Requests the host to handle a link activated by the buyer within the checkout.
 {
     "jsonrpc": "2.0",
     "id": "window_1",
-    "error": {
-        "code": "window_open_rejected_error",
-        "message": "Window open rejected by host."
+    "result": {
+        "ucp": { "version": "{{ ucp_version }}", "status": "error" },
+        "messages": [
+            {
+                "type": "error",
+                "code": "window_open_rejected_error",
+                "content": "Window open rejected by host.",
+                "severity": "unrecoverable"
+            }
+        ]
     }
 }
 ```
@@ -1593,11 +1638,11 @@ Requests the host to handle a link activated by the buyer within the checkout.
 
 ### Error Codes
 
-Responses to delegation request messages from the
-embedded checkout may resolve to errors. The message responder **SHOULD** use
-error codes mapped to
-**[W3C DOMException](https://webidl.spec.whatwg.org/#idl-DOMException)** names
-where possible.
+Delegation requests may result in errors. Errors **MUST** be returned using the
+standard UCP `error_response` shape within the `result` field — the same shape
+used by REST and MCP transports. EP-specific error codes are defined in
+`embedded_error_code.json` and are inspired by
+**[W3C DOMException](https://webidl.spec.whatwg.org/#idl-DOMException)** names.
 
 | Code                         | Description                                                                                                                                    |
 | :--------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------- |

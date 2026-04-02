@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/embedded_error_response.json",
+  "title": "Embedded Protocol Error Response",
+  "description": "Error response for Embedded Protocol delegation methods. Same structure as error_response but uses EP-specific error codes for the error message type.",
+  "type": "object",
+  "required": ["ucp", "messages"],
+  "additionalProperties": false,
+  "properties": {
+    "ucp": {
+      "allOf": [
+        { "$ref": "../../ucp.json#/$defs/base" },
+        {
+          "properties": { "status": { "const": "error" } },
+          "required": ["status"]
+        }
+      ],
+      "description": "UCP protocol metadata. Status MUST be 'error' for error response."
+    },
+    "messages": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "$ref": "embedded_message_error.json"
+          },
+          {
+            "$ref": "message_warning.json"
+          },
+          {
+            "$ref": "message_info.json"
+          }
+        ]
+      },
+      "minItems": 1,
+      "description": "Array of messages describing why the delegation failed."
+    },
+    "continue_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL for buyer handoff or session recovery."
+    }
+  }
+}
