@@ -316,6 +316,27 @@
         "name": "response",
         "schema": {"$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/lookup_response"}
       }
+    },
+    {
+      "name": "get_product",
+      "summary": "Get product details",
+      "description": "Retrieve complete product detail by identifier with optional interactive option selection.",
+      "params": [
+        {
+          "name": "meta",
+          "required": true,
+          "schema": {"$ref": "#/components/schemas/meta"}
+        },
+        {
+          "name": "catalog",
+          "required": true,
+          "schema": {"$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/get_product_request"}
+        }
+      ],
+      "result": {
+        "name": "response",
+        "schema": {"$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/get_product_response"}
+      }
     }
   ]
 }
