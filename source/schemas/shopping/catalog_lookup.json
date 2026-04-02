@@ -34,6 +34,10 @@
           "minItems": 1,
           "description": "Identifiers to lookup. Implementations MUST support product ID and variant ID; MAY support secondary identifiers (SKU, handle, etc.)."
         },
+        "filters": {
+          "$ref": "types/search_filters.json",
+          "description": "Filter criteria to narrow returned products and variants. All specified filters combine with AND logic."
+        },
         "context": {
           "$ref": "types/context.json"
         },
@@ -99,6 +103,10 @@
             "type": "string"
           },
           "description": "Option names in relaxation priority order. When no exact variant matches all selections, the server drops options from the end of this list first. E.g., ['Color', 'Size'] keeps Color and relaxes Size."
+        },
+        "filters": {
+          "$ref": "types/search_filters.json",
+          "description": "Filter criteria to narrow returned variants. All specified filters combine with AND logic."
         },
         "context": {
           "$ref": "types/context.json"
