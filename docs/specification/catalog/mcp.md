@@ -674,6 +674,12 @@ Business outcomes use the JSON-RPC `result` field with messages in the response
 payload. See the [Partial Success](#partial-success) section for handling mixed
 results.
 
+## Entities
+
+### Detail Product {: #detail-product }
+
+{{ extension_schema_fields('catalog_lookup.json#/$defs/detail_product', 'catalog/mcp') }}
+
 ## Conformance
 
 A conforming MCP transport implementation **MUST**:
