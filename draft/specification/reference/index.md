@@ -69,7 +69,7 @@ ______________________________________________________________________
 | line_items    | Array\[[Order Line Item](/draft/specification/reference/#order-line-item)\]            | **Yes**  | Line items representing what was purchased — can change post-order via edits or exchanges.                              |
 | fulfillment   | object                                                                                 | **Yes**  | Fulfillment data: buyer expectations and what actually happened.                                                        |
 | adjustments   | Array\[[Adjustment](/draft/specification/reference/#adjustment)\]                      | No       | Post-order events (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment.   |
-| currency      | string                                                                                 | No       | ISO 4217 currency code. MUST match the currency from the originating checkout session.                                  |
+| currency      | string                                                                                 | **Yes**  | ISO 4217 currency code. MUST match the currency from the originating checkout session.                                  |
 | totals        | [Totals](/draft/specification/reference/#totals)                                       | **Yes**  | Different totals for the order.                                                                                         |
 
 ______________________________________________________________________
