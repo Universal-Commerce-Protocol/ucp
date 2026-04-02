@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/identity_linking.json",
+  "name": "dev.ucp.common.identity_linking",
+  "title": "Identity Linking",
+  "description": "Capability schema for identity linking. Businesses declare trusted identity providers and per-capability scope requirements in the capability config.",
+  "$comment": "Scope declarations live in config.capabilities, not on individual capability schemas. Each entry declares what scopes the business offers for buyer-authenticated access and whether buyer auth is required. Platforms derive the authorization scope set by collecting scopes from this map, intersected with the negotiated capabilities.",
+
+  "$defs": {
+    "capability_identity_config": {
+      "type": "object",
+      "description": "Per-capability identity configuration. Declares whether buyer auth is required and what scopes govern buyer-scoped access. When scopes is absent, the capability name itself is the scope (coarse-grained). When scopes is present, each entry is appended to the capability name to form the wire-format scope token.",
+      "properties": {
+        "required": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether this capability requires buyer identity (obtained via identity linking). When true, the business returns an identity_required error for requests without a buyer identity token. When false (default), the capability works at agent-auth level and buyer identity upgrades the experience."
+        },
+        "scopes": {
+          "type": "array",
+          "description": "Sub-scope identifiers within the capability (e.g., 'read', 'manage'). Defined by the capability's own spec as operation groups. Each entry is joined to the capability name with a colon on the wire (e.g., 'dev.ucp.shopping.order:read'). When absent, the capability name itself is the scope.",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "uniqueItems": true,
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "provider": {
+      "type": "object",
+      "description": "An identity provider that authenticates buyers via OAuth 2.0.",
+      "required": ["auth_url"],
+      "properties": {
+        "auth_url": {
+          "type": "string",
+          "format": "uri",
+          "description": "Base URL for authorization server metadata discovery. Platforms resolve metadata via RFC 8414 (/.well-known/oauth-authorization-server) with OIDC fallback (/.well-known/openid-configuration) on 404."
+        }
+      }
+    },
+
+    "dev.ucp.common.identity_linking": {
+      "platform_schema": {
+        "title": "Identity Linking (Platform)",
+        "description": "Platform-level identity linking capability declaration.",
+        "allOf": [
+          { "$ref": "../capability.json#/$defs/platform_schema" }
+        ]
+      },
+      "business_schema": {
+        "title": "Identity Linking (Business)",
+        "description": "Business-level identity linking configuration declaring trusted identity providers and per-capability scope requirements.",
+        "allOf": [
+          { "$ref": "../capability.json#/$defs/business_schema" },
+          {
+            "properties": {
+              "config": {
+                "type": "object",
+                "properties": {
+                  "providers": {
+                    "type": "object",
+                    "description": "Map of trusted identity providers keyed by reverse-domain identifier.",
+                    "propertyNames": { "$ref": "../ucp.json#/$defs/reverse_domain_name" },
+                    "additionalProperties": { "$ref": "#/$defs/provider" }
+                  },
+                  "capabilities": {
+                    "type": "object",
+                    "description": "Map of capabilities that offer buyer-scoped features, keyed by capability name. Capabilities absent from this map have no buyer-scoped features. Platforms derive the authorization scope set from this map intersected with the negotiated capabilities.",
+                    "propertyNames": { "$ref": "../ucp.json#/$defs/reverse_domain_name" },
+                    "additionalProperties": { "$ref": "#/$defs/capability_identity_config" }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

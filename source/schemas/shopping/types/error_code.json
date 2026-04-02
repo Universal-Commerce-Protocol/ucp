@@ -9,6 +9,6 @@
     "item_unavailable",
     "address_undeliverable",
     "payment_failed",
-    "eligibility_invalid"
+    "identity_required"
   ]
 }
