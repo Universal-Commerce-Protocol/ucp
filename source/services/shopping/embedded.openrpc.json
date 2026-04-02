@@ -24,6 +24,10 @@
             },
             "uniqueItems": true
           }
+        },
+        {
+          "name": "auth",
+          "schema": { "$ref": "#/components/schemas/auth" }
         }
       ],
       "result": {
@@ -42,6 +46,10 @@
                 }
               }
             },
+            "credential": {
+              "type": "string",
+              "description": "Requested authorization. Some common examples include API key and OAuth token."
+            },
             "checkout": {
               "$ref": "../../schemas/shopping/checkout.json",
               "description": "Initial checkout state with host-provided data (saved instruments, addresses)."
@@ -58,15 +66,7 @@
       "params": [
         {
           "name": "type",
-          "schema": {
-            "type": "string",
-            "description": "The type of authorization data business is requesting from the host.",
-            "examples": [
-              "oauth",
-              "api_key",
-              "jwt"
-            ]
-          }
+          "schema": {"$ref": "#/components/schemas/type"}
         }
       ],
       "result": {
@@ -126,8 +126,11 @@
           "name": "checkout",
           "required": true,
           "schema": {
-            "$ref": "../../schemas/shopping/checkout.json",
-            "description": "Current checkout state with updated messages."
+            "oneOf": [
+              { "$ref": "../../schemas/shopping/checkout.json" },
+              { "$ref": "../../schemas/shopping/types/error_response.json" }
+            ],
+            "description": "Current checkout state with updated messages or an error response."
           }
         }
       ]
@@ -330,6 +333,10 @@
             },
             "uniqueItems": true
           }
+        },
+        {
+          "name": "auth",
+          "schema": {"$ref": "#/components/schemas/auth"}
         }
       ],
       "result": {
@@ -364,15 +371,7 @@
       "params": [
         {
           "name": "type",
-          "schema": {
-            "type": "string",
-            "description": "The type of authorization data business is requesting from the host.",
-            "examples": [
-              "oauth",
-              "api_key",
-              "jwt"
-            ]
-          }
+          "schema": {"$ref": "#/components/schemas/type"}
         }
       ],
       "result": {
@@ -464,12 +463,34 @@
           "name": "cart",
           "required": true,
           "schema": {
-            "$ref": "../../schemas/shopping/cart.json",
-            "description": "Current cart state with updated messages."
+            "oneOf": [
+              { "$ref": "../../schemas/shopping/cart.json" },
+              { "$ref": "../../schemas/shopping/types/error_response.json" }
+            ],
+            "description": "Current cart state with updated messages or an error response."
           }
         }
       ]
     }
   ],
+  "components": {
+    "schemas": {
+      "type": {
+        "type": "string",
+        "description": "The type of authorization data business is requesting from the host.",
+        "examples": [
+          "oauth",
+          "api_key",
+          "jwt"
+        ]
+      },
+      "auth": {
+        "type": "object",
+        "properties": {
+          "type": "#/components/schemas/type"
+        }
+      }
+    }
+  },
   "x-delegations": ["payment.instruments_change", "payment.credential", "window.open"]
 }

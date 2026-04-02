@@ -492,11 +492,12 @@ for `postMessage()` calls — before the `ec.ready` message is sent.
 Core messages are defined by the ECP specification and **MUST** be supported by
 all implementations. All messages are sent from Embedded Checkout to host.
 
-| Category         | Purpose                                                 | Pattern      | Core Messages                                                                                            |
-| :--------------- | :------------------------------------------------------ | :----------- | :------------------------------------------------------------------------------------------------------- |
-| **Handshake**    | Establish connection between host and Embedded Checkout | Request      | `ec.ready`                                                                                               |
-| **Lifecycle**    | Inform of checkout state transitions                    | Notification | `ec.start`, `ec.complete`                                                                                |
-| **State Change** | Inform of checkout field changes                        | Notification | `ec.line_items.change`, `ec.buyer.change`, `ec.payment.change`, `ec.messages.change`, `ec.totals.change` |
+| Category          | Purpose                                                               | Pattern      | Core Messages                                                                                            |
+| :---------------- | :-------------------------------------------------------------------- | :----------- | :------------------------------------------------------------------------------------------------------- |
+| **Handshake**     | Establish connection between host and Embedded Checkout               | Request      | `ec.ready`                                                                                               |
+| **Authentication**| Communicate auth data exchanges between Embedded Checkout and host.   | Request      | `ep.cart.auth`                                                                                           |
+| **Lifecycle**     | Inform of checkout state transitions                                  | Notification | `ec.start`, `ec.complete`                                                                                |
+| **State Change**  | Inform of checkout field changes                                      | Notification | `ec.line_items.change`, `ec.buyer.change`, `ec.payment.change`, `ec.messages.change`, `ec.totals.change` |
 
 #### Extension Messages
 
@@ -523,9 +524,9 @@ Where:
 Upon rendering, the Embedded Checkout **MUST** broadcast readiness to the parent
 context using the `ec.ready` message. This message initializes a secure
 communication channel between the host and Embedded Checkout, communicates which
-delegations were accepted, and allows the host to provide additional,
-display-only state for the checkout that was not communicated over UCP checkout
-actions.
+delegations were accepted, communicates whether or not additional auth exchange
+is needed, and allows the host to provide additional, display-only state for the
+checkout that was not communicated over UCP checkout actions.
 
 - **Direction:** Embedded Checkout → host
 - **Type:** Request
@@ -535,6 +536,11 @@ actions.
         both `ec_delegate` (what host requested) and `config.delegate` from the
         checkout response (what business allows). An empty array means no
         delegations were accepted.
+    - `auth` (object, **OPTIONAL**): When `ec_auth` URL param is neither sufficient
+            nor applicable due to additional considerations, business can request for
+            authorization during initial handshake by specifying the `type` enum
+            within this object. This `type` enum value is a mirror of the payload content
+            included in [`ec.auth`](#ecauth).
 
 **Example Message (no delegations accepted):**
 
@@ -544,7 +550,10 @@ actions.
     "id": "ready_1",
     "method": "ec.ready",
     "params": {
-        "delegate": []
+        "delegate": [],
+        "auth": {
+            "type": "oauth"
+        }
     }
 }
 ```
@@ -557,7 +566,10 @@ actions.
     "id": "ready_1",
     "method": "ec.ready",
     "params": {
-        "delegate": ["payment.credential", "fulfillment.address_change", "window.open"]
+        "delegate": ["payment.credential", "fulfillment.address_change", "window.open"],
+        "auth": {
+            "type": "oauth"
+        }
     }
 }
 ```
@@ -571,6 +583,9 @@ to complete the handshake.
     - `upgrade` (object, **OPTIONAL**): An object describing how the Embedded
         Checkout should update the communication channel it uses to communicate
         with the host.
+    - `credential` (string, **OPTIONAL**): The requested authorization data,
+        can be in the form of an OAuth token, JWT, API keys, etc. **MUST** be
+        set if `auth` is present in the request.
     - `checkout` (object, **OPTIONAL**): Additional, display-only state for
         the checkout that was not communicated over UCP checkout actions. This
         is used to populate the checkout UI, and may only be used to populate
@@ -584,7 +599,9 @@ to complete the handshake.
 {
     "jsonrpc": "2.0",
     "id": "ready_1",
-    "result": {}
+    "result": {
+        "credential": "fake_identity_linking_oauth_token"
+    }
 }
 ```
 
@@ -592,7 +609,9 @@ Hosts **MAY** respond with an `upgrade` field to update the communication
 channel between host and Embedded Checkout. Currently, this object only supports
 a `port` field, which **MUST** be a `MessagePort` object, and **MUST** be
 transferred to the embedded checkout context (e.g., with `{transfer: [port2]}`
-on the host's `iframe.contentWindow.postMessage()` call):
+on the host's `iframe.contentWindow.postMessage()` call). When `upgrade`
+is present, host **SHOULD NOT** set `credential` if `auth` is specified
+in the request to avoid oversharing data that will ultimately be thrown away:
 
 **Example Message:**
 
@@ -657,10 +676,7 @@ information:**
 
 Embedded checkout **MAY** request authorization from the host in the following scenarios:
 
-1. Initial handshake: When `ec_auth` URL param is neither sufficient nor applicable due
-to additional considerations, business can request for authorization to be exchanged
-through this mechanism before the session starts.
-2. Reauth: Certain authentication methods (i.e. OAuth token) have strict expiration timestamps.
+1. Reauth: Certain authentication methods (i.e. OAuth token) have strict expiration timestamps.
 If a session lasted longer than the allowed duration, business can request for a refreshed
 authorization to be provided by the host before the session continues.
 
@@ -711,14 +727,41 @@ or the authorization data requested by Embedded Checkout.
     "jsonrpc": "2.0",
     "id": "auth_1",
     "error": {
-        "code": "internal_error",
-        "message": "Something went wrong when fetching the required authorization data."
+        "code": "timeout_error",
+        "message": "An internal service timed out when fetching the required authorization data."
     }
 }
 ```
 
-If the ingestion of the authorization is not successful, Embedded Checkout **MAY**
-re-initiate this request with the host again.
+If the error appears to be transient within the host (i.e. `timeout_error`),
+Embedded Checkout **MAY** re-initiate this request with the host again. Otherwise, Embedded Checkout
+**MUST** issue a state change message containing an `unrecoverable` error response. This response
+**SHOULD** also contain a `continue_url` to allow buyer handoff.
+
+**Example Error Response Message Through ec.messages.change:**
+
+```json
+{
+    "jsonrpc": "2.0",
+    "method": "ec.messages.change",
+    "params": {
+        "ucp": { "version": "{{ ucp_version }}", "status": "error" },
+        "messages": [
+            {
+                "type": "error",
+                "code": "not_supported_error",
+                "content": "Requested auth credential type is not supported",
+                "severity": "unrecoverable"
+            }
+        ],
+        "continue_url": "merchant.example.com"
+    }
+}
+```
+
+When the host receives this error response, they **MUST** tear down the iframe and **SHOULD**
+display a custom error screen to set proper buyer expectation. If a `continue_url` is present in
+the error response, host **MUST** use it to handoff the buyer for session recovery.
 
 ### Lifecycle Messages
 

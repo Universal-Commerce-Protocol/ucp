@@ -248,12 +248,12 @@ for `postMessage()` calls — before the `ep.cart.ready` message is sent.
 Core messages are defined by the ECaP specification and **MUST** be supported by
 all implementations.
 
-| Category          | Communication Direction | Purpose                                                                   | Pattern                | Core Messages                                                                             |
-| :---------------- | :---------------------- | :------------------------------------------------------------------------ | :--------------------- | :---------------------------------------------------------------------------------------- |
-| **Handshake**     | Embedded Cart -> Host   | Establish connection between host and Embedded Cart.                      | Request                | `ep.cart.ready`                                                                           |
-| **Authentication**| Embedded Cart -> Host   | Communicate auth data exchanges between Embedded Cart and host.           | Request                | `ep.cart.auth`                                                                            |
-| **Lifecycle**     | Embedded Cart -> Host   | Inform of cart state in Embedded Cart.                                    | Notification           | `ep.cart.start`, `ep.cart.complete`                                                       |
-| **State Change**  | Embedded Cart -> Host   | Inform of cart field changes.                                             | Notification           | `ep.cart.line_items.change`, `ep.cart.buyer.change`, `ep.cart.messages.change`            |
+| Category          | Purpose                                                                   | Pattern                | Core Messages                                                                             |
+| :---------------- | :------------------------------------------------------------------------ | :--------------------- | :---------------------------------------------------------------------------------------- |
+| **Handshake**     | Establish connection between host and Embedded Cart.                      | Request                | `ep.cart.ready`                                                                           |
+| **Authentication**| Communicate auth data exchanges between Embedded Cart and host.           | Request                | `ep.cart.auth`                                                                            |
+| **Lifecycle**     | Inform of cart state in Embedded Cart.                                    | Notification           | `ep.cart.start`, `ep.cart.complete`                                                       |
+| **State Change**  | Inform of cart field changes.                                             | Notification           | `ep.cart.line_items.change`, `ep.cart.buyer.change`, `ep.cart.messages.change`            |
 
 ### Handshake Messages
 
@@ -273,6 +273,11 @@ any requested authorization data back to Embedded Cart.
         both `ep_cart_delegate` (what host requested) and `config.delegate`
         from the cart response (what business allows). An empty array
         means no delegations were accepted.
+    - `auth` (object, **OPTIONAL**): When `ep_cart_auth` URL param is neither sufficient
+        nor applicable due to additional considerations, business can request for
+        authorization during initial handshake by specifying the `type` enum
+        within this object. This `type` enum value is a mirror of the payload content
+        included in [`ep.cart.auth`](#epcartauth).
 
 **Example Message (no delegations accepted):**
 
@@ -282,7 +287,10 @@ any requested authorization data back to Embedded Cart.
     "id": "ready_1",
     "method": "ep.cart.ready",
     "params": {
-        "delegate": []
+        "delegate": [],
+        "auth": {
+            "type": "oauth"
+        }
     }
 }
 ```
@@ -296,6 +304,9 @@ to complete the handshake.
     - `upgrade` (object, **OPTIONAL**): An object describing how the Embedded
         Cart should update the communication channel it uses to communicate
         with the host.
+    - `credential` (string, **OPTIONAL**): The requested authorization data,
+        can be in the form of an OAuth token, JWT, API keys, etc. **MUST** be
+        set if `auth` is present in the request.
 
 **Example Message:**
 
@@ -303,7 +314,9 @@ to complete the handshake.
 {
     "jsonrpc": "2.0",
     "id": "ready_1",
-    "result": {}
+    "result": {
+        "credential": "fake_identity_linking_oauth_token"
+    }
 }
 ```
 
@@ -311,7 +324,9 @@ Hosts **MAY** respond with an `upgrade` field to update the communication
 channel between host and Embedded Cart. Currently, this object only supports
 a `port` field, which **MUST** be a `MessagePort` object, and **MUST** be
 transferred to the embedded cart context (e.g., with `{transfer: [port2]}`
-on the host's `iframe.contentWindow.postMessage()` call):
+on the host's `iframe.contentWindow.postMessage()` call). When `upgrade`
+is present, host **SHOULD NOT** set `credential` if `auth` is specified
+in the request to avoid oversharing data that will ultimately be thrown away:
 
 **Example Message:**
 
@@ -339,10 +354,7 @@ channel.
 
 Embedded cart **MAY** request authorization from the host in the following scenarios:
 
-1. **Initial handshake**: When `ep_cart_auth` URL param is neither sufficient nor applicable due
-to additional considerations, business can request for authorization to be exchanged
-through this mechanism before the session starts.
-2. **Reauth**: Certain authentication methods (i.e. OAuth token) have strict expiration timestamps.
+1. **Reauth**: Certain authentication methods (i.e. OAuth token) have strict expiration timestamps.
 If a session lasted longer than the allowed duration, business can request for a refreshed
 authorization to be provided by the host before the session continues.
 
@@ -393,14 +405,41 @@ or the authorization data requested by Embedded Cart.
     "jsonrpc": "2.0",
     "id": "auth_1",
     "error": {
-        "code": "internal_error",
-        "message": "Something went wrong when fetching the required authorization data."
+        "code": "timeout_error",
+        "message": "An internal service timed out when fetching the required authorization data."
     }
 }
 ```
 
-If the ingestion of the authorization is not successful, Embedded Cart **MAY**
-re-initiate this request with the host again.
+If the error appears to be transient within the host (i.e. `timeout_error`),
+Embedded Cart **MAY** re-initiate this request with the host again. Otherwise, Embedded Cart
+**MUST** issue a state change message containing an `unrecoverable` error response. This response
+**SHOULD** also contain a `continue_url` to allow buyer handoff.
+
+**Example Error Response Message Through ep.cart.messages.change:**
+
+```json
+{
+    "jsonrpc": "2.0",
+    "method": "ep.cart.messages.change",
+    "params": {
+        "ucp": { "version": "{{ ucp_version }}", "status": "error" },
+        "messages": [
+            {
+                "type": "error",
+                "code": "not_supported_error",
+                "content": "Requested auth credential type is not supported",
+                "severity": "unrecoverable"
+            }
+        ],
+        "continue_url": "merchant.example.com"
+    }
+}
+```
+
+When the host receives this error response, they **MUST** tear down the iframe and **SHOULD**
+display a custom error screen to set proper buyer expectation. If a `continue_url` is present in
+the error response, host **MUST** use it to handoff the buyer for session recovery.
 
 ### Lifecycle Messages
 
