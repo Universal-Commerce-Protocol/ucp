@@ -270,5 +270,5 @@ Businesses implementing the REST binding:
 * **SHOULD** sign responses per the
   [Message Signatures](signatures.md) specification
 
-See [Order Capability - Guidelines](order.md#guidelines) for
+See [Order Capability - Guidelines](order.md#operations-guidelines) for
 capability-level requirements that apply across all transports.

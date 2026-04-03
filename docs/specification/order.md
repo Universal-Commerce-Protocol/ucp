@@ -21,7 +21,7 @@
 ## Overview
 
 Orders represent confirmed transactions resulting from a successful checkout
-submission. It provides a complete record of what was purchased, how
+submission. They provide a complete record of what was purchased, how
 it will be delivered, and what has happened since order placement.
 
 ### Key Concepts
@@ -44,9 +44,9 @@ Orders have three main components:
 * Typically money movements (refunds, returns, credits, disputes, cancellations)
 * Can be any post-order change
 * Can happen before, during, or after fulfillment
-* Businesses SHOULD append new entries rather than mutating existing ones;
+* Businesses **SHOULD** append new entries rather than mutating existing ones;
   append-only ledger is preferred. Businesses that do not maintain adjustment
-  history MAY perform in-place updates of existing entries
+  history **MAY** perform in-place updates of existing entries
   (e.g. a single `return` adjustment can transition from `pending` to `completed`)
 
 ## Data Model
@@ -175,7 +175,7 @@ Examples: `refund`, `return`, `credit`, `price_adjustment`, `dispute`,
   },
   "id": "order_abc123",
   "checkout_id": "checkout_xyz789",
-  "permalink_url": "https://business.com/orders/abc123",
+  "permalink_url": "https://business.example.com/orders/abc123",
   "currency": "USD",
   "line_items": [
     {
@@ -373,12 +373,12 @@ that includes a `messages` array describing the outcome:
 }
 ```
 
-### Guidelines
+### Guidelines {: #operations-guidelines }
 
 **Platform:**
 
 * **MUST** include `UCP-Agent` header with profile URL on all requests
-* **SHOULD** rely on webhooks (see, Events) as the primary order update channel
+* **SHOULD** rely on webhooks (see [Events](#events)) as the primary order update channel
   and use Get Order for reconciliation or on-demand retrieval
 * **SHOULD** treat order data as ephemeral and discard it when no longer needed
   for active commerce flows
@@ -498,7 +498,7 @@ business's orders, even with a valid signature.
 See [Message Signatures - Key Rotation](signatures.md#key-rotation) for
 zero-downtime key rotation procedures.
 
-### Guidelines
+### Guidelines {: #events-guidelines }
 
 **Platform:**
 

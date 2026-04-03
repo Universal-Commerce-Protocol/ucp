@@ -219,6 +219,7 @@ current-state snapshot of an order.
           "order": {
             "ucp": {
               "version": "{{ ucp_version }}",
+              "status": "error",
               "capabilities": [
                 {
                   "name": "dev.ucp.shopping.order",
@@ -257,6 +258,7 @@ current-state snapshot of an order.
           "order": {
             "ucp": {
               "version": "{{ ucp_version }}",
+              "status": "error",
               "capabilities": [
                 {
                   "name": "dev.ucp.shopping.order",
@@ -300,5 +302,10 @@ Platforms implementing the MCP binding:
   order experience - the business site is the source of truth for order details
   and post-purchase operations
 
-See [Order Capability - Guidelines](order.md#guidelines) for
+Businesses implementing the MCP binding:
+
+* **MUST** implement the `get_order` tool per the
+  [OpenRPC schema](https://ucp.dev/services/shopping/mcp.openrpc.json)
+
+See [Order Capability - Guidelines](order.md#operations-guidelines) for
 capability-level requirements that apply across all transports.
