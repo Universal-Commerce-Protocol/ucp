@@ -847,10 +847,11 @@ The business controls what MUST be rendered (top-level entries) versus what MAY 
 
 ### Order Confirmation
 
-| Name          | Type   | Required | Description                                     |
-| ------------- | ------ | -------- | ----------------------------------------------- |
-| id            | string | **Yes**  | Unique order identifier.                        |
-| permalink_url | string | **Yes**  | Permalink to access the order on merchant site. |
+| Name          | Type   | Required | Description                                                                            |
+| ------------- | ------ | -------- | -------------------------------------------------------------------------------------- |
+| id            | string | **Yes**  | Unique order identifier.                                                               |
+| label         | string | No       | Human-readable label for identifying the order. MUST only be provided by the business. |
+| permalink_url | string | **Yes**  | Permalink to access the order on merchant site.                                        |
 
 ### Error Response
 

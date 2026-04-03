@@ -64,6 +64,7 @@ ______________________________________________________________________
 | ------------- | -------------------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------- |
 | ucp           | [Ucp Response Order Schema](/draft/specification/reference/#ucp-response-order-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields. |
 | id            | string                                                                                 | **Yes**  | Unique order identifier.                                                                                                |
+| label         | string                                                                                 | No       | Human-readable label for identifying the order. MUST only be provided by the business.                                  |
 | checkout_id   | string                                                                                 | **Yes**  | Associated checkout ID for reconciliation.                                                                              |
 | permalink_url | string                                                                                 | **Yes**  | Permalink to access the order on merchant site.                                                                         |
 | line_items    | Array\[[Order Line Item](/draft/specification/reference/#order-line-item)\]            | **Yes**  | Line items representing what was purchased — can change post-order via edits or exchanges.                              |
@@ -442,10 +443,11 @@ ______________________________________________________________________
 
 ### Order Confirmation
 
-| Name          | Type   | Required | Description                                     |
-| ------------- | ------ | -------- | ----------------------------------------------- |
-| id            | string | **Yes**  | Unique order identifier.                        |
-| permalink_url | string | **Yes**  | Permalink to access the order on merchant site. |
+| Name          | Type   | Required | Description                                                                            |
+| ------------- | ------ | -------- | -------------------------------------------------------------------------------------- |
+| id            | string | **Yes**  | Unique order identifier.                                                               |
+| label         | string | No       | Human-readable label for identifying the order. MUST only be provided by the business. |
+| permalink_url | string | **Yes**  | Permalink to access the order on merchant site.                                        |
 
 ______________________________________________________________________
 
