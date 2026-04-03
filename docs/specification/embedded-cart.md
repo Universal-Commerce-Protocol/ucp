@@ -700,4 +700,4 @@ Cart protocol.
 The core object representing the current state of the cart, including
 line items, totals, and buyer information.
 
-{{ schema_fields('cart_resp', 'embedded-cart') }}
+{{ schema_fields('cart_resp', 'cart') }}
