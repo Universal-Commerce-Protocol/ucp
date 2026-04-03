@@ -4,10 +4,6 @@
   "name": "dev.ucp.shopping.checkout",
   "title": "Checkout",
   "description": "Base checkout schema. Extensions compose onto this using allOf.",
-  "$comment": "identity_scopes is a UCP annotation processed by UCP-aware tooling during capability negotiation. Its canonical definition and processing rules are specified in the identity_linking capability schema.",
-  "identity_scopes": [
-    "dev.ucp.shopping.scopes.checkout_session"
-  ],
   "type": "object",
   "required": [
     "ucp",
