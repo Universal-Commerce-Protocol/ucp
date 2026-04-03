@@ -1640,18 +1640,27 @@ Requests the host to handle a link activated by the buyer within the checkout.
 
 Delegation requests may result in errors. Errors **MUST** be returned using the
 standard UCP `error_response` shape within the `result` field — the same shape
-used by REST and MCP transports. EP-specific error codes are defined in
-`embedded_error_code.json` and are inspired by
-**[W3C DOMException](https://webidl.spec.whatwg.org/#idl-DOMException)** names.
+used by REST and MCP transports. For delegation exchanges, an error
+signals that the delegation failed but the session remains active —
+severity prescribes the recommended action.
 
-| Code                         | Description                                                                                                                                    |
-| :--------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------- |
-| `abort_error`                | The user cancelled the interaction (e.g., closed the sheet).                                                                                   |
-| `security_error`             | The host origin validation failed.                                                                                                             |
-| `not_supported_error`        | The requested payment method is not supported by the host.                                                                                     |
-| `invalid_state_error`        | Handshake was attempted out of order.                                                                                                          |
-| `not_allowed_error`          | The request was missing valid User Activation (see [Prevention of Unsolicited Payment Requests](#prevention-of-unsolicited-payment-requests)). |
-| `window_open_rejected_error` | Host policy prevented the navigation. The host **MAY** notify the buyer that their request was rejected.                                       |
+ECP defines the following error codes:
+
+| Code                         | Severity        | Description                                                                                                                                    |
+| :--------------------------- | :-------------- | :--------------------------------------------------------------------------------------------------------------------------------------------- |
+| `abort_error`                | `recoverable`   | The user cancelled the interaction (e.g., closed the sheet).                                                                                   |
+| `security_error`             | `unrecoverable` | The host origin validation failed.                                                                                                             |
+| `not_supported_error`        | `unrecoverable` | The requested payment method is not supported by the host.                                                                                     |
+| `invalid_state_error`        | `unrecoverable` | Handshake was attempted out of order.                                                                                                          |
+| `not_allowed_error`          | `recoverable`   | The request was missing valid User Activation (see [Prevention of Unsolicited Payment Requests](#prevention-of-unsolicited-payment-requests)). |
+| `window_open_rejected_error` | `unrecoverable` | Host policy prevented the navigation. The host **MAY** notify the buyer that their request was rejected.                                       |
+
+Delegation errors **SHOULD** use only `recoverable` and `unrecoverable`
+severities. `recoverable` means the delegation may be re-attempted.
+For `abort_error`, the buyer cancelled and may choose to try again.
+For `not_allowed_error`, recovery requires a new [user activation](https://html.spec.whatwg.org/multipage/interaction.html#activation)
+gesture before re-attempting the delegation. `unrecoverable` errors
+indicate the delegation cannot succeed in the current session.
 
 ### Security for Web-Based Hosts
 
