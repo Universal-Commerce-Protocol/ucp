@@ -948,43 +948,6 @@ informational notices about the checkout state.
 }
 ```
 
-#### `ec.error`
-
-Signals a session-level error unrelated to the checkout resource itself — for example,
-a terminal auth failure that prevents the session from continuing.
-
-- **Direction:** Embedded Checkout → host
-- **Type:** Notification
-- **Payload:**
-    - `ucp` (object, **REQUIRED**): UCP protocol metadata. `status` **MUST** be `"error"`.
-    - `messages` (array, **REQUIRED**): One or more messages describing the failure.
-    - `continue_url` (string, **OPTIONAL**): URL for buyer handoff or session recovery.
-
-**Example Message:**
-
-```json
-{
-    "jsonrpc": "2.0",
-    "method": "ec.error",
-    "params": {
-        "ucp": { "version": "{{ ucp_version }}", "status": "error" },
-        "messages": [
-            {
-                "type": "error",
-                "code": "not_supported_error",
-                "content": "Requested auth credential type is not supported.",
-                "severity": "unrecoverable"
-            }
-        ],
-        "continue_url": "https://merchant.example.com/checkout/abc123"
-    }
-}
-```
-
-When the host receives `ec.error`, it **MUST** tear down the embedded context and **SHOULD**
-display an appropriate error state to the buyer. If `continue_url` is present, host **MUST**
-use it to hand off the buyer for session recovery.
-
 #### `ec.totals.change`
 
 Checkout totals have been updated. This message covers all total line changes
@@ -1044,6 +1007,45 @@ When a change also triggers a domain-specific message (e.g.,
 
 Payment state has been updated. See [`ec.payment.change`](#ecpaymentchange) for
 full documentation.
+
+### Session Error Messages
+
+#### `ec.error`
+
+Signals a session-level error unrelated to the checkout resource itself — for example,
+a terminal auth failure that prevents the session from continuing.
+
+- **Direction:** Embedded Checkout → host
+- **Type:** Notification
+- **Payload:**
+    - `ucp` (object, **REQUIRED**): UCP protocol metadata. `status` **MUST** be `"error"`.
+    - `messages` (array, **REQUIRED**): One or more messages describing the failure.
+    - `continue_url` (string, **OPTIONAL**): URL for buyer handoff or session recovery.
+
+**Example Message:**
+
+```json
+{
+    "jsonrpc": "2.0",
+    "method": "ec.error",
+    "params": {
+        "ucp": { "version": "{{ ucp_version }}", "status": "error" },
+        "messages": [
+            {
+                "type": "error",
+                "code": "not_supported_error",
+                "content": "Requested auth credential type is not supported.",
+                "severity": "unrecoverable"
+            }
+        ],
+        "continue_url": "https://merchant.example.com/checkout/abc123"
+    }
+}
+```
+
+When the host receives `ec.error`, it **MUST** tear down the embedded context and **SHOULD**
+display an appropriate error state to the buyer. If `continue_url` is present, host **MUST**
+use it to hand off the buyer for session recovery.
 
 ## Payment Extension
 

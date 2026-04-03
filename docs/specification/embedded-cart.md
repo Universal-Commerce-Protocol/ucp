@@ -618,6 +618,45 @@ informational notices about the cart state.
 }
 ```
 
+### Session Error Messages
+
+#### `ep.cart.error`
+
+Signals a session-level error unrelated to the cart resource itself — for example,
+a terminal auth failure that prevents the session from continuing.
+
+- **Direction:** Embedded Cart → host
+- **Type:** Notification
+- **Payload:**
+    - `ucp` (object, **REQUIRED**): UCP protocol metadata. `status` **MUST** be `"error"`.
+    - `messages` (array, **REQUIRED**): One or more messages describing the failure.
+    - `continue_url` (string, **OPTIONAL**): URL for buyer handoff or session recovery.
+
+**Example Message:**
+
+```json
+{
+    "jsonrpc": "2.0",
+    "method": "ep.cart.error",
+    "params": {
+        "ucp": { "version": "{{ ucp_version }}", "status": "error" },
+        "messages": [
+            {
+                "type": "error",
+                "code": "not_supported_error",
+                "content": "Requested auth credential type is not supported.",
+                "severity": "unrecoverable"
+            }
+        ],
+        "continue_url": "https://merchant.example.com/cart/abc123"
+    }
+}
+```
+
+When the host receives `ep.cart.error`, it **MUST** tear down the embedded context and **SHOULD**
+display an appropriate error state to the buyer. If `continue_url` is present, host **MUST**
+use it to hand off the buyer for session recovery.
+
 ## Security & Error Handling
 
 ### Error Codes
