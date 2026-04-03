@@ -314,7 +314,7 @@ which platform originated them.
 
 Businesses **MAY** define additional access policies (e.g., trusted partner
 agreements), enforce data availability constraints (e.g., retention
-windows, regulatory erasure), and omit or redact fields from the response
+windows, regulatory erasure), and omit or redact optional fields from the response
 based on context, business policy, or other requirements - independently
 of authorization.
 

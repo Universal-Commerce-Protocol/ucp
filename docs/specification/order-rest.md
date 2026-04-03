@@ -263,15 +263,12 @@ Platforms implementing the REST binding:
 * **SHOULD** delegate to the business via `permalink_url` for the authoritative
   order experience - the business site is the source of truth for order details
   and post-purchase operations
-* **SHOULD** rely on webhooks as the primary order update channel and use
-  Get Order for reconciliation or on-demand retrieval
-* **SHOULD** treat order data as ephemeral and discard it when no longer needed
-  for active commerce flows
 
 Businesses implementing the REST binding:
 
-* **MUST** authenticate requests to order data before returning a response
-  (see [Order Capability - Authorization](order.md#authorization))
 * **MUST** serve all endpoints over HTTPS with TLS 1.3+
 * **SHOULD** sign responses per the
   [Message Signatures](signatures.md) specification
+
+See [Order Capability - Guidelines](order.md#guidelines) for
+capability-level requirements that apply across all transports.

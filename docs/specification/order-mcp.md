@@ -299,10 +299,6 @@ Platforms implementing the MCP binding:
 * **SHOULD** delegate to the business via `permalink_url` for the authoritative
   order experience - the business site is the source of truth for order details
   and post-purchase operations
-* **SHOULD** rely on webhooks as the primary order update channel and use
-  `get_order` for reconciliation or on-demand retrieval
 
-Businesses implementing the MCP binding:
-
-* **MUST** authenticate requests to order data before returning a response
-  (see [Order Capability - Authorization](order.md#authorization))
+See [Order Capability - Guidelines](order.md#guidelines) for
+capability-level requirements that apply across all transports.
