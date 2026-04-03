@@ -22,9 +22,13 @@
 - [Buyer Consent Extension](http://ucp.dev/draft/specification/buyer-consent/index.md)
 - [Discounts Extension](http://ucp.dev/draft/specification/discount/index.md)
 - [Fulfillment Extension](http://ucp.dev/draft/specification/fulfillment/index.md)
+
+## Cart Capability
+
 - [Overview](http://ucp.dev/draft/specification/cart/index.md)
 - [HTTP/REST Binding](http://ucp.dev/draft/specification/cart-rest/index.md)
 - [MCP Binding](http://ucp.dev/draft/specification/cart-mcp/index.md)
+- [EP Binding](http://ucp.dev/draft/specification/embedded-cart/index.md)
 
 ## Catalog Capability
 
