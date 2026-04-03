@@ -556,6 +556,14 @@ Business outcomes use the standard HTTP 200 status with messages in the response
 
 {{ extension_schema_fields('catalog_lookup.json#/$defs/detail_product', 'catalog/rest') }}
 
+### Get Product Response {: #catalog-lookup-get-product-response }
+
+{{ extension_schema_fields('catalog_lookup.json#/$defs/get_product_response', 'catalog/rest') }}
+
+### Error Response {: #error-response }
+
+{{ schema_fields('types/error_response', 'catalog/rest') }}
+
 ## Conformance
 
 A conforming REST transport implementation **MUST**:

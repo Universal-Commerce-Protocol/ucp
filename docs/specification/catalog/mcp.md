@@ -680,6 +680,14 @@ results.
 
 {{ extension_schema_fields('catalog_lookup.json#/$defs/detail_product', 'catalog/mcp') }}
 
+### Get Product Response {: #catalog-lookup-get-product-response }
+
+{{ extension_schema_fields('catalog_lookup.json#/$defs/get_product_response', 'catalog/mcp') }}
+
+### Error Response {: #error-response }
+
+{{ schema_fields('types/error_response', 'catalog/mcp') }}
+
 ## Conformance
 
 A conforming MCP transport implementation **MUST**:
