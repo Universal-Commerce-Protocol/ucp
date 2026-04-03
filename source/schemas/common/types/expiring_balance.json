@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/expiring_balance.json",
+  "title": "Expiring Balance",
+  "description": "The balance that are expiring.",
+  "type": "object",
+  "required": ["amount", "expiry_time"],
+  "properties": {
+    "amount": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "The amount of expiring balance."
+    },
+    "expiry_time": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Balance expiration date (RFC 3339)."
+    },
+    "reason": {
+      "type": "string",
+      "description": "Human-readable explanation of the reason for the expiring balance."
+    }
+  }
+}
