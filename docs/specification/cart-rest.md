@@ -39,20 +39,22 @@ Businesses advertise REST transport availability through their UCP profile at
         }
       }
     },
-    "capabilities": [
-      {
-        "name": "dev.ucp.shopping.checkout",
-        "version": "{{ ucp_version }}",
-        "spec": "https://ucp.dev/{{ ucp_version }}/specification/checkout",
-        "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/checkout.json"
-      },
-      {
-        "name": "dev.ucp.shopping.cart",
-        "version": "{{ ucp_version }}",
-        "spec": "https://ucp.dev/{{ ucp_version }}/specification/cart",
-        "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/cart.json"
-      }
-    ]
+    "capabilities": {
+      "dev.ucp.shopping.checkout": [
+        {
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/checkout",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/checkout.json"
+        }
+      ],
+      "dev.ucp.shopping.cart": [
+        {
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/cart",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/cart.json"
+        }
+      ]
+    }
   }
 }
 ```
@@ -129,16 +131,10 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
     {
       "ucp": {
         "version": "{{ ucp_version }}",
-        "capabilities": [
-          {
-            "name": "dev.ucp.shopping.checkout",
-            "version": "{{ ucp_version }}"
-          },
-          {
-            "name": "dev.ucp.shopping.cart",
-            "version": "{{ ucp_version }}"
-          }
-        ]
+        "capabilities": {
+          "dev.ucp.shopping.checkout": [{"version": "{{ ucp_version }}"}],
+          "dev.ucp.shopping.cart": [{"version": "{{ ucp_version }}"}]
+        }
       },
       "id": "cart_abc123",
       "line_items": [
@@ -223,16 +219,10 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
     {
       "ucp": {
         "version": "{{ ucp_version }}",
-        "capabilities": [
-          {
-            "name": "dev.ucp.shopping.checkout",
-            "version": "{{ ucp_version }}"
-          },
-          {
-            "name": "dev.ucp.shopping.cart",
-            "version": "{{ ucp_version }}"
-          }
-        ]
+        "capabilities": {
+          "dev.ucp.shopping.checkout": [{"version": "{{ ucp_version }}"}],
+          "dev.ucp.shopping.cart": [{"version": "{{ ucp_version }}"}]
+        }
       },
       "id": "cart_abc123",
       "line_items": [
@@ -276,12 +266,9 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
       "ucp": {
         "version": "{{ ucp_version }}",
         "status": "error",
-        "capabilities": [
-          {
-            "name": "dev.ucp.shopping.cart",
-            "version": "{{ ucp_version }}"
-          }
-        ]
+        "capabilities": {
+          "dev.ucp.shopping.cart": [{"version": "{{ ucp_version }}"}]
+        }
       },
       "messages": [
         {
@@ -351,16 +338,10 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
     {
       "ucp": {
         "version": "{{ ucp_version }}",
-        "capabilities": [
-          {
-            "name": "dev.ucp.shopping.checkout",
-            "version": "{{ ucp_version }}"
-          },
-          {
-            "name": "dev.ucp.shopping.cart",
-            "version": "{{ ucp_version }}"
-          }
-        ]
+        "capabilities": {
+          "dev.ucp.shopping.checkout": [{"version": "{{ ucp_version }}"}],
+          "dev.ucp.shopping.cart": [{"version": "{{ ucp_version }}"}]
+        }
       },
       "id": "cart_abc123",
       "line_items": [
@@ -438,16 +419,10 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
     {
       "ucp": {
         "version": "{{ ucp_version }}",
-        "capabilities": [
-          {
-            "name": "dev.ucp.shopping.checkout",
-            "version": "{{ ucp_version }}"
-          },
-          {
-            "name": "dev.ucp.shopping.cart",
-            "version": "{{ ucp_version }}"
-          }
-        ]
+        "capabilities": {
+          "dev.ucp.shopping.checkout": [{"version": "{{ ucp_version }}"}],
+          "dev.ucp.shopping.cart": [{"version": "{{ ucp_version }}"}]
+        }
       },
       "id": "cart_abc123",
       "line_items": [
