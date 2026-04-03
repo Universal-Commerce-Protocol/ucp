@@ -87,6 +87,18 @@ with an appropriate error (HTTP 400 `request_too_large` for REST, JSON-RPC
 * **`featured`**: Identifier resolved to the parent product; server
   selected this variant as representative (e.g., product ID, handle).
 
+### Filters
+
+Both `lookup_catalog` and `get_product` accept optional `filters` to
+narrow the returned products and variants. Filters use the same schema
+and AND semantics as [Search Filters](search.md#search-filters) — for
+example, a price filter excludes variants outside the specified range.
+
+Filters apply *after* identifier resolution (lookup) or option selection
+(get_product). An identifier that resolves to a product whose variants
+all fall outside the price filter results in that product being excluded
+from the response.
+
 ### Request
 
 {{ extension_schema_fields('catalog_lookup.json#/$defs/lookup_request', 'catalog') }}
