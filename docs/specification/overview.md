@@ -417,21 +417,6 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
           "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/discount.json",
           "extends": "dev.ucp.shopping.checkout"
         }
-      ],
-      "dev.ucp.common.identity_linking": [
-        {
-          "version": "{{ ucp_version }}",
-          "spec": "https://ucp.dev/{{ ucp_version }}/specification/identity-linking",
-          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/common/identity_linking.json",
-          "config": {
-            "supported_mechanisms": [
-              {
-                "type": "oauth2",
-                "issuer": "https://auth.merchant.example.com"
-              }
-            ]
-          }
-        }
       ]
     },
     "payment_handlers": {
@@ -532,13 +517,6 @@ example:
           "config": {
             "webhook_url": "https://platform.example.com/webhooks/ucp/orders"
           }
-        }
-      ],
-      "dev.ucp.common.identity_linking": [
-        {
-          "version": "{{ ucp_version }}",
-          "spec": "https://ucp.dev/{{ ucp_version }}/specification/identity-linking",
-          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/common/identity_linking.json"
         }
       ]
     },
@@ -672,25 +650,14 @@ for a session:
     (latest date). If the set is empty (no mutual version), **exclude** the
     capability from the intersection.
 
-3. **Prune orphaned extensions & unauthorized capabilities**: Remove any capability that lacks its required structural or functional dependencies:
-    - **Structural Dependencies**: Remove any capability where `extends` is
-      set but **none** of its parent capabilities are in the intersection.
-        - For single-parent extensions (`extends: "string"`): parent must be present
-        - For multi-parent extensions (`extends: ["a", "b"]`): at least one parent
-          must be present
-    - **Scope Dependencies**: Remove any capability declaring `identity_scopes`
-      if `dev.ucp.common.identity_linking` is not present in the intersection.
+3. **Prune orphaned extensions**: Remove any capability where `extends` is
+    set but **none** of its parent capabilities are in the intersection.
+    - For single-parent extensions (`extends: "string"`): parent must be present
+    - For multi-parent extensions (`extends: ["a", "b"]`): at least one parent
+        must be present
 
 4. **Repeat pruning**: Continue step 3 until no more capabilities are removed
-    (handles transitive extension chains and chained scope dependencies).
-
-5. **Derive Scopes (Final Pass)**: If `dev.ucp.common.identity_linking` is
-    present in the negotiated capabilities, the authorization scope set
-    **MUST ONLY** be derived from the finalized intersection list *after* all
-    pruning loops have stabilized. Capabilities excluded during pruning MUST NOT
-    contribute to the derived authorization scopes. If the final derived scope
-    list is mathematically empty (no active capabilities request scopes), the
-    agent **SHOULD** abort the identity linking process.
+    (handles transitive extension chains).
 
 The result is the set of capabilities both parties support at mutually
 compatible versions, with extension dependencies satisfied.
