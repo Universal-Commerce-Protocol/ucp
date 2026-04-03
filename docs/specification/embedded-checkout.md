@@ -537,10 +537,10 @@ checkout that was not communicated over UCP checkout actions.
         checkout response (what business allows). An empty array means no
         delegations were accepted.
     - `auth` (object, **OPTIONAL**): When `ec_auth` URL param is neither sufficient
-            nor applicable due to additional considerations, business can request for
-            authorization during initial handshake by specifying the `type` enum
-            within this object. This `type` enum value is a mirror of the payload content
-            included in [`ec.auth`](#ecauth).
+        nor applicable due to additional considerations, business can request for
+        authorization during initial handshake by specifying the `type` enum
+        within this object. This `type` enum value is a mirror of the payload content
+        included in [`ec.auth`](#ecauth).
 
 **Example Message (no delegations accepted):**
 
@@ -582,7 +582,9 @@ to complete the handshake.
 - **Result Payload:**
     - `upgrade` (object, **OPTIONAL**): An object describing how the Embedded
         Checkout should update the communication channel it uses to communicate
-        with the host.
+        with the host. When present, host **SHOULD NOT** include `credential`
+        — the channel will be re-established and any credential sent here
+        will be discarded.
     - `credential` (string, **OPTIONAL**): The requested authorization data,
         can be in the form of an OAuth token, JWT, API keys, etc. **MUST** be
         set if `auth` is present in the request.
@@ -609,9 +611,7 @@ Hosts **MAY** respond with an `upgrade` field to update the communication
 channel between host and Embedded Checkout. Currently, this object only supports
 a `port` field, which **MUST** be a `MessagePort` object, and **MUST** be
 transferred to the embedded checkout context (e.g., with `{transfer: [port2]}`
-on the host's `iframe.contentWindow.postMessage()` call). When `upgrade`
-is present, host **SHOULD NOT** set `credential` if `auth` is specified
-in the request to avoid oversharing data that will ultimately be thrown away:
+on the host's `iframe.contentWindow.postMessage()` call):
 
 **Example Message:**
 
@@ -726,24 +726,33 @@ or the authorization data requested by Embedded Checkout.
 {
     "jsonrpc": "2.0",
     "id": "auth_1",
-    "error": {
-        "code": "timeout_error",
-        "message": "An internal service timed out when fetching the required authorization data."
+     "result": {
+        "ucp": { "version": "{{ ucp_version }}", "status": "error" },
+        "messages": [
+            {
+                "type": "error",
+                "code": "timeout_error",
+                "content": "An internal service timed out when fetching the required authorization data.",
+                "severity": "recoverable"
+            }
+        ]
     }
 }
 ```
 
-If the error appears to be transient within the host (i.e. `timeout_error`),
-Embedded Checkout **MAY** re-initiate this request with the host again. Otherwise, Embedded Checkout
-**MUST** issue a state change message containing an `unrecoverable` error response. This response
-**SHOULD** also contain a `continue_url` to allow buyer handoff.
+If the error appears to be transient within the host (i.e. `timeout_error`) - as indicated with
+`recoverable` severity - Embedded Checkout **MAY** re-initiate this request with the host again.
+Otherwise, Embedded Checkout **MUST** issue an `ec.error` notification containing an `unrecoverable`
+error response. The same mechanism can also be used in the happy path if Embedded Checkout is
+unable to process the host-provided authorization data (i.e. credential is corrupted).
+This response **SHOULD** also contain a `continue_url` to allow buyer handoff.
 
-**Example Error Response Message Through ec.messages.change:**
+**Example Error Response Message Through ec.error:**
 
 ```json
 {
     "jsonrpc": "2.0",
-    "method": "ec.messages.change",
+    "method": "ec.error",
     "params": {
         "ucp": { "version": "{{ ucp_version }}", "status": "error" },
         "messages": [

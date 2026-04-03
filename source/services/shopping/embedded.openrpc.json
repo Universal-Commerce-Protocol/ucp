@@ -85,6 +85,22 @@
     },
 
     {
+      "name": "ec.error",
+      "summary": "A session-level error has occurred.",
+      "description": "Business notifies host that a session-level error, unrelated to the checkout resource, has occurred.",
+      "params": [
+        {
+          "name": "error",
+          "required": true,
+          "schema": {
+            "$ref": "../../schemas/shopping/types/error_response.json",
+            "description": "Session-level error raised by the business."
+          }
+        }
+      ]
+    },
+
+    {
       "name": "ec.start",
       "summary": "Checkout visible to buyer",
       "description": "Merchant notifies host that checkout UI is visible and ready for interaction. Sent after successful ec.ready handshake.",
@@ -390,6 +406,22 @@
     },
 
     {
+      "name": "ep.cart.error",
+      "summary": "A session-level error has occurred.",
+      "description": "Business notifies host that a session-level error, unrelated to the cart resource, has occurred.",
+      "params": [
+        {
+          "name": "error",
+          "required": true,
+          "schema": {
+            "$ref": "../../schemas/shopping/types/error_response.json",
+            "description": "Session-level error raised by the business."
+          }
+        }
+      ]
+    },
+
+    {
       "name": "ep.cart.start",
       "summary": "Cart visible to buyer",
       "description": "Business notifies host that cart UI is visible and ready for interaction.",
@@ -486,7 +518,7 @@
       "auth": {
         "type": "object",
         "properties": {
-          "type": "#/components/schemas/type"
+          "type": { "$ref": "#/components/schemas/type" }
         }
       }
     }

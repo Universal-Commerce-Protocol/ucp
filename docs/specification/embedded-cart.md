@@ -137,19 +137,19 @@ ECaP query parameters.
 
 All ECaP parameters are passed via URL query string, not HTTP headers, to ensure
 maximum compatibility across different embedding environments. Parameters **SHOULD**
-use the `ep_cart` prefix to avoid namespace pollution and clearly distinguish ECaP
-parameters from business-specific query parameters:
+use either `ep` or `ep_cart` prefixes to avoid namespace pollution and clearly
+distinguish ECaP parameters from business-specific query parameters:
 
 - `ep_version` (string, **REQUIRED**): The UCP version for this session
     (format: `YYYY-MM-DD`). Must match the version from service discovery.
-- `ep_cart_auth` (string, **OPTIONAL**): Authentication token in business-defined
+- `ep_auth` (string, **OPTIONAL**): Authentication token in business-defined
     format.
+- `ep_color_scheme` (string, **OPTIONAL**): The color scheme preference for
+    the cart UI. Valid values: `light`, `dark`. When not provided, the
+    Embedded Cart follows system preference.
 - `ep_cart_delegate` (string, **OPTIONAL**): Comma-delimited list of delegations
     the host wants to handle. **MAY** be empty if no delegations are needed.
     **SHOULD** be a subset of `config.delegate` from the embedded service binding.
-- `ep_cart_color_scheme` (string, **OPTIONAL**): The color scheme preference for
-    the cart UI. Valid values: `light`, `dark`. When not provided, the
-    Embedded Cart follows system preference.
 
 ## Transport & Messaging
 
@@ -273,7 +273,7 @@ any requested authorization data back to Embedded Cart.
         both `ep_cart_delegate` (what host requested) and `config.delegate`
         from the cart response (what business allows). An empty array
         means no delegations were accepted.
-    - `auth` (object, **OPTIONAL**): When `ep_cart_auth` URL param is neither sufficient
+    - `auth` (object, **OPTIONAL**): When `ep_auth` URL param is neither sufficient
         nor applicable due to additional considerations, business can request for
         authorization during initial handshake by specifying the `type` enum
         within this object. This `type` enum value is a mirror of the payload content
@@ -303,7 +303,9 @@ to complete the handshake.
 - **Result Payload:**
     - `upgrade` (object, **OPTIONAL**): An object describing how the Embedded
         Cart should update the communication channel it uses to communicate
-        with the host.
+        with the host. When present, host **SHOULD NOT** include `credential`
+        — the channel will be re-established and any credential sent here
+        will be discarded.
     - `credential` (string, **OPTIONAL**): The requested authorization data,
         can be in the form of an OAuth token, JWT, API keys, etc. **MUST** be
         set if `auth` is present in the request.
@@ -324,9 +326,7 @@ Hosts **MAY** respond with an `upgrade` field to update the communication
 channel between host and Embedded Cart. Currently, this object only supports
 a `port` field, which **MUST** be a `MessagePort` object, and **MUST** be
 transferred to the embedded cart context (e.g., with `{transfer: [port2]}`
-on the host's `iframe.contentWindow.postMessage()` call). When `upgrade`
-is present, host **SHOULD NOT** set `credential` if `auth` is specified
-in the request to avoid oversharing data that will ultimately be thrown away:
+on the host's `iframe.contentWindow.postMessage()` call):
 
 **Example Message:**
 
@@ -404,24 +404,33 @@ or the authorization data requested by Embedded Cart.
 {
     "jsonrpc": "2.0",
     "id": "auth_1",
-    "error": {
-        "code": "timeout_error",
-        "message": "An internal service timed out when fetching the required authorization data."
+    "result": {
+        "ucp": { "version": "{{ ucp_version }}", "status": "error" },
+        "messages": [
+            {
+                "type": "error",
+                "code": "timeout_error",
+                "content": "An internal service timed out when fetching the required authorization data.",
+                "severity": "recoverable"
+            }
+        ]
     }
 }
 ```
 
-If the error appears to be transient within the host (i.e. `timeout_error`),
-Embedded Cart **MAY** re-initiate this request with the host again. Otherwise, Embedded Cart
-**MUST** issue a state change message containing an `unrecoverable` error response. This response
-**SHOULD** also contain a `continue_url` to allow buyer handoff.
+If the error appears to be transient within the host (i.e. `timeout_error`) - as indicated with
+`recoverable` severity - Embedded Cart **MAY** re-initiate this request with the host again.
+Otherwise, Embedded Cart **MUST** issue an `ep.cart.error` notification containing an `unrecoverable`
+error response. The same mechanism can also be used in the happy path if Embedded Cart is
+unable to process the host-provided authorization data (i.e. credential is corrupted).
+This response **SHOULD** also contain a `continue_url` to allow buyer handoff.
 
-**Example Error Response Message Through ep.cart.messages.change:**
+**Example Error Response Message Through ep.cart.error:**
 
 ```json
 {
     "jsonrpc": "2.0",
-    "method": "ep.cart.messages.change",
+    "method": "ep.cart.error",
     "params": {
         "ucp": { "version": "{{ ucp_version }}", "status": "error" },
         "messages": [
