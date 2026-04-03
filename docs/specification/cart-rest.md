@@ -30,14 +30,15 @@ Businesses advertise REST transport availability through their UCP profile at
   "ucp": {
     "version": "{{ ucp_version }}",
     "services": {
-      "dev.ucp.shopping": {
-        "version": "{{ ucp_version }}",
-        "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview",
-        "rest": {
+      "dev.ucp.shopping": [
+        {
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview",
+          "transport": "rest",
           "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/rest.openapi.json",
           "endpoint": "https://business.example.com/ucp/v1"
         }
-      }
+      ]
     },
     "capabilities": {
       "dev.ucp.shopping.checkout": [

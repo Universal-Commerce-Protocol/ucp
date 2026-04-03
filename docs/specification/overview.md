@@ -115,20 +115,7 @@ standard formats:
 
 #### Service Definition
 
-| Field             | Type   | Required | Description                         |
-| ----------------- | ------ | -------- | ----------------------------------- |
-| `version`         | string | Yes      | Service version (YYYY-MM-DD format) |
-| `spec`            | string | Yes      | URL to service documentation        |
-| `rest`            | object | No       | REST transport binding              |
-| `rest.schema`     | string | Yes      | URL to OpenAPI spec (JSON)          |
-| `rest.endpoint`   | string | Yes      | Business's REST endpoint            |
-| `mcp`             | object | No       | MCP transport binding               |
-| `mcp.schema`      | string | Yes      | URL to OpenRPC spec (JSON)          |
-| `mcp.endpoint`    | string | Yes      | Business's MCP endpoint             |
-| `a2a`             | object | No       | A2A transport binding               |
-| `a2a.endpoint`    | string | Yes      | Business's A2A Agent Card URL       |
-| `embedded`        | string | No       | Embedded transport binding          |
-| `embedded.schema` | string | Yes      | URL to OpenRPC spec (JSON)          |
+{{ extension_schema_fields('service.json#/$defs/platform_schema', 'overview') }}
 
 Transport definitions **MUST** be thin: they declare method names and reference
 base schemas only. See [Requirements](#requirements) for details.
