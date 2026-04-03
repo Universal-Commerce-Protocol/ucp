@@ -31,6 +31,12 @@
           { "$ref": "../../schemas/shopping/types/error_response.json" }
         ]
       },
+      "catalog_get_product_result": {
+        "oneOf": [
+          { "$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/get_product_response" },
+          { "$ref": "../../schemas/shopping/types/error_response.json" }
+        ]
+      },
       "meta": {
         "type": "object",
         "description": "Request metadata.",
@@ -335,7 +341,7 @@
       ],
       "result": {
         "name": "response",
-        "schema": {"$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/get_product_response"}
+        "schema": {"$ref": "#/components/schemas/catalog_get_product_result"}
       }
     }
   ]
