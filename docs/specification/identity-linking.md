@@ -45,8 +45,9 @@ negotiate the mechanism exactly like other UCP capabilities.
 
 Businesses **MUST** declare the supported mechanisms in the capability `config`
 using the `supported_mechanisms` array. Each mechanism must dictate its `type`
-using an open string vocabulary (e.g., `oauth2`, `verifiable_credential`) and
-provide the necessary resolution endpoints (like `issuer`).
+using an open string vocabulary (e.g., `oauth2`, `wallet_attestation`,
+`verifiable_credential`) and provide the necessary resolution endpoints (like
+`issuer` for OAuth or `provider_jwks` for wallet attestation).
 
 ```json
 {
@@ -276,6 +277,109 @@ Example metadata retrieved via RFC 8414:
       [OpenID RISC Profile 1.0](https://openid.net/specs/openid-risc-1_0-final.html)
       to enable Cross-Account Protection.
 
+### Wallet Attestation (`"type": "wallet_attestation"`)
+
+The wallet attestation mechanism enables commerce flows where the user's
+blockchain wallet address serves as the identity. Instead of redirecting to an
+authorization server and establishing an account link, the platform obtains a
+cryptographically signed attestation of on-chain state (token holdings,
+credentials, membership) from a third-party verification provider. The business
+verifies this attestation offline using the provider's published JWKS.
+
+This mechanism is appropriate when:
+
+- The commerce action depends on **what the user holds**, not who they are
+  (e.g., token-gated merchandise, holder-exclusive discounts, membership
+  verification).
+- No persistent account link is needed — each transaction is independently
+  verifiable.
+- The business wants to verify eligibility without requiring the user to create
+  an account or complete an OAuth redirect flow.
+
+#### JWKS Resolution
+
+When a platform encounters `"type": "wallet_attestation"`, it **MUST** use the
+`provider_jwks` URI from the mechanism configuration as the JWKS endpoint for
+signature verification.
+
+Platforms **MUST** fetch the JWKS document from `provider_jwks` and cache it
+according to standard HTTP caching headers. If the fetch fails (non-2xx HTTP
+response or connection timeout), the platform **MUST** abort the identity
+linking process.
+
+The JWKS document **MUST** conform to
+[RFC 7517 (JSON Web Key)](https://datatracker.ietf.org/doc/html/rfc7517). Each
+key in the `keys` array **MUST** include a `kid` (Key ID) field. Platforms
+select the verification key by matching the `kid` from the attestation response
+against the `kid` values in the JWKS.
+
+#### Attestation Flow
+
+The wallet attestation flow is stateless — no redirect, no token exchange, no
+account creation:
+
+1. The platform determines the user's wallet address (e.g., via a connected
+   wallet or user input).
+2. The platform sends a verification request to the `attestation_endpoint`
+   (if provided in the mechanism configuration) with the wallet address and the
+   conditions to verify.
+3. The provider evaluates the conditions against on-chain state and returns a
+   signed attestation containing at minimum:
+    - `pass` (boolean) — whether all conditions were met.
+    - `sig` — cryptographic signature over the attestation payload.
+    - `kid` — identifier of the signing key, resolvable via the provider's JWKS.
+4. The platform attaches the attestation to the cart or checkout object. If a
+   dedicated attestation extension is available (e.g., a sibling map on the
+   checkout object keyed by reverse-domain eligibility claims), the platform
+   **SHOULD** use that extension. Otherwise, the platform **MAY** attach the
+   attestation as an opaque extension property.
+5. The business verifies the attestation offline: fetch JWKS from
+   `provider_jwks`, select the key matching `kid`, verify `sig` over the
+   canonical serialization of the attestation payload.
+
+#### For platforms
+
+- **MUST** obtain the user's wallet address before initiating the attestation
+  flow.
+- **MUST** send verification requests to the `attestation_endpoint` declared in
+  the mechanism configuration. If `attestation_endpoint` is not provided, the
+  platform **MUST** determine the provider's endpoint through out-of-band
+  configuration.
+- **MUST** verify that the attestation response contains `sig`, `kid`, and a
+  payload with a `pass` boolean before relaying it to the business.
+- **MUST** check `expiresAt` (if present) and discard expired attestations
+  before attaching them to cart or checkout objects.
+- **SHOULD** cache JWKS responses according to HTTP caching headers to avoid
+  redundant fetches.
+
+#### For businesses
+
+- **MUST** declare `provider_jwks` in the mechanism configuration pointing to
+  the JWKS endpoint of each attestation provider they trust.
+- **MUST** verify attestation signatures offline using the published JWKS. The
+  business fetches the JWKS, selects the key whose `kid` matches the
+  attestation's `kid`, and verifies `sig` over the canonical JSON serialization
+  of the attestation payload.
+- **MUST** reject attestations where `kid` does not match any key in the
+  declared JWKS.
+- **MUST** check `expiresAt` and reject expired attestations.
+- **MUST NOT** trust attestation results without signature verification — the
+  `pass` boolean alone is not sufficient.
+- **MAY** accept attestations from multiple providers by listing multiple
+  `wallet_attestation` entries in `supported_mechanisms`, each with a different
+  `provider_jwks`.
+
+#### Scope Considerations
+
+The wallet attestation mechanism does not require OAuth 2.0 scopes.
+Verification is stateless and self-contained — there is no authorization grant,
+no access token, and no persistent session. Capabilities that use wallet
+attestation exclusively (without also requiring OAuth) contribute zero scopes to
+the derived scope set. The pruning algorithm in the
+[overview specification](overview.md) already handles this correctly:
+capabilities without `identity_scopes` are retained in the intersection without
+affecting the authorization scope union.
+
 ## End-to-End Workflow & Example
 
 ### Scenario: An AI Shopping Agent (Platform) and a Shopping Merchant (Business)
@@ -362,3 +466,116 @@ The AI Shopping Agent only knows how to perform checkouts. It does NOT yet know 
    authorization code for an `access_token` bound only to checkout and
    successfully utilizes the UCP REST APIs via
    `Authorization: Bearer <access_token>`.
+
+### Scenario: Token-Gated Commerce with Wallet Attestation
+
+#### 1. The Merchant's Profile (`/.well-known/ucp`)
+
+The Merchant sells token-gated merchandise. Holders of a specific token receive
+exclusive discounts. The merchant supports both OAuth (for account-linked
+experiences) and wallet attestation (for token-gated eligibility).
+
+```json
+{
+  "dev.ucp.shopping.checkout": [{ "version": "2026-03-14", "config": {} }],
+  "dev.ucp.common.identity_linking": [{
+    "version": "2026-03-14",
+    "config": {
+      "supported_mechanisms": [
+        {
+          "type": "wallet_attestation",
+          "provider_jwks": "https://verifier.example.com/.well-known/jwks.json",
+          "attestation_endpoint": "https://verifier.example.com/v1/attest"
+        },
+        {
+          "type": "oauth2",
+          "issuer": "https://auth.merchant.example.com"
+        }
+      ]
+    }
+  }]
+}
+```
+
+#### 2. The AI Agent's Profile
+
+The AI Shopping Agent supports both wallet attestation and OAuth.
+
+```json
+{
+  "dev.ucp.shopping.checkout": [{ "version": "2026-03-14" }],
+  "dev.ucp.common.identity_linking": [{ "version": "2026-03-14" }]
+}
+```
+
+#### 3. Execution Steps
+
+1. **Capability Discovery & Intersection**: The agent intersects profiles and
+   negotiates `dev.ucp.shopping.checkout` and
+   `dev.ucp.common.identity_linking`.
+2. **Identity Mechanism Selection**: The agent applies the Mechanism Selection
+   Algorithm. The first entry is `wallet_attestation`, which the agent supports,
+   so it is selected (business preference takes priority).
+3. **Wallet Address Resolution**: The agent determines the user's wallet address
+   — for example, by prompting the user to connect their wallet or reading a
+   previously stored address.
+4. **Attestation Request**: The agent sends a verification request to the
+   `attestation_endpoint`:
+
+    ```http
+    POST https://verifier.example.com/v1/attest
+    Content-Type: application/json
+
+    {
+      "wallet": "0x1234...abcd",
+      "conditions": [
+        {
+          "type": "token_balance",
+          "contractAddress": "0xabcd...1234",
+          "chainId": 1,
+          "threshold": 1,
+          "decimals": 18
+        }
+      ]
+    }
+    ```
+
+5. **Attestation Response**: The provider returns a signed attestation:
+
+    ```json
+    {
+      "attestation": {
+        "id": "ATST-3F7A2B1C9D4E8F06",
+        "pass": true,
+        "results": [{ "condition": 0, "met": true }],
+        "attestedAt": "2026-03-18T12:00:00Z",
+        "expiresAt": "2026-03-18T12:30:00Z"
+      },
+      "sig": "MEUCIQDx...base64...==",
+      "kid": "verifier-key-v1"
+    }
+    ```
+
+6. **Attach to Checkout**: The agent attaches the attestation to the checkout
+   object as an extension property, keyed by the eligibility claim:
+
+    ```json
+    {
+      "extensions": {
+        "com.merchant.token_holder": {
+          "provider_jwks": "https://verifier.example.com/.well-known/jwks.json",
+          "kid": "verifier-key-v1",
+          "attestation": { "id": "ATST-3F7A2B1C9D4E8F06", "pass": true, "results": [{ "condition": 0, "met": true }], "attestedAt": "2026-03-18T12:00:00Z", "expiresAt": "2026-03-18T12:30:00Z" },
+          "sig": "MEUCIQDx...base64...=="
+        }
+      }
+    }
+    ```
+
+7. **Business Verification (Offline)**: The merchant fetches the JWKS from
+   `https://verifier.example.com/.well-known/jwks.json`, selects the key with
+   `kid: "verifier-key-v1"`, verifies the signature over the canonical JSON
+   serialization of the `attestation` object, checks that `expiresAt` has not
+   passed, and reads `attestation.pass` to determine eligibility. If verified,
+   the token-gated discount is applied. No network call to the attestation
+   provider is needed at verification time.

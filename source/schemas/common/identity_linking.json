@@ -54,7 +54,7 @@
       "properties": {
         "type": {
           "type": "string",
-          "description": "The mechanism type discriminator. Known values: 'oauth2'. Specific mechanism schemas constrain this to a constant value."
+          "description": "The mechanism type discriminator. Known values: 'oauth2', 'wallet_attestation'. Specific mechanism schemas constrain this to a constant value."
         }
       },
       "additionalProperties": true
@@ -78,6 +78,30 @@
           "type": "string",
           "format": "uri",
           "description": "Optional explicit URI to the authorization server's metadata (e.g., `https://auth.merchant.example.com/.well-known/openid-configuration`). If omitted, platforms construct discovery paths based on the `issuer`."
+        }
+      },
+      "additionalProperties": true
+    },
+
+    "wallet_attestation": {
+      "type": "object",
+      "title": "Wallet Attestation Mechanism",
+      "description": "Stateless identity mechanism where the user's blockchain wallet address serves as the identity. A third-party attestation provider verifies on-chain state (token holdings, credentials, membership) and returns a cryptographically signed result that the business verifies offline via JWKS. No redirect flow, token exchange, or account creation is required.",
+      "required": ["type", "provider_jwks"],
+      "properties": {
+        "type": {
+          "const": "wallet_attestation",
+          "description": "Wallet attestation identity mechanism."
+        },
+        "provider_jwks": {
+          "type": "string",
+          "format": "uri",
+          "description": "URI of the JWKS endpoint containing the public key(s) used to verify attestation signatures. The business fetches this endpoint, selects the key matching the `kid` in the attestation, and verifies the signature. This is the trust anchor — the business declares which signing keys it accepts."
+        },
+        "attestation_endpoint": {
+          "type": "string",
+          "format": "uri",
+          "description": "URI of the attestation endpoint that accepts wallet verification requests and returns signed attestation results. If omitted, the platform is responsible for determining the provider's attestation endpoint independently."
         }
       },
       "additionalProperties": true
