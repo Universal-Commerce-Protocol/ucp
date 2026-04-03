@@ -498,6 +498,7 @@ all implementations. All messages are sent from Embedded Checkout to host.
 | **Authentication**| Communicate auth data exchanges between Embedded Checkout and host.   | Request      | `ec.auth`                                                                                                |
 | **Lifecycle**     | Inform of checkout state transitions                                  | Notification | `ec.start`, `ec.complete`                                                                                |
 | **State Change**  | Inform of checkout field changes                                      | Notification | `ec.line_items.change`, `ec.buyer.change`, `ec.payment.change`, `ec.messages.change`, `ec.totals.change` |
+| **Session Error** | Signal a session-level error unrelated to the checkout resource       | Notification | `ec.error`                                                                                               |
 
 #### Extension Messages
 
@@ -946,6 +947,43 @@ informational notices about the checkout state.
     }
 }
 ```
+
+#### `ec.error`
+
+Signals a session-level error unrelated to the checkout resource itself — for example,
+a terminal auth failure that prevents the session from continuing.
+
+- **Direction:** Embedded Checkout → host
+- **Type:** Notification
+- **Payload:**
+    - `ucp` (object, **REQUIRED**): UCP protocol metadata. `status` **MUST** be `"error"`.
+    - `messages` (array, **REQUIRED**): One or more messages describing the failure.
+    - `continue_url` (string, **OPTIONAL**): URL for buyer handoff or session recovery.
+
+**Example Message:**
+
+```json
+{
+    "jsonrpc": "2.0",
+    "method": "ec.error",
+    "params": {
+        "ucp": { "version": "{{ ucp_version }}", "status": "error" },
+        "messages": [
+            {
+                "type": "error",
+                "code": "not_supported_error",
+                "content": "Requested auth credential type is not supported.",
+                "severity": "unrecoverable"
+            }
+        ],
+        "continue_url": "https://merchant.example.com/checkout/abc123"
+    }
+}
+```
+
+When the host receives `ec.error`, it **MUST** tear down the embedded context and **SHOULD**
+display an appropriate error state to the buyer. If `continue_url` is present, host **MUST**
+use it to hand off the buyer for session recovery.
 
 #### `ec.totals.change`
 
