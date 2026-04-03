@@ -674,7 +674,7 @@
             "description": "Order retrieved or business outcome message",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/order" }
+                "schema": { "$ref": "#/components/schemas/order_response" }
               }
             }
           }
@@ -936,6 +936,12 @@
       },
       "order": {
         "$ref": "../../schemas/shopping/order.json"
+      },
+      "order_response": {
+        "oneOf": [
+          { "$ref": "../../schemas/shopping/order.json" },
+          { "$ref": "../../schemas/shopping/types/error_response.json" }
+        ]
       },
       "payment": {
         "$ref": "../../schemas/shopping/payment.json"

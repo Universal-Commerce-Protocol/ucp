@@ -329,17 +329,23 @@ array describing the outcome:
 ```json
 {
   "ucp": {
-    "version": "2026-01",
-    "capabilities": {
-      "dev.ucp.shopping.order": [{"version": "2026-01"}]
-    }
+    "version": "{{ ucp_version }}",
+    "status": "error",
+    "capabilities": [
+      {
+        "name": "dev.ucp.shopping.order",
+        "version": "{{ ucp_version }}"
+      }
+    ]
   },
-  "messages": [{
-    "type": "error",
-    "code": "not_found",
-    "severity": "unrecoverable",
-    "content": "Order not found."
-  }]
+  "messages": [
+    {
+      "type": "error",
+      "code": "not_found",
+      "severity": "unrecoverable",
+      "content": "Order not found."
+    }
+  ]
 }
 ```
 
@@ -348,17 +354,23 @@ array describing the outcome:
 ```json
 {
   "ucp": {
-    "version": "2026-01",
-    "capabilities": {
-      "dev.ucp.shopping.order": [{"version": "2026-01"}]
-    }
+    "version": "{{ ucp_version }}",
+    "status": "error",
+    "capabilities": [
+      {
+        "name": "dev.ucp.shopping.order",
+        "version": "{{ ucp_version }}"
+      }
+    ]
   },
-  "messages": [{
-    "type": "error",
-    "code": "unauthorized",
-    "severity": "unrecoverable",
-    "content": "Not authorized to access this order."
-  }]
+  "messages": [
+    {
+      "type": "error",
+      "code": "unauthorized",
+      "severity": "unrecoverable",
+      "content": "Not authorized to access this order."
+    }
+  ]
 }
 ```
 

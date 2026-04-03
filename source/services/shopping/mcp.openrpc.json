@@ -31,6 +31,12 @@
           { "$ref": "../../schemas/shopping/types/error_response.json" }
         ]
       },
+      "order_result": {
+        "oneOf": [
+          { "$ref": "../../schemas/shopping/order.json" },
+          { "$ref": "../../schemas/shopping/types/error_response.json" }
+        ]
+      },
       "meta": {
         "type": "object",
         "description": "Request metadata.",
@@ -335,7 +341,7 @@
       ],
       "result": {
         "name": "order",
-        "schema": {"$ref": "../../schemas/shopping/order.json"}
+        "schema": {"$ref": "#/components/schemas/order_result"}
       }
     }
   ]

@@ -29,25 +29,27 @@ Businesses advertise MCP transport availability through their UCP profile at
 ```json
 {
   "ucp": {
-    "version": "2026-01",
+    "version": "{{ ucp_version }}",
     "services": {
-      "dev.ucp.shopping": {
-        "version": "2026-01",
-        "spec": "https://ucp.dev/specification/overview",
-        "mcp": {
-          "schema": "https://ucp.dev/services/shopping/mcp.openrpc.json",
+      "dev.ucp.shopping": [
+        {
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview",
+          "transport": "mcp",
+          "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/mcp.openrpc.json",
           "endpoint": "https://business.example.com/ucp/mcp"
         }
-      }
+      ]
     },
-    "capabilities": [
-      {
-        "name": "dev.ucp.shopping.order",
-        "version": "2026-01",
-        "spec": "https://ucp.dev/specification/order",
-        "schema": "https://ucp.dev/schemas/shopping/order.json"
-      }
-    ]
+    "capabilities": {
+      "dev.ucp.shopping.order": [
+        {
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/order",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/order.json"
+        }
+      ]
+    }
   }
 }
 ```
@@ -135,10 +137,13 @@ current-state snapshot of an order.
         "structuredContent": {
           "order": {
             "ucp": {
-              "version": "2026-01",
-              "capabilities": {
-                "dev.ucp.shopping.order": [{"version": "2026-01"}]
-              }
+              "version": "{{ ucp_version }}",
+              "capabilities": [
+                {
+                  "name": "dev.ucp.shopping.order",
+                  "version": "{{ ucp_version }}"
+                }
+              ]
             },
             "id": "order_abc123",
             "checkout_id": "checkout_xyz789",
@@ -213,10 +218,13 @@ current-state snapshot of an order.
         "structuredContent": {
           "order": {
             "ucp": {
-              "version": "2026-01",
-              "capabilities": {
-                "dev.ucp.shopping.order": [{"version": "2026-01"}]
-              }
+              "version": "{{ ucp_version }}",
+              "capabilities": [
+                {
+                  "name": "dev.ucp.shopping.order",
+                  "version": "{{ ucp_version }}"
+                }
+              ]
             },
             "messages": [
               {
@@ -248,10 +256,13 @@ current-state snapshot of an order.
         "structuredContent": {
           "order": {
             "ucp": {
-              "version": "2026-01",
-              "capabilities": {
-                "dev.ucp.shopping.order": [{"version": "2026-01"}]
-              }
+              "version": "{{ ucp_version }}",
+              "capabilities": [
+                {
+                  "name": "dev.ucp.shopping.order",
+                  "version": "{{ ucp_version }}"
+                }
+              ]
             },
             "messages": [
               {
