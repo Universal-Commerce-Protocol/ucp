@@ -539,8 +539,8 @@ checkout that was not communicated over UCP checkout actions.
         delegations were accepted.
     - `auth` (object, **OPTIONAL**): When `ec_auth` URL param is neither sufficient
         nor applicable due to additional considerations, business can request for
-        authorization during initial handshake by specifying the `type` enum
-        within this object. This `type` enum value is a mirror of the payload content
+        authorization during initial handshake by specifying the `type` string
+        within this object. This `type` string value is a mirror of the payload content
         included in [`ec.auth`](#ecauth).
 
 **Example Message (no delegations accepted):**
@@ -685,7 +685,7 @@ authorization to be provided by the host before the session continues.
 - **Direction:** Embedded Checkout → Host
 - **Type:** Request
 - **Payload:**
-    - `type` (enum, **REQUIRED**): The requested authorization type.
+    - `type` (string, **REQUIRED**): The requested authorization type.
 
 **Example Message:**
 
@@ -765,7 +765,7 @@ This response **SHOULD** also contain a `continue_url` to allow buyer handoff.
                 "severity": "unrecoverable"
             }
         ],
-        "continue_url": "merchant.example.com"
+        "continue_url": "https://merchant.example.com"
     }
 }
 ```

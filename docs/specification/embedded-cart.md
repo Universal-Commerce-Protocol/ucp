@@ -254,6 +254,7 @@ all implementations.
 | **Authentication**| Communicate auth data exchanges between Embedded Cart and host.           | Request                | `ep.cart.auth`                                                                            |
 | **Lifecycle**     | Inform of cart state in Embedded Cart.                                    | Notification           | `ep.cart.start`, `ep.cart.complete`                                                       |
 | **State Change**  | Inform of cart field changes.                                             | Notification           | `ep.cart.line_items.change`, `ep.cart.buyer.change`, `ep.cart.messages.change`            |
+| **Session Error** | Signal a session-level error unrelated to the cart resource.              | Notification           | `ep.cart.error`                                                                           |
 
 ### Handshake Messages
 
@@ -275,8 +276,8 @@ any requested authorization data back to Embedded Cart.
         means no delegations were accepted.
     - `auth` (object, **OPTIONAL**): When `ep_auth` URL param is neither sufficient
         nor applicable due to additional considerations, business can request for
-        authorization during initial handshake by specifying the `type` enum
-        within this object. This `type` enum value is a mirror of the payload content
+        authorization during initial handshake by specifying the `type` string
+        within this object. This `type` string value is a mirror of the payload content
         included in [`ep.cart.auth`](#epcartauth).
 
 **Example Message (no delegations accepted):**
@@ -362,7 +363,7 @@ authorization to be provided by the host before the session continues.
 - **Direction:** Embedded Cart → Host
 - **Type:** Request
 - **Payload:**
-    - `type` (enum, **REQUIRED**): The requested authorization type.
+    - `type` (string, **REQUIRED**): The requested authorization type.
 
 **Example Message:**
 
@@ -442,7 +443,7 @@ This response **SHOULD** also contain a `continue_url` to allow buyer handoff.
                 "severity": "unrecoverable"
             }
         ],
-        "continue_url": "merchant.example.com"
+        "continue_url": "https://merchant.example.com"
     }
 }
 ```
@@ -631,6 +632,7 @@ where possible.
 | `abort_error`                | The user cancelled the interaction (e.g., closed the sheet).                                                                                   |
 | `security_error`             | The host origin validation failed.                                                                                                             |
 | `invalid_state_error`        | Handshake was attempted out of order.                                                                                                          |
+| `not_supported_error`        | The requested operation or authorization type is not supported by the host.                                                                    |
 
 ### Security for Web-Based Hosts
 
