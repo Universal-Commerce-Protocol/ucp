@@ -267,22 +267,21 @@ Examples: `refund`, `return`, `credit`, `price_adjustment`, `dispute`,
 ## Operations
 
 The order entity is a **current-state snapshot**: the authoritative latest
-state of the order at the time of retrieval or delivery. Both Get Order and the
-Order Event Webhook return the same order shape. Webhooks deliver state updates
-proactively so platforms avoid polling; Get Order provides synchronous access
-for reconciliation or on-demand retrieval.
+state of the order at the time of retrieval or delivery. Businesses **MUST**
+return the full order entity on every response. The same schema is used
+for both synchronous retrieval (this section) and asynchronous event
+delivery (see [Events](#events)).
 
 The `permalink_url` is the authoritative reference for the full order
 experience - timeline, post-purchase operations, returns. The API provides
 programmatic access to current state for conversational and operational use
 cases.
 
-| Operation                                   | Method | Endpoint              | Description                                            |
-| :------------------------------------------ | :----- | :-------------------- | :----------------------------------------------------- |
-| [Get Order](#get-order)                     | `GET`  | `/orders/{id}`        | Platform retrieves current order state.                |
-| [Order Event Webhook](#order-event-webhook) | `POST` | Platform-provided URL | Business sends order lifecycle events to the platform. |
+| Operation                               | Method | Endpoint       | Description                             |
+| :-------------------------------------- | :----- | :------------- | :-------------------------------------- |
+| [Get Order](#get-order)                 | `GET`  | `/orders/{id}` | Platform retrieves current order state. |
 
-Transport-specific details: [REST Binding](order-rest.md) |
+For transport-specific details, see [REST Binding](order-rest.md), and
 [MCP Binding](order-mcp.md)
 
 ### Get Order
@@ -321,8 +320,8 @@ of authorization.
 
 #### Error Responses
 
-When the business cannot return an order, the response includes a `messages`
-array describing the outcome:
+When the business cannot return an order, the response returns an error
+that includes a `messages` array describing the outcome:
 
 **Order not found:**
 
@@ -373,6 +372,31 @@ array describing the outcome:
   ]
 }
 ```
+
+### Guidelines
+
+**Platform:**
+
+* **MUST** include `UCP-Agent` header with profile URL on all requests
+* **SHOULD** rely on webhooks (see, Events) as the primary order update channel
+  and use Get Order for reconciliation or on-demand retrieval
+* **SHOULD** treat order data as ephemeral and discard it when no longer needed
+  for active commerce flows
+
+**Business:**
+
+* **MUST** authenticate requests to order data before returning a response
+  (see [Authorization](#authorization))
+
+## Events
+
+Businesses push order lifecycle updates to the platform via webhooks. The
+payload is the same **current-state snapshot** described in
+[Operations](#operations) — the full order entity.
+
+| Event                                       | Method | Endpoint              | Description                                            |
+| :------------------------------------------ | :----- | :-------------------- | :----------------------------------------------------- |
+| [Order Event Webhook](#order-event-webhook) | `POST` | Platform-provided URL | Business sends order lifecycle events to the platform. |
 
 ### Order Event Webhook
 
@@ -474,17 +498,12 @@ business's orders, even with a valid signature.
 See [Message Signatures - Key Rotation](signatures.md#key-rotation) for
 zero-downtime key rotation procedures.
 
-## Guidelines
+### Guidelines
 
 **Platform:**
 
 * **MUST** respond quickly with a 2xx HTTP status code to acknowledge webhook
   receipt; process events asynchronously after responding
-* **SHOULD** rely on webhooks as the primary order update channel and use Get
-  Order for reconciliation or on-demand retrieval
-* **MUST** include `UCP-Agent` header with profile URL on all requests
-* **SHOULD** treat order data as ephemeral and discard it when no longer needed
-  for active commerce flows
 
 **Business:**
 
@@ -495,8 +514,6 @@ zero-downtime key rotation procedures.
 * **MUST** send "Order created" event with fully populated order entity
 * **MUST** send full order entity on updates (not incremental deltas)
 * **MUST** retry failed webhook deliveries
-* **MUST** authenticate requests to order data before returning a response
-  (see [Order Capability - Authorization](#authorization))
 
 ## Entities
 
