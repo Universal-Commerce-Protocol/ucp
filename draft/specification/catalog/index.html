@@ -24,7 +24,7 @@
       
       
       <link rel="icon" href="../../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
@@ -2855,6 +2855,12 @@ as the first element. Platforms SHOULD treat the first element as featured.</p>
 </thead>
 <tbody>
 <tr>
+<td style="text-align: left;">id</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional server-assigned identifier for this option value. When present in a selected_option, the server SHOULD use it for matching instead of label.</td>
+</tr>
+<tr>
 <td style="text-align: left;">label</td>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
@@ -2878,6 +2884,12 @@ as the first element. Platforms SHOULD treat the first element as featured.</p>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Option name (e.g., 'Size').</td>
+</tr>
+<tr>
+<td style="text-align: left;">id</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional option value identifier from option_value.id. When present, the server SHOULD use it for matching; name and label remain required for display.</td>
 </tr>
 <tr>
 <td style="text-align: left;">label</td>

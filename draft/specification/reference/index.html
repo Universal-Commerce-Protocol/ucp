@@ -24,7 +24,7 @@
       
       
       <link rel="icon" href="../../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
@@ -1814,6 +1814,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#detail-option-value" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Detail Option Value
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#error-code_1" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3093,6 +3104,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#detail-option-value" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Detail Option Value
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#error-code_1" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4201,7 +4223,7 @@ within the UCP.</p>
 </table>
 <hr />
 <h3 id="catalog-lookup">Catalog Lookup<a class="headerlink" href="#catalog-lookup" title="Permanent link">&para;</a></h3>
-<p>Product/variant lookup by identifier capability.</p>
+<p>Product/variant lookup by identifier. Supports batch retrieval (lookup_catalog) and single-product detail (get_product).</p>
 <hr />
 <h3 id="catalog-search">Catalog Search<a class="headerlink" href="#catalog-search" title="Permanent link">&para;</a></h3>
 <p>Product catalog search capability.</p>
@@ -4852,6 +4874,32 @@ within the UCP.</p>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Markdown-formatted content.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="detail-option-value">Detail Option Value<a class="headerlink" href="#detail-option-value" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">id</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional server-assigned identifier for this option value. When present in a selected_option, the server SHOULD use it for matching instead of label.</td>
+</tr>
+<tr>
+<td style="text-align: left;">label</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Display text for this option value (e.g., 'Small', 'Blue').</td>
 </tr>
 </tbody>
 </table>
@@ -5595,6 +5643,12 @@ within the UCP.</p>
 </thead>
 <tbody>
 <tr>
+<td style="text-align: left;">id</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional server-assigned identifier for this option value. When present in a selected_option, the server SHOULD use it for matching instead of label.</td>
+</tr>
+<tr>
 <td style="text-align: left;">label</td>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
@@ -6184,6 +6238,12 @@ within the UCP.</p>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Option name (e.g., 'Size').</td>
+</tr>
+<tr>
+<td style="text-align: left;">id</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional option value identifier from option_value.id. When present, the server SHOULD use it for matching; name and label remain required for display.</td>
 </tr>
 <tr>
 <td style="text-align: left;">label</td>

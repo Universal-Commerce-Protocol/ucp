@@ -71,10 +71,11 @@ The `meta["ucp-agent"]` field is **required** on all requests to enable version 
 
 ## Tools
 
-| Tool             | Capability                                                           | Description                                            |
-| ---------------- | -------------------------------------------------------------------- | ------------------------------------------------------ |
-| `search_catalog` | [Search](http://ucp.dev/draft/specification/catalog/search/index.md) | Search for products.                                   |
-| `lookup_catalog` | [Lookup](http://ucp.dev/draft/specification/catalog/lookup/index.md) | Lookup one or more products or variants by identifier. |
+| Tool             | Capability                                                                           | Description                                            |
+| ---------------- | ------------------------------------------------------------------------------------ | ------------------------------------------------------ |
+| `search_catalog` | [Search](http://ucp.dev/draft/specification/catalog/search/index.md)                 | Search for products.                                   |
+| `lookup_catalog` | [Lookup](http://ucp.dev/draft/specification/catalog/lookup/index.md)                 | Lookup one or more products or variants by identifier. |
+| `get_product`    | [Lookup](http://ucp.dev/draft/specification/catalog/lookup/#get-product-get_product) | Get full product detail by identifier.                 |
 
 ### `search_catalog`
 
@@ -245,6 +246,7 @@ The `catalog.ids` parameter accepts an array of identifiers and optional context
 | Name    | Type          | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | ------- | ------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | ids     | Array[string] | **Yes**  | Identifiers to lookup. Implementations MUST support product ID and variant ID; MAY support secondary identifiers (SKU, handle, etc.).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| filters | object        | No       | Filter criteria to narrow returned products and variants. All specified filters combine with AND logic.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | context | object        | No       | Provisional buyer signals for relevance and localization—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data. Context SHOULD be non-identifying and can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. |
 | signals | object        | No       | Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.                                                                                                                                                                                                                                                                 |
 
@@ -418,6 +420,184 @@ When some identifiers are not found, the response includes the found products. T
 }
 ```
 
+### `get_product`
+
+Maps to the [Catalog Lookup](http://ucp.dev/draft/specification/catalog/lookup/#get-product-get_product) capability. Returns a singular `product` object for full product detail with interactive option selection.
+
+#### Get Product Request
+
+| Name        | Type          | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| ----------- | ------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| id          | string        | **Yes**  | Product or variant identifier. Implementations MUST support product ID and variant ID.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| selected    | Array[object] | No       | Partial or full option selections for interactive variant narrowing. When provided, response option values include availability signals (available, exists) relative to these selections.                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| preferences | Array[string] | No       | Option names in relaxation priority order. When no exact variant matches all selections, the server drops options from the end of this list first. E.g., ['Color', 'Size'] keeps Color and relaxes Size.                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| filters     | object        | No       | Filter criteria to narrow returned variants. All specified filters combine with AND logic.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| context     | object        | No       | Provisional buyer signals for relevance and localization—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data. Context SHOULD be non-identifying and can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. |
+| signals     | object        | No       | Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.                                                                                                                                                                                                                                                                 |
+
+#### Get Product Response
+
+| Name     | Type          | Required | Description                                                                                                |
+| -------- | ------------- | -------- | ---------------------------------------------------------------------------------------------------------- |
+| ucp      | any           | **Yes**  | UCP metadata for catalog responses.                                                                        |
+| product  | object        | **Yes**  | The requested product with full detail. Singular — this is a single-resource operation.                    |
+| messages | Array[object] | No       | Warnings or informational messages about the product (e.g., price recently changed, limited availability). |
+
+#### Get Product Example
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "method": "tools/call",
+  "params": {
+    "name": "get_product",
+    "arguments": {
+      "meta": {
+        "ucp-agent": {
+          "profile": "https://platform.example/profiles/v2026-01/shopping-agent.json"
+        }
+      },
+      "catalog": {
+        "id": "prod_abc123",
+        "selected": [
+          { "name": "Color", "label": "Blue" }
+        ],
+        "preferences": ["Color", "Size"],
+        "context": {
+          "address_country": "US"
+        }
+      }
+    }
+  }
+}
+```
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "result": {
+    "structuredContent": {
+      "ucp": {
+        "version": "draft",
+        "capabilities": {
+          "dev.ucp.shopping.catalog.lookup": [
+            {"version": "draft"}
+          ]
+        }
+      },
+      "product": {
+        "id": "prod_abc123",
+        "handle": "runner-pro",
+        "title": "Runner Pro",
+        "description": {
+          "plain": "Lightweight running shoes with responsive cushioning."
+        },
+        "url": "https://business.example.com/products/runner-pro",
+        "price_range": {
+          "min": { "amount": 12000, "currency": "USD" },
+          "max": { "amount": 15000, "currency": "USD" }
+        },
+        "media": [
+          {
+            "type": "image",
+            "url": "https://cdn.example.com/products/runner-pro-blue.jpg",
+            "alt_text": "Runner Pro in Blue"
+          }
+        ],
+        "options": [
+          {
+            "name": "Color",
+            "values": [
+              {"label": "Blue", "available": true, "exists": true},
+              {"label": "Red", "available": true, "exists": true},
+              {"label": "Green", "available": false, "exists": true}
+            ]
+          },
+          {
+            "name": "Size",
+            "values": [
+              {"label": "8", "available": true, "exists": true},
+              {"label": "9", "available": true, "exists": true},
+              {"label": "10", "available": true, "exists": true},
+              {"label": "11", "available": false, "exists": false},
+              {"label": "12", "available": true, "exists": true}
+            ]
+          }
+        ],
+        "selected": [
+          { "name": "Color", "label": "Blue" }
+        ],
+        "variants": [
+          {
+            "id": "prod_abc123_blu_10",
+            "sku": "BRP-BLU-10",
+            "title": "Blue, Size 10",
+            "description": { "plain": "Blue, Size 10" },
+            "price": { "amount": 12000, "currency": "USD" },
+            "availability": { "available": true },
+            "selected_options": [
+              { "name": "Color", "label": "Blue" },
+              { "name": "Size", "label": "10" }
+            ]
+          },
+          {
+            "id": "prod_abc123_blu_12",
+            "sku": "BRP-BLU-12",
+            "title": "Blue, Size 12",
+            "description": { "plain": "Blue, Size 12" },
+            "price": { "amount": 15000, "currency": "USD" },
+            "availability": { "available": true },
+            "selected_options": [
+              { "name": "Color", "label": "Blue" },
+              { "name": "Size", "label": "12" }
+            ]
+          }
+        ],
+        "rating": {
+          "value": 4.5,
+          "scale_max": 5,
+          "count": 128
+        }
+      }
+    }
+  }
+}
+```
+
+#### Product Not Found
+
+When the identifier does not resolve to a product, the server returns a successful JSON-RPC result with `ucp.status: "error"` and a descriptive message. This is an application outcome, not a transport error.
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "result": {
+    "structuredContent": {
+      "ucp": {
+        "version": "draft",
+        "status": "error",
+        "capabilities": {
+          "dev.ucp.shopping.catalog.lookup": [
+            {"version": "draft"}
+          ]
+        }
+      },
+      "messages": [
+        {
+          "type": "error",
+          "code": "not_found",
+          "content": "Product not found: prod_invalid",
+          "severity": "unrecoverable"
+        }
+      ]
+    }
+  }
+}
+```
+
 ## Error Handling
 
 UCP uses a two-layer error model separating transport errors from business outcomes.
@@ -470,12 +650,49 @@ When all requested identifiers fail to resolve, the response contains an empty `
 
 Business outcomes use the JSON-RPC `result` field with messages in the response payload. See the [Partial Success](#partial-success) section for handling mixed results.
 
+## Entities
+
+### Detail Product
+
+| Name             | Type          | Required | Description                                                                                      |
+| ---------------- | ------------- | -------- | ------------------------------------------------------------------------------------------------ |
+| id               | string        | **Yes**  | Global ID (GID) uniquely identifying this product.                                               |
+| handle           | string        | No       | URL-safe slug for SEO-friendly URLs (e.g., 'blue-runner-pro'). Use id for stable API references. |
+| title            | string        | **Yes**  | Product title.                                                                                   |
+| description      | object        | **Yes**  | Product description in one or more formats.                                                      |
+| url              | string        | No       | Canonical product page URL.                                                                      |
+| categories       | Array[object] | No       | Product categories with optional taxonomy identifiers.                                           |
+| price_range      | object        | **Yes**  | Price range across all variants.                                                                 |
+| list_price_range | object        | No       | List price range before discounts (for strikethrough display).                                   |
+| media            | Array[object] | No       | Product media (images, videos, 3D models). First item is the featured media for listings.        |
+| options          | Array[object] | No       | Product options (Size, Color, etc.).                                                             |
+| variants         | Array[object] | **Yes**  | Purchasable variants of this product. First item is the featured variant for listings.           |
+| rating           | object        | No       | Aggregate product rating.                                                                        |
+| tags             | Array[string] | No       | Product tags for categorization and search.                                                      |
+| metadata         | object        | No       | Business-defined custom data extending the standard product model.                               |
+
+### Get Product Response
+
+| Name     | Type          | Required | Description                                                                                                |
+| -------- | ------------- | -------- | ---------------------------------------------------------------------------------------------------------- |
+| ucp      | any           | **Yes**  | UCP metadata for catalog responses.                                                                        |
+| product  | object        | **Yes**  | The requested product with full detail. Singular — this is a single-resource operation.                    |
+| messages | Array[object] | No       | Warnings or informational messages about the product (e.g., price recently changed, limited availability). |
+
+### Error Response
+
+| Name         | Type                                                        | Required | Description                                                       |
+| ------------ | ----------------------------------------------------------- | -------- | ----------------------------------------------------------------- |
+| ucp          | any                                                         | **Yes**  | UCP protocol metadata. Status MUST be 'error' for error response. |
+| messages     | Array\[[Message](/draft/specification/reference/#message)\] | **Yes**  | Array of messages describing why the operation failed.            |
+| continue_url | string                                                      | No       | URL for buyer handoff or session recovery.                        |
+
 ## Conformance
 
 A conforming MCP transport implementation **MUST**:
 
 1. Implement JSON-RPC 2.0 protocol correctly.
-1. Implement tools for each catalog capability advertised in the business's UCP profile, per their respective capability requirements ([Search](http://ucp.dev/draft/specification/catalog/search/index.md), [Lookup](http://ucp.dev/draft/specification/catalog/lookup/index.md)). Each capability may be adopted independently.
+1. Implement tools for each catalog capability advertised in the business's UCP profile, per their respective capability requirements ([Search](http://ucp.dev/draft/specification/catalog/search/index.md), [Lookup](http://ucp.dev/draft/specification/catalog/lookup/index.md)). Each capability may be adopted independently. When the Lookup capability is advertised, both `lookup_catalog` and `get_product` tools MUST be available.
 1. Use JSON-RPC errors for transport issues; use `messages` array for business outcomes.
 1. Return successful result for lookup requests; unknown identifiers result in fewer products returned (MAY include informational `not_found` messages).
 1. Validate tool inputs against UCP schemas.

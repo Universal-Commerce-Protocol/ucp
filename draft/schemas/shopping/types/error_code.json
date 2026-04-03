@@ -5,6 +5,7 @@
   "description": "Error code identifying the type of error. Standard errors are defined in specification (see examples), and have standardized semantics; freeform codes are permitted.",
   "type": "string",
   "examples": [
+    "not_found",
     "out_of_stock",
     "item_unavailable",
     "address_undeliverable",

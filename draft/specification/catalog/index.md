@@ -144,16 +144,18 @@ In lookup responses, each variant carries an `inputs` array for correlation: whi
 
 ### Option Value
 
-| Name  | Type   | Required | Description                                                 |
-| ----- | ------ | -------- | ----------------------------------------------------------- |
-| label | string | **Yes**  | Display text for this option value (e.g., 'Small', 'Blue'). |
+| Name  | Type   | Required | Description                                                                                                                                           |
+| ----- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| id    | string | No       | Optional server-assigned identifier for this option value. When present in a selected_option, the server SHOULD use it for matching instead of label. |
+| label | string | **Yes**  | Display text for this option value (e.g., 'Small', 'Blue').                                                                                           |
 
 ### Selected Option
 
-| Name  | Type   | Required | Description                            |
-| ----- | ------ | -------- | -------------------------------------- |
-| name  | string | **Yes**  | Option name (e.g., 'Size').            |
-| label | string | **Yes**  | Selected option label (e.g., 'Large'). |
+| Name  | Type   | Required | Description                                                                                                                                             |
+| ----- | ------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| name  | string | **Yes**  | Option name (e.g., 'Size').                                                                                                                             |
+| id    | string | No       | Optional option value identifier from option_value.id. When present, the server SHOULD use it for matching; name and label remain required for display. |
+| label | string | **Yes**  | Selected option label (e.g., 'Large').                                                                                                                  |
 
 ### Rating
 

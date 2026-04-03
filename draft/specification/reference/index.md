@@ -25,7 +25,7 @@ ______________________________________________________________________
 
 ### Catalog Lookup
 
-Product/variant lookup by identifier capability.
+Product/variant lookup by identifier. Supports batch retrieval (lookup_catalog) and single-product detail (get_product).
 
 ______________________________________________________________________
 
@@ -213,6 +213,15 @@ ______________________________________________________________________
 | plain    | string | No       | Plain text content.                                                                                                                                                       |
 | html     | string | No       | HTML-formatted content. Security: Platforms MUST sanitize before rendering—strip scripts, event handlers, and untrusted elements. Treat all rich text as untrusted input. |
 | markdown | string | No       | Markdown-formatted content.                                                                                                                                               |
+
+______________________________________________________________________
+
+### Detail Option Value
+
+| Name  | Type   | Required | Description                                                                                                                                           |
+| ----- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| id    | string | No       | Optional server-assigned identifier for this option value. When present in a selected_option, the server SHOULD use it for matching instead of label. |
+| label | string | **Yes**  | Display text for this option value (e.g., 'Small', 'Blue').                                                                                           |
 
 ______________________________________________________________________
 
@@ -435,9 +444,10 @@ ______________________________________________________________________
 
 ### Option Value
 
-| Name  | Type   | Required | Description                                                 |
-| ----- | ------ | -------- | ----------------------------------------------------------- |
-| label | string | **Yes**  | Display text for this option value (e.g., 'Small', 'Blue'). |
+| Name  | Type   | Required | Description                                                                                                                                           |
+| ----- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| id    | string | No       | Optional server-assigned identifier for this option value. When present in a selected_option, the server SHOULD use it for matching instead of label. |
+| label | string | **Yes**  | Display text for this option value (e.g., 'Small', 'Blue').                                                                                           |
 
 ______________________________________________________________________
 
@@ -620,10 +630,11 @@ ______________________________________________________________________
 
 ### Selected Option
 
-| Name  | Type   | Required | Description                            |
-| ----- | ------ | -------- | -------------------------------------- |
-| name  | string | **Yes**  | Option name (e.g., 'Size').            |
-| label | string | **Yes**  | Selected option label (e.g., 'Large'). |
+| Name  | Type   | Required | Description                                                                                                                                             |
+| ----- | ------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| name  | string | **Yes**  | Option name (e.g., 'Size').                                                                                                                             |
+| id    | string | No       | Optional option value identifier from option_value.id. When present, the server SHOULD use it for matching; name and label remain required for display. |
+| label | string | **Yes**  | Selected option label (e.g., 'Large').                                                                                                                  |
 
 ______________________________________________________________________
 
