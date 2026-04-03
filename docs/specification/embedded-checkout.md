@@ -582,12 +582,13 @@ to complete the handshake.
 - **Result Payload:**
     - `upgrade` (object, **OPTIONAL**): An object describing how the Embedded
         Checkout should update the communication channel it uses to communicate
-        with the host. When present, host **SHOULD NOT** include `credential`
+        with the host. When present, host **MUST NOT** include `credential`
         — the channel will be re-established and any credential sent here
         will be discarded.
     - `credential` (string, **OPTIONAL**): The requested authorization data,
         can be in the form of an OAuth token, JWT, API keys, etc. **MUST** be
-        set if `auth` is present in the request.
+        set if `auth` is present in the request. **MUST NOT** be set if
+        `upgrade` is present.
     - `checkout` (object, **OPTIONAL**): Additional, display-only state for
         the checkout that was not communicated over UCP checkout actions. This
         is used to populate the checkout UI, and may only be used to populate
