@@ -176,6 +176,7 @@ Examples: `refund`, `return`, `credit`, `price_adjustment`, `dispute`,
   "id": "order_abc123",
   "checkout_id": "checkout_xyz789",
   "permalink_url": "https://business.com/orders/abc123",
+  "currency": "USD",
   "line_items": [
     {
       "id": "li_shoes",
@@ -336,6 +337,7 @@ array describing the outcome:
   "messages": [{
     "type": "error",
     "code": "not_found",
+    "severity": "unrecoverable",
     "content": "Order not found."
   }]
 }
@@ -354,6 +356,7 @@ array describing the outcome:
   "messages": [{
     "type": "error",
     "code": "unauthorized",
+    "severity": "unrecoverable",
     "content": "Not authorized to access this order."
   }]
 }

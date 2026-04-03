@@ -143,6 +143,7 @@ current-state snapshot of an order.
             "id": "order_abc123",
             "checkout_id": "checkout_xyz789",
             "permalink_url": "https://business.example.com/orders/abc123",
+            "currency": "USD",
             "line_items": [
               {
                 "id": "li_shoes",
@@ -221,6 +222,7 @@ current-state snapshot of an order.
               {
                 "type": "error",
                 "code": "not_found",
+                "severity": "unrecoverable",
                 "content": "Order not found."
               }
             ]
@@ -255,6 +257,7 @@ current-state snapshot of an order.
               {
                 "type": "error",
                 "code": "unauthorized",
+                "severity": "unrecoverable",
                 "content": "Not authorized to access this order."
               }
             ]
