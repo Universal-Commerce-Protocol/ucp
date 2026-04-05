@@ -74,7 +74,7 @@ All capability and service names **MUST** use the format:
 | ----------------------------------- | ----------- | -------- | ---------------- |
 | `dev.ucp.shopping.checkout`         | ucp.dev     | shopping | checkout         |
 | `dev.ucp.shopping.fulfillment`      | ucp.dev     | shopping | fulfillment      |
-| `dev.ucp.common.identity_linking`   | ucp.dev     | common   | identity_linking |
+| `dev.ucp.common.identity_management`  | ucp.dev     | common   | identity_management |
 | `com.example.payments.installments` | example.com | payments | installments     |
 
 #### Spec URL Binding
