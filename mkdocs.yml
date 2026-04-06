@@ -39,29 +39,33 @@ nav:
       - Overview: specification/overview.md
       - Checkout Capability:
           - Overview: specification/checkout.md
-          - HTTP/REST Binding: specification/checkout-rest.md
-          - MCP Binding: specification/checkout-mcp.md
-          - A2A Binding: specification/checkout-a2a.md
-          - EP Binding: specification/embedded-checkout.md
+          - Transports:
+              - REST: specification/checkout-rest.md
+              - MCP: specification/checkout-mcp.md
+              - A2A: specification/checkout-a2a.md
+              - Embedded: specification/embedded-checkout.md
           - AP2 Mandates Extension: specification/ap2-mandates.md
           - Buyer Consent Extension: specification/buyer-consent.md
           - Discounts Extension: specification/discount.md
           - Fulfillment Extension: specification/fulfillment.md
       - Cart Capability:
           - Overview: specification/cart.md
-          - HTTP/REST Binding: specification/cart-rest.md
-          - MCP Binding: specification/cart-mcp.md
-          - EP Binding: specification/embedded-cart.md
+          - Transports:
+              - REST: specification/cart-rest.md
+              - MCP: specification/cart-mcp.md
+              - Embedded: specification/embedded-cart.md
       - Catalog Capability:
           - Overview: specification/catalog/index.md
           - Search: specification/catalog/search.md
           - Lookup: specification/catalog/lookup.md
-          - HTTP/REST Binding: specification/catalog/rest.md
-          - MCP Binding: specification/catalog/mcp.md
+          - Transports:
+              - REST: specification/catalog/rest.md
+              - MCP: specification/catalog/mcp.md
       - Order Capability:
           - Overview: specification/order.md
-          - HTTP/REST Binding: specification/order-rest.md
-          - MCP Binding: specification/order-mcp.md
+          - Transports:
+              - REST: specification/order-rest.md
+              - MCP: specification/order-mcp.md
       - Identity Linking Capability: specification/identity-linking.md
       - Payment Handlers:
           - Guide: specification/payment-handler-guide.md
@@ -221,6 +225,7 @@ plugins:
           - specification/checkout-rest.md
           - specification/checkout-mcp.md
           - specification/checkout-a2a.md
+          - specification/embedded-protocol.md
           - specification/embedded-checkout.md
           - specification/ap2-mandates.md
           - specification/buyer-consent.md
@@ -230,6 +235,7 @@ plugins:
           - specification/cart.md
           - specification/cart-rest.md
           - specification/cart-mcp.md
+          - specification/embedded-protocol.md
           - specification/embedded-cart.md
         Catalog Capability:
           - specification/catalog/index.md
