@@ -3,7 +3,7 @@
   "$id": "https://ucp.dev/schemas/shopping/catalog_lookup.json",
   "name": "dev.ucp.shopping.catalog.lookup",
   "title": "Catalog Lookup",
-  "description": "Product/variant lookup by identifier capability.",
+  "description": "Product/variant lookup by identifier. Supports batch retrieval (lookup_catalog) and single-product detail (get_product).",
   "type": "object",
   "$defs": {
     "lookup_variant": {
@@ -33,6 +33,10 @@
           "items": { "type": "string" },
           "minItems": 1,
           "description": "Identifiers to lookup. Implementations MUST support product ID and variant ID; MAY support secondary identifiers (SKU, handle, etc.)."
+        },
+        "filters": {
+          "$ref": "types/search_filters.json",
+          "description": "Filter criteria to narrow returned products and variants. All specified filters combine with AND logic."
         },
         "context": {
           "$ref": "types/context.json"
@@ -74,6 +78,92 @@
             "$ref": "types/message.json"
           },
           "description": "Errors, warnings, or informational messages about the requested items."
+        }
+      }
+    },
+    "get_product_request": {
+      "type": "object",
+      "description": "Request body for single-product retrieval. Supports interactive variant narrowing via selected and preferences.",
+      "required": ["id"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Product or variant identifier. Implementations MUST support product ID and variant ID."
+        },
+        "selected": {
+          "type": "array",
+          "items": {
+            "$ref": "types/selected_option.json"
+          },
+          "description": "Partial or full option selections for interactive variant narrowing. When provided, response option values include availability signals (available, exists) relative to these selections."
+        },
+        "preferences": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Option names in relaxation priority order. When no exact variant matches all selections, the server drops options from the end of this list first. E.g., ['Color', 'Size'] keeps Color and relaxes Size."
+        },
+        "filters": {
+          "$ref": "types/search_filters.json",
+          "description": "Filter criteria to narrow returned variants. All specified filters combine with AND logic."
+        },
+        "context": {
+          "$ref": "types/context.json"
+        },
+        "signals": {
+          "$ref": "types/signals.json"
+        }
+      }
+    },
+    "detail_product": {
+      "description": "A product in a get_product response, extended with effective selections and availability signals on option values.",
+      "type": "object",
+      "allOf": [{ "$ref": "types/product.json" }],
+      "properties": {
+        "selected": {
+          "type": "array",
+          "items": { "$ref": "types/selected_option.json" },
+          "description": "Effective option selections that anchor the featured variant and availability signals. Required when the product has configurable options; may be empty or omitted for products with no option axes."
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "values"],
+            "properties": {
+              "name": { "type": "string" },
+              "values": {
+                "type": "array",
+                "items": { "$ref": "types/detail_option_value.json" },
+                "minItems": 1
+              }
+            }
+          },
+          "description": "Product options with availability signals relative to the effective selections."
+        }
+      }
+    },
+    "get_product_response": {
+      "type": "object",
+      "required": [
+        "ucp",
+        "product"
+      ],
+      "properties": {
+        "ucp": {
+          "$ref": "../ucp.json#/$defs/response_catalog_schema"
+        },
+        "product": {
+          "$ref": "#/$defs/detail_product",
+          "description": "The requested product with full detail. Singular — this is a single-resource operation."
+        },
+        "messages": {
+          "type": "array",
+          "items": {
+            "$ref": "types/message.json"
+          },
+          "description": "Warnings or informational messages about the product (e.g., price recently changed, limited availability)."
         }
       }
     }

@@ -287,7 +287,7 @@ image: assets/banner.png
     "token_endpoint": "https://example.com/oauth2/token",
     "revocation_endpoint": "https://example.com/oauth2/revoke",
     "scopes_supported": [
-      "dev.ucp.shopping.scopes.checkout_session"
+      "ucp:scopes:checkout_session",
     ],
     "response_types_supported": [
       "code"
@@ -367,8 +367,8 @@ image: assets/banner.png
         "type": "refund",
         "occurred_at": "2026-01-12T14:30:00Z",
         "status": "completed",
-        "line_items": [{ "id": "li_1", "quantity": 1 }],
-        "amount": 26550,
+        "line_items": [{ "id": "li_1", "quantity": -1 }],
+        "totals": [{ "type": "total", "amount": -26550 }],
         "description": "Defective item"
       }
     ],

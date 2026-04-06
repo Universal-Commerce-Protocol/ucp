@@ -23,18 +23,23 @@
       "type": "object",
       "required": ["total", "fulfilled"],
       "properties": {
+        "original": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Quantity from the original checkout."
+        },
         "total": {
           "type": "integer",
           "minimum": 0,
-          "description": "Current total quantity."
+          "description": "Current total active quantity. May differ from original due to post-order modifications (e.g., returns or cancellations)."
         },
         "fulfilled": {
           "type": "integer",
           "minimum": 0,
-          "description": "Quantity fulfilled (sum from fulfillment events)."
+          "description": "Quantity fulfilled so far."
         }
       },
-      "description": "Quantity tracking. Both total and fulfilled are derived from events."
+      "description": "Quantity tracking for the line item."
     },
     "totals": {
       "type": "array",
@@ -48,9 +53,10 @@
       "enum": [
         "processing",
         "partial",
-        "fulfilled"
+        "fulfilled",
+        "removed"
       ],
-      "description": "Derived status: fulfilled if quantity.fulfilled == quantity.total, partial if quantity.fulfilled > 0, otherwise processing."
+      "description": "Derived status: removed if quantity.total == 0, fulfilled if quantity.total > 0 and quantity.fulfilled == quantity.total, partial if quantity.total > 0 and quantity.fulfilled > 0, otherwise processing."
     },
     "parent_id": {
       "type": "string",
