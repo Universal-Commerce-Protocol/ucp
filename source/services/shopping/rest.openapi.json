@@ -647,6 +647,50 @@
           }
         }
       }
+    },
+    "/catalog/product": {
+      "post": {
+        "operationId": "get_product",
+        "summary": "Get Product Details",
+        "description": "Retrieve complete product detail by identifier. Returns a singular product with a relevant set of variants, exact pricing, and real-time availability. Supports interactive option selection via `selected` and `preferences` parameters for variant narrowing and availability signals.",
+        "parameters": [
+          { "$ref": "#/components/parameters/authorization" },
+          { "$ref": "#/components/parameters/x_api_key" },
+          { "$ref": "#/components/parameters/signature" },
+          { "$ref": "#/components/parameters/signature_input" },
+          { "$ref": "#/components/parameters/content_digest" },
+          { "$ref": "#/components/parameters/request_id" },
+          { "$ref": "#/components/parameters/user_agent" },
+          { "$ref": "#/components/parameters/ucp_agent" },
+          { "$ref": "#/components/parameters/content_type" },
+          { "$ref": "#/components/parameters/accept" },
+          { "$ref": "#/components/parameters/accept_language" },
+          { "$ref": "#/components/parameters/accept_encoding" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/catalog_get_product_request" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Product detail",
+            "headers": {
+              "Signature": { "$ref": "#/components/headers/signature" },
+              "Signature-Input": { "$ref": "#/components/headers/signature_input" },
+              "Content-Digest": { "$ref": "#/components/headers/content_digest" }
+            },
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/catalog_get_product_response" }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "webhooks": {
@@ -912,6 +956,15 @@
       },
       "catalog_lookup_response": {
         "$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/lookup_response"
+      },
+      "catalog_get_product_request": {
+        "$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/get_product_request"
+      },
+      "catalog_get_product_response": {
+        "oneOf": [
+          { "$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/get_product_response" },
+          { "$ref": "../../schemas/shopping/types/error_response.json" }
+        ]
       }
     }
   }

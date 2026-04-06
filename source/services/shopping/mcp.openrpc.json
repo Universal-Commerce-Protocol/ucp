@@ -31,6 +31,12 @@
           { "$ref": "../../schemas/shopping/types/error_response.json" }
         ]
       },
+      "catalog_get_product_result": {
+        "oneOf": [
+          { "$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/get_product_response" },
+          { "$ref": "../../schemas/shopping/types/error_response.json" }
+        ]
+      },
       "meta": {
         "type": "object",
         "description": "Request metadata.",
@@ -315,6 +321,27 @@
       "result": {
         "name": "response",
         "schema": {"$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/lookup_response"}
+      }
+    },
+    {
+      "name": "get_product",
+      "summary": "Get product details",
+      "description": "Retrieve complete product detail by identifier with optional interactive option selection.",
+      "params": [
+        {
+          "name": "meta",
+          "required": true,
+          "schema": {"$ref": "#/components/schemas/meta"}
+        },
+        {
+          "name": "catalog",
+          "required": true,
+          "schema": {"$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/get_product_request"}
+        }
+      ],
+      "result": {
+        "name": "response",
+        "schema": {"$ref": "#/components/schemas/catalog_get_product_result"}
       }
     }
   ]
