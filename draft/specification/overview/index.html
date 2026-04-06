@@ -1692,6 +1692,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#pre-release-versions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pre-release Versions
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -4105,6 +4116,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#pre-release-versions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pre-release Versions
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -6228,6 +6250,17 @@ every request:</p>
 </span><span id="__span-38-9"><a id="__codelineno-38-9" name="__codelineno-38-9" href="#__codelineno-38-9"></a><span class="w">  </span><span class="nt">&quot;continue_url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://merchant.com/&quot;</span>
 </span><span id="__span-38-10"><a id="__codelineno-38-10" name="__codelineno-38-10" href="#__codelineno-38-10"></a><span class="p">}</span>
 </span></code></pre></div>
+<h5 id="pre-release-versions">Pre-release Versions<a class="headerlink" href="#pre-release-versions" title="Permanent link">&para;</a></h5>
+<p>The protocol version <strong>MUST</strong> be a dated release in <code>YYYY-MM-DD</code> format.
+Businesses <strong>MUST NOT</strong> advertise a non-date version string (e.g.
+<code>"draft"</code>) in their profile <code>version</code> field or in <code>supported_versions</code>.
+Pre-release implementations are not stable and MUST NOT be surfaced
+through public discovery — doing so would expose the general ecosystem
+to undefined behavior and incompatible changes without notice.</p>
+<p>Platforms and businesses <strong>MAY</strong> coordinate on pre-release implementations outside of
+public discovery. Such use carries no stability or compatibility
+guarantees — the underlying behavior may change at any time without
+notice.</p>
 <h4 id="capability-versions">Capability Versions<a class="headerlink" href="#capability-versions" title="Permanent link">&para;</a></h4>
 <p>Capability versions are negotiated independently of the protocol
 version. Each capability in the profile is an array. Multiple entries
