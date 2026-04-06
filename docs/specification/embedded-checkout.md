@@ -708,6 +708,34 @@ information:**
 }
 ```
 
+**Example Error Response:**
+
+If the host cannot complete the handshake (e.g., origin validation failure or
+protocol state violation), it **MUST** respond with an `error_response` result:
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": "ready_1",
+    "result": {
+        "ucp": { "version": "{{ ucp_version }}", "status": "error" },
+        "messages": [
+            {
+                "type": "error",
+                "code": "security_error",
+                "content": "Host origin validation failed.",
+                "severity": "unrecoverable"
+            }
+        ]
+    }
+}
+```
+
+When the host responds with an error, the session cannot proceed. The host
+**MUST** tear down the embedded context and **MAY** redirect the buyer to
+`continue_url` if present. The Embedded Checkout **MUST NOT** send further
+messages after receiving a handshake error.
+
 ### Authentication
 
 #### `ec.auth`
@@ -779,11 +807,6 @@ or an `error_response`.
     }
 }
 ```
-
-When the host responds with an error, the session cannot proceed. The host
-**MUST** tear down the embedded context and **MAY** redirect the buyer to
-`continue_url` if present. The Embedded Checkout **MUST NOT** send further
-messages after receiving a handshake error.
 
 If the error appears to be transient within the host (i.e. `timeout_error`) - as indicated with
 `recoverable` severity - Embedded Checkout **MAY** re-initiate this request with the host again.
