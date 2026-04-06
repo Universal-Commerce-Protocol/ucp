@@ -8,6 +8,10 @@
     "label"
   ],
   "properties": {
+    "id": {
+      "type": "string",
+      "description": "Optional server-assigned identifier for this option value. When present in a selected_option, the server SHOULD use it for matching instead of label."
+    },
     "label": {
       "type": "string",
       "description": "Display text for this option value (e.g., 'Small', 'Blue')."
