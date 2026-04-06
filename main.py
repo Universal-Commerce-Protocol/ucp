@@ -643,6 +643,28 @@ def define_env(env):
         f_type = details.get("type", "any")
         ref = details.get("$ref")
 
+        # Resolve UCP $defs references inline so properties render as
+        # expanded tables (with anchors) instead of opaque links.
+        # e.g., "$ref": "../../ucp.json#/$defs/error" -> inline the allOf
+        if ref and "ucp.json#/$defs/" in ref and "$defs" in ref:
+          def_name = ref.split("/")[-1]
+          try:
+            with UCP_SCHEMA_PATH.open(encoding="utf-8") as f:
+              ucp_data = json.load(f)
+              resolved_def = ucp_data.get("$defs", {}).get(def_name)
+              if resolved_def:
+                # Merge resolved def into details, preserving embedder's
+                # description. The resolved def (e.g. allOf with base +
+                # status const) replaces the bare $ref.
+                embedder_desc = details.get("description")
+                details = dict(resolved_def)
+                if embedder_desc:
+                  details["description"] = embedder_desc
+                ref = None
+                f_type = details.get("type", "any")
+          except (json.JSONDecodeError, OSError):
+            pass
+
         # Check for Array specific logic
         items = details.get("items", {})
         items_ref = items.get("$ref")
