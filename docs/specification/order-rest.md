@@ -112,12 +112,9 @@ Returns the current-state snapshot of an order.
     {
       "ucp": {
         "version": "{{ ucp_version }}",
-        "capabilities": [
-          {
-            "name": "dev.ucp.shopping.order",
-            "version": "{{ ucp_version }}"
-          }
-        ]
+        "capabilities": {
+          "dev.ucp.shopping.order": [{"version": "{{ ucp_version }}"}]
+        }
       },
       "id": "order_abc123",
       "checkout_id": "checkout_xyz789",
@@ -183,12 +180,9 @@ Returns the current-state snapshot of an order.
       "ucp": {
         "version": "{{ ucp_version }}",
         "status": "error",
-        "capabilities": [
-          {
-            "name": "dev.ucp.shopping.order",
-            "version": "{{ ucp_version }}"
-          }
-        ]
+        "capabilities": {
+          "dev.ucp.shopping.order": [{"version": "{{ ucp_version }}"}]
+        }
       },
       "messages": [
         {
@@ -211,12 +205,9 @@ Returns the current-state snapshot of an order.
       "ucp": {
         "version": "{{ ucp_version }}",
         "status": "error",
-        "capabilities": [
-          {
-            "name": "dev.ucp.shopping.order",
-            "version": "{{ ucp_version }}"
-          }
-        ]
+        "capabilities": {
+          "dev.ucp.shopping.order": [{"version": "{{ ucp_version }}"}]
+        }
       },
       "messages": [
         {

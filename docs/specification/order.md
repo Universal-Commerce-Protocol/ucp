@@ -330,12 +330,9 @@ that includes a `messages` array describing the outcome:
   "ucp": {
     "version": "{{ ucp_version }}",
     "status": "error",
-    "capabilities": [
-      {
-        "name": "dev.ucp.shopping.order",
-        "version": "{{ ucp_version }}"
-      }
-    ]
+    "capabilities": {
+      "dev.ucp.shopping.order": [{"version": "{{ ucp_version }}"}]
+    }
   },
   "messages": [
     {
@@ -355,12 +352,9 @@ that includes a `messages` array describing the outcome:
   "ucp": {
     "version": "{{ ucp_version }}",
     "status": "error",
-    "capabilities": [
-      {
-        "name": "dev.ucp.shopping.order",
-        "version": "{{ ucp_version }}"
-      }
-    ]
+    "capabilities": {
+      "dev.ucp.shopping.order": [{"version": "{{ ucp_version }}"}]
+    }
   },
   "messages": [
     {
