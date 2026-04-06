@@ -786,12 +786,16 @@ def define_env(env):
             embedded_schema_data = embedded_schema_data.copy()
             embedded_schema_data["allOf"] = new_all_of
 
-          return _render_table_from_schema(
+          table = _render_table_from_schema(
             embedded_schema_data,
             spec_file_name,
             need_header,
             parent_required_list,
           )
+          desc = embedded_schema_data.get("description", "")
+          if desc and need_header:
+            return f"{desc}\n\n{table}"
+          return table
         else:
           raise RuntimeError(
             f"Definition '{def_path}' not found in '{full_path}'"
