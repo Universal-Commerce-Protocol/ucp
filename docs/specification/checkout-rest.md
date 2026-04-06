@@ -66,11 +66,8 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
       "line_items": [
         {
           "item": {
-            "id": "item_123",
-            "title": "Red T-Shirt",
-            "price": 2500
+            "id": "item_123"
           },
-          "id": "li_1",
           "quantity": 2
         }
       ]
@@ -85,17 +82,17 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
 
     {
       "ucp": {
-        "version": "2026-01-11",
+        "version": "{{ ucp_version }}",
         "capabilities": {
           "dev.ucp.shopping.checkout": [
-            {"version": "2026-01-11"}
+            {"version": "{{ ucp_version }}"}
           ]
         },
         "payment_handlers": {
           "com.shopify.shop_pay": [
             {
               "id": "shop_pay_1234",
-              "version": "2026-01-11",
+              "version": "{{ ucp_version }}",
               "available_instruments": [
                 {"type": "shop_pay"}
               ],
@@ -216,9 +213,7 @@ so clients must include all previously set fields they wish to retain.
       "line_items": [
         {
           "item": {
-            "id": "item_123",
-            "title": "Red T-Shirt",
-            "price": 2500
+            "id": "item_123"
           },
           "id": "li_1",
           "quantity": 2
@@ -235,17 +230,17 @@ so clients must include all previously set fields they wish to retain.
 
     {
       "ucp": {
-        "version": "2026-01-11",
+        "version": "{{ ucp_version }}",
         "capabilities": {
           "dev.ucp.shopping.checkout": [
-            {"version": "2026-01-11"}
+            {"version": "{{ ucp_version }}"}
           ]
         },
         "payment_handlers": {
           "com.shopify.shop_pay": [
             {
               "id": "shop_pay_1234",
-              "version": "2026-01-11",
+              "version": "{{ ucp_version }}",
               "available_instruments": [
                 {"type": "shop_pay"}
               ],
@@ -347,9 +342,7 @@ type & addresses.
       "line_items": [
         {
           "item": {
-            "id": "item_123",
-            "title": "Red T-Shirt",
-            "price": 2500
+            "id": "item_123"
           },
           "id": "li_1",
           "quantity": 2
@@ -382,17 +375,17 @@ type & addresses.
 
     {
       "ucp": {
-        "version": "2026-01-11",
+        "version": "{{ ucp_version }}",
         "capabilities": {
           "dev.ucp.shopping.checkout": [
-            {"version": "2026-01-11"}
+            {"version": "{{ ucp_version }}"}
           ]
         },
         "payment_handlers": {
           "com.google.pay": [
             {
               "id": "gpay_1234",
-              "version": "2026-01-11",
+              "version": "{{ ucp_version }}",
               "config": {
                 "allowed_payment_methods": [
                   {
@@ -549,9 +542,7 @@ Follow-up calls after initial `fulfillment` data to update selection.
       "line_items": [
         {
           "item": {
-            "id": "item_123",
-            "title": "Red T-Shirt",
-            "price": 2500
+            "id": "item_123"
           },
           "id": "li_1",
           "quantity": 2,
@@ -594,17 +585,17 @@ Follow-up calls after initial `fulfillment` data to update selection.
 
     {
       "ucp": {
-        "version": "2026-01-11",
+        "version": "{{ ucp_version }}",
         "capabilities": {
           "dev.ucp.shopping.checkout": [
-            {"version": "2026-01-11"}
+            {"version": "{{ ucp_version }}"}
           ]
         },
         "payment_handlers": {
           "com.shopify.shop_pay": [
             {
               "id": "shop_pay_1234",
-              "version": "2026-01-11",
+              "version": "{{ ucp_version }}",
               "available_instruments": [
                 {"type": "shop_pay"}
               ],
@@ -766,8 +757,9 @@ place to set these expectations via `messages`.
           }
         ]
       },
-      "risk_signals": {
-        //... risk signal related data (device fingerprint / risk token)
+      "signals": {
+        "dev.ucp.buyer_ip": "203.0.113.42",
+        "dev.ucp.user_agent": "Mozilla/5.0 ..."
       }
     }
     ```
@@ -780,17 +772,17 @@ place to set these expectations via `messages`.
 
     {
       "ucp": {
-        "version": "2026-01-11",
+        "version": "{{ ucp_version }}",
         "capabilities": {
           "dev.ucp.shopping.checkout": [
-            {"version": "2026-01-11"}
+            {"version": "{{ ucp_version }}"}
           ]
         },
         "payment_handlers": {
           "com.google.pay": [
             {
               "id": "gpay_1234",
-              "version": "2026-01-11",
+              "version": "{{ ucp_version }}",
               "config": {
                 "allowed_payment_methods": [
                   {
@@ -941,17 +933,17 @@ place to set these expectations via `messages`.
 
     {
       "ucp": {
-        "version": "2026-01-11",
+        "version": "{{ ucp_version }}",
         "capabilities": {
           "dev.ucp.shopping.checkout": [
-            {"version": "2026-01-11"}
+            {"version": "{{ ucp_version }}"}
           ]
         },
         "payment_handlers": {
           "com.shopify.shop_pay": [
             {
               "id": "shop_pay_1234",
-              "version": "2026-01-11",
+              "version": "{{ ucp_version }}",
               "available_instruments": [
                 {"type": "shop_pay"}
               ],
@@ -1096,17 +1088,17 @@ place to set these expectations via `messages`.
 
     {
       "ucp": {
-        "version": "2026-01-11",
+        "version": "{{ ucp_version }}",
         "capabilities": {
           "dev.ucp.shopping.checkout": [
-            {"version": "2026-01-11"}
+            {"version": "{{ ucp_version }}"}
           ]
         },
         "payment_handlers": {
           "com.google.pay": [
             {
               "id": "gpay_1234",
-              "version": "2026-01-11",
+              "version": "{{ ucp_version }}",
               "config": {
                 "allowed_payment_methods": [
                   {
@@ -1290,9 +1282,9 @@ with HTTP 200 and the UCP envelope containing `messages`:
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "{{ ucp_version }}",
     "capabilities": {
-      "dev.ucp.shopping.checkout": [{"version": "2026-01-11"}]
+      "dev.ucp.shopping.checkout": [{"version": "{{ ucp_version }}"}]
     }
   },
   "id": "checkout_abc123",

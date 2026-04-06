@@ -15,7 +15,7 @@
 
 
 site_name: Universal Commerce Protocol (UCP)
-site_url: https://ucp.dev/  # Required for the llmstxt plugin to work.
+site_url: !ENV [SITE_URL, "https://ucp.dev/"]  # Required for the llmstxt plugin to work.
 site_description: >
   The Universal Commerce Protocol (UCP) is a solution for enabling gen AI agents
   to make payments on behalf of users, safely, securely, and in a decentralized
@@ -30,7 +30,7 @@ nav:
   - Overview:
       - Home: index.md
       - Core Concepts: documentation/core-concepts.md
-      - Specification: /latest/specification/overview
+      - Specification: !ENV [SPEC_URL, "https://ucp.dev/latest/specification/overview/"]
       - UCP and AP2: documentation/ucp-and-ap2.md
       - Roadmap: documentation/roadmap.md
       - Schema Authoring: documentation/schema-authoring.md
@@ -51,6 +51,7 @@ nav:
           - Overview: specification/cart.md
           - HTTP/REST Binding: specification/cart-rest.md
           - MCP Binding: specification/cart-mcp.md
+          - EP Binding: specification/embedded-cart.md
       - Catalog Capability:
           - Overview: specification/catalog/index.md
           - Search: specification/catalog/search.md
@@ -142,8 +143,8 @@ theme:
     # - navigation.expand
     - navigation.footer
     # - navigation.indexes
-    - navigation.instant
-    - navigation.instant.progress
+    # - navigation.instant
+    # - navigation.instant.progress
     # - navigation.path
     - navigation.top
     - navigation.tracking
@@ -222,9 +223,11 @@ plugins:
           - specification/buyer-consent.md
           - specification/discount.md
           - specification/fulfillment.md
+        Cart Capability:
           - specification/cart.md
           - specification/cart-rest.md
           - specification/cart-mcp.md
+          - specification/embedded-cart.md
         Catalog Capability:
           - specification/catalog/index.md
           - specification/catalog/search.md

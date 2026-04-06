@@ -95,21 +95,21 @@ profile, they declare support for the Embedded Checkout Protocol.
     "services": {
         "dev.ucp.shopping": [
             {
-                "version": "2026-01-11",
+                "version": "{{ ucp_version }}",
                 "transport": "rest",
-                "schema": "https://ucp.dev/services/shopping/openapi.json",
+                "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/rest.openapi.json",
                 "endpoint": "https://merchant.example.com/ucp/v1"
             },
             {
-                "version": "2026-01-11",
+                "version": "{{ ucp_version }}",
                 "transport": "mcp",
-                "schema": "https://ucp.dev/services/shopping/mcp.openrpc.json",
+                "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/mcp.openrpc.json",
                 "endpoint": "https://merchant.example.com/ucp/mcp"
             },
             {
-                "version": "2026-01-11",
+                "version": "{{ ucp_version }}",
                 "transport": "embedded",
-                "schema": "https://ucp.dev/services/shopping/embedded.openrpc.json"
+                "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/embedded.openrpc.json"
             }
         ]
     }
@@ -134,14 +134,14 @@ indicate ECP availability and allowed delegations for a specific session.
     "status": "open",
     "continue_url": "https://merchant.example.com/checkout/abc123",
     "ucp": {
-        "version": "2026-01-11",
+        "version": "{{ ucp_version }}",
         "services": {
             "dev.ucp.shopping": [
                 {
-                    "version": "2026-01-11",
+                    "version": "{{ ucp_version }}",
                     "transport": "embedded",
                     "config": {
-                        "delegate": ["payment.credential", "fulfillment.address_change"]
+                        "delegate": ["payment.credential", "fulfillment.address_change", "window.open"]
                     }
                 }
             ]
@@ -250,12 +250,13 @@ message following a consistent pattern: `ec.{delegation}_request`
 | `payment.instruments_change` | `ec.payment.instruments_change_request` |
 | `payment.credential`         | `ec.payment.credential_request`         |
 | `fulfillment.address_change` | `ec.fulfillment.address_change_request` |
+| `window.open`                | `ec.window.open_request`                |
 
 Extensions define their own delegation identifiers; see each extension's
 specification for available options.
 
 ```text
-?ec_version=2026-01-11&ec_delegate=payment.instruments_change,payment.credential,fulfillment.address_change
+?ec_version=2026-01-11&ec_delegate=payment.instruments_change,payment.credential,fulfillment.address_change,window.open
 ```
 
 #### Color Scheme
@@ -333,7 +334,7 @@ The Embedded Checkout determines which delegations to honor based on:
 The Embedded Checkout **MUST** indicate accepted delegations in the `ec.ready`
 request via the `delegate` field (see [`ec.ready`](#ecready)). If a
 requested delegation is not accepted, the Embedded Checkout **MUST** handle that
-capability using its own UI.
+action using its own UI.
 
 #### Binding Requirements
 
@@ -354,7 +355,7 @@ capability using its own UI.
 
 #### 3.3.3 Delegation Flow
 
-1. **Request**: Embedded Checkout sends an `ec.{capability}.{action}_request`
+1. **Request**: Embedded Checkout sends an `ec.{domain}.{action}_request`
     message with current state (includes `id`)
 2. **Native UI**: Host presents native UI for the delegated action
 3. **Response**: host sends back a JSON-RPC response with matching `id` and
@@ -362,9 +363,10 @@ capability using its own UI.
 4. **Update**: Embedded Checkout updates its state and may send subsequent
     change notifications
 
-See [Payment Extension](#payment-extension) and
-[Fulfillment Extension](#fulfillment-extension) for
-capability-specific delegation details.
+See [Payment Extension](#payment-extension),
+[Fulfillment Extension](#fulfillment-extension), and
+[Window Extension](#window-extension) for
+domain-specific delegation details.
 
 ### Navigation Constraints
 
@@ -445,8 +447,8 @@ For requests (messages with `id`), receivers **MUST** respond with either:
 When the host is a web application, communication starts using `postMessage`
 between the host and Checkout windows. The host **MUST** listen for
 `postMessage` calls from the embedded window, and when a message is received,
-they **MUST** validate the origin matches the `checkout_url` used to start the
-checkout.
+they **MUST** validate the origin matches the `continue_url` used to start the
+embedded checkout.
 
 Upon validation, the host **MAY** create a `MessageChannel`, and transfer one of
 its ports in the result of the [`ec.ready` response](#ecready). When a host
@@ -456,7 +458,7 @@ that channel. Otherwise, the host and business **MUST** continue using
 
 #### Communication Channel for Native Hosts
 
-When the host is a native application, they MUST inject globals into the
+When the host is a native application, they **MUST** inject globals into the
 Embedded Checkout that allows `postMessage` communication between the web and
 native environments. The host **MUST** create at least one of the following
 globals:
@@ -490,25 +492,28 @@ for `postMessage()` calls — before the `ec.ready` message is sent.
 Core messages are defined by the ECP specification and **MUST** be supported by
 all implementations. All messages are sent from Embedded Checkout to host.
 
-| Category         | Purpose                                                 | Pattern      | Core Messages                                                                        |
-| :--------------- | :------------------------------------------------------ | :----------- | :----------------------------------------------------------------------------------- |
-| **Handshake**    | Establish connection between host and Embedded Checkout | Request      | `ec.ready`                                                                           |
-| **Lifecycle**    | Inform of checkout state transitions                    | Notification | `ec.start`, `ec.complete`                                                            |
-| **State Change** | Inform of checkout field changes                        | Notification | `ec.line_items.change`, `ec.buyer.change`, `ec.payment.change`, `ec.messages.change` |
+| Category          | Purpose                                                               | Pattern      | Core Messages                                                                                            |
+| :---------------- | :-------------------------------------------------------------------- | :----------- | :------------------------------------------------------------------------------------------------------- |
+| **Handshake**     | Establish connection between host and Embedded Checkout               | Request      | `ec.ready`                                                                                               |
+| **Authentication**| Communicate auth data exchanges between Embedded Checkout and host.   | Request      | `ec.auth`                                                                                                |
+| **Lifecycle**     | Inform of checkout state transitions                                  | Notification | `ec.start`, `ec.complete`                                                                                |
+| **State Change**  | Inform of checkout field changes                                      | Notification | `ec.line_items.change`, `ec.buyer.change`, `ec.payment.change`, `ec.messages.change`, `ec.totals.change` |
+| **Session Error** | Signal a session-level error unrelated to the checkout resource       | Notification | `ec.error`                                                                                               |
 
 #### Extension Messages
 
 Extensions **MAY** extend the Embedded protocol by defining additional messages.
 Extension messages **MUST** follow the naming convention:
 
-- **Notifications**: `ec.{capability}.change` — state change notifications (no
+- **Notifications**: `ec.{domain}.change` — state change notifications (no
     `id`)
-- **Delegation requests**: `ec.{capability}.{action}_request` — requires
+- **Delegation requests**: `ec.{domain}.{action}_request` — requires
     response (has `id`)
 
 Where:
 
-- `{capability}` matches the capability identifier from discovery
+- `{domain}` matches the domain identifier from discovery (e.g., `payment`,
+    `fulfillment`, `window`)
 - `{action}` describes the specific action being delegated (e.g.,
     `instruments_change`, `address_change`)
 - `_request` suffix signals this is a delegation point requiring a response
@@ -520,9 +525,9 @@ Where:
 Upon rendering, the Embedded Checkout **MUST** broadcast readiness to the parent
 context using the `ec.ready` message. This message initializes a secure
 communication channel between the host and Embedded Checkout, communicates which
-delegations were accepted, and allows the host to provide additional,
-display-only state for the checkout that was not communicated over UCP checkout
-actions.
+delegations were accepted, communicates whether or not additional auth exchange
+is needed, and allows the host to provide additional, display-only state for the
+checkout that was not communicated over UCP checkout actions.
 
 - **Direction:** Embedded Checkout → host
 - **Type:** Request
@@ -532,6 +537,11 @@ actions.
         both `ec_delegate` (what host requested) and `config.delegate` from the
         checkout response (what business allows). An empty array means no
         delegations were accepted.
+    - `auth` (object, **OPTIONAL**): When `ec_auth` URL param is neither sufficient
+        nor applicable due to additional considerations, business can request for
+        authorization during initial handshake by specifying the `type` string
+        within this object. This `type` string value is a mirror of the payload content
+        included in [`ec.auth`](#ecauth).
 
 **Example Message (no delegations accepted):**
 
@@ -541,7 +551,10 @@ actions.
     "id": "ready_1",
     "method": "ec.ready",
     "params": {
-        "delegate": []
+        "delegate": [],
+        "auth": {
+            "type": "oauth"
+        }
     }
 }
 ```
@@ -554,7 +567,10 @@ actions.
     "id": "ready_1",
     "method": "ec.ready",
     "params": {
-        "delegate": ["payment.credential", "fulfillment.address_change"]
+        "delegate": ["payment.credential", "fulfillment.address_change", "window.open"],
+        "auth": {
+            "type": "oauth"
+        }
     }
 }
 ```
@@ -567,7 +583,13 @@ to complete the handshake.
 - **Result Payload:**
     - `upgrade` (object, **OPTIONAL**): An object describing how the Embedded
         Checkout should update the communication channel it uses to communicate
-        with the host.
+        with the host. When present, host **MUST NOT** include `credential`
+        — the channel will be re-established and any credential sent here
+        will be discarded.
+    - `credential` (string, **OPTIONAL**): The requested authorization data,
+        can be in the form of an OAuth token, JWT, API keys, etc. **MUST** be
+        set if `auth` is present in the request. **MUST NOT** be set if
+        `upgrade` is present.
     - `checkout` (object, **OPTIONAL**): Additional, display-only state for
         the checkout that was not communicated over UCP checkout actions. This
         is used to populate the checkout UI, and may only be used to populate
@@ -581,7 +603,9 @@ to complete the handshake.
 {
     "jsonrpc": "2.0",
     "id": "ready_1",
-    "result": {}
+    "result": {
+        "credential": "fake_identity_linking_oauth_token"
+    }
 }
 ```
 
@@ -647,6 +671,108 @@ information:**
     }
 }
 ```
+
+### Authentication
+
+#### `ec.auth`
+
+Embedded checkout **MAY** request authorization from the host in the following scenarios:
+
+1. Reauth: Certain authentication methods (i.e. OAuth token) have strict expiration timestamps.
+If a session lasted longer than the allowed duration, business can request for a refreshed
+authorization to be provided by the host before the session continues.
+
+- **Direction:** Embedded Checkout → Host
+- **Type:** Request
+- **Payload:**
+    - `type` (string, **REQUIRED**): The requested authorization type.
+
+**Example Message:**
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": "auth_1",
+    "method": "ec.auth",
+    "params": {
+        "type": "oauth"
+    }
+}
+```
+
+The `ec.auth` message is a request, which means that host
+**MUST** respond to exchange the authorization. The host **MUST** respond with either an error,
+or the authorization data requested by Embedded Checkout.
+
+- **Direction:** host → Embedded Checkout
+- **Type:** Response
+- **Result Payload:**
+    - `credential` (string, **REQUIRED**): The requested authorization data,
+    can be in the form of an OAuth token, JWT, API keys, etc.
+
+**Example Message:**
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": "auth_1",
+    "result": {
+        "credential": "fake_identity_linking_oauth_token"
+    }
+}
+```
+
+**Example Error Message:**
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": "auth_1",
+     "result": {
+        "ucp": { "version": "{{ ucp_version }}", "status": "error" },
+        "messages": [
+            {
+                "type": "error",
+                "code": "timeout_error",
+                "content": "An internal service timed out when fetching the required authorization data.",
+                "severity": "recoverable"
+            }
+        ]
+    }
+}
+```
+
+If the error appears to be transient within the host (i.e. `timeout_error`) - as indicated with
+`recoverable` severity - Embedded Checkout **MAY** re-initiate this request with the host again.
+Otherwise, Embedded Checkout **MUST** issue an `ec.error` notification containing an `unrecoverable`
+error response. The same mechanism can also be used in the happy path if Embedded Checkout is
+unable to process the host-provided authorization data (i.e. credential is corrupted).
+This response **SHOULD** also contain a `continue_url` to allow buyer handoff.
+
+**Example Error Response Message Through ec.error:**
+
+```json
+{
+    "jsonrpc": "2.0",
+    "method": "ec.error",
+    "params": {
+        "ucp": { "version": "{{ ucp_version }}", "status": "error" },
+        "messages": [
+            {
+                "type": "error",
+                "code": "not_supported_error",
+                "content": "Requested auth credential type is not supported",
+                "severity": "unrecoverable"
+            }
+        ],
+        "continue_url": "https://merchant.example.com"
+    }
+}
+```
+
+When the host receives this error response, they **MUST** tear down the iframe and **SHOULD**
+display a custom error screen to set proper buyer expectation. If a `continue_url` is present in
+the error response, host **MUST** use it to handoff the buyer for session recovery.
 
 ### Lifecycle Messages
 
@@ -822,10 +948,104 @@ informational notices about the checkout state.
 }
 ```
 
+#### `ec.totals.change`
+
+Checkout totals have been updated. This message covers all total line changes
+including taxes, fees, discounts, and fulfillment costs — many of which have no
+other domain-specific change message. Businesses **MUST** send this message
+whenever `checkout.totals` changes for any reason.
+
+When a change also triggers a domain-specific message (e.g.,
+`ec.line_items.change`, `ec.buyer.change`, or `ec.payment.change`), the business
+**MUST** send the domain-specific message first, then follow it with
+`ec.totals.change`.
+
+- **Direction:** Embedded Checkout → host
+- **Type:** Notification
+- **Payload:**
+    - `checkout`: The latest state of the checkout
+
+**Example Message:**
+
+```json
+{
+    "jsonrpc": "2.0",
+    "method": "ec.totals.change",
+    "params": {
+        "checkout": {
+            "id": "checkout_123",
+            // The entire checkout object is provided, including the updated totals
+            "totals": [
+                {
+                    "type": "subtotal",
+                    "display_text": "Subtotal",
+                    "amount": 4000
+                },
+                {
+                    "type": "fulfillment",
+                    "display_text": "Shipping",
+                    "amount": 599
+                },
+                {
+                    "type": "tax",
+                    "display_text": "Tax",
+                    "amount": 382
+                },
+                {
+                    "type": "total",
+                    "display_text": "Total",
+                    "amount": 4981
+                }
+            ]
+            // ...
+        }
+    }
+}
+```
+
 #### `ec.payment.change`
 
 Payment state has been updated. See [`ec.payment.change`](#ecpaymentchange) for
 full documentation.
+
+### Session Error Messages
+
+#### `ec.error`
+
+Signals a session-level error unrelated to the checkout resource itself — for example,
+a terminal auth failure that prevents the session from continuing.
+
+- **Direction:** Embedded Checkout → host
+- **Type:** Notification
+- **Payload:**
+    - `ucp` (object, **REQUIRED**): UCP protocol metadata. `status` **MUST** be `"error"`.
+    - `messages` (array, **REQUIRED**): One or more messages describing the failure.
+    - `continue_url` (string, **OPTIONAL**): URL for buyer handoff or session recovery.
+
+**Example Message:**
+
+```json
+{
+    "jsonrpc": "2.0",
+    "method": "ec.error",
+    "params": {
+        "ucp": { "version": "{{ ucp_version }}", "status": "error" },
+        "messages": [
+            {
+                "type": "error",
+                "code": "not_supported_error",
+                "content": "Requested auth credential type is not supported.",
+                "severity": "unrecoverable"
+            }
+        ],
+        "continue_url": "https://merchant.example.com/checkout/abc123"
+    }
+}
+```
+
+When the host receives `ec.error`, it **MUST** tear down the embedded context and **SHOULD**
+display an appropriate error state to the buyer. If `continue_url` is present, host **MUST**
+use it to hand off the buyer for session recovery.
 
 ## Payment Extension
 
@@ -1265,7 +1485,109 @@ rather than attempting to merge the new data with existing state.
 The address object uses the UCP
 [PostalAddress](site:specification/checkout/#postal-address) format:
 
+### Postal Address
+
 {{ schema_fields('postal_address', 'embedded-checkout') }}
+
+## Window Extension
+
+The window extension defines how the Embedded Checkout notifies the host when
+the buyer activates a link presented by the business. When a checkout URL
+includes `ec_delegate=window.open`, the host **MUST** handle every
+`ec.window.open_request` and acknowledge the request.
+
+This is distinct from
+[Navigation Constraints](#navigation-constraints), which the Embedded Checkout
+enforces unconditionally to prevent navigation to unrelated pages.
+
+### Window Overview & Host Choice
+
+Window delegation allows for two different patterns:
+
+**Option A: Host Delegates to Embedded Checkout** The host does NOT include
+`window.open` in `ec_delegate`. The Embedded Checkout handles link presentation
+using its own inline UI. This is the standard, non-delegated flow.
+
+**Option B: Host Takes Control** The host includes
+`ec_delegate=window.open` in the Checkout URL, informing the Embedded Checkout
+to send `ec.window.open_request` when the buyer activates a link. When delegated:
+
+**Embedded Checkout responsibilities**:
+
+- **MUST** send `ec.window.open_request` when the buyer activates a link
+    presented by the business
+
+**Host responsibilities**:
+
+- **MUST** validate that the requested URL uses the `https` scheme
+- **SHOULD** apply additional host security policies (e.g., verifying
+    origins)
+- **MUST** present the content to the buyer for every approved request
+    (e.g., in a modal, new tab, or similar)
+- **MUST** respond with a JSON-RPC success result when the request was
+    processed, or a `window_open_rejected_error` error if host policy prevented
+    the navigation
+- **MAY** notify the buyer if the request was rejected
+
+By accepting `window.open` delegation, the host assumes responsibility for
+handling the buyer's link interactions. The Embedded Checkout **MUST NOT**
+present its own UI for the link.
+
+The `ec.window.open_request` payload contains only the URL. Hosts that need
+richer context (e.g., link type or label) **MAY** cross-reference the requested
+URL against the `checkout.links` array from the checkout session to obtain
+additional metadata.
+
+### Window Message API Reference
+
+#### `ec.window.open_request`
+
+Requests the host to handle a link activated by the buyer within the checkout.
+
+- **Direction:** Embedded Checkout → Host
+- **Type:** Request
+- **Payload:**
+    - `url` (string, uri, **REQUIRED**): The URL of the resource to present.
+
+**Example Message:**
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": "window_1",
+    "method": "ec.window.open_request",
+    "params": {
+        "url": "https://merchant.com/privacy-policy"
+    }
+}
+```
+
+- **Direction:** Host → Embedded Checkout
+- **Type:** Response
+- **Payload:** Empty object (`{}`).
+
+**Example Success Response:**
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": "window_1",
+    "result": {}
+}
+```
+
+**Example Error Response:**
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": "window_1",
+    "error": {
+        "code": "window_open_rejected_error",
+        "message": "Window open rejected by host."
+    }
+}
+```
 
 ## Security & Error Handling
 
@@ -1277,13 +1599,14 @@ error codes mapped to
 **[W3C DOMException](https://webidl.spec.whatwg.org/#idl-DOMException)** names
 where possible.
 
-| Code                  | Description                                                                                                                                    |
-| :-------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------- |
-| `abort_error`         | The user cancelled the interaction (e.g., closed the sheet).                                                                                   |
-| `security_error`      | The host origin validation failed.                                                                                                             |
-| `not_supported_error` | The requested payment method is not supported by the host.                                                                                     |
-| `invalid_state_error` | Handshake was attempted out of order.                                                                                                          |
-| `not_allowed_error`   | The request was missing valid User Activation (see [Prevention of Unsolicited Payment Requests](#prevention-of-unsolicited-payment-requests)). |
+| Code                         | Description                                                                                                                                    |
+| :--------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------- |
+| `abort_error`                | The user cancelled the interaction (e.g., closed the sheet).                                                                                   |
+| `security_error`             | The host origin validation failed.                                                                                                             |
+| `not_supported_error`        | The requested payment method is not supported by the host.                                                                                     |
+| `invalid_state_error`        | Handshake was attempted out of order.                                                                                                          |
+| `not_allowed_error`          | The request was missing valid User Activation (see [Prevention of Unsolicited Payment Requests](#prevention-of-unsolicited-payment-requests)). |
+| `window_open_rejected_error` | Host policy prevented the navigation. The host **MAY** notify the buyer that their request was rejected.                                       |
 
 ### Security for Web-Based Hosts
 
@@ -1382,10 +1705,30 @@ account, or wallet credential) available to the buyer.
 
 {{ schema_fields('payment_instrument', 'embedded-checkout') }}
 
-### Payment Handler Response
+#### Selected Payment Instrument
+
+{{ extension_schema_fields('types/payment_instrument.json#/$defs/selected_payment_instrument', 'embedded-checkout') }}
+
+### Card Payment Instrument
+
+{{ schema_fields('types/card_payment_instrument', 'embedded-checkout') }}
+
+### Payment Credential
+
+{{ schema_fields('types/payment_credential', 'embedded-checkout') }}
+
+### Token Credential
+
+{{ schema_fields('types/token_credential_resp', 'embedded-checkout') }}
+
+### Card Credential
+
+{{ schema_fields('types/card_credential', 'embedded-checkout') }}
+
+### Payment Handler
 
 Represents the processor or wallet provider responsible for authenticating and
 processing a specific payment instrument (e.g., Google Pay, Stripe, or a Bank
 App).
 
-{{ schema_fields('payment_handler_resp', 'embedded-checkout') }}
+{{ extension_schema_fields('payment_handler.json#/$defs/response_schema', 'embedded-checkout') }}

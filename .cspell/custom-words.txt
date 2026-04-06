@@ -70,6 +70,7 @@ inlinehilite
 lifecycles
 ligeras
 linenums
+linkignore
 llms
 llmstxt
 mastercard
@@ -104,4 +105,7 @@ worktree
 yaml
 zapatillas
 yml
+jwks
 keyid
+reauth
+reprepare

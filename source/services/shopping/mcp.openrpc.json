@@ -2,7 +2,6 @@
   "openrpc": "1.3.2",
   "info": {
     "title": "UCP Shopping Service",
-    "version": "2026-01-11",
     "description": "Canonical MCP/JSON-RPC interface for UCP Shopping service. Schema references are logical pointers - actual payload shape is determined by negotiated capabilities.\n\n**Endpoint Resolution:** This spec defines methods only. The endpoint URL MUST be obtained from the merchant's discovery profile at `/.well-known/ucp` under `services[\"dev.ucp.shopping\"][transport=mcp].endpoint`. The server entry below is a placeholder for tooling compatibility."
   },
   "servers": [
@@ -29,6 +28,12 @@
       "cart_result": {
         "oneOf": [
           { "$ref": "../../schemas/shopping/cart.json" },
+          { "$ref": "../../schemas/shopping/types/error_response.json" }
+        ]
+      },
+      "catalog_get_product_result": {
+        "oneOf": [
+          { "$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/get_product_response" },
           { "$ref": "../../schemas/shopping/types/error_response.json" }
         ]
       },
@@ -316,6 +321,27 @@
       "result": {
         "name": "response",
         "schema": {"$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/lookup_response"}
+      }
+    },
+    {
+      "name": "get_product",
+      "summary": "Get product details",
+      "description": "Retrieve complete product detail by identifier with optional interactive option selection.",
+      "params": [
+        {
+          "name": "meta",
+          "required": true,
+          "schema": {"$ref": "#/components/schemas/meta"}
+        },
+        {
+          "name": "catalog",
+          "required": true,
+          "schema": {"$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/get_product_request"}
+        }
+      ],
+      "result": {
+        "name": "response",
+        "schema": {"$ref": "#/components/schemas/catalog_get_product_result"}
       }
     }
   ]

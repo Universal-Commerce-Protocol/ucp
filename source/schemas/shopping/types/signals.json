@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/signals.json",
+  "title": "Signals",
+  "description": "Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.",
+  "type": "object",
+  "propertyNames": {
+    "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9_]*)+$",
+    "description": "Reverse-domain identifier (e.g., dev.ucp.buyer_ip, com.example.device_id)."
+  },
+  "properties": {
+    "dev.ucp.buyer_ip": {
+      "type": "string",
+      "description": "Client's IP address (IPv4 or IPv6)."
+    },
+    "dev.ucp.user_agent": {
+      "type": "string",
+      "description": "Client's HTTP User-Agent header or equivalent."
+    }
+  },
+  "additionalProperties": true
+}

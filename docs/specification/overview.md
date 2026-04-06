@@ -142,9 +142,9 @@ appended to this endpoint to form the complete URL.
 
 ```json
 {
-  "version": "2026-01-11",
+  "version": "{{ ucp_version }}",
   "transport": "rest",
-  "schema": "https://ucp.dev/services/shopping/openapi.json",
+  "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/rest.openapi.json",
   "endpoint": "https://business.example.com/api/v2"
 }
 ```
@@ -181,9 +181,9 @@ Extensions use the `extends` field to declare their parent(s):
 {
   "dev.ucp.shopping.fulfillment": [
     {
-      "version": "2026-01-23",
-      "spec": "https://ucp.dev/2026-01-23/specification/fulfillment",
-      "schema": "https://ucp.dev/2026-01-23/schemas/shopping/fulfillment.json",
+      "version": "{{ ucp_version }}",
+      "spec": "https://ucp.dev/{{ ucp_version }}/specification/fulfillment",
+      "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json",
       "extends": "dev.ucp.shopping.checkout"
     }
   ]
@@ -198,9 +198,9 @@ Extensions **MAY** extend multiple parent capabilities by using an array:
 {
   "dev.ucp.shopping.discount": [
     {
-      "version": "2026-01-23",
-      "spec": "https://ucp.dev/2026-01-23/specification/discount",
-      "schema": "https://ucp.dev/2026-01-23/schemas/shopping/discount.json",
+      "version": "{{ ucp_version }}",
+      "spec": "https://ucp.dev/{{ ucp_version }}/specification/discount",
+      "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/discount.json",
       "extends": ["dev.ucp.shopping.checkout", "dev.ucp.shopping.cart"]
     }
   ]
@@ -363,58 +363,58 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "{{ ucp_version }}",
     "services": {
       "dev.ucp.shopping": [
         {
-          "version": "2026-01-11",
-          "spec": "https://ucp.dev/specification/overview",
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview",
           "transport": "rest",
           "endpoint": "https://business.example.com/ucp/v1",
-          "schema": "https://ucp.dev/services/shopping/openapi.json"
+          "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/rest.openapi.json"
         },
         {
-          "version": "2026-01-11",
-          "spec": "https://ucp.dev/specification/overview",
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview",
           "transport": "mcp",
           "endpoint": "https://business.example.com/ucp/mcp",
-          "schema": "https://ucp.dev/services/shopping/mcp.openrpc.json"
+          "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/mcp.openrpc.json"
         },
         {
-          "version": "2026-01-11",
-          "spec": "https://ucp.dev/specification/overview",
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview",
           "transport": "a2a",
           "endpoint": "https://business.example.com/.well-known/agent-card.json"
         },
         {
-          "version": "2026-01-11",
-          "spec": "https://ucp.dev/specification/overview",
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview",
           "transport": "embedded",
-          "schema": "https://ucp.dev/services/shopping/embedded.openrpc.json"
+          "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/embedded.openrpc.json"
         }
       ]
     },
     "capabilities": {
       "dev.ucp.shopping.checkout": [
         {
-          "version": "2026-01-11",
-          "spec": "https://ucp.dev/specification/checkout",
-          "schema": "https://ucp.dev/schemas/shopping/checkout.json"
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/checkout",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/checkout.json"
         }
       ],
       "dev.ucp.shopping.fulfillment": [
         {
-          "version": "2026-01-11",
-          "spec": "https://ucp.dev/specification/fulfillment",
-          "schema": "https://ucp.dev/schemas/shopping/fulfillment.json",
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/fulfillment",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json",
           "extends": "dev.ucp.shopping.checkout"
         }
       ],
       "dev.ucp.shopping.discount": [
         {
-          "version": "2026-01-11",
-          "spec": "https://ucp.dev/specification/discount",
-          "schema": "https://ucp.dev/schemas/shopping/discount.json",
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/discount",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/discount.json",
           "extends": "dev.ucp.shopping.checkout"
         }
       ]
@@ -423,7 +423,7 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
       "com.example.processor_tokenizer": [
         {
           "id": "processor_tokenizer",
-          "version": "2026-01-11",
+          "version": "{{ ucp_version }}",
           "spec": "https://example.com/specs/payments/processor_tokenizer",
           "schema": "https://example.com/specs/payments/merchant_tokenizer.json",
           "available_instruments": [
@@ -482,38 +482,38 @@ example:
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "{{ ucp_version }}",
     "services": {
       "dev.ucp.shopping": [
         {
-          "version": "2026-01-11",
-          "spec": "https://ucp.dev/specification/overview",
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview",
           "transport": "rest",
-          "schema": "https://ucp.dev/services/shopping/openapi.json"
+          "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/rest.openapi.json"
         }
       ]
     },
     "capabilities": {
       "dev.ucp.shopping.checkout": [
         {
-          "version": "2026-01-11",
-          "spec": "https://ucp.dev/specification/checkout",
-          "schema": "https://ucp.dev/schemas/shopping/checkout.json"
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/checkout",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/checkout.json"
         }
       ],
       "dev.ucp.shopping.fulfillment": [
         {
-          "version": "2026-01-11",
-          "spec": "https://ucp.dev/specification/fulfillment",
-          "schema": "https://ucp.dev/schemas/shopping/fulfillment.json",
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/fulfillment",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json",
           "extends": "dev.ucp.shopping.checkout"
         }
       ],
       "dev.ucp.shopping.order": [
         {
-          "version": "2026-01-11",
-          "spec": "https://ucp.dev/specification/order",
-          "schema": "https://ucp.dev/schemas/shopping/order.json",
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/order",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/order.json",
           "config": {
             "webhook_url": "https://platform.example.com/webhooks/ucp/orders"
           }
@@ -532,7 +532,7 @@ example:
       "dev.shopify.shop_pay": [
         {
           "id": "shop_pay_1234",
-          "version": "2026-01-11",
+          "version": "{{ ucp_version }}",
           "spec": "https://shopify.dev/ucp/shop-pay-handler",
           "schema": "https://shopify.dev/ucp/schemas/shop-pay-config.json",
           "available_instruments": [
@@ -543,9 +543,9 @@ example:
       "dev.ucp.processor_tokenizer": [
         {
           "id": "processor_tokenizer",
-          "version": "2026-01-11",
+          "version": "{{ ucp_version }}",
           "spec": "https://example.com/specs/payments/processor_tokenizer-payment",
-          "schema": "https://ucp.dev/schemas/payments/delegate-payment.json",
+          "schema": "https://example.com/schemas/payments/delegate-payment.json",
           "available_instruments": [
             {"type": "card", "constraints": {"brands": ["visa", "mastercard"]}}
           ]
@@ -769,7 +769,11 @@ task through the standard web interface.
     Content-Type: application/json
 
     {
-      "ucp": { "version": "2026-01-11", "status": "error" },
+      "ucp": {
+        "version": "{{ ucp_version }}",
+        "status": "error",
+        "capabilities": {}
+      },
       "messages": [
         {
           "type": "error",
@@ -845,7 +849,10 @@ task through the standard web interface.
       "id": 1,
       "result": {
         "structuredContent": {
-          "ucp": { "version": "2026-01-11", "status": "error" },
+          "ucp": {
+            "version": "{{ ucp_version }}",
+            "status": "error"
+          },
           "messages": [
             {
               "type": "error",
@@ -904,18 +911,18 @@ The `capabilities` registry in responses indicates active capabilities:
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "{{ ucp_version }}",
     "capabilities": {
       "dev.ucp.shopping.checkout": [
-        {"version": "2026-01-11"}
+        {"version": "{{ ucp_version }}"}
       ],
       "dev.ucp.shopping.fulfillment": [
-        {"version": "2026-01-11"}
+        {"version": "{{ ucp_version }}"}
       ]
     },
     "payment_handlers": {
       "com.example.processor_tokenizer": [
-        {"id": "processor_tokenizer", "version": "2026-01-11", "available_instruments": [{"type": "card"}]}
+        {"id": "processor_tokenizer", "version": "{{ ucp_version }}", "available_instruments": [{"type": "card"}]}
       ]
     }
   },
@@ -1185,26 +1192,6 @@ and cart context, then returns the resolved result. Platforms **MUST** treat the
 the [Payment Handler Guide](payment-handler-guide.md#resolving-available_instruments)
 for the full resolution semantics.
 
-### Risk Signals
-
-To aid in fraud assessment, the Platform **MAY** include additional risk signals
-in the `complete` call, providing the Business with more context about the
-transaction's legitimacy. The structure and content of these risk signals are
-not strictly defined by this specification, allowing flexibility based on the
-agreement between the Platform and Business or specific payment handler
-requirements.
-
-**Example (Flexible Structure):**
-
-```json
-{
-  "risk_signals": {
-    "session_id": "abc_123_xyz",
-    "score": 0.95,
-  }
-}
-```
-
 ### Implementation Scenarios
 
 The following scenarios illustrate how different payment handlers and
@@ -1221,12 +1208,12 @@ an encrypted payment token.
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "{{ ucp_version }}",
     "payment_handlers": {
       "com.google.pay": [
         {
           "id": "8c9202bd-63cc-4241-8d24-d57ce69ea31c",
-          "version": "2026-01-11",
+          "version": "{{ ucp_version }}",
           "config": {
             "api_version": 2,
             "api_version_minor": 0,
@@ -1258,7 +1245,7 @@ an encrypted payment token.
       "dev.shopify.shop_pay": [
         {
           "id": "shop_pay_1234",
-          "version": "2026-01-11",
+          "version": "{{ ucp_version }}",
           "available_instruments": [
             {"type": "shop_pay"}
           ],
@@ -1314,8 +1301,9 @@ POST /checkout-sessions/{id}/complete
       }
     ]
   },
-  "risk_signals": {
-      // ...
+  "signals": {
+    "dev.ucp.buyer_ip": "203.0.113.42",
+    "dev.ucp.user_agent": "Mozilla/5.0 ..."
   }
 }
 ```
@@ -1336,7 +1324,7 @@ request a challenge.
       "com.example.tokenizer": [
         {
           "id": "merchant_tokenizer",
-          "version": "2026-01-11",
+          "version": "{{ ucp_version }}",
           "spec": "https://example.com/specs/tokenizer",
           "schema": "https://example.com/schemas/tokenizer.json",
           "available_instruments": [
@@ -1379,8 +1367,9 @@ POST /checkout-sessions/{id}/complete
       }
     ]
   },
-  "risk_signals": {
-    // ... host could send risk_signals here
+  "signals": {
+    "dev.ucp.buyer_ip": "203.0.113.42",
+    "dev.ucp.user_agent": "Mozilla/5.0 ..."
   }
 }
 ```
@@ -1421,9 +1410,9 @@ session token, the agent generates cryptographic mandates.
       "dev.ucp.ap2_mandate_compatible_handlers": [
         {
           "id": "ap2_234352",
-          "version": "2026-01-11",
-          "spec": "https://ucp.dev/specs/ap2-handler",
-          "schema": "https://ucp.dev/schemas/ap2-handler.json",
+          "version": "{{ ucp_version }}",
+          "spec": "https://example.com/specs/ap2-handler",
+          "schema": "https://example.com/schemas/ap2-handler.json",
           "available_instruments": [
             {"type": "ap2_mandate"}
           ]
@@ -1457,9 +1446,9 @@ POST /checkout-sessions/{id}/complete
       }
     ]
   },
-  "risk_signals": {
-    "session_id": "abc_123_xyz",
-    "score": 0.95
+  "signals": {
+    "dev.ucp.buyer_ip": "203.0.113.42",
+    "com.example.risk_score": 0.95
   },
   "ap2": {
     "checkout_mandate": "eyJhbGciOiJ...", // Signed proof of checkout terms
@@ -1541,19 +1530,17 @@ certified and handle:
 
 ### Fraud Prevention Integration
 
-While UCP does not define fraud prevention APIs, the payment architecture
-supports fraud signal integration:
+UCP supports fraud prevention through [Signals](#signals) and the
+payment architecture:
 
+- Platforms provide transaction environment [signals](#signals) (IP, user
+    agent) on catalog, cart, and checkout requests
 - Businesses can require additional fields in handler configurations (e.g.,
     3DS requirements)
-- Platforms can submit device fingerprints and session data alongside credentials
 - Payment credential providers can perform risk assessment during credential
     acquisition
 - Businesses can reject high-risk transactions and request additional
-    verification
-
-Future extensions **MAY** standardize fraud signal schemas, but the current
-architecture allows flexible integration with existing fraud prevention systems.
+    verification via signal feedback
 
 ### Payment Architecture Extensions
 
@@ -1630,7 +1617,7 @@ MCP servers:
   "result": {
     "structuredContent": {
       "checkout": {
-        "ucp": {"version": "2026-01-11", "capabilities": {...}},
+        "ucp": {"version": "{{ ucp_version }}", "capabilities": {...}},
         "id": "checkout_abc123",
         "status": "incomplete",
         ...
@@ -1660,11 +1647,12 @@ Initiation comes through a `continue_url` that is returned by the business.
 
 UCP defines a set of standard capabilities:
 
-| Capability Name      | ID (URI)                                       | Description                                                                                                  |
-| :------------------- | :--------------------------------------------- | :----------------------------------------------------------------------------------------------------------- |
-| **Checkout**         | `{{ ucp_url }}/schemas/shopping/checkout.json` | Facilitates the creation and management of checkout sessions, including cart management and tax calculation. |
-| **Identity Linking** | -                                              | Enables platforms to obtain authorization via OAuth 2.0 to perform actions on a user's behalf.               |
-| **Order**            | `{{ ucp_url }}/schemas/shopping/order.json`    | Allows businesses to push asynchronous updates about an order's lifecycle (shipping, delivery, returns).     |
+| Capability Name      | ID (URI)                                                              | Description                                                                                                  |
+| :------------------- | :-------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------- |
+| **Cart**.            | [schemas/shopping/cart.json](site:schemas/shopping/cart.json)         | Enables basket building before purchase intent is established.                                               |
+| **Checkout**         | [schemas/shopping/checkout.json](site:schemas/shopping/checkout.json) | Facilitates the creation and management of checkout sessions, including cart management and tax calculation. |
+| **Identity Linking** | -                                                                     | Enables platforms to obtain authorization via OAuth 2.0 to perform actions on a user's behalf.               |
+| **Order**            | [schemas/shopping/order.json](site:schemas/shopping/order.json)       | Allows businesses to push asynchronous updates about an order's lifecycle (shipping, delivery, returns).     |
 
 ### Definition & Extensions
 
@@ -1683,6 +1671,65 @@ All UCP communication **MUST** occur over **HTTPS**.
 Sensitive data (such as Payment Credentials or PII) **MUST** be handled
 according to PCI-DSS and GDPR guidelines. UCP encourages the use of tokenized
 payment data to minimize business and platform liability.
+
+### Signals
+
+Businesses require environment data for authorization, rate
+limiting, and abuse prevention. Signal values **MUST NOT** be buyer-asserted
+claims — platforms provide signals based on direct observation (e.g.,
+connection IP, user agent) or by relaying independently verifiable
+third-party attestations, such as cryptographically signed results from an
+external verifier that the business can validate against the provider's
+published key set.
+
+All signal keys **MUST** use reverse-domain naming to ensure provenance and
+prevent collisions when multiple extensions contribute to the shared namespace.
+Well-known signals use the `dev.ucp` namespace (e.g., `dev.ucp.buyer_ip`);
+extension signals use their own namespace (e.g., `com.example.device_id`).
+
+```json
+{
+  "signals": {
+    "dev.ucp.buyer_ip": "203.0.113.42",
+    "dev.ucp.user_agent": "Mozilla/5.0 ...",
+    "com.example.attestation": {
+      "provider_jwks": "https://example.com/.well-known/jwks.json",
+      "kid": "example-key-2026-01",
+      "payload": { "id": "att-7c3e9f", "pass": true, "...": "..." },
+      "sig": "base64url..."
+    }
+  }
+}
+```
+
+Signal fields may contain personally identifiable information
+(PII). Platforms **SHOULD** include only signals relevant to the current
+transaction. Businesses **SHOULD NOT** persist signal data beyond the
+operational needs of the transaction (e.g., order finalization, fraud review).
+
+Businesses **MAY** use messages with code `signal` to request additional
+data. The `path` field identifies the requested signal; the message `type`
+determines enforcement. An `error` blocks status progression until the
+signal is provided; an `info` is advisory and non-blocking.
+
+```json
+{
+  "messages": [
+    {
+      "type": "error",
+      "code": "signal",
+      "path": "$.signals['dev.ucp.buyer_ip']",
+      "content": "Buyer IP is required to proceed."
+    },
+    {
+      "type": "info",
+      "code": "signal",
+      "path": "$.signals['dev.ucp.user_agent']",
+      "content": "Providing user agent may improve checkout outcomes."
+    }
+  ]
+}
+```
 
 ### Transaction Integrity and Non-Repudiation
 
@@ -1721,7 +1768,7 @@ Both businesses and platforms declare a single version in their profiles:
     ```json
     {
       "ucp": {
-        "version": "2026-01-11",
+        "version": "{{ ucp_version }}",
         "services": { ... },
         "capabilities": { ... },
         "payment_handlers": { ... }
@@ -1734,7 +1781,7 @@ Both businesses and platforms declare a single version in their profiles:
     ```json
     {
       "ucp": {
-        "version": "2026-01-11",
+        "version": "{{ ucp_version }}",
         "services": { ... },
         "capabilities": { ... },
         "payment_handlers": { ... }
@@ -1824,7 +1871,7 @@ Response with version confirmation:
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "{{ ucp_version }}",
     "capabilities": { ... },
     "payment_handlers": { ... }
   },
