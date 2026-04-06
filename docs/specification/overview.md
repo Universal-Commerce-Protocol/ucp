@@ -70,12 +70,12 @@ All capability and service names **MUST** use the format:
 
 **Examples:**
 
-| Name                                | Authority   | Service  | Capability       |
-| ----------------------------------- | ----------- | -------- | ---------------- |
-| `dev.ucp.shopping.checkout`         | ucp.dev     | shopping | checkout         |
-| `dev.ucp.shopping.fulfillment`      | ucp.dev     | shopping | fulfillment      |
-| `dev.ucp.common.identity_linking`   | ucp.dev     | common   | identity_linking |
-| `com.example.payments.installments` | example.com | payments | installments     |
+| Name                                     | Authority   | Service  | Capability            |
+| ---------------------------------------- | ----------- | -------- | --------------------- |
+| `dev.ucp.shopping.checkout`              | ucp.dev     | shopping | checkout              |
+| `dev.ucp.shopping.fulfillment`           | ucp.dev     | shopping | fulfillment           |
+| `dev.ucp.common.identity_management`     | ucp.dev     | common   | identity_management   |
+| `com.example.payments.installments`      | example.com | payments | installments          |
 
 #### Spec URL Binding
 

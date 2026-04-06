@@ -1,0 +1,256 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "UCP Common Service",
+    "description": "Canonical REST interface for UCP Common service. Includes Identity Management operations.\n\n**Endpoint Resolution:** This spec defines operations only. The base URL MUST be obtained from the merchant's discovery profile at `/.well-known/ucp` under `services[\"dev.ucp.common\"][transport=rest].endpoint`."
+  },
+  "servers": [
+    {
+      "url": "{endpoint}",
+      "description": "Merchant-provided endpoint from UCP discovery profile",
+      "variables": {
+        "endpoint": {
+          "default": "https://merchant.example.com/ucp/common",
+          "description": "Obtain from /.well-known/ucp → services[\"dev.ucp.common\"][transport=rest].endpoint"
+        }
+      }
+    }
+  ],
+  "paths": {
+    "/identities/link": {
+      "post": {
+        "operationId": "link_identity",
+        "summary": "Link Identity",
+        "description": "Link a platform identity with a business identity using token exchange.",
+        "parameters": [
+          { "$ref": "#/components/parameters/authorization" },
+          { "$ref": "#/components/parameters/ucp_agent" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["grant_type", "subject_token", "subject_token_type"],
+                "properties": {
+                  "grant_type": { "type": "string" },
+                  "subject_token": { "type": "string" },
+                  "subject_token_type": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Identity linked successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "access_token": { "type": "string" },
+                    "token_type": { "type": "string" },
+                    "expires_in": { "type": "integer" },
+                    "identity": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "string" },
+                        "status": { "type": "string" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identities": {
+      "post": {
+        "operationId": "create_identity",
+        "summary": "Create Identity",
+        "description": "Create a new identity profile.",
+        "parameters": [
+          { "$ref": "#/components/parameters/authorization" },
+          { "$ref": "#/components/parameters/ucp_agent" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/identity" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Identity created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/identity_response" }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "list_identities",
+        "summary": "List Identities",
+        "description": "List or search identities.",
+        "parameters": [
+          { "$ref": "#/components/parameters/authorization" },
+          { "$ref": "#/components/parameters/ucp_agent" },
+          {
+            "name": "email",
+            "in": "query",
+            "schema": { "type": "string" },
+            "description": "Filter by email."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of identities",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "count": { "type": "integer" },
+                    "results": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/identity_response" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identities/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string" }
+        }
+      ],
+      "get": {
+        "operationId": "get_identity",
+        "summary": "Get Identity",
+        "description": "Get identity profile details.",
+        "parameters": [
+          { "$ref": "#/components/parameters/authorization" },
+          { "$ref": "#/components/parameters/ucp_agent" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Identity details",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/identity_response" }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "update_identity",
+        "summary": "Update Identity",
+        "description": "Update identity profile details.",
+        "parameters": [
+          { "$ref": "#/components/parameters/authorization" },
+          { "$ref": "#/components/parameters/ucp_agent" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/identity" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Identity updated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/identity_response" }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "delete_identity",
+        "summary": "Delete Identity",
+        "description": "Delete or deactivate an identity.",
+        "parameters": [
+          { "$ref": "#/components/parameters/authorization" },
+          { "$ref": "#/components/parameters/ucp_agent" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Identity deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "authorization": {
+        "name": "Authorization",
+        "in": "header",
+        "required": false,
+        "schema": { "type": "string" },
+        "description": "Bearer token."
+      },
+      "ucp_agent": {
+        "name": "UCP-Agent",
+        "in": "header",
+        "required": false,
+        "schema": { "type": "string" },
+        "description": "Platform agent identification."
+      }
+    },
+    "schemas": {
+      "identity": {
+        "type": "object",
+        "properties": {
+          "email": { "type": "string" },
+          "first_name": { "type": "string" },
+          "last_name": { "type": "string" }
+        }
+      },
+      "identity_response": {
+        "allOf": [
+          { "$ref": "#/components/schemas/identity" },
+          {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "status": { "type": "string" },
+              "created_at": { "type": "string", "format": "date-time" }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

@@ -270,7 +270,7 @@ image: assets/banner.png
           <div class="pane-eyebrow">SEE IT IN ACTION</div>
           <h3>Identity Linking</h3>
           <p>OAuth 2.0 standard enables agents to maintain secure, authorized relationships without sharing credentials.</p>
-          <a href="latest/specification/identity-linking/" class="learn-more-btn">Learn more</a>
+          <a href="latest/specification/identity-management/" class="learn-more-btn">Learn more</a>
         </div>
         <div class="pane-visuals">
           <div class="image-container">

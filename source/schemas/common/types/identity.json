@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/identity.json",
+  "title": "Identity",
+  "description": "Represents a user identity with full lifecycle management fields.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the identity.",
+      "ucp_request": {
+        "create": "omit",
+        "update": "required"
+      }
+    },
+    "email": {
+      "type": "string",
+      "description": "Primary email address.",
+      "ucp_request": {
+        "create": "required",
+        "update": "optional"
+      }
+    },
+    "email_verified": {
+      "type": "boolean",
+      "description": "Whether the email address has been verified.",
+      "ucp_request": "omit"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Primary phone number (E.164).",
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional"
+      }
+    },
+    "phone_verified": {
+      "type": "boolean",
+      "description": "Whether the phone number has been verified.",
+      "ucp_request": "omit"
+    },
+    "first_name": {
+      "type": "string",
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional"
+      }
+    },
+    "last_name": {
+      "type": "string",
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional"
+      }
+    },
+    "addresses": {
+      "type": "array",
+      "items": {
+        "$ref": "../../shopping/types/postal_address.json"
+      },
+      "description": "List of addresses associated with the identity.",
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional"
+      }
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Tags assigned to the identity.",
+      "ucp_request": "omit"
+    },
+    "metafields": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Custom metadata fields.",
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional"
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": ["active", "disabled", "pending"],
+      "description": "Status of the identity account.",
+      "ucp_request": "omit"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "ucp_request": "omit"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "ucp_request": "omit"
+    }
+  },
+  "anyOf": [
+    { "required": ["email"] },
+    { "required": ["phone"] }
+  ]
+}

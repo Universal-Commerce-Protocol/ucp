@@ -1,0 +1,228 @@
+{
+  "openrpc": "1.3.2",
+  "info": {
+    "title": "UCP Common Service",
+    "description": "Canonical MCP/JSON-RPC interface for UCP Common service. Includes Identity Management operations.\n\n**Endpoint Resolution:** This spec defines methods only. The endpoint URL MUST be obtained from the merchant's discovery profile at `/.well-known/ucp` under `services[\"dev.ucp.common\"][transport=mcp].endpoint`."
+  },
+  "servers": [
+    {
+      "name": "merchant",
+      "url": "{endpoint}",
+      "description": "Merchant-provided endpoint from UCP discovery profile",
+      "variables": {
+        "endpoint": {
+          "default": "https://merchant.example.com/ucp/common/mcp",
+          "description": "Obtain from /.well-known/ucp → services[\"dev.ucp.common\"][transport=mcp].endpoint"
+        }
+      }
+    }
+  ],
+  "components": {
+    "schemas": {
+      "meta": {
+        "type": "object",
+        "description": "Request metadata.",
+        "required": ["ucp-agent"],
+        "additionalProperties": true,
+        "properties": {
+          "ucp-agent": {
+            "type": "object",
+            "description": "Platform agent identification.",
+            "required": ["profile"],
+            "properties": {
+              "profile": {
+                "type": "string",
+                "format": "uri",
+                "description": "URL to the platform's UCP profile document."
+              }
+            }
+          },
+          "idempotency-key": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique key for retry safety."
+          }
+        }
+      },
+      "identity": {
+        "type": "object",
+        "properties": {
+          "email": { "type": "string" },
+          "first_name": { "type": "string" },
+          "last_name": { "type": "string" }
+        }
+      },
+      "identity_response": {
+        "allOf": [
+          { "$ref": "#/components/schemas/identity" },
+          {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "status": { "type": "string" },
+              "created_at": { "type": "string", "format": "date-time" }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "methods": [
+    {
+      "name": "link_identity",
+      "summary": "Link Identity",
+      "params": [
+        {
+          "name": "meta",
+          "required": true,
+          "schema": { "$ref": "#/components/schemas/meta" }
+        },
+        {
+          "name": "grant_type",
+          "required": true,
+          "schema": { "type": "string" }
+        },
+        {
+          "name": "subject_token",
+          "required": true,
+          "schema": { "type": "string" }
+        },
+        {
+          "name": "subject_token_type",
+          "required": true,
+          "schema": { "type": "string" }
+        }
+      ],
+      "result": {
+        "name": "link_result",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "access_token": { "type": "string" },
+            "token_type": { "type": "string" },
+            "expires_in": { "type": "integer" },
+            "identity": { "$ref": "#/components/schemas/identity_response" }
+          }
+        }
+      }
+    },
+    {
+      "name": "create_identity",
+      "summary": "Create Identity",
+      "params": [
+        {
+          "name": "meta",
+          "required": true,
+          "schema": { "$ref": "#/components/schemas/meta" }
+        },
+        {
+          "name": "identity",
+          "required": true,
+          "schema": { "$ref": "#/components/schemas/identity" }
+        }
+      ],
+      "result": {
+        "name": "identity",
+        "schema": { "$ref": "#/components/schemas/identity_response" }
+      }
+    },
+    {
+      "name": "get_identity",
+      "summary": "Get Identity",
+      "params": [
+        {
+          "name": "meta",
+          "required": true,
+          "schema": { "$ref": "#/components/schemas/meta" }
+        },
+        {
+          "name": "id",
+          "required": true,
+          "schema": { "type": "string" }
+        }
+      ],
+      "result": {
+        "name": "identity",
+        "schema": { "$ref": "#/components/schemas/identity_response" }
+      }
+    },
+    {
+      "name": "update_identity",
+      "summary": "Update Identity",
+      "params": [
+        {
+          "name": "meta",
+          "required": true,
+          "schema": { "$ref": "#/components/schemas/meta" }
+        },
+        {
+          "name": "id",
+          "required": true,
+          "schema": { "type": "string" }
+        },
+        {
+          "name": "identity",
+          "required": true,
+          "schema": { "$ref": "#/components/schemas/identity" }
+        }
+      ],
+      "result": {
+        "name": "identity",
+        "schema": { "$ref": "#/components/schemas/identity_response" }
+      }
+    },
+    {
+      "name": "delete_identity",
+      "summary": "Delete Identity",
+      "params": [
+        {
+          "name": "meta",
+          "required": true,
+          "schema": { "$ref": "#/components/schemas/meta" }
+        },
+        {
+          "name": "id",
+          "required": true,
+          "schema": { "type": "string" }
+        }
+      ],
+      "result": {
+        "name": "status",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "status": { "type": "string" }
+          }
+        }
+      }
+    },
+    {
+      "name": "list_identities",
+      "summary": "List Identities",
+      "params": [
+        {
+          "name": "meta",
+          "required": true,
+          "schema": { "$ref": "#/components/schemas/meta" }
+        },
+        {
+          "name": "email",
+          "schema": { "type": "string" }
+        }
+      ],
+      "result": {
+        "name": "identities",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "count": { "type": "integer" },
+            "results": {
+              "type": "array",
+              "items": { "$ref": "#/components/schemas/identity_response" }
+            }
+          }
+        }
+      }
+    }
+  ]
+}
