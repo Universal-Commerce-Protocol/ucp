@@ -1896,6 +1896,20 @@ Version unsupported error — no resource is created:
 }
 ```
 
+##### Pre-release Versions
+
+The protocol version **MUST** be a dated release in `YYYY-MM-DD` format.
+Businesses **MUST NOT** advertise a non-date version string (e.g.
+`"draft"`) in their profile `version` field or in `supported_versions`.
+Pre-release implementations are not stable and MUST NOT be surfaced
+through public discovery — doing so would expose the general ecosystem
+to undefined behavior and incompatible changes without notice.
+
+Platforms and businesses **MAY** coordinate on pre-release implementations outside of
+public discovery. Such use carries no stability or compatibility
+guarantees — the underlying behavior may change at any time without
+notice.
+
 #### Capability Versions
 
 Capability versions are negotiated independently of the protocol
