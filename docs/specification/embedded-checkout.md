@@ -455,7 +455,14 @@ MCP transports.
 **Error Response:**
 
 ```json
-{ "jsonrpc": "2.0", "id": "...", "error": {...} }
+{
+  "jsonrpc": "2.0",
+  "id": "...",
+  "result": {
+    "ucp": { "version": "{{ ucp_version }}", "status": "error" },
+    "messages": [...]
+  }
+}
 ```
 
 In both cases, `result.ucp.status` serves as the discriminator between success
@@ -730,12 +737,13 @@ authorization to be provided by the host before the session continues.
 ```
 
 The `ec.auth` message is a request, which means that host
-**MUST** respond to exchange the authorization. The host **MUST** respond with either an error,
-or the authorization data requested by Embedded Checkout.
+**MUST** respond with a `result` containing either the authorization data
+or an `error_response`.
 
 - **Direction:** host → Embedded Checkout
 - **Type:** Response
 - **Result Payload:**
+    - `ucp` (object, **REQUIRED**): UCP protocol metadata with `status: "success"`.
     - `credential` (string, **REQUIRED**): The requested authorization data,
     can be in the form of an OAuth token, JWT, API keys, etc.
 
@@ -746,6 +754,7 @@ or the authorization data requested by Embedded Checkout.
     "jsonrpc": "2.0",
     "id": "auth_1",
     "result": {
+        "ucp": { "version": "{{ ucp_version }}", "status": "success" },
         "credential": "fake_identity_linking_oauth_token"
     }
 }
@@ -1236,9 +1245,16 @@ existing state.
 {
     "jsonrpc": "2.0",
     "id": "payment_instruments_change_request_1",
-    "error": {
-        "code": "abort_error",
-        "message": "User closed the payment sheet without authorizing."
+    "result": {
+        "ucp": { "version": "{{ ucp_version }}", "status": "error" },
+        "messages": [
+            {
+                "type": "error",
+                "code": "abort_error",
+                "content": "User closed the payment sheet without authorizing.",
+                "severity": "recoverable"
+            }
+        ]
     }
 }
 ```
@@ -1336,9 +1352,16 @@ new data with existing state.
 {
     "jsonrpc": "2.0",
     "id": "payment_credential_request_1",
-    "error": {
-        "code": "abort_error",
-        "message": "User closed the payment sheet without authorizing."
+    "result": {
+        "ucp": { "version": "{{ ucp_version }}", "status": "error" },
+        "messages": [
+            {
+                "type": "error",
+                "code": "abort_error",
+                "content": "User closed the payment sheet without authorizing.",
+                "severity": "recoverable"
+            }
+        ]
     }
 }
 ```
@@ -1513,9 +1536,16 @@ rather than attempting to merge the new data with existing state.
 {
     "jsonrpc": "2.0",
     "id": "fulfillment_address_change_request_1",
-    "error": {
-        "code": "abort_error",
-        "message": "User cancelled address selection."
+    "result": {
+        "ucp": { "version": "{{ ucp_version }}", "status": "error" },
+        "messages": [
+            {
+                "type": "error",
+                "code": "abort_error",
+                "content": "User cancelled address selection.",
+                "severity": "recoverable"
+            }
+        ]
     }
 }
 ```
