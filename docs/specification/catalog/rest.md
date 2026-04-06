@@ -62,6 +62,7 @@ Businesses advertise REST transport availability through their UCP profile at
 | :--- | :--- | :--- | :--- |
 | `/catalog/search` | POST | [Search](search.md) | Search for products. |
 | `/catalog/lookup` | POST | [Lookup](lookup.md) | Lookup one or more products by ID. |
+| `/catalog/product` | POST | [Lookup](lookup.md#get-product-get_product) | Get full product detail by identifier. |
 
 ### `POST /catalog/search`
 
@@ -333,6 +334,164 @@ messages indicating which identifiers were not found.
     }
     ```
 
+### `POST /catalog/product`
+
+Maps to the [Catalog Lookup](lookup.md#get-product-get_product) capability. Returns a singular
+`product` object (not an array) for full product detail page rendering.
+
+{{ method_fields('get_product', 'rest.openapi.json', 'catalog/rest') }}
+
+#### Example: With Option Selection
+
+The user selected Color=Blue. The response includes availability signals
+on option values and returns variants matching the selection.
+
+=== "Request"
+
+    ```json
+    POST /catalog/product HTTP/1.1
+    Host: business.example.com
+    Content-Type: application/json
+
+    {
+      "id": "prod_abc123",
+      "selected": [
+        { "name": "Color", "label": "Blue" }
+      ],
+      "preferences": ["Color", "Size"],
+      "context": {
+        "address_country": "US"
+      }
+    }
+    ```
+
+=== "Response"
+
+    ```json
+    {
+      "ucp": {
+        "version": "{{ ucp_version }}",
+        "capabilities": {
+          "dev.ucp.shopping.catalog.lookup": [
+            {"version": "{{ ucp_version }}"}
+          ]
+        }
+      },
+      "product": {
+        "id": "prod_abc123",
+        "handle": "runner-pro",
+        "title": "Runner Pro",
+        "description": {
+          "plain": "Lightweight running shoes with responsive cushioning."
+        },
+        "url": "https://business.example.com/products/runner-pro",
+        "price_range": {
+          "min": { "amount": 12000, "currency": "USD" },
+          "max": { "amount": 15000, "currency": "USD" }
+        },
+        "media": [
+          {
+            "type": "image",
+            "url": "https://cdn.example.com/products/runner-pro-blue.jpg",
+            "alt_text": "Runner Pro in Blue"
+          }
+        ],
+        "options": [
+          {
+            "name": "Color",
+            "values": [
+              {"label": "Blue", "available": true, "exists": true},
+              {"label": "Red", "available": true, "exists": true},
+              {"label": "Green", "available": false, "exists": true}
+            ]
+          },
+          {
+            "name": "Size",
+            "values": [
+              {"label": "8", "available": true, "exists": true},
+              {"label": "9", "available": true, "exists": true},
+              {"label": "10", "available": true, "exists": true},
+              {"label": "11", "available": false, "exists": false},
+              {"label": "12", "available": true, "exists": true}
+            ]
+          }
+        ],
+        "selected": [
+          { "name": "Color", "label": "Blue" }
+        ],
+        "variants": [
+          {
+            "id": "prod_abc123_blu_10",
+            "sku": "BRP-BLU-10",
+            "title": "Blue, Size 10",
+            "description": { "plain": "Blue, Size 10" },
+            "price": { "amount": 12000, "currency": "USD" },
+            "availability": { "available": true },
+            "selected_options": [
+              { "name": "Color", "label": "Blue" },
+              { "name": "Size", "label": "10" }
+            ]
+          },
+          {
+            "id": "prod_abc123_blu_12",
+            "sku": "BRP-BLU-12",
+            "title": "Blue, Size 12",
+            "description": { "plain": "Blue, Size 12" },
+            "price": { "amount": 15000, "currency": "USD" },
+            "availability": { "available": true },
+            "selected_options": [
+              { "name": "Color", "label": "Blue" },
+              { "name": "Size", "label": "12" }
+            ]
+          }
+        ],
+        "rating": {
+          "value": 4.5,
+          "scale_max": 5,
+          "count": 128
+        }
+      }
+    }
+    ```
+
+Green is out of stock (`available: false, exists: true`). Size 11 doesn't
+exist in Blue (`exists: false`). Variants returned match the Color=Blue
+selection.
+
+#### Product Not Found
+
+When the identifier does not resolve to a product, the server returns HTTP 200
+with `ucp.status: "error"` and a descriptive message. This is an application
+outcome, not a transport error — the handler executed and reports its result
+via the UCP envelope.
+
+```json
+{
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "status": "error",
+    "capabilities": {
+      "dev.ucp.shopping.catalog.lookup": [
+        {"version": "{{ ucp_version }}"}
+      ]
+    }
+  },
+  "messages": [
+    {
+      "type": "error",
+      "code": "not_found",
+      "content": "Product not found: prod_invalid",
+      "severity": "unrecoverable"
+    }
+  ]
+}
+```
+
+Unlike `/catalog/lookup` (which returns partial results for batch requests),
+`/catalog/product` is a single-resource operation. A missing product is an
+application error with `unrecoverable` severity — the agent should not retry
+with the same identifier.
+
 ## Error Handling
 
 UCP uses a two-layer error model separating transport errors from business outcomes.
@@ -393,11 +552,23 @@ Business outcomes use the standard HTTP 200 status with messages in the response
 
 {{ extension_schema_fields('ucp.json#/$defs/response_catalog_schema', 'catalog/rest') }}
 
+### Detail Product {: #detail-product }
+
+{{ extension_schema_fields('catalog_lookup.json#/$defs/detail_product', 'catalog/rest') }}
+
+### Get Product Response {: #catalog-lookup-get-product-response }
+
+{{ extension_schema_fields('catalog_lookup.json#/$defs/get_product_response', 'catalog/rest') }}
+
+### Error Response {: #error-response }
+
+{{ schema_fields('types/error_response', 'catalog/rest') }}
+
 ## Conformance
 
 A conforming REST transport implementation **MUST**:
 
-1. Implement endpoints for each catalog capability advertised in the business's UCP profile, per their respective capability requirements ([Search](search.md), [Lookup](lookup.md)). Each capability may be adopted independently.
+1. Implement endpoints for each catalog capability advertised in the business's UCP profile, per their respective capability requirements ([Search](search.md), [Lookup](lookup.md)). Each capability may be adopted independently. When the Lookup capability is advertised, both `/catalog/lookup` and `/catalog/product` MUST be available.
 2. Return products with valid `Price` objects (amount + currency).
 3. Support cursor-based pagination with default limit of 10.
 4. Return HTTP 200 for lookup requests; unknown identifiers result in fewer products returned (MAY include informational `not_found` messages).

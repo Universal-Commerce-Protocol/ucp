@@ -31,17 +31,23 @@ Orders have three main components:
 **Line Items** — what was purchased at checkout:
 
 * Includes current quantity counts (total, fulfilled)
+* Can change post-order (e.g. order edits, exchanges); **MUST** include all
+  line items that ever existed on the order regardless of edits or alterations
 
 **Fulfillment** — how items get delivered:
 
 * **Expectations** — buyer-facing *promises* about when/how items will arrive
 * **Events** (append-only log) — what actually happened (e.g. 👕 was shipped)
 
-**Adjustments** (append-only log) — post-order events independent of fulfillment:
+**Adjustments** — post-order events independent of fulfillment:
 
 * Typically money movements (refunds, returns, credits, disputes, cancellations)
 * Can be any post-order change
 * Can happen before, during, or after fulfillment
+* Businesses SHOULD append new entries rather than mutating existing ones;
+  append-only ledger is preferred. Businesses that do not maintain adjustment
+  history MAY perform in-place updates of existing entries
+  (e.g. a single `return` adjustment can transition from `pending` to `completed`)
 
 ## Data Model
 
@@ -50,7 +56,7 @@ Orders have three main components:
 Line items reflect what was purchased at checkout and their current state:
 
 * Item details (product, price, quantity ordered)
-* Quantity counts and status are derived
+* Quantity counts and fulfillment status
 
 ### Fulfillment
 
@@ -83,7 +89,7 @@ Expectations can be split, merged, or adjusted post-order. For example:
 
 ### Adjustments
 
-**Adjustments** are an append-only log of events that exist independently of
+**Adjustments** are post-order events that exist independently of
 fulfillment:
 
 * Type is an open string field - businesses can use any values that make sense
@@ -91,7 +97,9 @@ fulfillment:
   `price_adjustment`, `dispute`, `cancellation`)
 * Can be any post-order change
 * Optionally link to line items (or order-level for things like shipping refunds)
-* Include amount when relevant
+* Quantities and amounts are signed—negative for reductions (returns, refunds),
+  positive for additions (exchanges)
+* Include totals breakdown when relevant
 * Can happen at any time regardless of fulfillment status
 
 ## Schema
@@ -103,7 +111,6 @@ fulfillment:
 ### Order Line Item
 
 Line items reflect what was purchased at checkout and their current state.
-Status and quantity counts should reflect the event logs.
 
 {{ schema_fields('order_line_item', 'order') }}
 
@@ -111,7 +118,8 @@ Status and quantity counts should reflect the event logs.
 
 ```json
 {
-  "total": 3,      // Current total quantity
+  "original": 3,   // Quantity from the original checkout
+  "total": 3,      // Current total (may differ after edits/exchanges)
   "fulfilled": 2   // What has been fulfilled
 }
 ```
@@ -119,7 +127,8 @@ Status and quantity counts should reflect the event logs.
 **Status Derivation:**
 
 ```text
-if (fulfilled == total) → "fulfilled"
+if (total == 0) → "removed"
+else if (fulfilled == total) → "fulfilled"
 else if (fulfilled > 0) → "partial"
 else → "processing"
 ```
@@ -171,7 +180,7 @@ Examples: `refund`, `return`, `credit`, `price_adjustment`, `dispute`,
     {
       "id": "li_shoes",
       "item": { "id": "prod_shoes", "title": "Running Shoes", "price": 3000 },
-      "quantity": { "total": 3, "fulfilled": 3 },
+      "quantity": { "original": 3, "total": 3, "fulfilled": 3 },
       "totals": [
         {"type": "subtotal", "amount": 9000},
         {"type": "total", "amount": 9000}
@@ -181,7 +190,7 @@ Examples: `refund`, `return`, `credit`, `price_adjustment`, `dispute`,
     {
       "id": "li_shirts",
       "item": { "id": "prod_shirts", "title": "Cotton T-Shirt", "price": 2000 },
-      "quantity": { "total": 2, "fulfilled": 0 },
+      "quantity": { "original": 2, "total": 2, "fulfilled": 0 },
       "totals": [
         {"type": "subtotal", "amount": 4000},
         {"type": "total", "amount": 4000}
@@ -238,8 +247,10 @@ Examples: `refund`, `return`, `credit`, `price_adjustment`, `dispute`,
       "type": "refund",
       "occurred_at": "2025-01-10T14:30:00Z",
       "status": "completed",
-      "line_items": [{ "id": "li_shoes", "quantity": 1 }],
-      "amount": 3000,
+      "line_items": [{ "id": "li_shoes", "quantity": -1 }],
+      "totals": [
+        { "type": "total", "amount": -3000 }
+      ],
       "description": "Defective item"
     }
   ],

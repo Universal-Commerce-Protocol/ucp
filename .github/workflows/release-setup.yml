@@ -12,7 +12,6 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-
 name: Setup Release Branch
 
 on:
@@ -29,11 +28,24 @@ jobs:
       contents: write
 
     steps:
+      - name: Generate GitHub App Token (if available)
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        # Only attempt this if the secret exists (e.g., on the main repo)
+        env:
+          APP_ID: ${{ secrets.RELEASE_APP_ID }}
+        if: ${{ env.APP_ID != '' }}
+        with:
+          app-id: ${{ secrets.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
           # Checkout the newly created branch
           ref: ${{ github.ref_name }}
+          # Use the app token if generated, otherwise fallback to default GITHUB_TOKEN
+          token: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
 
       - name: Update mkdocs.yml version
         run: |
@@ -48,9 +60,19 @@ jobs:
           grep "ucp_version:" mkdocs.yml
 
       - name: Commit and Push
+        env:
+          # Use the app token if generated, otherwise fallback to default GITHUB_TOKEN
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
+          APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
         run: |
-          git config user.name github-actions[bot]
-          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          # Configure Git identity conditionally
+          if [ -n "$APP_SLUG" ]; then
+            git config user.name "${APP_SLUG}[bot]"
+            git config user.email "${APP_SLUG}[bot]@users.noreply.github.com"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          fi
 
           git add mkdocs.yml
 
@@ -59,5 +81,6 @@ jobs:
             echo "No changes to commit (version might already be set)"
           else
             git commit -m "chore: bake version $VERSION into mkdocs.yml"
-            git push origin ${{ github.ref_name }}
+            # Authenticate the push
+            git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git HEAD:${{ github.ref_name }}
           fi

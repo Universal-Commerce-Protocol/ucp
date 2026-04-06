@@ -117,3 +117,5 @@ paise
 prefill
 prefilled
 callback
+reauth
+reprepare
