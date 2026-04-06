@@ -170,7 +170,7 @@ All ECaP messages **MUST** use JSON-RPC 2.0 format
 - Require a response from the receiver
 - **MUST** include a unique `id` field
 - Receiver **MUST** respond with matching `id`
-- Response **MUST** be either a `result` or `error` object
+- Response **MUST** be either a `result` or an `error_response`
 - Used for operations requiring acknowledgment or data
 
 **Notifications** (without `id` field):
@@ -182,19 +182,41 @@ All ECaP messages **MUST** use JSON-RPC 2.0 format
 
 ### Response Handling
 
-For requests (messages with `id`), receivers **MUST** respond with either:
+For requests (messages with `id`), receivers **MUST** respond with a `result`.
+Both success and error outcomes **MUST** be returned via the `result` field,
+consistent with UCP's two-layer error model. The JSON-RPC `error` field is
+reserved for transport-level failures (parse errors, method not found, invalid
+params). Implementations **MUST NOT** use the JSON-RPC `error` field for
+delegation-level error codes.
 
 **Success Response:**
 
 ```json
-{ "jsonrpc": "2.0", "id": "...", "result": {...} }
+{
+  "jsonrpc": "2.0",
+  "id": "...",
+  "result": {
+    "ucp": { "version": "{{ ucp_version }}", "status": "success" },
+    ...
+  }
+}
 ```
 
 **Error Response:**
 
 ```json
-{ "jsonrpc": "2.0", "id": "...", "error": {...} }
+{
+  "jsonrpc": "2.0",
+  "id": "...",
+  "result": {
+    "ucp": { "version": "{{ ucp_version }}", "status": "error" },
+    "messages": [...]
+  }
+}
 ```
+
+In both cases, `result.ucp.status` serves as the discriminator between success
+and error outcomes — the same pattern used across all UCP transports.
 
 ### Communication Channels
 
@@ -302,6 +324,9 @@ to complete the handshake.
 - **Direction:** Host → Embedded Cart
 - **Type:** Response
 - **Result Payload:**
+    - `ucp` (object, **REQUIRED**): UCP protocol metadata. The `version`
+        confirms the negotiated `ep_version` and `status` **MUST** be
+        `"success"`.
     - `upgrade` (object, **OPTIONAL**): An object describing how the Embedded
         Cart should update the communication channel it uses to communicate
         with the host. When present, host **MUST NOT** include `credential`
@@ -319,6 +344,7 @@ to complete the handshake.
     "jsonrpc": "2.0",
     "id": "ready_1",
     "result": {
+        "ucp": { "version": "{{ ucp_version }}", "status": "success" },
         "credential": "fake_identity_linking_oauth_token"
     }
 }
@@ -337,6 +363,7 @@ on the host's `iframe.contentWindow.postMessage()` call):
     "jsonrpc": "2.0",
     "id": "ready_1",
     "result": {
+        "ucp": { "version": "{{ ucp_version }}", "status": "success" },
         "upgrade": {
             "port": "[Transferable MessagePort]"
         }
@@ -349,6 +376,13 @@ discard any other information in the message, send a new `ep.cart.ready` message
 over the upgraded communication channel, and wait for a new response. All
 subsequent messages **MUST** be sent only over the upgraded communication
 channel.
+
+If the host cannot complete the handshake (e.g., origin validation failure or
+protocol state violation), it **MUST** respond with an `error_response` result.
+When the host responds with an error, the session cannot proceed. The host
+**MUST** tear down the embedded context and **MAY** redirect the buyer to
+`continue_url` if present. The Embedded Cart **MUST NOT** send further
+messages after receiving a handshake error.
 
 ### Authentication
 
@@ -379,12 +413,13 @@ authorization to be provided by the host before the session continues.
 ```
 
 The `ep.cart.auth` message is a request, which means that host
-**MUST** respond to exchange the authorization. The host **MUST** respond with either an error,
-or the authorization data requested by Embedded Cart.
+**MUST** respond with a `result` containing either the authorization data
+or an `error_response`.
 
 - **Direction:** host → Embedded Cart
 - **Type:** Response
 - **Result Payload:**
+    - `ucp` (object, **REQUIRED**): UCP protocol metadata with `status: "success"`.
     - `credential` (string, **REQUIRED**): The requested authorization data,
     can be in the form of an OAuth token, JWT, API keys, etc.
 
@@ -395,6 +430,7 @@ or the authorization data requested by Embedded Cart.
     "jsonrpc": "2.0",
     "id": "auth_1",
     "result": {
+        "ucp": { "version": "{{ ucp_version }}", "status": "success" },
         "credential": "fake_identity_linking_oauth_token"
     }
 }

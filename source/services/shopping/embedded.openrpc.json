@@ -88,15 +88,23 @@
       "result": {
         "name": "authResult",
         "schema": {
-          "type": "object",
-          "description": "Auth response from host containing the requested authorization data.",
-          "required": ["credential"],
-          "properties": {
-            "credential": {
-              "type": "string",
-              "description": "Requested authorization. Some common examples include API key and OAuth token."
+          "oneOf": [
+            {
+              "type": "object",
+              "description": "Auth response from host containing the requested authorization data.",
+              "required": ["ucp", "credential"],
+              "properties": {
+                "ucp": { "$ref": "#/components/schemas/ucp_success" },
+                "credential": {
+                  "type": "string",
+                  "description": "Requested authorization. Some common examples include API key and OAuth token."
+                }
+              }
+            },
+            {
+              "$ref": "../../schemas/shopping/types/error_response.json"
             }
-          }
+          ]
         }
       }
     },
@@ -158,11 +166,8 @@
           "name": "checkout",
           "required": true,
           "schema": {
-            "oneOf": [
-              { "$ref": "../../schemas/shopping/checkout.json" },
-              { "$ref": "../../schemas/shopping/types/error_response.json" }
-            ],
-            "description": "Current checkout state with updated messages or an error response."
+            "$ref": "../../schemas/shopping/checkout.json",
+            "description": "Current checkout state with updated messages."
           }
         }
       ]
@@ -382,24 +387,33 @@
       "result": {
         "name": "readyResult",
         "schema": {
-          "type": "object",
-          "description": "Handshake response from host.",
-          "properties": {
-            "upgrade": {
+          "oneOf": [
+            {
               "type": "object",
-              "description": "Channel upgrade instructions. If present, switch to provided MessagePort.",
+              "description": "Handshake response from host.",
+              "required": ["ucp"],
               "properties": {
-                "port": {
+                "ucp": { "$ref": "#/components/schemas/ucp_success" },
+                "upgrade": {
                   "type": "object",
-                  "description": "MessagePort for upgraded channel. Runtime type is MessagePort."
+                  "description": "Channel upgrade instructions. If present, switch to provided MessagePort.",
+                  "properties": {
+                    "port": {
+                      "type": "object",
+                      "description": "MessagePort for upgraded channel. Runtime type is MessagePort."
+                    }
+                  }
+                },
+                "credential": {
+                  "type": "string",
+                  "description": "Requested authorization. Some common examples include API key and OAuth token."
                 }
               }
             },
-            "credential": {
-              "type": "string",
-              "description": "Requested authorization. Some common examples include API key and OAuth token."
+            {
+              "$ref": "../../schemas/shopping/types/error_response.json"
             }
-          }
+          ]
         }
       }
     },
@@ -417,15 +431,23 @@
       "result": {
         "name": "authResult",
         "schema": {
-          "type": "object",
-          "description": "Auth response from host containing the requested authorization data.",
-          "required": ["credential"],
-          "properties": {
-            "credential": {
-              "type": "string",
-              "description": "Requested authorization. Some common examples include API key and OAuth token."
+          "oneOf": [
+            {
+              "type": "object",
+              "description": "Auth response from host containing the requested authorization data.",
+              "required": ["ucp", "credential"],
+              "properties": {
+                "ucp": { "$ref": "#/components/schemas/ucp_success" },
+                "credential": {
+                  "type": "string",
+                  "description": "Requested authorization. Some common examples include API key and OAuth token."
+                }
+              }
+            },
+            {
+              "$ref": "../../schemas/shopping/types/error_response.json"
             }
-          }
+          ]
         }
       }
     },
@@ -519,11 +541,8 @@
           "name": "cart",
           "required": true,
           "schema": {
-            "oneOf": [
-              { "$ref": "../../schemas/shopping/cart.json" },
-              { "$ref": "../../schemas/shopping/types/error_response.json" }
-            ],
-            "description": "Current cart state with updated messages or an error response."
+            "$ref": "../../schemas/shopping/cart.json",
+            "description": "Current cart state with updated messages."
           }
         }
       ]
