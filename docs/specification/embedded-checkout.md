@@ -771,6 +771,11 @@ or the authorization data requested by Embedded Checkout.
 }
 ```
 
+When the host responds with an error, the session cannot proceed. The host
+**MUST** tear down the embedded context and **MAY** redirect the buyer to
+`continue_url` if present. The Embedded Checkout **MUST NOT** send further
+messages after receiving a handshake error.
+
 If the error appears to be transient within the host (i.e. `timeout_error`) - as indicated with
 `recoverable` severity - Embedded Checkout **MAY** re-initiate this request with the host again.
 Otherwise, Embedded Checkout **MUST** issue an `ec.error` notification containing an `unrecoverable`
