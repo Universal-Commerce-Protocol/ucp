@@ -2,14 +2,14 @@
   "openrpc": "1.3.2",
   "info": {
     "title": "UCP Shopping Embedded Protocol",
-    "description": "Embedded Protocol (EP) methods for the UCP shopping service. Methods are sent from Merchant to Host via postMessage using JSON-RPC 2.0. Method prefixes indicate capability scope: ec.* (checkout). Future capabilities may define additional prefixes (e.g., eo.* for order). Schema references are logical pointers - actual payload shape is determined by negotiated capabilities.\n\nEmbedded Protocol is a client-to-client postMessage interface, so there is no endpoint URL to access this API. Platforms detect merchant support for this protocol based on the presence of `services[\"dev.ucp.shopping\"][transport=embedded]` in discovery responses."
+    "description": "Embedded Protocol (EP) methods for the UCP shopping service. Methods are sent from Merchant to Host via postMessage using JSON-RPC 2.0. Method prefixes indicate capability scope: ep.{capability} (i.e. ep.checkout). Schema references are logical pointers - actual payload shape is determined by negotiated capabilities.\n\nEmbedded Protocol is a client-to-client postMessage interface, so there is no endpoint URL to access this API. Platforms detect merchant support for this protocol based on the presence of `services[\"dev.ucp.shopping\"][transport=embedded]` in discovery responses."
   },
   "servers": [],
   "methods": [
     {
       "name": "ec.ready",
       "summary": "Handshake from merchant to host",
-      "description": "Initiates the Embedded Checkout Protocol. Merchant declares which delegations it accepts, host responds with optional channel upgrade and initial checkout state.",
+      "description": "Initiates the Embedded Checkout Protocol. Merchant declares which delegations it accepts and requests any additional authorization, host responds with optional channel upgrade, auth credential, and initial checkout state.",
       "params": [
         {
           "name": "delegate",
@@ -23,6 +23,10 @@
             },
             "uniqueItems": true
           }
+        },
+        {
+          "name": "auth",
+          "schema": { "$ref": "#/components/schemas/auth" }
         }
       ],
       "result": {
@@ -41,6 +45,10 @@
                 }
               }
             },
+            "credential": {
+              "type": "string",
+              "description": "Requested authorization. Some common examples include API key and OAuth token."
+            },
             "checkout": {
               "$ref": "../../schemas/shopping/checkout.json",
               "description": "Initial checkout state with host-provided data (saved instruments, addresses)."
@@ -48,6 +56,48 @@
           }
         }
       }
+    },
+
+    {
+      "name": "ec.auth",
+      "summary": "Authorization exchange between host & business.",
+      "description": "Augments Embedded Checkout Protocol by doing auth exchanges per business requirement. Can be used by business to refresh a previously exchanged authorization.",
+      "params": [
+        {
+          "name": "type",
+          "schema": {"$ref": "#/components/schemas/type"}
+        }
+      ],
+      "result": {
+        "name": "authResult",
+        "schema": {
+          "type": "object",
+          "description": "Auth response from host containing the requested authorization data.",
+          "required": ["credential"],
+          "properties": {
+            "credential": {
+              "type": "string",
+              "description": "Requested authorization. Some common examples include API key and OAuth token."
+            }
+          }
+        }
+      }
+    },
+
+    {
+      "name": "ec.error",
+      "summary": "A session-level error has occurred.",
+      "description": "Business notifies host that a session-level error, unrelated to the checkout resource, has occurred.",
+      "params": [
+        {
+          "name": "error",
+          "required": true,
+          "schema": {
+            "$ref": "../../schemas/shopping/types/error_response.json",
+            "description": "Session-level error raised by the business."
+          }
+        }
+      ]
     },
 
     {
@@ -91,8 +141,11 @@
           "name": "checkout",
           "required": true,
           "schema": {
-            "$ref": "../../schemas/shopping/checkout.json",
-            "description": "Current checkout state with updated messages."
+            "oneOf": [
+              { "$ref": "../../schemas/shopping/checkout.json" },
+              { "$ref": "../../schemas/shopping/types/error_response.json" }
+            ],
+            "description": "Current checkout state with updated messages or an error response."
           }
         }
       ]
@@ -276,7 +329,199 @@
           "description": "Acknowledgement that the host handled the request."
         }
       }
+    },
+
+    {
+      "name": "ep.cart.ready",
+      "summary": "Handshake from business to host",
+      "description": "Initiates the Embedded Cart Protocol. Business declares which delegation it supports and requests any additional authorization, host responds with optional channel upgrade and auth credential.",
+      "params": [
+        {
+          "name": "delegate",
+          "required": true,
+          "schema": {
+            "type": "array",
+            "description": "Delegation types the merchant accepts.",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z_]+(?:\\.[a-z_]+)*$"
+            },
+            "uniqueItems": true
+          }
+        },
+        {
+          "name": "auth",
+          "schema": {"$ref": "#/components/schemas/auth"}
+        }
+      ],
+      "result": {
+        "name": "readyResult",
+        "schema": {
+          "type": "object",
+          "description": "Handshake response from host.",
+          "properties": {
+            "upgrade": {
+              "type": "object",
+              "description": "Channel upgrade instructions. If present, switch to provided MessagePort.",
+              "properties": {
+                "port": {
+                  "type": "object",
+                  "description": "MessagePort for upgraded channel. Runtime type is MessagePort."
+                }
+              }
+            },
+            "credential": {
+              "type": "string",
+              "description": "Requested authorization. Some common examples include API key and OAuth token."
+            }
+          }
+        }
+      }
+    },
+
+    {
+      "name": "ep.cart.auth",
+      "summary": "Authorization exchange between host & business.",
+      "description": "Augments Embedded Cart Protocol by doing auth exchanges per business requirement. Can be used by business to refresh a previously exchanged authorization.",
+      "params": [
+        {
+          "name": "type",
+          "schema": {"$ref": "#/components/schemas/type"}
+        }
+      ],
+      "result": {
+        "name": "authResult",
+        "schema": {
+          "type": "object",
+          "description": "Auth response from host containing the requested authorization data.",
+          "required": ["credential"],
+          "properties": {
+            "credential": {
+              "type": "string",
+              "description": "Requested authorization. Some common examples include API key and OAuth token."
+            }
+          }
+        }
+      }
+    },
+
+    {
+      "name": "ep.cart.error",
+      "summary": "A session-level error has occurred.",
+      "description": "Business notifies host that a session-level error, unrelated to the cart resource, has occurred.",
+      "params": [
+        {
+          "name": "error",
+          "required": true,
+          "schema": {
+            "$ref": "../../schemas/shopping/types/error_response.json",
+            "description": "Session-level error raised by the business."
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "ep.cart.start",
+      "summary": "Cart visible to buyer",
+      "description": "Business notifies host that cart UI is visible and ready for interaction.",
+      "params": [
+        {
+          "name": "cart",
+          "required": true,
+          "schema": {
+            "$ref": "../../schemas/shopping/cart.json",
+            "description": "Current cart state."
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "ep.cart.complete",
+      "summary": "Cart completed successfully",
+      "description": "Business notifies host that cart building has completed.",
+      "params": [
+        {
+          "name": "cart",
+          "required": true,
+          "schema": {
+            "$ref": "../../schemas/shopping/cart.json",
+            "description": "Final cart state."
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "ep.cart.line_items.change",
+      "summary": "Line items changed",
+      "description": "Business notifies host that cart.line_items has changed (item added, removed, quantity updated).",
+      "params": [
+        {
+          "name": "cart",
+          "required": true,
+          "schema": {
+            "$ref": "../../schemas/shopping/cart.json",
+            "description": "Current cart state with updated line items."
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "ep.cart.buyer.change",
+      "summary": "Buyer information changed",
+      "description": "Business notifies host that cart.buyer has changed (email, phone, name updated).",
+      "params": [
+        {
+          "name": "cart",
+          "required": true,
+          "schema": {
+            "$ref": "../../schemas/shopping/cart.json",
+            "description": "Current cart state with updated buyer."
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "ep.cart.messages.change",
+      "summary": "Cart messages changed",
+      "description": "Business notifies host that cart.messages has changed. Includes errors, warnings, and info. Host should update UI accordingly.",
+      "params": [
+        {
+          "name": "cart",
+          "required": true,
+          "schema": {
+            "oneOf": [
+              { "$ref": "../../schemas/shopping/cart.json" },
+              { "$ref": "../../schemas/shopping/types/error_response.json" }
+            ],
+            "description": "Current cart state with updated messages or an error response."
+          }
+        }
+      ]
     }
   ],
+  "components": {
+    "schemas": {
+      "type": {
+        "type": "string",
+        "description": "The type of authorization data business is requesting from the host.",
+        "examples": [
+          "oauth",
+          "api_key",
+          "jwt"
+        ]
+      },
+      "auth": {
+        "type": "object",
+        "properties": {
+          "type": { "$ref": "#/components/schemas/type" }
+        }
+      }
+    }
+  },
   "x-delegations": ["payment.instruments_change", "payment.credential", "window.open"]
 }

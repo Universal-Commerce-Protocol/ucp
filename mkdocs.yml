@@ -51,6 +51,7 @@ nav:
           - Overview: specification/cart.md
           - HTTP/REST Binding: specification/cart-rest.md
           - MCP Binding: specification/cart-mcp.md
+          - EP Binding: specification/embedded-cart.md
       - Catalog Capability:
           - Overview: specification/catalog/index.md
           - Search: specification/catalog/search.md
@@ -222,9 +223,11 @@ plugins:
           - specification/buyer-consent.md
           - specification/discount.md
           - specification/fulfillment.md
+        Cart Capability:
           - specification/cart.md
           - specification/cart-rest.md
           - specification/cart-mcp.md
+          - specification/embedded-cart.md
         Catalog Capability:
           - specification/catalog/index.md
           - specification/catalog/search.md
