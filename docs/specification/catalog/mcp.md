@@ -31,14 +31,15 @@ Businesses advertise MCP transport availability through their UCP profile at
   "ucp": {
     "version": "{{ ucp_version }}",
     "services": {
-      "dev.ucp.shopping": {
-        "version": "{{ ucp_version }}",
-        "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview",
-        "mcp": {
+      "dev.ucp.shopping": [
+        {
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview",
+          "transport": "mcp",
           "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/mcp.openrpc.json",
           "endpoint": "https://business.example.com/ucp/mcp"
         }
-      }
+      ]
     },
     "capabilities": {
       "dev.ucp.shopping.catalog.search": [{
