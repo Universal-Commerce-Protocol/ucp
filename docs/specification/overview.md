@@ -707,6 +707,12 @@ For MCP over HTTP, the HTTP status code is the primary signal; the JSON-RPC
 `Retry-After` header (REST) or `error.data.retry_after` (MCP) for 429 and 503
 responses.
 
+The Embedded Protocol uses the same JSON-RPC error codes for peer-to-peer
+communication between host and embedded context. Server-specific scenarios
+(rate limiting, idempotency) do not apply to the embedded transport. See
+[Embedded Protocol — Response Handling](embedded-protocol.md#response-handling)
+for the full error handling specification.
+
 ##### The `continue_url` Field
 
 When UCP negotiation fails, `continue_url` provides a fallback web experience.

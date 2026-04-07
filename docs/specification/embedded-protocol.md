@@ -120,6 +120,29 @@ application-level error codes.
 In both cases, `result.ucp.status` serves as the discriminator between success
 and error outcomes — the same pattern used across all UCP transports.
 
+### Transport Errors
+
+Transport errors are protocol-level failures that prevent request processing.
+These are returned as JSON-RPC `error` using standard JSON-RPC error codes and
+indicate the message itself is invalid or could not be processed — not that
+executed business logic produced an error outcome. See the
+[Core Specification](overview.md#error-codes) for the complete error code
+registry.
+
+For example, if a request cannot be processed (unknown method, malformed
+params), the host **MUST** respond with a JSON-RPC `error`:
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": "req_1",
+    "error": {
+        "code": -32601,
+        "message": "Method not found."
+    }
+}
+```
+
 ## Communication Channels
 
 ### Web-Based Hosts
@@ -441,10 +464,8 @@ resource, not just the changed fields.
 
 ## Error Codes
 
-EP defines a shared set of error codes. These are mapped to
-**[W3C DOMException](https://webidl.spec.whatwg.org/#idl-DOMException)** names
-where possible. Capabilities **MAY** define additional error codes for
-capability-specific scenarios.
+The Embedded Protocol defines a shared set of error codes. Capabilities
+**MAY** define additional error codes for capability-specific scenarios.
 
 | Code                  | Severity        | Description                                                          |
 | :-------------------- | :-------------- | :------------------------------------------------------------------- |

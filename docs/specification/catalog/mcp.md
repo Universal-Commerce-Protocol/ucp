@@ -623,14 +623,10 @@ UCP uses a two-layer error model separating transport errors from business outco
 
 ### Transport Errors
 
-Use JSON-RPC 2.0 error codes for protocol-level issues that prevent request processing:
-
-| Code | Meaning |
-| :--- | :--- |
-| -32600 | Invalid Request - Malformed JSON-RPC |
-| -32601 | Method not found |
-| -32602 | Invalid params - Missing required parameter |
-| -32603 | Internal error |
+Transport-level failures (authentication, rate limiting, unavailability) that
+prevent request processing are returned as JSON-RPC `error`. See the
+[Core Specification](../overview.md#error-codes) for the complete error code
+registry and JSON-RPC error code mappings.
 
 ### Business Outcomes
 
