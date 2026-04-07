@@ -503,17 +503,36 @@ def define_env(env):
           context,
         )
 
+    # Merge required arrays from all allOf siblings so that
+    # requirements declared at any level surface correctly.
+    merged_required = list(required_list) if required_list else []
+    for item in properties_list:
+      for req in item.get("required", []):
+        if req not in merged_required:
+          merged_required.append(req)
+
     md = []
     for properties in properties_list:
       if len(properties) == 1 and "$ref" in properties:
         embedded_data = _render_table_from_ref(
-          properties["$ref"], required_list, spec_file_name, context
+          properties["$ref"], merged_required, spec_file_name, context
         )
         md.append(embedded_data)
         continue
+
+      # Skip allOf siblings that only carry constraints (required,
+      # anyOf with const-only properties) but define no new fields.
+      has_renderable = (
+        properties.get("properties")
+        or properties.get("$ref")
+        or properties.get("allOf")
+      )
+      if not has_renderable:
+        continue
+
       md.append(
         _render_table_from_schema(
-          properties, spec_file_name, False, required_list, context
+          properties, spec_file_name, False, merged_required, context
         )
       )
 
@@ -767,12 +786,16 @@ def define_env(env):
             embedded_schema_data = embedded_schema_data.copy()
             embedded_schema_data["allOf"] = new_all_of
 
-          return _render_table_from_schema(
+          table = _render_table_from_schema(
             embedded_schema_data,
             spec_file_name,
             need_header,
             parent_required_list,
           )
+          desc = embedded_schema_data.get("description", "")
+          if desc and need_header:
+            return f"{desc}\n\n{table}"
+          return table
         else:
           raise RuntimeError(
             f"Definition '{def_path}' not found in '{full_path}'"
