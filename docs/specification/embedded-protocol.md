@@ -315,7 +315,7 @@ continuing. Each capability defines its own session error notification method
 ```json
 {
     "jsonrpc": "2.0",
-    "method": "ep.cart.error",
+    "method": "ec.error",
     "params": {
         "ucp": { "version": "{{ ucp_version }}", "status": "error" },
         "messages": [
@@ -326,7 +326,7 @@ continuing. Each capability defines its own session error notification method
                 "severity": "unrecoverable"
             }
         ],
-        "continue_url": "https://merchant.example.com/cart/abc123"
+        "continue_url": "https://merchant.example.com/checkout/abc123"
     }
 }
 ```
@@ -452,6 +452,7 @@ capability-specific scenarios.
 | `security_error`      | `unrecoverable` | The host origin validation failed.                                   |
 | `invalid_state_error` | `unrecoverable` | Handshake was attempted out of order.                                |
 | `not_supported_error` | `unrecoverable` | The requested operation or authorization type is not supported.      |
+| `timeout_error`       | `recoverable`   | An internal service timed out. The operation may be retried.         |
 
 Errors **SHOULD** use only `recoverable` and `unrecoverable` severities.
 `recoverable` means the operation may be re-attempted. `unrecoverable` means
