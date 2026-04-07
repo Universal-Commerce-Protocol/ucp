@@ -116,10 +116,9 @@ This object MUST be one of the following types: [Shipping Destination](/draft/sp
 
 #### Total
 
-| Name                     | Type | Required | Description |
-| ------------------------ | ---- | -------- | ----------- |
-| *No properties defined.* |      |          |             |
-| *No properties defined.* |      |          |             |
+| Name | Type | Required | Description |
+| ---- | ---- | -------- | ----------- |
+|      |      |          |             |
 
 #### Postal Address
 

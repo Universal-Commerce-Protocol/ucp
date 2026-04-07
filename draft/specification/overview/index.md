@@ -72,20 +72,17 @@ A **service** defines the API surface for a vertical (shopping, common, etc.). S
 
 #### Service Definition
 
-| Field             | Type   | Required | Description                         |
-| ----------------- | ------ | -------- | ----------------------------------- |
-| `version`         | string | Yes      | Service version (YYYY-MM-DD format) |
-| `spec`            | string | Yes      | URL to service documentation        |
-| `rest`            | object | No       | REST transport binding              |
-| `rest.schema`     | string | Yes      | URL to OpenAPI spec (JSON)          |
-| `rest.endpoint`   | string | Yes      | Business's REST endpoint            |
-| `mcp`             | object | No       | MCP transport binding               |
-| `mcp.schema`      | string | Yes      | URL to OpenRPC spec (JSON)          |
-| `mcp.endpoint`    | string | Yes      | Business's MCP endpoint             |
-| `a2a`             | object | No       | A2A transport binding               |
-| `a2a.endpoint`    | string | Yes      | Business's A2A Agent Card URL       |
-| `embedded`        | string | No       | Embedded transport binding          |
-| `embedded.schema` | string | Yes      | URL to OpenRPC spec (JSON)          |
+Full service declaration for platform-level discovery. All transports require `version`, `spec`, and `transport`. REST and MCP additionally require `schema` and `endpoint`; A2A requires `endpoint`; embedded requires `schema`.
+
+| Name      | Type   | Required | Description                                                                                     |
+| --------- | ------ | -------- | ----------------------------------------------------------------------------------------------- |
+| version   | string | **Yes**  | Entity version in YYYY-MM-DD format.                                                            |
+| spec      | string | **Yes**  | URL to human-readable specification document.                                                   |
+| schema    | string | No       | URL to JSON Schema defining this entity's structure and payloads.                               |
+| id        | string | No       | Unique identifier for this entity instance. Used to disambiguate when multiple instances exist. |
+| config    | object | No       | Entity-specific configuration. Structure defined by each entity's schema.                       |
+| transport | string | **Yes**  | Transport protocol for this service binding. **Enum:** `rest`, `mcp`, `a2a`, `embedded`         |
+| endpoint  | string | No       | Endpoint URL for this transport binding.                                                        |
 
 Transport definitions **MUST** be thin: they declare method names and reference base schemas only. See [Requirements](#requirements) for details.
 
@@ -124,9 +121,11 @@ A **capability** is a feature within a service. It declares what functionality i
 
 #### Capability Definition
 
+Full capability declaration for platform-level discovery. Includes spec/schema URLs for agent fetching.
+
 | Name    | Type    | Required | Description                                                                                                                     |
 | ------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| version | string  | No       | Entity version in YYYY-MM-DD format.                                                                                            |
+| version | string  | **Yes**  | Entity version in YYYY-MM-DD format.                                                                                            |
 | spec    | string  | **Yes**  | URL to human-readable specification document.                                                                                   |
 | schema  | string  | **Yes**  | URL to JSON Schema defining this entity's structure and payloads.                                                               |
 | id      | string  | No       | Unique identifier for this entity instance. Used to disambiguate when multiple instances exist.                                 |

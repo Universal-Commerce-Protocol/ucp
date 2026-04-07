@@ -451,7 +451,7 @@ Performs a full replacement of the checkout resource. The platform is **REQUIRED
 | ------------ | --------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | id           | string                                                          | **Yes**  | The unique identifier of the checkout session.Defined in path.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | id           | string                                                          | **Yes**  | Unique identifier of the checkout session.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| line_items   | Array\[[Line Item](/draft/specification/reference/#line-item)\] | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| line_items   | Array\[[Line Item](/draft/specification/reference/#line-item)\] | No       | List of line items being checked out.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | buyer        | [Buyer](/draft/specification/reference/#buyer)                  | No       | Representation of the buyer.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | context      | [Context](/draft/specification/reference/#context)              | No       | Provisional buyer signals for relevance and localization—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data. Context SHOULD be non-identifying and can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. |
 | signals      | [Signals](/draft/specification/reference/#signals)              | No       | Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.                                                                                                                                                                                                                                                                 |
@@ -475,7 +475,7 @@ After this call, other details will be updated through subsequent events as the 
 | id           | string                                             | **Yes**  | The unique identifier of the checkout session.Defined in path.                                                                                                                                                                                                                                                                                                                                          |
 | signals      | [Signals](/draft/specification/reference/#signals) | No       | Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace. |
 | risk_signals | object                                             | No       | Deprecated. Use signals instead. Will be removed in the next version.                                                                                                                                                                                                                                                                                                                                   |
-| payment      | [Payment](/draft/specification/checkout/#payment)  | **Yes**  | Payment configuration containing handlers.                                                                                                                                                                                                                                                                                                                                                              |
+| payment      | [Payment](/draft/specification/checkout/#payment)  | No       | Payment configuration containing handlers.                                                                                                                                                                                                                                                                                                                                                              |
 
 **Output**
 
@@ -539,6 +539,8 @@ Environment data provided by the platform to support authorization and abuse pre
 | dev.ucp.user_agent | string | No       | Client's HTTP User-Agent header or equivalent. |
 
 ### Fulfillment Option
+
+A fulfillment option within a group (e.g., Standard Shipping $5, Express $15).
 
 | Name                      | Type          | Required | Description                                                                |
 | ------------------------- | ------------- | -------- | -------------------------------------------------------------------------- |
@@ -673,6 +675,8 @@ Error code identifying the type of error. Standard errors are defined in specifi
 
 #### Selected Payment Instrument
 
+A payment instrument with selection state.
+
 | Name            | Type    | Required | Description                                                                                                                                                  |
 | --------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | id              | string  | **Yes**  | A unique identifier for this instrument instance, assigned by the platform.                                                                                  |
@@ -705,6 +709,8 @@ Error code identifying the type of error. Standard errors are defined in specifi
 
 ### Response
 
+Capability reference in responses. Only name/version required to confirm active capabilities.
+
 | Name    | Type    | Required | Description                                                                                                                     |
 | ------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | version | string  | **Yes**  | Entity version in YYYY-MM-DD format.                                                                                            |
@@ -716,10 +722,9 @@ Error code identifying the type of error. Standard errors are defined in specifi
 
 ### Total
 
-| Name                     | Type | Required | Description |
-| ------------------------ | ---- | -------- | ----------- |
-| *No properties defined.* |      |          |             |
-| *No properties defined.* |      |          |             |
+| Name | Type | Required | Description |
+| ---- | ---- | -------- | ----------- |
+|      |      |          |             |
 
 #### Rendering Contract
 
@@ -834,13 +839,15 @@ The business controls what MUST be rendered (top-level entries) versus what MAY 
 
 ### UCP Response Checkout
 
+UCP metadata for checkout responses.
+
 | Name             | Type   | Required | Description                                                                 |
 | ---------------- | ------ | -------- | --------------------------------------------------------------------------- |
 | version          | string | **Yes**  | UCP version in YYYY-MM-DD format.                                           |
 | status           | string | No       | Application-level status of the UCP operation. **Enum:** `success`, `error` |
 | services         | object | No       | Service registry keyed by reverse-domain name.                              |
 | capabilities     | object | No       | Capability registry keyed by reverse-domain name.                           |
-| payment_handlers | object | No       | Payment handler registry keyed by reverse-domain name.                      |
+| payment_handlers | object | **Yes**  | Payment handler registry keyed by reverse-domain name.                      |
 | services         | any    | No       |                                                                             |
 | capabilities     | any    | No       |                                                                             |
 | payment_handlers | any    | **Yes**  |                                                                             |

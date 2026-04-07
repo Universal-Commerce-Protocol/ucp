@@ -4422,87 +4422,58 @@ standard formats:</p>
 <li><strong>EP(embedded)</strong>: OpenRPC (JSON format)</li>
 </ul>
 <h4 id="service-definition">Service Definition<a class="headerlink" href="#service-definition" title="Permanent link">&para;</a></h4>
+<p>Full service declaration for platform-level discovery. All transports require <code>version</code>, <code>spec</code>, and <code>transport</code>. REST and MCP additionally require <code>schema</code> and <code>endpoint</code>; A2A requires <code>endpoint</code>; embedded requires <code>schema</code>.</p>
 <table>
 <thead>
 <tr>
-<th>Field</th>
-<th>Type</th>
-<th>Required</th>
-<th>Description</th>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>version</code></td>
-<td>string</td>
-<td>Yes</td>
-<td>Service version (YYYY-MM-DD format)</td>
+<td style="text-align: left;">version</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Entity version in YYYY-MM-DD format.</td>
 </tr>
 <tr>
-<td><code>spec</code></td>
-<td>string</td>
-<td>Yes</td>
-<td>URL to service documentation</td>
+<td style="text-align: left;">spec</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">URL to human-readable specification document.</td>
 </tr>
 <tr>
-<td><code>rest</code></td>
-<td>object</td>
-<td>No</td>
-<td>REST transport binding</td>
+<td style="text-align: left;">schema</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">URL to JSON Schema defining this entity's structure and payloads.</td>
 </tr>
 <tr>
-<td><code>rest.schema</code></td>
-<td>string</td>
-<td>Yes</td>
-<td>URL to OpenAPI spec (JSON)</td>
+<td style="text-align: left;">id</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Unique identifier for this entity instance. Used to disambiguate when multiple instances exist.</td>
 </tr>
 <tr>
-<td><code>rest.endpoint</code></td>
-<td>string</td>
-<td>Yes</td>
-<td>Business's REST endpoint</td>
+<td style="text-align: left;">config</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Entity-specific configuration. Structure defined by each entity's schema.</td>
 </tr>
 <tr>
-<td><code>mcp</code></td>
-<td>object</td>
-<td>No</td>
-<td>MCP transport binding</td>
+<td style="text-align: left;">transport</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Transport protocol for this service binding.<br><strong>Enum:</strong> <code>rest</code>, <code>mcp</code>, <code>a2a</code>, <code>embedded</code></td>
 </tr>
 <tr>
-<td><code>mcp.schema</code></td>
-<td>string</td>
-<td>Yes</td>
-<td>URL to OpenRPC spec (JSON)</td>
-</tr>
-<tr>
-<td><code>mcp.endpoint</code></td>
-<td>string</td>
-<td>Yes</td>
-<td>Business's MCP endpoint</td>
-</tr>
-<tr>
-<td><code>a2a</code></td>
-<td>object</td>
-<td>No</td>
-<td>A2A transport binding</td>
-</tr>
-<tr>
-<td><code>a2a.endpoint</code></td>
-<td>string</td>
-<td>Yes</td>
-<td>Business's A2A Agent Card URL</td>
-</tr>
-<tr>
-<td><code>embedded</code></td>
-<td>string</td>
-<td>No</td>
-<td>Embedded transport binding</td>
-</tr>
-<tr>
-<td><code>embedded.schema</code></td>
-<td>string</td>
-<td>Yes</td>
-<td>URL to OpenRPC spec (JSON)</td>
+<td style="text-align: left;">endpoint</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Endpoint URL for this transport binding.</td>
 </tr>
 </tbody>
 </table>
@@ -4534,6 +4505,7 @@ appended to this endpoint to form the complete URL.</p>
 <p>A <strong>capability</strong> is a feature within a service. It declares what
 functionality is supported and where to find documentation and schemas.</p>
 <h4 id="capability-definition">Capability Definition<a class="headerlink" href="#capability-definition" title="Permanent link">&para;</a></h4>
+<p>Full capability declaration for platform-level discovery. Includes spec/schema URLs for agent fetching.</p>
 <table>
 <thead>
 <tr>
@@ -4547,7 +4519,7 @@ functionality is supported and where to find documentation and schemas.</p>
 <tr>
 <td style="text-align: left;">version</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Entity version in YYYY-MM-DD format.</td>
 </tr>
 <tr>

@@ -4744,13 +4744,13 @@ within the UCP.</p>
 <tr>
 <td style="text-align: left;">id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">No</td>
 <td style="text-align: left;">A unique identifier for this instrument instance, assigned by the platform.</td>
 </tr>
 <tr>
 <td style="text-align: left;">handler_id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">No</td>
 <td style="text-align: left;">The unique identifier for the handler instance that produced this instrument. This corresponds to the 'id' field in the Payment Handler definition.</td>
 </tr>
 <tr>
@@ -6429,16 +6429,10 @@ within the UCP.</p>
 </thead>
 <tbody>
 <tr>
-<td style="text-align: left;"><em>No properties defined.</em></td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;"><em>No properties defined.</em></td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
 </tr>
 </tbody>
 </table>
@@ -6455,16 +6449,10 @@ within the UCP.</p>
 </thead>
 <tbody>
 <tr>
-<td style="text-align: left;"><em>No properties defined.</em></td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;"><em>No properties defined.</em></td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
 </tr>
 </tbody>
 </table>
@@ -6592,6 +6580,7 @@ within the UCP.</p>
 </table>
 <hr />
 <h3 id="payment-instrument-selected-payment-instrument">Selected Payment Instrument<a class="headerlink" href="#payment-instrument-selected-payment-instrument" title="Permanent link">&para;</a></h3>
+<p>A payment instrument with selection state.</p>
 <table>
 <thead>
 <tr>
@@ -6647,6 +6636,7 @@ within the UCP.</p>
 </tbody>
 </table>
 <h3 id="pagination-request">Pagination Request<a class="headerlink" href="#pagination-request" title="Permanent link">&para;</a></h3>
+<p>Pagination parameters for requests.</p>
 <table>
 <thead>
 <tr>
@@ -6672,6 +6662,7 @@ within the UCP.</p>
 </tbody>
 </table>
 <h3 id="pagination-response">Pagination Response<a class="headerlink" href="#pagination-response" title="Permanent link">&para;</a></h3>
+<p>Pagination information in responses.</p>
 <table>
 <thead>
 <tr>
@@ -6708,11 +6699,14 @@ within the UCP.</p>
 <h3 id="ap2-mandate-extension">AP2 Mandate Extension<a class="headerlink" href="#ap2-mandate-extension" title="Permanent link">&para;</a></h3>
 <h4 id="merchant-authorization">Merchant Authorization<a class="headerlink" href="#merchant-authorization" title="Permanent link">&para;</a></h4>
 <p>JWS Detached Content signature (RFC 7515 Appendix F) over the checkout response body (excluding ap2 field). Format: <code>&lt;base64url-header&gt;..&lt;base64url-signature&gt;</code>. The header MUST contain 'alg' (ES256/ES384/ES512) and 'kid' claims. The signature covers both the header and JCS-canonicalized checkout payload.</p>
+<p>JWS Detached Content signature (RFC 7515 Appendix F) over the checkout response body (excluding ap2 field). Format: <code>&lt;base64url-header&gt;..&lt;base64url-signature&gt;</code>. The header MUST contain 'alg' (ES256/ES384/ES512) and 'kid' claims. The signature covers both the header and JCS-canonicalized checkout payload.</p>
 <p><strong>Pattern:</strong> <code>^[A-Za-z0-9_-]+\.\.[A-Za-z0-9_-]+$</code></p>
 <h4 id="checkout-mandate">Checkout Mandate<a class="headerlink" href="#checkout-mandate" title="Permanent link">&para;</a></h4>
 <p>SD-JWT+kb credential in <code>ap2.checkout_mandate</code>. Proving user authorization for the checkout. Contains the full checkout including <code>ap2.merchant_authorization</code>.</p>
+<p>SD-JWT+kb credential in <code>ap2.checkout_mandate</code>. Proving user authorization for the checkout. Contains the full checkout including <code>ap2.merchant_authorization</code>.</p>
 <p><strong>Pattern:</strong> <code>^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]*\.[A-Za-z0-9_-]+(~[A-Za-z0-9_-]+)*$</code></p>
 <h4 id="ap2-with-merchant-authorization">Ap2 With Merchant Authorization<a class="headerlink" href="#ap2-with-merchant-authorization" title="Permanent link">&para;</a></h4>
+<p>AP2 extension data including merchant authorization.</p>
 <table>
 <thead>
 <tr>
@@ -6732,6 +6726,7 @@ within the UCP.</p>
 </tbody>
 </table>
 <h4 id="ap2-with-checkout-mandate">Ap2 With Checkout Mandate<a class="headerlink" href="#ap2-with-checkout-mandate" title="Permanent link">&para;</a></h4>
+<p>AP2 extension data including checkout mandate.</p>
 <table>
 <thead>
 <tr>
@@ -6751,6 +6746,7 @@ within the UCP.</p>
 </tbody>
 </table>
 <h4 id="checkout-with-ap2-mandate">Checkout with AP2 Mandate<a class="headerlink" href="#checkout-with-ap2-mandate" title="Permanent link">&para;</a></h4>
+<p>Checkout extended with AP2 mandate support.</p>
 <table>
 <thead>
 <tr>
@@ -6861,10 +6857,12 @@ within the UCP.</p>
 </table>
 <h4 id="ap2-error-code">AP2 Error Code<a class="headerlink" href="#ap2-error-code" title="Permanent link">&para;</a></h4>
 <p>Error codes specific to AP2 mandate verification.</p>
+<p>Error codes specific to AP2 mandate verification.</p>
 <p><strong>Enum:</strong> <code>mandate_required</code>, <code>agent_missing_key</code>, <code>mandate_invalid_signature</code>, <code>mandate_expired</code>, <code>mandate_scope_mismatch</code>, <code>merchant_authorization_invalid</code>, <code>merchant_authorization_missing</code></p>
 <hr />
 <h3 id="buyer-consent-extension">Buyer Consent Extension<a class="headerlink" href="#buyer-consent-extension" title="Permanent link">&para;</a></h3>
 <h4 id="consent">Consent<a class="headerlink" href="#consent" title="Permanent link">&para;</a></h4>
+<p>User consent states for data processing</p>
 <table>
 <thead>
 <tr>
@@ -6902,6 +6900,7 @@ within the UCP.</p>
 </tbody>
 </table>
 <h4 id="buyer-with-consent">Buyer with Consent<a class="headerlink" href="#buyer-with-consent" title="Permanent link">&para;</a></h4>
+<p>Buyer object extended with consent tracking.</p>
 <table>
 <thead>
 <tr>
@@ -6945,6 +6944,7 @@ within the UCP.</p>
 </tbody>
 </table>
 <h4 id="checkout-with-buyer-consent">Checkout with Buyer Consent<a class="headerlink" href="#checkout-with-buyer-consent" title="Permanent link">&para;</a></h4>
+<p>Checkout extended with consent tracking via buyer object.</p>
 <table>
 <thead>
 <tr>
@@ -7056,6 +7056,7 @@ within the UCP.</p>
 <hr />
 <h3 id="discount-extension">Discount Extension<a class="headerlink" href="#discount-extension" title="Permanent link">&para;</a></h3>
 <h4 id="allocation">Allocation<a class="headerlink" href="#allocation" title="Permanent link">&para;</a></h4>
+<p>Breakdown of how a discount amount was allocated to a specific target.</p>
 <table>
 <thead>
 <tr>
@@ -7081,6 +7082,7 @@ within the UCP.</p>
 </tbody>
 </table>
 <h4 id="applied-discount">Applied Discount<a class="headerlink" href="#applied-discount" title="Permanent link">&para;</a></h4>
+<p>A discount that was successfully applied.</p>
 <table>
 <thead>
 <tr>
@@ -7148,6 +7150,7 @@ within the UCP.</p>
 </tbody>
 </table>
 <h4 id="discounts-object">Discounts Object<a class="headerlink" href="#discounts-object" title="Permanent link">&para;</a></h4>
+<p>Discount codes input and applied discounts output.</p>
 <table>
 <thead>
 <tr>
@@ -7173,6 +7176,7 @@ within the UCP.</p>
 </tbody>
 </table>
 <h4 id="cart-with-discount">Cart with Discount<a class="headerlink" href="#cart-with-discount" title="Permanent link">&para;</a></h4>
+<p>Cart extended with discount capability.</p>
 <table>
 <thead>
 <tr>
@@ -7264,6 +7268,7 @@ within the UCP.</p>
 </tbody>
 </table>
 <h4 id="checkout-with-discount">Checkout with Discount<a class="headerlink" href="#checkout-with-discount" title="Permanent link">&para;</a></h4>
+<p>Checkout extended with discount capability.</p>
 <table>
 <thead>
 <tr>
@@ -7375,6 +7380,7 @@ within the UCP.</p>
 <hr />
 <h3 id="fulfillment-extension">Fulfillment Extension<a class="headerlink" href="#fulfillment-extension" title="Permanent link">&para;</a></h3>
 <h4 id="fulfillment-option_1">Fulfillment Option<a class="headerlink" href="#fulfillment-option_1" title="Permanent link">&para;</a></h4>
+<p>A fulfillment option within a group (e.g., Standard Shipping $5, Express $15).</p>
 <table>
 <thead>
 <tr>
@@ -7430,6 +7436,7 @@ within the UCP.</p>
 </tbody>
 </table>
 <h4 id="fulfillment-group_1">Fulfillment Group<a class="headerlink" href="#fulfillment-group_1" title="Permanent link">&para;</a></h4>
+<p>A merchant-generated package/group of line items with fulfillment options.</p>
 <table>
 <thead>
 <tr>
@@ -7467,6 +7474,7 @@ within the UCP.</p>
 </tbody>
 </table>
 <h4 id="fulfillment-method_1">Fulfillment Method<a class="headerlink" href="#fulfillment-method_1" title="Permanent link">&para;</a></h4>
+<p>A fulfillment method (shipping or pickup) with destinations and groups.</p>
 <table>
 <thead>
 <tr>
@@ -7516,6 +7524,7 @@ within the UCP.</p>
 </tbody>
 </table>
 <h4 id="fulfillment-available-method_1">Fulfillment Available Method<a class="headerlink" href="#fulfillment-available-method_1" title="Permanent link">&para;</a></h4>
+<p>Inventory availability hint for a fulfillment method type.</p>
 <table>
 <thead>
 <tr>
@@ -7553,6 +7562,7 @@ within the UCP.</p>
 </tbody>
 </table>
 <h4 id="fulfillment_1">Fulfillment<a class="headerlink" href="#fulfillment_1" title="Permanent link">&para;</a></h4>
+<p>Container for fulfillment methods and availability.</p>
 <table>
 <thead>
 <tr>
@@ -7578,6 +7588,7 @@ within the UCP.</p>
 </tbody>
 </table>
 <h4 id="checkout-with-fulfillment">Checkout with Fulfillment<a class="headerlink" href="#checkout-with-fulfillment" title="Permanent link">&para;</a></h4>
+<p>Checkout extended with hierarchical fulfillment.</p>
 <table>
 <thead>
 <tr>
@@ -7694,6 +7705,7 @@ within the UCP.</p>
 and responses.</p>
 <h3 id="platform-discovery-profile">Platform Discovery Profile<a class="headerlink" href="#platform-discovery-profile" title="Permanent link">&para;</a></h3>
 <p>The top-level structure of a platform profile document (hosted at a URI advertised by the platform).</p>
+<p>Full UCP metadata for platform-level configuration. Hosted at a URI advertised by the platform in request headers.</p>
 <table>
 <thead>
 <tr>
@@ -7719,7 +7731,7 @@ and responses.</p>
 <tr>
 <td style="text-align: left;">services</td>
 <td style="text-align: left;">object</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Service registry keyed by reverse-domain name.</td>
 </tr>
 <tr>
@@ -7731,7 +7743,7 @@ and responses.</p>
 <tr>
 <td style="text-align: left;">payment_handlers</td>
 <td style="text-align: left;">object</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Payment handler registry keyed by reverse-domain name.</td>
 </tr>
 <tr>
@@ -7756,6 +7768,7 @@ and responses.</p>
 </table>
 <h3 id="business-discovery-profile">Business Discovery Profile<a class="headerlink" href="#business-discovery-profile" title="Permanent link">&para;</a></h3>
 <p>The top-level structure of a business discovery document (<code>/.well-known/ucp</code>).</p>
+<p>UCP metadata for business/merchant-level configuration. Subset of platform schema with business-specific settings.</p>
 <table>
 <thead>
 <tr>
@@ -7781,7 +7794,7 @@ and responses.</p>
 <tr>
 <td style="text-align: left;">services</td>
 <td style="text-align: left;">object</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Service registry keyed by reverse-domain name.</td>
 </tr>
 <tr>
@@ -7793,7 +7806,7 @@ and responses.</p>
 <tr>
 <td style="text-align: left;">payment_handlers</td>
 <td style="text-align: left;">object</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Payment handler registry keyed by reverse-domain name.</td>
 </tr>
 <tr>
@@ -7824,6 +7837,7 @@ and responses.</p>
 </table>
 <h3 id="ucp-response-checkout-schema">Checkout Response Metadata<a class="headerlink" href="#ucp-response-checkout-schema" title="Permanent link">&para;</a></h3>
 <p>The <code>ucp</code> object included in checkout responses.</p>
+<p>UCP metadata for checkout responses.</p>
 <table>
 <thead>
 <tr>
@@ -7861,7 +7875,7 @@ and responses.</p>
 <tr>
 <td style="text-align: left;">payment_handlers</td>
 <td style="text-align: left;">object</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Payment handler registry keyed by reverse-domain name.</td>
 </tr>
 <tr>
@@ -7886,6 +7900,7 @@ and responses.</p>
 </table>
 <h3 id="ucp-response-cart-schema">Cart Response Metadata<a class="headerlink" href="#ucp-response-cart-schema" title="Permanent link">&para;</a></h3>
 <p>The <code>ucp</code> object included in cart responses.</p>
+<p>UCP metadata for cart responses. No payment handlers needed pre-checkout.</p>
 <table>
 <thead>
 <tr>
@@ -7936,6 +7951,7 @@ and responses.</p>
 </table>
 <h3 id="ucp-response-order-schema">Order Response Metadata<a class="headerlink" href="#ucp-response-order-schema" title="Permanent link">&para;</a></h3>
 <p>The <code>ucp</code> object included in order responses or events.</p>
+<p>UCP metadata for order responses. No payment handlers needed post-purchase.</p>
 <table>
 <thead>
 <tr>
@@ -7990,6 +8006,7 @@ and responses.</p>
 different required fields in each context.</p>
 <h4 id="discovery">Capability (Discovery)<a class="headerlink" href="#discovery" title="Permanent link">&para;</a></h4>
 <p>As seen in discovery profiles.</p>
+<p>Full capability declaration for platform-level discovery. Includes spec/schema URLs for agent fetching.</p>
 <table>
 <thead>
 <tr>
@@ -8003,7 +8020,7 @@ different required fields in each context.</p>
 <tr>
 <td style="text-align: left;">version</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Entity version in YYYY-MM-DD format.</td>
 </tr>
 <tr>
@@ -8040,6 +8057,7 @@ different required fields in each context.</p>
 </table>
 <h4 id="response">Capability (Response)<a class="headerlink" href="#response" title="Permanent link">&para;</a></h4>
 <p>As seen in response messages.</p>
+<p>Capability reference in responses. Only name/version required to confirm active capabilities.</p>
 <table>
 <thead>
 <tr>

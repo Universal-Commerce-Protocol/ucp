@@ -79,20 +79,17 @@ A **service** defines the API surface for a vertical (shopping, common, etc.). S
 
 #### Service Definition
 
-| Field             | Type   | Required | Description                         |
-| ----------------- | ------ | -------- | ----------------------------------- |
-| `version`         | string | Yes      | Service version (YYYY-MM-DD format) |
-| `spec`            | string | Yes      | URL to service documentation        |
-| `rest`            | object | No       | REST transport binding              |
-| `rest.schema`     | string | Yes      | URL to OpenAPI spec (JSON)          |
-| `rest.endpoint`   | string | Yes      | Business's REST endpoint            |
-| `mcp`             | object | No       | MCP transport binding               |
-| `mcp.schema`      | string | Yes      | URL to OpenRPC spec (JSON)          |
-| `mcp.endpoint`    | string | Yes      | Business's MCP endpoint             |
-| `a2a`             | object | No       | A2A transport binding               |
-| `a2a.endpoint`    | string | Yes      | Business's A2A Agent Card URL       |
-| `embedded`        | string | No       | Embedded transport binding          |
-| `embedded.schema` | string | Yes      | URL to OpenRPC spec (JSON)          |
+Full service declaration for platform-level discovery. All transports require `version`, `spec`, and `transport`. REST and MCP additionally require `schema` and `endpoint`; A2A requires `endpoint`; embedded requires `schema`.
+
+| Name      | Type   | Required | Description                                                                                     |
+| --------- | ------ | -------- | ----------------------------------------------------------------------------------------------- |
+| version   | string | **Yes**  | Entity version in YYYY-MM-DD format.                                                            |
+| spec      | string | **Yes**  | URL to human-readable specification document.                                                   |
+| schema    | string | No       | URL to JSON Schema defining this entity's structure and payloads.                               |
+| id        | string | No       | Unique identifier for this entity instance. Used to disambiguate when multiple instances exist. |
+| config    | object | No       | Entity-specific configuration. Structure defined by each entity's schema.                       |
+| transport | string | **Yes**  | Transport protocol for this service binding. **Enum:** `rest`, `mcp`, `a2a`, `embedded`         |
+| endpoint  | string | No       | Endpoint URL for this transport binding.                                                        |
 
 Transport definitions **MUST** be thin: they declare method names and reference base schemas only. See [Requirements](#requirements) for details.
 
@@ -131,9 +128,11 @@ A **capability** is a feature within a service. It declares what functionality i
 
 #### Capability Definition
 
+Full capability declaration for platform-level discovery. Includes spec/schema URLs for agent fetching.
+
 | Name    | Type    | Required | Description                                                                                                                     |
 | ------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| version | string  | No       | Entity version in YYYY-MM-DD format.                                                                                            |
+| version | string  | **Yes**  | Entity version in YYYY-MM-DD format.                                                                                            |
 | spec    | string  | **Yes**  | URL to human-readable specification document.                                                                                   |
 | schema  | string  | **Yes**  | URL to JSON Schema defining this entity's structure and payloads.                                                               |
 | id      | string  | No       | Unique identifier for this entity instance. Used to disambiguate when multiple instances exist.                                 |
@@ -2632,7 +2631,7 @@ Performs a full replacement of the checkout resource. The platform is **REQUIRED
 | ------------ | --------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | id           | string                                                          | **Yes**  | The unique identifier of the checkout session.Defined in path.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | id           | string                                                          | **Yes**  | Unique identifier of the checkout session.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| line_items   | Array\[[Line Item](/draft/specification/reference/#line-item)\] | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| line_items   | Array\[[Line Item](/draft/specification/reference/#line-item)\] | No       | List of line items being checked out.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | buyer        | [Buyer](/draft/specification/reference/#buyer)                  | No       | Representation of the buyer.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | context      | [Context](/draft/specification/reference/#context)              | No       | Provisional buyer signals for relevance and localization—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data. Context SHOULD be non-identifying and can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. |
 | signals      | [Signals](/draft/specification/reference/#signals)              | No       | Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.                                                                                                                                                                                                                                                                 |
@@ -2656,7 +2655,7 @@ After this call, other details will be updated through subsequent events as the 
 | id           | string                                             | **Yes**  | The unique identifier of the checkout session.Defined in path.                                                                                                                                                                                                                                                                                                                                          |
 | signals      | [Signals](/draft/specification/reference/#signals) | No       | Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace. |
 | risk_signals | object                                             | No       | Deprecated. Use signals instead. Will be removed in the next version.                                                                                                                                                                                                                                                                                                                                   |
-| payment      | [Payment](/draft/specification/checkout/#payment)  | **Yes**  | Payment configuration containing handlers.                                                                                                                                                                                                                                                                                                                                                              |
+| payment      | [Payment](/draft/specification/checkout/#payment)  | No       | Payment configuration containing handlers.                                                                                                                                                                                                                                                                                                                                                              |
 
 **Output**
 
@@ -2720,6 +2719,8 @@ Environment data provided by the platform to support authorization and abuse pre
 | dev.ucp.user_agent | string | No       | Client's HTTP User-Agent header or equivalent. |
 
 ### Fulfillment Option
+
+A fulfillment option within a group (e.g., Standard Shipping $5, Express $15).
 
 | Name                      | Type          | Required | Description                                                                |
 | ------------------------- | ------------- | -------- | -------------------------------------------------------------------------- |
@@ -2854,6 +2855,8 @@ Error code identifying the type of error. Standard errors are defined in specifi
 
 #### Selected Payment Instrument
 
+A payment instrument with selection state.
+
 | Name            | Type    | Required | Description                                                                                                                                                  |
 | --------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | id              | string  | **Yes**  | A unique identifier for this instrument instance, assigned by the platform.                                                                                  |
@@ -2886,6 +2889,8 @@ Error code identifying the type of error. Standard errors are defined in specifi
 
 ### Response
 
+Capability reference in responses. Only name/version required to confirm active capabilities.
+
 | Name    | Type    | Required | Description                                                                                                                     |
 | ------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | version | string  | **Yes**  | Entity version in YYYY-MM-DD format.                                                                                            |
@@ -2897,10 +2902,9 @@ Error code identifying the type of error. Standard errors are defined in specifi
 
 ### Total
 
-| Name                     | Type | Required | Description |
-| ------------------------ | ---- | -------- | ----------- |
-| *No properties defined.* |      |          |             |
-| *No properties defined.* |      |          |             |
+| Name | Type | Required | Description |
+| ---- | ---- | -------- | ----------- |
+|      |      |          |             |
 
 #### Rendering Contract
 
@@ -3015,13 +3019,15 @@ The business controls what MUST be rendered (top-level entries) versus what MAY 
 
 ### UCP Response Checkout
 
+UCP metadata for checkout responses.
+
 | Name             | Type   | Required | Description                                                                 |
 | ---------------- | ------ | -------- | --------------------------------------------------------------------------- |
 | version          | string | **Yes**  | UCP version in YYYY-MM-DD format.                                           |
 | status           | string | No       | Application-level status of the UCP operation. **Enum:** `success`, `error` |
 | services         | object | No       | Service registry keyed by reverse-domain name.                              |
 | capabilities     | object | No       | Capability registry keyed by reverse-domain name.                           |
-| payment_handlers | object | No       | Payment handler registry keyed by reverse-domain name.                      |
+| payment_handlers | object | **Yes**  | Payment handler registry keyed by reverse-domain name.                      |
 | services         | any    | No       |                                                                             |
 | capabilities     | any    | No       |                                                                             |
 | payment_handlers | any    | **Yes**  |                                                                             |
@@ -6946,6 +6952,8 @@ Represents a specific method of payment (e.g., a specific credit card, bank acco
 
 #### Selected Payment Instrument
 
+A payment instrument with selection state.
+
 | Name            | Type    | Required | Description                                                                                                                                                  |
 | --------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | id              | string  | **Yes**  | A unique identifier for this instrument instance, assigned by the platform.                                                                                  |
@@ -6960,8 +6968,8 @@ Represents a specific method of payment (e.g., a specific credit card, bank acco
 
 | Name            | Type                                                                     | Required | Description                                                                                                                                                  |
 | --------------- | ------------------------------------------------------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| id              | string                                                                   | **Yes**  | A unique identifier for this instrument instance, assigned by the platform.                                                                                  |
-| handler_id      | string                                                                   | **Yes**  | The unique identifier for the handler instance that produced this instrument. This corresponds to the 'id' field in the Payment Handler definition.          |
+| id              | string                                                                   | No       | A unique identifier for this instrument instance, assigned by the platform.                                                                                  |
+| handler_id      | string                                                                   | No       | The unique identifier for the handler instance that produced this instrument. This corresponds to the 'id' field in the Payment Handler definition.          |
 | type            | string                                                                   | **Yes**  | The broad category of the instrument (e.g., 'card', 'tokenized_card'). Specific schemas will constrain this to a constant value.                             |
 | billing_address | [Postal Address](/draft/specification/reference/#postal-address)         | No       | The billing address associated with this payment method.                                                                                                     |
 | credential      | [Payment Credential](/draft/specification/reference/#payment-credential) | No       | The base definition for any payment credential. Handlers define specific credential types.                                                                   |
@@ -7001,15 +7009,16 @@ Represents a specific method of payment (e.g., a specific credit card, bank acco
 
 Represents the processor or wallet provider responsible for authenticating and processing a specific payment instrument (e.g., Google Pay, Stripe, or a Bank App).
 
-| Name    | Type   | Required | Description                                                                                     |
-| ------- | ------ | -------- | ----------------------------------------------------------------------------------------------- |
-| version | string | **Yes**  | Entity version in YYYY-MM-DD format.                                                            |
-| spec    | string | No       | URL to human-readable specification document.                                                   |
-| schema  | string | No       | URL to JSON Schema defining this entity's structure and payloads.                               |
-| id      | string | No       | Unique identifier for this entity instance. Used to disambiguate when multiple instances exist. |
-| config  | object | No       | Entity-specific configuration. Structure defined by each entity's schema.                       |
+Handler reference in responses. May include full config state for runtime usage of the handler.
 
-| available_instruments | Array[object] | No | Instrument types this handler supports, with optional constraints. When absent, every instrument should be considered available. |
+| Name                  | Type          | Required | Description                                                                                                                      |
+| --------------------- | ------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| version               | string        | **Yes**  | Entity version in YYYY-MM-DD format.                                                                                             |
+| spec                  | string        | No       | URL to human-readable specification document.                                                                                    |
+| schema                | string        | No       | URL to JSON Schema defining this entity's structure and payloads.                                                                |
+| id                    | string        | **Yes**  | Unique identifier for this entity instance. Used to disambiguate when multiple instances exist.                                  |
+| config                | object        | No       | Entity-specific configuration. Structure defined by each entity's schema.                                                        |
+| available_instruments | Array[object] | No       | Instrument types this handler supports, with optional constraints. When absent, every instrument should be considered available. |
 
 # AP2 Mandates Extension
 
@@ -7191,6 +7200,8 @@ Once the `dev.ucp.shopping.ap2_mandate` capability is negotiated, the session is
 
 The platform initiates the session. The business returns the `Checkout` object with `ap2.merchant_authorization` embedded in the response body.
 
+Checkout extended with AP2 mandate support.
+
 | Name         | Type          | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | ------------ | ------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | ucp          | any           | **Yes**  | UCP metadata for checkout responses.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
@@ -7285,6 +7296,8 @@ The business trusts the Credential Issuer (Bank) and verifies the user's Key Bin
 
 Once the mandates are generated, the platform submits them in the completion request:
 
+AP2 extension data including checkout mandate.
+
 | Name             | Type   | Required | Description                                      |
 | ---------------- | ------ | -------- | ------------------------------------------------ |
 | checkout_mandate | string | No       | SD-JWT+kb proving user authorized this checkout. |
@@ -7365,11 +7378,15 @@ The business passes the `token` (composite object) to their Payment Handler / PS
 
 JWS Detached Content signature (RFC 7515 Appendix F) over the checkout response body (excluding ap2 field). Format: `<base64url-header>..<base64url-signature>`. The header MUST contain 'alg' (ES256/ES384/ES512) and 'kid' claims. The signature covers both the header and JCS-canonicalized checkout payload.
 
+JWS Detached Content signature (RFC 7515 Appendix F) over the checkout response body (excluding ap2 field). Format: `<base64url-header>..<base64url-signature>`. The header MUST contain 'alg' (ES256/ES384/ES512) and 'kid' claims. The signature covers both the header and JCS-canonicalized checkout payload.
+
 **Pattern:** `^[A-Za-z0-9_-]+\.\.[A-Za-z0-9_-]+$`
 
 ### AP2 Checkout Response
 
 The `ap2` object included in checkout responses.
+
+AP2 extension data including merchant authorization.
 
 | Name                   | Type   | Required | Description                                                |
 | ---------------------- | ------ | -------- | ---------------------------------------------------------- |
@@ -7379,17 +7396,23 @@ The `ap2` object included in checkout responses.
 
 SD-JWT+kb credential in `ap2.checkout_mandate`. Proving user authorization for the checkout. Contains the full checkout including `ap2.merchant_authorization`.
 
+SD-JWT+kb credential in `ap2.checkout_mandate`. Proving user authorization for the checkout. Contains the full checkout including `ap2.merchant_authorization`.
+
 **Pattern:** `^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]*\.[A-Za-z0-9_-]+(~[A-Za-z0-9_-]+)*$`
 
 ### AP2 Complete Request
 
 The `ap2` object included in COMPLETE checkout requests.
 
+AP2 extension data including checkout mandate.
+
 | Name             | Type   | Required | Description                                      |
 | ---------------- | ------ | -------- | ------------------------------------------------ |
 | checkout_mandate | string | No       | SD-JWT+kb proving user authorized this checkout. |
 
 ### Error Codes
+
+Error codes specific to AP2 mandate verification.
 
 Error codes specific to AP2 mandate verification.
 
@@ -7442,6 +7465,8 @@ The consent extension extends the **buyer object** within checkout:
 ## Schema Definition
 
 ### Consent Object
+
+User consent states for data processing
 
 | Name         | Type    | Required | Description                                       |
 | ------------ | ------- | -------- | ------------------------------------------------- |
@@ -7568,12 +7593,16 @@ When this capability is active, cart and/or checkout are extended with a `discou
 
 ### Discounts Object
 
+Discount codes input and applied discounts output.
+
 | Name    | Type          | Required | Description                                                                                                |
 | ------- | ------------- | -------- | ---------------------------------------------------------------------------------------------------------- |
 | codes   | Array[string] | No       | Discount codes to apply. Case-insensitive. Replaces previously submitted codes. Send empty array to clear. |
 | applied | Array[object] | No       | Discounts successfully applied (code-based and automatic).                                                 |
 
 ### Applied Discount
+
+A discount that was successfully applied.
 
 | Name        | Type          | Required | Description                                                                                                                                                                        |
 | ----------- | ------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -7588,6 +7617,8 @@ When this capability is active, cart and/or checkout are extended with a `discou
 | allocations | Array[object] | No       | Breakdown of where this discount was allocated. Sum of allocation amounts equals total amount.                                                                                     |
 
 ### Allocation
+
+Breakdown of how a discount amount was allocated to a specific target.
 
 | Name   | Type    | Required | Description                                                                       |
 | ------ | ------- | -------- | --------------------------------------------------------------------------------- |
@@ -8169,10 +8200,9 @@ This object MUST be one of the following types: [Shipping Destination](/draft/sp
 
 #### Total
 
-| Name                     | Type | Required | Description |
-| ------------------------ | ---- | -------- | ----------- |
-| *No properties defined.* |      |          |             |
-| *No properties defined.* |      |          |             |
+| Name | Type | Required | Description |
+| ---- | ---- | -------- | ----------- |
+|      |      |          |             |
 
 #### Postal Address
 
@@ -8803,6 +8833,8 @@ Cart reuses the same entity schemas as [Checkout](http://ucp.dev/draft/specifica
 
 ### UCP Response Cart
 
+UCP metadata for cart responses. No payment handlers needed pre-checkout.
+
 | Name             | Type   | Required | Description                                                                 |
 | ---------------- | ------ | -------- | --------------------------------------------------------------------------- |
 | version          | string | **Yes**  | UCP version in YYYY-MM-DD format.                                           |
@@ -8883,10 +8915,9 @@ Environment data provided by the platform to support authorization and abuse pre
 
 The same totals contract applies to cart and checkout. See [Checkout Totals](http://ucp.dev/draft/specification/checkout/#totals) for the rendering contract, accounting identity, well-known types, repeating types, and sub-line semantics.
 
-| Name                     | Type | Required | Description |
-| ------------------------ | ---- | -------- | ----------- |
-| *No properties defined.* |      |          |             |
-| *No properties defined.* |      |          |             |
+| Name | Type | Required | Description |
+| ---- | ---- | -------- | ----------- |
+|      |      |          |             |
 
 Taxes MAY be included where calculable. Platforms SHOULD assume cart totals are estimates; accurate taxes are computed at checkout.
 
@@ -8951,29 +8982,32 @@ Businesses advertise REST transport availability through their UCP profile at `/
   "ucp": {
     "version": "draft",
     "services": {
-      "dev.ucp.shopping": {
-        "version": "draft",
-        "spec": "https://ucp.dev/draft/specification/overview",
-        "rest": {
+      "dev.ucp.shopping": [
+        {
+          "version": "draft",
+          "spec": "https://ucp.dev/draft/specification/overview",
+          "transport": "rest",
           "schema": "https://ucp.dev/draft/services/shopping/rest.openapi.json",
           "endpoint": "https://business.example.com/ucp/v1"
         }
-      }
+      ]
     },
-    "capabilities": [
-      {
-        "name": "dev.ucp.shopping.checkout",
-        "version": "draft",
-        "spec": "https://ucp.dev/draft/specification/checkout",
-        "schema": "https://ucp.dev/draft/schemas/shopping/checkout.json"
-      },
-      {
-        "name": "dev.ucp.shopping.cart",
-        "version": "draft",
-        "spec": "https://ucp.dev/draft/specification/cart",
-        "schema": "https://ucp.dev/draft/schemas/shopping/cart.json"
-      }
-    ]
+    "capabilities": {
+      "dev.ucp.shopping.checkout": [
+        {
+          "version": "draft",
+          "spec": "https://ucp.dev/draft/specification/checkout",
+          "schema": "https://ucp.dev/draft/schemas/shopping/checkout.json"
+        }
+      ],
+      "dev.ucp.shopping.cart": [
+        {
+          "version": "draft",
+          "spec": "https://ucp.dev/draft/specification/cart",
+          "schema": "https://ucp.dev/draft/schemas/shopping/cart.json"
+        }
+      ]
+    }
   }
 }
 ```
@@ -9061,16 +9095,10 @@ Content-Type: application/json
 {
   "ucp": {
     "version": "draft",
-    "capabilities": [
-      {
-        "name": "dev.ucp.shopping.checkout",
-        "version": "draft"
-      },
-      {
-        "name": "dev.ucp.shopping.cart",
-        "version": "draft"
-      }
-    ]
+    "capabilities": {
+      "dev.ucp.shopping.checkout": [{"version": "draft"}],
+      "dev.ucp.shopping.cart": [{"version": "draft"}]
+    }
   },
   "id": "cart_abc123",
   "line_items": [
@@ -9162,16 +9190,10 @@ Content-Type: application/json
 {
   "ucp": {
     "version": "draft",
-    "capabilities": [
-      {
-        "name": "dev.ucp.shopping.checkout",
-        "version": "draft"
-      },
-      {
-        "name": "dev.ucp.shopping.cart",
-        "version": "draft"
-      }
-    ]
+    "capabilities": {
+      "dev.ucp.shopping.checkout": [{"version": "draft"}],
+      "dev.ucp.shopping.cart": [{"version": "draft"}]
+    }
   },
   "id": "cart_abc123",
   "line_items": [
@@ -9213,12 +9235,9 @@ Content-Type: application/json
   "ucp": {
     "version": "draft",
     "status": "error",
-    "capabilities": [
-      {
-        "name": "dev.ucp.shopping.cart",
-        "version": "draft"
-      }
-    ]
+    "capabilities": {
+      "dev.ucp.shopping.cart": [{"version": "draft"}]
+    }
   },
   "messages": [
     {
@@ -9303,16 +9322,10 @@ Content-Type: application/json
 {
   "ucp": {
     "version": "draft",
-    "capabilities": [
-      {
-        "name": "dev.ucp.shopping.checkout",
-        "version": "draft"
-      },
-      {
-        "name": "dev.ucp.shopping.cart",
-        "version": "draft"
-      }
-    ]
+    "capabilities": {
+      "dev.ucp.shopping.checkout": [{"version": "draft"}],
+      "dev.ucp.shopping.cart": [{"version": "draft"}]
+    }
   },
   "id": "cart_abc123",
   "line_items": [
@@ -9399,16 +9412,10 @@ Content-Type: application/json
 {
   "ucp": {
     "version": "draft",
-    "capabilities": [
-      {
-        "name": "dev.ucp.shopping.checkout",
-        "version": "draft"
-      },
-      {
-        "name": "dev.ucp.shopping.cart",
-        "version": "draft"
-      }
-    ]
+    "capabilities": {
+      "dev.ucp.shopping.checkout": [{"version": "draft"}],
+      "dev.ucp.shopping.cart": [{"version": "draft"}]
+    }
   },
   "id": "cart_abc123",
   "line_items": [
@@ -9548,29 +9555,32 @@ Businesses advertise MCP transport availability through their UCP profile at `/.
   "ucp": {
     "version": "draft",
     "services": {
-      "dev.ucp.shopping": {
-        "version": "draft",
-        "spec": "https://ucp.dev/draft/specification/overview",
-        "mcp": {
+      "dev.ucp.shopping": [
+        {
+          "version": "draft",
+          "spec": "https://ucp.dev/draft/specification/overview",
+          "transport": "mcp",
           "schema": "https://ucp.dev/draft/services/shopping/mcp.openrpc.json",
           "endpoint": "https://business.example.com/ucp/mcp"
         }
-      }
+      ]
     },
-    "capabilities": [
-      {
-        "name": "dev.ucp.shopping.checkout",
-        "version": "draft",
-        "spec": "https://ucp.dev/draft/specification/checkout",
-        "schema": "https://ucp.dev/draft/schemas/shopping/checkout.json"
-      },
-      {
-        "name": "dev.ucp.shopping.cart",
-        "version": "draft",
-        "spec": "https://ucp.dev/draft/specification/cart",
-        "schema": "https://ucp.dev/draft/schemas/shopping/cart.json"
-      }
-    ]
+    "capabilities": {
+      "dev.ucp.shopping.checkout": [
+        {
+          "version": "draft",
+          "spec": "https://ucp.dev/draft/specification/checkout",
+          "schema": "https://ucp.dev/draft/schemas/shopping/checkout.json"
+        }
+      ],
+      "dev.ucp.shopping.cart": [
+        {
+          "version": "draft",
+          "spec": "https://ucp.dev/draft/specification/cart",
+          "schema": "https://ucp.dev/draft/schemas/shopping/cart.json"
+        }
+      ]
+    }
   }
 }
 ```
@@ -9693,16 +9703,10 @@ Maps to the [Create Cart](http://ucp.dev/draft/specification/cart/#create-cart) 
       "cart": {
         "ucp": {
           "version": "draft",
-          "capabilities": [
-            {
-              "name": "dev.ucp.shopping.checkout",
-              "version": "draft"
-            },
-            {
-              "name": "dev.ucp.shopping.cart",
-              "version": "draft"
-            }
-          ]
+          "capabilities": {
+            "dev.ucp.shopping.checkout": [{"version": "draft"}],
+            "dev.ucp.shopping.cart": [{"version": "draft"}]
+          }
         },
         "id": "cart_abc123",
         "line_items": [
@@ -9826,16 +9830,10 @@ Maps to the [Get Cart](http://ucp.dev/draft/specification/cart/#get-cart) operat
       "cart": {
         "ucp": {
           "version": "draft",
-          "capabilities": [
-            {
-              "name": "dev.ucp.shopping.checkout",
-              "version": "draft"
-            },
-            {
-              "name": "dev.ucp.shopping.cart",
-              "version": "draft"
-            }
-          ]
+          "capabilities": {
+            "dev.ucp.shopping.checkout": [{"version": "draft"}],
+            "dev.ucp.shopping.cart": [{"version": "draft"}]
+          }
         },
         "id": "cart_abc123",
         "line_items": [
@@ -9887,12 +9885,9 @@ Maps to the [Get Cart](http://ucp.dev/draft/specification/cart/#get-cart) operat
       "cart": {
         "ucp": {
           "version": "draft",
-          "capabilities": [
-            {
-              "name": "dev.ucp.shopping.cart",
-              "version": "draft"
-            }
-          ]
+          "capabilities": {
+            "dev.ucp.shopping.cart": [{"version": "draft"}]
+          }
         },
         "messages": [
           {
@@ -9999,16 +9994,10 @@ Maps to the [Update Cart](http://ucp.dev/draft/specification/cart/#update-cart) 
       "cart": {
         "ucp": {
           "version": "draft",
-          "capabilities": [
-            {
-              "name": "dev.ucp.shopping.checkout",
-              "version": "draft"
-            },
-            {
-              "name": "dev.ucp.shopping.cart",
-              "version": "draft"
-            }
-          ]
+          "capabilities": {
+            "dev.ucp.shopping.checkout": [{"version": "draft"}],
+            "dev.ucp.shopping.cart": [{"version": "draft"}]
+          }
         },
         "id": "cart_abc123",
         "line_items": [
@@ -10120,16 +10109,10 @@ Maps to the [Cancel Cart](http://ucp.dev/draft/specification/cart/#cancel-cart) 
       "cart": {
         "ucp": {
           "version": "draft",
-          "capabilities": [
-            {
-              "name": "dev.ucp.shopping.checkout",
-              "version": "draft"
-            },
-            {
-              "name": "dev.ucp.shopping.cart",
-              "version": "draft"
-            }
-          ]
+          "capabilities": {
+            "dev.ucp.shopping.checkout": [{"version": "draft"}],
+            "dev.ucp.shopping.cart": [{"version": "draft"}]
+          }
         },
         "id": "cart_abc123",
         "line_items": [
@@ -11248,12 +11231,16 @@ The `limit` parameter is a requested page size, not a guaranteed count. Implemen
 
 ### Pagination Request
 
+Pagination parameters for requests.
+
 | Name   | Type    | Required | Description                                                        |
 | ------ | ------- | -------- | ------------------------------------------------------------------ |
 | cursor | string  | No       | Opaque cursor from previous response.                              |
 | limit  | integer | No       | Requested page size. Implementations MAY clamp to a lower maximum. |
 
 ### Pagination Response
+
+Pagination information in responses.
 
 | Name          | Type    | Required | Description                                                                           |
 | ------------- | ------- | -------- | ------------------------------------------------------------------------------------- |
@@ -11329,6 +11316,8 @@ Filters apply *after* identifier resolution (lookup) or option selection (get_pr
 
 ### Request
 
+Request body for catalog lookup.
+
 | Name    | Type          | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | ------- | ------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | ids     | Array[string] | **Yes**  | Identifiers to lookup. Implementations MUST support product ID and variant ID; MAY support secondary identifiers (SKU, handle, etc.).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
@@ -11397,6 +11386,8 @@ These fields appear on each option value in `product.options[].values[]`. They r
 
 ### Request
 
+Request body for single-product retrieval. Supports interactive variant narrowing via selected and preferences.
+
 | Name        | Type          | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | ----------- | ------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | id          | string        | **Yes**  | Product or variant identifier. Implementations MUST support product ID and variant ID.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
@@ -11438,14 +11429,15 @@ Businesses advertise REST transport availability through their UCP profile at `/
   "ucp": {
     "version": "draft",
     "services": {
-      "dev.ucp.shopping": {
-        "version": "draft",
-        "spec": "https://ucp.dev/draft/specification/overview",
-        "rest": {
+      "dev.ucp.shopping": [
+        {
+          "version": "draft",
+          "spec": "https://ucp.dev/draft/specification/overview",
+          "transport": "rest",
           "schema": "https://ucp.dev/draft/services/shopping/rest.openapi.json",
           "endpoint": "https://business.example.com/ucp"
         }
-      }
+      ]
     },
     "capabilities": {
       "dev.ucp.shopping.catalog.search": [{
@@ -11969,6 +11961,8 @@ Business outcomes use the standard HTTP 200 status with messages in the response
 
 ### UCP Response Catalog
 
+UCP metadata for catalog responses.
+
 | Name             | Type   | Required | Description                                                                 |
 | ---------------- | ------ | -------- | --------------------------------------------------------------------------- |
 | version          | string | **Yes**  | UCP version in YYYY-MM-DD format.                                           |
@@ -11979,6 +11973,8 @@ Business outcomes use the standard HTTP 200 status with messages in the response
 | capabilities     | any    | No       |                                                                             |
 
 ### Detail Product
+
+A product in a get_product response, extended with effective selections and availability signals on option values.
 
 | Name             | Type          | Required | Description                                                                                      |
 | ---------------- | ------------- | -------- | ------------------------------------------------------------------------------------------------ |
@@ -12038,14 +12034,15 @@ Businesses advertise MCP transport availability through their UCP profile at `/.
   "ucp": {
     "version": "draft",
     "services": {
-      "dev.ucp.shopping": {
-        "version": "draft",
-        "spec": "https://ucp.dev/draft/specification/overview",
-        "mcp": {
+      "dev.ucp.shopping": [
+        {
+          "version": "draft",
+          "spec": "https://ucp.dev/draft/specification/overview",
+          "transport": "mcp",
           "schema": "https://ucp.dev/draft/services/shopping/mcp.openrpc.json",
           "endpoint": "https://business.example.com/ucp/mcp"
         }
-      }
+      ]
     },
     "capabilities": {
       "dev.ucp.shopping.catalog.search": [{
@@ -12268,6 +12265,8 @@ The `catalog.ids` parameter accepts an array of identifiers and optional context
 
 #### Lookup Request
 
+Request body for catalog lookup.
+
 | Name    | Type          | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | ------- | ------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | ids     | Array[string] | **Yes**  | Identifiers to lookup. Implementations MUST support product ID and variant ID; MAY support secondary identifiers (SKU, handle, etc.).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
@@ -12450,6 +12449,8 @@ When some identifiers are not found, the response includes the found products. T
 Maps to the [Catalog Lookup](http://ucp.dev/draft/specification/catalog/lookup/#get-product-get_product) capability. Returns a singular `product` object for full product detail with interactive option selection.
 
 #### Get Product Request
+
+Request body for single-product retrieval. Supports interactive variant narrowing via selected and preferences.
 
 | Name        | Type          | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | ----------- | ------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -12678,6 +12679,8 @@ Business outcomes use the JSON-RPC `result` field with messages in the response 
 ## Entities
 
 ### Detail Product
+
+A product in a get_product response, extended with effective selections and availability signals on option values.
 
 | Name             | Type          | Required | Description                                                                                      |
 | ---------------- | ------------- | -------- | ------------------------------------------------------------------------------------------------ |
@@ -13013,15 +13016,15 @@ Businesses POST order events to a webhook URL provided by the platform during pa
 
 | Name          | Type                                                                               | Required | Description                                                                                                             |
 | ------------- | ---------------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------- |
-| ucp           | [Ucp Response Order Schema](/draft/specification/order/#ucp-response-order-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields. |
-| id            | string                                                                             | **Yes**  | Unique order identifier.                                                                                                |
+| ucp           | [Ucp Response Order Schema](/draft/specification/order/#ucp-response-order-schema) | No       | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields. |
+| id            | string                                                                             | No       | Unique order identifier.                                                                                                |
 | label         | string                                                                             | No       | Human-readable label for identifying the order. MUST only be provided by the business.                                  |
-| checkout_id   | string                                                                             | **Yes**  | Associated checkout ID for reconciliation.                                                                              |
-| permalink_url | string                                                                             | **Yes**  | Permalink to access the order on merchant site.                                                                         |
-| line_items    | Array\[[Order Line Item](/draft/specification/reference/#order-line-item)\]        | **Yes**  | Line items representing what was purchased — can change post-order via edits or exchanges.                              |
-| fulfillment   | object                                                                             | **Yes**  | Fulfillment data: buyer expectations and what actually happened.                                                        |
+| checkout_id   | string                                                                             | No       | Associated checkout ID for reconciliation.                                                                              |
+| permalink_url | string                                                                             | No       | Permalink to access the order on merchant site.                                                                         |
+| line_items    | Array\[[Order Line Item](/draft/specification/reference/#order-line-item)\]        | No       | Line items representing what was purchased — can change post-order via edits or exchanges.                              |
+| fulfillment   | object                                                                             | No       | Fulfillment data: buyer expectations and what actually happened.                                                        |
 | adjustments   | Array\[[Adjustment](/draft/specification/reference/#adjustment)\]                  | No       | Post-order events (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment.   |
-| totals        | [Totals](/draft/specification/reference/#totals)                                   | **Yes**  | Different totals for the order.                                                                                         |
+| totals        | [Totals](/draft/specification/reference/#totals)                                   | No       | Different totals for the order.                                                                                         |
 | event_id      | string                                                                             | **Yes**  | Unique event identifier.                                                                                                |
 | created_time  | string                                                                             | **Yes**  | Event creation timestamp in RFC 3339 format.                                                                            |
 
@@ -13034,6 +13037,8 @@ Businesses POST order events to a webhook URL provided by the platform during pa
 ### Webhook URL Configuration
 
 The platform provides its webhook URL in the order capability's `config` field during capability negotiation. The business discovers this URL from the platform's profile and uses it to send order lifecycle events.
+
+Platform's order capability configuration.
 
 | Name        | Type   | Required | Description                                                 |
 | ----------- | ------ | -------- | ----------------------------------------------------------- |
@@ -13158,6 +13163,8 @@ See [Message Signatures - Key Rotation](http://ucp.dev/draft/specification/signa
 
 ### Response
 
+Capability reference in responses. Only name/version required to confirm active capabilities.
+
 | Name    | Type    | Required | Description                                                                                                                     |
 | ------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | version | string  | **Yes**  | Entity version in YYYY-MM-DD format.                                                                                            |
@@ -13169,12 +13176,13 @@ See [Message Signatures - Key Rotation](http://ucp.dev/draft/specification/signa
 
 ### Total
 
-| Name                     | Type | Required | Description |
-| ------------------------ | ---- | -------- | ----------- |
-| *No properties defined.* |      |          |             |
-| *No properties defined.* |      |          |             |
+| Name | Type | Required | Description |
+| ---- | ---- | -------- | ----------- |
+|      |      |          |             |
 
 ### UCP Response Order Schema
+
+UCP metadata for order responses. No payment handlers needed post-purchase.
 
 | Name             | Type   | Required | Description                                                                 |
 | ---------------- | ------ | -------- | --------------------------------------------------------------------------- |
@@ -15841,8 +15849,8 @@ ______________________________________________________________________
 
 | Name            | Type                                                                     | Required | Description                                                                                                                                                  |
 | --------------- | ------------------------------------------------------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| id              | string                                                                   | **Yes**  | A unique identifier for this instrument instance, assigned by the platform.                                                                                  |
-| handler_id      | string                                                                   | **Yes**  | The unique identifier for the handler instance that produced this instrument. This corresponds to the 'id' field in the Payment Handler definition.          |
+| id              | string                                                                   | No       | A unique identifier for this instrument instance, assigned by the platform.                                                                                  |
+| handler_id      | string                                                                   | No       | The unique identifier for the handler instance that produced this instrument. This corresponds to the 'id' field in the Payment Handler definition.          |
 | type            | string                                                                   | **Yes**  | The broad category of the instrument (e.g., 'card', 'tokenized_card'). Specific schemas will constrain this to a constant value.                             |
 | billing_address | [Postal Address](/draft/specification/reference/#postal-address)         | No       | The billing address associated with this payment method.                                                                                                     |
 | credential      | [Payment Credential](/draft/specification/reference/#payment-credential) | No       | The base definition for any payment credential. Handlers define specific credential types.                                                                   |
@@ -16351,19 +16359,17 @@ ______________________________________________________________________
 
 ### Total
 
-| Name                     | Type | Required | Description |
-| ------------------------ | ---- | -------- | ----------- |
-| *No properties defined.* |      |          |             |
-| *No properties defined.* |      |          |             |
+| Name | Type | Required | Description |
+| ---- | ---- | -------- | ----------- |
+|      |      |          |             |
 
 ______________________________________________________________________
 
 ### Totals
 
-| Name                     | Type | Required | Description |
-| ------------------------ | ---- | -------- | ----------- |
-| *No properties defined.* |      |          |             |
-| *No properties defined.* |      |          |             |
+| Name | Type | Required | Description |
+| ---- | ---- | -------- | ----------- |
+|      |      |          |             |
 
 ______________________________________________________________________
 
@@ -16394,6 +16400,8 @@ ______________________________________________________________________
 
 ### Selected Payment Instrument
 
+A payment instrument with selection state.
+
 | Name            | Type    | Required | Description                                                                                                                                                  |
 | --------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | id              | string  | **Yes**  | A unique identifier for this instrument instance, assigned by the platform.                                                                                  |
@@ -16406,12 +16414,16 @@ ______________________________________________________________________
 
 ### Pagination Request
 
+Pagination parameters for requests.
+
 | Name   | Type    | Required | Description                                                        |
 | ------ | ------- | -------- | ------------------------------------------------------------------ |
 | cursor | string  | No       | Opaque cursor from previous response.                              |
 | limit  | integer | No       | Requested page size. Implementations MAY clamp to a lower maximum. |
 
 ### Pagination Response
+
+Pagination information in responses.
 
 | Name          | Type    | Required | Description                                                                           |
 | ------------- | ------- | -------- | ------------------------------------------------------------------------------------- |
@@ -16431,9 +16443,13 @@ Error code identifying the type of error. Standard errors are defined in specifi
 
 JWS Detached Content signature (RFC 7515 Appendix F) over the checkout response body (excluding ap2 field). Format: `<base64url-header>..<base64url-signature>`. The header MUST contain 'alg' (ES256/ES384/ES512) and 'kid' claims. The signature covers both the header and JCS-canonicalized checkout payload.
 
+JWS Detached Content signature (RFC 7515 Appendix F) over the checkout response body (excluding ap2 field). Format: `<base64url-header>..<base64url-signature>`. The header MUST contain 'alg' (ES256/ES384/ES512) and 'kid' claims. The signature covers both the header and JCS-canonicalized checkout payload.
+
 **Pattern:** `^[A-Za-z0-9_-]+\.\.[A-Za-z0-9_-]+$`
 
 #### Checkout Mandate
+
+SD-JWT+kb credential in `ap2.checkout_mandate`. Proving user authorization for the checkout. Contains the full checkout including `ap2.merchant_authorization`.
 
 SD-JWT+kb credential in `ap2.checkout_mandate`. Proving user authorization for the checkout. Contains the full checkout including `ap2.merchant_authorization`.
 
@@ -16441,17 +16457,23 @@ SD-JWT+kb credential in `ap2.checkout_mandate`. Proving user authorization for t
 
 #### Ap2 With Merchant Authorization
 
+AP2 extension data including merchant authorization.
+
 | Name                   | Type   | Required | Description                                                |
 | ---------------------- | ------ | -------- | ---------------------------------------------------------- |
 | merchant_authorization | string | No       | Merchant's signature proving checkout terms are authentic. |
 
 #### Ap2 With Checkout Mandate
 
+AP2 extension data including checkout mandate.
+
 | Name             | Type   | Required | Description                                      |
 | ---------------- | ------ | -------- | ------------------------------------------------ |
 | checkout_mandate | string | No       | SD-JWT+kb proving user authorized this checkout. |
 
 #### Checkout with AP2 Mandate
+
+Checkout extended with AP2 mandate support.
 
 | Name         | Type          | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | ------------ | ------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -16476,6 +16498,8 @@ SD-JWT+kb credential in `ap2.checkout_mandate`. Proving user authorization for t
 
 Error codes specific to AP2 mandate verification.
 
+Error codes specific to AP2 mandate verification.
+
 **Enum:** `mandate_required`, `agent_missing_key`, `mandate_invalid_signature`, `mandate_expired`, `mandate_scope_mismatch`, `merchant_authorization_invalid`, `merchant_authorization_missing`
 
 ______________________________________________________________________
@@ -16483,6 +16507,8 @@ ______________________________________________________________________
 ### Buyer Consent Extension
 
 #### Consent
+
+User consent states for data processing
 
 | Name         | Type    | Required | Description                                       |
 | ------------ | ------- | -------- | ------------------------------------------------- |
@@ -16493,6 +16519,8 @@ ______________________________________________________________________
 
 #### Buyer with Consent
 
+Buyer object extended with consent tracking.
+
 | Name         | Type   | Required | Description              |
 | ------------ | ------ | -------- | ------------------------ |
 | first_name   | string | No       | First name of the buyer. |
@@ -16502,6 +16530,8 @@ ______________________________________________________________________
 | consent      | object | No       | Consent tracking fields. |
 
 #### Checkout with Buyer Consent
+
+Checkout extended with consent tracking via buyer object.
 
 | Name         | Type          | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | ------------ | ------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -16528,12 +16558,16 @@ ______________________________________________________________________
 
 #### Allocation
 
+Breakdown of how a discount amount was allocated to a specific target.
+
 | Name   | Type    | Required | Description                                                                       |
 | ------ | ------- | -------- | --------------------------------------------------------------------------------- |
 | path   | string  | **Yes**  | JSONPath to the allocation target (e.g., '$.line_items[0]', '$.totals.shipping'). |
 | amount | integer | **Yes**  | Amount allocated to this target in ISO 4217 minor units.                          |
 
 #### Applied Discount
+
+A discount that was successfully applied.
 
 | Name        | Type          | Required | Description                                                                                                                                                                        |
 | ----------- | ------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -16549,12 +16583,16 @@ ______________________________________________________________________
 
 #### Discounts Object
 
+Discount codes input and applied discounts output.
+
 | Name    | Type          | Required | Description                                                                                                |
 | ------- | ------------- | -------- | ---------------------------------------------------------------------------------------------------------- |
 | codes   | Array[string] | No       | Discount codes to apply. Case-insensitive. Replaces previously submitted codes. Send empty array to clear. |
 | applied | Array[object] | No       | Discounts successfully applied (code-based and automatic).                                                 |
 
 #### Cart with Discount
+
+Cart extended with discount capability.
 
 | Name         | Type          | Required | Description                                                                                                                                                                                                                                                                                                                                                                                             |
 | ------------ | ------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -16573,6 +16611,8 @@ ______________________________________________________________________
 | discounts    | object        | No       | Discount codes input and applied discounts output.                                                                                                                                                                                                                                                                                                                                                      |
 
 #### Checkout with Discount
+
+Checkout extended with discount capability.
 
 | Name         | Type          | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | ------------ | ------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -16599,6 +16639,8 @@ ______________________________________________________________________
 
 #### Fulfillment Option
 
+A fulfillment option within a group (e.g., Standard Shipping $5, Express $15).
+
 | Name                      | Type          | Required | Description                                                                |
 | ------------------------- | ------------- | -------- | -------------------------------------------------------------------------- |
 | id                        | string        | **Yes**  | Unique fulfillment option identifier.                                      |
@@ -16611,6 +16653,8 @@ ______________________________________________________________________
 
 #### Fulfillment Group
 
+A merchant-generated package/group of line items with fulfillment options.
+
 | Name               | Type               | Required | Description                                                            |
 | ------------------ | ------------------ | -------- | ---------------------------------------------------------------------- |
 | id                 | string             | **Yes**  | Group identifier for referencing merchant-generated groups in updates. |
@@ -16619,6 +16663,8 @@ ______________________________________________________________________
 | selected_option_id | ['string', 'null'] | No       | ID of the selected fulfillment option for this group.                  |
 
 #### Fulfillment Method
+
+A fulfillment method (shipping or pickup) with destinations and groups.
 
 | Name                    | Type               | Required | Description                                                                                                  |
 | ----------------------- | ------------------ | -------- | ------------------------------------------------------------------------------------------------------------ |
@@ -16631,6 +16677,8 @@ ______________________________________________________________________
 
 #### Fulfillment Available Method
 
+Inventory availability hint for a fulfillment method type.
+
 | Name           | Type               | Required | Description                                                                              |
 | -------------- | ------------------ | -------- | ---------------------------------------------------------------------------------------- |
 | type           | string             | **Yes**  | Fulfillment method type this availability applies to. **Enum:** `shipping`, `pickup`     |
@@ -16640,12 +16688,16 @@ ______________________________________________________________________
 
 #### Fulfillment
 
+Container for fulfillment methods and availability.
+
 | Name              | Type          | Required | Description                         |
 | ----------------- | ------------- | -------- | ----------------------------------- |
 | methods           | Array[object] | No       | Fulfillment methods for cart items. |
 | available_methods | Array[object] | No       | Inventory availability hints.       |
 
 #### Checkout with Fulfillment
+
+Checkout extended with hierarchical fulfillment.
 
 | Name         | Type          | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | ------------ | ------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -16680,13 +16732,15 @@ The following schemas define the structure of UCP metadata used in discovery and
 
 The top-level structure of a platform profile document (hosted at a URI advertised by the platform).
 
+Full UCP metadata for platform-level configuration. Hosted at a URI advertised by the platform in request headers.
+
 | Name             | Type   | Required | Description                                                                 |
 | ---------------- | ------ | -------- | --------------------------------------------------------------------------- |
 | version          | string | **Yes**  | UCP version in YYYY-MM-DD format.                                           |
 | status           | string | No       | Application-level status of the UCP operation. **Enum:** `success`, `error` |
-| services         | object | No       | Service registry keyed by reverse-domain name.                              |
+| services         | object | **Yes**  | Service registry keyed by reverse-domain name.                              |
 | capabilities     | object | No       | Capability registry keyed by reverse-domain name.                           |
-| payment_handlers | object | No       | Payment handler registry keyed by reverse-domain name.                      |
+| payment_handlers | object | **Yes**  | Payment handler registry keyed by reverse-domain name.                      |
 | services         | any    | **Yes**  |                                                                             |
 | capabilities     | any    | No       |                                                                             |
 | payment_handlers | any    | **Yes**  |                                                                             |
@@ -16695,13 +16749,15 @@ The top-level structure of a platform profile document (hosted at a URI advertis
 
 The top-level structure of a business discovery document (`/.well-known/ucp`).
 
+UCP metadata for business/merchant-level configuration. Subset of platform schema with business-specific settings.
+
 | Name               | Type   | Required | Description                                                                                                                                                                                                                                                                                          |
 | ------------------ | ------ | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | version            | string | **Yes**  | UCP version in YYYY-MM-DD format.                                                                                                                                                                                                                                                                    |
 | status             | string | No       | Application-level status of the UCP operation. **Enum:** `success`, `error`                                                                                                                                                                                                                          |
-| services           | object | No       | Service registry keyed by reverse-domain name.                                                                                                                                                                                                                                                       |
+| services           | object | **Yes**  | Service registry keyed by reverse-domain name.                                                                                                                                                                                                                                                       |
 | capabilities       | object | No       | Capability registry keyed by reverse-domain name.                                                                                                                                                                                                                                                    |
-| payment_handlers   | object | No       | Payment handler registry keyed by reverse-domain name.                                                                                                                                                                                                                                               |
+| payment_handlers   | object | **Yes**  | Payment handler registry keyed by reverse-domain name.                                                                                                                                                                                                                                               |
 | supported_versions | object | No       | Previous protocol versions this business supports, mapped to profile URIs. Businesses that support older protocol versions SHOULD advertise each version and link to its profile. Each URI points to a complete, self-contained profile for that version. When omitted, only `version` is supported. |
 | services           | any    | **Yes**  |                                                                                                                                                                                                                                                                                                      |
 | capabilities       | any    | No       |                                                                                                                                                                                                                                                                                                      |
@@ -16711,13 +16767,15 @@ The top-level structure of a business discovery document (`/.well-known/ucp`).
 
 The `ucp` object included in checkout responses.
 
+UCP metadata for checkout responses.
+
 | Name             | Type   | Required | Description                                                                 |
 | ---------------- | ------ | -------- | --------------------------------------------------------------------------- |
 | version          | string | **Yes**  | UCP version in YYYY-MM-DD format.                                           |
 | status           | string | No       | Application-level status of the UCP operation. **Enum:** `success`, `error` |
 | services         | object | No       | Service registry keyed by reverse-domain name.                              |
 | capabilities     | object | No       | Capability registry keyed by reverse-domain name.                           |
-| payment_handlers | object | No       | Payment handler registry keyed by reverse-domain name.                      |
+| payment_handlers | object | **Yes**  | Payment handler registry keyed by reverse-domain name.                      |
 | services         | any    | No       |                                                                             |
 | capabilities     | any    | No       |                                                                             |
 | payment_handlers | any    | **Yes**  |                                                                             |
@@ -16725,6 +16783,8 @@ The `ucp` object included in checkout responses.
 ### Cart Response Metadata
 
 The `ucp` object included in cart responses.
+
+UCP metadata for cart responses. No payment handlers needed pre-checkout.
 
 | Name             | Type   | Required | Description                                                                 |
 | ---------------- | ------ | -------- | --------------------------------------------------------------------------- |
@@ -16738,6 +16798,8 @@ The `ucp` object included in cart responses.
 ### Order Response Metadata
 
 The `ucp` object included in order responses or events.
+
+UCP metadata for order responses. No payment handlers needed post-purchase.
 
 | Name             | Type   | Required | Description                                                                 |
 | ---------------- | ------ | -------- | --------------------------------------------------------------------------- |
@@ -16756,9 +16818,11 @@ This object describes a single capability or extension. It appears in the `capab
 
 As seen in discovery profiles.
 
+Full capability declaration for platform-level discovery. Includes spec/schema URLs for agent fetching.
+
 | Name    | Type    | Required | Description                                                                                                                     |
 | ------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| version | string  | No       | Entity version in YYYY-MM-DD format.                                                                                            |
+| version | string  | **Yes**  | Entity version in YYYY-MM-DD format.                                                                                            |
 | spec    | string  | **Yes**  | URL to human-readable specification document.                                                                                   |
 | schema  | string  | **Yes**  | URL to JSON Schema defining this entity's structure and payloads.                                                               |
 | id      | string  | No       | Unique identifier for this entity instance. Used to disambiguate when multiple instances exist.                                 |
@@ -16768,6 +16832,8 @@ As seen in discovery profiles.
 #### Capability (Response)
 
 As seen in response messages.
+
+Capability reference in responses. Only name/version required to confirm active capabilities.
 
 | Name    | Type    | Required | Description                                                                                                                     |
 | ------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------- |

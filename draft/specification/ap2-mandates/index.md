@@ -178,6 +178,8 @@ Once the `dev.ucp.shopping.ap2_mandate` capability is negotiated, the session is
 
 The platform initiates the session. The business returns the `Checkout` object with `ap2.merchant_authorization` embedded in the response body.
 
+Checkout extended with AP2 mandate support.
+
 | Name         | Type          | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | ------------ | ------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | ucp          | any           | **Yes**  | UCP metadata for checkout responses.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
@@ -272,6 +274,8 @@ The business trusts the Credential Issuer (Bank) and verifies the user's Key Bin
 
 Once the mandates are generated, the platform submits them in the completion request:
 
+AP2 extension data including checkout mandate.
+
 | Name             | Type   | Required | Description                                      |
 | ---------------- | ------ | -------- | ------------------------------------------------ |
 | checkout_mandate | string | No       | SD-JWT+kb proving user authorized this checkout. |
@@ -352,11 +356,15 @@ The business passes the `token` (composite object) to their Payment Handler / PS
 
 JWS Detached Content signature (RFC 7515 Appendix F) over the checkout response body (excluding ap2 field). Format: `<base64url-header>..<base64url-signature>`. The header MUST contain 'alg' (ES256/ES384/ES512) and 'kid' claims. The signature covers both the header and JCS-canonicalized checkout payload.
 
+JWS Detached Content signature (RFC 7515 Appendix F) over the checkout response body (excluding ap2 field). Format: `<base64url-header>..<base64url-signature>`. The header MUST contain 'alg' (ES256/ES384/ES512) and 'kid' claims. The signature covers both the header and JCS-canonicalized checkout payload.
+
 **Pattern:** `^[A-Za-z0-9_-]+\.\.[A-Za-z0-9_-]+$`
 
 ### AP2 Checkout Response
 
 The `ap2` object included in checkout responses.
+
+AP2 extension data including merchant authorization.
 
 | Name                   | Type   | Required | Description                                                |
 | ---------------------- | ------ | -------- | ---------------------------------------------------------- |
@@ -366,17 +374,23 @@ The `ap2` object included in checkout responses.
 
 SD-JWT+kb credential in `ap2.checkout_mandate`. Proving user authorization for the checkout. Contains the full checkout including `ap2.merchant_authorization`.
 
+SD-JWT+kb credential in `ap2.checkout_mandate`. Proving user authorization for the checkout. Contains the full checkout including `ap2.merchant_authorization`.
+
 **Pattern:** `^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]*\.[A-Za-z0-9_-]+(~[A-Za-z0-9_-]+)*$`
 
 ### AP2 Complete Request
 
 The `ap2` object included in COMPLETE checkout requests.
 
+AP2 extension data including checkout mandate.
+
 | Name             | Type   | Required | Description                                      |
 | ---------------- | ------ | -------- | ------------------------------------------------ |
 | checkout_mandate | string | No       | SD-JWT+kb proving user authorized this checkout. |
 
 ### Error Codes
+
+Error codes specific to AP2 mandate verification.
 
 Error codes specific to AP2 mandate verification.
 

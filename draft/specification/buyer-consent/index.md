@@ -37,6 +37,8 @@ The consent extension extends the **buyer object** within checkout:
 
 ### Consent Object
 
+User consent states for data processing
+
 | Name         | Type    | Required | Description                                       |
 | ------------ | ------- | -------- | ------------------------------------------------- |
 | analytics    | boolean | No       | Consent for analytics and performance tracking.   |

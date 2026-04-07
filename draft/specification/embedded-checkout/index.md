@@ -1458,6 +1458,8 @@ Represents a specific method of payment (e.g., a specific credit card, bank acco
 
 #### Selected Payment Instrument
 
+A payment instrument with selection state.
+
 | Name            | Type    | Required | Description                                                                                                                                                  |
 | --------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | id              | string  | **Yes**  | A unique identifier for this instrument instance, assigned by the platform.                                                                                  |
@@ -1472,8 +1474,8 @@ Represents a specific method of payment (e.g., a specific credit card, bank acco
 
 | Name            | Type                                                                     | Required | Description                                                                                                                                                  |
 | --------------- | ------------------------------------------------------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| id              | string                                                                   | **Yes**  | A unique identifier for this instrument instance, assigned by the platform.                                                                                  |
-| handler_id      | string                                                                   | **Yes**  | The unique identifier for the handler instance that produced this instrument. This corresponds to the 'id' field in the Payment Handler definition.          |
+| id              | string                                                                   | No       | A unique identifier for this instrument instance, assigned by the platform.                                                                                  |
+| handler_id      | string                                                                   | No       | The unique identifier for the handler instance that produced this instrument. This corresponds to the 'id' field in the Payment Handler definition.          |
 | type            | string                                                                   | **Yes**  | The broad category of the instrument (e.g., 'card', 'tokenized_card'). Specific schemas will constrain this to a constant value.                             |
 | billing_address | [Postal Address](/draft/specification/reference/#postal-address)         | No       | The billing address associated with this payment method.                                                                                                     |
 | credential      | [Payment Credential](/draft/specification/reference/#payment-credential) | No       | The base definition for any payment credential. Handlers define specific credential types.                                                                   |
@@ -1513,12 +1515,13 @@ Represents a specific method of payment (e.g., a specific credit card, bank acco
 
 Represents the processor or wallet provider responsible for authenticating and processing a specific payment instrument (e.g., Google Pay, Stripe, or a Bank App).
 
-| Name    | Type   | Required | Description                                                                                     |
-| ------- | ------ | -------- | ----------------------------------------------------------------------------------------------- |
-| version | string | **Yes**  | Entity version in YYYY-MM-DD format.                                                            |
-| spec    | string | No       | URL to human-readable specification document.                                                   |
-| schema  | string | No       | URL to JSON Schema defining this entity's structure and payloads.                               |
-| id      | string | No       | Unique identifier for this entity instance. Used to disambiguate when multiple instances exist. |
-| config  | object | No       | Entity-specific configuration. Structure defined by each entity's schema.                       |
+Handler reference in responses. May include full config state for runtime usage of the handler.
 
-| available_instruments | Array[object] | No | Instrument types this handler supports, with optional constraints. When absent, every instrument should be considered available. |
+| Name                  | Type          | Required | Description                                                                                                                      |
+| --------------------- | ------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| version               | string        | **Yes**  | Entity version in YYYY-MM-DD format.                                                                                             |
+| spec                  | string        | No       | URL to human-readable specification document.                                                                                    |
+| schema                | string        | No       | URL to JSON Schema defining this entity's structure and payloads.                                                                |
+| id                    | string        | **Yes**  | Unique identifier for this entity instance. Used to disambiguate when multiple instances exist.                                  |
+| config                | object        | No       | Entity-specific configuration. Structure defined by each entity's schema.                                                        |
+| available_instruments | Array[object] | No       | Instrument types this handler supports, with optional constraints. When absent, every instrument should be considered available. |

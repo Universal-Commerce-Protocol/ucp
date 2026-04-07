@@ -13,29 +13,32 @@ Businesses advertise MCP transport availability through their UCP profile at `/.
   "ucp": {
     "version": "draft",
     "services": {
-      "dev.ucp.shopping": {
-        "version": "draft",
-        "spec": "https://ucp.dev/draft/specification/overview",
-        "mcp": {
+      "dev.ucp.shopping": [
+        {
+          "version": "draft",
+          "spec": "https://ucp.dev/draft/specification/overview",
+          "transport": "mcp",
           "schema": "https://ucp.dev/draft/services/shopping/mcp.openrpc.json",
           "endpoint": "https://business.example.com/ucp/mcp"
         }
-      }
+      ]
     },
-    "capabilities": [
-      {
-        "name": "dev.ucp.shopping.checkout",
-        "version": "draft",
-        "spec": "https://ucp.dev/draft/specification/checkout",
-        "schema": "https://ucp.dev/draft/schemas/shopping/checkout.json"
-      },
-      {
-        "name": "dev.ucp.shopping.cart",
-        "version": "draft",
-        "spec": "https://ucp.dev/draft/specification/cart",
-        "schema": "https://ucp.dev/draft/schemas/shopping/cart.json"
-      }
-    ]
+    "capabilities": {
+      "dev.ucp.shopping.checkout": [
+        {
+          "version": "draft",
+          "spec": "https://ucp.dev/draft/specification/checkout",
+          "schema": "https://ucp.dev/draft/schemas/shopping/checkout.json"
+        }
+      ],
+      "dev.ucp.shopping.cart": [
+        {
+          "version": "draft",
+          "spec": "https://ucp.dev/draft/specification/cart",
+          "schema": "https://ucp.dev/draft/schemas/shopping/cart.json"
+        }
+      ]
+    }
   }
 }
 ```
@@ -158,16 +161,10 @@ Maps to the [Create Cart](http://ucp.dev/draft/specification/cart/#create-cart) 
       "cart": {
         "ucp": {
           "version": "draft",
-          "capabilities": [
-            {
-              "name": "dev.ucp.shopping.checkout",
-              "version": "draft"
-            },
-            {
-              "name": "dev.ucp.shopping.cart",
-              "version": "draft"
-            }
-          ]
+          "capabilities": {
+            "dev.ucp.shopping.checkout": [{"version": "draft"}],
+            "dev.ucp.shopping.cart": [{"version": "draft"}]
+          }
         },
         "id": "cart_abc123",
         "line_items": [
@@ -291,16 +288,10 @@ Maps to the [Get Cart](http://ucp.dev/draft/specification/cart/#get-cart) operat
       "cart": {
         "ucp": {
           "version": "draft",
-          "capabilities": [
-            {
-              "name": "dev.ucp.shopping.checkout",
-              "version": "draft"
-            },
-            {
-              "name": "dev.ucp.shopping.cart",
-              "version": "draft"
-            }
-          ]
+          "capabilities": {
+            "dev.ucp.shopping.checkout": [{"version": "draft"}],
+            "dev.ucp.shopping.cart": [{"version": "draft"}]
+          }
         },
         "id": "cart_abc123",
         "line_items": [
@@ -352,12 +343,9 @@ Maps to the [Get Cart](http://ucp.dev/draft/specification/cart/#get-cart) operat
       "cart": {
         "ucp": {
           "version": "draft",
-          "capabilities": [
-            {
-              "name": "dev.ucp.shopping.cart",
-              "version": "draft"
-            }
-          ]
+          "capabilities": {
+            "dev.ucp.shopping.cart": [{"version": "draft"}]
+          }
         },
         "messages": [
           {
@@ -464,16 +452,10 @@ Maps to the [Update Cart](http://ucp.dev/draft/specification/cart/#update-cart) 
       "cart": {
         "ucp": {
           "version": "draft",
-          "capabilities": [
-            {
-              "name": "dev.ucp.shopping.checkout",
-              "version": "draft"
-            },
-            {
-              "name": "dev.ucp.shopping.cart",
-              "version": "draft"
-            }
-          ]
+          "capabilities": {
+            "dev.ucp.shopping.checkout": [{"version": "draft"}],
+            "dev.ucp.shopping.cart": [{"version": "draft"}]
+          }
         },
         "id": "cart_abc123",
         "line_items": [
@@ -585,16 +567,10 @@ Maps to the [Cancel Cart](http://ucp.dev/draft/specification/cart/#cancel-cart) 
       "cart": {
         "ucp": {
           "version": "draft",
-          "capabilities": [
-            {
-              "name": "dev.ucp.shopping.checkout",
-              "version": "draft"
-            },
-            {
-              "name": "dev.ucp.shopping.cart",
-              "version": "draft"
-            }
-          ]
+          "capabilities": {
+            "dev.ucp.shopping.checkout": [{"version": "draft"}],
+            "dev.ucp.shopping.cart": [{"version": "draft"}]
+          }
         },
         "id": "cart_abc123",
         "line_items": [

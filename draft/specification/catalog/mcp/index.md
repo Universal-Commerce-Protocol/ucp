@@ -13,14 +13,15 @@ Businesses advertise MCP transport availability through their UCP profile at `/.
   "ucp": {
     "version": "draft",
     "services": {
-      "dev.ucp.shopping": {
-        "version": "draft",
-        "spec": "https://ucp.dev/draft/specification/overview",
-        "mcp": {
+      "dev.ucp.shopping": [
+        {
+          "version": "draft",
+          "spec": "https://ucp.dev/draft/specification/overview",
+          "transport": "mcp",
           "schema": "https://ucp.dev/draft/services/shopping/mcp.openrpc.json",
           "endpoint": "https://business.example.com/ucp/mcp"
         }
-      }
+      ]
     },
     "capabilities": {
       "dev.ucp.shopping.catalog.search": [{
@@ -243,6 +244,8 @@ The `catalog.ids` parameter accepts an array of identifiers and optional context
 
 #### Lookup Request
 
+Request body for catalog lookup.
+
 | Name    | Type          | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | ------- | ------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | ids     | Array[string] | **Yes**  | Identifiers to lookup. Implementations MUST support product ID and variant ID; MAY support secondary identifiers (SKU, handle, etc.).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
@@ -425,6 +428,8 @@ When some identifiers are not found, the response includes the found products. T
 Maps to the [Catalog Lookup](http://ucp.dev/draft/specification/catalog/lookup/#get-product-get_product) capability. Returns a singular `product` object for full product detail with interactive option selection.
 
 #### Get Product Request
+
+Request body for single-product retrieval. Supports interactive variant narrowing via selected and preferences.
 
 | Name        | Type          | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | ----------- | ------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -653,6 +658,8 @@ Business outcomes use the JSON-RPC `result` field with messages in the response 
 ## Entities
 
 ### Detail Product
+
+A product in a get_product response, extended with effective selections and availability signals on option values.
 
 | Name             | Type          | Required | Description                                                                                      |
 | ---------------- | ------------- | -------- | ------------------------------------------------------------------------------------------------ |

@@ -45,12 +45,16 @@ When this capability is active, cart and/or checkout are extended with a `discou
 
 ### Discounts Object
 
+Discount codes input and applied discounts output.
+
 | Name    | Type          | Required | Description                                                                                                |
 | ------- | ------------- | -------- | ---------------------------------------------------------------------------------------------------------- |
 | codes   | Array[string] | No       | Discount codes to apply. Case-insensitive. Replaces previously submitted codes. Send empty array to clear. |
 | applied | Array[object] | No       | Discounts successfully applied (code-based and automatic).                                                 |
 
 ### Applied Discount
+
+A discount that was successfully applied.
 
 | Name        | Type          | Required | Description                                                                                                                                                                        |
 | ----------- | ------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -65,6 +69,8 @@ When this capability is active, cart and/or checkout are extended with a `discou
 | allocations | Array[object] | No       | Breakdown of where this discount was allocated. Sum of allocation amounts equals total amount.                                                                                     |
 
 ### Allocation
+
+Breakdown of how a discount amount was allocated to a specific target.
 
 | Name   | Type    | Required | Description                                                                       |
 | ------ | ------- | -------- | --------------------------------------------------------------------------------- |

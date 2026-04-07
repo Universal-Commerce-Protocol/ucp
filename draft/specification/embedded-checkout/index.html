@@ -5714,6 +5714,7 @@ account, or wallet credential) available to the buyer.</p>
 </tbody>
 </table>
 <h4 id="selected-payment-instrument">Selected Payment Instrument<a class="headerlink" href="#selected-payment-instrument" title="Permanent link">&para;</a></h4>
+<p>A payment instrument with selection state.</p>
 <table>
 <thead>
 <tr>
@@ -5782,13 +5783,13 @@ account, or wallet credential) available to the buyer.</p>
 <tr>
 <td style="text-align: left;">id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">No</td>
 <td style="text-align: left;">A unique identifier for this instrument instance, assigned by the platform.</td>
 </tr>
 <tr>
 <td style="text-align: left;">handler_id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">No</td>
 <td style="text-align: left;">The unique identifier for the handler instance that produced this instrument. This corresponds to the 'id' field in the Payment Handler definition.</td>
 </tr>
 <tr>
@@ -5950,6 +5951,7 @@ account, or wallet credential) available to the buyer.</p>
 <p>Represents the processor or wallet provider responsible for authenticating and
 processing a specific payment instrument (e.g., Google Pay, Stripe, or a Bank
 App).</p>
+<p>Handler reference in responses. May include full config state for runtime usage of the handler.</p>
 <table>
 <thead>
 <tr>
@@ -5981,7 +5983,7 @@ App).</p>
 <tr>
 <td style="text-align: left;">id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Unique identifier for this entity instance. Used to disambiguate when multiple instances exist.</td>
 </tr>
 <tr>
@@ -5990,9 +5992,14 @@ App).</p>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Entity-specific configuration. Structure defined by each entity's schema.</td>
 </tr>
+<tr>
+<td style="text-align: left;">available_instruments</td>
+<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Instrument types this handler supports, with optional constraints. When absent, every instrument should be considered available.</td>
+</tr>
 </tbody>
 </table>
-<p>| available_instruments | Array[object] | No | Instrument types this handler supports, with optional constraints. When absent, every instrument should be considered available. |</p>
 
 
 

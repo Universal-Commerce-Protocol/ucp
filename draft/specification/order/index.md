@@ -285,15 +285,15 @@ Businesses POST order events to a webhook URL provided by the platform during pa
 
 | Name          | Type                                                                               | Required | Description                                                                                                             |
 | ------------- | ---------------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------- |
-| ucp           | [Ucp Response Order Schema](/draft/specification/order/#ucp-response-order-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields. |
-| id            | string                                                                             | **Yes**  | Unique order identifier.                                                                                                |
+| ucp           | [Ucp Response Order Schema](/draft/specification/order/#ucp-response-order-schema) | No       | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields. |
+| id            | string                                                                             | No       | Unique order identifier.                                                                                                |
 | label         | string                                                                             | No       | Human-readable label for identifying the order. MUST only be provided by the business.                                  |
-| checkout_id   | string                                                                             | **Yes**  | Associated checkout ID for reconciliation.                                                                              |
-| permalink_url | string                                                                             | **Yes**  | Permalink to access the order on merchant site.                                                                         |
-| line_items    | Array\[[Order Line Item](/draft/specification/reference/#order-line-item)\]        | **Yes**  | Line items representing what was purchased — can change post-order via edits or exchanges.                              |
-| fulfillment   | object                                                                             | **Yes**  | Fulfillment data: buyer expectations and what actually happened.                                                        |
+| checkout_id   | string                                                                             | No       | Associated checkout ID for reconciliation.                                                                              |
+| permalink_url | string                                                                             | No       | Permalink to access the order on merchant site.                                                                         |
+| line_items    | Array\[[Order Line Item](/draft/specification/reference/#order-line-item)\]        | No       | Line items representing what was purchased — can change post-order via edits or exchanges.                              |
+| fulfillment   | object                                                                             | No       | Fulfillment data: buyer expectations and what actually happened.                                                        |
 | adjustments   | Array\[[Adjustment](/draft/specification/reference/#adjustment)\]                  | No       | Post-order events (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment.   |
-| totals        | [Totals](/draft/specification/reference/#totals)                                   | **Yes**  | Different totals for the order.                                                                                         |
+| totals        | [Totals](/draft/specification/reference/#totals)                                   | No       | Different totals for the order.                                                                                         |
 | event_id      | string                                                                             | **Yes**  | Unique event identifier.                                                                                                |
 | created_time  | string                                                                             | **Yes**  | Event creation timestamp in RFC 3339 format.                                                                            |
 
@@ -306,6 +306,8 @@ Businesses POST order events to a webhook URL provided by the platform during pa
 ### Webhook URL Configuration
 
 The platform provides its webhook URL in the order capability's `config` field during capability negotiation. The business discovers this URL from the platform's profile and uses it to send order lifecycle events.
+
+Platform's order capability configuration.
 
 | Name        | Type   | Required | Description                                                 |
 | ----------- | ------ | -------- | ----------------------------------------------------------- |
@@ -430,6 +432,8 @@ See [Message Signatures - Key Rotation](http://ucp.dev/draft/specification/signa
 
 ### Response
 
+Capability reference in responses. Only name/version required to confirm active capabilities.
+
 | Name    | Type    | Required | Description                                                                                                                     |
 | ------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | version | string  | **Yes**  | Entity version in YYYY-MM-DD format.                                                                                            |
@@ -441,12 +445,13 @@ See [Message Signatures - Key Rotation](http://ucp.dev/draft/specification/signa
 
 ### Total
 
-| Name                     | Type | Required | Description |
-| ------------------------ | ---- | -------- | ----------- |
-| *No properties defined.* |      |          |             |
-| *No properties defined.* |      |          |             |
+| Name | Type | Required | Description |
+| ---- | ---- | -------- | ----------- |
+|      |      |          |             |
 
 ### UCP Response Order Schema
+
+UCP metadata for order responses. No payment handlers needed post-purchase.
 
 | Name             | Type   | Required | Description                                                                 |
 | ---------------- | ------ | -------- | --------------------------------------------------------------------------- |

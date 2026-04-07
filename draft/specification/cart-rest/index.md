@@ -13,29 +13,32 @@ Businesses advertise REST transport availability through their UCP profile at `/
   "ucp": {
     "version": "draft",
     "services": {
-      "dev.ucp.shopping": {
-        "version": "draft",
-        "spec": "https://ucp.dev/draft/specification/overview",
-        "rest": {
+      "dev.ucp.shopping": [
+        {
+          "version": "draft",
+          "spec": "https://ucp.dev/draft/specification/overview",
+          "transport": "rest",
           "schema": "https://ucp.dev/draft/services/shopping/rest.openapi.json",
           "endpoint": "https://business.example.com/ucp/v1"
         }
-      }
+      ]
     },
-    "capabilities": [
-      {
-        "name": "dev.ucp.shopping.checkout",
-        "version": "draft",
-        "spec": "https://ucp.dev/draft/specification/checkout",
-        "schema": "https://ucp.dev/draft/schemas/shopping/checkout.json"
-      },
-      {
-        "name": "dev.ucp.shopping.cart",
-        "version": "draft",
-        "spec": "https://ucp.dev/draft/specification/cart",
-        "schema": "https://ucp.dev/draft/schemas/shopping/cart.json"
-      }
-    ]
+    "capabilities": {
+      "dev.ucp.shopping.checkout": [
+        {
+          "version": "draft",
+          "spec": "https://ucp.dev/draft/specification/checkout",
+          "schema": "https://ucp.dev/draft/schemas/shopping/checkout.json"
+        }
+      ],
+      "dev.ucp.shopping.cart": [
+        {
+          "version": "draft",
+          "spec": "https://ucp.dev/draft/specification/cart",
+          "schema": "https://ucp.dev/draft/schemas/shopping/cart.json"
+        }
+      ]
+    }
   }
 }
 ```
@@ -123,16 +126,10 @@ Content-Type: application/json
 {
   "ucp": {
     "version": "draft",
-    "capabilities": [
-      {
-        "name": "dev.ucp.shopping.checkout",
-        "version": "draft"
-      },
-      {
-        "name": "dev.ucp.shopping.cart",
-        "version": "draft"
-      }
-    ]
+    "capabilities": {
+      "dev.ucp.shopping.checkout": [{"version": "draft"}],
+      "dev.ucp.shopping.cart": [{"version": "draft"}]
+    }
   },
   "id": "cart_abc123",
   "line_items": [
@@ -224,16 +221,10 @@ Content-Type: application/json
 {
   "ucp": {
     "version": "draft",
-    "capabilities": [
-      {
-        "name": "dev.ucp.shopping.checkout",
-        "version": "draft"
-      },
-      {
-        "name": "dev.ucp.shopping.cart",
-        "version": "draft"
-      }
-    ]
+    "capabilities": {
+      "dev.ucp.shopping.checkout": [{"version": "draft"}],
+      "dev.ucp.shopping.cart": [{"version": "draft"}]
+    }
   },
   "id": "cart_abc123",
   "line_items": [
@@ -275,12 +266,9 @@ Content-Type: application/json
   "ucp": {
     "version": "draft",
     "status": "error",
-    "capabilities": [
-      {
-        "name": "dev.ucp.shopping.cart",
-        "version": "draft"
-      }
-    ]
+    "capabilities": {
+      "dev.ucp.shopping.cart": [{"version": "draft"}]
+    }
   },
   "messages": [
     {
@@ -365,16 +353,10 @@ Content-Type: application/json
 {
   "ucp": {
     "version": "draft",
-    "capabilities": [
-      {
-        "name": "dev.ucp.shopping.checkout",
-        "version": "draft"
-      },
-      {
-        "name": "dev.ucp.shopping.cart",
-        "version": "draft"
-      }
-    ]
+    "capabilities": {
+      "dev.ucp.shopping.checkout": [{"version": "draft"}],
+      "dev.ucp.shopping.cart": [{"version": "draft"}]
+    }
   },
   "id": "cart_abc123",
   "line_items": [
@@ -461,16 +443,10 @@ Content-Type: application/json
 {
   "ucp": {
     "version": "draft",
-    "capabilities": [
-      {
-        "name": "dev.ucp.shopping.checkout",
-        "version": "draft"
-      },
-      {
-        "name": "dev.ucp.shopping.cart",
-        "version": "draft"
-      }
-    ]
+    "capabilities": {
+      "dev.ucp.shopping.checkout": [{"version": "draft"}],
+      "dev.ucp.shopping.cart": [{"version": "draft"}]
+    }
   },
   "id": "cart_abc123",
   "line_items": [

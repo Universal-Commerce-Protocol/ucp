@@ -2968,13 +2968,13 @@ during partner onboarding. The URL format is platform-specific.</p>
 <tr>
 <td style="text-align: left;">ucp</td>
 <td style="text-align: left;"><a href="/draft/specification/order/#ucp-response-order-schema">Ucp Response Order Schema</a></td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">No</td>
 <td style="text-align: left;">Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.</td>
 </tr>
 <tr>
 <td style="text-align: left;">id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">No</td>
 <td style="text-align: left;">Unique order identifier.</td>
 </tr>
 <tr>
@@ -2986,25 +2986,25 @@ during partner onboarding. The URL format is platform-specific.</p>
 <tr>
 <td style="text-align: left;">checkout_id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">No</td>
 <td style="text-align: left;">Associated checkout ID for reconciliation.</td>
 </tr>
 <tr>
 <td style="text-align: left;">permalink_url</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">No</td>
 <td style="text-align: left;">Permalink to access the order on merchant site.</td>
 </tr>
 <tr>
 <td style="text-align: left;">line_items</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#order-line-item">Order Line Item</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">No</td>
 <td style="text-align: left;">Line items representing what was purchased — can change post-order via edits or exchanges.</td>
 </tr>
 <tr>
 <td style="text-align: left;">fulfillment</td>
 <td style="text-align: left;">object</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">No</td>
 <td style="text-align: left;">Fulfillment data: buyer expectations and what actually happened.</td>
 </tr>
 <tr>
@@ -3016,7 +3016,7 @@ during partner onboarding. The URL format is platform-specific.</p>
 <tr>
 <td style="text-align: left;">totals</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#totals">Totals</a></td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">No</td>
 <td style="text-align: left;">Different totals for the order.</td>
 </tr>
 <tr>
@@ -3056,6 +3056,7 @@ during partner onboarding. The URL format is platform-specific.</p>
 <p>The platform provides its webhook URL in the order capability's <code>config</code> field
 during capability negotiation. The business discovers this URL from the
 platform's profile and uses it to send order lifecycle events.</p>
+<p>Platform's order capability configuration.</p>
 <table>
 <thead>
 <tr>
@@ -3284,6 +3285,7 @@ zero-downtime key rotation procedures.</p>
 </tbody>
 </table>
 <h3 id="response">Response<a class="headerlink" href="#response" title="Permanent link">&para;</a></h3>
+<p>Capability reference in responses. Only name/version required to confirm active capabilities.</p>
 <table>
 <thead>
 <tr>
@@ -3344,20 +3346,15 @@ zero-downtime key rotation procedures.</p>
 </thead>
 <tbody>
 <tr>
-<td style="text-align: left;"><em>No properties defined.</em></td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;"><em>No properties defined.</em></td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
 </tr>
 </tbody>
 </table>
 <h3 id="ucp-response-order-schema">UCP Response Order Schema <span id="ucp"></span><a class="headerlink" href="#ucp-response-order-schema" title="Permanent link">&para;</a></h3>
+<p>UCP metadata for order responses. No payment handlers needed post-purchase.</p>
 <table>
 <thead>
 <tr>

@@ -61,12 +61,16 @@ The `limit` parameter is a requested page size, not a guaranteed count. Implemen
 
 ### Pagination Request
 
+Pagination parameters for requests.
+
 | Name   | Type    | Required | Description                                                        |
 | ------ | ------- | -------- | ------------------------------------------------------------------ |
 | cursor | string  | No       | Opaque cursor from previous response.                              |
 | limit  | integer | No       | Requested page size. Implementations MAY clamp to a lower maximum. |
 
 ### Pagination Response
+
+Pagination information in responses.
 
 | Name          | Type    | Required | Description                                                                           |
 | ------------- | ------- | -------- | ------------------------------------------------------------------------------------- |

@@ -151,6 +151,8 @@ Cart reuses the same entity schemas as [Checkout](http://ucp.dev/draft/specifica
 
 ### UCP Response Cart
 
+UCP metadata for cart responses. No payment handlers needed pre-checkout.
+
 | Name             | Type   | Required | Description                                                                 |
 | ---------------- | ------ | -------- | --------------------------------------------------------------------------- |
 | version          | string | **Yes**  | UCP version in YYYY-MM-DD format.                                           |
@@ -231,10 +233,9 @@ Environment data provided by the platform to support authorization and abuse pre
 
 The same totals contract applies to cart and checkout. See [Checkout Totals](http://ucp.dev/draft/specification/checkout/#totals) for the rendering contract, accounting identity, well-known types, repeating types, and sub-line semantics.
 
-| Name                     | Type | Required | Description |
-| ------------------------ | ---- | -------- | ----------- |
-| *No properties defined.* |      |          |             |
-| *No properties defined.* |      |          |             |
+| Name | Type | Required | Description |
+| ---- | ---- | -------- | ----------- |
+|      |      |          |             |
 
 Taxes MAY be included where calculable. Platforms SHOULD assume cart totals are estimates; accurate taxes are computed at checkout.
 

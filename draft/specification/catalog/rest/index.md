@@ -13,14 +13,15 @@ Businesses advertise REST transport availability through their UCP profile at `/
   "ucp": {
     "version": "draft",
     "services": {
-      "dev.ucp.shopping": {
-        "version": "draft",
-        "spec": "https://ucp.dev/draft/specification/overview",
-        "rest": {
+      "dev.ucp.shopping": [
+        {
+          "version": "draft",
+          "spec": "https://ucp.dev/draft/specification/overview",
+          "transport": "rest",
           "schema": "https://ucp.dev/draft/services/shopping/rest.openapi.json",
           "endpoint": "https://business.example.com/ucp"
         }
-      }
+      ]
     },
     "capabilities": {
       "dev.ucp.shopping.catalog.search": [{
@@ -544,6 +545,8 @@ Business outcomes use the standard HTTP 200 status with messages in the response
 
 ### UCP Response Catalog
 
+UCP metadata for catalog responses.
+
 | Name             | Type   | Required | Description                                                                 |
 | ---------------- | ------ | -------- | --------------------------------------------------------------------------- |
 | version          | string | **Yes**  | UCP version in YYYY-MM-DD format.                                           |
@@ -554,6 +557,8 @@ Business outcomes use the standard HTTP 200 status with messages in the response
 | capabilities     | any    | No       |                                                                             |
 
 ### Detail Product
+
+A product in a get_product response, extended with effective selections and availability signals on option values.
 
 | Name             | Type          | Required | Description                                                                                      |
 | ---------------- | ------------- | -------- | ------------------------------------------------------------------------------------------------ |

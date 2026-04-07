@@ -2607,6 +2607,7 @@ a completion request without mandates <strong>MUST</strong> result in a session 
 <h3 id="step-1-checkout-creation-signing">Step 1: Checkout Creation &amp; Signing<a class="headerlink" href="#step-1-checkout-creation-signing" title="Permanent link">&para;</a></h3>
 <p>The platform initiates the session. The business returns the <code>Checkout</code> object
 with <code>ap2.merchant_authorization</code> embedded in the response body.</p>
+<p>Checkout extended with AP2 mandate support.</p>
 <table>
 <thead>
 <tr>
@@ -2783,6 +2784,7 @@ Binding (+kb) signature.</p>
 <h3 id="step-3-submission-complete_checkout">Step 3: Submission (<code>complete_checkout</code>)<a class="headerlink" href="#step-3-submission-complete_checkout" title="Permanent link">&para;</a></h3>
 <p>Once the mandates are generated, the platform submits them in the completion
 request:</p>
+<p>AP2 extension data including checkout mandate.</p>
 <table>
 <thead>
 <tr>
@@ -2881,9 +2883,11 @@ checkout.</p>
 <h2 id="schema">Schema<a class="headerlink" href="#schema" title="Permanent link">&para;</a></h2>
 <h3 id="merchant-authorization">Business Authorization<a class="headerlink" href="#merchant-authorization" title="Permanent link">&para;</a></h3>
 <p>JWS Detached Content signature (RFC 7515 Appendix F) over the checkout response body (excluding ap2 field). Format: <code>&lt;base64url-header&gt;..&lt;base64url-signature&gt;</code>. The header MUST contain 'alg' (ES256/ES384/ES512) and 'kid' claims. The signature covers both the header and JCS-canonicalized checkout payload.</p>
+<p>JWS Detached Content signature (RFC 7515 Appendix F) over the checkout response body (excluding ap2 field). Format: <code>&lt;base64url-header&gt;..&lt;base64url-signature&gt;</code>. The header MUST contain 'alg' (ES256/ES384/ES512) and 'kid' claims. The signature covers both the header and JCS-canonicalized checkout payload.</p>
 <p><strong>Pattern:</strong> <code>^[A-Za-z0-9_-]+\.\.[A-Za-z0-9_-]+$</code></p>
 <h3 id="ap2-checkout-response">AP2 Checkout Response<a class="headerlink" href="#ap2-checkout-response" title="Permanent link">&para;</a></h3>
 <p>The <code>ap2</code> object included in checkout responses.</p>
+<p>AP2 extension data including merchant authorization.</p>
 <table>
 <thead>
 <tr>
@@ -2904,9 +2908,11 @@ checkout.</p>
 </table>
 <h3 id="checkout-mandate">Checkout Mandate<a class="headerlink" href="#checkout-mandate" title="Permanent link">&para;</a></h3>
 <p>SD-JWT+kb credential in <code>ap2.checkout_mandate</code>. Proving user authorization for the checkout. Contains the full checkout including <code>ap2.merchant_authorization</code>.</p>
+<p>SD-JWT+kb credential in <code>ap2.checkout_mandate</code>. Proving user authorization for the checkout. Contains the full checkout including <code>ap2.merchant_authorization</code>.</p>
 <p><strong>Pattern:</strong> <code>^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]*\.[A-Za-z0-9_-]+(~[A-Za-z0-9_-]+)*$</code></p>
 <h3 id="ap2-complete-request">AP2 Complete Request<a class="headerlink" href="#ap2-complete-request" title="Permanent link">&para;</a></h3>
 <p>The <code>ap2</code> object included in COMPLETE checkout requests.</p>
+<p>AP2 extension data including checkout mandate.</p>
 <table>
 <thead>
 <tr>
@@ -2926,6 +2932,7 @@ checkout.</p>
 </tbody>
 </table>
 <h3 id="error-codes">Error Codes<a class="headerlink" href="#error-codes" title="Permanent link">&para;</a></h3>
+<p>Error codes specific to AP2 mandate verification.</p>
 <p>Error codes specific to AP2 mandate verification.</p>
 <p><strong>Enum:</strong> <code>mandate_required</code>, <code>agent_missing_key</code>, <code>mandate_invalid_signature</code>, <code>mandate_expired</code>, <code>mandate_scope_mismatch</code>, <code>merchant_authorization_invalid</code>, <code>merchant_authorization_missing</code></p>
 <table>
