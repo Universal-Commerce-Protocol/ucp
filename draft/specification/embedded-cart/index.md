@@ -124,7 +124,7 @@ All ECaP messages **MUST** use JSON-RPC 2.0 format ([RFC 7159](https://datatrack
 - Require a response from the receiver
 - **MUST** include a unique `id` field
 - Receiver **MUST** respond with matching `id`
-- Response **MUST** be either a `result` or `error` object
+- Response **MUST** be either a `result` or an `error_response`
 - Used for operations requiring acknowledgment or data
 
 **Notifications** (without `id` field):
@@ -136,19 +136,35 @@ All ECaP messages **MUST** use JSON-RPC 2.0 format ([RFC 7159](https://datatrack
 
 ### Response Handling
 
-For requests (messages with `id`), receivers **MUST** respond with either:
+For requests (messages with `id`), receivers **MUST** respond with a `result`. Both success and error outcomes **MUST** be returned via the `result` field, consistent with UCP's two-layer error model. The JSON-RPC `error` field is reserved for transport-level failures (parse errors, method not found, invalid params). Implementations **MUST NOT** use the JSON-RPC `error` field for delegation-level error codes.
 
 **Success Response:**
 
 ```json
-{ "jsonrpc": "2.0", "id": "...", "result": {...} }
+{
+  "jsonrpc": "2.0",
+  "id": "...",
+  "result": {
+    "ucp": { "version": "draft", "status": "success" },
+    ...
+  }
+}
 ```
 
 **Error Response:**
 
 ```json
-{ "jsonrpc": "2.0", "id": "...", "error": {...} }
+{
+  "jsonrpc": "2.0",
+  "id": "...",
+  "result": {
+    "ucp": { "version": "draft", "status": "error" },
+    "messages": [...]
+  }
+}
 ```
+
+In both cases, `result.ucp.status` serves as the discriminator between success and error outcomes — the same pattern used across all UCP transports.
 
 ### Communication Channels
 
@@ -226,6 +242,7 @@ The `ep.cart.ready` message is a request, which means that the host **MUST** res
 - **Direction:** Host → Embedded Cart
 - **Type:** Response
 - **Result Payload:**
+  - `ucp` (object, **REQUIRED**): UCP protocol metadata. The `version` confirms the negotiated `ep_version` and `status` **MUST** be `"success"`.
   - `upgrade` (object, **OPTIONAL**): An object describing how the Embedded Cart should update the communication channel it uses to communicate with the host. When present, host **MUST NOT** include `credential` — the channel will be re-established and any credential sent here will be discarded.
   - `credential` (string, **OPTIONAL**): The requested authorization data, can be in the form of an OAuth token, JWT, API keys, etc. **MUST** be set if `auth` is present in the request. **MUST NOT** be set if `upgrade` is present.
 
@@ -236,6 +253,7 @@ The `ep.cart.ready` message is a request, which means that the host **MUST** res
     "jsonrpc": "2.0",
     "id": "ready_1",
     "result": {
+        "ucp": { "version": "draft", "status": "success" },
         "credential": "fake_identity_linking_oauth_token"
     }
 }
@@ -250,6 +268,7 @@ Hosts **MAY** respond with an `upgrade` field to update the communication channe
     "jsonrpc": "2.0",
     "id": "ready_1",
     "result": {
+        "ucp": { "version": "draft", "status": "success" },
         "upgrade": {
             "port": "[Transferable MessagePort]"
         }
@@ -258,6 +277,8 @@ Hosts **MAY** respond with an `upgrade` field to update the communication channe
 ```
 
 When the host responds with an `upgrade` object, the Embedded Cart **MUST** discard any other information in the message, send a new `ep.cart.ready` message over the upgraded communication channel, and wait for a new response. All subsequent messages **MUST** be sent only over the upgraded communication channel.
+
+If the host cannot complete the handshake (e.g., origin validation failure or protocol state violation), it **MUST** respond with an `error_response` result. When the host responds with an error, the session cannot proceed. The host **MUST** tear down the embedded context and **MAY** redirect the buyer to `continue_url` if present. The Embedded Cart **MUST NOT** send further messages after receiving a handshake error.
 
 ### Authentication
 
@@ -284,11 +305,12 @@ Embedded cart **MAY** request authorization from the host in the following scena
 }
 ```
 
-The `ep.cart.auth` message is a request, which means that host **MUST** respond to exchange the authorization. The host **MUST** respond with either an error, or the authorization data requested by Embedded Cart.
+The `ep.cart.auth` message is a request, which means that host **MUST** respond with a `result` containing either the authorization data or an `error_response`.
 
 - **Direction:** host → Embedded Cart
 - **Type:** Response
 - **Result Payload:**
+  - `ucp` (object, **REQUIRED**): UCP protocol metadata with `status: "success"`.
   - `credential` (string, **REQUIRED**): The requested authorization data, can be in the form of an OAuth token, JWT, API keys, etc.
 
 **Example Message:**
@@ -298,6 +320,7 @@ The `ep.cart.auth` message is a request, which means that host **MUST** respond 
     "jsonrpc": "2.0",
     "id": "auth_1",
     "result": {
+        "ucp": { "version": "draft", "status": "success" },
         "credential": "fake_identity_linking_oauth_token"
     }
 }
@@ -597,17 +620,17 @@ The following schemas define the data structures used within the Embedded Cart p
 
 The core object representing the current state of the cart, including line items, totals, and buyer information.
 
-| Name         | Type                                                                            | Required | Description                                                                                                                                                                                                                                                                                                                                                                                             |
-| ------------ | ------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ucp          | [Ucp Response Cart Schema](/draft/specification/cart/#ucp-response-cart-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                                                                                                                                                                                                                                                                                 |
-| id           | string                                                                          | **Yes**  | Unique cart identifier.                                                                                                                                                                                                                                                                                                                                                                                 |
-| line_items   | Array\[[Line Item Response](/draft/specification/reference/#line-item)\]        | **Yes**  | Cart line items. Same structure as checkout. Full replacement on update.                                                                                                                                                                                                                                                                                                                                |
-| context      | [Context](/draft/specification/reference/#context)                              | No       | Buyer signals for localization (country, region, postal_code). Merchant uses for pricing, availability, currency. Falls back to geo-IP if omitted.                                                                                                                                                                                                                                                      |
-| signals      | [Signals](/draft/specification/reference/#signals)                              | No       | Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace. |
-| buyer        | [Buyer](/draft/specification/reference/#buyer)                                  | No       | Optional buyer information for personalized estimates.                                                                                                                                                                                                                                                                                                                                                  |
-| currency     | string                                                                          | **Yes**  | ISO 4217 currency code. Determined by merchant based on context or geo-IP.                                                                                                                                                                                                                                                                                                                              |
-| totals       | [Totals](/draft/specification/reference/#totals)                                | **Yes**  | Estimated cost breakdown. May be partial if shipping/tax not yet calculable.                                                                                                                                                                                                                                                                                                                            |
-| messages     | Array\[[Message](/draft/specification/reference/#message)\]                     | No       | Validation messages, warnings, or informational notices.                                                                                                                                                                                                                                                                                                                                                |
-| links        | Array\[[Link](/draft/specification/reference/#link)\]                           | No       | Optional merchant links (policies, FAQs).                                                                                                                                                                                                                                                                                                                                                               |
-| continue_url | string                                                                          | No       | URL for cart handoff and session recovery. Enables sharing and human-in-the-loop flows.                                                                                                                                                                                                                                                                                                                 |
-| expires_at   | string                                                                          | No       | Cart expiry timestamp (RFC 3339). Optional.                                                                                                                                                                                                                                                                                                                                                             |
+| Name         | Type                                                                     | Required | Description                                                                                                                                                                                                                                                                                                                                                                                             |
+| ------------ | ------------------------------------------------------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ucp          | any                                                                      | **Yes**  | UCP metadata for cart responses. No payment handlers needed pre-checkout.                                                                                                                                                                                                                                                                                                                               |
+| id           | string                                                                   | **Yes**  | Unique cart identifier.                                                                                                                                                                                                                                                                                                                                                                                 |
+| line_items   | Array\[[Line Item Response](/draft/specification/reference/#line-item)\] | **Yes**  | Cart line items. Same structure as checkout. Full replacement on update.                                                                                                                                                                                                                                                                                                                                |
+| context      | [Context](/draft/specification/reference/#context)                       | No       | Buyer signals for localization (country, region, postal_code). Merchant uses for pricing, availability, currency. Falls back to geo-IP if omitted.                                                                                                                                                                                                                                                      |
+| signals      | [Signals](/draft/specification/reference/#signals)                       | No       | Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace. |
+| buyer        | [Buyer](/draft/specification/reference/#buyer)                           | No       | Optional buyer information for personalized estimates.                                                                                                                                                                                                                                                                                                                                                  |
+| currency     | string                                                                   | **Yes**  | ISO 4217 currency code. Determined by merchant based on context or geo-IP.                                                                                                                                                                                                                                                                                                                              |
+| totals       | [Totals](/draft/specification/reference/#totals)                         | **Yes**  | Estimated cost breakdown. May be partial if shipping/tax not yet calculable.                                                                                                                                                                                                                                                                                                                            |
+| messages     | Array\[[Message](/draft/specification/reference/#message)\]              | No       | Validation messages, warnings, or informational notices.                                                                                                                                                                                                                                                                                                                                                |
+| links        | Array\[[Link](/draft/specification/reference/#link)\]                    | No       | Optional merchant links (policies, FAQs).                                                                                                                                                                                                                                                                                                                                                               |
+| continue_url | string                                                                   | No       | URL for cart handoff and session recovery. Enables sharing and human-in-the-loop flows.                                                                                                                                                                                                                                                                                                                 |
+| expires_at   | string                                                                   | No       | Cart expiry timestamp (RFC 3339). Optional.                                                                                                                                                                                                                                                                                                                                                             |

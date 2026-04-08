@@ -11,21 +11,7 @@
   "additionalProperties": false,
   "properties": {
     "ucp": {
-      "allOf": [
-        {
-          "$ref": "https://ucp.dev/draft/schemas/ucp.json#/$defs/base"
-        },
-        {
-          "properties": {
-            "status": {
-              "const": "error"
-            }
-          },
-          "required": [
-            "status"
-          ]
-        }
-      ],
+      "$ref": "https://ucp.dev/draft/schemas/ucp.json#/$defs/error",
       "description": "UCP protocol metadata. Status MUST be 'error' for error response."
     },
     "messages": {

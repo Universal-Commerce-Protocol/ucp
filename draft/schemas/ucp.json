@@ -140,6 +140,42 @@
         }
       }
     },
+    "success": {
+      "description": "UCP metadata with status 'success'. Use for response branches that carry the expected payload.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
+        },
+        {
+          "properties": {
+            "status": {
+              "const": "success"
+            }
+          },
+          "required": [
+            "status"
+          ]
+        }
+      ]
+    },
+    "error": {
+      "description": "UCP metadata with status 'error'. Use for response branches that carry error information.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
+        },
+        {
+          "properties": {
+            "status": {
+              "const": "error"
+            }
+          },
+          "required": [
+            "status"
+          ]
+        }
+      ]
+    },
     "platform_schema": {
       "title": "UCP Platform Schema",
       "description": "Full UCP metadata for platform-level configuration. Hosted at a URI advertised by the platform in request headers.",

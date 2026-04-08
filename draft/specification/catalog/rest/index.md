@@ -63,12 +63,12 @@ Maps to the [Catalog Search](http://ucp.dev/draft/specification/catalog/search/i
 
 **Output**
 
-| Name       | Type                                                                                          | Required | Description                                                                                                             |
-| ---------- | --------------------------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------- |
-| ucp        | [Ucp Response Catalog Schema](/draft/specification/catalog/rest/#ucp-response-catalog-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields. |
-| products   | Array\[[Product](/draft/specification/reference/#product)\]                                   | **Yes**  | Products matching the search criteria.                                                                                  |
-| pagination | [Pagination Response](/draft/specification/reference/#pagination-response)                    | No       | Cursor-based pagination for list operations.                                                                            |
-| messages   | Array\[[Message](/draft/specification/reference/#message)\]                                   | No       | Errors, warnings, or informational messages about the search results.                                                   |
+| Name       | Type                                                                       | Required | Description                                                           |
+| ---------- | -------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------- |
+| ucp        | any                                                                        | **Yes**  | UCP metadata for catalog responses.                                   |
+| products   | Array\[[Product](/draft/specification/reference/#product)\]                | **Yes**  | Products matching the search criteria.                                |
+| pagination | [Pagination Response](/draft/specification/reference/#pagination-response) | No       | Cursor-based pagination for list operations.                          |
+| messages   | Array\[[Message](/draft/specification/reference/#message)\]                | No       | Errors, warnings, or informational messages about the search results. |
 
 #### Example
 
@@ -201,11 +201,11 @@ The request body contains an array of identifiers and optional context that appl
 
 **Output**
 
-| Name     | Type                                                                                          | Required | Description                                                                                                                                         |
-| -------- | --------------------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ucp      | [Ucp Response Catalog Schema](/draft/specification/catalog/rest/#ucp-response-catalog-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                             |
-| products | Array[any]                                                                                    | **Yes**  | Products matching the requested identifiers. May contain fewer items if some identifiers not found, or more if identifiers match multiple products. |
-| messages | Array\[[Message](/draft/specification/reference/#message)\]                                   | No       | Errors, warnings, or informational messages about the requested items.                                                                              |
+| Name     | Type                                                        | Required | Description                                                                                                                                         |
+| -------- | ----------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ucp      | any                                                         | **Yes**  | UCP metadata for catalog responses.                                                                                                                 |
+| products | Array[any]                                                  | **Yes**  | Products matching the requested identifiers. May contain fewer items if some identifiers not found, or more if identifiers match multiple products. |
+| messages | Array\[[Message](/draft/specification/reference/#message)\] | No       | Errors, warnings, or informational messages about the requested items.                                                                              |
 
 #### Example: Batch Lookup with Context
 

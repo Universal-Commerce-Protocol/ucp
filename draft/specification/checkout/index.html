@@ -3572,11 +3572,10 @@ platform receives messages indicating what's needed to progress.</p>
 </ul>
 <h3 id="error-handling">Error Handling<a class="headerlink" href="#error-handling" title="Permanent link">&para;</a></h3>
 <p>The <code>messages</code> array contains errors, warnings, and informational messages
-about the checkout state. Error messages include a <code>severity</code> field that
-reflects the resource state and recommended action. When <code>ucp.status</code>
-is <code>"success"</code>, a resource is returned and severity indicates the
-recommended action. When <code>ucp.status</code> is <code>"error"</code>, no valid resource
-exists — severity is <code>unrecoverable</code>:</p>
+about the checkout state. <code>ucp.status</code> is the shape discriminator —
+<code>"success"</code> means the response carries the expected payload, <code>"error"</code>
+means it carries error information instead. The <code>severity</code> field on each
+error message prescribes the recommended action:</p>
 <table>
 <thead>
 <tr>
@@ -3620,7 +3619,8 @@ placement (e.g., high-value order approval, first-purchase policy).</li>
 <p>When the business cannot create a new resource or the requested resource
 no longer exists, the response contains <code>ucp.status: "error"</code> with
 <code>messages</code> describing the failure — no resource is included in the
-response body. Error responses MUST use <code>severity: "unrecoverable"</code>.
+response body. When no resource exists to act on, messages SHOULD use
+<code>severity: "unrecoverable"</code>.
 For example, a business may reject a create checkout request where all
 items are unavailable:</p>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="p">{</span>
@@ -3673,17 +3673,17 @@ Businesses <strong>SHOULD</strong> surface such messages as early as possible, a
 <p>Example error processing algorithm:</p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>GIVEN response with messages array
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>IF ucp.status = &quot;error&quot;
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>  -- No resource exists; severity is unrecoverable
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>  RETRY with new resource or inputs, or hand off via continue_url
-</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>  RETURN
-</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>
-</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>FILTER errors FROM messages WHERE type = &quot;error&quot;
-</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>
-</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>PARTITION errors INTO
-</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>  recoverable           WHERE severity = &quot;recoverable&quot;
-</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>  requires_buyer_input  WHERE severity = &quot;requires_buyer_input&quot;
-</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>  requires_buyer_review WHERE severity = &quot;requires_buyer_review&quot;
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>FILTER errors FROM messages WHERE type = &quot;error&quot;
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>PARTITION errors INTO
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>  recoverable           WHERE severity = &quot;recoverable&quot;
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>  requires_buyer_input  WHERE severity = &quot;requires_buyer_input&quot;
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>  requires_buyer_review WHERE severity = &quot;requires_buyer_review&quot;
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>  unrecoverable         WHERE severity = &quot;unrecoverable&quot;
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>IF unrecoverable is not empty
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>  RETRY with new resource or inputs, or hand off via continue_url
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>  RETURN
 </span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>
 </span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a>IF recoverable is not empty
 </span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a>  FOR EACH error IN recoverable
@@ -4038,9 +4038,9 @@ redirect to the checkout UI or renders the checkout page directly.</p>
 <tbody>
 <tr>
 <td style="text-align: left;">ucp</td>
-<td style="text-align: left;"><a href="/draft/specification/checkout/#ucp-response-checkout-schema">Ucp Response Checkout Schema</a></td>
+<td style="text-align: left;">any</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.</td>
+<td style="text-align: left;">UCP metadata for checkout responses.</td>
 </tr>
 <tr>
 <td style="text-align: left;">id</td>

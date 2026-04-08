@@ -135,7 +135,7 @@ To initiate the session, the host **MUST** augment the `continue_url` with ECP q
 
 All ECP parameters are passed via URL query string, not HTTP headers, to ensure maximum compatibility across different embedding environments. Parameters use the `ec_` prefix to avoid namespace pollution and clearly distinguish ECP parameters from business-specific query parameters:
 
-- `ec_version` (string, **REQUIRED**): The UCP version for this session (format: `YYYY-MM-DD`). Must match the version from the checkout response.
+- `ec_version` (string, **REQUIRED**): The UCP version for this session (format: `YYYY-MM-DD`). Must match the version from the checkout response. The version is negotiated at session initialization and **MUST** remain constant for the lifetime of the ECP session — neither party may change the version after the handshake.
 - `ec_auth` (string, **OPTIONAL**): Authentication token in business-defined format
 - `ec_delegate` (string, **OPTIONAL**): Comma-delimited list of delegations the host wants to handle. **SHOULD** be a subset of `config.delegate` from the embedded service binding.
 - `ec_color_scheme` (string, **OPTIONAL**): The color scheme preference for the checkout UI. Valid values: `light`, `dark`. When not provided, the Embedded Checkout follows system preference.
@@ -329,15 +329,33 @@ For requests (messages with `id`), receivers **MUST** respond with either:
 
 **Success Response:**
 
+All delegation success results **MUST** include the `ucp` envelope with `status: "success"`. The `version` **MUST** echo the `ec_version` negotiated during session initialization and confirmed by the host in the `ec.ready` response. The version is session-bound: once established during the handshake, it **MUST NOT** change for the duration of the ECP session. This provides explicit protocol-level confirmation and is the same envelope used by REST and MCP transports.
+
 ```json
-{ "jsonrpc": "2.0", "id": "...", "result": {...} }
+{
+  "jsonrpc": "2.0",
+  "id": "...",
+  "result": {
+    "ucp": { "version": "draft", "status": "success" },
+    "checkout": { ... }
+  }
+}
 ```
 
 **Error Response:**
 
 ```json
-{ "jsonrpc": "2.0", "id": "...", "error": {...} }
+{
+  "jsonrpc": "2.0",
+  "id": "...",
+  "result": {
+    "ucp": { "version": "draft", "status": "error" },
+    "messages": [...]
+  }
+}
 ```
+
+In both cases, `result.ucp.status` serves as the discriminator between success and error outcomes — the same pattern used across all UCP transports.
 
 ### Communication Channels
 
@@ -444,6 +462,7 @@ The `ec.ready` message is a request, which means that the host **MUST** respond 
 - **Direction:** host → Embedded Checkout
 - **Type:** Response
 - **Result Payload:**
+  - `ucp` (object, **REQUIRED**): UCP protocol metadata. The `version` confirms the negotiated `ec_version` and `status` **MUST** be `"success"`. This version is session-bound — the host explicitly confirms the protocol version here, and it **MUST NOT** change for the duration of the session.
   - `upgrade` (object, **OPTIONAL**): An object describing how the Embedded Checkout should update the communication channel it uses to communicate with the host. When present, host **MUST NOT** include `credential` — the channel will be re-established and any credential sent here will be discarded.
   - `credential` (string, **OPTIONAL**): The requested authorization data, can be in the form of an OAuth token, JWT, API keys, etc. **MUST** be set if `auth` is present in the request. **MUST NOT** be set if `upgrade` is present.
   - `checkout` (object, **OPTIONAL**): Additional, display-only state for the checkout that was not communicated over UCP checkout actions. This is used to populate the checkout UI, and may only be used to populate the following fields, under specific conditions:
@@ -456,6 +475,7 @@ The `ec.ready` message is a request, which means that the host **MUST** respond 
     "jsonrpc": "2.0",
     "id": "ready_1",
     "result": {
+        "ucp": { "version": "draft", "status": "success" },
         "credential": "fake_identity_linking_oauth_token"
     }
 }
@@ -470,6 +490,7 @@ Hosts **MAY** respond with an `upgrade` field to update the communication channe
     "jsonrpc": "2.0",
     "id": "ready_1",
     "result": {
+        "ucp": { "version": "draft", "status": "success" },
         "upgrade": {
             "port": "[Transferable MessagePort]"
         }
@@ -488,6 +509,7 @@ The host **MAY** also respond with a `checkout` object, which will be used to po
     "jsonrpc": "2.0",
     "id": "ready_1",
     "result": {
+        "ucp": { "version": "draft", "status": "success" },
         "checkout": {
             "payment": {
                 // The instrument structure is defined by the handler's instrument schema
@@ -512,6 +534,30 @@ The host **MAY** also respond with a `checkout` object, which will be used to po
     }
 }
 ```
+
+**Example Error Response:**
+
+If the host cannot complete the handshake (e.g., origin validation failure or protocol state violation), it **MUST** respond with an `error_response` result:
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": "ready_1",
+    "result": {
+        "ucp": { "version": "draft", "status": "error" },
+        "messages": [
+            {
+                "type": "error",
+                "code": "security_error",
+                "content": "Host origin validation failed.",
+                "severity": "unrecoverable"
+            }
+        ]
+    }
+}
+```
+
+When the host responds with an error, the session cannot proceed. The host **MUST** tear down the embedded context and **MAY** redirect the buyer to `continue_url` if present. The Embedded Checkout **MUST NOT** send further messages after receiving a handshake error.
 
 ### Authentication
 
@@ -538,11 +584,12 @@ Embedded checkout **MAY** request authorization from the host in the following s
 }
 ```
 
-The `ec.auth` message is a request, which means that host **MUST** respond to exchange the authorization. The host **MUST** respond with either an error, or the authorization data requested by Embedded Checkout.
+The `ec.auth` message is a request, which means that host **MUST** respond with a `result` containing either the authorization data or an `error_response`.
 
 - **Direction:** host → Embedded Checkout
 - **Type:** Response
 - **Result Payload:**
+  - `ucp` (object, **REQUIRED**): UCP protocol metadata with `status: "success"`.
   - `credential` (string, **REQUIRED**): The requested authorization data, can be in the form of an OAuth token, JWT, API keys, etc.
 
 **Example Message:**
@@ -552,6 +599,7 @@ The `ec.auth` message is a request, which means that host **MUST** respond to ex
     "jsonrpc": "2.0",
     "id": "auth_1",
     "result": {
+        "ucp": { "version": "draft", "status": "success" },
         "credential": "fake_identity_linking_oauth_token"
     }
 }
@@ -948,6 +996,7 @@ The host **MUST** respond with either an error, or the newly-selected payment in
 - **Direction:** host → Embedded Checkout
 - **Type:** Response
 - **Payload:**
+  - `ucp`: UCP protocol metadata with `status: "success"`
   - `checkout`: The update to apply to the checkout object
 
 **Example Success Response:**
@@ -957,6 +1006,7 @@ The host **MUST** respond with either an error, or the newly-selected payment in
     "jsonrpc": "2.0",
     "id": "payment_instruments_change_request_1",
     "result": {
+        "ucp": { "version": "draft", "status": "success" },
         "checkout": {
             "payment": {
                 // The instrument structure is defined by the handler's instrument schema
@@ -989,9 +1039,16 @@ The host **MUST** respond with either an error, or the newly-selected payment in
 {
     "jsonrpc": "2.0",
     "id": "payment_instruments_change_request_1",
-    "error": {
-        "code": "abort_error",
-        "message": "User closed the payment sheet without authorizing."
+    "result": {
+        "ucp": { "version": "draft", "status": "error" },
+        "messages": [
+            {
+                "type": "error",
+                "code": "abort_error",
+                "content": "User closed the payment sheet without authorizing.",
+                "severity": "recoverable"
+            }
+        ]
     }
 }
 ```
@@ -1036,6 +1093,7 @@ The host **MUST** respond with either an error, or the credential for the select
 - **Direction:** host → Embedded Checkout
 - **Type:** Response
 - **Payload:**
+  - `ucp`: UCP protocol metadata with `status: "success"`
   - `checkout`: The update to apply to the checkout object
 
 **Example Success Response:**
@@ -1045,6 +1103,7 @@ The host **MUST** respond with either an error, or the credential for the select
     "jsonrpc": "2.0",
     "id": "payment_credential_request_1",
     "result": {
+        "ucp": { "version": "draft", "status": "success" },
         "checkout": {
             "payment": {
                 "instruments": [
@@ -1080,9 +1139,16 @@ The host **MUST** respond with either an error, or the credential for the select
 {
     "jsonrpc": "2.0",
     "id": "payment_credential_request_1",
-    "error": {
-        "code": "abort_error",
-        "message": "User closed the payment sheet without authorizing."
+    "result": {
+        "ucp": { "version": "draft", "status": "error" },
+        "messages": [
+            {
+                "type": "error",
+                "code": "abort_error",
+                "content": "User closed the payment sheet without authorizing.",
+                "severity": "recoverable"
+            }
+        ]
     }
 }
 ```
@@ -1194,6 +1260,7 @@ The host **MUST** respond with either an error, or the newly-selected address. I
 - **Direction:** host → Embedded Checkout
 - **Type:** Response
 - **Payload:**
+  - `ucp`: UCP protocol metadata with `status: "success"`
   - `checkout`: The update to apply to the checkout object
 
 **Example Success Response:**
@@ -1203,6 +1270,7 @@ The host **MUST** respond with either an error, or the newly-selected address. I
     "jsonrpc": "2.0",
     "id": "fulfillment_address_change_request_1",
     "result": {
+        "ucp": { "version": "draft", "status": "success" },
         "checkout": {
             "fulfillment": {
                 "methods": [
@@ -1232,9 +1300,16 @@ The host **MUST** respond with either an error, or the newly-selected address. I
 {
     "jsonrpc": "2.0",
     "id": "fulfillment_address_change_request_1",
-    "error": {
-        "code": "abort_error",
-        "message": "User cancelled address selection."
+    "result": {
+        "ucp": { "version": "draft", "status": "error" },
+        "messages": [
+            {
+                "type": "error",
+                "code": "abort_error",
+                "content": "User cancelled address selection.",
+                "severity": "recoverable"
+            }
+        ]
     }
 }
 ```
@@ -1313,7 +1388,8 @@ Requests the host to handle a link activated by the buyer within the checkout.
 
 - **Direction:** Host → Embedded Checkout
 - **Type:** Response
-- **Payload:** Empty object (`{}`).
+- **Payload:**
+  - `ucp`: UCP protocol metadata with `status: "success"`
 
 **Example Success Response:**
 
@@ -1321,7 +1397,9 @@ Requests the host to handle a link activated by the buyer within the checkout.
 {
     "jsonrpc": "2.0",
     "id": "window_1",
-    "result": {}
+    "result": {
+        "ucp": { "version": "draft", "status": "success" }
+    }
 }
 ```
 
@@ -1331,9 +1409,16 @@ Requests the host to handle a link activated by the buyer within the checkout.
 {
     "jsonrpc": "2.0",
     "id": "window_1",
-    "error": {
-        "code": "window_open_rejected_error",
-        "message": "Window open rejected by host."
+    "result": {
+        "ucp": { "version": "draft", "status": "error" },
+        "messages": [
+            {
+                "type": "error",
+                "code": "window_open_rejected_error",
+                "content": "Window open rejected by host.",
+                "severity": "unrecoverable"
+            }
+        ]
     }
 }
 ```
@@ -1342,16 +1427,20 @@ Requests the host to handle a link activated by the buyer within the checkout.
 
 ### Error Codes
 
-Responses to delegation request messages from the embedded checkout may resolve to errors. The message responder **SHOULD** use error codes mapped to **[W3C DOMException](https://webidl.spec.whatwg.org/#idl-DOMException)** names where possible.
+Delegation requests may result in errors. Errors **MUST** be returned using the standard UCP `error_response` shape within the `result` field — the same shape used by REST and MCP transports. For delegation exchanges, an error signals that the delegation failed but the session remains active — severity prescribes the recommended action.
 
-| Code                         | Description                                                                                                                                    |
-| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `abort_error`                | The user cancelled the interaction (e.g., closed the sheet).                                                                                   |
-| `security_error`             | The host origin validation failed.                                                                                                             |
-| `not_supported_error`        | The requested payment method is not supported by the host.                                                                                     |
-| `invalid_state_error`        | Handshake was attempted out of order.                                                                                                          |
-| `not_allowed_error`          | The request was missing valid User Activation (see [Prevention of Unsolicited Payment Requests](#prevention-of-unsolicited-payment-requests)). |
-| `window_open_rejected_error` | Host policy prevented the navigation. The host **MAY** notify the buyer that their request was rejected.                                       |
+ECP defines the following error codes:
+
+| Code                         | Severity        | Description                                                                                                                                    |
+| ---------------------------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `abort_error`                | `recoverable`   | The user cancelled the interaction (e.g., closed the sheet).                                                                                   |
+| `security_error`             | `unrecoverable` | The host origin validation failed.                                                                                                             |
+| `not_supported_error`        | `unrecoverable` | The requested payment method is not supported by the host.                                                                                     |
+| `invalid_state_error`        | `unrecoverable` | Handshake was attempted out of order.                                                                                                          |
+| `not_allowed_error`          | `recoverable`   | The request was missing valid User Activation (see [Prevention of Unsolicited Payment Requests](#prevention-of-unsolicited-payment-requests)). |
+| `window_open_rejected_error` | `unrecoverable` | Host policy prevented the navigation. The host **MAY** notify the buyer that their request was rejected.                                       |
+
+Delegation errors **SHOULD** use only `recoverable` and `unrecoverable` severities. `recoverable` means the delegation may be re-attempted. For `abort_error`, the buyer cancelled and may choose to try again. For `not_allowed_error`, recovery requires a new [user activation](https://html.spec.whatwg.org/multipage/interaction.html#activation) gesture before re-attempting the delegation. `unrecoverable` errors indicate the delegation cannot succeed in the current session.
 
 ### Security for Web-Based Hosts
 
@@ -1402,41 +1491,41 @@ The following schemas define the data structures used within the Embedded Checko
 
 The core object representing the current state of the transaction, including line items, totals, and buyer information.
 
-| Name         | Type                                                                                        | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| ------------ | ------------------------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ucp          | [Ucp Response Checkout Schema](/draft/specification/checkout/#ucp-response-checkout-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| id           | string                                                                                      | **Yes**  | Unique identifier of the checkout session.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| line_items   | Array\[[Line Item Response](/draft/specification/reference/#line-item)\]                    | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| buyer        | [Buyer](/draft/specification/reference/#buyer)                                              | No       | Representation of the buyer.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| context      | [Context](/draft/specification/reference/#context)                                          | No       | Provisional buyer signals for relevance and localization—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data. Context SHOULD be non-identifying and can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. |
-| signals      | [Signals](/draft/specification/reference/#signals)                                          | No       | Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.                                                                                                                                                                                                                                                                 |
-| status       | string                                                                                      | **Yes**  | Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details. **Enum:** `incomplete`, `requires_escalation`, `ready_for_complete`, `complete_in_progress`, `completed`, `canceled`                                                                                                                                                                                                                                                                                                                                                                                                         |
-| currency     | string                                                                                      | **Yes**  | ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| totals       | [Totals](/draft/specification/reference/#totals)                                            | **Yes**  | Different cart totals.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| messages     | Array\[[Message](/draft/specification/reference/#message)\]                                 | No       | List of messages with error and info about the checkout session state.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| links        | Array\[[Link](/draft/specification/reference/#link)\]                                       | **Yes**  | Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| expires_at   | string                                                                                      | No       | RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| continue_url | string                                                                                      | No       | URL for checkout handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| payment      | [Payment](/draft/specification/checkout/#payment)                                           | No       | Payment configuration containing handlers.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| order        | [Order Confirmation](/draft/specification/reference/#order-confirmation)                    | No       | Details about an order created for this checkout session.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| Name         | Type                                                                     | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| ------------ | ------------------------------------------------------------------------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ucp          | any                                                                      | **Yes**  | UCP metadata for checkout responses.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| id           | string                                                                   | **Yes**  | Unique identifier of the checkout session.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| line_items   | Array\[[Line Item Response](/draft/specification/reference/#line-item)\] | **Yes**  | List of line items being checked out.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| buyer        | [Buyer](/draft/specification/reference/#buyer)                           | No       | Representation of the buyer.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| context      | [Context](/draft/specification/reference/#context)                       | No       | Provisional buyer signals for relevance and localization—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data. Context SHOULD be non-identifying and can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. |
+| signals      | [Signals](/draft/specification/reference/#signals)                       | No       | Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.                                                                                                                                                                                                                                                                 |
+| status       | string                                                                   | **Yes**  | Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details. **Enum:** `incomplete`, `requires_escalation`, `ready_for_complete`, `complete_in_progress`, `completed`, `canceled`                                                                                                                                                                                                                                                                                                                                                                                                         |
+| currency     | string                                                                   | **Yes**  | ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| totals       | [Totals](/draft/specification/reference/#totals)                         | **Yes**  | Different cart totals.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| messages     | Array\[[Message](/draft/specification/reference/#message)\]              | No       | List of messages with error and info about the checkout session state.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| links        | Array\[[Link](/draft/specification/reference/#link)\]                    | **Yes**  | Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| expires_at   | string                                                                   | No       | RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| continue_url | string                                                                   | No       | URL for checkout handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| payment      | [Payment](/draft/specification/checkout/#payment)                        | No       | Payment configuration containing handlers.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| order        | [Order Confirmation](/draft/specification/reference/#order-confirmation) | No       | Details about an order created for this checkout session.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 
 ### Order
 
 The object returned upon successful completion of a checkout, containing confirmation details.
 
-| Name          | Type                                                                               | Required | Description                                                                                                                                   |
-| ------------- | ---------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| ucp           | [Ucp Response Order Schema](/draft/specification/order/#ucp-response-order-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                       |
-| id            | string                                                                             | **Yes**  | Unique order identifier.                                                                                                                      |
-| label         | string                                                                             | No       | Human-readable label for identifying the order. MUST only be provided by the business.                                                        |
-| checkout_id   | string                                                                             | **Yes**  | Associated checkout ID for reconciliation.                                                                                                    |
-| permalink_url | string                                                                             | **Yes**  | Permalink to access the order on merchant site.                                                                                               |
-| line_items    | Array\[[Order Line Item](/draft/specification/reference/#order-line-item)\]        | **Yes**  | Line items representing what was purchased — can change post-order via edits or exchanges.                                                    |
-| fulfillment   | object                                                                             | **Yes**  | Fulfillment data: buyer expectations and what actually happened.                                                                              |
-| adjustments   | Array\[[Adjustment](/draft/specification/reference/#adjustment)\]                  | No       | Post-order events (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment.                         |
-| currency      | string                                                                             | No       | ISO 4217 currency code. MUST match the currency from the originating checkout session.                                                        |
-| totals        | [Totals](/draft/specification/reference/#totals)                                   | **Yes**  | Different totals for the order.                                                                                                               |
-| messages      | Array\[[Message](/draft/specification/reference/#message)\]                        | No       | Business outcome messages (errors, warnings, informational). Present when the business needs to communicate status or issues to the platform. |
+| Name          | Type                                                                        | Required | Description                                                                                                                                   |
+| ------------- | --------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| ucp           | any                                                                         | **Yes**  | UCP metadata for order responses. No payment handlers needed post-purchase.                                                                   |
+| id            | string                                                                      | **Yes**  | Unique order identifier.                                                                                                                      |
+| label         | string                                                                      | No       | Human-readable label for identifying the order. MUST only be provided by the business.                                                        |
+| checkout_id   | string                                                                      | **Yes**  | Associated checkout ID for reconciliation.                                                                                                    |
+| permalink_url | string                                                                      | **Yes**  | Permalink to access the order on merchant site.                                                                                               |
+| line_items    | Array\[[Order Line Item](/draft/specification/reference/#order-line-item)\] | **Yes**  | Line items representing what was purchased — can change post-order via edits or exchanges.                                                    |
+| fulfillment   | object                                                                      | **Yes**  | Fulfillment data: buyer expectations and what actually happened.                                                                              |
+| adjustments   | Array\[[Adjustment](/draft/specification/reference/#adjustment)\]           | No       | Post-order events (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment.                         |
+| currency      | string                                                                      | No       | ISO 4217 currency code. MUST match the currency from the originating checkout session.                                                        |
+| totals        | [Totals](/draft/specification/reference/#totals)                            | **Yes**  | Different totals for the order.                                                                                                               |
+| messages      | Array\[[Message](/draft/specification/reference/#message)\]                 | No       | Business outcome messages (errors, warnings, informational). Present when the business needs to communicate status or issues to the platform. |
 
 ### Payment
 

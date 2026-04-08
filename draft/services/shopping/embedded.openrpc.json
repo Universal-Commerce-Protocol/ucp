@@ -35,28 +35,49 @@
       "result": {
         "name": "readyResult",
         "schema": {
-          "type": "object",
-          "description": "Handshake response from host.",
-          "properties": {
-            "upgrade": {
+          "oneOf": [
+            {
               "type": "object",
-              "description": "Channel upgrade instructions. If present, switch to provided MessagePort.",
+              "description": "Handshake response from host.",
+              "required": [
+                "ucp"
+              ],
               "properties": {
-                "port": {
+                "ucp": {
+                  "$ref": "#/components/schemas/ucp_success"
+                },
+                "upgrade": {
                   "type": "object",
-                  "description": "MessagePort for upgraded channel. Runtime type is MessagePort."
+                  "description": "Channel upgrade instructions. If present, switch to provided MessagePort.",
+                  "properties": {
+                    "port": {
+                      "type": "object",
+                      "description": "MessagePort for upgraded channel. Runtime type is MessagePort."
+                    }
+                  }
+                },
+                "credential": {
+                  "type": "string",
+                  "description": "Requested authorization. Some common examples include API key and OAuth token."
+                },
+                "checkout": {
+                  "type": "object",
+                  "description": "Initial delegation state from host. Fields are permitted only when the corresponding delegation is accepted.",
+                  "properties": {
+                    "payment": {
+                      "$ref": "#/components/schemas/payment_instrument_selection"
+                    },
+                    "fulfillment": {
+                      "$ref": "https://ucp.dev/draft/schemas/shopping/types/fulfillment.json"
+                    }
+                  }
                 }
               }
             },
-            "credential": {
-              "type": "string",
-              "description": "Requested authorization. Some common examples include API key and OAuth token."
-            },
-            "checkout": {
-              "$ref": "https://ucp.dev/draft/schemas/shopping/checkout.json",
-              "description": "Initial checkout state with host-provided data (saved instruments, addresses)."
+            {
+              "$ref": "https://ucp.dev/draft/schemas/shopping/types/error_response.json"
             }
-          }
+          ]
         }
       }
     },
@@ -75,17 +96,28 @@
       "result": {
         "name": "authResult",
         "schema": {
-          "type": "object",
-          "description": "Auth response from host containing the requested authorization data.",
-          "required": [
-            "credential"
-          ],
-          "properties": {
-            "credential": {
-              "type": "string",
-              "description": "Requested authorization. Some common examples include API key and OAuth token."
+          "oneOf": [
+            {
+              "type": "object",
+              "description": "Auth response from host containing the requested authorization data.",
+              "required": [
+                "ucp",
+                "credential"
+              ],
+              "properties": {
+                "ucp": {
+                  "$ref": "#/components/schemas/ucp_success"
+                },
+                "credential": {
+                  "type": "string",
+                  "description": "Requested authorization. Some common examples include API key and OAuth token."
+                }
+              }
+            },
+            {
+              "$ref": "https://ucp.dev/draft/schemas/shopping/types/error_response.json"
             }
-          }
+          ]
         }
       }
     },
@@ -143,15 +175,8 @@
           "name": "checkout",
           "required": true,
           "schema": {
-            "oneOf": [
-              {
-                "$ref": "https://ucp.dev/draft/schemas/shopping/checkout.json"
-              },
-              {
-                "$ref": "https://ucp.dev/draft/schemas/shopping/types/error_response.json"
-              }
-            ],
-            "description": "Current checkout state with updated messages or an error response."
+            "$ref": "https://ucp.dev/draft/schemas/shopping/checkout.json",
+            "description": "Current checkout state with updated messages."
           }
         }
       ]
@@ -233,35 +258,33 @@
       "result": {
         "name": "instrumentsChangeResult",
         "schema": {
-          "type": "object",
-          "description": "Checkout state after instrument selection.",
-          "required": [
-            "checkout"
-          ],
-          "properties": {
-            "checkout": {
+          "oneOf": [
+            {
               "type": "object",
-              "description": "Partial checkout update with payment instrument selection.",
+              "description": "Checkout state after instrument selection.",
+              "required": [
+                "ucp",
+                "checkout"
+              ],
               "properties": {
-                "payment": {
+                "ucp": {
+                  "$ref": "#/components/schemas/ucp_success"
+                },
+                "checkout": {
                   "type": "object",
+                  "description": "Partial checkout update with payment instrument selection.",
                   "properties": {
-                    "selected_instrument_id": {
-                      "type": "string",
-                      "description": "ID of the selected payment instrument."
-                    },
-                    "instruments": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "https://ucp.dev/draft/schemas/shopping/types/payment_instrument.json#/$defs/selected_payment_instrument"
-                      },
-                      "description": "Available payment instruments after selection."
+                    "payment": {
+                      "$ref": "#/components/schemas/payment_instrument_selection"
                     }
                   }
                 }
               }
+            },
+            {
+              "$ref": "https://ucp.dev/draft/schemas/shopping/types/error_response.json"
             }
-          }
+          ]
         }
       }
     },
@@ -282,31 +305,33 @@
       "result": {
         "name": "credentialResult",
         "schema": {
-          "type": "object",
-          "description": "Checkout state with payment credential ready for completion.",
-          "required": [
-            "checkout"
-          ],
-          "properties": {
-            "checkout": {
+          "oneOf": [
+            {
               "type": "object",
-              "description": "Partial checkout update with payment credential.",
+              "description": "Checkout state with payment credential ready for completion.",
+              "required": [
+                "ucp",
+                "checkout"
+              ],
               "properties": {
-                "payment": {
+                "ucp": {
+                  "$ref": "#/components/schemas/ucp_success"
+                },
+                "checkout": {
                   "type": "object",
+                  "description": "Partial checkout update with payment credential.",
                   "properties": {
-                    "instruments": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "https://ucp.dev/draft/schemas/shopping/types/payment_instrument.json#/$defs/selected_payment_instrument"
-                      },
-                      "description": "Payment instruments with credential populated on selected instrument."
+                    "payment": {
+                      "$ref": "#/components/schemas/payment_instruments"
                     }
                   }
                 }
               }
+            },
+            {
+              "$ref": "https://ucp.dev/draft/schemas/shopping/types/error_response.json"
             }
-          }
+          ]
         }
       }
     },
@@ -328,10 +353,31 @@
       "result": {
         "name": "windowOpenResult",
         "schema": {
-          "type": "object",
-          "description": "Acknowledgement that the host handled the request."
+          "oneOf": [
+            {
+              "type": "object",
+              "description": "Acknowledgement that the host handled the request.",
+              "required": [
+                "ucp"
+              ],
+              "properties": {
+                "ucp": {
+                  "$ref": "#/components/schemas/ucp_success"
+                }
+              }
+            },
+            {
+              "$ref": "https://ucp.dev/draft/schemas/shopping/types/error_response.json"
+            }
+          ]
         }
       }
+    },
+    {
+      "$ref": "https://ucp.dev/draft/schemas/shopping/fulfillment.json#/embedded/methods/ec.fulfillment.change"
+    },
+    {
+      "$ref": "https://ucp.dev/draft/schemas/shopping/fulfillment.json#/embedded/methods/ec.fulfillment.address_change_request"
     },
     {
       "name": "ep.cart.ready",
@@ -361,24 +407,37 @@
       "result": {
         "name": "readyResult",
         "schema": {
-          "type": "object",
-          "description": "Handshake response from host.",
-          "properties": {
-            "upgrade": {
+          "oneOf": [
+            {
               "type": "object",
-              "description": "Channel upgrade instructions. If present, switch to provided MessagePort.",
+              "description": "Handshake response from host.",
+              "required": [
+                "ucp"
+              ],
               "properties": {
-                "port": {
+                "ucp": {
+                  "$ref": "#/components/schemas/ucp_success"
+                },
+                "upgrade": {
                   "type": "object",
-                  "description": "MessagePort for upgraded channel. Runtime type is MessagePort."
+                  "description": "Channel upgrade instructions. If present, switch to provided MessagePort.",
+                  "properties": {
+                    "port": {
+                      "type": "object",
+                      "description": "MessagePort for upgraded channel. Runtime type is MessagePort."
+                    }
+                  }
+                },
+                "credential": {
+                  "type": "string",
+                  "description": "Requested authorization. Some common examples include API key and OAuth token."
                 }
               }
             },
-            "credential": {
-              "type": "string",
-              "description": "Requested authorization. Some common examples include API key and OAuth token."
+            {
+              "$ref": "https://ucp.dev/draft/schemas/shopping/types/error_response.json"
             }
-          }
+          ]
         }
       }
     },
@@ -397,17 +456,28 @@
       "result": {
         "name": "authResult",
         "schema": {
-          "type": "object",
-          "description": "Auth response from host containing the requested authorization data.",
-          "required": [
-            "credential"
-          ],
-          "properties": {
-            "credential": {
-              "type": "string",
-              "description": "Requested authorization. Some common examples include API key and OAuth token."
+          "oneOf": [
+            {
+              "type": "object",
+              "description": "Auth response from host containing the requested authorization data.",
+              "required": [
+                "ucp",
+                "credential"
+              ],
+              "properties": {
+                "ucp": {
+                  "$ref": "#/components/schemas/ucp_success"
+                },
+                "credential": {
+                  "type": "string",
+                  "description": "Requested authorization. Some common examples include API key and OAuth token."
+                }
+              }
+            },
+            {
+              "$ref": "https://ucp.dev/draft/schemas/shopping/types/error_response.json"
             }
-          }
+          ]
         }
       }
     },
@@ -495,15 +565,8 @@
           "name": "cart",
           "required": true,
           "schema": {
-            "oneOf": [
-              {
-                "$ref": "https://ucp.dev/draft/schemas/shopping/cart.json"
-              },
-              {
-                "$ref": "https://ucp.dev/draft/schemas/shopping/types/error_response.json"
-              }
-            ],
-            "description": "Current cart state with updated messages or an error response."
+            "$ref": "https://ucp.dev/draft/schemas/shopping/cart.json",
+            "description": "Current cart state with updated messages."
           }
         }
       ]
@@ -511,6 +574,38 @@
   ],
   "components": {
     "schemas": {
+      "ucp_success": {
+        "$ref": "https://ucp.dev/draft/schemas/ucp.json#/$defs/success"
+      },
+      "payment_instruments": {
+        "type": "object",
+        "description": "Payment instruments from host.",
+        "properties": {
+          "instruments": {
+            "type": "array",
+            "items": {
+              "$ref": "https://ucp.dev/draft/schemas/shopping/types/payment_instrument.json#/$defs/selected_payment_instrument"
+            },
+            "description": "Available payment instruments."
+          }
+        }
+      },
+      "payment_instrument_selection": {
+        "description": "Payment instruments with selected instrument ID.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/payment_instruments"
+          },
+          {
+            "properties": {
+              "selected_instrument_id": {
+                "type": "string",
+                "description": "ID of the selected payment instrument."
+              }
+            }
+          }
+        ]
+      },
       "type": {
         "type": "string",
         "description": "The type of authorization data business is requesting from the host.",
@@ -533,6 +628,7 @@
   "x-delegations": [
     "payment.instruments_change",
     "payment.credential",
+    "fulfillment.address_change",
     "window.open"
   ]
 }
