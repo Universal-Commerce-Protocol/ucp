@@ -402,7 +402,7 @@ during partner onboarding. The URL format is platform-specific.
 | Header               | Description                                 |
 | :------------------- | :------------------------------------------ |
 | `Webhook-Timestamp`  | Event creation timestamp (RFC 3339)         |
-| `Request-Id`         | Unique event identifier                     |
+| `Webhook-Event-Id`   | Unique event identifier                     |
 
 {{ method_fields('order_event_webhook', 'rest.openapi.json', 'order') }}
 
