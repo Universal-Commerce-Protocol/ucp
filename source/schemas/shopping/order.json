@@ -90,14 +90,7 @@
     "currency": {
       "type": "string",
       "description": "ISO 4217 currency code. MUST match the currency from the originating checkout session.",
-      "ucp_request": "omit", 
-      "ucp_response": {
-        "transition": {
-          "from": "optional",
-          "to": "required",
-          "description": "Global requirement for currency in all Order responses."
-        }
-      } 
+      "ucp_request": "omit"
     },
     "totals": {
       "$ref": "types/totals.json",

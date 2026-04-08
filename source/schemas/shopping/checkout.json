@@ -23,11 +23,7 @@
     "id": {
       "type": "string",
       "description": "Unique identifier of the checkout session.",
-      "ucp_request": {
-        "create": "omit",
-        "update": {"transition": {"from": "required", "to": "omit", "description": "ID is provided as argument on the request, this ID is redundant."}},
-        "complete": "omit"
-      }
+      "ucp_request": "omit"
     },
     "line_items": {
       "type": "array",
@@ -60,27 +56,7 @@
     },
     "signals": {
       "$ref": "types/signals.json",
-      "ucp_request": {
-        "create": "optional",
-        "update": "optional",
-        "complete": "optional"
-      }
-    },
-    "risk_signals": {
-      "type": "object",
-      "description": "Deprecated. Use signals instead. Will be removed in the next version.",
-      "deprecated": true,
-      "additionalProperties": true,
-      "ucp_request": {
-        "complete": {
-          "transition": {
-            "from": "optional",
-            "to": "omit",
-            "description": "Replaced by signals. Will be removed in the next version."
-          }
-        }
-      },
-      "ucp_response": "omit"
+      "ucp_request": "optional"
     },
     "status": {
       "type": "string",
@@ -98,11 +74,7 @@
     "currency": {
       "type": "string",
       "description": "ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.",
-      "ucp_request": {
-        "create": "omit",
-        "update": "omit",
-        "complete": "omit"
-      }
+      "ucp_request": "omit"
     },
     "totals": {
       "$ref": "types/totals.json",
