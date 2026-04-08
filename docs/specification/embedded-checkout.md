@@ -401,7 +401,7 @@ completion.
 ## Transport & Messaging
 
 ECP uses the shared EP transport layer. See
-[Embedded Protocol — Transport & Messaging](embedded-protocol.md#transport--messaging)
+[Embedded Protocol — Transport & Messaging](embedded-protocol.md#transport-messaging)
 for message format, message types, and response handling conventions.
 
 The `ucp.version` in all responses **MUST** echo the `ec_version` negotiated

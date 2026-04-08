@@ -154,7 +154,7 @@ distinguish ECaP parameters from business-specific query parameters:
 ## Transport & Messaging
 
 ECaP uses the shared EP transport layer. See
-[Embedded Protocol — Transport & Messaging](embedded-protocol.md#transport--messaging)
+[Embedded Protocol — Transport & Messaging](embedded-protocol.md#transport-messaging)
 for message format, message types, and response handling conventions.
 
 The `ucp.version` in all responses **MUST** echo the `ep_version` negotiated
