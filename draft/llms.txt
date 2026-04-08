@@ -40,7 +40,9 @@
 
 ## Other Capabilities
 
-- [Order Capability](http://ucp.dev/draft/specification/order/index.md)
+- [Overview](http://ucp.dev/draft/specification/order/index.md)
+- [HTTP/REST Binding](http://ucp.dev/draft/specification/order-rest/index.md)
+- [MCP Binding](http://ucp.dev/draft/specification/order-mcp/index.md)
 - [Identity Linking Capability](http://ucp.dev/draft/specification/identity-linking/index.md)
 - [Guide](http://ucp.dev/draft/specification/payment-handler-guide/index.md)
 - [Template](http://ucp.dev/draft/specification/payment-handler-template/index.md)

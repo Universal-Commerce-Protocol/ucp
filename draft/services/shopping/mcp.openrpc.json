@@ -3,7 +3,7 @@
   "info": {
     "title": "UCP Shopping Service",
     "description": "Canonical MCP/JSON-RPC interface for UCP Shopping service. Schema references are logical pointers - actual payload shape is determined by negotiated capabilities.\n\n**Endpoint Resolution:** This spec defines methods only. The endpoint URL MUST be obtained from the merchant's discovery profile at `/.well-known/ucp` under `services[\"dev.ucp.shopping\"][transport=mcp].endpoint`. The server entry below is a placeholder for tooling compatibility.",
-    "version": "2026-04-07"
+    "version": "2026-04-08"
   },
   "servers": [
     {
@@ -34,6 +34,16 @@
         "oneOf": [
           {
             "$ref": "https://ucp.dev/draft/schemas/shopping/cart.json"
+          },
+          {
+            "$ref": "https://ucp.dev/draft/schemas/shopping/types/error_response.json"
+          }
+        ]
+      },
+      "order_result": {
+        "oneOf": [
+          {
+            "$ref": "https://ucp.dev/draft/schemas/shopping/order.json"
           },
           {
             "$ref": "https://ucp.dev/draft/schemas/shopping/types/error_response.json"
@@ -424,6 +434,34 @@
         "name": "response",
         "schema": {
           "$ref": "https://ucp.dev/draft/schemas/shopping/catalog_lookup.json#/$defs/lookup_response"
+        }
+      }
+    },
+    {
+      "name": "get_order",
+      "summary": "Get order",
+      "description": "Get the current state of an order. Returns the full order entity as a current-state snapshot.",
+      "params": [
+        {
+          "name": "meta",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/meta"
+          }
+        },
+        {
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "description": "The unique identifier of the order."
+          }
+        }
+      ],
+      "result": {
+        "name": "order",
+        "schema": {
+          "$ref": "#/components/schemas/order_result"
         }
       }
     },

@@ -6918,18 +6918,19 @@ The core object representing the current state of the transaction, including lin
 
 The object returned upon successful completion of a checkout, containing confirmation details.
 
-| Name          | Type                                                                               | Required | Description                                                                                                             |
-| ------------- | ---------------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------- |
-| ucp           | [Ucp Response Order Schema](/draft/specification/order/#ucp-response-order-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields. |
-| id            | string                                                                             | **Yes**  | Unique order identifier.                                                                                                |
-| label         | string                                                                             | No       | Human-readable label for identifying the order. MUST only be provided by the business.                                  |
-| checkout_id   | string                                                                             | **Yes**  | Associated checkout ID for reconciliation.                                                                              |
-| permalink_url | string                                                                             | **Yes**  | Permalink to access the order on merchant site.                                                                         |
-| line_items    | Array\[[Order Line Item](/draft/specification/reference/#order-line-item)\]        | **Yes**  | Line items representing what was purchased — can change post-order via edits or exchanges.                              |
-| fulfillment   | object                                                                             | **Yes**  | Fulfillment data: buyer expectations and what actually happened.                                                        |
-| adjustments   | Array\[[Adjustment](/draft/specification/reference/#adjustment)\]                  | No       | Post-order events (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment.   |
-| currency      | string                                                                             | No       | ISO 4217 currency code. MUST match the currency from the originating checkout session.                                  |
-| totals        | [Totals](/draft/specification/reference/#totals)                                   | **Yes**  | Different totals for the order.                                                                                         |
+| Name          | Type                                                                               | Required | Description                                                                                                                                   |
+| ------------- | ---------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| ucp           | [Ucp Response Order Schema](/draft/specification/order/#ucp-response-order-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                       |
+| id            | string                                                                             | **Yes**  | Unique order identifier.                                                                                                                      |
+| label         | string                                                                             | No       | Human-readable label for identifying the order. MUST only be provided by the business.                                                        |
+| checkout_id   | string                                                                             | **Yes**  | Associated checkout ID for reconciliation.                                                                                                    |
+| permalink_url | string                                                                             | **Yes**  | Permalink to access the order on merchant site.                                                                                               |
+| line_items    | Array\[[Order Line Item](/draft/specification/reference/#order-line-item)\]        | **Yes**  | Line items representing what was purchased — can change post-order via edits or exchanges.                                                    |
+| fulfillment   | object                                                                             | **Yes**  | Fulfillment data: buyer expectations and what actually happened.                                                                              |
+| adjustments   | Array\[[Adjustment](/draft/specification/reference/#adjustment)\]                  | No       | Post-order events (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment.                         |
+| currency      | string                                                                             | No       | ISO 4217 currency code. MUST match the currency from the originating checkout session.                                                        |
+| totals        | [Totals](/draft/specification/reference/#totals)                                   | **Yes**  | Different totals for the order.                                                                                                               |
+| messages      | Array\[[Message](/draft/specification/reference/#message)\]                        | No       | Business outcome messages (errors, warnings, informational). Present when the business needs to communicate status or issues to the platform. |
 
 ### Payment
 
@@ -12735,7 +12736,7 @@ A conforming MCP transport implementation **MUST**:
 
 ## Overview
 
-Orders represent confirmed transactions resulting from a successful checkout submission. It provides a complete record of what was purchased, how it will be delivered, and what has happened since order placement.
+Orders represent confirmed transactions resulting from a successful checkout submission. They provide a complete record of what was purchased, how it will be delivered, and what has happened since order placement.
 
 ### Key Concepts
 
@@ -12756,7 +12757,7 @@ Orders have three main components:
 - Typically money movements (refunds, returns, credits, disputes, cancellations)
 - Can be any post-order change
 - Can happen before, during, or after fulfillment
-- Businesses SHOULD append new entries rather than mutating existing ones; append-only ledger is preferred. Businesses that do not maintain adjustment history MAY perform in-place updates of existing entries (e.g. a single `return` adjustment can transition from `pending` to `completed`)
+- Businesses **SHOULD** append new entries rather than mutating existing ones; append-only ledger is preferred. Businesses that do not maintain adjustment history **MAY** perform in-place updates of existing entries (e.g. a single `return` adjustment can transition from `pending` to `completed`)
 
 ## Data Model
 
@@ -12809,18 +12810,19 @@ Expectations can be split, merged, or adjusted post-order. For example:
 
 ### Order
 
-| Name          | Type                                                                               | Required | Description                                                                                                             |
-| ------------- | ---------------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------- |
-| ucp           | [Ucp Response Order Schema](/draft/specification/order/#ucp-response-order-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields. |
-| id            | string                                                                             | **Yes**  | Unique order identifier.                                                                                                |
-| label         | string                                                                             | No       | Human-readable label for identifying the order. MUST only be provided by the business.                                  |
-| checkout_id   | string                                                                             | **Yes**  | Associated checkout ID for reconciliation.                                                                              |
-| permalink_url | string                                                                             | **Yes**  | Permalink to access the order on merchant site.                                                                         |
-| line_items    | Array\[[Order Line Item](/draft/specification/reference/#order-line-item)\]        | **Yes**  | Line items representing what was purchased — can change post-order via edits or exchanges.                              |
-| fulfillment   | object                                                                             | **Yes**  | Fulfillment data: buyer expectations and what actually happened.                                                        |
-| adjustments   | Array\[[Adjustment](/draft/specification/reference/#adjustment)\]                  | No       | Post-order events (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment.   |
-| currency      | string                                                                             | No       | ISO 4217 currency code. MUST match the currency from the originating checkout session.                                  |
-| totals        | [Totals](/draft/specification/reference/#totals)                                   | **Yes**  | Different totals for the order.                                                                                         |
+| Name          | Type                                                                               | Required | Description                                                                                                                                   |
+| ------------- | ---------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| ucp           | [Ucp Response Order Schema](/draft/specification/order/#ucp-response-order-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                       |
+| id            | string                                                                             | **Yes**  | Unique order identifier.                                                                                                                      |
+| label         | string                                                                             | No       | Human-readable label for identifying the order. MUST only be provided by the business.                                                        |
+| checkout_id   | string                                                                             | **Yes**  | Associated checkout ID for reconciliation.                                                                                                    |
+| permalink_url | string                                                                             | **Yes**  | Permalink to access the order on merchant site.                                                                                               |
+| line_items    | Array\[[Order Line Item](/draft/specification/reference/#order-line-item)\]        | **Yes**  | Line items representing what was purchased — can change post-order via edits or exchanges.                                                    |
+| fulfillment   | object                                                                             | **Yes**  | Fulfillment data: buyer expectations and what actually happened.                                                                              |
+| adjustments   | Array\[[Adjustment](/draft/specification/reference/#adjustment)\]                  | No       | Post-order events (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment.                         |
+| currency      | string                                                                             | No       | ISO 4217 currency code. MUST match the currency from the originating checkout session.                                                        |
+| totals        | [Totals](/draft/specification/reference/#totals)                                   | **Yes**  | Different totals for the order.                                                                                                               |
+| messages      | Array\[[Message](/draft/specification/reference/#message)\]                        | No       | Business outcome messages (errors, warnings, informational). Present when the business needs to communicate status or issues to the platform. |
 
 ### Order Line Item
 
@@ -12912,7 +12914,8 @@ Examples: `refund`, `return`, `credit`, `price_adjustment`, `dispute`, `cancella
   },
   "id": "order_abc123",
   "checkout_id": "checkout_xyz789",
-  "permalink_url": "https://business.com/orders/abc123",
+  "permalink_url": "https://business.example.com/orders/abc123",
+  "currency": "USD",
   "line_items": [
     {
       "id": "li_shoes",
@@ -13000,11 +13003,102 @@ Examples: `refund`, `return`, `credit`, `price_adjustment`, `dispute`, `cancella
 }
 ```
 
+## Operations
+
+The order entity is a **current-state snapshot**: the authoritative latest state of the order at the time of retrieval or delivery. Businesses **MUST** return the full order entity on every response. The same schema is used for both synchronous retrieval (this section) and asynchronous event delivery (see [Events](#events)).
+
+The `permalink_url` is the authoritative reference for the full order experience - timeline, post-purchase operations, returns. The API provides programmatic access to current state for conversational and operational use cases.
+
+| Operation               | Method | Endpoint       | Description                             |
+| ----------------------- | ------ | -------------- | --------------------------------------- |
+| [Get Order](#get-order) | `GET`  | `/orders/{id}` | Platform retrieves current order state. |
+
+For transport-specific details, see [REST Binding](http://ucp.dev/draft/specification/order-rest/index.md), and [MCP Binding](http://ucp.dev/draft/specification/order-mcp/index.md)
+
+### Get Order
+
+Returns the current-state snapshot of an order.
+
+#### Authorization
+
+The business **MUST** authenticate requests to order data before returning a response, using any supported UCP mechanism - API keys, OAuth 2.0, mutual TLS, or HTTP Message Signatures (see [Identity and Authentication](http://ucp.dev/draft/specification/checkout-rest/#authentication)). The authentication method determines the scope of accessible orders:
+
+| Authentication       | Recommended Access Scope                                 |
+| -------------------- | -------------------------------------------------------- |
+| Platform credentials | Orders originated by the platform                        |
+| Buyer authorization  | Orders originated by the buyer, subject to granted scope |
+
+**Platform credentials** (API key, signatures, OAuth client credentials) - businesses **MAY** allow access for orders the platform originated. The platform provided buyer and payment information during the checkout flow, observed the order confirmation, and is retrieving the latest state of an order it already has context for.
+
+**Buyer authorization** - the platform obtains buyer authorization via [Identity Linking](http://ucp.dev/draft/specification/identity-linking/index.md) with the necessary scopes, or a similar mechanism. This grants access to the buyer's orders regardless of which platform originated them.
+
+Businesses **MAY** define additional access policies (e.g., trusted partner agreements), enforce data availability constraints (e.g., retention windows, regulatory erasure), and omit or redact optional fields from the response based on context, business policy, or other requirements - independently of authorization.
+
+#### Error Responses
+
+When the business cannot return an order, the response returns an error that includes a `messages` array describing the outcome:
+
+**Order not found:**
+
+```json
+{
+  "ucp": {
+    "version": "draft",
+    "status": "error",
+    "capabilities": {
+      "dev.ucp.shopping.order": [{"version": "draft"}]
+    }
+  },
+  "messages": [
+    {
+      "type": "error",
+      "code": "not_found",
+      "severity": "unrecoverable",
+      "content": "Order not found."
+    }
+  ]
+}
+```
+
+**Not authorized:**
+
+```json
+{
+  "ucp": {
+    "version": "draft",
+    "status": "error",
+    "capabilities": {
+      "dev.ucp.shopping.order": [{"version": "draft"}]
+    }
+  },
+  "messages": [
+    {
+      "type": "error",
+      "code": "unauthorized",
+      "severity": "unrecoverable",
+      "content": "Not authorized to access this order."
+    }
+  ]
+}
+```
+
+### Guidelines
+
+**Platform:**
+
+- **MUST** include `UCP-Agent` header with profile URL on all requests
+- **SHOULD** rely on webhooks (see [Events](#events)) as the primary order update channel and use Get Order for reconciliation or on-demand retrieval
+- **SHOULD** treat order data as ephemeral and discard it when no longer needed for active commerce flows
+
+**Business:**
+
+- **MUST** authenticate requests to order data before returning a response (see [Authorization](#authorization))
+
 ## Events
 
-Businesses send order status changes as events after order placement.
+Businesses push order lifecycle updates to the platform via webhooks. The payload is the same **current-state snapshot** described in [Operations](#operations) — the full order entity.
 
-| Event Mechanism                             | Method | Endpoint              | Description                                            |
+| Event                                       | Method | Endpoint              | Description                                            |
 | ------------------------------------------- | ------ | --------------------- | ------------------------------------------------------ |
 | [Order Event Webhook](#order-event-webhook) | `POST` | Platform-provided URL | Business sends order lifecycle events to the platform. |
 
@@ -13014,19 +13108,20 @@ Businesses POST order events to a webhook URL provided by the platform during pa
 
 **Inputs**
 
-| Name          | Type                                                                               | Required | Description                                                                                                             |
-| ------------- | ---------------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------- |
-| ucp           | [Ucp Response Order Schema](/draft/specification/order/#ucp-response-order-schema) | No       | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields. |
-| id            | string                                                                             | No       | Unique order identifier.                                                                                                |
-| label         | string                                                                             | No       | Human-readable label for identifying the order. MUST only be provided by the business.                                  |
-| checkout_id   | string                                                                             | No       | Associated checkout ID for reconciliation.                                                                              |
-| permalink_url | string                                                                             | No       | Permalink to access the order on merchant site.                                                                         |
-| line_items    | Array\[[Order Line Item](/draft/specification/reference/#order-line-item)\]        | No       | Line items representing what was purchased — can change post-order via edits or exchanges.                              |
-| fulfillment   | object                                                                             | No       | Fulfillment data: buyer expectations and what actually happened.                                                        |
-| adjustments   | Array\[[Adjustment](/draft/specification/reference/#adjustment)\]                  | No       | Post-order events (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment.   |
-| totals        | [Totals](/draft/specification/reference/#totals)                                   | No       | Different totals for the order.                                                                                         |
-| event_id      | string                                                                             | **Yes**  | Unique event identifier.                                                                                                |
-| created_time  | string                                                                             | **Yes**  | Event creation timestamp in RFC 3339 format.                                                                            |
+| Name          | Type                                                                               | Required | Description                                                                                                                                   |
+| ------------- | ---------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| ucp           | [Ucp Response Order Schema](/draft/specification/order/#ucp-response-order-schema) | No       | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                       |
+| id            | string                                                                             | No       | Unique order identifier.                                                                                                                      |
+| label         | string                                                                             | No       | Human-readable label for identifying the order. MUST only be provided by the business.                                                        |
+| checkout_id   | string                                                                             | No       | Associated checkout ID for reconciliation.                                                                                                    |
+| permalink_url | string                                                                             | No       | Permalink to access the order on merchant site.                                                                                               |
+| line_items    | Array\[[Order Line Item](/draft/specification/reference/#order-line-item)\]        | No       | Line items representing what was purchased — can change post-order via edits or exchanges.                                                    |
+| fulfillment   | object                                                                             | No       | Fulfillment data: buyer expectations and what actually happened.                                                                              |
+| adjustments   | Array\[[Adjustment](/draft/specification/reference/#adjustment)\]                  | No       | Post-order events (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment.                         |
+| totals        | [Totals](/draft/specification/reference/#totals)                                   | No       | Different totals for the order.                                                                                                               |
+| messages      | Array\[[Message](/draft/specification/reference/#message)\]                        | No       | Business outcome messages (errors, warnings, informational). Present when the business needs to communicate status or issues to the platform. |
+| event_id      | string                                                                             | **Yes**  | Unique event identifier.                                                                                                                      |
+| created_time  | string                                                                             | **Yes**  | Event creation timestamp in RFC 3339 format.                                                                                                  |
 
 **Output**
 
@@ -13121,17 +13216,16 @@ This prevents a malicious business from sending fake events for another business
 
 See [Message Signatures - Key Rotation](http://ucp.dev/draft/specification/signatures/#key-rotation) for zero-downtime key rotation procedures.
 
-## Guidelines
+### Guidelines
 
 **Platform:**
 
-- **MUST** respond quickly with a 2xx HTTP status code to acknowledge receipt
-- Process events asynchronously after responding
+- **MUST** respond quickly with a 2xx HTTP status code to acknowledge webhook receipt; process events asynchronously after responding
 
 **Business:**
 
 - **MUST** include `UCP-Agent` header with profile URL for signer identification
-- **MUST** sign all webhook payloads per the [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md) specification using RFC 9421 headers (`Signature`, `Signature-Input`, `Content-Digest`).
+- **MUST** sign all webhook payloads per the [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md) specification using RFC 9421 headers (`Signature`, `Signature-Input`, `Content-Digest`)
 - **MUST** send "Order created" event with fully populated order entity
 - **MUST** send full order entity on updates (not incremental deltas)
 - **MUST** retry failed webhook deliveries
@@ -13192,6 +13286,537 @@ UCP metadata for order responses. No payment handlers needed post-purchase.
 | capabilities     | object | No       | Capability registry keyed by reverse-domain name.                           |
 | payment_handlers | object | No       | Payment handler registry keyed by reverse-domain name.                      |
 | capabilities     | any    | No       |                                                                             |
+
+# Order Capability - REST Binding
+
+This document specifies the REST binding for the [Order Capability](http://ucp.dev/draft/specification/order/index.md).
+
+## Protocol Fundamentals
+
+### Discovery
+
+Businesses advertise REST transport availability through their UCP profile at `/.well-known/ucp`.
+
+```json
+{
+  "ucp": {
+    "version": "draft",
+    "services": {
+      "dev.ucp.shopping": [
+        {
+          "version": "draft",
+          "spec": "https://ucp.dev/draft/specification/overview",
+          "transport": "rest",
+          "schema": "https://ucp.dev/draft/services/shopping/rest.openapi.json",
+          "endpoint": "https://business.example.com/ucp/v1"
+        }
+      ]
+    },
+    "capabilities": {
+      "dev.ucp.shopping.order": [
+        {
+          "version": "draft",
+          "spec": "https://ucp.dev/draft/specification/order",
+          "schema": "https://ucp.dev/draft/schemas/shopping/order.json"
+        }
+      ]
+    }
+  }
+}
+```
+
+### Base URL
+
+All UCP REST endpoints are relative to the business's base URL, which is discovered through the UCP profile at `/.well-known/ucp`. The endpoint for the order capability is defined in the `rest.endpoint` field of the business profile.
+
+### Content Types
+
+- **Response**: `application/json`
+
+All response bodies **MUST** be valid JSON as specified in [RFC 8259](https://tools.ietf.org/html/rfc8259).
+
+### Transport Security
+
+All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
+
+## Operations
+
+| Operation               | Method | Endpoint       | Description                        |
+| ----------------------- | ------ | -------------- | ---------------------------------- |
+| [Get Order](#get-order) | `GET`  | `/orders/{id}` | Get the current state of an order. |
+
+For the Order Event Webhook (business -> platform push), see the [Order Capability overview](http://ucp.dev/draft/specification/order/#order-event-webhook).
+
+### Get Order
+
+Returns the current-state snapshot of an order.
+
+#### Input Schema
+
+- `id` (String, required): The order ID (path parameter).
+
+#### Output Schema
+
+| Name          | Type                                                                               | Required | Description                                                                                                                                   |
+| ------------- | ---------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| ucp           | [Ucp Response Order Schema](/draft/specification/order/#ucp-response-order-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                       |
+| id            | string                                                                             | **Yes**  | Unique order identifier.                                                                                                                      |
+| label         | string                                                                             | No       | Human-readable label for identifying the order. MUST only be provided by the business.                                                        |
+| checkout_id   | string                                                                             | **Yes**  | Associated checkout ID for reconciliation.                                                                                                    |
+| permalink_url | string                                                                             | **Yes**  | Permalink to access the order on merchant site.                                                                                               |
+| line_items    | Array\[[Order Line Item](/draft/specification/reference/#order-line-item)\]        | **Yes**  | Line items representing what was purchased — can change post-order via edits or exchanges.                                                    |
+| fulfillment   | object                                                                             | **Yes**  | Fulfillment data: buyer expectations and what actually happened.                                                                              |
+| adjustments   | Array\[[Adjustment](/draft/specification/reference/#adjustment)\]                  | No       | Post-order events (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment.                         |
+| currency      | string                                                                             | No       | ISO 4217 currency code. MUST match the currency from the originating checkout session.                                                        |
+| totals        | [Totals](/draft/specification/reference/#totals)                                   | **Yes**  | Different totals for the order.                                                                                                               |
+| messages      | Array\[[Message](/draft/specification/reference/#message)\]                        | No       | Business outcome messages (errors, warnings, informational). Present when the business needs to communicate status or issues to the platform. |
+
+#### Example
+
+```json
+GET /orders/order_abc123 HTTP/1.1
+UCP-Agent: profile="https://platform.example/.well-known/ucp"
+Accept: application/json
+Signature-Input: sig1=("@method" "@authority" "@path" "ucp-agent");created=1706800000;keyid="platform-2026"
+Signature: sig1=:MEUCIQDTxNq8h7LGHpvVZQp1iHkFp9+3N8Mxk2zH1wK4YuVN8w...:
+```
+
+```json
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "ucp": {
+    "version": "draft",
+    "capabilities": {
+      "dev.ucp.shopping.order": [{"version": "draft"}]
+    }
+  },
+  "id": "order_abc123",
+  "checkout_id": "checkout_xyz789",
+  "permalink_url": "https://business.example.com/orders/abc123",
+  "currency": "USD",
+  "line_items": [
+    {
+      "id": "li_shoes",
+      "item": { "id": "prod_shoes", "title": "Running Shoes", "price": 3000 },
+      "quantity": { "total": 1, "fulfilled": 1 },
+      "totals": [
+        {"type": "subtotal", "amount": 3000},
+        {"type": "total", "amount": 3000}
+      ],
+      "status": "fulfilled"
+    }
+  ],
+  "fulfillment": {
+    "expectations": [
+      {
+        "id": "exp_1",
+        "line_items": [{ "id": "li_shoes", "quantity": 1 }],
+        "method_type": "shipping",
+        "destination": {
+          "street_address": "123 Main St",
+          "address_locality": "Austin",
+          "address_region": "TX",
+          "address_country": "US",
+          "postal_code": "78701"
+        },
+        "description": "Delivered"
+      }
+    ],
+    "events": [
+      {
+        "id": "evt_1",
+        "occurred_at": "2026-01-08T10:30:00Z",
+        "type": "delivered",
+        "line_items": [{ "id": "li_shoes", "quantity": 1 }],
+        "tracking_number": "1Z999AA10123456784",
+        "tracking_url": "https://ups.com/track/1Z999AA10123456784",
+        "description": "Delivered to front door"
+      }
+    ]
+  },
+  "adjustments": [],
+  "totals": [
+    { "type": "subtotal", "amount": 3000 },
+    { "type": "fulfillment", "amount": 800 },
+    { "type": "tax", "amount": 304 },
+    { "type": "total", "amount": 4104 }
+  ]
+}
+```
+
+```json
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "ucp": {
+    "version": "draft",
+    "status": "error",
+    "capabilities": {
+      "dev.ucp.shopping.order": [{"version": "draft"}]
+    }
+  },
+  "messages": [
+    {
+      "type": "error",
+      "code": "not_found",
+      "severity": "unrecoverable",
+      "content": "Order not found."
+    }
+  ]
+}
+```
+
+```json
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "ucp": {
+    "version": "draft",
+    "status": "error",
+    "capabilities": {
+      "dev.ucp.shopping.order": [{"version": "draft"}]
+    }
+  },
+  "messages": [
+    {
+      "type": "error",
+      "code": "unauthorized",
+      "severity": "unrecoverable",
+      "content": "Not authorized to access this order."
+    }
+  ]
+}
+```
+
+## HTTP Headers
+
+**Request Headers**
+
+| Header            | Required | Description                                                                                                                                                                                                                                                   |
+| ----------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Authorization`   | No       | Should contain oauth token representing the following 2 schemes: 1. Platform self authenticating (client_credentials). 2. Platform authenticating on behalf of end user (authorization_code).                                                                 |
+| `X-API-Key`       | No       | Authenticates the platform with a reusable api key allocated to the platform by the business.                                                                                                                                                                 |
+| `Signature`       | No       | RFC 9421 HTTP Message Signature. Required when using HTTP Message Signatures for authentication. Format: `sig1=:<base64-signature>:`.                                                                                                                         |
+| `Signature-Input` | No       | RFC 9421 Signature-Input header. Required when using HTTP Message Signatures for authentication. Format: `sig1=("@method" "@path" ...);created=<timestamp>;keyid="<key-id>"`.                                                                                 |
+| `Request-Id`      | **Yes**  | For tracing the requests across network layers and components.                                                                                                                                                                                                |
+| `User-Agent`      | No       | Identifies the user agent string making the call.                                                                                                                                                                                                             |
+| `UCP-Agent`       | **Yes**  | Identifies the UCP agent making the call. All requests MUST include the UCP-Agent header containing the signer's profile URI using RFC 8941 Dictionary syntax. The URL MUST point to /.well-known/ucp. Format: profile="https://example.com/.well-known/ucp". |
+| `Content-Type`    | No       | Representation Metadata. Tells the receiver what the data in the message body actually is.                                                                                                                                                                    |
+| `Accept`          | No       | Content Negotiation. The client tells the server what data formats it is capable of understanding.                                                                                                                                                            |
+| `Accept-Language` | No       | Localization. Tells the receiver the user's preferred natural languages, often with "weights" or priorities.                                                                                                                                                  |
+| `Accept-Encoding` | No       | Compression. The client tells the server which content-codings it supports, usually for compression                                                                                                                                                           |
+
+### Specific Header Requirements
+
+**UCP-Agent** (required on all requests):
+
+Platform identification using [RFC 8941 Dictionary](https://www.rfc-editor.org/rfc/rfc8941#name-dictionaries) syntax:
+
+```http
+UCP-Agent: profile="https://platform.example/.well-known/ucp"
+```
+
+## Message Signing
+
+Request and response signatures follow the [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md) specification using RFC 9421 HTTP Message Signatures. See [REST Request Signing](http://ucp.dev/draft/specification/signatures/#rest-request-signing) and [REST Request Verification](http://ucp.dev/draft/specification/signatures/#rest-request-verification) for the complete algorithm.
+
+## Conformance
+
+Platforms implementing the REST binding:
+
+- **MUST** include `UCP-Agent` header with profile URL on all requests
+- **MUST** check the `messages` array in responses before accessing order data
+- **SHOULD** delegate to the business via `permalink_url` for the authoritative order experience - the business site is the source of truth for order details and post-purchase operations
+
+Businesses implementing the REST binding:
+
+- **MUST** serve all endpoints over HTTPS with TLS 1.3+
+- **SHOULD** sign responses per the [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md) specification
+
+See [Order Capability - Guidelines](http://ucp.dev/draft/specification/order/#operations-guidelines) for capability-level requirements that apply across all transports.
+
+# Order Capability - MCP Binding
+
+This document specifies the Model Context Protocol (MCP) binding for the [Order Capability](http://ucp.dev/draft/specification/order/index.md).
+
+## Protocol Fundamentals
+
+### Discovery
+
+Businesses advertise MCP transport availability through their UCP profile at `/.well-known/ucp`.
+
+```json
+{
+  "ucp": {
+    "version": "draft",
+    "services": {
+      "dev.ucp.shopping": [
+        {
+          "version": "draft",
+          "spec": "https://ucp.dev/draft/specification/overview",
+          "transport": "mcp",
+          "schema": "https://ucp.dev/draft/services/shopping/mcp.openrpc.json",
+          "endpoint": "https://business.example.com/ucp/mcp"
+        }
+      ]
+    },
+    "capabilities": {
+      "dev.ucp.shopping.order": [
+        {
+          "version": "draft",
+          "spec": "https://ucp.dev/draft/specification/order",
+          "schema": "https://ucp.dev/draft/schemas/shopping/order.json"
+        }
+      ]
+    }
+  }
+}
+```
+
+### Request Metadata
+
+MCP clients **MUST** include a `meta` object in every request containing protocol metadata:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "tools/call",
+  "params": {
+    "name": "get_order",
+    "arguments": {
+      "meta": {
+        "ucp-agent": {
+          "profile": "https://platform.example/.well-known/ucp"
+        }
+      },
+      "id": "order_abc123"
+    }
+  }
+}
+```
+
+The `meta["ucp-agent"]` field is **required** on all requests to enable [capability negotiation](http://ucp.dev/draft/specification/overview/#negotiation-protocol). Platforms **MAY** include additional metadata fields.
+
+## Tools
+
+UCP Capabilities map 1:1 to MCP Tools.
+
+| Tool        | Operation                                                        | Description                        |
+| ----------- | ---------------------------------------------------------------- | ---------------------------------- |
+| `get_order` | [Get Order](http://ucp.dev/draft/specification/order/#get-order) | Get the current state of an order. |
+
+### `get_order`
+
+Maps to the [Get Order](http://ucp.dev/draft/specification/order/#get-order) operation. Returns the current-state snapshot of an order.
+
+#### Input Schema
+
+- `meta` (Object, required): Request metadata with `ucp-agent.profile`.
+- `id` (String, required): The ID of the order.
+
+#### Output Schema
+
+| Name          | Type                                                                               | Required | Description                                                                                                                                   |
+| ------------- | ---------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| ucp           | [Ucp Response Order Schema](/draft/specification/order/#ucp-response-order-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                       |
+| id            | string                                                                             | **Yes**  | Unique order identifier.                                                                                                                      |
+| label         | string                                                                             | No       | Human-readable label for identifying the order. MUST only be provided by the business.                                                        |
+| checkout_id   | string                                                                             | **Yes**  | Associated checkout ID for reconciliation.                                                                                                    |
+| permalink_url | string                                                                             | **Yes**  | Permalink to access the order on merchant site.                                                                                               |
+| line_items    | Array\[[Order Line Item](/draft/specification/reference/#order-line-item)\]        | **Yes**  | Line items representing what was purchased — can change post-order via edits or exchanges.                                                    |
+| fulfillment   | object                                                                             | **Yes**  | Fulfillment data: buyer expectations and what actually happened.                                                                              |
+| adjustments   | Array\[[Adjustment](/draft/specification/reference/#adjustment)\]                  | No       | Post-order events (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment.                         |
+| currency      | string                                                                             | No       | ISO 4217 currency code. MUST match the currency from the originating checkout session.                                                        |
+| totals        | [Totals](/draft/specification/reference/#totals)                                   | **Yes**  | Different totals for the order.                                                                                                               |
+| messages      | Array\[[Message](/draft/specification/reference/#message)\]                        | No       | Business outcome messages (errors, warnings, informational). Present when the business needs to communicate status or issues to the platform. |
+
+#### Example
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "tools/call",
+  "params": {
+    "name": "get_order",
+    "arguments": {
+      "meta": {
+        "ucp-agent": {
+          "profile": "https://platform.example/.well-known/ucp"
+        }
+      },
+      "id": "order_abc123"
+    }
+  }
+}
+```
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "structuredContent": {
+      "order": {
+        "ucp": {
+          "version": "draft",
+          "capabilities": {
+            "dev.ucp.shopping.order": [{"version": "draft"}]
+          }
+        },
+        "id": "order_abc123",
+        "checkout_id": "checkout_xyz789",
+        "permalink_url": "https://business.example.com/orders/abc123",
+        "currency": "USD",
+        "line_items": [
+          {
+            "id": "li_shoes",
+            "item": { "id": "prod_shoes", "title": "Running Shoes", "price": 3000 },
+            "quantity": { "total": 1, "fulfilled": 1 },
+            "totals": [
+              {"type": "subtotal", "amount": 3000},
+              {"type": "total", "amount": 3000}
+            ],
+            "status": "fulfilled"
+          }
+        ],
+        "fulfillment": {
+          "expectations": [
+            {
+              "id": "exp_1",
+              "line_items": [{ "id": "li_shoes", "quantity": 1 }],
+              "method_type": "shipping",
+              "destination": {
+                "street_address": "123 Main St",
+                "address_locality": "Austin",
+                "address_region": "TX",
+                "address_country": "US",
+                "postal_code": "78701"
+              },
+              "description": "Delivered"
+            }
+          ],
+          "events": [
+            {
+              "id": "evt_1",
+              "occurred_at": "2026-01-08T10:30:00Z",
+              "type": "delivered",
+              "line_items": [{ "id": "li_shoes", "quantity": 1 }],
+              "tracking_number": "1Z999AA10123456784",
+              "tracking_url": "https://ups.com/track/1Z999AA10123456784",
+              "description": "Delivered to front door"
+            }
+          ]
+        },
+        "adjustments": [],
+        "totals": [
+          { "type": "subtotal", "amount": 3000 },
+          { "type": "fulfillment", "amount": 800 },
+          { "type": "tax", "amount": 304 },
+          { "type": "total", "amount": 4104 }
+        ]
+      }
+    },
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"order\":{\"ucp\":{...},\"id\":\"order_abc123\",...}}"
+      }
+    ]
+  }
+}
+```
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "structuredContent": {
+      "order": {
+        "ucp": {
+          "version": "draft",
+          "status": "error",
+          "capabilities": {
+            "dev.ucp.shopping.order": [{"version": "draft"}]
+          }
+        },
+        "messages": [
+          {
+            "type": "error",
+            "code": "not_found",
+            "severity": "unrecoverable",
+            "content": "Order not found."
+          }
+        ]
+      }
+    },
+    "content": [
+      {
+        "type": "text",
+        "text": "Order not found."
+      }
+    ]
+  }
+}
+```
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "structuredContent": {
+      "order": {
+        "ucp": {
+          "version": "draft",
+          "status": "error",
+          "capabilities": {
+            "dev.ucp.shopping.order": [{"version": "draft"}]
+          }
+        },
+        "messages": [
+          {
+            "type": "error",
+            "code": "unauthorized",
+            "severity": "unrecoverable",
+            "content": "Not authorized to access this order."
+          }
+        ]
+      }
+    },
+    "content": [
+      {
+        "type": "text",
+        "text": "Not authorized to access this order."
+      }
+    ]
+  }
+}
+```
+
+## Error Handling
+
+When the business cannot return an order, the response includes a `messages` array describing the outcome. Platforms **MUST** check `messages` before accessing order fields.
+
+## Conformance
+
+Platforms implementing the MCP binding:
+
+- **MUST** include `meta.ucp-agent.profile` on all requests
+- **MUST** check the `messages` array in responses before accessing order data
+- **SHOULD** delegate to the business via `permalink_url` for the authoritative order experience - the business site is the source of truth for order details and post-purchase operations
+
+Businesses implementing the MCP binding:
+
+- **MUST** implement the `get_order` tool per the [OpenRPC schema](https://ucp.dev/services/shopping/mcp.openrpc.json)
+
+See [Order Capability - Guidelines](http://ucp.dev/draft/specification/order/#operations-guidelines) for capability-level requirements that apply across all transports.
 
 # Identity Linking Capability
 
@@ -15737,18 +16362,19 @@ ______________________________________________________________________
 
 ### Order
 
-| Name          | Type                                                                                   | Required | Description                                                                                                             |
-| ------------- | -------------------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------- |
-| ucp           | [Ucp Response Order Schema](/draft/specification/reference/#ucp-response-order-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields. |
-| id            | string                                                                                 | **Yes**  | Unique order identifier.                                                                                                |
-| label         | string                                                                                 | No       | Human-readable label for identifying the order. MUST only be provided by the business.                                  |
-| checkout_id   | string                                                                                 | **Yes**  | Associated checkout ID for reconciliation.                                                                              |
-| permalink_url | string                                                                                 | **Yes**  | Permalink to access the order on merchant site.                                                                         |
-| line_items    | Array\[[Order Line Item](/draft/specification/reference/#order-line-item)\]            | **Yes**  | Line items representing what was purchased — can change post-order via edits or exchanges.                              |
-| fulfillment   | object                                                                                 | **Yes**  | Fulfillment data: buyer expectations and what actually happened.                                                        |
-| adjustments   | Array\[[Adjustment](/draft/specification/reference/#adjustment)\]                      | No       | Post-order events (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment.   |
-| currency      | string                                                                                 | **Yes**  | ISO 4217 currency code. MUST match the currency from the originating checkout session.                                  |
-| totals        | [Totals](/draft/specification/reference/#totals)                                       | **Yes**  | Different totals for the order.                                                                                         |
+| Name          | Type                                                                                   | Required | Description                                                                                                                                   |
+| ------------- | -------------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| ucp           | [Ucp Response Order Schema](/draft/specification/reference/#ucp-response-order-schema) | **Yes**  | Protocol metadata for discovery profiles and responses. Uses slim schema pattern with context-specific required fields.                       |
+| id            | string                                                                                 | **Yes**  | Unique order identifier.                                                                                                                      |
+| label         | string                                                                                 | No       | Human-readable label for identifying the order. MUST only be provided by the business.                                                        |
+| checkout_id   | string                                                                                 | **Yes**  | Associated checkout ID for reconciliation.                                                                                                    |
+| permalink_url | string                                                                                 | **Yes**  | Permalink to access the order on merchant site.                                                                                               |
+| line_items    | Array\[[Order Line Item](/draft/specification/reference/#order-line-item)\]            | **Yes**  | Line items representing what was purchased — can change post-order via edits or exchanges.                                                    |
+| fulfillment   | object                                                                                 | **Yes**  | Fulfillment data: buyer expectations and what actually happened.                                                                              |
+| adjustments   | Array\[[Adjustment](/draft/specification/reference/#adjustment)\]                      | No       | Post-order events (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment.                         |
+| currency      | string                                                                                 | **Yes**  | ISO 4217 currency code. MUST match the currency from the originating checkout session.                                                        |
+| totals        | [Totals](/draft/specification/reference/#totals)                                       | **Yes**  | Different totals for the order.                                                                                                               |
+| messages      | Array\[[Message](/draft/specification/reference/#message)\]                            | No       | Business outcome messages (errors, warnings, informational). Present when the business needs to communicate status or issues to the platform. |
 
 ______________________________________________________________________
 
