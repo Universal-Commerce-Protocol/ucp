@@ -102,6 +102,13 @@
     "totals": {
       "$ref": "types/totals.json",
       "description": "Different totals for the order."
+    },
+    "messages": {
+      "type": "array",
+      "items": {
+        "$ref": "types/message.json"
+      },
+      "description": "Business outcome messages (errors, warnings, informational). Present when the business needs to communicate status or issues to the platform."
     }
   }
 }

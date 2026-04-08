@@ -21,7 +21,7 @@
 ## Overview
 
 Orders represent confirmed transactions resulting from a successful checkout
-submission. It provides a complete record of what was purchased, how
+submission. They provide a complete record of what was purchased, how
 it will be delivered, and what has happened since order placement.
 
 ### Key Concepts
@@ -44,9 +44,9 @@ Orders have three main components:
 * Typically money movements (refunds, returns, credits, disputes, cancellations)
 * Can be any post-order change
 * Can happen before, during, or after fulfillment
-* Businesses SHOULD append new entries rather than mutating existing ones;
+* Businesses **SHOULD** append new entries rather than mutating existing ones;
   append-only ledger is preferred. Businesses that do not maintain adjustment
-  history MAY perform in-place updates of existing entries
+  history **MAY** perform in-place updates of existing entries
   (e.g. a single `return` adjustment can transition from `pending` to `completed`)
 
 ## Data Model
@@ -175,7 +175,8 @@ Examples: `refund`, `return`, `credit`, `price_adjustment`, `dispute`,
   },
   "id": "order_abc123",
   "checkout_id": "checkout_xyz789",
-  "permalink_url": "https://business.com/orders/abc123",
+  "permalink_url": "https://business.example.com/orders/abc123",
+  "currency": "USD",
   "line_items": [
     {
       "id": "li_shoes",
@@ -263,11 +264,131 @@ Examples: `refund`, `return`, `credit`, `price_adjustment`, `dispute`,
 }
 ```
 
+## Operations
+
+The order entity is a **current-state snapshot**: the authoritative latest
+state of the order at the time of retrieval or delivery. Businesses **MUST**
+return the full order entity on every response. The same schema is used
+for both synchronous retrieval (this section) and asynchronous event
+delivery (see [Events](#events)).
+
+The `permalink_url` is the authoritative reference for the full order
+experience - timeline, post-purchase operations, returns. The API provides
+programmatic access to current state for conversational and operational use
+cases.
+
+| Operation                               | Method | Endpoint       | Description                             |
+| :-------------------------------------- | :----- | :------------- | :-------------------------------------- |
+| [Get Order](#get-order)                 | `GET`  | `/orders/{id}` | Platform retrieves current order state. |
+
+For transport-specific details, see [REST Binding](order-rest.md), and
+[MCP Binding](order-mcp.md)
+
+### Get Order
+
+Returns the current-state snapshot of an order.
+
+#### Authorization
+
+The business **MUST** authenticate requests to order data before returning a
+response, using any supported UCP mechanism - API keys, OAuth 2.0, mutual
+TLS, or HTTP Message Signatures (see
+[Identity and Authentication](checkout-rest.md#authentication)). The
+authentication method determines the scope of accessible orders:
+
+| Authentication | Recommended Access Scope |
+| :------------- | :----------------------- |
+| Platform credentials | Orders originated by the platform |
+| Buyer authorization | Orders originated by the buyer, subject to granted scope |
+
+**Platform credentials** (API key, signatures, OAuth client credentials) -
+businesses **MAY** allow access for orders the platform originated. The
+platform provided buyer and payment information during the checkout flow,
+observed the order confirmation, and is retrieving the latest state of an
+order it already has context for.
+
+**Buyer authorization** - the platform obtains buyer authorization via
+[Identity Linking](identity-linking.md) with the necessary scopes, or a
+similar mechanism. This grants access to the buyer's orders regardless of
+which platform originated them.
+
+Businesses **MAY** define additional access policies (e.g., trusted partner
+agreements), enforce data availability constraints (e.g., retention
+windows, regulatory erasure), and omit or redact optional fields from the response
+based on context, business policy, or other requirements - independently
+of authorization.
+
+#### Error Responses
+
+When the business cannot return an order, the response returns an error
+that includes a `messages` array describing the outcome:
+
+**Order not found:**
+
+```json
+{
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "status": "error",
+    "capabilities": {
+      "dev.ucp.shopping.order": [{"version": "{{ ucp_version }}"}]
+    }
+  },
+  "messages": [
+    {
+      "type": "error",
+      "code": "not_found",
+      "severity": "unrecoverable",
+      "content": "Order not found."
+    }
+  ]
+}
+```
+
+**Not authorized:**
+
+```json
+{
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "status": "error",
+    "capabilities": {
+      "dev.ucp.shopping.order": [{"version": "{{ ucp_version }}"}]
+    }
+  },
+  "messages": [
+    {
+      "type": "error",
+      "code": "unauthorized",
+      "severity": "unrecoverable",
+      "content": "Not authorized to access this order."
+    }
+  ]
+}
+```
+
+### Guidelines {: #operations-guidelines }
+
+**Platform:**
+
+* **MUST** include `UCP-Agent` header with profile URL on all requests
+* **SHOULD** rely on webhooks (see [Events](#events)) as the primary order update channel
+  and use Get Order for reconciliation or on-demand retrieval
+* **SHOULD** treat order data as ephemeral and discard it when no longer needed
+  for active commerce flows
+
+**Business:**
+
+* **MUST** authenticate requests to order data before returning a response
+  (see [Authorization](#authorization))
+
 ## Events
 
-Businesses send order status changes as events after order placement.
+Businesses push order lifecycle updates to the platform via webhooks. The
+payload is the same **current-state snapshot** described in
+[Operations](#operations) — the full order entity.
 
-| Event Mechanism                             | Method | Endpoint              | Description                                            |
+| Event                                       | Method | Endpoint              | Description                                            |
 | :------------------------------------------ | :----- | :-------------------- | :----------------------------------------------------- |
 | [Order Event Webhook](#order-event-webhook) | `POST` | Platform-provided URL | Business sends order lifecycle events to the platform. |
 
@@ -371,19 +492,19 @@ business's orders, even with a valid signature.
 See [Message Signatures - Key Rotation](signatures.md#key-rotation) for
 zero-downtime key rotation procedures.
 
-## Guidelines
+### Guidelines {: #events-guidelines }
 
 **Platform:**
 
-* **MUST** respond quickly with a 2xx HTTP status code to acknowledge receipt
-* Process events asynchronously after responding
+* **MUST** respond quickly with a 2xx HTTP status code to acknowledge webhook
+  receipt; process events asynchronously after responding
 
 **Business:**
 
 * **MUST** include `UCP-Agent` header with profile URL for signer identification
 * **MUST** sign all webhook payloads per the
   [Message Signatures](signatures.md) specification using RFC 9421 headers
-  (`Signature`, `Signature-Input`, `Content-Digest`).
+  (`Signature`, `Signature-Input`, `Content-Digest`)
 * **MUST** send "Order created" event with fully populated order entity
 * **MUST** send full order entity on updates (not incremental deltas)
 * **MUST** retry failed webhook deliveries

@@ -648,6 +648,39 @@
         }
       }
     },
+    "/orders/{id}": {
+      "parameters": [
+        { "$ref": "#/components/parameters/order_id_path" }
+      ],
+      "get": {
+        "operationId": "get_order",
+        "summary": "Get Order",
+        "description": "Get the current state of an order. Returns the full order entity as a current-state snapshot. The business verifies the requesting platform created the checkout that produced this order.",
+        "parameters": [
+          { "$ref": "#/components/parameters/authorization" },
+          { "$ref": "#/components/parameters/x_api_key" },
+          { "$ref": "#/components/parameters/signature" },
+          { "$ref": "#/components/parameters/signature_input" },
+          { "$ref": "#/components/parameters/request_id" },
+          { "$ref": "#/components/parameters/user_agent" },
+          { "$ref": "#/components/parameters/ucp_agent" },
+          { "$ref": "#/components/parameters/content_type" },
+          { "$ref": "#/components/parameters/accept" },
+          { "$ref": "#/components/parameters/accept_language" },
+          { "$ref": "#/components/parameters/accept_encoding" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Order retrieved or business outcome message",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/order_response" }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/product": {
       "post": {
         "operationId": "get_product",
@@ -770,6 +803,15 @@
         "in": "path",
         "required": true,
         "description": "The unique identifier of the cart.",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "order_id_path": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "The unique identifier of the order.",
         "schema": {
           "type": "string"
         }
@@ -938,6 +980,12 @@
       },
       "order": {
         "$ref": "../../schemas/shopping/order.json"
+      },
+      "order_response": {
+        "oneOf": [
+          { "$ref": "../../schemas/shopping/order.json" },
+          { "$ref": "../../schemas/shopping/types/error_response.json" }
+        ]
       },
       "payment": {
         "$ref": "../../schemas/shopping/payment.json"
