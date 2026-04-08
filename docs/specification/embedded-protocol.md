@@ -402,6 +402,7 @@ Both are notifications — the host **MUST NOT** respond.
     "params": {
         "checkout": {
             "id": "checkout_123",
+            // ... other checkout fields
             "order": {
                 "id": "ord_99887766",
                 "permalink_url": "https://merchant.com/orders/ord_99887766"
@@ -434,6 +435,7 @@ resource, not just the changed fields.
             "id": "checkout_123",
             "totals": [/* ... */],
             "line_items": [/* ... */]
+            // ... other checkout fields
         }
     }
 }
@@ -448,6 +450,7 @@ resource, not just the changed fields.
     "params": {
         "cart": {
             "id": "cart_123",
+            "line_items": [/* ... */],
             "messages": [
                 {
                     "type": "error",
@@ -457,6 +460,7 @@ resource, not just the changed fields.
                     "severity": "recoverable"
                 }
             ]
+            // ... other cart fields
         }
     }
 }
