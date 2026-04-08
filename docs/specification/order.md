@@ -397,6 +397,13 @@ payload is the same **current-state snapshot** described in
 Businesses POST order events to a webhook URL provided by the platform
 during partner onboarding. The URL format is platform-specific.
 
+**Required Headers:**
+
+| Header               | Description                                 |
+| :------------------- | :------------------------------------------ |
+| `Webhook-Timestamp`  | Event creation timestamp (RFC 3339)         |
+| `Request-Id`         | Unique event identifier                     |
+
 {{ method_fields('order_event_webhook', 'rest.openapi.json', 'order') }}
 
 ### Webhook URL Configuration
