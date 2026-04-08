@@ -115,20 +115,7 @@ standard formats:
 
 #### Service Definition
 
-| Field             | Type   | Required | Description                         |
-| ----------------- | ------ | -------- | ----------------------------------- |
-| `version`         | string | Yes      | Service version (YYYY-MM-DD format) |
-| `spec`            | string | Yes      | URL to service documentation        |
-| `rest`            | object | No       | REST transport binding              |
-| `rest.schema`     | string | Yes      | URL to OpenAPI spec (JSON)          |
-| `rest.endpoint`   | string | Yes      | Business's REST endpoint            |
-| `mcp`             | object | No       | MCP transport binding               |
-| `mcp.schema`      | string | Yes      | URL to OpenRPC spec (JSON)          |
-| `mcp.endpoint`    | string | Yes      | Business's MCP endpoint             |
-| `a2a`             | object | No       | A2A transport binding               |
-| `a2a.endpoint`    | string | Yes      | Business's A2A Agent Card URL       |
-| `embedded`        | string | No       | Embedded transport binding          |
-| `embedded.schema` | string | Yes      | URL to OpenRPC spec (JSON)          |
+{{ extension_schema_fields('service.json#/$defs/platform_schema', 'overview') }}
 
 Transport definitions **MUST** be thin: they declare method names and reference
 base schemas only. See [Requirements](#requirements) for details.
@@ -719,6 +706,12 @@ For MCP over HTTP, the HTTP status code is the primary signal; the JSON-RPC
 `error.code` provides a secondary signal. Both transports **SHOULD** include
 `Retry-After` header (REST) or `error.data.retry_after` (MCP) for 429 and 503
 responses.
+
+The Embedded Protocol uses the same JSON-RPC error codes for peer-to-peer
+communication between host and embedded context. Server-specific scenarios
+(rate limiting, idempotency) do not apply to the embedded transport. See
+[Embedded Protocol — Response Handling](embedded-protocol.md#response-handling)
+for the full error handling specification.
 
 ##### The `continue_url` Field
 
@@ -1895,6 +1888,20 @@ Version unsupported error — no resource is created:
   "continue_url": "https://merchant.com/"
 }
 ```
+
+##### Pre-release Versions
+
+The protocol version **MUST** be a dated release in `YYYY-MM-DD` format.
+Businesses **MUST NOT** advertise a non-date version string (e.g.
+`"draft"`) in their profile `version` field or in `supported_versions`.
+Pre-release implementations are not stable and MUST NOT be surfaced
+through public discovery — doing so would expose the general ecosystem
+to undefined behavior and incompatible changes without notice.
+
+Platforms and businesses **MAY** coordinate on pre-release implementations outside of
+public discovery. Such use carries no stability or compatibility
+guarantees — the underlying behavior may change at any time without
+notice.
 
 #### Capability Versions
 
