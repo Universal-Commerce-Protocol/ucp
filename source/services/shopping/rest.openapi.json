@@ -739,7 +739,7 @@
           { "$ref": "#/components/parameters/ucp_agent" },
           { "$ref": "#/components/parameters/x_api_key" },
           { "$ref": "#/components/parameters/webhook_timestamp" },
-          { "$ref": "#/components/parameters/request_id" }
+          { "$ref": "#/components/parameters/webhook_event_id" }
         ],
         "requestBody": {
           "required": true,
@@ -927,6 +927,16 @@
           "format": "date-time"
         },
         "description": "Webhook event creation timestamp (RFC 3339)."
+      },
+      "webhook_event_id": {
+        "name": "Webhook-Event-Id",
+        "in": "header",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "description": "The unique identifier of a webhook event."
       }
     },
     "headers": {
