@@ -14,10 +14,11 @@
 ## Checkout Capability
 
 - [Overview](http://ucp.dev/draft/specification/checkout/index.md)
-- [HTTP/REST Binding](http://ucp.dev/draft/specification/checkout-rest/index.md)
-- [MCP Binding](http://ucp.dev/draft/specification/checkout-mcp/index.md)
-- [A2A Binding](http://ucp.dev/draft/specification/checkout-a2a/index.md)
-- [EP Binding](http://ucp.dev/draft/specification/embedded-checkout/index.md)
+- [REST](http://ucp.dev/draft/specification/checkout-rest/index.md)
+- [MCP](http://ucp.dev/draft/specification/checkout-mcp/index.md)
+- [A2A](http://ucp.dev/draft/specification/checkout-a2a/index.md)
+- [Embedded protocol](http://ucp.dev/draft/specification/embedded-protocol/index.md)
+- [Embedded](http://ucp.dev/draft/specification/embedded-checkout/index.md)
 - [AP2 Mandates Extension](http://ucp.dev/draft/specification/ap2-mandates/index.md)
 - [Buyer Consent Extension](http://ucp.dev/draft/specification/buyer-consent/index.md)
 - [Discounts Extension](http://ucp.dev/draft/specification/discount/index.md)
@@ -26,23 +27,24 @@
 ## Cart Capability
 
 - [Overview](http://ucp.dev/draft/specification/cart/index.md)
-- [HTTP/REST Binding](http://ucp.dev/draft/specification/cart-rest/index.md)
-- [MCP Binding](http://ucp.dev/draft/specification/cart-mcp/index.md)
-- [EP Binding](http://ucp.dev/draft/specification/embedded-cart/index.md)
+- [REST](http://ucp.dev/draft/specification/cart-rest/index.md)
+- [MCP](http://ucp.dev/draft/specification/cart-mcp/index.md)
+- [Embedded protocol](http://ucp.dev/draft/specification/embedded-protocol/index.md)
+- [Embedded](http://ucp.dev/draft/specification/embedded-cart/index.md)
 
 ## Catalog Capability
 
 - [Overview](http://ucp.dev/draft/specification/catalog/index.md)
 - [Search](http://ucp.dev/draft/specification/catalog/search/index.md)
 - [Lookup](http://ucp.dev/draft/specification/catalog/lookup/index.md)
-- [HTTP/REST Binding](http://ucp.dev/draft/specification/catalog/rest/index.md)
-- [MCP Binding](http://ucp.dev/draft/specification/catalog/mcp/index.md)
+- [REST](http://ucp.dev/draft/specification/catalog/rest/index.md)
+- [MCP](http://ucp.dev/draft/specification/catalog/mcp/index.md)
 
 ## Other Capabilities
 
 - [Overview](http://ucp.dev/draft/specification/order/index.md)
-- [HTTP/REST Binding](http://ucp.dev/draft/specification/order-rest/index.md)
-- [MCP Binding](http://ucp.dev/draft/specification/order-mcp/index.md)
+- [REST](http://ucp.dev/draft/specification/order-rest/index.md)
+- [MCP](http://ucp.dev/draft/specification/order-mcp/index.md)
 - [Identity Linking Capability](http://ucp.dev/draft/specification/identity-linking/index.md)
 - [Guide](http://ucp.dev/draft/specification/payment-handler-guide/index.md)
 - [Template](http://ucp.dev/draft/specification/payment-handler-template/index.md)
