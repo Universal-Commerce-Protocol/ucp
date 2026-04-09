@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/2026-04-08/schemas/shopping/types/item.json",
+  "title": "Item",
+  "type": "object",
+  "required": [
+    "id",
+    "title",
+    "price"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "The product identifier, often the SKU, required to resolve the product details associated with this line item. Should be recognized by both the Platform, and the Business."
+    },
+    "title": {
+      "type": "string",
+      "description": "Product title.",
+      "ucp_request": "omit"
+    },
+    "price": {
+      "$ref": "https://ucp.dev/2026-04-08/schemas/shopping/types/amount.json",
+      "description": "Unit price in ISO 4217 minor units.",
+      "ucp_request": "omit"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "Product image URI.",
+      "format": "uri",
+      "ucp_request": "omit"
+    }
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/2026-04-08/schemas/shopping/types/order_line_item.json",
+  "title": "Order Line Item",
+  "type": "object",
+  "required": [
+    "id",
+    "item",
+    "quantity",
+    "totals",
+    "status"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Line item identifier."
+    },
+    "item": {
+      "$ref": "https://ucp.dev/2026-04-08/schemas/shopping/types/item.json",
+      "description": "Product data (id, title, price, image_url)."
+    },
+    "quantity": {
+      "type": "object",
+      "required": [
+        "total",
+        "fulfilled"
+      ],
+      "properties": {
+        "original": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Quantity from the original checkout."
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Current total active quantity. May differ from original due to post-order modifications (e.g., returns or cancellations)."
+        },
+        "fulfilled": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Quantity fulfilled so far."
+        }
+      },
+      "description": "Quantity tracking for the line item."
+    },
+    "totals": {
+      "type": "array",
+      "items": {
+        "$ref": "https://ucp.dev/2026-04-08/schemas/shopping/types/total.json"
+      },
+      "description": "Line item totals breakdown."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "processing",
+        "partial",
+        "fulfilled",
+        "removed"
+      ],
+      "description": "Derived status: removed if quantity.total == 0, fulfilled if quantity.total > 0 and quantity.fulfilled == quantity.total, partial if quantity.total > 0 and quantity.fulfilled > 0, otherwise processing."
+    },
+    "parent_id": {
+      "type": "string",
+      "description": "Parent line item identifier for any nested structures."
+    }
+  }
+}

@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/2026-04-08/schemas/shopping/types/total.json",
+  "title": "Total",
+  "description": "A cost breakdown entry with a category, amount, and optional display text.",
+  "type": "object",
+  "required": [
+    "type",
+    "amount"
+  ],
+  "properties": {
+    "type": {
+      "type": "string",
+      "description": "Cost category. Well-known values: subtotal, items_discount, discount, fulfillment, tax, fee, total. Businesses MAY use additional values.",
+      "ucp_request": "omit"
+    },
+    "display_text": {
+      "type": "string",
+      "description": "Text to display against the amount. Should reflect appropriate method (e.g., 'Shipping', 'Delivery').",
+      "ucp_request": "omit"
+    },
+    "amount": {
+      "$ref": "https://ucp.dev/2026-04-08/schemas/shopping/types/signed_amount.json",
+      "ucp_request": "omit"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "enum": [
+              "discount",
+              "items_discount"
+            ]
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "amount": {
+            "exclusiveMaximum": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "enum": [
+              "subtotal",
+              "fulfillment",
+              "tax",
+              "fee"
+            ]
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "amount": {
+            "minimum": 0
+          }
+        }
+      }
+    }
+  ]
+}
