@@ -90,14 +90,7 @@
     "currency": {
       "type": "string",
       "description": "ISO 4217 currency code. MUST match the currency from the originating checkout session.",
-      "ucp_request": "omit",
-      "ucp_response": {
-        "transition": {
-          "from": "optional",
-          "to": "required",
-          "description": "Global requirement for currency in all Order responses."
-        }
-      }
+      "ucp_request": "omit"
     },
     "totals": {
       "$ref": "https://ucp.dev/draft/schemas/shopping/types/totals.json",
@@ -111,5 +104,5 @@
       "description": "Business outcome messages (errors, warnings, informational). Present when the business needs to communicate status or issues to the platform."
     }
   },
-  "version": "2026-04-08"
+  "version": "2026-04-09"
 }
