@@ -84,59 +84,65 @@
     "delegations": [
       "fulfillment.address_change"
     ],
-    "methods": [
-      {
+    "methods": {
+      "ec.fulfillment.change": {
         "name": "ec.fulfillment.change",
         "summary": "Fulfillment details changed",
-        "description": "Merchant notifies host that checkout.fulfillment has changed (shipping method selected, destination updated).",
+        "description": "Merchant notifies host that checkout.fulfillment has changed (shipping method selected, delivery options updated).",
         "params": [
           {
             "name": "checkout",
             "required": true,
             "schema": {
-              "$ref": "../../schemas/shopping/checkout.json",
+              "$ref": "checkout.json",
               "description": "Current checkout state with updated fulfillment."
             }
           }
         ]
       },
-      {
+      "ec.fulfillment.address_change_request": {
         "name": "ec.fulfillment.address_change_request",
-        "summary": "Request address selection",
+        "summary": "Request address change",
         "description": "Merchant requests host to present address selection UI for a shipping fulfillment method.",
         "params": [
           {
             "name": "checkout",
             "required": true,
             "schema": {
-              "$ref": "../../schemas/shopping/checkout.json",
-              "description": "Current checkout state with fulfillment context."
+              "$ref": "checkout.json",
+              "description": "Current checkout state with fulfillment details."
             }
           }
         ],
         "result": {
           "name": "addressChangeResult",
           "schema": {
-            "type": "object",
-            "description": "Checkout state with updated fulfillment address.",
-            "required": [
-              "checkout"
-            ],
-            "properties": {
-              "checkout": {
+            "oneOf": [
+              {
                 "type": "object",
-                "description": "Partial checkout update with fulfillment address selection.",
+                "description": "Checkout state after address selection.",
+                "required": ["ucp", "checkout"],
                 "properties": {
-                  "fulfillment": {
-                    "$ref": "../../schemas/shopping/types/fulfillment.json",
-                    "description": "Fulfillment with updated destinations and selected_destination_id."
+                  "ucp": { "$ref": "../ucp.json#/$defs/success" },
+                  "checkout": {
+                    "type": "object",
+                    "description": "Partial checkout update with fulfillment address selection.",
+                    "properties": {
+                      "fulfillment": {
+                        "$ref": "types/fulfillment.json",
+                        "description": "Updated fulfillment with new selected destination and destinations."
+                      }
+                    }
                   }
                 }
+              },
+              {
+                "$ref": "types/error_response.json"
               }
-            }
+            ]
           }
         }
       }
-    ]
+    }
   }
 }

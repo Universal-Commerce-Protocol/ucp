@@ -107,3 +107,6 @@ zapatillas
 yml
 jwks
 keyid
+reauth
+reprepare
+sandboxing

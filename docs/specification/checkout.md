@@ -117,11 +117,10 @@ platform receives messages indicating what's needed to progress.
 ### Error Handling
 
 The `messages` array contains errors, warnings, and informational messages
-about the checkout state. Error messages include a `severity` field that
-reflects the resource state and recommended action. When `ucp.status`
-is `"success"`, a resource is returned and severity indicates the
-recommended action. When `ucp.status` is `"error"`, no valid resource
-exists — severity is `unrecoverable`:
+about the checkout state. `ucp.status` is the shape discriminator —
+`"success"` means the response carries the expected payload, `"error"`
+means it carries error information instead. The `severity` field on each
+error message prescribes the recommended action:
 
 | Severity                | Meaning                                          | Platform Action                                                   |
 | :---------------------- | :----------------------------------------------- | :---------------------------------------------------------------- |
@@ -142,7 +141,8 @@ placement (e.g., high-value order approval, first-purchase policy).
 When the business cannot create a new resource or the requested resource
 no longer exists, the response contains `ucp.status: "error"` with
 `messages` describing the failure — no resource is included in the
-response body. Error responses MUST use `severity: "unrecoverable"`.
+response body. When no resource exists to act on, messages SHOULD use
+`severity: "unrecoverable"`.
 For example, a business may reject a create checkout request where all
 items are unavailable:
 
@@ -205,17 +205,17 @@ Example error processing algorithm:
 ```text
 GIVEN response with messages array
 
-IF ucp.status = "error"
-  -- No resource exists; severity is unrecoverable
-  RETRY with new resource or inputs, or hand off via continue_url
-  RETURN
-
 FILTER errors FROM messages WHERE type = "error"
 
 PARTITION errors INTO
   recoverable           WHERE severity = "recoverable"
   requires_buyer_input  WHERE severity = "requires_buyer_input"
   requires_buyer_review WHERE severity = "requires_buyer_review"
+  unrecoverable         WHERE severity = "unrecoverable"
+
+IF unrecoverable is not empty
+  RETRY with new resource or inputs, or hand off via continue_url
+  RETURN
 
 IF recoverable is not empty
   FOR EACH error IN recoverable

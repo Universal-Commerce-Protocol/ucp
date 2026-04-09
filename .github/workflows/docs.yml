@@ -21,10 +21,11 @@ on:
   push:
     branches:
       - main
-      - 'release/**'
+      - "release/**"
   pull_request:
     branches:
       - main
+      - "release/**"
     paths:
       - ".github/workflows/docs.yml"
       - "requirements-docs.txt"
@@ -37,6 +38,12 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-latest
+    # Don't run this workflow if this is a release branch creation event
+    # (event.before SHA is all zeros)
+    if: >-
+      !(github.event_name == 'push' &&
+        startsWith(github.ref, 'refs/heads/release/') &&
+        github.event.before == '0000000000000000000000000000000000000000')
     steps:
       - name: Checkout Code
         uses: actions/checkout@v5
@@ -62,6 +69,9 @@ jobs:
     needs: lint
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' || github.event.pull_request.base.ref == 'main'
+    permissions:
+      contents: read
+      pages: read
     steps:
       - name: Checkout Code
         uses: actions/checkout@v5
@@ -80,7 +90,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           PAGES_URL=$(gh api "repos/${{ github.repository }}/pages" --jq '.html_url' 2>/dev/null || true)
-          if [ -z "$PAGES_URL" ]; then PAGES_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"; fi
+          if [ -z "$PAGES_URL" ] || [ "$PAGES_URL" = "null" ]; then PAGES_URL="https://${{ github.repository_owner }}.github.io/${GITHUB_REPOSITORY#*/}"; fi
           if [[ "$PAGES_URL" != */ ]]; then PAGES_URL="${PAGES_URL}/"; fi
           echo "SITE_URL=$PAGES_URL" >> $GITHUB_ENV
           echo "SPEC_URL=${PAGES_URL}latest/specification/overview/" >> $GITHUB_ENV
@@ -93,7 +103,12 @@ jobs:
   build_and_verify_release:
     needs: lint
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/heads/release/') || startsWith(github.event.pull_request.base.ref, 'release/')
+    if: >-
+      startsWith(github.ref, 'refs/heads/release/') ||
+      startsWith(github.event.pull_request.base.ref, 'release/')
+    permissions:
+      contents: read
+      pages: read
     steps:
       - name: Checkout Code
         uses: actions/checkout@v5
@@ -112,7 +127,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           PAGES_URL=$(gh api "repos/${{ github.repository }}/pages" --jq '.html_url' 2>/dev/null || true)
-          if [ -z "$PAGES_URL" ]; then PAGES_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"; fi
+          if [ -z "$PAGES_URL" ] || [ "$PAGES_URL" = "null" ]; then PAGES_URL="https://${{ github.repository_owner }}.github.io/${GITHUB_REPOSITORY#*/}"; fi
           if [[ "$PAGES_URL" != */ ]]; then PAGES_URL="${PAGES_URL}/"; fi
           echo "SITE_URL=$PAGES_URL" >> $GITHUB_ENV
           echo "SPEC_URL=${PAGES_URL}latest/specification/overview/" >> $GITHUB_ENV
@@ -149,7 +164,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           PAGES_URL=$(gh api "repos/${{ github.repository }}/pages" --jq '.html_url' 2>/dev/null || true)
-          if [ -z "$PAGES_URL" ]; then PAGES_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"; fi
+          if [ -z "$PAGES_URL" ] || [ "$PAGES_URL" = "null" ]; then PAGES_URL="https://${{ github.repository_owner }}.github.io/${GITHUB_REPOSITORY#*/}"; fi
           if [[ "$PAGES_URL" != */ ]]; then PAGES_URL="${PAGES_URL}/"; fi
           echo "SITE_URL=$PAGES_URL" >> $GITHUB_ENV
           echo "SPEC_URL=${PAGES_URL}latest/specification/overview/" >> $GITHUB_ENV
@@ -210,7 +225,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           PAGES_URL=$(gh api "repos/${{ github.repository }}/pages" --jq '.html_url' 2>/dev/null || true)
-          if [ -z "$PAGES_URL" ]; then PAGES_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"; fi
+          if [ -z "$PAGES_URL" ] || [ "$PAGES_URL" = "null" ]; then PAGES_URL="https://${{ github.repository_owner }}.github.io/${GITHUB_REPOSITORY#*/}"; fi
           if [[ "$PAGES_URL" != */ ]]; then PAGES_URL="${PAGES_URL}/"; fi
           echo "SITE_URL=$PAGES_URL" >> $GITHUB_ENV
           echo "SPEC_URL=${PAGES_URL}latest/specification/overview/" >> $GITHUB_ENV

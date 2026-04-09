@@ -31,14 +31,15 @@ Businesses advertise MCP transport availability through their UCP profile at
   "ucp": {
     "version": "{{ ucp_version }}",
     "services": {
-      "dev.ucp.shopping": {
-        "version": "{{ ucp_version }}",
-        "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview",
-        "mcp": {
+      "dev.ucp.shopping": [
+        {
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview",
+          "transport": "mcp",
           "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/mcp.openrpc.json",
           "endpoint": "https://business.example.com/ucp/mcp"
         }
-      }
+      ]
     },
     "capabilities": {
       "dev.ucp.shopping.catalog.search": [{
@@ -95,6 +96,7 @@ version compatibility checking and capability negotiation.
 | :--- | :--- | :--- |
 | `search_catalog` | [Search](search.md) | Search for products. |
 | `lookup_catalog` | [Lookup](lookup.md) | Lookup one or more products or variants by identifier. |
+| `get_product` | [Lookup](lookup.md#get-product-get_product) | Get full product detail by identifier. |
 
 ### `search_catalog`
 
@@ -437,20 +439,194 @@ response MAY include informational messages indicating which identifiers were no
 }
 ```
 
+### `get_product`
+
+Maps to the [Catalog Lookup](lookup.md#get-product-get_product) capability. Returns a singular
+`product` object for full product detail with interactive option selection.
+
+#### Get Product Request
+
+{{ extension_schema_fields(
+  'catalog_lookup.json#/$defs/get_product_request', 'catalog/mcp'
+) }}
+
+#### Get Product Response
+
+{{ extension_schema_fields(
+  'catalog_lookup.json#/$defs/get_product_response', 'catalog/mcp'
+) }}
+
+#### Get Product Example
+
+=== "Request"
+
+    ```json
+    {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "method": "tools/call",
+      "params": {
+        "name": "get_product",
+        "arguments": {
+          "meta": {
+            "ucp-agent": {
+              "profile": "https://platform.example/profiles/v2026-01/shopping-agent.json"
+            }
+          },
+          "catalog": {
+            "id": "prod_abc123",
+            "selected": [
+              { "name": "Color", "label": "Blue" }
+            ],
+            "preferences": ["Color", "Size"],
+            "context": {
+              "address_country": "US"
+            }
+          }
+        }
+      }
+    }
+    ```
+
+=== "Response"
+
+    ```json
+    {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "structuredContent": {
+          "ucp": {
+            "version": "{{ ucp_version }}",
+            "capabilities": {
+              "dev.ucp.shopping.catalog.lookup": [
+                {"version": "{{ ucp_version }}"}
+              ]
+            }
+          },
+          "product": {
+            "id": "prod_abc123",
+            "handle": "runner-pro",
+            "title": "Runner Pro",
+            "description": {
+              "plain": "Lightweight running shoes with responsive cushioning."
+            },
+            "url": "https://business.example.com/products/runner-pro",
+            "price_range": {
+              "min": { "amount": 12000, "currency": "USD" },
+              "max": { "amount": 15000, "currency": "USD" }
+            },
+            "media": [
+              {
+                "type": "image",
+                "url": "https://cdn.example.com/products/runner-pro-blue.jpg",
+                "alt_text": "Runner Pro in Blue"
+              }
+            ],
+            "options": [
+              {
+                "name": "Color",
+                "values": [
+                  {"label": "Blue", "available": true, "exists": true},
+                  {"label": "Red", "available": true, "exists": true},
+                  {"label": "Green", "available": false, "exists": true}
+                ]
+              },
+              {
+                "name": "Size",
+                "values": [
+                  {"label": "8", "available": true, "exists": true},
+                  {"label": "9", "available": true, "exists": true},
+                  {"label": "10", "available": true, "exists": true},
+                  {"label": "11", "available": false, "exists": false},
+                  {"label": "12", "available": true, "exists": true}
+                ]
+              }
+            ],
+            "selected": [
+              { "name": "Color", "label": "Blue" }
+            ],
+            "variants": [
+              {
+                "id": "prod_abc123_blu_10",
+                "sku": "BRP-BLU-10",
+                "title": "Blue, Size 10",
+                "description": { "plain": "Blue, Size 10" },
+                "price": { "amount": 12000, "currency": "USD" },
+                "availability": { "available": true },
+                "selected_options": [
+                  { "name": "Color", "label": "Blue" },
+                  { "name": "Size", "label": "10" }
+                ]
+              },
+              {
+                "id": "prod_abc123_blu_12",
+                "sku": "BRP-BLU-12",
+                "title": "Blue, Size 12",
+                "description": { "plain": "Blue, Size 12" },
+                "price": { "amount": 15000, "currency": "USD" },
+                "availability": { "available": true },
+                "selected_options": [
+                  { "name": "Color", "label": "Blue" },
+                  { "name": "Size", "label": "12" }
+                ]
+              }
+            ],
+            "rating": {
+              "value": 4.5,
+              "scale_max": 5,
+              "count": 128
+            }
+          }
+        }
+      }
+    }
+    ```
+
+#### Product Not Found
+
+When the identifier does not resolve to a product, the server returns a
+successful JSON-RPC result with `ucp.status: "error"` and a descriptive
+message. This is an application outcome, not a transport error.
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "result": {
+    "structuredContent": {
+      "ucp": {
+        "version": "{{ ucp_version }}",
+        "status": "error",
+        "capabilities": {
+          "dev.ucp.shopping.catalog.lookup": [
+            {"version": "{{ ucp_version }}"}
+          ]
+        }
+      },
+      "messages": [
+        {
+          "type": "error",
+          "code": "not_found",
+          "content": "Product not found: prod_invalid",
+          "severity": "unrecoverable"
+        }
+      ]
+    }
+  }
+}
+```
+
 ## Error Handling
 
 UCP uses a two-layer error model separating transport errors from business outcomes.
 
 ### Transport Errors
 
-Use JSON-RPC 2.0 error codes for protocol-level issues that prevent request processing:
-
-| Code | Meaning |
-| :--- | :--- |
-| -32600 | Invalid Request - Malformed JSON-RPC |
-| -32601 | Method not found |
-| -32602 | Invalid params - Missing required parameter |
-| -32603 | Internal error |
+Transport-level failures (authentication, rate limiting, unavailability) that
+prevent request processing are returned as JSON-RPC `error`. See the
+[Core Specification](../overview.md#error-codes) for the complete error code
+registry and JSON-RPC error code mappings.
 
 ### Business Outcomes
 
@@ -495,12 +671,26 @@ Business outcomes use the JSON-RPC `result` field with messages in the response
 payload. See the [Partial Success](#partial-success) section for handling mixed
 results.
 
+## Entities
+
+### Detail Product {: #detail-product }
+
+{{ extension_schema_fields('catalog_lookup.json#/$defs/detail_product', 'catalog/mcp') }}
+
+### Get Product Response {: #catalog-lookup-get-product-response }
+
+{{ extension_schema_fields('catalog_lookup.json#/$defs/get_product_response', 'catalog/mcp') }}
+
+### Error Response {: #error-response }
+
+{{ schema_fields('types/error_response', 'catalog/mcp') }}
+
 ## Conformance
 
 A conforming MCP transport implementation **MUST**:
 
 1. Implement JSON-RPC 2.0 protocol correctly.
-2. Implement tools for each catalog capability advertised in the business's UCP profile, per their respective capability requirements ([Search](search.md), [Lookup](lookup.md)). Each capability may be adopted independently.
+2. Implement tools for each catalog capability advertised in the business's UCP profile, per their respective capability requirements ([Search](search.md), [Lookup](lookup.md)). Each capability may be adopted independently. When the Lookup capability is advertised, both `lookup_catalog` and `get_product` tools MUST be available.
 3. Use JSON-RPC errors for transport issues; use `messages` array for business outcomes.
 4. Return successful result for lookup requests; unknown identifiers result in fewer products returned (MAY include informational `not_found` messages).
 5. Validate tool inputs against UCP schemas.
