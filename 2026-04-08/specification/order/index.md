@@ -374,22 +374,29 @@ Businesses push order lifecycle updates to the platform via webhooks. The payloa
 
 Businesses POST order events to a webhook URL provided by the platform during partner onboarding. The URL format is platform-specific.
 
+Headers follow **[Standard Webhooks](https://www.standardwebhooks.com/)**; except for request signing, which follows [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421). See [Message Signatures](http://ucp.dev/2026-04-08/specification/signatures/index.md) for more details.
+
+**Required Headers:**
+
+| Header              | Description                       |
+| ------------------- | --------------------------------- |
+| `Webhook-Timestamp` | Event occurrence timestamp (unix) |
+| `Webhook-Id`        | Unique event identifier           |
+
 **Inputs**
 
 | Name          | Type                                                                             | Required | Description                                                                                                                                   |
 | ------------- | -------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| ucp           | any                                                                              | No       | UCP metadata for order responses. No payment handlers needed post-purchase.                                                                   |
-| id            | string                                                                           | No       | Unique order identifier.                                                                                                                      |
+| ucp           | any                                                                              | **Yes**  | UCP metadata for order responses. No payment handlers needed post-purchase.                                                                   |
+| id            | string                                                                           | **Yes**  | Unique order identifier.                                                                                                                      |
 | label         | string                                                                           | No       | Human-readable label for identifying the order. MUST only be provided by the business.                                                        |
-| checkout_id   | string                                                                           | No       | Associated checkout ID for reconciliation.                                                                                                    |
-| permalink_url | string                                                                           | No       | Permalink to access the order on merchant site.                                                                                               |
-| line_items    | Array\[[Order Line Item](/2026-04-08/specification/reference/#order-line-item)\] | No       | Line items representing what was purchased — can change post-order via edits or exchanges.                                                    |
-| fulfillment   | object                                                                           | No       | Fulfillment data: buyer expectations and what actually happened.                                                                              |
+| checkout_id   | string                                                                           | **Yes**  | Associated checkout ID for reconciliation.                                                                                                    |
+| permalink_url | string                                                                           | **Yes**  | Permalink to access the order on merchant site.                                                                                               |
+| line_items    | Array\[[Order Line Item](/2026-04-08/specification/reference/#order-line-item)\] | **Yes**  | Line items representing what was purchased — can change post-order via edits or exchanges.                                                    |
+| fulfillment   | object                                                                           | **Yes**  | Fulfillment data: buyer expectations and what actually happened.                                                                              |
 | adjustments   | Array\[[Adjustment](/2026-04-08/specification/reference/#adjustment)\]           | No       | Post-order events (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment.                         |
-| totals        | [Totals](/2026-04-08/specification/reference/#totals)                            | No       | Different totals for the order.                                                                                                               |
+| totals        | [Totals](/2026-04-08/specification/reference/#totals)                            | **Yes**  | Different totals for the order.                                                                                                               |
 | messages      | Array\[[Message](/2026-04-08/specification/reference/#message)\]                 | No       | Business outcome messages (errors, warnings, informational). Present when the business needs to communicate status or issues to the platform. |
-| event_id      | string                                                                           | **Yes**  | Unique event identifier.                                                                                                                      |
-| created_time  | string                                                                           | **Yes**  | Event creation timestamp in RFC 3339 format.                                                                                                  |
 
 **Output**
 

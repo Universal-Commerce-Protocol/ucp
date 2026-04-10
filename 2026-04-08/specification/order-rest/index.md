@@ -219,7 +219,7 @@ Content-Type: application/json
 | `Content-Type`    | No       | Representation Metadata. Tells the receiver what the data in the message body actually is.                                                                                                                                                                    |
 | `Accept`          | No       | Content Negotiation. The client tells the server what data formats it is capable of understanding.                                                                                                                                                            |
 | `Accept-Language` | No       | Localization. Tells the receiver the user's preferred natural languages, often with "weights" or priorities.                                                                                                                                                  |
-| `Accept-Encoding` | No       | Compression. The client tells the server which content-codings it supports, usually for compression                                                                                                                                                           |
+| `Accept-Encoding` | No       | Compression. The client tells the server which content-codings it supports, usually for compression.                                                                                                                                                          |
 
 ### Specific Header Requirements
 
