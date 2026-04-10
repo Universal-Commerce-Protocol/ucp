@@ -3570,6 +3570,28 @@ payload is the same <strong>current-state snapshot</strong> described in
 <h3 id="order-event-webhook">Order Event Webhook<a class="headerlink" href="#order-event-webhook" title="Permanent link">&para;</a></h3>
 <p>Businesses POST order events to a webhook URL provided by the platform
 during partner onboarding. The URL format is platform-specific.</p>
+<p>Headers follow <strong><a href="https://www.standardwebhooks.com/" target="_blank">Standard Webhooks</a></strong>;
+except for request signing, which follows <a href="https://www.rfc-editor.org/rfc/rfc9421">RFC 9421</a>.
+See <a href="../signatures/">Message Signatures</a> for more details.</p>
+<p><strong>Required Headers:</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Header</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>Webhook-Timestamp</code></td>
+<td style="text-align: left;">Event occurrence timestamp (unix)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>Webhook-Id</code></td>
+<td style="text-align: left;">Unique event identifier</td>
+</tr>
+</tbody>
+</table>
 <p><strong>Inputs</strong></p>
 <table>
 <thead>
@@ -3584,13 +3606,13 @@ during partner onboarding. The URL format is platform-specific.</p>
 <tr>
 <td style="text-align: left;">ucp</td>
 <td style="text-align: left;">any</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">UCP metadata for order responses. No payment handlers needed post-purchase.</td>
 </tr>
 <tr>
 <td style="text-align: left;">id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Unique order identifier.</td>
 </tr>
 <tr>
@@ -3602,25 +3624,25 @@ during partner onboarding. The URL format is platform-specific.</p>
 <tr>
 <td style="text-align: left;">checkout_id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Associated checkout ID for reconciliation.</td>
 </tr>
 <tr>
 <td style="text-align: left;">permalink_url</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Permalink to access the order on merchant site.</td>
 </tr>
 <tr>
 <td style="text-align: left;">line_items</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#order-line-item">Order Line Item</a>]</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Line items representing what was purchased — can change post-order via edits or exchanges.</td>
 </tr>
 <tr>
 <td style="text-align: left;">fulfillment</td>
 <td style="text-align: left;">object</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Fulfillment data: buyer expectations and what actually happened.</td>
 </tr>
 <tr>
@@ -3632,7 +3654,7 @@ during partner onboarding. The URL format is platform-specific.</p>
 <tr>
 <td style="text-align: left;">totals</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#totals">Totals</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
 <td style="text-align: left;">Different totals for the order.</td>
 </tr>
 <tr>
@@ -3640,18 +3662,6 @@ during partner onboarding. The URL format is platform-specific.</p>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#message">Message</a>]</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Business outcome messages (errors, warnings, informational). Present when the business needs to communicate status or issues to the platform.</td>
-</tr>
-<tr>
-<td style="text-align: left;">event_id</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Unique event identifier.</td>
-</tr>
-<tr>
-<td style="text-align: left;">created_time</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Event creation timestamp in RFC 3339 format.</td>
 </tr>
 </tbody>
 </table>
