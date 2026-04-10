@@ -600,9 +600,9 @@ def define_env(env):
 
     if (
       not properties
-      and "allOf" not in schema_data
       and "oneOf" not in schema_data
       and "$ref" not in schema_data
+      and ("allOf" not in schema_data or schema_data.get("type") == "array")
     ):
       # Fallback for scalar schemas (Enums, Strings with patterns, etc.)
       s_type = schema_data.get("type")
@@ -634,7 +634,7 @@ def define_env(env):
           context,
         )
       )
-    elif "allOf" in schema_data:
+    elif "allOf" in schema_data and not properties:
       md.append(
         _render_embedded_table(
           schema_data.get("allOf", []),
