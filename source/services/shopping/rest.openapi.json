@@ -737,32 +737,15 @@
           { "$ref": "#/components/parameters/signature_input" },
           { "$ref": "#/components/parameters/content_digest" },
           { "$ref": "#/components/parameters/ucp_agent" },
-          { "$ref": "#/components/parameters/x_api_key" }
+          { "$ref": "#/components/parameters/x_api_key" },
+          { "$ref": "#/components/parameters/webhook_timestamp" },
+          { "$ref": "#/components/parameters/webhook_id" }
         ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": {
-                "allOf": [
-                  { "$ref": "#/components/schemas/order" },
-                  {
-                    "type": "object",
-                    "required": ["event_id", "created_time"],
-                    "properties": {
-                      "event_id": {
-                        "type": "string",
-                        "description": "Unique event identifier."
-                      },
-                      "created_time": {
-                        "type": "string",
-                        "format": "date-time",
-                        "description": "Event creation timestamp in RFC 3339 format."
-                      }
-                    }
-                  }
-                ]
-              }
+              "schema": { "$ref": "#/components/schemas/order" }
             }
           }
         },
@@ -933,7 +916,26 @@
         "schema": {
           "type": "string"
         },
-        "description": "Compression. The client tells the server which content-codings it supports, usually for compression"
+        "description": "Compression. The client tells the server which content-codings it supports, usually for compression."
+      },
+      "webhook_timestamp": {
+        "name": "Webhook-Timestamp",
+        "in": "header",
+        "required": true,
+        "schema": {
+          "type": "integer"
+        },
+        "description": "Webhook event occurrence unix timestamp (seconds since epoch)."
+      },
+      "webhook_id": {
+        "name": "Webhook-Id",
+        "in": "header",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "description": "The unique identifier of a webhook event."
       }
     },
     "headers": {
