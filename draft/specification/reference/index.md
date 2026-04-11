@@ -698,26 +698,26 @@ ______________________________________________________________________
 
 ### Variant
 
-| Name             | Type                                                                        | Required | Description                                                                               |
-| ---------------- | --------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------- |
-| id               | string                                                                      | **Yes**  | Global ID (GID) uniquely identifying this variant. Used as item.id in checkout.           |
-| sku              | string                                                                      | No       | Business-assigned identifier for inventory and fulfillment.                               |
-| barcodes         | Array[object]                                                               | No       | Industry-standard product identifiers for cross-reference and correlation.                |
-| handle           | string                                                                      | No       | URL-safe variant handle/slug.                                                             |
-| title            | string                                                                      | **Yes**  | Variant display title (e.g., 'Blue / Large').                                             |
-| description      | [Description](/draft/specification/reference/#description)                  | **Yes**  | Variant description in one or more formats.                                               |
-| url              | string                                                                      | No       | Canonical variant page URL.                                                               |
-| categories       | Array\[[Category](/draft/specification/reference/#category)\]               | No       | Variant categories with optional taxonomy identifiers.                                    |
-| price            | [Price](/draft/specification/reference/#price)                              | **Yes**  | Current selling price.                                                                    |
-| list_price       | [Price](/draft/specification/reference/#price)                              | No       | List price before discounts (for strikethrough display).                                  |
-| unit_price       | object                                                                      | No       | Price per standard unit of measurement. MAY be omitted when unit pricing does not apply.  |
-| availability     | object                                                                      | No       | Variant availability for purchase.                                                        |
-| selected_options | Array\[[Selected Option](/draft/specification/reference/#selected-option)\] | No       | Option selections that define this variant.                                               |
-| media            | Array\[[Media](/draft/specification/reference/#media)\]                     | No       | Variant media (images, videos, 3D models). First item is the featured media for listings. |
-| rating           | [Rating](/draft/specification/reference/#rating)                            | No       | Variant rating.                                                                           |
-| tags             | Array[string]                                                               | No       | Variant tags for categorization and search.                                               |
-| metadata         | object                                                                      | No       | Business-defined custom data extending the standard variant model.                        |
-| seller           | object                                                                      | No       | Optional seller context for this variant.                                                 |
+| Name         | Type                                                                        | Required | Description                                                                               |
+| ------------ | --------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------- |
+| id           | string                                                                      | **Yes**  | Global ID (GID) uniquely identifying this variant. Used as item.id in checkout.           |
+| sku          | string                                                                      | No       | Business-assigned identifier for inventory and fulfillment.                               |
+| barcodes     | Array[object]                                                               | No       | Industry-standard product identifiers for cross-reference and correlation.                |
+| handle       | string                                                                      | No       | URL-safe variant handle/slug.                                                             |
+| title        | string                                                                      | **Yes**  | Variant display title (e.g., 'Blue / Large').                                             |
+| description  | [Description](/draft/specification/reference/#description)                  | **Yes**  | Variant description in one or more formats.                                               |
+| url          | string                                                                      | No       | Canonical variant page URL.                                                               |
+| categories   | Array\[[Category](/draft/specification/reference/#category)\]               | No       | Variant categories with optional taxonomy identifiers.                                    |
+| price        | [Price](/draft/specification/reference/#price)                              | **Yes**  | Current selling price.                                                                    |
+| list_price   | [Price](/draft/specification/reference/#price)                              | No       | List price before discounts (for strikethrough display).                                  |
+| unit_price   | object                                                                      | No       | Price per standard unit of measurement. MAY be omitted when unit pricing does not apply.  |
+| availability | object                                                                      | No       | Variant availability for purchase.                                                        |
+| options      | Array\[[Selected Option](/draft/specification/reference/#selected-option)\] | No       | Option values that define this variant (e.g., Color: Blue, Size: Large).                  |
+| media        | Array\[[Media](/draft/specification/reference/#media)\]                     | No       | Variant media (images, videos, 3D models). First item is the featured media for listings. |
+| rating       | [Rating](/draft/specification/reference/#rating)                            | No       | Variant rating.                                                                           |
+| tags         | Array[string]                                                               | No       | Variant tags for categorization and search.                                               |
+| metadata     | object                                                                      | No       | Business-defined custom data extending the standard variant model.                        |
+| seller       | object                                                                      | No       | Optional seller context for this variant.                                                 |
 
 ______________________________________________________________________
 

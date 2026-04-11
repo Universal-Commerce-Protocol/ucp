@@ -11424,26 +11424,26 @@ In lookup responses, each variant carries an `inputs` array for correlation: whi
 
 `media` is an ordered array. Businesses SHOULD return the featured variant image as the first element. Platforms SHOULD treat the first element as featured.
 
-| Name             | Type                                                                        | Required | Description                                                                               |
-| ---------------- | --------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------- |
-| id               | string                                                                      | **Yes**  | Global ID (GID) uniquely identifying this variant. Used as item.id in checkout.           |
-| sku              | string                                                                      | No       | Business-assigned identifier for inventory and fulfillment.                               |
-| barcodes         | Array[object]                                                               | No       | Industry-standard product identifiers for cross-reference and correlation.                |
-| handle           | string                                                                      | No       | URL-safe variant handle/slug.                                                             |
-| title            | string                                                                      | **Yes**  | Variant display title (e.g., 'Blue / Large').                                             |
-| description      | [Description](/draft/specification/reference/#description)                  | **Yes**  | Variant description in one or more formats.                                               |
-| url              | string                                                                      | No       | Canonical variant page URL.                                                               |
-| categories       | Array\[[Category](/draft/specification/reference/#category)\]               | No       | Variant categories with optional taxonomy identifiers.                                    |
-| price            | [Price](/draft/specification/reference/#price)                              | **Yes**  | Current selling price.                                                                    |
-| list_price       | [Price](/draft/specification/reference/#price)                              | No       | List price before discounts (for strikethrough display).                                  |
-| unit_price       | object                                                                      | No       | Price per standard unit of measurement. MAY be omitted when unit pricing does not apply.  |
-| availability     | object                                                                      | No       | Variant availability for purchase.                                                        |
-| selected_options | Array\[[Selected Option](/draft/specification/reference/#selected-option)\] | No       | Option selections that define this variant.                                               |
-| media            | Array\[[Media](/draft/specification/reference/#media)\]                     | No       | Variant media (images, videos, 3D models). First item is the featured media for listings. |
-| rating           | [Rating](/draft/specification/reference/#rating)                            | No       | Variant rating.                                                                           |
-| tags             | Array[string]                                                               | No       | Variant tags for categorization and search.                                               |
-| metadata         | object                                                                      | No       | Business-defined custom data extending the standard variant model.                        |
-| seller           | object                                                                      | No       | Optional seller context for this variant.                                                 |
+| Name         | Type                                                                        | Required | Description                                                                               |
+| ------------ | --------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------- |
+| id           | string                                                                      | **Yes**  | Global ID (GID) uniquely identifying this variant. Used as item.id in checkout.           |
+| sku          | string                                                                      | No       | Business-assigned identifier for inventory and fulfillment.                               |
+| barcodes     | Array[object]                                                               | No       | Industry-standard product identifiers for cross-reference and correlation.                |
+| handle       | string                                                                      | No       | URL-safe variant handle/slug.                                                             |
+| title        | string                                                                      | **Yes**  | Variant display title (e.g., 'Blue / Large').                                             |
+| description  | [Description](/draft/specification/reference/#description)                  | **Yes**  | Variant description in one or more formats.                                               |
+| url          | string                                                                      | No       | Canonical variant page URL.                                                               |
+| categories   | Array\[[Category](/draft/specification/reference/#category)\]               | No       | Variant categories with optional taxonomy identifiers.                                    |
+| price        | [Price](/draft/specification/reference/#price)                              | **Yes**  | Current selling price.                                                                    |
+| list_price   | [Price](/draft/specification/reference/#price)                              | No       | List price before discounts (for strikethrough display).                                  |
+| unit_price   | object                                                                      | No       | Price per standard unit of measurement. MAY be omitted when unit pricing does not apply.  |
+| availability | object                                                                      | No       | Variant availability for purchase.                                                        |
+| options      | Array\[[Selected Option](/draft/specification/reference/#selected-option)\] | No       | Option values that define this variant (e.g., Color: Blue, Size: Large).                  |
+| media        | Array\[[Media](/draft/specification/reference/#media)\]                     | No       | Variant media (images, videos, 3D models). First item is the featured media for listings. |
+| rating       | [Rating](/draft/specification/reference/#rating)                            | No       | Variant rating.                                                                           |
+| tags         | Array[string]                                                               | No       | Variant tags for categorization and search.                                               |
+| metadata     | object                                                                      | No       | Business-defined custom data extending the standard variant model.                        |
+| seller       | object                                                                      | No       | Optional seller context for this variant.                                                 |
 
 ### Price
 
@@ -12073,7 +12073,7 @@ Maps to the [Catalog Search](http://ucp.dev/draft/specification/catalog/search/i
           "description": { "plain": "Size 10 variant" },
           "price": { "amount": 12000, "currency": "USD" },
           "availability": { "available": true },
-          "selected_options": [
+          "options": [
             { "name": "Size", "label": "10" }
           ],
           "tags": ["running", "road", "neutral"],
@@ -12359,7 +12359,7 @@ Content-Type: application/json
         "description": { "plain": "Blue, Size 10" },
         "price": { "amount": 12000, "currency": "USD" },
         "availability": { "available": true },
-        "selected_options": [
+        "options": [
           { "name": "Color", "label": "Blue" },
           { "name": "Size", "label": "10" }
         ]
@@ -12371,7 +12371,7 @@ Content-Type: application/json
         "description": { "plain": "Blue, Size 12" },
         "price": { "amount": 15000, "currency": "USD" },
         "availability": { "available": true },
-        "selected_options": [
+        "options": [
           { "name": "Color", "label": "Blue" },
           { "name": "Size", "label": "12" }
         ]
@@ -12728,7 +12728,7 @@ Maps to the [Catalog Search](http://ucp.dev/draft/specification/catalog/search/i
               "description": { "plain": "Size 10 variant" },
               "price": { "amount": 12000, "currency": "USD" },
               "availability": { "available": true },
-              "selected_options": [
+              "options": [
                 { "name": "Size", "label": "10" }
               ],
               "tags": ["running", "road", "neutral"],
@@ -13073,7 +13073,7 @@ Request body for single-product retrieval. Supports interactive variant narrowin
             "description": { "plain": "Blue, Size 10" },
             "price": { "amount": 12000, "currency": "USD" },
             "availability": { "available": true },
-            "selected_options": [
+            "options": [
               { "name": "Color", "label": "Blue" },
               { "name": "Size", "label": "10" }
             ]
@@ -13085,7 +13085,7 @@ Request body for single-product retrieval. Supports interactive variant narrowin
             "description": { "plain": "Blue, Size 12" },
             "price": { "amount": 15000, "currency": "USD" },
             "availability": { "available": true },
-            "selected_options": [
+            "options": [
               { "name": "Color", "label": "Blue" },
               { "name": "Size", "label": "12" }
             ]
@@ -17509,26 +17509,26 @@ ______________________________________________________________________
 
 ### Variant
 
-| Name             | Type                                                                        | Required | Description                                                                               |
-| ---------------- | --------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------- |
-| id               | string                                                                      | **Yes**  | Global ID (GID) uniquely identifying this variant. Used as item.id in checkout.           |
-| sku              | string                                                                      | No       | Business-assigned identifier for inventory and fulfillment.                               |
-| barcodes         | Array[object]                                                               | No       | Industry-standard product identifiers for cross-reference and correlation.                |
-| handle           | string                                                                      | No       | URL-safe variant handle/slug.                                                             |
-| title            | string                                                                      | **Yes**  | Variant display title (e.g., 'Blue / Large').                                             |
-| description      | [Description](/draft/specification/reference/#description)                  | **Yes**  | Variant description in one or more formats.                                               |
-| url              | string                                                                      | No       | Canonical variant page URL.                                                               |
-| categories       | Array\[[Category](/draft/specification/reference/#category)\]               | No       | Variant categories with optional taxonomy identifiers.                                    |
-| price            | [Price](/draft/specification/reference/#price)                              | **Yes**  | Current selling price.                                                                    |
-| list_price       | [Price](/draft/specification/reference/#price)                              | No       | List price before discounts (for strikethrough display).                                  |
-| unit_price       | object                                                                      | No       | Price per standard unit of measurement. MAY be omitted when unit pricing does not apply.  |
-| availability     | object                                                                      | No       | Variant availability for purchase.                                                        |
-| selected_options | Array\[[Selected Option](/draft/specification/reference/#selected-option)\] | No       | Option selections that define this variant.                                               |
-| media            | Array\[[Media](/draft/specification/reference/#media)\]                     | No       | Variant media (images, videos, 3D models). First item is the featured media for listings. |
-| rating           | [Rating](/draft/specification/reference/#rating)                            | No       | Variant rating.                                                                           |
-| tags             | Array[string]                                                               | No       | Variant tags for categorization and search.                                               |
-| metadata         | object                                                                      | No       | Business-defined custom data extending the standard variant model.                        |
-| seller           | object                                                                      | No       | Optional seller context for this variant.                                                 |
+| Name         | Type                                                                        | Required | Description                                                                               |
+| ------------ | --------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------- |
+| id           | string                                                                      | **Yes**  | Global ID (GID) uniquely identifying this variant. Used as item.id in checkout.           |
+| sku          | string                                                                      | No       | Business-assigned identifier for inventory and fulfillment.                               |
+| barcodes     | Array[object]                                                               | No       | Industry-standard product identifiers for cross-reference and correlation.                |
+| handle       | string                                                                      | No       | URL-safe variant handle/slug.                                                             |
+| title        | string                                                                      | **Yes**  | Variant display title (e.g., 'Blue / Large').                                             |
+| description  | [Description](/draft/specification/reference/#description)                  | **Yes**  | Variant description in one or more formats.                                               |
+| url          | string                                                                      | No       | Canonical variant page URL.                                                               |
+| categories   | Array\[[Category](/draft/specification/reference/#category)\]               | No       | Variant categories with optional taxonomy identifiers.                                    |
+| price        | [Price](/draft/specification/reference/#price)                              | **Yes**  | Current selling price.                                                                    |
+| list_price   | [Price](/draft/specification/reference/#price)                              | No       | List price before discounts (for strikethrough display).                                  |
+| unit_price   | object                                                                      | No       | Price per standard unit of measurement. MAY be omitted when unit pricing does not apply.  |
+| availability | object                                                                      | No       | Variant availability for purchase.                                                        |
+| options      | Array\[[Selected Option](/draft/specification/reference/#selected-option)\] | No       | Option values that define this variant (e.g., Color: Blue, Size: Large).                  |
+| media        | Array\[[Media](/draft/specification/reference/#media)\]                     | No       | Variant media (images, videos, 3D models). First item is the featured media for listings. |
+| rating       | [Rating](/draft/specification/reference/#rating)                            | No       | Variant rating.                                                                           |
+| tags         | Array[string]                                                               | No       | Variant tags for categorization and search.                                               |
+| metadata     | object                                                                      | No       | Business-defined custom data extending the standard variant model.                        |
+| seller       | object                                                                      | No       | Optional seller context for this variant.                                                 |
 
 ______________________________________________________________________
 

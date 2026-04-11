@@ -147,7 +147,7 @@ Maps to the [Catalog Search](http://ucp.dev/draft/specification/catalog/search/i
           "description": { "plain": "Size 10 variant" },
           "price": { "amount": 12000, "currency": "USD" },
           "availability": { "available": true },
-          "selected_options": [
+          "options": [
             { "name": "Size", "label": "10" }
           ],
           "tags": ["running", "road", "neutral"],
@@ -433,7 +433,7 @@ Content-Type: application/json
         "description": { "plain": "Blue, Size 10" },
         "price": { "amount": 12000, "currency": "USD" },
         "availability": { "available": true },
-        "selected_options": [
+        "options": [
           { "name": "Color", "label": "Blue" },
           { "name": "Size", "label": "10" }
         ]
@@ -445,7 +445,7 @@ Content-Type: application/json
         "description": { "plain": "Blue, Size 12" },
         "price": { "amount": 15000, "currency": "USD" },
         "availability": { "available": true },
-        "selected_options": [
+        "options": [
           { "name": "Color", "label": "Blue" },
           { "name": "Size", "label": "12" }
         ]
