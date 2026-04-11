@@ -16,24 +16,20 @@
 
 # Core Concepts
 
-The Universal Commerce Protocol (UCP) is an open standard designed to facilitate
-communication and interoperability between diverse commerce entities. In a
-fragmented landscape where consumer platforms, business platforms, payment
-providers, and identity providers operate on different systems, UCP provides
-a standardized common language and functional primitives.
+The Universal Commerce Protocol (UCP) is an open standard for interoperability between commerce entities. It defines a common language and functional primitives so that clients and providers can interoperate securely and reliably across any commercial vertical.
 
 This document provides the detailed technical specification for UCP.
 For a complete definition of all data models and schemas, see the
 [Schema Reference](../specification/reference.md).
 
 !!! note "Terminology"
-    Throughout this documentation, **Platform** (or *consumer platform*) refers to any entity that *consumes* capabilities — an app, an AI agent, a procurement system, or another business. **Business** (or *business platform*) refers to any entity that *exposes* capabilities — a retailer, a supplier, a service provider, or any other participant offering commerce functionality. These roles are defined by direction of capability flow, not by industry vertical, making UCP equally applicable to B2C, B2B, and agent-to-agent commerce. The terms *consumer surface* and *merchant platform* may appear in earlier drafts and community discussions — they are synonymous with Platform and Business respectively.
+    Throughout this documentation, **Client** refers to any entity that *consumes* capabilities — an app, an AI agent, a procurement system, or another business. **Provider** refers to any entity that *exposes* capabilities — a retailer, a supplier, a service provider, or any other participant offering commerce functionality. These roles are defined by direction of capability flow, not by industry vertical, making UCP equally applicable to B2C, B2B, and agent-to-agent commerce. The terms *platform* and *business* may appear in earlier drafts and community discussions — they are synonymous with Client and Provider respectively.
 
 Its primary goal is to enable:
 
-* **Consumer Platforms:** To dynamically discover and consume the capabilities business platform exposes.
-* **Business Platforms:** To declare what they offer and how they operate — once — and have any compatible platform discover and use it without bespoke integrations.
-* **Payment & Credential Providers:** To securely hold sensitive user data and issue tokens or credentials on behalf of users, so that platforms and businesses never handle sensitive payment or identity information directly.
+* **Clients:** To dynamically discover and consume the capabilities a provider exposes.
+* **Providers:** To declare what they offer and how they operate — once — and have any compatible client discover and use it without bespoke integrations.
+* **Payment & Credential Providers:** To securely hold sensitive user data and issue tokens or credentials on behalf of users, so that clients and providers never handle sensitive payment or identity information directly.
 
 ## High level architecture
 
@@ -46,10 +42,10 @@ Its primary goal is to enable:
 
 ## Key Goals of UCP
 
-* **Interoperability:** Bridge the gap between consumer platforms, business platforms,
+* **Interoperability:** Bridge the gap between clients, providers,
     and payment ecosystems.
-* **Discovery:** Allow consumer platforms to dynamically discover what
-    capabilities a business supports (e.g., "Do they support checkout?", "Do they
+* **Discovery:** Allow clients to dynamically discover what
+    capabilities a provider supports (e.g., "Do they support checkout?", "Do they
     support fulfillment options or identity linking?").
 * **Security:** Facilitate secure, standards-based (OAuth 2.0, PCI-DSS
     compliant patterns) exchanges of sensitive user and payment data.
@@ -62,28 +58,28 @@ Its primary goal is to enable:
 UCP defines the interactions between four distinct actors, each playing
 a specific role in the commerce lifecycle.
 
-### Consumer Platform (Application/Agent)
+### Client
 
-The platform is any entity that consumes capabilities exposed by a business —
+The client is any entity that consumes capabilities exposed by a provider —
 an AI agent, a mobile app, a procurement system, or another business acting
 as a capability consumer. It orchestrates the interaction by discovering what
-the business supports and invoking the appropriate capabilities on behalf of
+the provider supports and invoking the appropriate capabilities on behalf of
 its principal (a user, an automated process, or another system).
 
-* **Responsibilities:** Discovering business capabilities via profiles,
+* **Responsibilities:** Discovering provider capabilities via profiles,
     initiating and managing capability sessions, and acting on behalf of its
     principal within the bounds of negotiated capabilities.
 * **Examples:** AI Shopping Assistants, Super Apps, Search Engines, B2B Procurement Systems.
 
-### Business
+### Provider
 
-The entity exposing capabilities. In transactional contexts, businesses
-act as the **Merchant of Record (MoR)**, retaining financial liability
+The entity exposing capabilities. In transactional contexts, provider typically
+acts as the **Merchant of Record (MoR)**, retaining financial liability
 and ownership of the transaction — though UCP's capability model is not limited
 to transactional use cases.
 
-* **Responsibilities:** Publishing a capability profile, declaring supported
-    services and extensions, processing capability invocations which may be stateful or stateless.
+* **Responsibilities:** Publishing a UCP profile, declaring supported
+    services, capabilities and extensions, processing capability invocations which may be stateful or stateless.
 * **Examples:** Retailers, Airlines, Hotel Chains, Service Providers, Suppliers, Distributors.
 
 ### Credential Provider (CP)
@@ -92,7 +88,7 @@ A trusted entity responsible for securely managing and sharing sensitive user
 data, particularly payment instruments and shipping addresses.
 
 * **Responsibilities:** Authenticating the user, issuing payment tokens (to
-    keep raw card data off the platform), and holding PII securely to minimize
+    keep raw card data off the client), and holding PII securely to minimize
     compliance scope for other parties.
 * **Examples:** Digital Wallets (e.g., Google Wallet, Apple Pay), Identity
     Providers.
@@ -116,13 +112,13 @@ interact.
 
 Capabilities are standalone, independently versioned features that
 a business declares it supports. They are the "verbs" of the protocol —
-discrete units of functionality that platforms can discover, negotiate, and
+discrete units of functionality that clients can discover, negotiate, and
 invoke.
 
 Each capability is identified by a reverse-domain name (e.g.,
 `dev.ucp.shopping.checkout`) and carries a date-based version. Capabilities
-are declared in the business's UCP profile at `/.well-known/ucp` and
-negotiated and confirmed in every response so that the platform always knows
+are declared in the provider's UCP profile at `/.well-known/ucp` and
+negotiated and confirmed in every response so that the client always knows
 the active feature set for a given interaction.
 
 The following are examples of capabilities defined in UCP — see the [Specification](../specification/overview.md) for the authoritative and up-to-date list.
@@ -185,8 +181,8 @@ A single service can be accessed via multiple transport bindings:
 | **A2A** | Agent Card | Agent-to-Agent protocol integrations |
 | **Embedded** | OpenRPC | Embedded integrations |
 
-A business declares which transport bindings it supports within each service;
-platforms pick whichever fits their context — an AI agent may prefer MCP, a
+A provider declares which transport bindings it supports within each service;
+clients pick whichever fits their context — an AI agent may prefer MCP, a
 traditional web app may use REST.
 
 Service namespaces are also UCP's extensibility mechanism for new verticals — e.g.,
@@ -195,9 +191,9 @@ services they support.
 
 ## Discovery & Capability Negotiation
 
-UCP uses a profile-based discovery model. Every business publishes a machine-readable
+UCP uses a profile-based discovery model. Every provider publishes a machine-readable
 profile at `/.well-known/ucp` that declares which services, capabilities, and
-payment handlers they support. Platforms advertise their own profile URL on each
+payment handlers they support. Clients advertise their own profile URL on each
 request via the `UCP-Agent` header.
 
 ```text
@@ -205,36 +201,36 @@ POST /checkout-sessions HTTP/1.1
 UCP-Agent: profile="https://agent.example/profiles/shopping-agent.json"
 ```
 
-This design enables **permissionless onboarding** — any platform with a
-discoverable profile can interact with any business without prior registration.
-Businesses may additionally establish trust with known platforms through
+This design enables **permissionless onboarding** — any client with a
+discoverable profile can interact with any provider without prior registration.
+Providers may additionally establish trust with known clients through
 out-of-band onboarding & verification mechanisms (API keys, OAuth credentials, mTLS certificates).
 
 ### Capability Intersection
 
-Capability negotiation follows a **server-selects** architecture. The business
+Capability negotiation follows a **server-selects** architecture. The provider
 determines the active capabilities by computing the intersection of its own
-declared capabilities with those in the platform's profile:
+declared capabilities with those in the client's profile:
 
 1. **Intersect by name** — Only capabilities both parties declare are candidates.
 2. **Select version** — For each matched capability, compute the set of versions
-   present in both the business and platform arrays. Select the highest (latest
+   present in both the provider and client arrays. Select the highest (latest
    date). If no mutual version exists, exclude the capability.
 3. **Prune orphaned extensions** — Extensions whose parent capability is not in
    the intersection are removed. Pruning repeats until stable (handles chains).
 
-The result is a minimal, mutually compatible capability set. Businesses include
-the active capabilities in every response so platforms always know which features
+The result is a minimal, mutually compatible capability set. Providers include
+the active capabilities in every response so clients always know which features
 apply to a given interaction.
 
 ### Profile Structure
 
-Both business and platform profiles share a common base structure — a `ucp`
+Both provider and client profiles share a common base structure — a `ucp`
 object declaring protocol version, services, capabilities, and payment handlers,
 alongside a `signing_keys` array of JWK public keys. The `ucp` object differs
-between the two: the business profile uses a business-specific schema (hosted at
-`/.well-known/ucp`), while the platform profile uses a platform-specific schema
-(hosted at a URI the platform advertises per-request). This dual-purpose profile
+between the two: the provider profile uses a provider-specific schema (hosted at
+`/.well-known/ucp`), while the client profile uses a client-specific schema
+(hosted at a URI the client advertises per-request). This dual-purpose profile
 — capabilities *and* keys in a single document — means discovery and
 authentication are resolved together.
 
@@ -296,7 +292,7 @@ registry — domain owners control their own namespace.
 | `com.example.payments.installments` | example.com | example.com |
 
 The `spec` and `schema` URLs declared in a capability must originate from the
-namespace authority domain. Platforms **MUST** validate this binding to prevent
+namespace authority domain. Clients **MUST** validate this binding to prevent
 spoofed capabilities.
 
 The `dev.ucp.*` namespace is reserved exclusively for capabilities governed by
@@ -311,22 +307,22 @@ decentralized by design.
 ## Payment Architecture
 
 UCP decouples payment instrument acceptance from payment processing to solve
-the N-to-N complexity problem between platforms, businesses, and payment
+the N-to-N complexity problem between clients, providers, and payment
 processors.
 
 ### The Trust Triangle
 
 The payment model is built on three bilateral trust relationships:
 
-1. **Business ↔ Payment Service Provider (PSP)** — Pre-existing legal and
-   technical relationship; the business holds API keys and contracts with its PSP.
-2. **Platform ↔ Credential Provider (CP)** — The platform acquires a payment
+1. **Provider ↔ Payment Service Provider (PSP)** — Pre-existing legal and
+   technical relationship; the provider holds API keys and contracts with its PSP.
+2. **Client ↔ Credential Provider (CP)** — The client acquires a payment
    instrument (token, encrypted payload) directly from the CP, keeping raw
-   credentials off the platform-to-business API.
-3. **Platform ↔ Business** — The platform submits the opaque token to the
-   business, which processes it via its backend PSP integration.
+   credentials off the client-to-provider API.
+3. **Client ↔ Provider** — The client submits the opaque token to the
+   provider, which processes it via its backend PSP integration.
 
-Credentials flow **platform → business** only; businesses **MUST NOT** echo
+Credentials flow **client → provider** only; providers **MUST NOT** echo
 credentials back in responses.
 
 ### Payment Handlers
@@ -345,13 +341,13 @@ The 3-step payment lifecycle:
 1. **Negotiation** — The business advertises available payment handlers in its
    profile and checkout response based on contents and negotiated
    properties of the checkout.
-2. **Acquisition** — The platform executes the handler's logic to acquire a
+2. **Acquisition** — The client executes the handler's logic to acquire a
    payment instrument (token or encrypted payload) directly from the CP.
-3. **Completion** — The platform submits the instrument to the business, which
+3. **Completion** — The client submits the instrument to the provider, which
    charges funds via its PSP integration.
 
-This architecture keeps raw card data off the platform-to-business API,
-minimizing PCI scope for the platform and reducing compliance surface for the
+This architecture keeps raw card data off the client-to-provider API,
+minimizing PCI scope for the client and reducing compliance surface for the
 overall integration.
 
 ## Security & Authentication
@@ -380,16 +376,16 @@ UCP supports multiple authentication models:
 | **API Keys** | Pre-established | Pre-shared secrets exchanged out-of-band |
 | **mTLS** | Pre-established | Mutual TLS with client certificates |
 
-Business-to-platform webhooks **MUST** be signed. HTTP Message Signatures are
-the only mechanism that enables a platform to interact with a business without
+Provider-to-client webhooks **MUST** be signed. HTTP Message Signatures are
+the only mechanism that enables a client to interact with a provider without
 prior credential exchange.
 
 ### Identity Linking
 
-The `dev.ucp.common.identity_linking` capability enables a platform to obtain
-OAuth 2.0 authorization to act on behalf of a user at a business — unlocking
+The `dev.ucp.common.identity_linking` capability enables a client to obtain
+OAuth 2.0 authorization to act on behalf of a user at a provider — unlocking
 loyalty benefits, personalized offers, wishlists, and authenticated checkouts.
-Businesses publish their OAuth 2.0 server metadata at
+Providers publish their OAuth 2.0 server metadata at
 `/.well-known/oauth-authorization-server`.
 
 ## Versioning
@@ -400,9 +396,9 @@ the date of the last backwards-incompatible change.
 * **Non-breaking additions** do not increment the date.
 * **Breaking changes** require a `!` prefix in the PR title and a 2-week
   advance notice to the community before merging.
-* Businesses that support older protocol versions **SHOULD** publish
+* Providers that support older protocol versions **SHOULD** publish
   version-specific profiles and advertise them via the `supported_versions`
-  field in their profile, enabling platforms to discover the exact capability
+  field in their profile, enabling clients to discover the exact capability
   set for each supported version.
 
 Capability schemas carry their version inline, which enables independent
