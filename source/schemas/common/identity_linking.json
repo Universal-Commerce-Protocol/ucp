@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/identity_linking.json",
+  "name": "dev.ucp.common.identity_linking",
+  "version": "Working Draft",
+  "title": "Identity Linking",
+  "description": "Capability schema for identity linking. Establishes OAuth 2.0 as the v1 auth mechanism. Businesses declare which capabilities offer buyer-scoped features, and whether buyer identity is required for each, in the capability config.",
+  "$comment": "Auth mechanism: v1 uses business-hosted OAuth 2.0 with RFC 8414 discovery. The 'config' object is open for non-breaking extension. Reserved extension points: 'providers' (map of trusted OAuth identity providers keyed by reverse-domain, enabling delegated IdP and identity chaining); 'mechanisms' (ordered array of mechanism objects with a 'type' discriminator, enabling multi-mechanism negotiation for non-OAuth schemes such as wallet attestation or verifiable credentials). When neither field is present, platforms MUST use OAuth 2.0 with RFC 8414 discovery on the business domain. Platforms MUST ignore unrecognized fields in 'config' and fall back to this default behavior.",
+
+  "$defs": {
+    "capability_identity_config": {
+      "type": "object",
+      "title": "Capability Identity Configuration",
+      "description": "Per-capability identity configuration. Declares whether buyer authentication is required and what sub-scopes govern buyer-authenticated access. When 'scopes' is absent, the capability name itself is the scope token (coarse-grained). When 'scopes' is present, each entry is joined to the capability name with a colon on the wire (e.g., 'dev.ucp.shopping.order:read').",
+      "properties": {
+        "required": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether this capability requires buyer identity. When true, the business returns an 'identity_required' error for requests that arrive without a buyer identity token. When false (default), the capability operates at agent-authenticated access level and buyer identity upgrades the experience (e.g., enabling personalized pricing or saved addresses)."
+        },
+        "scopes": {
+          "type": "array",
+          "description": "Sub-scope identifiers within the capability, defined by the capability's own spec as named operation groups (e.g., 'read', 'manage'). Each entry is joined to the capability name with a colon to form the wire-format scope token. When absent, the capability name alone is the scope.",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "uniqueItems": true,
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "platform_schema": {
+      "title": "Identity Linking (Platform)",
+      "description": "Platform-level identity linking capability declaration. Platforms advertise support for identity linking; no auth-specific config is required in v1. Future versions may extend this schema with 'config.supported_providers' or similar fields to enable provider-preference signaling.",
+      "allOf": [
+        { "$ref": "../capability.json#/$defs/platform_schema" }
+      ]
+    },
+
+    "business_schema": {
+      "title": "Identity Linking (Business)",
+      "description": "Business-level identity linking configuration. Businesses declare which capabilities offer buyer-scoped features and whether buyer identity is required for each.",
+      "allOf": [
+        { "$ref": "../capability.json#/$defs/business_schema" },
+        {
+          "type": "object",
+          "required": ["config"],
+          "properties": {
+            "config": {
+              "type": "object",
+              "$comment": "Reserved extension points for future non-breaking additions: 'providers' (delegated IdP map) and 'mechanisms' (multi-mechanism negotiation array). See schema-level $comment for details.",
+              "required": ["capabilities"],
+              "properties": {
+                "capabilities": {
+                  "type": "object",
+                  "description": "Map of capabilities that offer buyer-scoped features, keyed by capability name (reverse-domain format). Capabilities absent from this map have no buyer-scoped features — they operate at public or agent-authenticated access only. Platforms derive the authorization scope set by intersecting this map with the negotiated capability set.",
+                  "propertyNames": { "$ref": "../shopping/types/reverse_domain_name.json" },
+                  "additionalProperties": { "$ref": "#/$defs/capability_identity_config" }
+                }
+              },
+              "additionalProperties": true
+            }
+          }
+        }
+      ]
+    }
+  }
+}

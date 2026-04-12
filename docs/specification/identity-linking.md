@@ -17,125 +17,370 @@
 # Identity Linking Capability
 
 * **Capability Name:** `dev.ucp.common.identity_linking`
+* **Schema:** `https://ucp.dev/schemas/common/identity_linking.json`
 
 ## Overview
 
-The Identity Linking capability enables a **platform** (e.g., Google, an agentic
-service) to obtain authorization to perform actions on behalf of a user on a
-**business**'s site.
+The Identity Linking capability enables a **platform** to obtain authorization
+to perform actions on behalf of a **buyer** on a **business**'s (relying
+party) site.
 
-This linkage is foundational for commerce experiences, such as accessing
-loyalty benefits, utilizing personalized offers, managing wishlists, and
-executing authenticated checkouts.
+This linkage is foundational for buyer-authenticated commerce experiences: accessing
+loyalty benefits, personalized offers, saved addresses, wishlists, and order
+history. Capabilities without identity linking still operate at public or
+agent-authenticated access levels — identity linking upgrades the experience,
+it does not gate it.
 
-**This specification leverages
-[OAuth 2.0](https://datatracker.ietf.org/doc/html/rfc6749){ target="_blank" }** as the mechanism
-for securely linking a user's platform account with their business account.
+**This specification uses
+[OAuth 2.0](https://datatracker.ietf.org/doc/html/rfc6749){ target="_blank" }**
+as the v1 auth mechanism. The schema is designed for incremental extension:
+future versions will add delegated identity provider support and multi-mechanism
+negotiation without breaking changes to this version (see
+[Future Extensibility](#future-extensibility)).
 
-## General guidelines
+### Participants
 
-(In addition to the overarching guidelines)
+| UCP Role | Identity Role | Description |
+| :------- | :------------ | :---------- |
+| **Platform** | User Agent | Trusted intermediary that initiates identity linking and presents buyer identity tokens to businesses on behalf of the buyer. |
+| **Business** | Authorization Server / Relying Party | Hosts its own OAuth 2.0 authorization server. Authenticates buyers and issues access tokens scoped to UCP capabilities. |
+| **Buyer** | Resource Owner | The person whose identity is being linked. Grants explicit consent to the platform during the OAuth authorization flow. |
 
-### For platforms
+### Access Levels
 
-* **MUST** authenticate using their `client_id` and `client_secret`
-    ([RFC 6749 2.3.1](https://datatracker.ietf.org/doc/html/rfc6749#section-2.3.1){target="_blank"})
-    through HTTP Basic Authentication
-    ([RFC 7617](https://datatracker.ietf.org/doc/html/rfc7617){target="_blank"})
-    when exchanging codes for tokens.
-    * **MAY** support Client Metadata
-    * **MAY** support Dynamic Client Registration mechanisms to supersede
-        static credential exchange.
-* The platform must include the token in the HTTP Authorization header using
-    the Bearer schema (`Authorization: Bearer <access_token>`)
+Identity linking upgrades capabilities to buyer-authenticated access.
+Capabilities are **never** excluded from negotiation based on the presence or
+absence of identity linking.
+
+| Level | Authentication | Example |
+| :---- | :------------- | :------ |
+| **Public** | None | Browse a public catalog |
+| **Agent-authenticated** | Platform credentials (`client_id` / `client_secret`) | Guest checkout, create a cart |
+| **Buyer-authenticated** | Platform credentials + buyer identity token | Saved addresses, full order history, personalized pricing |
+
+## General Guidelines
+
+### For Platforms
+
+* **MUST** authenticate using `client_id` and `client_secret`
+    ([RFC 6749 §2.3.1](https://datatracker.ietf.org/doc/html/rfc6749#section-2.3.1){ target="_blank" })
+    via HTTP Basic Authentication
+    ([RFC 7617](https://datatracker.ietf.org/doc/html/rfc7617){ target="_blank" })
+    when exchanging authorization codes for tokens.
+* **MUST** include buyer identity tokens in the HTTP `Authorization` header
+    using the Bearer scheme: `Authorization: Bearer <access_token>`.
 * **MUST** implement the OAuth 2.0 Authorization Code flow
-    ([RFC 6749 4.1](https://datatracker.ietf.org/doc/html/rfc6749#section-4.1){target="_blank"})
-    as the primary linking mechanism.
-* **SHOULD** include a unique, unguessable state parameter in the
-    authorization request to prevent Cross-Site Request Forgery (CSRF)
-    ([RFC 6749 10.12](https://datatracker.ietf.org/doc/html/rfc6749#section-10.12){target="_blank"})
-    (part of
-    [OAuth 2.1 draft](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-14#name-preventing-csrf-attacks){target="_blank"})
-    .
-* Revocation and security events
-    * **SHOULD** call the business's revocation endpoint
-        ([RFC 7009](https://datatracker.ietf.org/doc/html/rfc7009){target="_blank"}) when a user
-        initiates an unlink action on the platform side.
+    ([RFC 6749 §4.1](https://datatracker.ietf.org/doc/html/rfc6749#section-4.1){ target="_blank" })
+    as the account linking mechanism.
+* **MUST** use PKCE
+    ([RFC 7636](https://datatracker.ietf.org/doc/html/rfc7636){ target="_blank" })
+    with `code_challenge_method=S256` for all authorization code exchanges.
+* **MUST** validate the `iss` parameter in the authorization response
+    ([RFC 9207](https://datatracker.ietf.org/doc/html/rfc9207){ target="_blank" })
+    to prevent Mix-Up Attacks. If `iss` is present and does not match the
+    authorization server's issuer URI (as declared in its RFC 8414 metadata),
+    the platform **MUST** abort and discard the authorization response.
+* **SHOULD** include a unique, unguessable `state` parameter in the
+    authorization request to prevent CSRF
+    ([RFC 6749 §10.12](https://datatracker.ietf.org/doc/html/rfc6749#section-10.12){ target="_blank" }).
+* Revocation and security events:
+    * **MUST** call the business's token revocation endpoint
+        ([RFC 7009](https://datatracker.ietf.org/doc/html/rfc7009){ target="_blank" })
+        when a buyer initiates an unlink action on the platform side.
     * **SHOULD** support
-        [OpenID RISC Profile 1.0](https://openid.net/specs/openid-risc-1_0-final.html)
-        to handle asynchronous account updates, unlinking events, and
-        cross-account protection.
+        [OpenID RISC Profile 1.0](https://openid.net/specs/openid-risc-1_0-final.html){ target="_blank" }
+        to handle asynchronous account updates and cross-account protection
+        events initiated by the business.
 
-### For businesses
+### For Businesses
 
 * **MUST** implement OAuth 2.0
-    ([RFC 6749](https://datatracker.ietf.org/doc/html/rfc6749))
-* **MUST** adhere to [RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414) to
-    declare the location of their OAuth 2.0 endpoints
-    (`/.well-known/oauth-authorization-server`)
-    * **SHOULD** implement
-        [RFC 9728](https://datatracker.ietf.org/doc/html/rfc9728/) (HTTP
-        Resource Metadata) to allow platforms to discover the Authorization
-        Server associated with specific resources.
-    * **SHOULD** fill in `scopes_supported` as part of
-        [RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414).
-* **MUST** enforce Client Authentication at the Token Endpoint.
-* **MUST** provide an account creation flow if the user does not already have
-    an account.
-* **MUST** support standard UCP scopes, as defined in the Scopes section,
-    granting the tokens permission to all associated Operations for a given
-    resource.
-* Additional permissions **MAY** be granted beyond those explicitly requested,
-    provided that the requested scopes are, at minimum, included.
-* The platform and business **MAY** define additional custom scopes beyond the
-    minimum scope requirements.
-* Revocation and security events
-    * **MUST** implement standard Token Revocation as defined in
-        [RFC 7009](https://datatracker.ietf.org/doc/html/rfc7009).
-    * **MUST** revoke the specified token and **SHOULD** recursively revoke
-        all associated tokens (e.g., revoking a `refresh_token` **MUST** also
-        immediately revoke all active `access_token`s issued from it).
-    * **MUST** support revocation requests authenticated with the same client
-        credentials used for the token endpoint.
-    * **SHOULD** support
-        [OpenID RISC Profile 1.0](https://openid.net/specs/openid-risc-1_0-final.html)
-        to enable Cross-Account Protection and securely signal revocation or
-        account state changes initiated by the business side.
-        ([See Cross-Account protection](https://developers.google.com/identity/account-linking/unlinking#cross-account_protection_risc))
+    ([RFC 6749](https://datatracker.ietf.org/doc/html/rfc6749){ target="_blank" }).
+* **MUST** publish authorization server metadata via
+    [RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414){ target="_blank" }
+    at `/.well-known/oauth-authorization-server`.
+* **MUST** populate `scopes_supported` in RFC 8414 metadata to allow platforms
+    to detect scope mismatches before initiating an authorization flow.
+* **MUST** return the `iss` parameter in the authorization response
+    ([RFC 9207](https://datatracker.ietf.org/doc/html/rfc9207){ target="_blank" }).
+* **MUST** enforce PKCE
+    ([RFC 7636](https://datatracker.ietf.org/doc/html/rfc7636){ target="_blank" })
+    validation at the token endpoint for all authorization code exchanges.
+    Requests without a valid `code_verifier` **MUST** be rejected.
+* **MUST** enforce exact string matching for the `redirect_uri` parameter
+    during authorization requests to prevent open redirects and token theft.
+    The `redirect_uri` in the token request **MUST** be identical to the one
+    in the authorization request.
+* **MUST** enforce client authentication at the token endpoint.
+* **MUST** implement token revocation
+    ([RFC 7009](https://datatracker.ietf.org/doc/html/rfc7009){ target="_blank" }).
+    Revoking a `refresh_token` **MUST** also immediately invalidate all
+    `access_token`s issued from it.
+* **MUST** support revocation requests authenticated with the same client
+    credentials used at the token endpoint.
+* **SHOULD** provide an account creation flow if the buyer does not already have
+    an account, or return a `continue_url` in an `identity_required` error
+    response (see [Error Handling](#error-handling)) pointing to an onboarding
+    flow.
+* **MUST** support standard UCP scopes as defined in the
+    [Scopes](#scopes) section.
+* **SHOULD** implement
+    [RFC 9728](https://datatracker.ietf.org/doc/html/rfc9728/){ target="_blank" }
+    (HTTP Resource Metadata) to allow platforms to discover the authorization
+    server associated with specific resources.
+* **SHOULD** support
+    [OpenID RISC Profile 1.0](https://openid.net/specs/openid-risc-1_0-final.html){ target="_blank" }
+    to signal revocation and account state changes to platforms.
+
+## Discovery
+
+Platforms resolve business authorization server metadata using the following
+**strict two-tier hierarchy**. The issuer URI used as the discovery base is
+the business's domain as declared in its UCP profile.
+
+1. **RFC 8414 (Primary):** Fetch
+   `{business-domain}/.well-known/oauth-authorization-server`.
+    * `2xx` response: use this metadata. Discovery complete.
+    * `404 Not Found`: proceed to step 2.
+    * Any other non-2xx response, network error, or timeout: **MUST** abort.
+      **MUST NOT** proceed to step 2.
+
+2. **OIDC Discovery (Fallback):** Fetch
+   `{business-domain}/.well-known/openid-configuration`.
+    * `2xx` response: use this metadata. Discovery complete.
+    * Any non-2xx response, network error, or timeout: **MUST** abort the
+      identity linking process.
+
+Platforms **MUST NOT** silently fall through on any error other than `404` in
+step 1. This prevents partial or undefined behavior when a server is
+misconfigured or temporarily unavailable.
+
+The `issuer` value in the discovered metadata **MUST** match the discovery
+base URI exactly (per
+[RFC 8414 §3.3](https://datatracker.ietf.org/doc/html/rfc8414#section-3.3){ target="_blank" }).
+Platforms **MUST NOT** normalize (e.g., strip trailing slashes) before
+comparison — the value must be a byte-for-byte match.
+
+## Account Linking Flow
+
+Identity linking uses the OAuth 2.0 Authorization Code flow with PKCE.
+
+```text
+Platform                              Business AS
+   |                                       |
+   |-- (1) Discover metadata via RFC 8414 -->|
+   |<-- authorization_endpoint, token_endpoint, scopes_supported --|
+   |                                       |
+   |-- (2) Authorization Request --------->|
+   |       response_type=code              |
+   |       client_id, redirect_uri         |
+   |       scope=<derived scope set>       |
+   |       code_challenge (S256)           |
+   |       state                           |
+   |                                       |
+   |       [buyer authenticates and        |
+   |        grants consent at business]    |
+   |                                       |
+   |<-- (3) Authorization Response --------|
+   |       code, state, iss                |
+   |                                       |
+   |  Validate: state matches, iss matches |
+   |  discovered issuer URI                |
+   |                                       |
+   |-- (4) Token Request ----------------->|
+   |       grant_type=authorization_code   |
+   |       code, redirect_uri              |
+   |       code_verifier                   |
+   |       client_id (Basic Auth)          |
+   |                                       |
+   |<-- (5) Token Response ----------------|
+   |       access_token, refresh_token     |
+   |       token_type=Bearer, scope        |
+```
+
+**Step 2 — Scope set:** Platforms derive the authorization scope set from the
+business's `config.capabilities` map (see
+[Scope Derivation](#scope-derivation)).
+Platforms **MUST** request only the derived scope set — not a superset.
+
+**Step 3 — Validation:** The platform **MUST** verify that the `state`
+parameter matches the value sent in step 2, and that the `iss` parameter
+(if present) matches the authorization server's `issuer` URI from discovered
+metadata. If either check fails, the platform **MUST** discard the
+authorization response.
+
+**Step 4 — PKCE:** The `code_verifier` **MUST** correspond to the
+`code_challenge` sent in step 2. Businesses **MUST** reject token requests
+where `code_verifier` is absent or does not verify against the stored
+`code_challenge`.
 
 ## Scopes
 
-We'd ask users to authorize the platform to have access to all the scopes that
-could be required for UCP, regardless of whether the business supports them.
+Scopes define the permissions an identified buyer grants to a platform for a
+given capability. Whether a capability requires buyer authentication — and what
+scopes govern buyer-scoped access — is a **business decision** declared in the
+identity linking capability config. The same capability may require buyer auth
+at one business and serve public requests at another.
 
-### Structure
+### Scope Naming
 
-The scope complexity should be hidden in the consent screen shown to the user:
-they shouldn't see one row for each action, but rather a general one, for
-example "Allow \[platform\] to manage checkout sessions".
+Scope tokens use the **capability name** directly as the scope identifier,
+reusing UCP's existing reverse-DNS naming for global uniqueness and eliminating
+a separate scope namespace:
 
-### Mapping between resources, actions and capabilities
+* **Coarse-grained** (no sub-scopes): the capability name is the scope.
+  Example: `dev.ucp.shopping.checkout`
+* **Fine-grained** (sub-scopes): the capability name with a colon-separated
+  operation group. Example: `dev.ucp.shopping.order:read`,
+  `dev.ucp.shopping.order:manage`
 
-Resources       | Operation                  | Scope Action
-:-------------- | :------------------------- | :----------------------------
-CheckoutSession | Get                        | `ucp:scopes:checkout_session`
-CheckoutSession | Create                     | `ucp:scopes:checkout_session`
-CheckoutSession | Update                     | `ucp:scopes:checkout_session`
-CheckoutSession | Delete                     | `ucp:scopes:checkout_session`
-CheckoutSession | Cancel                     | `ucp:scopes:checkout_session`
-CheckoutSession | Complete                   | `ucp:scopes:checkout_session`
+Sub-scope names are defined by each capability's own specification as named
+**operation groups** — logical groupings of operations (e.g., `read` = Get /
+List, `manage` = Cancel / Return). Each capability defines its own operation
+group names. Sub-scope tokens **MUST** match the pattern `^[a-z][a-z0-9_]*$`.
 
-A scope covering a capability must grant access to all operations associated to
-the capability. For example, ucp:scopes:checkout\_session must grant all of:
-Get, Create, Update, Delete, Cancel, Complete.
+Third-party capabilities follow the same convention using their own reverse-DNS
+name: `com.example.loyalty:points`.
+
+### Capability Scope Configuration
+
+Businesses declare per-capability identity requirements in
+`config.capabilities` of their `dev.ucp.common.identity_linking` entry:
+
+| Field | Type | Default | Description |
+| :---- | :--- | :------ | :---------- |
+| *(entry absent)* | — | — | No buyer-scoped features. Capability operates at public or agent-authenticated access only. |
+| `required` | boolean | `false` | When `true`, business returns `identity_required` for requests without a buyer identity token. When `false`, buyer identity upgrades the experience. |
+| `scopes` | string[] | *(absent)* | Sub-scope operation groups offered by this capability. When absent, the capability name is the scope. |
+
+### Scope Derivation
+
+Platforms derive the authorization scope set from the business's identity
+linking config before initiating the account linking flow:
+
+1. Read `config.capabilities` from the business's
+   `dev.ucp.common.identity_linking` capability entry.
+2. Intersect the map keys with the negotiated capability set — ignore entries
+   for capabilities not present in the intersection.
+3. For each remaining entry: if `scopes` is present, expand each sub-scope to
+   `<capability-name>:<sub-scope>`; if absent, use the capability name alone.
+4. The union of all expanded scope tokens is the authorization scope set.
+
+If the derived scope set is empty (no capabilities in the intersection appear
+in `config.capabilities`), the platform **SHOULD** skip the identity linking
+flow — there are no buyer-scoped features to authorize for this business.
+
+### Consent Presentation
+
+Consent screens are rendered by the business's authorization server. This
+specification does not define scope description strings — the authorization
+server is responsible for presenting human-readable consent text for the
+scopes it supports. Consent screens **SHOULD** group scopes by capability
+rather than listing individual operations: for example, "Allow [platform] to
+view your order history".
+
+## Error Handling
+
+### `identity_required`
+
+When a capability is configured with `required: true` and a request arrives
+without a valid buyer identity token, the business **MUST** return a UCP error
+response containing a message with `code: "identity_required"`.
+
+The business **MAY** include a `continue_url` in the response body, pointing to
+a URL where the buyer can complete account creation or onboarding (e.g., terms
+acceptance). After the buyer completes the onboarding flow, the platform retries
+account linking.
+
+```json
+{
+  "messages": [
+    {
+      "type": "error",
+      "code": "identity_required",
+      "content": "Buyer identity is required to access order history.",
+      "severity": "requires_buyer_review"
+    }
+  ],
+  "continue_url": "https://merchant.example.com/onboarding?return_to=..."
+}
+```
+
+## Security Considerations
+
+* **PKCE.** PKCE (`S256`) is REQUIRED for all authorization code flows.
+  Plain PKCE (`plain`) **MUST NOT** be used. Businesses **MUST** reject
+  authorization code exchanges without a valid `code_verifier`.
+* **Mix-Up Attack prevention.** Platforms **MUST** validate the `iss`
+  parameter in the authorization response (RFC 9207). Businesses **MUST**
+  return `iss` in every authorization response. Without `iss` validation,
+  an attacker that controls one authorization server can redirect a
+  victim's authorization code to a different server.
+* **`redirect_uri` exactness.** Businesses **MUST** enforce exact string
+  matching for `redirect_uri`. Partial-match or prefix-match implementations
+  are a common source of open redirect and token theft vulnerabilities.
+* **`issuer` exactness.** The `issuer` value in RFC 8414 metadata and the
+  `iss` parameter in authorization responses **MUST** be identical
+  (byte-for-byte). Platforms **MUST NOT** normalize before comparison.
+  Normalization (e.g., stripping trailing slashes) is a known source of
+  `iss` validation bypass.
+* **Transport security.** All communication between platform and business
+  **MUST** use HTTPS with a minimum of TLS 1.2
+  ([RFC 6749 §1.6](https://datatracker.ietf.org/doc/html/rfc6749#section-1.6){ target="_blank" }).
+* **`scopes_supported`.** Businesses **MUST** populate `scopes_supported` in
+  RFC 8414 metadata. Platforms **SHOULD** verify that the derived scope set is
+  a subset of `scopes_supported` before initiating the authorization flow, to
+  fail fast on scope mismatches rather than at the consent screen.
+* **Token revocation.** Platforms **MUST** revoke buyer identity tokens at the
+  business's revocation endpoint (RFC 7009) when a buyer unlinks their account.
+  Businesses **MUST** reject subsequent requests that present revoked tokens.
+
+## Future Extensibility
+
+This specification intentionally scopes v1 to business-hosted OAuth 2.0.
+The schema and protocol are designed to accommodate two additional auth
+patterns as non-breaking extensions in future versions:
+
+### Delegated Identity Providers (`config.providers`)
+
+A future version will allow businesses to declare trusted external OAuth
+identity providers (e.g., `com.google`, `com.shopify`) in a `config.providers`
+map, keyed by reverse-domain identifier. Platforms that have already
+established an OAuth session with a trusted provider can present a
+JWT-based authorization grant to the business's token endpoint instead of
+initiating a new browser-based OAuth flow — useful for multi-merchant agentic
+commerce where N merchants should not require N separate consent screens.
+
+When `config.providers` is present, the platform uses the provider selection
+and identity chaining flows defined in that version. When `config.providers` is
+absent (as in v1), platforms **MUST** fall back to direct OAuth 2.0 against the
+business domain via RFC 8414 discovery.
+
+### Multi-Mechanism Negotiation (`config.mechanisms`)
+
+A future version will allow businesses to declare support for non-OAuth
+authentication mechanisms (e.g., wallet attestation, verifiable credentials)
+via a `config.mechanisms` array. Each entry will carry a `type` discriminator
+and mechanism-specific fields. Platforms will select the first entry whose
+`type` they support, using business-preference ordering — analogous to TLS
+cipher suite negotiation.
+
+When `config.mechanisms` is present, platforms use the mechanism selection
+algorithm defined in that version. When absent (as in v1), platforms **MUST**
+treat OAuth 2.0 as the implicit mechanism.
+
+**Forward-compatibility rule for platforms:** When `config` contains fields
+not defined in this version of the spec (`providers`, `mechanisms`, or any
+other future field), platforms **MUST** ignore those fields and proceed using
+OAuth 2.0 with RFC 8414 discovery on the business domain, as defined here.
+This ensures v1 platform implementations remain valid as the spec evolves.
 
 ## Examples
 
-### Authorization server metadata
+### Authorization Server Metadata
 
-Example of [metadata](https://datatracker.ietf.org/doc/html/rfc8414#section-2){target="_blank"}
-supposed to be hosted in /.well-known/oauth-authorization-server as per
-[RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414){target="_blank"}:
+Example metadata hosted at `/.well-known/oauth-authorization-server` per
+[RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414){ target="_blank" }:
 
 ```json
 {
@@ -143,19 +388,139 @@ supposed to be hosted in /.well-known/oauth-authorization-server as per
   "authorization_endpoint": "https://merchant.example.com/oauth2/authorize",
   "token_endpoint": "https://merchant.example.com/oauth2/token",
   "revocation_endpoint": "https://merchant.example.com/oauth2/revoke",
+  "jwks_uri": "https://merchant.example.com/oauth2/jwks",
   "scopes_supported": [
-    "ucp:scopes:checkout_session",
+    "dev.ucp.shopping.checkout",
+    "dev.ucp.shopping.order:read",
+    "dev.ucp.shopping.order:manage"
   ],
-  "response_types_supported": [
-    "code"
-  ],
-  "grant_types_supported": [
-    "authorization_code",
-    "refresh_token"
-  ],
-  "token_endpoint_auth_methods_supported": [
-    "client_secret_basic"
-  ],
+  "response_types_supported": ["code"],
+  "grant_types_supported": ["authorization_code", "refresh_token"],
+  "code_challenge_methods_supported": ["S256"],
+  "token_endpoint_auth_methods_supported": ["client_secret_basic"],
+  "authorization_response_iss_parameter_supported": true,
   "service_documentation": "https://merchant.example.com/docs/oauth2"
 }
 ```
+
+Note: `authorization_response_iss_parameter_supported: true` advertises
+RFC 9207 support. `code_challenge_methods_supported: ["S256"]` signals PKCE.
+Both **MUST** be present in UCP-compliant metadata.
+
+### Business Profile (`/.well-known/ucp`)
+
+A business that requires buyer identity for order management but serves
+checkout without it:
+
+```json
+{
+  "ucp": {
+    "capabilities": {
+      "dev.ucp.common.identity_linking": [{
+        "version": "Working Draft",
+        "spec": "https://ucp.dev/specification/identity-linking",
+        "schema": "https://ucp.dev/schemas/common/identity_linking.json",
+        "config": {
+          "capabilities": {
+            "dev.ucp.shopping.checkout": {},
+            "dev.ucp.shopping.order": {
+              "required": true,
+              "scopes": ["read", "manage"]
+            }
+          }
+        }
+      }]
+    }
+  }
+}
+```
+
+**Reading this config:**
+
+* `dev.ucp.shopping.checkout`: present in the map, no `required` flag
+  (defaults to `false`) → buyer identity upgrades the experience
+  (e.g., pre-filled address) but is not required. Scope token: `dev.ucp.shopping.checkout`.
+* `dev.ucp.shopping.order`: `required: true` → business returns
+  `identity_required` without a buyer token. Scope tokens:
+  `dev.ucp.shopping.order:read`, `dev.ucp.shopping.order:manage`.
+* Any capability not listed (e.g., `dev.ucp.shopping.cart`) → no
+  buyer-scoped features; operates at public / agent-authenticated level only.
+
+### End-to-End Walkthrough
+
+**Setup:** Platform (AI shopping agent) + Business (merchant with checkout
+and order capabilities).
+
+**Negotiated capabilities:** `dev.ucp.shopping.checkout`,
+`dev.ucp.shopping.order`, `dev.ucp.common.identity_linking`.
+
+**Step 1 — Scope derivation.** Platform reads business's
+`config.capabilities`:
+
+* `dev.ucp.shopping.checkout` → scope: `dev.ucp.shopping.checkout`
+* `dev.ucp.shopping.order` (scopes: `["read", "manage"]`) → scopes:
+  `dev.ucp.shopping.order:read`, `dev.ucp.shopping.order:manage`
+
+Derived scope set: `dev.ucp.shopping.checkout dev.ucp.shopping.order:read dev.ucp.shopping.order:manage`
+
+**Step 2 — Discovery.** Platform fetches
+`https://merchant.example.com/.well-known/oauth-authorization-server`,
+receives `2xx`, extracts `authorization_endpoint` and `token_endpoint`.
+Verifies `dev.ucp.shopping.order:read` is in `scopes_supported`.
+
+**Step 3 — Authorization request.** Platform generates PKCE pair
+(`code_verifier`, `code_challenge`), sends the buyer to:
+
+```text
+GET https://merchant.example.com/oauth2/authorize
+  ?response_type=code
+  &client_id=platform-client-id
+  &redirect_uri=https://agent.example.com/callback
+  &scope=dev.ucp.shopping.checkout dev.ucp.shopping.order:read dev.ucp.shopping.order:manage
+  &code_challenge=<S256-hash>
+  &code_challenge_method=S256
+  &state=<random>
+```
+
+Reserved characters in `redirect_uri` and `:` in scope tokens must be
+percent-encoded in the actual request; they are shown decoded here for readability.
+
+**Step 4 — Authorization response.** Buyer authenticates and consents.
+Business redirects to:
+
+```text
+https://agent.example.com/callback
+  ?code=<auth-code>
+  &state=<random>
+  &iss=https://merchant.example.com
+```
+
+Platform validates `state` matches and `iss` equals the discovered `issuer`.
+
+**Step 5 — Token exchange.** Platform calls token endpoint:
+
+```http
+POST https://merchant.example.com/oauth2/token
+Authorization: Basic <base64(client_id:client_secret)>
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=authorization_code
+&code=<auth-code>
+&redirect_uri=https://agent.example.com/callback
+&code_verifier=<verifier>
+```
+
+Business validates `code_verifier` against stored `code_challenge`, returns:
+
+```json
+{
+  "access_token": "<token>",
+  "token_type": "Bearer",
+  "expires_in": 3600,
+  "refresh_token": "<refresh>",
+  "scope": "dev.ucp.shopping.checkout dev.ucp.shopping.order:read dev.ucp.shopping.order:manage"
+}
+```
+
+Platform now includes `Authorization: Bearer <token>` on subsequent requests
+to buyer-authenticated capability endpoints.
