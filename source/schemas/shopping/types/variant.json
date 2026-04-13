@@ -117,12 +117,12 @@
         }
       }
     },
-    "selected_options": {
+    "options": {
       "type": "array",
       "items": {
         "$ref": "selected_option.json"
       },
-      "description": "Option selections that define this variant."
+      "description": "Option values that define this variant (e.g., Color: Blue, Size: Large)."
     },
     "media": {
       "type": "array",
