@@ -13,7 +13,7 @@
       "title": "Capability Identity Configuration",
       "description": "Per-capability identity configuration. Declares whether buyer authentication is required and what sub-scopes govern buyer-authenticated access. When 'scopes' is absent, the capability name itself is the scope token (coarse-grained). When 'scopes' is present, each entry is joined to the capability name with a colon on the wire (e.g., 'dev.ucp.shopping.order:read').",
       "properties": {
-        "required": {
+        "auth_required": {
           "type": "boolean",
           "default": false,
           "description": "Whether this capability requires buyer identity. When true, the business returns an 'identity_required' error for requests that arrive without a buyer identity token. When false (default), the capability operates at agent-authenticated access level and buyer identity upgrades the experience (e.g., enabling personalized pricing or saved addresses)."

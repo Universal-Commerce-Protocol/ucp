@@ -250,7 +250,7 @@ Businesses declare per-capability identity requirements in
 | Field | Type | Default | Description |
 | :---- | :--- | :------ | :---------- |
 | *(entry absent)* | — | — | No buyer-scoped features. Capability operates at public or agent-authenticated access only. |
-| `required` | boolean | `false` | When `true`, business returns `identity_required` for requests without a buyer identity token. When `false`, buyer identity upgrades the experience. |
+| `auth_required` | boolean | `false` | When `true`, business returns `identity_required` for requests without a buyer identity token. When `false`, buyer identity upgrades the experience. |
 | `scopes` | string[] | *(absent)* | Sub-scope operation groups offered by this capability. When absent, the capability name is the scope. |
 
 ### Scope Derivation
@@ -283,7 +283,7 @@ view your order history".
 
 ### `identity_required`
 
-When a capability is configured with `required: true` and a request arrives
+When a capability is configured with `auth_required: true` and a request arrives
 without a valid buyer identity token, the business **MUST** return a UCP error
 response containing a message with `code: "identity_required"`.
 
@@ -424,7 +424,7 @@ checkout without it:
           "capabilities": {
             "dev.ucp.shopping.checkout": {},
             "dev.ucp.shopping.order": {
-              "required": true,
+              "auth_required": true,
               "scopes": ["read", "manage"]
             }
           }
@@ -437,10 +437,10 @@ checkout without it:
 
 **Reading this config:**
 
-* `dev.ucp.shopping.checkout`: present in the map, no `required` flag
+* `dev.ucp.shopping.checkout`: present in the map, no `auth_required` flag
   (defaults to `false`) → buyer identity upgrades the experience
   (e.g., pre-filled address) but is not required. Scope token: `dev.ucp.shopping.checkout`.
-* `dev.ucp.shopping.order`: `required: true` → business returns
+* `dev.ucp.shopping.order`: `auth_required: true` → business returns
   `identity_required` without a buyer token. Scope tokens:
   `dev.ucp.shopping.order:read`, `dev.ucp.shopping.order:manage`.
 * Any capability not listed (e.g., `dev.ucp.shopping.cart`) → no
