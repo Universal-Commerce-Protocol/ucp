@@ -1,0 +1,49 @@
+name: Auto Label Merged PRs
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+      - "release/**"
+
+jobs:
+  label_prs:
+    runs-on: ubuntu-latest
+
+    if: github.event.pull_request.merged == true
+
+    permissions:
+      pull-requests: write
+
+    steps:
+      - name: Apply labels based on Conventional Commits
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = context.payload.pull_request.title.toLowerCase();
+            const prNumber = context.payload.pull_request.number;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            let labelsToAdd = [];
+
+            // The Regex checks: Starts with type (^type), optional scope (\([^)]+\))?, optional bang (!?), and a colon (:)
+            if (/^feat(\([^)]+\))?!?:/.test(title)) {
+              labelsToAdd.push('enhancement');
+            } else if (/^docs(\([^)]+\))?!?:/.test(title)) {
+              labelsToAdd.push('documentation');
+            }
+
+            if (labelsToAdd.length > 0) {
+              console.log(`Adding labels: ${labelsToAdd} to merged PR #${prNumber}`);
+              
+              await github.rest.issues.addLabels({
+                owner: owner,
+                repo: repo,
+                issue_number: prNumber,
+                labels: labelsToAdd
+              });
+            } else {
+              console.log('No matching Conventional Commit prefix found. No labels added.');
+            }
