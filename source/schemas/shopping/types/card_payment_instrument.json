@@ -24,6 +24,18 @@
                   "minItems": 1,
                   "uniqueItems": true,
                   "description": "Limit to specific card brands (e.g., ['visa', 'mastercard', 'amex'])."
+                },
+                "requires_card_verification": {
+                  "type": "boolean",
+                  "description": "When true, the handler requires card verification data. For FPAN: CVC. For network tokens: cryptogram and ECI."
+                },
+                "requires_billing_address": {
+                  "type": "boolean",
+                  "description": "When true, the handler requires a billing address on the instrument."
+                },
+                "requires_billing_postal_code": {
+                  "type": "boolean",
+                  "description": "When true, the handler requires a billing postal code for AVS verification. Ignored when requires_billing_address is true."
                 }
               }
             }
