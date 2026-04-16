@@ -405,7 +405,7 @@ Accept: application/json</pre>
  * ------------------------------------------------------------------
  */
 const UcpData = {
-  version: "2026-01-11",
+  version: "{{ ucp_version }}",
 
   inventory: {
     "sku_stickers": { title: "UCP Demo Sticker Pack", price: 599, image_url: "https://example.com/images/stickers.jpg" },
@@ -416,7 +416,7 @@ const UcpData = {
     "com.shopify.shop_pay": [
       {
         id: "shop_pay",
-        version: "2026-01-11",
+        version: "{{ ucp_version }}",
         spec: "https://shopify.dev/docs/agents/checkout/shop-pay-handler",
         config_schema: "https://shopify.dev/ucp/shop-pay-handler/2026-01-11/config.json",
         instrument_schemas: ["https://shopify.dev/ucp/shop-pay-handler/2026-01-11/instrument.json"],
@@ -426,7 +426,7 @@ const UcpData = {
     "com.google.pay": [
       {
         id: "gpay",
-        version: "2026-01-11",
+        version: "{{ ucp_version }}",
         spec: "https://pay.google.com/gp/p/ucp/2026-01-11/",
         config_schema: "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/config.json",
         instrument_schemas: [
