@@ -409,6 +409,7 @@
           { "$ref": "#/components/parameters/idempotency_key" },
           { "$ref": "#/components/parameters/request_id" },
           { "$ref": "#/components/parameters/user_agent" },
+          { "$ref": "#/components/parameters/ucp_agent" },
           { "$ref": "#/components/parameters/content_type" },
           { "$ref": "#/components/parameters/accept" },
           { "$ref": "#/components/parameters/accept_language" },
