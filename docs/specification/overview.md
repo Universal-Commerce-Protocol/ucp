@@ -353,7 +353,7 @@ Platforms **MUST** resolve schemas following this sequence:
 
 Businesses publish their profile at `/.well-known/ucp`. An example:
 
-<!-- ucp:example skip reason="business profile structure" -->
+<!-- ucp:example skip reason="profile document, no wrapper schema" -->
 ```json
 {
   "ucp": {
@@ -486,7 +486,7 @@ requiring cryptographic verification. Capabilities **MAY** include a `config`
 object for capability-specific settings (e.g., callback URLs, feature flags). An
 example:
 
-<!-- ucp:example skip reason="platform profile structure" -->
+<!-- ucp:example skip reason="profile document, no wrapper schema" -->
 ```json
 {
   "ucp": {
@@ -1233,7 +1233,7 @@ an encrypted payment token.
 
 ##### 1. Business Advertisement (Response from Create Checkout)
 
-<!-- ucp:example skip reason="payment handler advertisement" -->
+<!-- ucp:example skip reason="profile document, no wrapper schema" -->
 ```json
 {
   "ucp": {
@@ -1298,7 +1298,7 @@ respective handler API. The handler returns the encrypted token data.
 
 The Platform wraps the payment handler response into a payment instrument.
 
-<!-- ucp:example skip reason="handler-specific payment credential" -->
+<!-- ucp:example schema=shopping/checkout op=complete direction=request -->
 ```json
 POST /checkout-sessions/{id}/complete
 
@@ -1347,7 +1347,7 @@ request a challenge.
 
 ##### 1. Business Advertisement
 
-<!-- ucp:example skip reason="payment handler advertisement" -->
+<!-- ucp:example skip reason="profile document, no wrapper schema" -->
 ```json
 {
   "ucp": {
@@ -1385,7 +1385,7 @@ previous legal binding connection with them and receives `tok_visa_123`
 
 ##### 3. Complete Checkout (Request to Business)
 
-<!-- ucp:example skip reason="handler-specific payment credential" -->
+<!-- ucp:example skip reason="invalid JSON, contains comments" -->
 ```json
 POST /checkout-sessions/{id}/complete
 
@@ -1436,7 +1436,7 @@ session token, the agent generates cryptographic mandates.
 
 ##### 1. Business Advertisement
 
-<!-- ucp:example skip reason="payment handler advertisement" -->
+<!-- ucp:example skip reason="profile document, no wrapper schema" -->
 ```json
 {
   "ucp": {
@@ -1464,7 +1464,7 @@ non-agentic surface.
 
 ##### 3. Complete Checkout
 
-<!-- ucp:example skip reason="handler-specific payment credential" -->
+<!-- ucp:example skip reason="invalid JSON, contains comments" -->
 ```json
 POST /checkout-sessions/{id}/complete
 
@@ -1843,7 +1843,7 @@ Both businesses and platforms declare a single version in their profiles:
 
 === "Business Profile"
 
-    <!-- ucp:example skip reason="profile version fragment" -->
+    <!-- ucp:example skip reason="profile document, no wrapper schema" -->
     ```json
     {
       "ucp": {
@@ -1857,7 +1857,7 @@ Both businesses and platforms declare a single version in their profiles:
 
 === "Platform Profile"
 
-    <!-- ucp:example skip reason="profile version fragment" -->
+    <!-- ucp:example skip reason="profile document, no wrapper schema" -->
     ```json
     {
       "ucp": {
@@ -1893,7 +1893,7 @@ version — including its own capabilities, services, payment handlers,
 and signing keys. When `supported_versions` is omitted, only
 `version` is supported.
 
-<!-- ucp:example skip reason="profile version fragment" -->
+<!-- ucp:example skip reason="profile document, no wrapper schema" -->
 ```json
 {
   "ucp": {
