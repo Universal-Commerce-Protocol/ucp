@@ -116,6 +116,7 @@ Converts a raw credential into a token bound to a checkout and identity.
 **When to implement:** Always, unless you are an agent generating tokens
 internally.
 
+<!-- ucp:example skip reason="tokenization API, not UCP payload" -->
 ```json
 POST /tokenize
 Content-Type: application/json
@@ -140,6 +141,7 @@ Content-Type: application/json
 
 **Response:**
 
+<!-- ucp:example skip reason="tokenization API, not UCP payload" -->
 ```json
 {
   "token": "tok_abc123xyz789"
@@ -153,6 +155,7 @@ Returns the original credential for a valid token. Binding must match.
 **When to implement:** Always, unless you combine detokenization with
 processing (see PSP example).
 
+<!-- ucp:example skip reason="tokenization API, not UCP payload" -->
 ```json
 POST /detokenize
 Content-Type: application/json
@@ -168,6 +171,7 @@ Authorization: Bearer {caller_access_token}
 
 **Response:**
 
+<!-- ucp:example skip reason="tokenization API, not UCP payload" -->
 ```json
 {
   "type": "card",

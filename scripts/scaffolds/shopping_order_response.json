@@ -1,0 +1,27 @@
+{
+  "ucp": {
+    "version": "2026-01-01",
+    "status": "success"
+  },
+  "id": "order_scaffold",
+  "checkout_id": "chk_scaffold",
+  "permalink_url": "https://example.com/orders/scaffold",
+  "currency": "USD",
+  "line_items": [
+    {
+      "id": "li_scaffold",
+      "item": { "id": "item_scaffold", "title": "Scaffold Item", "price": 1000 },
+      "quantity": { "original": 1, "total": 1, "fulfilled": 0 },
+      "totals": [
+        { "type": "subtotal", "amount": 1000 },
+        { "type": "total", "amount": 1000 }
+      ],
+      "status": "processing"
+    }
+  ],
+  "fulfillment": {},
+  "totals": [
+    { "type": "subtotal", "amount": 1000 },
+    { "type": "total", "amount": 1000 }
+  ]
+}

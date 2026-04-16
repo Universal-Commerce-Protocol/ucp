@@ -90,6 +90,7 @@ profile, they declare support for the Embedded Checkout Protocol.
 
 **Service Discovery Example:**
 
+<!-- ucp:example skip reason="embedded protocol binding" -->
 ```json
 {
     "services": {
@@ -128,6 +129,7 @@ indicate ECP availability and allowed delegations for a specific session.
 
 **Checkout Response Example:**
 
+<!-- ucp:example skip reason="embedded protocol binding" -->
 ```json
 {
     "id": "checkout_abc123",
@@ -214,6 +216,7 @@ parameters from business-specific query parameters:
 
 **Example (Informative - JWT-based):**
 
+<!-- ucp:example skip reason="embedded protocol binding" -->
 ```json
 // One possible implementation using JWT
 {
@@ -483,6 +486,7 @@ checkout that was not communicated over UCP checkout actions.
 
 **Example Message (no delegations accepted):**
 
+<!-- ucp:example skip reason="embedded protocol binding" -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -499,6 +503,7 @@ checkout that was not communicated over UCP checkout actions.
 
 **Example Message (delegations accepted):**
 
+<!-- ucp:example skip reason="embedded protocol binding" -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -542,6 +547,7 @@ to complete the handshake.
 
 **Example Message:**
 
+<!-- ucp:example skip reason="embedded protocol binding" -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -561,6 +567,7 @@ on the host's `iframe.contentWindow.postMessage()` call):
 
 **Example Message:**
 
+<!-- ucp:example skip reason="embedded protocol binding" -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -587,6 +594,7 @@ business.
 **Example Message: Providing payment instruments, including display
 information:**
 
+<!-- ucp:example skip reason="embedded protocol binding" -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -623,6 +631,7 @@ information:**
 If the host cannot complete the handshake (e.g., origin validation failure or
 protocol state violation), it **MUST** respond with an `error_response` result:
 
+<!-- ucp:example skip reason="embedded protocol binding" -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -679,6 +688,7 @@ successful `ec.ready` handshake.
 
 **Example Message:**
 
+<!-- ucp:example skip reason="embedded protocol binding" -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -718,6 +728,7 @@ Indicates successful checkout completion.
 
 **Example Message:**
 
+<!-- ucp:example skip reason="embedded protocol binding" -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -753,6 +764,7 @@ Line items have been modified (quantity changed, items added/removed).
 
 **Example Message:**
 
+<!-- ucp:example skip reason="embedded protocol binding" -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -784,6 +796,7 @@ Buyer information has been updated (email, phone, address).
 
 **Example Message:**
 
+<!-- ucp:example skip reason="embedded protocol binding" -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -813,6 +826,7 @@ informational notices about the checkout state.
 
 **Example Message:**
 
+<!-- ucp:example skip reason="embedded protocol binding" -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -859,6 +873,7 @@ When a change also triggers a domain-specific message (e.g.,
 
 **Example Message:**
 
+<!-- ucp:example skip reason="embedded protocol binding" -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -963,6 +978,7 @@ checkout UI, such as a new payment method being selected.
 
 **Example Message:**
 
+<!-- ucp:example skip reason="embedded protocol binding" -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -997,6 +1013,7 @@ Requests the host to present payment instrument selection UI.
 
 **Example Message:**
 
+<!-- ucp:example skip reason="embedded protocol binding" -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -1030,6 +1047,7 @@ existing state.
 
 **Example Success Response:**
 
+<!-- ucp:example skip reason="embedded protocol binding" -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -1064,6 +1082,7 @@ existing state.
 
 **Example Error Response:**
 
+<!-- ucp:example skip reason="embedded protocol binding" -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -1094,6 +1113,7 @@ submission.
 
 **Example Message:**
 
+<!-- ucp:example skip reason="embedded protocol binding" -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -1134,6 +1154,7 @@ new data with existing state.
 
 **Example Success Response:**
 
+<!-- ucp:example skip reason="embedded protocol binding" -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -1171,6 +1192,7 @@ new data with existing state.
 
 **Example Error Response:**
 
+<!-- ucp:example skip reason="embedded protocol binding" -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -1247,6 +1269,7 @@ UI.
 
 **Example Message:**
 
+<!-- ucp:example skip reason="embedded protocol binding" -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -1276,6 +1299,7 @@ method.
 
 **Example Message:**
 
+<!-- ucp:example skip reason="embedded protocol binding" -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -1324,6 +1348,7 @@ rather than attempting to merge the new data with existing state.
 
 **Example Success Response:**
 
+<!-- ucp:example skip reason="embedded protocol binding" -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -1355,6 +1380,7 @@ rather than attempting to merge the new data with existing state.
 
 **Example Error Response:**
 
+<!-- ucp:example skip reason="embedded protocol binding" -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -1444,6 +1470,7 @@ Requests the host to handle a link activated by the buyer within the checkout.
 
 **Example Message:**
 
+<!-- ucp:example skip reason="embedded protocol binding" -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -1462,6 +1489,7 @@ Requests the host to handle a link activated by the buyer within the checkout.
 
 **Example Success Response:**
 
+<!-- ucp:example skip reason="embedded protocol binding" -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -1474,6 +1502,7 @@ Requests the host to handle a link activated by the buyer within the checkout.
 
 **Example Error Response:**
 
+<!-- ucp:example skip reason="embedded protocol binding" -->
 ```json
 {
     "jsonrpc": "2.0",

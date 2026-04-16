@@ -25,6 +25,7 @@ Businesses that support A2A transport must specify the agent card endpoint as
 part of `services` in UCP Profile at `/.well-known/ucp`. This allows capable
 platforms to interact with the business services over A2A Protocol.
 
+<!-- ucp:example skip reason="A2A transport binding" -->
 ```json
 {
   "ucp": {
@@ -48,6 +49,7 @@ platforms to interact with the business services over A2A Protocol.
 Shopping platforms interacting with the business agent must send their profile
 URI as `UCP-Agent` request headers with every request.
 
+<!-- ucp:example skip reason="A2A transport binding" -->
 ```json
 UCP-Agent: profile="https://agent.example/profiles/v2025-11/shopping-agent.json"
 Content-Type: application/json
@@ -80,6 +82,7 @@ extension.
 
 An example:
 
+<!-- ucp:example skip reason="A2A transport binding" -->
 ```json
 {
   "extensions": [
@@ -154,6 +157,7 @@ Examples:
 
 - Natural language input
 
+<!-- ucp:example skip reason="A2A transport binding" -->
 ```json
 {
   "message": {
@@ -173,6 +177,7 @@ Examples:
 
 - Structured inputs on user actions
 
+<!-- ucp:example skip reason="A2A transport binding" -->
 ```json
 {
   "message": {
@@ -197,6 +202,7 @@ Examples:
 **Response format:** Following is an example response from a business agent
 implementing Checkout functionality:
 
+<!-- ucp:example skip reason="A2A transport binding" -->
 ```json
 {
   "id": 33,
@@ -232,6 +238,7 @@ checkout object containing an `order` attribute with `id` and `permalink_url`.
 
 ### Request format
 
+<!-- ucp:example skip reason="A2A transport binding" -->
 ```json
 {
   "message": {
@@ -265,6 +272,7 @@ checkout object containing an `order` attribute with `id` and `permalink_url`.
 **Response format:** Following is an example response from a business agent
 implementing Checkout functionality:
 
+<!-- ucp:example skip reason="A2A transport binding" -->
 ```json
 {
   "id": 33,
@@ -302,6 +310,7 @@ part of the `DataPart` as `ap2.merchant_authorization`. This will allow the
 platform to cryptographically verify the checkout payload against the business's
 public keys.
 
+<!-- ucp:example skip reason="A2A transport binding" -->
 ```json
 {
   "id": 33,
@@ -340,6 +349,7 @@ verification and processing of the mandates to complete the checkout.
 
 ### Request format
 
+<!-- ucp:example skip reason="A2A transport binding" -->
 ```json
 {
   "message": {

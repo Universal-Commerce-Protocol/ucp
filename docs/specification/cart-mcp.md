@@ -26,6 +26,7 @@ This document specifies the Model Context Protocol (MCP) binding for the
 Businesses advertise MCP transport availability through their UCP profile at
 `/.well-known/ucp`.
 
+<!-- ucp:example skip reason="JSON-RPC transport binding" -->
 ```json
 {
   "ucp": {
@@ -66,6 +67,7 @@ Businesses advertise MCP transport availability through their UCP profile at
 MCP clients **MUST** include a `meta` object in every request containing
 protocol metadata:
 
+<!-- ucp:example skip reason="JSON-RPC transport binding" -->
 ```json
 {
   "jsonrpc": "2.0",
@@ -127,6 +129,7 @@ Maps to the [Create Cart](cart.md#create-cart) operation.
 
 === "Request"
 
+    <!-- ucp:example skip reason="JSON-RPC transport binding" -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -162,6 +165,7 @@ Maps to the [Create Cart](cart.md#create-cart) operation.
 
 === "Response"
 
+    <!-- ucp:example skip reason="JSON-RPC transport binding" -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -221,6 +225,7 @@ Maps to the [Create Cart](cart.md#create-cart) operation.
 
     All items out of stock — no cart resource is created:
 
+    <!-- ucp:example skip reason="JSON-RPC transport binding" -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -261,6 +266,7 @@ Maps to the [Get Cart](cart.md#get-cart) operation.
 
 === "Request"
 
+    <!-- ucp:example skip reason="JSON-RPC transport binding" -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -282,6 +288,7 @@ Maps to the [Get Cart](cart.md#get-cart) operation.
 
 === "Response"
 
+    <!-- ucp:example skip reason="JSON-RPC transport binding" -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -339,6 +346,7 @@ Maps to the [Get Cart](cart.md#get-cart) operation.
 
 === "Not Found"
 
+    <!-- ucp:example skip reason="JSON-RPC transport binding" -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -391,6 +399,7 @@ Maps to the [Update Cart](cart.md#update-cart) operation.
 
 === "Request"
 
+    <!-- ucp:example skip reason="JSON-RPC transport binding" -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -433,6 +442,7 @@ Maps to the [Update Cart](cart.md#update-cart) operation.
 
 === "Response"
 
+    <!-- ucp:example skip reason="JSON-RPC transport binding" -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -517,6 +527,7 @@ Maps to the [Cancel Cart](cart.md#cancel-cart) operation.
 
 === "Request"
 
+    <!-- ucp:example skip reason="JSON-RPC transport binding" -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -539,6 +550,7 @@ Maps to the [Cancel Cart](cart.md#cancel-cart) operation.
 
 === "Response"
 
+    <!-- ucp:example skip reason="JSON-RPC transport binding" -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -611,6 +623,7 @@ Business outcomes (including not found and validation errors) are returned as
 JSON-RPC `result` with `structuredContent` containing the UCP envelope and
 `messages`:
 
+<!-- ucp:example skip reason="JSON-RPC transport binding" -->
 ```json
 {
   "jsonrpc": "2.0",

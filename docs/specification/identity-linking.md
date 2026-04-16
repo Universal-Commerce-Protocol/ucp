@@ -137,6 +137,7 @@ Example of [metadata](https://datatracker.ietf.org/doc/html/rfc8414#section-2){t
 supposed to be hosted in /.well-known/oauth-authorization-server as per
 [RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414){target="_blank"}:
 
+<!-- ucp:example skip reason="OAuth metadata, not UCP payload" -->
 ```json
 {
   "issuer": "https://merchant.example.com",

@@ -56,6 +56,7 @@ When the cart capability is negotiated, platforms can convert a cart to checkout
 by providing `cart_id` in the Create Checkout request. The cart contents
 (`line_items`, `context`, `buyer`) initialize the checkout session.
 
+<!-- ucp:example skip reason="structural fragment" -->
 ```json
 {
   "cart_id": "cart_abc123",
@@ -133,6 +134,7 @@ error response instead of creating a cart resource. `ucp.status` is the
 primary discriminator; the absence of `id` is a consistent secondary
 indicator:
 
+<!-- ucp:example schema=shopping/types/error_response op=read -->
 ```json
 {
   "ucp": { "version": "2026-01-15", "status": "error" },

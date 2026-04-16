@@ -50,6 +50,7 @@ the `embedded` transport in their `/.well-known/ucp` profile, all cart
 
 **Service Discovery Example:**
 
+<!-- ucp:example skip reason="embedded protocol binding" -->
 ```json
 {
     "services": {
@@ -88,6 +89,7 @@ indicate ECaP availability and allowed delegations for a specific session.
 
 **Cart Response Example:**
 
+<!-- ucp:example skip reason="embedded protocol binding" -->
 ```json
 {
     "id": "cart_123",
@@ -217,6 +219,7 @@ any requested authorization data back to Embedded Cart.
 
 **Example Message (no delegations accepted):**
 
+<!-- ucp:example skip reason="embedded protocol binding" -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -252,6 +255,7 @@ to complete the handshake.
 
 **Example Message:**
 
+<!-- ucp:example skip reason="embedded protocol binding" -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -271,6 +275,7 @@ on the host's `iframe.contentWindow.postMessage()` call):
 
 **Example Message:**
 
+<!-- ucp:example skip reason="embedded protocol binding" -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -330,6 +335,7 @@ Signals that cart is visible and ready for interaction. Sent after a successful
 
 **Example Message:**
 
+<!-- ucp:example skip reason="embedded protocol binding" -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -364,6 +370,7 @@ proceed to initiate a checkout session based on the completed cart by issuing a
 
 **Example Message:**
 
+<!-- ucp:example skip reason="embedded protocol binding" -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -399,6 +406,7 @@ Line items have been modified (quantity changed, items added/removed).
 
 **Example Message:**
 
+<!-- ucp:example skip reason="embedded protocol binding" -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -430,6 +438,7 @@ Buyer information has been updated (email, phone, name).
 
 **Example Message:**
 
+<!-- ucp:example skip reason="embedded protocol binding" -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -459,6 +468,7 @@ informational notices about the cart state.
 
 **Example Message:**
 
+<!-- ucp:example skip reason="embedded protocol binding" -->
 ```json
 {
     "jsonrpc": "2.0",

@@ -116,6 +116,7 @@ Line items reflect what was purchased at checkout and their current state.
 
 **Quantity Structure:**
 
+<!-- ucp:example skip reason="structural fragment" -->
 ```json
 {
   "original": 3,   // Quantity from the original checkout
@@ -165,6 +166,7 @@ Examples: `refund`, `return`, `credit`, `price_adjustment`, `dispute`,
 
 ## Example
 
+<!-- ucp:example schema=shopping/order op=read -->
 ```json
 {
   "ucp": {
@@ -325,6 +327,7 @@ that includes a `messages` array describing the outcome:
 
 **Order not found:**
 
+<!-- ucp:example schema=shopping/types/error_response op=read -->
 ```json
 {
   "ucp": {
@@ -347,6 +350,7 @@ that includes a `messages` array describing the outcome:
 
 **Not authorized:**
 
+<!-- ucp:example schema=shopping/types/error_response op=read -->
 ```json
 {
   "ucp": {
@@ -420,6 +424,7 @@ platform's profile and uses it to send order lifecycle events.
 
 **Example:**
 
+<!-- ucp:example skip reason="capability config fragment" -->
 ```json
 {
   "dev.ucp.shopping.order": [

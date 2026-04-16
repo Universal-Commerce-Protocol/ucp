@@ -168,6 +168,7 @@ schema. The specification **SHOULD** define the available config and instrument
 schemas, and how to construct each based on the business's prerequisites output
 and desired configuration.
 
+<!-- ucp:example skip reason="handler schema definition" -->
 ```json
 {
   "ucp": {
@@ -213,6 +214,7 @@ and typically includes different configuration:
 
 **Business Schema Example** (business declares handler configuration):
 
+<!-- ucp:example skip reason="handler schema definition" -->
 ```json
 {
   "id": "processor_tokenizer_1234",
@@ -236,6 +238,7 @@ and typically includes different configuration:
 
 **Platform Schema Example** (platform declares handler support):
 
+<!-- ucp:example skip reason="handler schema definition" -->
 ```json
 {
   "id": "platform_tokenizer_2345", // note: ids are for disambiguation, they may differ between business and platform
@@ -259,6 +262,7 @@ and typically includes different configuration:
 
 **Response Schema Example** (runtime context for checkout):
 
+<!-- ucp:example skip reason="handler schema definition" -->
 ```json
 {
   "id": "processor_tokenizer_1234",
@@ -327,6 +331,7 @@ Authors typically define each shape in its own file and reference them:
 
 **Example Handler Schema:**
 
+<!-- ucp:example skip reason="handler schema definition" -->
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -416,6 +421,7 @@ Each variant has its own config schema tailored to its context:
 
 **Example `types/business_config.json`:**
 
+<!-- ucp:example skip reason="handler schema definition" -->
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -438,6 +444,7 @@ Each variant has its own config schema tailored to its context:
 
 **Example `types/platform_config.json`:**
 
+<!-- ucp:example skip reason="handler schema definition" -->
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -460,6 +467,7 @@ Each variant has its own config schema tailored to its context:
 
 **Example `types/response_config.json`:**
 
+<!-- ucp:example skip reason="handler schema definition" -->
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -522,6 +530,7 @@ constraints are meaningful (e.g., `brands` for cards), and **platforms/businesse
 
 **Example `types/tokenizer_instrument.json`**:
 
+<!-- ucp:example skip reason="handler schema definition" -->
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -578,6 +587,7 @@ constraints are meaningful (e.g., `brands` for cards), and **platforms/businesse
 
 **Example `types/tokenizer_alt_instrument.json`:**
 
+<!-- ucp:example skip reason="handler schema definition" -->
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -629,6 +639,7 @@ refresh credentials.
 
 **Example `types/tokenizer_token.json`** (expiring token):
 
+<!-- ucp:example skip reason="handler schema definition" -->
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -656,6 +667,7 @@ refresh credentials.
 
 **Example `types/tokenizer_alt_token.json`** (alt token):
 
+<!-- ucp:example skip reason="handler schema definition" -->
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
