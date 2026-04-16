@@ -192,6 +192,7 @@ credential type (e.g., PCI DSS for cards).
 
 #### Example Business Handler Declaration
 
+<!-- ucp:example skip reason="handler config example" -->
 ```json
 {
   "ucp": {
@@ -234,6 +235,7 @@ The response config includes runtime token lifecycle information.
 
 #### Example Response Config
 
+<!-- ucp:example skip reason="handler config example" -->
 ```json
 {
   "id": "platform_wallet",
@@ -268,6 +270,7 @@ For option B, see section [PSP Integration](#psp-integration).
 
 #### Detokenize Request Example (Business)
 
+<!-- ucp:example skip reason="handler config example" -->
 ```json
 POST https://provider.platform.example.com/ucp/detokenize
 Content-Type: application/json
@@ -323,6 +326,7 @@ registry using `platform_config`.
 
 #### Example Platform Handler Declaration
 
+<!-- ucp:example skip reason="handler config example" -->
 ```json
 {
   "ucp": {
@@ -373,6 +377,7 @@ access to sensitive instrument details.
 The platform application submits the checkout with the token (received from its
 payment credential provider):
 
+<!-- ucp:example skip reason="handler config example" -->
 ```json
 POST /checkout-sessions/{checkout_id}/complete
 Content-Type: application/json
@@ -441,6 +446,7 @@ When the business forwards a token to the PSP:
 
 #### Detokenize Request Example (PSP)
 
+<!-- ucp:example skip reason="handler config example" -->
 ```json
 POST https://provider.platform.example.com/ucp/detokenize
 Content-Type: application/json

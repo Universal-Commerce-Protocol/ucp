@@ -98,8 +98,16 @@ method.
 
 ### Example
 
+<!-- ucp:example schema=shopping/checkout op=read -->
 ```json
 {
+  "ucp": { ... },
+  "id": "...",
+  "status": "...",
+  "currency": "...",
+  "line_items": [ ... ],
+  "totals": [ ... ],
+  "links": [ ... ],
   "fulfillment": {
     "methods": [
       {
@@ -223,8 +231,16 @@ method, and when. Use cases:
 * **Alternative methods**: "These pants are also available for pickup at Downtown Store"
 * **Fulfill later**: Preorders, items shipping from a distant warehouse, pickup when store gets inventory
 
+<!-- ucp:example schema=shopping/checkout op=read -->
 ```json
 {
+  "ucp": { ... },
+  "id": "...",
+  "status": "...",
+  "currency": "...",
+  "line_items": [ ... ],
+  "totals": [ ... ],
+  "links": [ ... ],
   "fulfillment": {
     "methods": [
       {
@@ -280,6 +296,7 @@ single-group responses. The response shape is always
 `methods[].groups[]`—the difference is whether `groups.length` can exceed 1
 within each method.
 
+<!-- ucp:example skip reason="capability config" -->
 ```json
 // Default: single group per method
 { "dev.ucp.shopping.fulfillment": [{"version": "{{ ucp_version }}"}] }
@@ -295,6 +312,7 @@ Businesses declare what fulfillment configurations they support using
 
 {{ schema_fields('types/merchant_fulfillment_config', 'fulfillment') }}
 
+<!-- ucp:example skip reason="capability config" -->
 ```json
 {
   "capabilities": {
@@ -351,8 +369,16 @@ so no extension needed.
 
 **Config:** None required (default behavior)
 
+<!-- ucp:example schema=shopping/checkout op=read -->
 ```json
 {
+  "ucp": { ... },
+  "id": "...",
+  "status": "...",
+  "currency": "...",
+  "line_items": [ ... ],
+  "totals": [ ... ],
+  "links": [ ... ],
   "fulfillment": {
     "methods": [
       {
@@ -414,8 +440,16 @@ so no extension needed.
 Business splits items into multiple packages; buyer selects shipping rate per
 package.
 
+<!-- ucp:example schema=shopping/checkout op=read -->
 ```json
 {
+  "ucp": { ... },
+  "id": "...",
+  "status": "...",
+  "currency": "...",
+  "line_items": [ ... ],
+  "totals": [ ... ],
+  "links": [ ... ],
   "fulfillment": {
     "methods": [
       {
@@ -483,8 +517,16 @@ package.
 Shirt ships to mom (US), pants ship to grandma (Hong Kong). Two methods of the
 same type, each with its own destination.
 
+<!-- ucp:example schema=shopping/checkout op=read -->
 ```json
 {
+  "ucp": { ... },
+  "id": "...",
+  "status": "...",
+  "currency": "...",
+  "line_items": [ ... ],
+  "totals": [ ... ],
+  "links": [ ... ],
   "fulfillment": {
     "methods": [
       {

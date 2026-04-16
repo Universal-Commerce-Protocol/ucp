@@ -26,6 +26,7 @@ This document specifies the Model Context Protocol (MCP) binding for the
 Businesses advertise MCP transport availability through their UCP profile at
 `/.well-known/ucp`.
 
+<!-- ucp:example skip reason="JSON-RPC transport binding" -->
 ```json
 {
   "ucp": {
@@ -59,6 +60,7 @@ Businesses advertise MCP transport availability through their UCP profile at
 MCP clients **MUST** include a `meta` object in every request containing
 protocol metadata:
 
+<!-- ucp:example skip reason="JSON-RPC transport binding" -->
 ```json
 {
   "jsonrpc": "2.0",
@@ -108,6 +110,7 @@ current-state snapshot of an order.
 
 === "Request"
 
+    <!-- ucp:example skip reason="JSON-RPC transport binding" -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -129,6 +132,7 @@ current-state snapshot of an order.
 
 === "Response"
 
+    <!-- ucp:example skip reason="JSON-RPC transport binding" -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -205,6 +209,7 @@ current-state snapshot of an order.
 
 === "Not Found"
 
+    <!-- ucp:example skip reason="JSON-RPC transport binding" -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -239,6 +244,7 @@ current-state snapshot of an order.
 
 === "Not Authorized"
 
+    <!-- ucp:example skip reason="JSON-RPC transport binding" -->
     ```json
     {
       "jsonrpc": "2.0",

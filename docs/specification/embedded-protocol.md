@@ -93,6 +93,7 @@ application-level error codes.
 
 **Success Response:**
 
+<!-- ucp:example skip reason="embedded protocol binding" -->
 ```json
 {
   "jsonrpc": "2.0",
@@ -106,6 +107,7 @@ application-level error codes.
 
 **Error Response:**
 
+<!-- ucp:example skip reason="embedded protocol binding" -->
 ```json
 {
   "jsonrpc": "2.0",
@@ -132,6 +134,7 @@ registry.
 For example, if a request cannot be processed (unknown method, malformed
 params), the host **MUST** respond with a JSON-RPC `error`:
 
+<!-- ucp:example skip reason="embedded protocol binding" -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -252,6 +255,7 @@ data or an `error_response`.
 
 **Example Success Response:**
 
+<!-- ucp:example skip reason="embedded protocol binding" -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -265,6 +269,7 @@ data or an `error_response`.
 
 **Example Error Response:**
 
+<!-- ucp:example skip reason="embedded protocol binding" -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -295,6 +300,7 @@ the credential is corrupted). The session error **SHOULD** include a
 
 **Example — auth failure escalated to session error:**
 
+<!-- ucp:example skip reason="embedded protocol binding" -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -335,6 +341,7 @@ continuing. Each capability defines its own session error notification method
 
 **Example:**
 
+<!-- ucp:example skip reason="embedded protocol binding" -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -377,6 +384,7 @@ Both are notifications — the host **MUST NOT** respond.
 
 **Example — start notification (cart):**
 
+<!-- ucp:example skip reason="embedded protocol binding" -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -395,6 +403,7 @@ Both are notifications — the host **MUST NOT** respond.
 
 **Example — complete notification (checkout):**
 
+<!-- ucp:example skip reason="embedded protocol binding" -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -426,6 +435,7 @@ resource, not just the changed fields.
 
 **Example — line items changed (checkout):**
 
+<!-- ucp:example skip reason="embedded protocol binding" -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -443,6 +453,7 @@ resource, not just the changed fields.
 
 **Example — messages changed (cart):**
 
+<!-- ucp:example skip reason="embedded protocol binding" -->
 ```json
 {
     "jsonrpc": "2.0",

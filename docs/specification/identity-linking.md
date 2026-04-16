@@ -661,6 +661,7 @@ implementations remain valid as the spec evolves.
 Example metadata hosted at `/.well-known/oauth-authorization-server` per
 [RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414){ target="_blank" }:
 
+<!-- ucp:example skip reason="OAuth metadata, not UCP payload" -->
 ```json
 {
   "issuer": "https://merchant.example.com",

@@ -141,6 +141,7 @@ have their own compliance requirements.
 
 #### Example Business Handler Declaration
 
+<!-- ucp:example skip reason="handler config example" -->
 ```json
 {
   "ucp": {
@@ -185,6 +186,7 @@ The response config includes information about the encryption used.
 
 #### Example Response Config
 
+<!-- ucp:example skip reason="handler config example" -->
 ```json
 {
   "id": "platform_encrypted",
@@ -251,6 +253,7 @@ registry using `platform_config`.
 
 #### Example Platform Handler Declaration
 
+<!-- ucp:example skip reason="handler config example" -->
 ```json
 {
   "ucp": {
@@ -302,6 +305,7 @@ access to raw PANs.
 Platform application submits the checkout with the encrypted credential
 (received from its vaulting service):
 
+<!-- ucp:example skip reason="handler config example" -->
 ```json
 POST /checkout-sessions/{checkout_id}/complete
 UCP-Agent: profile="https://platform.example/profile"

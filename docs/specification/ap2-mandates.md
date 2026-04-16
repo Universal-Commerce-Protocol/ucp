@@ -65,6 +65,7 @@ Businesses declare support by adding `dev.ucp.shopping.ap2_mandate` to their
 
 **Business Profile Example:**
 
+<!-- ucp:example skip reason="AP2 capability config" -->
 ```json
 {
   "capabilities": {
@@ -143,6 +144,7 @@ Businesses **MUST** embed their signature in the checkout response body under
 
 **Checkout Response with Embedded Signature:**
 
+<!-- ucp:example skip reason="invalid JSON in source" -->
 ```json
 {
   "id": "chk_abc123",
@@ -252,8 +254,10 @@ with `ap2.merchant_authorization` embedded in the response body.
 
 **Example Response:**
 
+<!-- ucp:example schema=shopping/checkout op=read -->
 ```json
 {
+  "ucp": { ... },
   "id": "chk_abc123",
   "status": "ready_for_complete",
   "currency": "USD",
@@ -273,6 +277,7 @@ with `ap2.merchant_authorization` embedded in the response body.
     {"type": "tax", "amount": 400},
     {"type": "total", "amount": 5400}
   ],
+  "links": [ ... ],
   "ap2": {
     "merchant_authorization": "eyJhbGciOiJFUzI1NiIsImtpZCI6Im1lcmNoYW50XzIwMjUifQ..<signature>"
   }
@@ -337,6 +342,7 @@ request:
 
 {{ extension_schema_fields('ap2_mandate.json#/$defs/ap2_with_checkout_mandate', 'ap2-mandates') }}
 
+<!-- ucp:example skip reason="invalid JSON in source" -->
 ```json
 {
   "payment": {
