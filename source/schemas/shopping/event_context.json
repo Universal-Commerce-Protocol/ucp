@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/event_context.json",
+  "name": "dev.ucp.shopping.event_context",
+  "title": "Event Context Extension",
+  "description": "Extends Cart and Checkout with event context, enabling referring platforms to pass referral context and deduplication keys through agentic checkout flows.",
+  "$defs": {
+    "event_context_payload": {
+      "type": "object",
+      "required": ["platform"],
+      "properties": {
+        "platform": {
+          "$ref": "types/reverse_domain_name.json",
+          "description": "Referring platform identifier (reverse domain naming). MUST correspond to the domain of the platform's UCP-Agent profile URL.",
+          "examples": ["com.google", "com.meta", "com.tiktok", "com.openai"]
+        },
+        "dedup_keys": {
+          "type": "object",
+          "description": "Deduplication keys for reconciling this event with the merchant's own server-side reporting. Without these, the same transaction may be counted twice in analytics and reporting platforms.",
+          "minProperties": 1,
+          "properties": {
+            "event_id": { "type": "string", "description": "Shared dedup key. The merchant includes this same event_id when reporting the event via their server-side integration (e.g., CAPI, Enhanced Conversions, Events API) to prevent double-counting." },
+            "session_id": { "type": "string", "description": "Platform session identifier for cross-event correlation (e.g., fbp, ga_session_id)." }
+          }
+        },
+        "utm": {
+          "type": "object",
+          "description": "Standard UTM parameters for compatibility with web analytics tools (Google Analytics, Northbeam, Triple Whale, etc.).",
+          "properties": {
+            "utm_source": { "type": "string" },
+            "utm_medium": { "type": "string" },
+            "utm_campaign": { "type": "string" },
+            "utm_content": { "type": "string" },
+            "utm_term": { "type": "string" },
+            "utm_id": { "type": "string" },
+            "utm_source_platform": { "type": "string" }
+          }
+        },
+        "custom": {
+          "type": "object",
+          "description": "Platform-specific key-value pairs not covered by the structured fields above. Merchants pass these through to their analytics integrations based on the platform field.",
+          "additionalProperties": {
+            "type": ["string", "number", "boolean"]
+          },
+          "maxProperties": 20
+        }
+      }
+    },
+    "dev.ucp.shopping.cart": {
+      "title": "Cart with Event Context",
+      "description": "Cart extended with referral event context.",
+      "allOf": [
+        {
+          "$ref": "cart.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_context": {
+              "$ref": "#/$defs/event_context_payload",
+              "description": "Referral event context from the platform that drove the cart.",
+              "ucp_request": {
+                "create": "optional",
+                "update": "optional"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.checkout": {
+      "title": "Checkout with Event Context",
+      "description": "Checkout extended with referral event context.",
+      "allOf": [
+        {
+          "$ref": "checkout.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_context": {
+              "$ref": "#/$defs/event_context_payload",
+              "description": "Referral event context from the platform that drove the checkout.",
+              "ucp_request": {
+                "create": "optional",
+                "update": "optional",
+                "complete": "optional"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.event_context": {
+      "platform_schema": {
+        "title": "Event Context Capability (Platform)",
+        "description": "Platform-level event context capability. Indicates the platform can provide referral event context on cart and checkout requests.",
+        "allOf": [
+          {
+            "$ref": "../capability.json#/$defs/platform_schema"
+          }
+        ]
+      },
+      "business_schema": {
+        "title": "Event Context Capability (Business)",
+        "description": "Business-level event context capability. Indicates the business accepts and processes referral event context.",
+        "allOf": [
+          {
+            "$ref": "../capability.json#/$defs/business_schema"
+          }
+        ]
+      }
+    }
+  }
+}
