@@ -77,9 +77,10 @@ absence of identity linking.
     with `code_challenge_method=S256` for all authorization code exchanges.
 * **MUST** validate the `iss` parameter in the authorization response
     ([RFC 9207](https://datatracker.ietf.org/doc/html/rfc9207){ target="_blank" })
-    to prevent Mix-Up Attacks. If `iss` is present and does not match the
-    authorization server's issuer URI (as declared in its RFC 8414 metadata),
-    the platform **MUST** abort and discard the authorization response.
+    to prevent Mix-Up Attacks. The platform **MUST** verify that the `iss`
+    value matches the authorization server's issuer URI (as declared in its
+    RFC 8414 metadata). If the values do not match, the platform **MUST**
+    abort and discard the authorization response.
 * **SHOULD** include a unique, unguessable `state` parameter in the
     authorization request to prevent CSRF
     ([RFC 6749 §10.12](https://datatracker.ietf.org/doc/html/rfc6749#section-10.12){ target="_blank" }).
@@ -205,9 +206,9 @@ Platforms **MUST** request only the derived scope set — not a superset.
 
 **Step 3 — Validation:** The platform **MUST** verify that the `state`
 parameter matches the value sent in step 2, and that the `iss` parameter
-(if present) matches the authorization server's `issuer` URI from discovered
-metadata. If either check fails, the platform **MUST** discard the
-authorization response.
+matches the authorization server's `issuer` URI from discovered metadata.
+If either check fails, the platform **MUST** discard the authorization
+response.
 
 **Step 4 — PKCE:** The `code_verifier` **MUST** correspond to the
 `code_challenge` sent in step 2. Businesses **MUST** reject token requests

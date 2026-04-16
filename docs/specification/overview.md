@@ -414,7 +414,7 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
             "capabilities": {
               "dev.ucp.shopping.checkout": {},
               "dev.ucp.shopping.order": {
-                "required": true,
+                "auth_required": true,
                 "scopes": ["read", "manage"]
               }
             }
