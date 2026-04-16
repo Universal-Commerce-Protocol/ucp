@@ -177,13 +177,40 @@ def _is_ellipsis(value) -> bool:
   )
 
 
-def strip_ellipsis(obj):
-  """Remove ellipsis markers, returning cleaned object."""
+def strip_ellipsis(obj, _path="", _paths=None):
+  """Replace ellipsis markers with empty defaults.
+
+  Returns (cleaned_obj, ellipsis_paths) where ellipsis_paths
+  is a set of JSON Pointer paths that were ellipsis-marked.
+  Validation errors at these paths are suppressed.
+  """
+  if _paths is None:
+    _paths = set()
+
   if isinstance(obj, dict):
-    return {k: strip_ellipsis(v) for k, v in obj.items() if not _is_ellipsis(v)}
+    result = {}
+    for k, v in obj.items():
+      child_path = f"{_path}/{k}"
+      if v == "...":
+        _paths.add(child_path)
+        continue
+      elif isinstance(v, list) and v == ["..."]:
+        _paths.add(child_path)
+        result[k] = []
+      elif isinstance(v, dict) and v == {"...": "..."}:
+        _paths.add(child_path)
+        result[k] = {}
+      else:
+        result[k] = strip_ellipsis(v, child_path, _paths)
+    return result if _path else (result, _paths)
   elif isinstance(obj, list):
-    return [strip_ellipsis(item) for item in obj if item != "..."]
-  return obj
+    items = []
+    for i, item in enumerate(obj):
+      if item == "...":
+        continue
+      items.append(strip_ellipsis(item, f"{_path}/{i}", _paths))
+    return items if _path else (items, _paths)
+  return obj if _path else (obj, _paths)
 
 
 # -----------------------------------------------------------
@@ -460,6 +487,59 @@ def validate_payload(
     Path(tmp_path).unlink()
 
 
+def validate_payload_with_schema(
+  payload: dict,
+  schema_dict: dict,
+  direction: str,
+  op: str,
+  schema_base: Path,
+) -> tuple[bool, list[dict]]:
+  """Validate against an extracted schema dict."""
+  tmp_schema = None
+  tmp_payload = None
+  try:
+    with tempfile.NamedTemporaryFile(
+      mode="w", suffix=".json", delete=False
+    ) as f:
+      json.dump(schema_dict, f)
+      tmp_schema = f.name
+    with tempfile.NamedTemporaryFile(
+      mode="w", suffix=".json", delete=False
+    ) as f:
+      json.dump(payload, f)
+      tmp_payload = f.name
+    result = subprocess.run(
+      [
+        "ucp-schema",
+        "validate",
+        tmp_payload,
+        "--schema",
+        tmp_schema,
+        f"--{direction}",
+        "--op",
+        op,
+        "--json",
+      ],
+      capture_output=True,
+      text=True,
+      cwd=str(schema_base.parent),
+    )
+    if result.stdout.strip():
+      output = json.loads(result.stdout)
+      return (
+        output.get("valid", False),
+        output.get("errors", []),
+      )
+    if result.returncode != 0:
+      return False, [{"path": "", "message": result.stderr.strip()}]
+    return True, []
+  finally:
+    if tmp_schema:
+      Path(tmp_schema).unlink()
+    if tmp_payload:
+      Path(tmp_payload).unlink()
+
+
 # -----------------------------------------------------------
 # Scaffold loading
 # -----------------------------------------------------------
@@ -572,6 +652,7 @@ def process_block(
   op = annotation["op"]
   direction = annotation["direction"]
   subtree_path = annotation.get("path")
+  schema_def = annotation.get("def")
 
   # 1. Unwrap HTTP
   content = unwrap_http(block["content"])
@@ -604,16 +685,27 @@ def process_block(
   except RuntimeError as e:
     return Result(file, line, "error", str(e), annotation)
 
-  # 6. Coverage check
-  if subtree_path:
+  # 6. Coverage check — select sub-schema if def= given
+  if schema_def:
+    defs = resolved.get("$defs", {})
+    if schema_def not in defs:
+      return Result(
+        file,
+        line,
+        "error",
+        f"$defs/{schema_def} not found in schema",
+        annotation,
+      )
+    coverage_schema = defs[schema_def]
+  elif subtree_path:
     coverage_schema = jsonpath_get_schema(resolved, subtree_path)
   else:
     coverage_schema = resolved
 
   coverage_errors = check_coverage(example, coverage_schema)
 
-  # 7. Strip ellipsis
-  stripped = strip_ellipsis(example)
+  # 7. Strip ellipsis (track paths for error suppression)
+  stripped, ellipsis_paths = strip_ellipsis(example)
 
   # 8. Load scaffold and merge
   scaffold = load_scaffold(schema_path, direction, op, scaffolds_dir)
@@ -646,23 +738,32 @@ def process_block(
   else:
     merged = deep_merge(scaffold, stripped)
 
-  # 9. Validate
-  valid, val_errors = validate_payload(
-    merged,
-    schema_path,
-    direction,
-    op,
-    schema_base,
-  )
+  # 9. Validate — use extracted $def schema if specified
+  if schema_def:
+    valid, val_errors = validate_payload_with_schema(
+      merged, coverage_schema, direction, op, schema_base
+    )
+  else:
+    valid, val_errors = validate_payload(
+      merged,
+      schema_path,
+      direction,
+      op,
+      schema_base,
+    )
 
   # Collect all failures
   messages: list[str] = []
   for ce in coverage_errors:
     messages.append(f"coverage: {ce}")
   for ve in val_errors:
-    messages.append(
-      f"validation: {ve.get('path', '')} \u2014 {ve.get('message', '')}"
-    )
+    # Suppress errors at ellipsis-acknowledged paths
+    err_path = ve.get("path", "")
+    if any(
+      err_path == ep or err_path.startswith(ep + "/") for ep in ellipsis_paths
+    ):
+      continue
+    messages.append(f"validation: {err_path} \u2014 {ve.get('message', '')}")
 
   if messages:
     return Result(
