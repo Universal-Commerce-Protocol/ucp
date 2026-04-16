@@ -208,12 +208,12 @@ optional in `card_credential.json` but most merchants require it for
 card-not-present transactions. Named constraints give the platform a clear
 signal of what the merchant requires — no guesswork, no retry loops.
 
-| Constraint                     | Type    | Description                                                                                                                      |
-|--------------------------------|---------|----------------------------------------------------------------------------------------------------------------------------------|
-| `brands`                       | array   | Limit to specific card brands (e.g., `["visa", "mastercard"]`)                                                                   |
-| `requires_card_verification`   | boolean | When `true`, the handler requires card verification data. For FPAN: CVC. For network tokens: cryptogram and ECI.                 |
-| `requires_billing_address`     | boolean | When `true`, the handler requires a billing address on the instrument.                                                           |
-| `requires_billing_postal_code` | boolean | When `true`, the handler requires a billing postal code for AVS verification. Ignored when `requires_billing_address` is `true`. |
+| Constraint                     | Type    | Default | Description                                                                                                                      |
+|--------------------------------|---------|---------|----------------------------------------------------------------------------------------------------------------------------------|
+| `brands`                       | array   | —       | Limit to specific card brands (e.g., `["visa", "mastercard"]`)                                                                   |
+| `requires_card_verification`   | boolean | `false` | When `true`, the handler requires card verification data. For FPAN: CVC. For network tokens: cryptogram and ECI.                 |
+| `requires_billing_address`     | boolean | `false` | When `true`, the handler requires a billing address on the instrument.                                                           |
+| `requires_billing_postal_code` | boolean | `false` | When `true`, the handler requires a billing postal code for AVS verification. Ignored when `requires_billing_address` is `true`. |
 
 **Example — merchant requires card verification and billing address:**
 
@@ -244,6 +244,12 @@ merchant.
 
 When a constraint is absent or `false`, the handler places no additional
 requirement for that field. Platforms fall back to existing behavior.
+
+Constraints are additive to schema requirements. If the instrument or
+credential schema marks a field as required, the corresponding constraint
+is redundant and **MUST NOT** be interpreted as overriding the schema. A
+`requires_*` constraint of `false` or absent does not make a
+schema-required field optional.
 
 ---
 
