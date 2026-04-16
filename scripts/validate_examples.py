@@ -594,6 +594,10 @@ def process_block(
       annotation,
     )
 
+  # 5. Empty body — trivially valid (e.g. GET, cancel)
+  if example == {}:
+    return Result(file, line, "ok", annotation=annotation)
+
   # 5. Resolve schema
   try:
     resolved = resolve_schema(schema_path, direction, op, schema_base)

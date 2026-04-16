@@ -928,7 +928,7 @@ place to set these expectations via `messages`.
 
 === "Request"
 
-    <!-- ucp:example skip reason="empty request body" -->
+    <!-- ucp:example schema=shopping/checkout op=read direction=request -->
     ```json
     GET /checkout-sessions/{id}
     UCP-Agent: profile="https://platform.example/profile"
@@ -1085,7 +1085,7 @@ place to set these expectations via `messages`.
 
 === "Request"
 
-    <!-- ucp:example skip reason="empty request body" -->
+    <!-- ucp:example schema=shopping/checkout op=cancel direction=request -->
     ```json
     POST /checkout-sessions/{id}/cancel
     UCP-Agent: profile="https://platform.example/profile"
