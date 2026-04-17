@@ -3,7 +3,7 @@
   "$id": "https://ucp.dev/schemas/shopping/discount.json",
   "name": "dev.ucp.shopping.discount",
   "title": "Discount Extension",
-  "description": "Extends Checkout with discount code support, enabling agents to apply promotional, loyalty, referral, and other discount codes.",
+  "description": "Extends Cart and Checkout with discount support, including discount codes, automatic discounts, and eligibility-triggered provisional discounts.",
   "$defs": {
     "allocation": {
       "type": "object",
@@ -18,9 +18,8 @@
           "description": "JSONPath to the allocation target (e.g., '$.line_items[0]', '$.totals.shipping')."
         },
         "amount": {
-          "type": "integer",
-          "minimum": 0,
-          "description": "Amount allocated to this target in minor (cents) currency units."
+          "$ref": "types/amount.json",
+          "description": "Amount allocated to this target in ISO 4217 minor units."
         }
       }
     },
@@ -41,9 +40,8 @@
           "description": "Human-readable discount name (e.g., 'Summer Sale 20% Off')."
         },
         "amount": {
-          "type": "integer",
-          "minimum": 0,
-          "description": "Total discount amount in minor (cents) currency units."
+          "$ref": "types/amount.json",
+          "description": "Total discount amount in ISO 4217 minor units."
         },
         "automatic": {
           "type": "boolean",
@@ -62,6 +60,15 @@
           "type": "integer",
           "minimum": 1,
           "description": "Stacking order for discount calculation. Lower numbers applied first (1 = first)."
+        },
+        "provisional": {
+          "type": "boolean",
+          "default": false,
+          "description": "True if this discount requires additional verification."
+        },
+        "eligibility": {
+          "$ref": "types/reverse_domain_name.json",
+          "description": "The eligibility claim accepted by the Business for this discount. Corresponds to a value from context.eligibility. Omitted for code-based and non-eligibility automatic discounts."
         },
         "allocations": {
           "type": "array",
@@ -92,6 +99,27 @@
           "description": "Discounts successfully applied (code-based and automatic)."
         }
       }
+    },
+    "dev.ucp.shopping.cart": {
+      "title": "Cart with Discount",
+      "description": "Cart extended with discount capability.",
+      "allOf": [
+        {
+          "$ref": "cart.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "discounts": {
+              "$ref": "#/$defs/discounts_object",
+              "ucp_request": {
+                "create": "optional",
+                "update": "optional"
+              }
+            }
+          }
+        }
+      ]
     },
     "dev.ucp.shopping.checkout": {
       "title": "Checkout with Discount",

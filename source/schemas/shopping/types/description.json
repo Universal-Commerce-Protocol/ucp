@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/description.json",
+  "title": "Description",
+  "description": "Description content in one or more formats. At least one format must be provided.",
+  "type": "object",
+  "properties": {
+    "plain": {
+      "type": "string",
+      "description": "Plain text content."
+    },
+    "html": {
+      "type": "string",
+      "description": "HTML-formatted content. Security: Platforms MUST sanitize before rendering—strip scripts, event handlers, and untrusted elements. Treat all rich text as untrusted input."
+    },
+    "markdown": {
+      "type": "string",
+      "description": "Markdown-formatted content."
+    }
+  },
+  "minProperties": 1
+}

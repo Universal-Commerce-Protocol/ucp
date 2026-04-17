@@ -28,31 +28,34 @@ Businesses advertise REST transport availability through their UCP profile at
 ```json
 {
   "ucp": {
-    "version": "2026-01-15",
+    "version": "{{ ucp_version }}",
     "services": {
-      "dev.ucp.shopping": {
-        "version": "2026-01-15",
-        "spec": "https://ucp.dev/specification/overview",
-        "rest": {
-          "schema": "https://ucp.dev/services/shopping/openapi.json",
+      "dev.ucp.shopping": [
+        {
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview",
+          "transport": "rest",
+          "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/rest.openapi.json",
           "endpoint": "https://business.example.com/ucp/v1"
         }
-      }
+      ]
     },
-    "capabilities": [
-      {
-        "name": "dev.ucp.shopping.checkout",
-        "version": "2026-01-11",
-        "spec": "https://ucp.dev/specification/checkout",
-        "schema": "https://ucp.dev/schemas/shopping/checkout.json"
-      },
-      {
-        "name": "dev.ucp.shopping.cart",
-        "version": "2026-01-15",
-        "spec": "https://ucp.dev/specification/cart",
-        "schema": "https://ucp.dev/schemas/shopping/cart.json"
-      }
-    ]
+    "capabilities": {
+      "dev.ucp.shopping.checkout": [
+        {
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/checkout",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/checkout.json"
+        }
+      ],
+      "dev.ucp.shopping.cart": [
+        {
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/cart",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/cart.json"
+        }
+      ]
+    }
   }
 }
 ```
@@ -128,17 +131,11 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
     {
       "ucp": {
-        "version": "2026-01-15",
-        "capabilities": [
-          {
-            "name": "dev.ucp.shopping.checkout",
-            "version": "2026-01-11"
-          },
-          {
-            "name": "dev.ucp.shopping.cart",
-            "version": "2026-01-15"
-          }
-        ]
+        "version": "{{ ucp_version }}",
+        "capabilities": {
+          "dev.ucp.shopping.checkout": [{"version": "{{ ucp_version }}"}],
+          "dev.ucp.shopping.cart": [{"version": "{{ ucp_version }}"}]
+        }
       },
       "id": "cart_abc123",
       "line_items": [
@@ -173,6 +170,28 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
     }
     ```
 
+=== "Error Response"
+
+    All items out of stock — no cart resource is created:
+
+    ```json
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+
+    {
+      "ucp": { "version": "2026-01-15", "status": "error" },
+      "messages": [
+        {
+          "type": "error",
+          "code": "out_of_stock",
+          "content": "All requested items are currently out of stock",
+          "severity": "unrecoverable"
+        }
+      ],
+      "continue_url": "https://merchant.com/"
+    }
+    ```
+
 ### Get Cart
 
 #### Input Schema
@@ -200,17 +219,11 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
     {
       "ucp": {
-        "version": "2026-01-15",
-        "capabilities": [
-          {
-            "name": "dev.ucp.shopping.checkout",
-            "version": "2026-01-11"
-          },
-          {
-            "name": "dev.ucp.shopping.cart",
-            "version": "2026-01-15"
-          }
-        ]
+        "version": "{{ ucp_version }}",
+        "capabilities": {
+          "dev.ucp.shopping.checkout": [{"version": "{{ ucp_version }}"}],
+          "dev.ucp.shopping.cart": [{"version": "{{ ucp_version }}"}]
+        }
       },
       "id": "cart_abc123",
       "line_items": [
@@ -252,19 +265,18 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
     {
       "ucp": {
-        "version": "2026-01-15",
-        "capabilities": [
-          {
-            "name": "dev.ucp.shopping.cart",
-            "version": "2026-01-15"
-          }
-        ]
+        "version": "{{ ucp_version }}",
+        "status": "error",
+        "capabilities": {
+          "dev.ucp.shopping.cart": [{"version": "{{ ucp_version }}"}]
+        }
       },
       "messages": [
         {
           "type": "error",
           "code": "not_found",
-          "content": "Cart not found or has expired"
+          "content": "Cart not found or has expired",
+          "severity": "unrecoverable"
         }
       ],
       "continue_url": "https://merchant.com/"
@@ -326,17 +338,11 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
     {
       "ucp": {
-        "version": "2026-01-15",
-        "capabilities": [
-          {
-            "name": "dev.ucp.shopping.checkout",
-            "version": "2026-01-11"
-          },
-          {
-            "name": "dev.ucp.shopping.cart",
-            "version": "2026-01-15"
-          }
-        ]
+        "version": "{{ ucp_version }}",
+        "capabilities": {
+          "dev.ucp.shopping.checkout": [{"version": "{{ ucp_version }}"}],
+          "dev.ucp.shopping.cart": [{"version": "{{ ucp_version }}"}]
+        }
       },
       "id": "cart_abc123",
       "line_items": [
@@ -413,17 +419,11 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
     {
       "ucp": {
-        "version": "2026-01-15",
-        "capabilities": [
-          {
-            "name": "dev.ucp.shopping.checkout",
-            "version": "2026-01-11"
-          },
-          {
-            "name": "dev.ucp.shopping.cart",
-            "version": "2026-01-15"
-          }
-        ]
+        "version": "{{ ucp_version }}",
+        "capabilities": {
+          "dev.ucp.shopping.checkout": [{"version": "{{ ucp_version }}"}],
+          "dev.ucp.shopping.cart": [{"version": "{{ ucp_version }}"}]
+        }
       },
       "id": "cart_abc123",
       "line_items": [
@@ -510,16 +510,18 @@ HTTP 200 and the UCP envelope containing `messages`:
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "{{ ucp_version }}",
+    "status": "error",
     "capabilities": {
-      "dev.ucp.shopping.cart": [{"version": "2026-01-11"}]
+      "dev.ucp.shopping.cart": [{"version": "{{ ucp_version }}"}]
     }
   },
   "messages": [
     {
       "type": "error",
       "code": "not_found",
-      "content": "Cart not found or has expired"
+      "content": "Cart not found or has expired",
+      "severity": "unrecoverable"
     }
   ],
   "continue_url": "https://merchant.com/"

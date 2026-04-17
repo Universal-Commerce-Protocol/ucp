@@ -66,11 +66,8 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
       "line_items": [
         {
           "item": {
-            "id": "item_123",
-            "title": "Red T-Shirt",
-            "price": 2500
+            "id": "item_123"
           },
-          "id": "li_1",
           "quantity": 2
         }
       ]
@@ -85,17 +82,17 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
 
     {
       "ucp": {
-        "version": "2026-01-11",
+        "version": "{{ ucp_version }}",
         "capabilities": {
           "dev.ucp.shopping.checkout": [
-            {"version": "2026-01-11"}
+            {"version": "{{ ucp_version }}"}
           ]
         },
         "payment_handlers": {
           "com.shopify.shop_pay": [
             {
               "id": "shop_pay_1234",
-              "version": "2026-01-11",
+              "version": "{{ ucp_version }}",
               "available_instruments": [
                 {"type": "shop_pay"}
               ],
@@ -169,6 +166,28 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
     }
     ```
 
+=== "Error Response"
+
+    All items out of stock — no checkout resource is created:
+
+    ```json
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+
+    {
+      "ucp": { "version": "2026-01-11", "status": "error" },
+      "messages": [
+        {
+          "type": "error",
+          "code": "out_of_stock",
+          "content": "All requested items are currently out of stock",
+          "severity": "unrecoverable"
+        }
+      ],
+      "continue_url": "https://merchant.com/"
+    }
+    ```
+
 ### Update Checkout
 
 #### Update Buyer Info
@@ -194,9 +213,7 @@ so clients must include all previously set fields they wish to retain.
       "line_items": [
         {
           "item": {
-            "id": "item_123",
-            "title": "Red T-Shirt",
-            "price": 2500
+            "id": "item_123"
           },
           "id": "li_1",
           "quantity": 2
@@ -213,17 +230,17 @@ so clients must include all previously set fields they wish to retain.
 
     {
       "ucp": {
-        "version": "2026-01-11",
+        "version": "{{ ucp_version }}",
         "capabilities": {
           "dev.ucp.shopping.checkout": [
-            {"version": "2026-01-11"}
+            {"version": "{{ ucp_version }}"}
           ]
         },
         "payment_handlers": {
           "com.shopify.shop_pay": [
             {
               "id": "shop_pay_1234",
-              "version": "2026-01-11",
+              "version": "{{ ucp_version }}",
               "available_instruments": [
                 {"type": "shop_pay"}
               ],
@@ -325,9 +342,7 @@ type & addresses.
       "line_items": [
         {
           "item": {
-            "id": "item_123",
-            "title": "Red T-Shirt",
-            "price": 2500
+            "id": "item_123"
           },
           "id": "li_1",
           "quantity": 2
@@ -360,17 +375,17 @@ type & addresses.
 
     {
       "ucp": {
-        "version": "2026-01-11",
+        "version": "{{ ucp_version }}",
         "capabilities": {
           "dev.ucp.shopping.checkout": [
-            {"version": "2026-01-11"}
+            {"version": "{{ ucp_version }}"}
           ]
         },
         "payment_handlers": {
           "com.google.pay": [
             {
               "id": "gpay_1234",
-              "version": "2026-01-11",
+              "version": "{{ ucp_version }}",
               "config": {
                 "allowed_payment_methods": [
                   {
@@ -442,7 +457,7 @@ type & addresses.
           {
             "id": "shipping_1",
             "type": "shipping",
-            "line_item_ids": ["item_123"],
+            "line_item_ids": ["li_1"],
             "selected_destination_id": "dest_home",
             "destinations": [
               {
@@ -457,7 +472,7 @@ type & addresses.
             "groups": [
               {
                 "id": "package_1",
-                "line_item_ids": ["item_123"],
+                "line_item_ids": ["li_1"],
                 "selected_option_id": "standard",
                 "options": [
                   {
@@ -527,9 +542,7 @@ Follow-up calls after initial `fulfillment` data to update selection.
       "line_items": [
         {
           "item": {
-            "id": "item_123",
-            "title": "Red T-Shirt",
-            "price": 2500
+            "id": "item_123"
           },
           "id": "li_1",
           "quantity": 2,
@@ -540,7 +553,7 @@ Follow-up calls after initial `fulfillment` data to update selection.
           {
             "id": "shipping_1",
             "type": "shipping",
-            "line_item_ids": ["item_123"],
+            "line_item_ids": ["li_1"],
             "selected_destination_id": "dest_home",
             "destinations": [
               {
@@ -572,17 +585,17 @@ Follow-up calls after initial `fulfillment` data to update selection.
 
     {
       "ucp": {
-        "version": "2026-01-11",
+        "version": "{{ ucp_version }}",
         "capabilities": {
           "dev.ucp.shopping.checkout": [
-            {"version": "2026-01-11"}
+            {"version": "{{ ucp_version }}"}
           ]
         },
         "payment_handlers": {
           "com.shopify.shop_pay": [
             {
               "id": "shop_pay_1234",
-              "version": "2026-01-11",
+              "version": "{{ ucp_version }}",
               "available_instruments": [
                 {"type": "shop_pay"}
               ],
@@ -641,7 +654,7 @@ Follow-up calls after initial `fulfillment` data to update selection.
           {
             "id": "shipping_1",
             "type": "shipping",
-            "line_item_ids": ["item_123"],
+            "line_item_ids": ["li_1"],
             "selected_destination_id": "dest_home",
             "destinations": [
               {
@@ -656,7 +669,7 @@ Follow-up calls after initial `fulfillment` data to update selection.
             "groups": [
               {
                 "id": "package_1",
-                "line_item_ids": ["item_123"],
+                "line_item_ids": ["li_1"],
                 "selected_option_id": "express",
                 "options": [
                   {
@@ -744,8 +757,9 @@ place to set these expectations via `messages`.
           }
         ]
       },
-      "risk_signals": {
-        //... risk signal related data (device fingerprint / risk token)
+      "signals": {
+        "dev.ucp.buyer_ip": "203.0.113.42",
+        "dev.ucp.user_agent": "Mozilla/5.0 ..."
       }
     }
     ```
@@ -758,17 +772,17 @@ place to set these expectations via `messages`.
 
     {
       "ucp": {
-        "version": "2026-01-11",
+        "version": "{{ ucp_version }}",
         "capabilities": {
           "dev.ucp.shopping.checkout": [
-            {"version": "2026-01-11"}
+            {"version": "{{ ucp_version }}"}
           ]
         },
         "payment_handlers": {
           "com.google.pay": [
             {
               "id": "gpay_1234",
-              "version": "2026-01-11",
+              "version": "{{ ucp_version }}",
               "config": {
                 "allowed_payment_methods": [
                   {
@@ -835,7 +849,7 @@ place to set these expectations via `messages`.
           {
             "id": "shipping_1",
             "type": "shipping",
-            "line_item_ids": ["item_123"],
+            "line_item_ids": ["li_1"],
             "selected_destination_id": "dest_home",
             "destinations": [
               {
@@ -850,7 +864,7 @@ place to set these expectations via `messages`.
             "groups": [
               {
                 "id": "package_1",
-                "line_item_ids": ["item_123"],
+                "line_item_ids": ["li_1"],
                 "selected_option_id": "express",
                 "options": [
                   {
@@ -919,17 +933,17 @@ place to set these expectations via `messages`.
 
     {
       "ucp": {
-        "version": "2026-01-11",
+        "version": "{{ ucp_version }}",
         "capabilities": {
           "dev.ucp.shopping.checkout": [
-            {"version": "2026-01-11"}
+            {"version": "{{ ucp_version }}"}
           ]
         },
         "payment_handlers": {
           "com.shopify.shop_pay": [
             {
               "id": "shop_pay_1234",
-              "version": "2026-01-11",
+              "version": "{{ ucp_version }}",
               "available_instruments": [
                 {"type": "shop_pay"}
               ],
@@ -992,7 +1006,7 @@ place to set these expectations via `messages`.
           {
             "id": "shipping_1",
             "type": "shipping",
-            "line_item_ids": ["item_123"],
+            "line_item_ids": ["li_1"],
             "selected_destination_id": "dest_home",
             "destinations": [
               {
@@ -1007,7 +1021,7 @@ place to set these expectations via `messages`.
             "groups": [
               {
                 "id": "package_1",
-                "line_item_ids": ["item_123"],
+                "line_item_ids": ["li_1"],
                 "selected_option_id": "express",
                 "options": [
                   {
@@ -1074,17 +1088,17 @@ place to set these expectations via `messages`.
 
     {
       "ucp": {
-        "version": "2026-01-11",
+        "version": "{{ ucp_version }}",
         "capabilities": {
           "dev.ucp.shopping.checkout": [
-            {"version": "2026-01-11"}
+            {"version": "{{ ucp_version }}"}
           ]
         },
         "payment_handlers": {
           "com.google.pay": [
             {
               "id": "gpay_1234",
-              "version": "2026-01-11",
+              "version": "{{ ucp_version }}",
               "config": {
                 "allowed_payment_methods": [
                   {
@@ -1147,7 +1161,7 @@ place to set these expectations via `messages`.
           {
             "id": "shipping_1",
             "type": "shipping",
-            "line_item_ids": ["item_123"],
+            "line_item_ids": ["li_1"],
             "selected_destination_id": "dest_home",
             "destinations": [
               {
@@ -1162,7 +1176,7 @@ place to set these expectations via `messages`.
             "groups": [
               {
                 "id": "package_1",
-                "line_item_ids": ["item_123"],
+                "line_item_ids": ["li_1"],
                 "selected_option_id": "express",
                 "options": [
                   {
@@ -1268,9 +1282,9 @@ with HTTP 200 and the UCP envelope containing `messages`:
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "{{ ucp_version }}",
     "capabilities": {
-      "dev.ucp.shopping.checkout": [{"version": "2026-01-11"}]
+      "dev.ucp.shopping.checkout": [{"version": "{{ ucp_version }}"}]
     }
   },
   "id": "checkout_abc123",
@@ -1291,6 +1305,24 @@ with HTTP 200 and the UCP envelope containing `messages`:
     }
   ],
   "continue_url": "https://merchant.com/checkout/checkout_abc123"
+}
+```
+
+For `create_checkout`, when all items unavailable and no checkout can be created, returns
+HTTP 200 and the UCP envelope containing `messages`
+
+```json
+{
+  "ucp": { "version": "2026-01-11", "status": "error" },
+  "messages": [
+    {
+      "type": "error",
+      "code": "item_unavailable",
+      "content": "All items are not available for purchase",
+      "severity": "unrecoverable"
+    }
+  ],
+  "continue_url": "https://merchant.com/"
 }
 ```
 

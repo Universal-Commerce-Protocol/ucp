@@ -1,35 +1,35 @@
 # Universal Commerce Protocol (UCP) Codeowners
 
 # Default for all files.
-* @Universal-Commerce-Protocol/maintainers
+* @Universal-Commerce-Protocol/maintainers @Universal-Commerce-Protocol/tech-council @Universal-Commerce-Protocol/governance-council
 
 # Infrastructure, Tooling & Configuration
-/.github/                 @Universal-Commerce-Protocol/devops-maintainers
-/scripts/                 @Universal-Commerce-Protocol/devops-maintainers
-/generated/               @Universal-Commerce-Protocol/devops-maintainers
-/hooks.py                 @Universal-Commerce-Protocol/devops-maintainers
-/main.py                  @Universal-Commerce-Protocol/devops-maintainers
-/generate_ts_schema_types.js @Universal-Commerce-Protocol/devops-maintainers
-/.cspell/                 @Universal-Commerce-Protocol/devops-maintainers
-/.cspell.json             @Universal-Commerce-Protocol/devops-maintainers
-/.pre-commit-config.yaml  @Universal-Commerce-Protocol/devops-maintainers
-/.prettierignore          @Universal-Commerce-Protocol/devops-maintainers
-/.prettierrc              @Universal-Commerce-Protocol/devops-maintainers
-/.stylelintrc.json        @Universal-Commerce-Protocol/devops-maintainers
-/biome.json               @Universal-Commerce-Protocol/devops-maintainers
-/mkdocs.yml               @Universal-Commerce-Protocol/devops-maintainers
-/.gitignore               @Universal-Commerce-Protocol/devops-maintainers
-/pyproject.toml           @Universal-Commerce-Protocol/devops-maintainers
-/uv.lock                  @Universal-Commerce-Protocol/devops-maintainers
-/package.json             @Universal-Commerce-Protocol/devops-maintainers
-/package-lock.json        @Universal-Commerce-Protocol/devops-maintainers
+/.github/                 @Universal-Commerce-Protocol/devops-maintainers @Universal-Commerce-Protocol/maintainers @Universal-Commerce-Protocol/tech-council @Universal-Commerce-Protocol/governance-council
+/scripts/                 @Universal-Commerce-Protocol/devops-maintainers @Universal-Commerce-Protocol/maintainers @Universal-Commerce-Protocol/tech-council @Universal-Commerce-Protocol/governance-council
+/generated/               @Universal-Commerce-Protocol/devops-maintainers @Universal-Commerce-Protocol/maintainers @Universal-Commerce-Protocol/tech-council @Universal-Commerce-Protocol/governance-council
+/hooks.py                 @Universal-Commerce-Protocol/devops-maintainers @Universal-Commerce-Protocol/maintainers @Universal-Commerce-Protocol/tech-council @Universal-Commerce-Protocol/governance-council
+/main.py                  @Universal-Commerce-Protocol/devops-maintainers @Universal-Commerce-Protocol/maintainers @Universal-Commerce-Protocol/tech-council @Universal-Commerce-Protocol/governance-council
+/.cspell/                 @Universal-Commerce-Protocol/devops-maintainers @Universal-Commerce-Protocol/maintainers @Universal-Commerce-Protocol/tech-council @Universal-Commerce-Protocol/governance-council
+/.cspell.json             @Universal-Commerce-Protocol/devops-maintainers @Universal-Commerce-Protocol/maintainers @Universal-Commerce-Protocol/tech-council @Universal-Commerce-Protocol/governance-council
+/.pre-commit-config.yaml  @Universal-Commerce-Protocol/devops-maintainers @Universal-Commerce-Protocol/maintainers @Universal-Commerce-Protocol/tech-council @Universal-Commerce-Protocol/governance-council
+/.prettierignore          @Universal-Commerce-Protocol/devops-maintainers @Universal-Commerce-Protocol/maintainers @Universal-Commerce-Protocol/tech-council @Universal-Commerce-Protocol/governance-council
+/.prettierrc              @Universal-Commerce-Protocol/devops-maintainers @Universal-Commerce-Protocol/maintainers @Universal-Commerce-Protocol/tech-council @Universal-Commerce-Protocol/governance-council
+/.stylelintrc.json        @Universal-Commerce-Protocol/devops-maintainers @Universal-Commerce-Protocol/maintainers @Universal-Commerce-Protocol/tech-council @Universal-Commerce-Protocol/governance-council
+/biome.json               @Universal-Commerce-Protocol/devops-maintainers @Universal-Commerce-Protocol/maintainers @Universal-Commerce-Protocol/tech-council @Universal-Commerce-Protocol/governance-council
+/mkdocs.yml               @Universal-Commerce-Protocol/devops-maintainers @Universal-Commerce-Protocol/maintainers @Universal-Commerce-Protocol/tech-council @Universal-Commerce-Protocol/governance-council
+/.gitignore               @Universal-Commerce-Protocol/devops-maintainers @Universal-Commerce-Protocol/maintainers @Universal-Commerce-Protocol/tech-council @Universal-Commerce-Protocol/governance-council
+/pyproject.toml           @Universal-Commerce-Protocol/devops-maintainers @Universal-Commerce-Protocol/maintainers @Universal-Commerce-Protocol/tech-council @Universal-Commerce-Protocol/governance-council
+/uv.lock                  @Universal-Commerce-Protocol/devops-maintainers @Universal-Commerce-Protocol/maintainers @Universal-Commerce-Protocol/tech-council @Universal-Commerce-Protocol/governance-council
+/package.json             @Universal-Commerce-Protocol/devops-maintainers @Universal-Commerce-Protocol/maintainers @Universal-Commerce-Protocol/tech-council @Universal-Commerce-Protocol/governance-council
+/package-lock.json        @Universal-Commerce-Protocol/devops-maintainers @Universal-Commerce-Protocol/maintainers @Universal-Commerce-Protocol/tech-council @Universal-Commerce-Protocol/governance-council
 
 # Documentation
-/docs/                    @Universal-Commerce-Protocol/devops-maintainers
-/docs/specification/      @Universal-Commerce-Protocol/maintainers
+/docs/                    @Universal-Commerce-Protocol/devops-maintainers @Universal-Commerce-Protocol/maintainers @Universal-Commerce-Protocol/tech-council @Universal-Commerce-Protocol/governance-council
+/docs/specification/      @Universal-Commerce-Protocol/maintainers @Universal-Commerce-Protocol/tech-council @Universal-Commerce-Protocol/governance-council
 
 # Core Protocol
-/source/                  @Universal-Commerce-Protocol/tech-council
+/source/                  @Universal-Commerce-Protocol/tech-council @Universal-Commerce-Protocol/governance-council
 
 # Governance
+/LICENSE                 @Universal-Commerce-Protocol/governance-council
 /.github/CODEOWNERS      @Universal-Commerce-Protocol/governance-council

@@ -29,7 +29,7 @@
 
     "platform_schema": {
       "title": "Service (Platform Schema)",
-      "description": "Full service declaration for platform-level discovery. Different transports require different fields.",
+      "description": "Full service declaration for platform-level discovery. All transports require `version`, `spec`, and `transport`. REST and MCP additionally require `schema` and `endpoint`; A2A requires `endpoint`; embedded requires `schema`.",
       "allOf": [
         { "$ref": "#/$defs/base" },
         { "required": ["spec"] },

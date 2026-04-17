@@ -29,14 +29,14 @@ Businesses advertise MCP transport availability through their UCP profile at
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "{{ ucp_version }}",
     "services": {
       "dev.ucp.shopping": [
         {
-          "version": "2026-01-11",
-          "spec": "https://ucp.dev/specification/overview",
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview",
           "transport": "mcp",
-          "schema": "https://ucp.dev/services/shopping/mcp.openrpc.json",
+          "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/mcp.openrpc.json",
           "endpoint": "https://business.example.com/ucp/mcp"
         }
       ]
@@ -44,16 +44,16 @@ Businesses advertise MCP transport availability through their UCP profile at
     "capabilities": {
       "dev.ucp.shopping.checkout": [
         {
-          "version": "2026-01-11",
-          "spec": "https://ucp.dev/specification/checkout",
-          "schema": "https://ucp.dev/schemas/shopping/checkout.json"
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/checkout",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/checkout.json"
         }
       ],
       "dev.ucp.shopping.fulfillment": [
         {
-          "version": "2026-01-11",
-          "spec": "https://ucp.dev/specification/fulfillment",
-          "schema": "https://ucp.dev/schemas/shopping/fulfillment.json",
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/fulfillment",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json",
           "extends": "dev.ucp.shopping.checkout"
         }
       ]
@@ -62,7 +62,7 @@ Businesses advertise MCP transport availability through their UCP profile at
       "com.example.vendor.delegate_payment": [
         {
           "id": "handler_1",
-          "version": "2026-01-11",
+          "version": "{{ ucp_version }}",
           "spec": "https://example.vendor.com/specs/delegate-payment",
           "schema": "https://example.vendor.com/schemas/delegate-payment-config.json",
           "available_instruments": [
@@ -173,6 +173,7 @@ Maps to the [Create Checkout](checkout.md#create-checkout) operation.
             },
             "line_items": [
               {
+                "id": "li_1",
                 "item": {
                   "id": "item_123"
                 },
@@ -212,18 +213,18 @@ Maps to the [Create Checkout](checkout.md#create-checkout) operation.
         "structuredContent": {
           "checkout": {
             "ucp": {
-              "version": "2026-01-11",
+              "version": "{{ ucp_version }}",
               "capabilities": {
                 "dev.ucp.shopping.checkout": [
-                  {"version": "2026-01-11"}
+                  {"version": "{{ ucp_version }}"}
                 ],
                 "dev.ucp.shopping.fulfillment": [
-                  {"version": "2026-01-11"}
+                  {"version": "{{ ucp_version }}"}
                 ]
               },
               "payment_handlers": {
                 "com.example.vendor.delegate_payment": [
-                  {"id": "handler_1", "version": "2026-01-11", "available_instruments": [{"type": "card"}], "config": {}}
+                  {"id": "handler_1", "version": "{{ ucp_version }}", "available_instruments": [{"type": "card"}], "config": {}}
                 ]
               }
             },
@@ -236,7 +237,7 @@ Maps to the [Create Checkout](checkout.md#create-checkout) operation.
             },
             "line_items": [
               {
-                "id": "item_123",
+                "id": "li_1",
                 "item": {
                   "id": "item_123",
                   "title": "Blue Jeans",
@@ -270,7 +271,7 @@ Maps to the [Create Checkout](checkout.md#create-checkout) operation.
                 {
                   "id": "shipping_1",
                   "type": "shipping",
-                  "line_item_ids": ["item_123"],
+                  "line_item_ids": ["li_1"],
                   "selected_destination_id": "dest_home",
                   "destinations": [
                     {
@@ -285,7 +286,7 @@ Maps to the [Create Checkout](checkout.md#create-checkout) operation.
                   "groups": [
                     {
                       "id": "package_1",
-                      "line_item_ids": ["item_123"],
+                      "line_item_ids": ["li_1"],
                       "selected_option_id": "standard",
                       "options": [
                         {
@@ -335,6 +336,34 @@ Maps to the [Create Checkout](checkout.md#create-checkout) operation.
             "type": "text",
             "text": "{\"checkout\":{\"ucp\":{...},\"id\":\"checkout_abc123\",...}}"
           }
+        ]
+      }
+    }
+    ```
+
+=== "Error Response"
+
+    All items out of stock — no checkout resource is created:
+
+    ```json
+    {
+      "jsonrpc": "2.0",
+      "id": 1,
+      "result": {
+        "structuredContent": {
+          "ucp": { "version": "2026-01-11", "status": "error" },
+          "messages": [
+            {
+              "type": "error",
+              "code": "out_of_stock",
+              "content": "All requested items are currently out of stock",
+              "severity": "unrecoverable"
+            }
+          ],
+          "continue_url": "https://merchant.com/"
+        },
+        "content": [
+          {"type": "text", "text": "{\"ucp\":{...},\"messages\":[...]}"}
         ]
       }
     }
@@ -400,6 +429,7 @@ Maps to the [Update Checkout](checkout.md#update-checkout) operation.
                 "item": {
                   "id": "item_123"
                 },
+                "id": "li_1",
                 "quantity": 1
               }
             ],
@@ -408,7 +438,7 @@ Maps to the [Update Checkout](checkout.md#update-checkout) operation.
               "methods": [
                 {
                   "id": "shipping_1",
-                  "line_item_ids": ["item_123"],
+                  "line_item_ids": ["li_1"],
                   "groups": [
                     {
                       "id": "package_1",
@@ -434,18 +464,18 @@ Maps to the [Update Checkout](checkout.md#update-checkout) operation.
         "structuredContent": {
           "checkout": {
             "ucp": {
-              "version": "2026-01-11",
+              "version": "{{ ucp_version }}",
               "capabilities": {
                 "dev.ucp.shopping.checkout": [
-                  {"version": "2026-01-11"}
+                  {"version": "{{ ucp_version }}"}
                 ],
                 "dev.ucp.shopping.fulfillment": [
-                  {"version": "2026-01-11"}
+                  {"version": "{{ ucp_version }}"}
                 ]
               },
               "payment_handlers": {
                 "com.example.vendor.delegate_payment": [
-                  {"id": "handler_1", "version": "2026-01-11", "available_instruments": [{"type": "card"}], "config": {}}
+                  {"id": "handler_1", "version": "{{ ucp_version }}", "available_instruments": [{"type": "card"}], "config": {}}
                 ]
               }
             },
@@ -458,7 +488,7 @@ Maps to the [Update Checkout](checkout.md#update-checkout) operation.
             },
             "line_items": [
               {
-                "id": "item_123",
+                "id": "li_1",
                 "item": {
                   "id": "item_123",
                   "title": "Blue Jeans",
@@ -492,7 +522,7 @@ Maps to the [Update Checkout](checkout.md#update-checkout) operation.
                 {
                   "id": "shipping_1",
                   "type": "shipping",
-                  "line_item_ids": ["item_123"],
+                  "line_item_ids": ["li_1"],
                   "selected_destination_id": "dest_home",
                   "destinations": [
                     {
@@ -507,7 +537,7 @@ Maps to the [Update Checkout](checkout.md#update-checkout) operation.
                   "groups": [
                     {
                       "id": "package_1",
-                      "line_item_ids": ["item_123"],
+                      "line_item_ids": ["li_1"],
                       "selected_option_id": "express",
                       "options": [
                         {
@@ -621,16 +651,16 @@ as JSON-RPC `result` with `structuredContent` containing the UCP envelope and
     "structuredContent": {
       "checkout": {
         "ucp": {
-          "version": "2026-01-11",
+          "version": "{{ ucp_version }}",
           "capabilities": {
-            "dev.ucp.shopping.checkout": [{"version": "2026-01-11"}]
+            "dev.ucp.shopping.checkout": [{"version": "{{ ucp_version }}"}]
           }
         },
         "id": "checkout_abc123",
         "status": "incomplete",
         "line_items": [
           {
-            "id": "item_456",
+            "id": "li_1",
             "quantity": 100,
             "available_quantity": 12
           }
@@ -648,6 +678,34 @@ as JSON-RPC `result` with `structuredContent` containing the UCP envelope and
     },
     "content": [
       {"type": "text", "text": "{\"checkout\":{\"ucp\":{...},\"id\":\"checkout_abc123\",...}}"}
+    ]
+  }
+}
+```
+
+For `create_checkout`, when all items unavailable and no checkout can be created,
+JSON-RPC `result` with `structuredContent` containing the UCP envelope and `messages`:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "structuredContent": {
+      "ucp": { "version": "2026-01-11", "status": "error" },
+      "messages": [
+        {
+          "type": "error",
+          "code": "item_unavailable",
+          "content": "Items are not available for purchase in your region",
+          "severity": "unrecoverable",
+          "path": "$.line_items"
+        }
+      ],
+      "continue_url": "https://merchant.com/"
+    },
+    "content": [
+      {"type": "text", "text": "{\"ucp\":{...},\"messages\":[...]}"}
     ]
   }
 }

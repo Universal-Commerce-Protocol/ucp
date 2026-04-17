@@ -3,7 +3,7 @@
   "$id": "https://ucp.dev/schemas/shopping/cart.json",
   "name": "dev.ucp.shopping.cart",
   "title": "Cart",
-  "description": "Shopping cart with estimated pricing before checkout. Lightweight pre-purchase exploration with no payment info or complex status states. Cart exists (200) or doesn't (404).",
+  "description": "Shopping cart with estimated pricing before checkout. Lightweight pre-purchase exploration with no payment info or complex status states.",
   "$defs": {
     "checkout": {
       "title": "Checkout with Cart",
@@ -69,6 +69,13 @@
         "update": "optional"
       }
     },
+    "signals": {
+      "$ref": "types/signals.json",
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional"
+      }
+    },
     "buyer": {
       "$ref": "types/buyer.json",
       "description": "Optional buyer information for personalized estimates.",
@@ -83,10 +90,7 @@
       "ucp_request": "omit"
     },
     "totals": {
-      "type": "array",
-      "items": {
-        "$ref": "types/total.json"
-      },
+      "$ref": "types/totals.json",
       "description": "Estimated cost breakdown. May be partial if shipping/tax not yet calculable.",
       "ucp_request": "omit"
     },
