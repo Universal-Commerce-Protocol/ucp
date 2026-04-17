@@ -2832,10 +2832,10 @@ verification.</p>
 </tr>
 </tbody>
 </table>
-<p>* Required if request has query parameters
-*<em> Required if <code>UCP-Agent</code> header is present
-*</em>* Required for POST, PUT, DELETE, PATCH
-† Required if request has a body</p>
+<p>* Required if request has query parameters</p>
+<p>** Required if <code>UCP-Agent</code> header is present</p>
+<p>*** Required for POST, PUT, DELETE, PATCH</p>
+<p>† Required if request has a body</p>
 <p><strong>Signature Generation:</strong></p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>sign_rest_request(method, path, query, body_bytes, idempotency_key, private_key, kid):
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    // 1. Compute body digest (if body present)
