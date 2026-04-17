@@ -31,29 +31,32 @@ Businesses advertise MCP transport availability through their UCP profile at
   "ucp": {
     "version": "{{ ucp_version }}",
     "services": {
-      "dev.ucp.shopping": {
-        "version": "{{ ucp_version }}",
-        "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview",
-        "mcp": {
+      "dev.ucp.shopping": [
+        {
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview",
+          "transport": "mcp",
           "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/mcp.openrpc.json",
           "endpoint": "https://business.example.com/ucp/mcp"
         }
-      }
+      ]
     },
-    "capabilities": [
-      {
-        "name": "dev.ucp.shopping.checkout",
-        "version": "{{ ucp_version }}",
-        "spec": "https://ucp.dev/{{ ucp_version }}/specification/checkout",
-        "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/checkout.json"
-      },
-      {
-        "name": "dev.ucp.shopping.cart",
-        "version": "{{ ucp_version }}",
-        "spec": "https://ucp.dev/{{ ucp_version }}/specification/cart",
-        "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/cart.json"
-      }
-    ]
+    "capabilities": {
+      "dev.ucp.shopping.checkout": [
+        {
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/checkout",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/checkout.json"
+        }
+      ],
+      "dev.ucp.shopping.cart": [
+        {
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/cart",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/cart.json"
+        }
+      ]
+    }
   }
 }
 ```
@@ -168,16 +171,10 @@ Maps to the [Create Cart](cart.md#create-cart) operation.
           "cart": {
             "ucp": {
               "version": "{{ ucp_version }}",
-              "capabilities": [
-                {
-                  "name": "dev.ucp.shopping.checkout",
-                  "version": "{{ ucp_version }}"
-                },
-                {
-                  "name": "dev.ucp.shopping.cart",
-                  "version": "{{ ucp_version }}"
-                }
-              ]
+              "capabilities": {
+                "dev.ucp.shopping.checkout": [{"version": "{{ ucp_version }}"}],
+                "dev.ucp.shopping.cart": [{"version": "{{ ucp_version }}"}]
+              }
             },
             "id": "cart_abc123",
             "line_items": [
@@ -294,16 +291,10 @@ Maps to the [Get Cart](cart.md#get-cart) operation.
           "cart": {
             "ucp": {
               "version": "{{ ucp_version }}",
-              "capabilities": [
-                {
-                  "name": "dev.ucp.shopping.checkout",
-                  "version": "{{ ucp_version }}"
-                },
-                {
-                  "name": "dev.ucp.shopping.cart",
-                  "version": "{{ ucp_version }}"
-                }
-              ]
+              "capabilities": {
+                "dev.ucp.shopping.checkout": [{"version": "{{ ucp_version }}"}],
+                "dev.ucp.shopping.cart": [{"version": "{{ ucp_version }}"}]
+              }
             },
             "id": "cart_abc123",
             "line_items": [
@@ -357,12 +348,9 @@ Maps to the [Get Cart](cart.md#get-cart) operation.
           "cart": {
             "ucp": {
               "version": "{{ ucp_version }}",
-              "capabilities": [
-                {
-                  "name": "dev.ucp.shopping.cart",
-                  "version": "{{ ucp_version }}"
-                }
-              ]
+              "capabilities": {
+                "dev.ucp.shopping.cart": [{"version": "{{ ucp_version }}"}]
+              }
             },
             "messages": [
               {
@@ -454,16 +442,10 @@ Maps to the [Update Cart](cart.md#update-cart) operation.
           "cart": {
             "ucp": {
               "version": "{{ ucp_version }}",
-              "capabilities": [
-                {
-                  "name": "dev.ucp.shopping.checkout",
-                  "version": "{{ ucp_version }}"
-                },
-                {
-                  "name": "dev.ucp.shopping.cart",
-                  "version": "{{ ucp_version }}"
-                }
-              ]
+              "capabilities": {
+                "dev.ucp.shopping.checkout": [{"version": "{{ ucp_version }}"}],
+                "dev.ucp.shopping.cart": [{"version": "{{ ucp_version }}"}]
+              }
             },
             "id": "cart_abc123",
             "line_items": [
@@ -566,16 +548,10 @@ Maps to the [Cancel Cart](cart.md#cancel-cart) operation.
           "cart": {
             "ucp": {
               "version": "{{ ucp_version }}",
-              "capabilities": [
-                {
-                  "name": "dev.ucp.shopping.checkout",
-                  "version": "{{ ucp_version }}"
-                },
-                {
-                  "name": "dev.ucp.shopping.cart",
-                  "version": "{{ ucp_version }}"
-                }
-              ]
+              "capabilities": {
+                "dev.ucp.shopping.checkout": [{"version": "{{ ucp_version }}"}],
+                "dev.ucp.shopping.cart": [{"version": "{{ ucp_version }}"}]
+              }
             },
             "id": "cart_abc123",
             "line_items": [
