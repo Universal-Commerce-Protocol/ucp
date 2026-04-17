@@ -417,7 +417,7 @@ Content-Type: application/json
       {
         "id": "shipping_1",
         "type": "shipping",
-        "line_item_ids": ["item_123"],
+        "line_item_ids": ["li_1"],
         "selected_destination_id": "dest_home",
         "destinations": [
           {
@@ -432,7 +432,7 @@ Content-Type: application/json
         "groups": [
           {
             "id": "package_1",
-            "line_item_ids": ["item_123"],
+            "line_item_ids": ["li_1"],
             "selected_option_id": "standard",
             "options": [
               {
@@ -511,7 +511,7 @@ Content-Type: application/json
       {
         "id": "shipping_1",
         "type": "shipping",
-        "line_item_ids": ["item_123"],
+        "line_item_ids": ["li_1"],
         "selected_destination_id": "dest_home",
         "destinations": [
           {
@@ -610,7 +610,7 @@ Content-Type: application/json
       {
         "id": "shipping_1",
         "type": "shipping",
-        "line_item_ids": ["item_123"],
+        "line_item_ids": ["li_1"],
         "selected_destination_id": "dest_home",
         "destinations": [
           {
@@ -625,7 +625,7 @@ Content-Type: application/json
         "groups": [
           {
             "id": "package_1",
-            "line_item_ids": ["item_123"],
+            "line_item_ids": ["li_1"],
             "selected_option_id": "express",
             "options": [
               {
@@ -799,7 +799,7 @@ Content-Type: application/json
       {
         "id": "shipping_1",
         "type": "shipping",
-        "line_item_ids": ["item_123"],
+        "line_item_ids": ["li_1"],
         "selected_destination_id": "dest_home",
         "destinations": [
           {
@@ -814,7 +814,7 @@ Content-Type: application/json
         "groups": [
           {
             "id": "package_1",
-            "line_item_ids": ["item_123"],
+            "line_item_ids": ["li_1"],
             "selected_option_id": "express",
             "options": [
               {
@@ -952,7 +952,7 @@ Content-Type: application/json
       {
         "id": "shipping_1",
         "type": "shipping",
-        "line_item_ids": ["item_123"],
+        "line_item_ids": ["li_1"],
         "selected_destination_id": "dest_home",
         "destinations": [
           {
@@ -967,7 +967,7 @@ Content-Type: application/json
         "groups": [
           {
             "id": "package_1",
-            "line_item_ids": ["item_123"],
+            "line_item_ids": ["li_1"],
             "selected_option_id": "express",
             "options": [
               {
@@ -1103,7 +1103,7 @@ Content-Type: application/json
       {
         "id": "shipping_1",
         "type": "shipping",
-        "line_item_ids": ["item_123"],
+        "line_item_ids": ["li_1"],
         "selected_destination_id": "dest_home",
         "destinations": [
           {
@@ -1118,7 +1118,7 @@ Content-Type: application/json
         "groups": [
           {
             "id": "package_1",
-            "line_item_ids": ["item_123"],
+            "line_item_ids": ["li_1"],
             "selected_option_id": "express",
             "options": [
               {
