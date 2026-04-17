@@ -284,7 +284,7 @@ Block
 
 Carrefour
 
-Chewy
+Checkout.com
 
 Chewy
 
@@ -342,7 +342,7 @@ Block
 
 Carrefour
 
-Chewy
+Checkout.com
 
 Chewy
 
