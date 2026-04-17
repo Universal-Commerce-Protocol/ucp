@@ -200,8 +200,11 @@ verification.
 | `content-type`    | Cond.†    | Content-Type (if body present)         |
 
 \* Required if request has query parameters
+
 \** Required if `UCP-Agent` header is present
+
 \*** Required for POST, PUT, DELETE, PATCH
+
 † Required if request has a body
 
 **Signature Generation:**
