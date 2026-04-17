@@ -86,7 +86,7 @@ POST /checkouts
 ```json
 {
   "id": "checkout_456",
-  "status": "ready_for_payment",
+  "status": "ready_for_complete",
   "currency": "USD",
   "buyer": {
     "email": "jane.doe@example.com",

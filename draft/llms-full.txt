@@ -3277,7 +3277,7 @@ Content-Type: application/json
     {
       "type": "error",
       "code": "missing",
-      "path": "$.fulfillment.method[0].selected_destination_id",
+      "path": "$.fulfillment.methods[0].selected_destination_id",
       "content": "Fulfillment address is required",
       "severity": "recoverable"
     }
@@ -6980,7 +6980,7 @@ Requests the host to present address selection UI for a shipping fulfillment met
                         "destinations": [
                             {
                                 "id": "address_123",
-                                "address_street": "456 Old Street"
+                                "street_address": "456 Old Street"
                                 // ...
                             }
                         ]
@@ -7813,7 +7813,7 @@ POST /checkouts
 ```json
 {
   "id": "checkout_456",
-  "status": "ready_for_payment",
+  "status": "ready_for_complete",
   "currency": "USD",
   "buyer": {
     "email": "jane.doe@example.com",
@@ -16017,8 +16017,9 @@ Content-Type: application/json
       }
     ]
   },
-  "risk_signal": {
-    // ... the key value pair for potential risk signal data
+  "signals": {
+    "dev.ucp.buyer_ip": "203.0.113.42",
+    "dev.ucp.user_agent": "Mozilla/5.0 ..."
   }
 }
 ```

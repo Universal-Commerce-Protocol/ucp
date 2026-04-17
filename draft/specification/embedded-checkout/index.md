@@ -1066,7 +1066,7 @@ Requests the host to present address selection UI for a shipping fulfillment met
                         "destinations": [
                             {
                                 "id": "address_123",
-                                "address_street": "456 Old Street"
+                                "street_address": "456 Old Street"
                                 // ...
                             }
                         ]

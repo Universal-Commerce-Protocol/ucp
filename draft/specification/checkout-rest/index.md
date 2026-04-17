@@ -223,7 +223,7 @@ Content-Type: application/json
     {
       "type": "error",
       "code": "missing",
-      "path": "$.fulfillment.method[0].selected_destination_id",
+      "path": "$.fulfillment.methods[0].selected_destination_id",
       "content": "Fulfillment address is required",
       "severity": "recoverable"
     }
