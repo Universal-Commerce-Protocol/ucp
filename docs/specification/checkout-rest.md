@@ -257,7 +257,7 @@ so clients must include all previously set fields they wish to retain.
         {
           "type": "error",
           "code": "missing",
-          "path": "$.fulfillment.method[0].selected_destination_id",
+          "path": "$.fulfillment.methods[0].selected_destination_id",
           "content": "Fulfillment address is required",
           "severity": "recoverable"
         }
