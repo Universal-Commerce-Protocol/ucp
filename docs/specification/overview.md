@@ -1464,6 +1464,10 @@ Most platform implementations can **avoid PCI-DSS scope** by:
 - Forwarding credentials without the ability to use them directly
 - Using PSP tokenization payment handlers where raw credentials never pass
     through the platform
+- Presenting pre-provisioned card network tokens
+    (`card_number_type: "network_token"`) — DPANs with cryptograms are not
+    considered cardholder data by most acquirers, reducing PCI scope compared
+    to handling FPANs directly
 
 #### Business Scope
 
