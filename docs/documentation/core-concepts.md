@@ -121,4 +121,4 @@ interact.
     UCP is transport-agnostic but defines specific bindings for
     interoperability.
     * *Examples:* REST API (primary), MCP (Model Context Protocol), A2A
-        (Agent2Agent).
+        (Agent2Agent), EP (Embedded Protocol).
