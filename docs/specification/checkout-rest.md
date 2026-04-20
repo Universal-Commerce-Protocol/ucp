@@ -1291,11 +1291,17 @@ with HTTP 200 and the UCP envelope containing `messages`:
   "status": "incomplete",
   "line_items": [
     {
-      "id": "item_456",
-      "quantity": 100,
-      "available_quantity": 12
+      "id": "li_1",
+        "item": {
+          "id": "item_123",
+          "title": "Blue Jeans",
+          "price": 5000
+        },
+      "quantity": 12,
+      "totals": [...]
     }
   ],
+  "totals": [...],
   "messages": [
     {
       "type": "warning",
