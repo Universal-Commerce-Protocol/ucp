@@ -1359,15 +1359,13 @@ MCP tool responses use a dual-output pattern for backward compatibility. UCP MCP
   "id": 1,
   "result": {
     "structuredContent": {
-      "checkout": {
-        "ucp": {"version": "draft", "capabilities": {...}},
-        "id": "checkout_abc123",
-        "status": "incomplete",
-        ...
-      }
+      "ucp": {"version": "draft", "capabilities": {...}},
+      "id": "checkout_abc123",
+      "status": "incomplete",
+      ...
     },
     "content": [
-      {"type": "text", "text": "{\"checkout\":{\"ucp\":{...},\"id\":\"checkout_abc123\",...}}"}
+      {"type": "text", "text": "{\"ucp\":{...},\"id\":\"checkout_abc123\",...}"}
     ]
   }
 }
@@ -4581,130 +4579,128 @@ Maps to the [Create Checkout](http://ucp.dev/draft/specification/checkout/#creat
   "id": 1,
   "result": {
     "structuredContent": {
-      "checkout": {
-        "ucp": {
-          "version": "draft",
-          "capabilities": {
-            "dev.ucp.shopping.checkout": [
-              {"version": "draft"}
-            ],
-            "dev.ucp.shopping.fulfillment": [
-              {"version": "draft"}
-            ]
-          },
-          "payment_handlers": {
-            "com.example.vendor.delegate_payment": [
-              {"id": "handler_1", "version": "draft", "available_instruments": [{"type": "card"}], "config": {}}
-            ]
-          }
-        },
-        "id": "checkout_abc123",
-        "status": "incomplete",
-        "buyer": {
-          "email": "jane.doe@example.com",
-          "first_name": "Jane",
-          "last_name": "Doe"
-        },
-        "line_items": [
-          {
-            "id": "li_1",
-            "item": {
-              "id": "item_123",
-              "title": "Blue Jeans",
-              "price": 5000
-            },
-            "quantity": 1,
-            "totals": [
-              {"type": "subtotal", "amount": 5000},
-              {"type": "total", "amount": 5000}
-            ]
-          }
-        ],
-        "currency": "USD",
-        "totals": [
-          {
-            "type": "subtotal",
-            "amount": 5000
-          },
-          {
-            "type": "fulfillment",
-            "display_text": "Shipping",
-            "amount": 500
-          },
-          {
-            "type": "total",
-            "amount": 5500
-          }
-        ],
-        "fulfillment": {
-          "methods": [
-            {
-              "id": "shipping_1",
-              "type": "shipping",
-              "line_item_ids": ["li_1"],
-              "selected_destination_id": "dest_home",
-              "destinations": [
-                {
-                  "id": "dest_home",
-                  "street_address": "123 Main St",
-                  "address_locality": "Springfield",
-                  "address_region": "IL",
-                  "postal_code": "62701",
-                  "address_country": "US"
-                }
-              ],
-              "groups": [
-                {
-                  "id": "package_1",
-                  "line_item_ids": ["li_1"],
-                  "selected_option_id": "standard",
-                  "options": [
-                    {
-                      "id": "standard",
-                      "title": "Standard Shipping",
-                      "description": "Arrives in 5-7 business days",
-                      "totals": [
-                        {
-                          "type": "total",
-                          "amount": 500
-                        }
-                      ]
-                    },
-                    {
-                      "id": "express",
-                      "title": "Express Shipping",
-                      "description": "Arrives in 2-3 business days",
-                      "totals": [
-                        {
-                          "type": "total",
-                          "amount": 1000
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ]
-            }
+      "ucp": {
+        "version": "draft",
+        "capabilities": {
+          "dev.ucp.shopping.checkout": [
+            {"version": "draft"}
+          ],
+          "dev.ucp.shopping.fulfillment": [
+            {"version": "draft"}
           ]
         },
-        "links": [
-          {
-            "type": "privacy_policy",
-            "url": "https://business.example.com/privacy"
+        "payment_handlers": {
+          "com.example.vendor.delegate_payment": [
+            {"id": "handler_1", "version": "draft", "available_instruments": [{"type": "card"}], "config": {}}
+          ]
+        }
+      },
+      "id": "checkout_abc123",
+      "status": "incomplete",
+      "buyer": {
+        "email": "jane.doe@example.com",
+        "first_name": "Jane",
+        "last_name": "Doe"
+      },
+      "line_items": [
+        {
+          "id": "li_1",
+          "item": {
+            "id": "item_123",
+            "title": "Blue Jeans",
+            "price": 5000
           },
+          "quantity": 1,
+          "totals": [
+            {"type": "subtotal", "amount": 5000},
+            {"type": "total", "amount": 5000}
+          ]
+        }
+      ],
+      "currency": "USD",
+      "totals": [
+        {
+          "type": "subtotal",
+          "amount": 5000
+        },
+        {
+          "type": "fulfillment",
+          "display_text": "Shipping",
+          "amount": 500
+        },
+        {
+          "type": "total",
+          "amount": 5500
+        }
+      ],
+      "fulfillment": {
+        "methods": [
           {
-            "type": "terms_of_service",
-            "url": "https://business.example.com/terms"
+            "id": "shipping_1",
+            "type": "shipping",
+            "line_item_ids": ["li_1"],
+            "selected_destination_id": "dest_home",
+            "destinations": [
+              {
+                "id": "dest_home",
+                "street_address": "123 Main St",
+                "address_locality": "Springfield",
+                "address_region": "IL",
+                "postal_code": "62701",
+                "address_country": "US"
+              }
+            ],
+            "groups": [
+              {
+                "id": "package_1",
+                "line_item_ids": ["li_1"],
+                "selected_option_id": "standard",
+                "options": [
+                  {
+                    "id": "standard",
+                    "title": "Standard Shipping",
+                    "description": "Arrives in 5-7 business days",
+                    "totals": [
+                      {
+                        "type": "total",
+                        "amount": 500
+                      }
+                    ]
+                  },
+                  {
+                    "id": "express",
+                    "title": "Express Shipping",
+                    "description": "Arrives in 2-3 business days",
+                    "totals": [
+                      {
+                        "type": "total",
+                        "amount": 1000
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
           }
-        ],
-        "continue_url": "https://business.example.com/checkout-sessions/checkout_abc123",
-        "expires_at": "2026-01-11T18:30:00Z"
-      }
+        ]
+      },
+      "links": [
+        {
+          "type": "privacy_policy",
+          "url": "https://business.example.com/privacy"
+        },
+        {
+          "type": "terms_of_service",
+          "url": "https://business.example.com/terms"
+        }
+      ],
+      "continue_url": "https://business.example.com/checkout-sessions/checkout_abc123",
+      "expires_at": "2026-01-11T18:30:00Z"
     },
     "content": [
       {
         "type": "text",
-        "text": "{\"checkout\":{\"ucp\":{...},\"id\":\"checkout_abc123\",...}}"
+        "text": "{\"ucp\":{...},\"id\":\"checkout_abc123\",...}"
       }
     ]
   }
@@ -4825,130 +4821,128 @@ Maps to the [Update Checkout](http://ucp.dev/draft/specification/checkout/#updat
   "id": 2,
   "result": {
     "structuredContent": {
-      "checkout": {
-        "ucp": {
-          "version": "draft",
-          "capabilities": {
-            "dev.ucp.shopping.checkout": [
-              {"version": "draft"}
-            ],
-            "dev.ucp.shopping.fulfillment": [
-              {"version": "draft"}
-            ]
-          },
-          "payment_handlers": {
-            "com.example.vendor.delegate_payment": [
-              {"id": "handler_1", "version": "draft", "available_instruments": [{"type": "card"}], "config": {}}
-            ]
-          }
-        },
-        "id": "checkout_abc123",
-        "status": "incomplete",
-        "buyer": {
-          "email": "jane.doe@example.com",
-          "first_name": "Jane",
-          "last_name": "Doe"
-        },
-        "line_items": [
-          {
-            "id": "li_1",
-            "item": {
-              "id": "item_123",
-              "title": "Blue Jeans",
-              "price": 5000
-            },
-            "quantity": 1,
-            "totals": [
-              {"type": "subtotal", "amount": 5000},
-              {"type": "total", "amount": 5000}
-            ]
-          }
-        ],
-        "currency": "USD",
-        "totals": [
-          {
-            "type": "subtotal",
-            "amount": 5000
-          },
-          {
-            "type": "fulfillment",
-            "display_text": "Shipping",
-            "amount": 1000
-          },
-          {
-            "type": "total",
-            "amount": 6000
-          }
-        ],
-        "fulfillment": {
-          "methods": [
-            {
-              "id": "shipping_1",
-              "type": "shipping",
-              "line_item_ids": ["li_1"],
-              "selected_destination_id": "dest_home",
-              "destinations": [
-                {
-                  "id": "dest_home",
-                  "street_address": "123 Main St",
-                  "address_locality": "Springfield",
-                  "address_region": "IL",
-                  "postal_code": "62701",
-                  "address_country": "US"
-                }
-              ],
-              "groups": [
-                {
-                  "id": "package_1",
-                  "line_item_ids": ["li_1"],
-                  "selected_option_id": "express",
-                  "options": [
-                    {
-                      "id": "standard",
-                      "title": "Standard Shipping",
-                      "description": "Arrives in 5-7 business days",
-                      "totals": [
-                        {
-                          "type": "total",
-                          "amount": 500
-                        }
-                      ]
-                    },
-                    {
-                      "id": "express",
-                      "title": "Express Shipping",
-                      "description": "Arrives in 2-3 business days",
-                      "totals": [
-                        {
-                          "type": "total",
-                          "amount": 1000
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ]
-            }
+      "ucp": {
+        "version": "draft",
+        "capabilities": {
+          "dev.ucp.shopping.checkout": [
+            {"version": "draft"}
+          ],
+          "dev.ucp.shopping.fulfillment": [
+            {"version": "draft"}
           ]
         },
-        "links": [
-          {
-            "type": "privacy_policy",
-            "url": "https://business.example.com/privacy"
+        "payment_handlers": {
+          "com.example.vendor.delegate_payment": [
+            {"id": "handler_1", "version": "draft", "available_instruments": [{"type": "card"}], "config": {}}
+          ]
+        }
+      },
+      "id": "checkout_abc123",
+      "status": "incomplete",
+      "buyer": {
+        "email": "jane.doe@example.com",
+        "first_name": "Jane",
+        "last_name": "Doe"
+      },
+      "line_items": [
+        {
+          "id": "li_1",
+          "item": {
+            "id": "item_123",
+            "title": "Blue Jeans",
+            "price": 5000
           },
+          "quantity": 1,
+          "totals": [
+            {"type": "subtotal", "amount": 5000},
+            {"type": "total", "amount": 5000}
+          ]
+        }
+      ],
+      "currency": "USD",
+      "totals": [
+        {
+          "type": "subtotal",
+          "amount": 5000
+        },
+        {
+          "type": "fulfillment",
+          "display_text": "Shipping",
+          "amount": 1000
+        },
+        {
+          "type": "total",
+          "amount": 6000
+        }
+      ],
+      "fulfillment": {
+        "methods": [
           {
-            "type": "terms_of_service",
-            "url": "https://business.example.com/terms"
+            "id": "shipping_1",
+            "type": "shipping",
+            "line_item_ids": ["li_1"],
+            "selected_destination_id": "dest_home",
+            "destinations": [
+              {
+                "id": "dest_home",
+                "street_address": "123 Main St",
+                "address_locality": "Springfield",
+                "address_region": "IL",
+                "postal_code": "62701",
+                "address_country": "US"
+              }
+            ],
+            "groups": [
+              {
+                "id": "package_1",
+                "line_item_ids": ["li_1"],
+                "selected_option_id": "express",
+                "options": [
+                  {
+                    "id": "standard",
+                    "title": "Standard Shipping",
+                    "description": "Arrives in 5-7 business days",
+                    "totals": [
+                      {
+                        "type": "total",
+                        "amount": 500
+                      }
+                    ]
+                  },
+                  {
+                    "id": "express",
+                    "title": "Express Shipping",
+                    "description": "Arrives in 2-3 business days",
+                    "totals": [
+                      {
+                        "type": "total",
+                        "amount": 1000
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
           }
-        ],
-        "continue_url": "https://business.example.com/checkout-sessions/checkout_abc123",
-        "expires_at": "2026-01-11T18:30:00Z"
-      }
+        ]
+      },
+      "links": [
+        {
+          "type": "privacy_policy",
+          "url": "https://business.example.com/privacy"
+        },
+        {
+          "type": "terms_of_service",
+          "url": "https://business.example.com/terms"
+        }
+      ],
+      "continue_url": "https://business.example.com/checkout-sessions/checkout_abc123",
+      "expires_at": "2026-01-11T18:30:00Z"
     },
     "content": [
       {
         "type": "text",
-        "text": "{\"checkout\":{\"ucp\":{...},\"id\":\"checkout_abc123\",...}}"
+        "text": "{\"ucp\":{...},\"id\":\"checkout_abc123\",...}"
       }
     ]
   }
@@ -5003,35 +4997,33 @@ Business outcomes (including errors like unavailable merchandise) are returned a
   "id": 1,
   "result": {
     "structuredContent": {
-      "checkout": {
-        "ucp": {
-          "version": "draft",
-          "capabilities": {
-            "dev.ucp.shopping.checkout": [{"version": "draft"}]
-          }
-        },
-        "id": "checkout_abc123",
-        "status": "incomplete",
-        "line_items": [
-          {
-            "id": "li_1",
-            "quantity": 100,
-            "available_quantity": 12
-          }
-        ],
-        "messages": [
-          {
-            "type": "warning",
-            "code": "quantity_adjusted",
-            "content": "Quantity adjusted, requested 100 units but only 12 available",
-            "path": "$.line_items[0].quantity"
-          }
-        ],
-        "continue_url": "https://merchant.com/checkout/checkout_abc123"
-      }
+      "ucp": {
+        "version": "draft",
+        "capabilities": {
+          "dev.ucp.shopping.checkout": [{"version": "draft"}]
+        }
+      },
+      "id": "checkout_abc123",
+      "status": "incomplete",
+      "line_items": [
+        {
+          "id": "li_1",
+          "quantity": 100,
+          "available_quantity": 12
+        }
+      ],
+      "messages": [
+        {
+          "type": "warning",
+          "code": "quantity_adjusted",
+          "content": "Quantity adjusted, requested 100 units but only 12 available",
+          "path": "$.line_items[0].quantity"
+        }
+      ],
+      "continue_url": "https://merchant.com/checkout/checkout_abc123"
     },
     "content": [
-      {"type": "text", "text": "{\"checkout\":{\"ucp\":{...},\"id\":\"checkout_abc123\",...}}"}
+      {"type": "text", "text": "{\"ucp\":{...},\"id\":\"checkout_abc123\",...}"}
     ]
   }
 }
@@ -5120,7 +5112,7 @@ Content-Digest: sha-256=:Y5fK8nLmPqRsT3vWxYzAbCdEfGhIjKlMnO...:
 Signature-Input: sig1=("@status" "content-digest" "content-type");keyid="merchant-2026"
 Signature: sig1=:MFQCIH7kL9nM2oP5qR8sT1uV4wX6yZaB3cD...:
 
-{"jsonrpc":"2.0","id":1,"result":{"content":[{"type":"text","text":"..."}],"structuredContent":{"checkout":{"id":"checkout_abc123","status":"completed"}}}}
+{"jsonrpc":"2.0","id":1,"result":{"content":[{"type":"text","text":"..."}],"structuredContent":{"id":"checkout_abc123","status":"completed"}}}
 ```
 
 See [Message Signatures - REST Response Signing](http://ucp.dev/draft/specification/signatures/#rest-response-signing) for the signing algorithm (identical for MCP over HTTP).
@@ -9999,49 +9991,47 @@ Maps to the [Create Cart](http://ucp.dev/draft/specification/cart/#create-cart) 
   "id": 1,
   "result": {
     "structuredContent": {
-      "cart": {
-        "ucp": {
-          "version": "draft",
-          "capabilities": {
-            "dev.ucp.shopping.checkout": [{"version": "draft"}],
-            "dev.ucp.shopping.cart": [{"version": "draft"}]
-          }
-        },
-        "id": "cart_abc123",
-        "line_items": [
-          {
-            "id": "li_1",
-            "item": {
-              "id": "item_123",
-              "title": "Red T-Shirt",
-              "price": 2500
-            },
-            "quantity": 2,
-            "totals": [
-              {"type": "subtotal", "amount": 5000},
-              {"type": "total", "amount": 5000}
-            ]
-          }
-        ],
-        "currency": "USD",
-        "totals": [
-          {
-            "type": "subtotal",
-            "amount": 5000
+      "ucp": {
+        "version": "draft",
+        "capabilities": {
+          "dev.ucp.shopping.checkout": [{"version": "draft"}],
+          "dev.ucp.shopping.cart": [{"version": "draft"}]
+        }
+      },
+      "id": "cart_abc123",
+      "line_items": [
+        {
+          "id": "li_1",
+          "item": {
+            "id": "item_123",
+            "title": "Red T-Shirt",
+            "price": 2500
           },
-          {
-            "type": "total",
-            "amount": 5000
-          }
-        ],
-        "continue_url": "https://business.example.com/checkout?cart=cart_abc123",
-        "expires_at": "2026-01-16T12:00:00Z"
-      }
+          "quantity": 2,
+          "totals": [
+            {"type": "subtotal", "amount": 5000},
+            {"type": "total", "amount": 5000}
+          ]
+        }
+      ],
+      "currency": "USD",
+      "totals": [
+        {
+          "type": "subtotal",
+          "amount": 5000
+        },
+        {
+          "type": "total",
+          "amount": 5000
+        }
+      ],
+      "continue_url": "https://business.example.com/checkout?cart=cart_abc123",
+      "expires_at": "2026-01-16T12:00:00Z"
     },
     "content": [
       {
         "type": "text",
-        "text": "{\"cart\":{\"ucp\":{...},\"id\":\"cart_abc123\",...}}"
+        "text": "{\"ucp\":{...},\"id\":\"cart_abc123\",...}"
       }
     ]
   }
@@ -10126,49 +10116,47 @@ Maps to the [Get Cart](http://ucp.dev/draft/specification/cart/#get-cart) operat
   "id": 1,
   "result": {
     "structuredContent": {
-      "cart": {
-        "ucp": {
-          "version": "draft",
-          "capabilities": {
-            "dev.ucp.shopping.checkout": [{"version": "draft"}],
-            "dev.ucp.shopping.cart": [{"version": "draft"}]
-          }
-        },
-        "id": "cart_abc123",
-        "line_items": [
-          {
-            "id": "li_1",
-            "item": {
-              "id": "item_123",
-              "title": "Red T-Shirt",
-              "price": 2500
-            },
-            "quantity": 2,
-            "totals": [
-              {"type": "subtotal", "amount": 5000},
-              {"type": "total", "amount": 5000}
-            ]
-          }
-        ],
-        "currency": "USD",
-        "totals": [
-          {
-            "type": "subtotal",
-            "amount": 5000
+      "ucp": {
+        "version": "draft",
+        "capabilities": {
+          "dev.ucp.shopping.checkout": [{"version": "draft"}],
+          "dev.ucp.shopping.cart": [{"version": "draft"}]
+        }
+      },
+      "id": "cart_abc123",
+      "line_items": [
+        {
+          "id": "li_1",
+          "item": {
+            "id": "item_123",
+            "title": "Red T-Shirt",
+            "price": 2500
           },
-          {
-            "type": "total",
-            "amount": 5000
-          }
-        ],
-        "continue_url": "https://business.example.com/checkout?cart=cart_abc123",
-        "expires_at": "2026-01-16T12:00:00Z"
-      }
+          "quantity": 2,
+          "totals": [
+            {"type": "subtotal", "amount": 5000},
+            {"type": "total", "amount": 5000}
+          ]
+        }
+      ],
+      "currency": "USD",
+      "totals": [
+        {
+          "type": "subtotal",
+          "amount": 5000
+        },
+        {
+          "type": "total",
+          "amount": 5000
+        }
+      ],
+      "continue_url": "https://business.example.com/checkout?cart=cart_abc123",
+      "expires_at": "2026-01-16T12:00:00Z"
     },
     "content": [
       {
         "type": "text",
-        "text": "{\"cart\":{\"ucp\":{...},\"id\":\"cart_abc123\",...}}"
+        "text": "{\"ucp\":{...},\"id\":\"cart_abc123\",...}"
       }
     ]
   }
@@ -10181,23 +10169,21 @@ Maps to the [Get Cart](http://ucp.dev/draft/specification/cart/#get-cart) operat
   "id": 1,
   "result": {
     "structuredContent": {
-      "cart": {
-        "ucp": {
-          "version": "draft",
-          "capabilities": {
-            "dev.ucp.shopping.cart": [{"version": "draft"}]
-          }
-        },
-        "messages": [
-          {
-            "type": "error",
-            "code": "not_found",
-            "content": "Cart not found or has expired",
-            "severity": "unrecoverable"
-          }
-        ],
-        "continue_url": "https://merchant.com/"
-      }
+      "ucp": {
+        "version": "draft",
+        "capabilities": {
+          "dev.ucp.shopping.cart": [{"version": "draft"}]
+        }
+      },
+      "messages": [
+        {
+          "type": "error",
+          "code": "not_found",
+          "content": "Cart not found or has expired",
+          "severity": "unrecoverable"
+        }
+      ],
+      "continue_url": "https://merchant.com/"
     },
     "content": [
       {
@@ -10290,62 +10276,60 @@ Maps to the [Update Cart](http://ucp.dev/draft/specification/cart/#update-cart) 
   "id": 2,
   "result": {
     "structuredContent": {
-      "cart": {
-        "ucp": {
-          "version": "draft",
-          "capabilities": {
-            "dev.ucp.shopping.checkout": [{"version": "draft"}],
-            "dev.ucp.shopping.cart": [{"version": "draft"}]
-          }
+      "ucp": {
+        "version": "draft",
+        "capabilities": {
+          "dev.ucp.shopping.checkout": [{"version": "draft"}],
+          "dev.ucp.shopping.cart": [{"version": "draft"}]
+        }
+      },
+      "id": "cart_abc123",
+      "line_items": [
+        {
+          "id": "li_1",
+          "item": {
+            "id": "item_123",
+            "title": "Red T-Shirt",
+            "price": 2500
+          },
+          "quantity": 3,
+          "totals": [
+            {"type": "subtotal", "amount": 7500},
+            {"type": "total", "amount": 7500}
+          ]
         },
-        "id": "cart_abc123",
-        "line_items": [
-          {
-            "id": "li_1",
-            "item": {
-              "id": "item_123",
-              "title": "Red T-Shirt",
-              "price": 2500
-            },
-            "quantity": 3,
-            "totals": [
-              {"type": "subtotal", "amount": 7500},
-              {"type": "total", "amount": 7500}
-            ]
+        {
+          "id": "li_2",
+          "item": {
+            "id": "item_456",
+            "title": "Blue Jeans",
+            "price": 7500
           },
-          {
-            "id": "li_2",
-            "item": {
-              "id": "item_456",
-              "title": "Blue Jeans",
-              "price": 7500
-            },
-            "quantity": 1,
-            "totals": [
-              {"type": "subtotal", "amount": 7500},
-              {"type": "total", "amount": 7500}
-            ]
-          }
-        ],
-        "currency": "USD",
-        "totals": [
-          {
-            "type": "subtotal",
-            "amount": 15000
-          },
-          {
-            "type": "total",
-            "amount": 15000
-          }
-        ],
-        "continue_url": "https://business.example.com/checkout?cart=cart_abc123",
-        "expires_at": "2026-01-16T12:00:00Z"
-      }
+          "quantity": 1,
+          "totals": [
+            {"type": "subtotal", "amount": 7500},
+            {"type": "total", "amount": 7500}
+          ]
+        }
+      ],
+      "currency": "USD",
+      "totals": [
+        {
+          "type": "subtotal",
+          "amount": 15000
+        },
+        {
+          "type": "total",
+          "amount": 15000
+        }
+      ],
+      "continue_url": "https://business.example.com/checkout?cart=cart_abc123",
+      "expires_at": "2026-01-16T12:00:00Z"
     },
     "content": [
       {
         "type": "text",
-        "text": "{\"cart\":{\"ucp\":{...},\"id\":\"cart_abc123\",...}}"
+        "text": "{\"ucp\":{...},\"id\":\"cart_abc123\",...}"
       }
     ]
   }
@@ -10405,48 +10389,46 @@ Maps to the [Cancel Cart](http://ucp.dev/draft/specification/cart/#cancel-cart) 
   "id": 1,
   "result": {
     "structuredContent": {
-      "cart": {
-        "ucp": {
-          "version": "draft",
-          "capabilities": {
-            "dev.ucp.shopping.checkout": [{"version": "draft"}],
-            "dev.ucp.shopping.cart": [{"version": "draft"}]
-          }
-        },
-        "id": "cart_abc123",
-        "line_items": [
-          {
-            "id": "li_1",
-            "item": {
-              "id": "item_123",
-              "title": "Red T-Shirt",
-              "price": 2500
-            },
-            "quantity": 2,
-            "totals": [
-              {"type": "subtotal", "amount": 5000},
-              {"type": "total", "amount": 5000}
-            ]
-          }
-        ],
-        "currency": "USD",
-        "totals": [
-          {
-            "type": "subtotal",
-            "amount": 5000
+      "ucp": {
+        "version": "draft",
+        "capabilities": {
+          "dev.ucp.shopping.checkout": [{"version": "draft"}],
+          "dev.ucp.shopping.cart": [{"version": "draft"}]
+        }
+      },
+      "id": "cart_abc123",
+      "line_items": [
+        {
+          "id": "li_1",
+          "item": {
+            "id": "item_123",
+            "title": "Red T-Shirt",
+            "price": 2500
           },
-          {
-            "type": "total",
-            "amount": 5000
-          }
-        ],
-        "continue_url": "https://business.example.com/checkout?cart=cart_abc123"
-      }
+          "quantity": 2,
+          "totals": [
+            {"type": "subtotal", "amount": 5000},
+            {"type": "total", "amount": 5000}
+          ]
+        }
+      ],
+      "currency": "USD",
+      "totals": [
+        {
+          "type": "subtotal",
+          "amount": 5000
+        },
+        {
+          "type": "total",
+          "amount": 5000
+        }
+      ],
+      "continue_url": "https://business.example.com/checkout?cart=cart_abc123"
     },
     "content": [
       {
         "type": "text",
-        "text": "{\"cart\":{\"ucp\":{...},\"id\":\"cart_abc123\",...}}"
+        "text": "{\"ucp\":{...},\"id\":\"cart_abc123\",...}"
       }
     ]
   }
@@ -10470,23 +10452,21 @@ Business outcomes (including not found and validation errors) are returned as JS
   "id": 1,
   "result": {
     "structuredContent": {
-      "cart": {
-        "ucp": {
-          "version": "draft",
-          "capabilities": {
-            "dev.ucp.shopping.cart": [{"version": "draft"}]
-          }
-        },
-        "messages": [
-          {
-            "type": "error",
-            "code": "not_found",
-            "content": "Cart not found or has expired",
-            "severity": "unrecoverable"
-          }
-        ],
-        "continue_url": "https://merchant.com/"
-      }
+      "ucp": {
+        "version": "draft",
+        "capabilities": {
+          "dev.ucp.shopping.cart": [{"version": "draft"}]
+        }
+      },
+      "messages": [
+        {
+          "type": "error",
+          "code": "not_found",
+          "content": "Cart not found or has expired",
+          "severity": "unrecoverable"
+        }
+      ],
+      "continue_url": "https://merchant.com/"
     },
     "content": [
       {"type": "text", "text": "{\"ucp\":{...},\"messages\":[...]}"}
@@ -14180,70 +14160,68 @@ Maps to the [Get Order](http://ucp.dev/draft/specification/order/#get-order) ope
   "id": 1,
   "result": {
     "structuredContent": {
-      "order": {
-        "ucp": {
-          "version": "draft",
-          "capabilities": {
-            "dev.ucp.shopping.order": [{"version": "draft"}]
-          }
-        },
-        "id": "order_abc123",
-        "checkout_id": "checkout_xyz789",
-        "permalink_url": "https://business.example.com/orders/abc123",
-        "currency": "USD",
-        "line_items": [
+      "ucp": {
+        "version": "draft",
+        "capabilities": {
+          "dev.ucp.shopping.order": [{"version": "draft"}]
+        }
+      },
+      "id": "order_abc123",
+      "checkout_id": "checkout_xyz789",
+      "permalink_url": "https://business.example.com/orders/abc123",
+      "currency": "USD",
+      "line_items": [
+        {
+          "id": "li_shoes",
+          "item": { "id": "prod_shoes", "title": "Running Shoes", "price": 3000 },
+          "quantity": { "total": 1, "fulfilled": 1 },
+          "totals": [
+            {"type": "subtotal", "amount": 3000},
+            {"type": "total", "amount": 3000}
+          ],
+          "status": "fulfilled"
+        }
+      ],
+      "fulfillment": {
+        "expectations": [
           {
-            "id": "li_shoes",
-            "item": { "id": "prod_shoes", "title": "Running Shoes", "price": 3000 },
-            "quantity": { "total": 1, "fulfilled": 1 },
-            "totals": [
-              {"type": "subtotal", "amount": 3000},
-              {"type": "total", "amount": 3000}
-            ],
-            "status": "fulfilled"
+            "id": "exp_1",
+            "line_items": [{ "id": "li_shoes", "quantity": 1 }],
+            "method_type": "shipping",
+            "destination": {
+              "street_address": "123 Main St",
+              "address_locality": "Austin",
+              "address_region": "TX",
+              "address_country": "US",
+              "postal_code": "78701"
+            },
+            "description": "Delivered"
           }
         ],
-        "fulfillment": {
-          "expectations": [
-            {
-              "id": "exp_1",
-              "line_items": [{ "id": "li_shoes", "quantity": 1 }],
-              "method_type": "shipping",
-              "destination": {
-                "street_address": "123 Main St",
-                "address_locality": "Austin",
-                "address_region": "TX",
-                "address_country": "US",
-                "postal_code": "78701"
-              },
-              "description": "Delivered"
-            }
-          ],
-          "events": [
-            {
-              "id": "evt_1",
-              "occurred_at": "2026-01-08T10:30:00Z",
-              "type": "delivered",
-              "line_items": [{ "id": "li_shoes", "quantity": 1 }],
-              "tracking_number": "1Z999AA10123456784",
-              "tracking_url": "https://ups.com/track/1Z999AA10123456784",
-              "description": "Delivered to front door"
-            }
-          ]
-        },
-        "adjustments": [],
-        "totals": [
-          { "type": "subtotal", "amount": 3000 },
-          { "type": "fulfillment", "amount": 800 },
-          { "type": "tax", "amount": 304 },
-          { "type": "total", "amount": 4104 }
+        "events": [
+          {
+            "id": "evt_1",
+            "occurred_at": "2026-01-08T10:30:00Z",
+            "type": "delivered",
+            "line_items": [{ "id": "li_shoes", "quantity": 1 }],
+            "tracking_number": "1Z999AA10123456784",
+            "tracking_url": "https://ups.com/track/1Z999AA10123456784",
+            "description": "Delivered to front door"
+          }
         ]
-      }
+      },
+      "adjustments": [],
+      "totals": [
+        { "type": "subtotal", "amount": 3000 },
+        { "type": "fulfillment", "amount": 800 },
+        { "type": "tax", "amount": 304 },
+        { "type": "total", "amount": 4104 }
+      ]
     },
     "content": [
       {
         "type": "text",
-        "text": "{\"order\":{\"ucp\":{...},\"id\":\"order_abc123\",...}}"
+        "text": "{\"ucp\":{...},\"id\":\"order_abc123\",...}"
       }
     ]
   }
@@ -14256,23 +14234,21 @@ Maps to the [Get Order](http://ucp.dev/draft/specification/order/#get-order) ope
   "id": 1,
   "result": {
     "structuredContent": {
-      "order": {
-        "ucp": {
-          "version": "draft",
-          "status": "error",
-          "capabilities": {
-            "dev.ucp.shopping.order": [{"version": "draft"}]
-          }
-        },
-        "messages": [
-          {
-            "type": "error",
-            "code": "not_found",
-            "severity": "unrecoverable",
-            "content": "Order not found."
-          }
-        ]
-      }
+      "ucp": {
+        "version": "draft",
+        "status": "error",
+        "capabilities": {
+          "dev.ucp.shopping.order": [{"version": "draft"}]
+        }
+      },
+      "messages": [
+        {
+          "type": "error",
+          "code": "not_found",
+          "severity": "unrecoverable",
+          "content": "Order not found."
+        }
+      ]
     },
     "content": [
       {
@@ -14290,23 +14266,21 @@ Maps to the [Get Order](http://ucp.dev/draft/specification/order/#get-order) ope
   "id": 1,
   "result": {
     "structuredContent": {
-      "order": {
-        "ucp": {
-          "version": "draft",
-          "status": "error",
-          "capabilities": {
-            "dev.ucp.shopping.order": [{"version": "draft"}]
-          }
-        },
-        "messages": [
-          {
-            "type": "error",
-            "code": "unauthorized",
-            "severity": "unrecoverable",
-            "content": "Not authorized to access this order."
-          }
-        ]
-      }
+      "ucp": {
+        "version": "draft",
+        "status": "error",
+        "capabilities": {
+          "dev.ucp.shopping.order": [{"version": "draft"}]
+        }
+      },
+      "messages": [
+        {
+          "type": "error",
+          "code": "unauthorized",
+          "severity": "unrecoverable",
+          "content": "Not authorized to access this order."
+        }
+      ]
     },
     "content": [
       {

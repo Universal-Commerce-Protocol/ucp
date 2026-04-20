@@ -158,49 +158,47 @@ Maps to the [Create Cart](http://ucp.dev/draft/specification/cart/#create-cart) 
   "id": 1,
   "result": {
     "structuredContent": {
-      "cart": {
-        "ucp": {
-          "version": "draft",
-          "capabilities": {
-            "dev.ucp.shopping.checkout": [{"version": "draft"}],
-            "dev.ucp.shopping.cart": [{"version": "draft"}]
-          }
-        },
-        "id": "cart_abc123",
-        "line_items": [
-          {
-            "id": "li_1",
-            "item": {
-              "id": "item_123",
-              "title": "Red T-Shirt",
-              "price": 2500
-            },
-            "quantity": 2,
-            "totals": [
-              {"type": "subtotal", "amount": 5000},
-              {"type": "total", "amount": 5000}
-            ]
-          }
-        ],
-        "currency": "USD",
-        "totals": [
-          {
-            "type": "subtotal",
-            "amount": 5000
+      "ucp": {
+        "version": "draft",
+        "capabilities": {
+          "dev.ucp.shopping.checkout": [{"version": "draft"}],
+          "dev.ucp.shopping.cart": [{"version": "draft"}]
+        }
+      },
+      "id": "cart_abc123",
+      "line_items": [
+        {
+          "id": "li_1",
+          "item": {
+            "id": "item_123",
+            "title": "Red T-Shirt",
+            "price": 2500
           },
-          {
-            "type": "total",
-            "amount": 5000
-          }
-        ],
-        "continue_url": "https://business.example.com/checkout?cart=cart_abc123",
-        "expires_at": "2026-01-16T12:00:00Z"
-      }
+          "quantity": 2,
+          "totals": [
+            {"type": "subtotal", "amount": 5000},
+            {"type": "total", "amount": 5000}
+          ]
+        }
+      ],
+      "currency": "USD",
+      "totals": [
+        {
+          "type": "subtotal",
+          "amount": 5000
+        },
+        {
+          "type": "total",
+          "amount": 5000
+        }
+      ],
+      "continue_url": "https://business.example.com/checkout?cart=cart_abc123",
+      "expires_at": "2026-01-16T12:00:00Z"
     },
     "content": [
       {
         "type": "text",
-        "text": "{\"cart\":{\"ucp\":{...},\"id\":\"cart_abc123\",...}}"
+        "text": "{\"ucp\":{...},\"id\":\"cart_abc123\",...}"
       }
     ]
   }
@@ -285,49 +283,47 @@ Maps to the [Get Cart](http://ucp.dev/draft/specification/cart/#get-cart) operat
   "id": 1,
   "result": {
     "structuredContent": {
-      "cart": {
-        "ucp": {
-          "version": "draft",
-          "capabilities": {
-            "dev.ucp.shopping.checkout": [{"version": "draft"}],
-            "dev.ucp.shopping.cart": [{"version": "draft"}]
-          }
-        },
-        "id": "cart_abc123",
-        "line_items": [
-          {
-            "id": "li_1",
-            "item": {
-              "id": "item_123",
-              "title": "Red T-Shirt",
-              "price": 2500
-            },
-            "quantity": 2,
-            "totals": [
-              {"type": "subtotal", "amount": 5000},
-              {"type": "total", "amount": 5000}
-            ]
-          }
-        ],
-        "currency": "USD",
-        "totals": [
-          {
-            "type": "subtotal",
-            "amount": 5000
+      "ucp": {
+        "version": "draft",
+        "capabilities": {
+          "dev.ucp.shopping.checkout": [{"version": "draft"}],
+          "dev.ucp.shopping.cart": [{"version": "draft"}]
+        }
+      },
+      "id": "cart_abc123",
+      "line_items": [
+        {
+          "id": "li_1",
+          "item": {
+            "id": "item_123",
+            "title": "Red T-Shirt",
+            "price": 2500
           },
-          {
-            "type": "total",
-            "amount": 5000
-          }
-        ],
-        "continue_url": "https://business.example.com/checkout?cart=cart_abc123",
-        "expires_at": "2026-01-16T12:00:00Z"
-      }
+          "quantity": 2,
+          "totals": [
+            {"type": "subtotal", "amount": 5000},
+            {"type": "total", "amount": 5000}
+          ]
+        }
+      ],
+      "currency": "USD",
+      "totals": [
+        {
+          "type": "subtotal",
+          "amount": 5000
+        },
+        {
+          "type": "total",
+          "amount": 5000
+        }
+      ],
+      "continue_url": "https://business.example.com/checkout?cart=cart_abc123",
+      "expires_at": "2026-01-16T12:00:00Z"
     },
     "content": [
       {
         "type": "text",
-        "text": "{\"cart\":{\"ucp\":{...},\"id\":\"cart_abc123\",...}}"
+        "text": "{\"ucp\":{...},\"id\":\"cart_abc123\",...}"
       }
     ]
   }
@@ -340,23 +336,21 @@ Maps to the [Get Cart](http://ucp.dev/draft/specification/cart/#get-cart) operat
   "id": 1,
   "result": {
     "structuredContent": {
-      "cart": {
-        "ucp": {
-          "version": "draft",
-          "capabilities": {
-            "dev.ucp.shopping.cart": [{"version": "draft"}]
-          }
-        },
-        "messages": [
-          {
-            "type": "error",
-            "code": "not_found",
-            "content": "Cart not found or has expired",
-            "severity": "unrecoverable"
-          }
-        ],
-        "continue_url": "https://merchant.com/"
-      }
+      "ucp": {
+        "version": "draft",
+        "capabilities": {
+          "dev.ucp.shopping.cart": [{"version": "draft"}]
+        }
+      },
+      "messages": [
+        {
+          "type": "error",
+          "code": "not_found",
+          "content": "Cart not found or has expired",
+          "severity": "unrecoverable"
+        }
+      ],
+      "continue_url": "https://merchant.com/"
     },
     "content": [
       {
@@ -449,62 +443,60 @@ Maps to the [Update Cart](http://ucp.dev/draft/specification/cart/#update-cart) 
   "id": 2,
   "result": {
     "structuredContent": {
-      "cart": {
-        "ucp": {
-          "version": "draft",
-          "capabilities": {
-            "dev.ucp.shopping.checkout": [{"version": "draft"}],
-            "dev.ucp.shopping.cart": [{"version": "draft"}]
-          }
+      "ucp": {
+        "version": "draft",
+        "capabilities": {
+          "dev.ucp.shopping.checkout": [{"version": "draft"}],
+          "dev.ucp.shopping.cart": [{"version": "draft"}]
+        }
+      },
+      "id": "cart_abc123",
+      "line_items": [
+        {
+          "id": "li_1",
+          "item": {
+            "id": "item_123",
+            "title": "Red T-Shirt",
+            "price": 2500
+          },
+          "quantity": 3,
+          "totals": [
+            {"type": "subtotal", "amount": 7500},
+            {"type": "total", "amount": 7500}
+          ]
         },
-        "id": "cart_abc123",
-        "line_items": [
-          {
-            "id": "li_1",
-            "item": {
-              "id": "item_123",
-              "title": "Red T-Shirt",
-              "price": 2500
-            },
-            "quantity": 3,
-            "totals": [
-              {"type": "subtotal", "amount": 7500},
-              {"type": "total", "amount": 7500}
-            ]
+        {
+          "id": "li_2",
+          "item": {
+            "id": "item_456",
+            "title": "Blue Jeans",
+            "price": 7500
           },
-          {
-            "id": "li_2",
-            "item": {
-              "id": "item_456",
-              "title": "Blue Jeans",
-              "price": 7500
-            },
-            "quantity": 1,
-            "totals": [
-              {"type": "subtotal", "amount": 7500},
-              {"type": "total", "amount": 7500}
-            ]
-          }
-        ],
-        "currency": "USD",
-        "totals": [
-          {
-            "type": "subtotal",
-            "amount": 15000
-          },
-          {
-            "type": "total",
-            "amount": 15000
-          }
-        ],
-        "continue_url": "https://business.example.com/checkout?cart=cart_abc123",
-        "expires_at": "2026-01-16T12:00:00Z"
-      }
+          "quantity": 1,
+          "totals": [
+            {"type": "subtotal", "amount": 7500},
+            {"type": "total", "amount": 7500}
+          ]
+        }
+      ],
+      "currency": "USD",
+      "totals": [
+        {
+          "type": "subtotal",
+          "amount": 15000
+        },
+        {
+          "type": "total",
+          "amount": 15000
+        }
+      ],
+      "continue_url": "https://business.example.com/checkout?cart=cart_abc123",
+      "expires_at": "2026-01-16T12:00:00Z"
     },
     "content": [
       {
         "type": "text",
-        "text": "{\"cart\":{\"ucp\":{...},\"id\":\"cart_abc123\",...}}"
+        "text": "{\"ucp\":{...},\"id\":\"cart_abc123\",...}"
       }
     ]
   }
@@ -564,48 +556,46 @@ Maps to the [Cancel Cart](http://ucp.dev/draft/specification/cart/#cancel-cart) 
   "id": 1,
   "result": {
     "structuredContent": {
-      "cart": {
-        "ucp": {
-          "version": "draft",
-          "capabilities": {
-            "dev.ucp.shopping.checkout": [{"version": "draft"}],
-            "dev.ucp.shopping.cart": [{"version": "draft"}]
-          }
-        },
-        "id": "cart_abc123",
-        "line_items": [
-          {
-            "id": "li_1",
-            "item": {
-              "id": "item_123",
-              "title": "Red T-Shirt",
-              "price": 2500
-            },
-            "quantity": 2,
-            "totals": [
-              {"type": "subtotal", "amount": 5000},
-              {"type": "total", "amount": 5000}
-            ]
-          }
-        ],
-        "currency": "USD",
-        "totals": [
-          {
-            "type": "subtotal",
-            "amount": 5000
+      "ucp": {
+        "version": "draft",
+        "capabilities": {
+          "dev.ucp.shopping.checkout": [{"version": "draft"}],
+          "dev.ucp.shopping.cart": [{"version": "draft"}]
+        }
+      },
+      "id": "cart_abc123",
+      "line_items": [
+        {
+          "id": "li_1",
+          "item": {
+            "id": "item_123",
+            "title": "Red T-Shirt",
+            "price": 2500
           },
-          {
-            "type": "total",
-            "amount": 5000
-          }
-        ],
-        "continue_url": "https://business.example.com/checkout?cart=cart_abc123"
-      }
+          "quantity": 2,
+          "totals": [
+            {"type": "subtotal", "amount": 5000},
+            {"type": "total", "amount": 5000}
+          ]
+        }
+      ],
+      "currency": "USD",
+      "totals": [
+        {
+          "type": "subtotal",
+          "amount": 5000
+        },
+        {
+          "type": "total",
+          "amount": 5000
+        }
+      ],
+      "continue_url": "https://business.example.com/checkout?cart=cart_abc123"
     },
     "content": [
       {
         "type": "text",
-        "text": "{\"cart\":{\"ucp\":{...},\"id\":\"cart_abc123\",...}}"
+        "text": "{\"ucp\":{...},\"id\":\"cart_abc123\",...}"
       }
     ]
   }
@@ -629,23 +619,21 @@ Business outcomes (including not found and validation errors) are returned as JS
   "id": 1,
   "result": {
     "structuredContent": {
-      "cart": {
-        "ucp": {
-          "version": "draft",
-          "capabilities": {
-            "dev.ucp.shopping.cart": [{"version": "draft"}]
-          }
-        },
-        "messages": [
-          {
-            "type": "error",
-            "code": "not_found",
-            "content": "Cart not found or has expired",
-            "severity": "unrecoverable"
-          }
-        ],
-        "continue_url": "https://merchant.com/"
-      }
+      "ucp": {
+        "version": "draft",
+        "capabilities": {
+          "dev.ucp.shopping.cart": [{"version": "draft"}]
+        }
+      },
+      "messages": [
+        {
+          "type": "error",
+          "code": "not_found",
+          "content": "Cart not found or has expired",
+          "severity": "unrecoverable"
+        }
+      ],
+      "continue_url": "https://merchant.com/"
     },
     "content": [
       {"type": "text", "text": "{\"ucp\":{...},\"messages\":[...]}"}

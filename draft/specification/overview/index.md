@@ -1352,15 +1352,13 @@ MCP tool responses use a dual-output pattern for backward compatibility. UCP MCP
   "id": 1,
   "result": {
     "structuredContent": {
-      "checkout": {
-        "ucp": {"version": "draft", "capabilities": {...}},
-        "id": "checkout_abc123",
-        "status": "incomplete",
-        ...
-      }
+      "ucp": {"version": "draft", "capabilities": {...}},
+      "id": "checkout_abc123",
+      "status": "incomplete",
+      ...
     },
     "content": [
-      {"type": "text", "text": "{\"checkout\":{\"ucp\":{...},\"id\":\"checkout_abc123\",...}}"}
+      {"type": "text", "text": "{\"ucp\":{...},\"id\":\"checkout_abc123\",...}"}
     ]
   }
 }
