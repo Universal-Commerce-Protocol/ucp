@@ -60,4 +60,4 @@ UCP revolves around three fundamental constructs that define how entities intera
 - **Extensions:** Optional capabilities that augment another capability via the `extends` field. Extensions appear in `ucp.capabilities[]` alongside core capabilities.
   - *Examples:* Discounts (extends Checkout), AP2 Mandates (extends Checkout).
 - **Services:** The lower-level communication layers used to exchange data. UCP is transport-agnostic but defines specific bindings for interoperability.
-  - *Examples:* REST API (primary), MCP (Model Context Protocol), A2A (Agent2Agent).
+  - *Examples:* REST API (primary), MCP (Model Context Protocol), A2A (Agent2Agent), EP (Embedded Protocol).
