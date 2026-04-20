@@ -3423,88 +3423,16 @@ MAY include informational messages indicating which identifiers were not found.<
 </thead>
 <tbody>
 <tr>
-<td style="text-align: left;">id</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Global ID (GID) uniquely identifying this product.</td>
-</tr>
-<tr>
-<td style="text-align: left;">handle</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">URL-safe slug for SEO-friendly URLs (e.g., 'blue-runner-pro'). Use id for stable API references.</td>
-</tr>
-<tr>
-<td style="text-align: left;">title</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Product title.</td>
-</tr>
-<tr>
-<td style="text-align: left;">description</td>
-<td style="text-align: left;">object</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Product description in one or more formats.</td>
-</tr>
-<tr>
-<td style="text-align: left;">url</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Canonical product page URL.</td>
-</tr>
-<tr>
-<td style="text-align: left;">categories</td>
+<td style="text-align: left;">selected</td>
 <td style="text-align: left;">Array[object]</td>
 <td style="text-align: left;">No</td>
-<td style="text-align: left;">Product categories with optional taxonomy identifiers.</td>
-</tr>
-<tr>
-<td style="text-align: left;">price_range</td>
-<td style="text-align: left;">object</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Price range across all variants.</td>
-</tr>
-<tr>
-<td style="text-align: left;">list_price_range</td>
-<td style="text-align: left;">object</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">List price range before discounts (for strikethrough display).</td>
-</tr>
-<tr>
-<td style="text-align: left;">media</td>
-<td style="text-align: left;">Array[object]</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Product media (images, videos, 3D models). First item is the featured media for listings.</td>
+<td style="text-align: left;">Effective option selections that anchor the featured variant and availability signals. Required when the product has configurable options; may be empty or omitted for products with no option axes.</td>
 </tr>
 <tr>
 <td style="text-align: left;">options</td>
 <td style="text-align: left;">Array[object]</td>
 <td style="text-align: left;">No</td>
-<td style="text-align: left;">Product options (Size, Color, etc.).</td>
-</tr>
-<tr>
-<td style="text-align: left;">variants</td>
-<td style="text-align: left;">Array[object]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Purchasable variants of this product. First item is the featured variant for listings.</td>
-</tr>
-<tr>
-<td style="text-align: left;">rating</td>
-<td style="text-align: left;">object</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Aggregate product rating.</td>
-</tr>
-<tr>
-<td style="text-align: left;">tags</td>
-<td style="text-align: left;">Array[string]</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Product tags for categorization and search.</td>
-</tr>
-<tr>
-<td style="text-align: left;">metadata</td>
-<td style="text-align: left;">object</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Business-defined custom data extending the standard product model.</td>
+<td style="text-align: left;">Product options with availability signals relative to the effective selections.</td>
 </tr>
 </tbody>
 </table>

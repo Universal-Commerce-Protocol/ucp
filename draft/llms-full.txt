@@ -2904,9 +2904,11 @@ Capability reference in responses. Only name/version required to confirm active 
 
 ### Total
 
-| Name | Type | Required | Description |
-| ---- | ---- | -------- | ----------- |
-|      |      |          |             |
+| Name         | Type                                                           | Required | Description                                                                                                                                                                                                                                                                                 |
+| ------------ | -------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type         | string                                                         | **Yes**  | Cost category. Well-known values: subtotal, items_discount, discount, fulfillment, tax, fee, total. Businesses MAY use additional values.                                                                                                                                                   |
+| display_text | string                                                         | No       | Text to display against the amount. Should reflect appropriate method (e.g., 'Shipping', 'Delivery').                                                                                                                                                                                       |
+| amount       | [Signed Amount](/draft/specification/reference/#signed-amount) | **Yes**  | Monetary amount in the currency's minor unit as defined by ISO 4217. Refer to the currency's exponent to determine minor-to-major ratio (e.g., 2 for USD, 0 for JPY, 3 for KWD). May be negative — the sign is intrinsic to the value (e.g., discounts are negative, charges are positive). |
 
 #### Rendering Contract
 
@@ -8490,9 +8492,11 @@ This object MUST be one of the following types: [Shipping Destination](/draft/sp
 
 #### Total
 
-| Name | Type | Required | Description |
-| ---- | ---- | -------- | ----------- |
-|      |      |          |             |
+| Name         | Type                                                           | Required | Description                                                                                                                                                                                                                                                                                 |
+| ------------ | -------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type         | string                                                         | **Yes**  | Cost category. Well-known values: subtotal, items_discount, discount, fulfillment, tax, fee, total. Businesses MAY use additional values.                                                                                                                                                   |
+| display_text | string                                                         | No       | Text to display against the amount. Should reflect appropriate method (e.g., 'Shipping', 'Delivery').                                                                                                                                                                                       |
+| amount       | [Signed Amount](/draft/specification/reference/#signed-amount) | **Yes**  | Monetary amount in the currency's minor unit as defined by ISO 4217. Refer to the currency's exponent to determine minor-to-major ratio (e.g., 2 for USD, 0 for JPY, 3 for KWD). May be negative — the sign is intrinsic to the value (e.g., discounts are negative, charges are positive). |
 
 #### Postal Address
 
@@ -9205,9 +9209,11 @@ Environment data provided by the platform to support authorization and abuse pre
 
 The same totals contract applies to cart and checkout. See [Checkout Totals](http://ucp.dev/draft/specification/checkout/#totals) for the rendering contract, accounting identity, well-known types, repeating types, and sub-line semantics.
 
-| Name | Type | Required | Description |
-| ---- | ---- | -------- | ----------- |
-|      |      |          |             |
+| Name         | Type                                                           | Required | Description                                                                                                                                                                                                                                                                                 |
+| ------------ | -------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type         | string                                                         | **Yes**  | Cost category. Well-known values: subtotal, items_discount, discount, fulfillment, tax, fee, total. Businesses MAY use additional values.                                                                                                                                                   |
+| display_text | string                                                         | No       | Text to display against the amount. Should reflect appropriate method (e.g., 'Shipping', 'Delivery').                                                                                                                                                                                       |
+| amount       | [Signed Amount](/draft/specification/reference/#signed-amount) | **Yes**  | Monetary amount in the currency's minor unit as defined by ISO 4217. Refer to the currency's exponent to determine minor-to-major ratio (e.g., 2 for USD, 0 for JPY, 3 for KWD). May be negative — the sign is intrinsic to the value (e.g., discounts are negative, charges are positive). |
 
 Taxes MAY be included where calculable. Platforms SHOULD assume cart totals are estimates; accurate taxes are computed at checkout.
 
@@ -12475,22 +12481,10 @@ UCP metadata for catalog responses.
 
 A product in a get_product response, extended with effective selections and availability signals on option values.
 
-| Name             | Type          | Required | Description                                                                                      |
-| ---------------- | ------------- | -------- | ------------------------------------------------------------------------------------------------ |
-| id               | string        | **Yes**  | Global ID (GID) uniquely identifying this product.                                               |
-| handle           | string        | No       | URL-safe slug for SEO-friendly URLs (e.g., 'blue-runner-pro'). Use id for stable API references. |
-| title            | string        | **Yes**  | Product title.                                                                                   |
-| description      | object        | **Yes**  | Product description in one or more formats.                                                      |
-| url              | string        | No       | Canonical product page URL.                                                                      |
-| categories       | Array[object] | No       | Product categories with optional taxonomy identifiers.                                           |
-| price_range      | object        | **Yes**  | Price range across all variants.                                                                 |
-| list_price_range | object        | No       | List price range before discounts (for strikethrough display).                                   |
-| media            | Array[object] | No       | Product media (images, videos, 3D models). First item is the featured media for listings.        |
-| options          | Array[object] | No       | Product options (Size, Color, etc.).                                                             |
-| variants         | Array[object] | **Yes**  | Purchasable variants of this product. First item is the featured variant for listings.           |
-| rating           | object        | No       | Aggregate product rating.                                                                        |
-| tags             | Array[string] | No       | Product tags for categorization and search.                                                      |
-| metadata         | object        | No       | Business-defined custom data extending the standard product model.                               |
+| Name     | Type          | Required | Description                                                                                                                                                                                          |
+| -------- | ------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| selected | Array[object] | No       | Effective option selections that anchor the featured variant and availability signals. Required when the product has configurable options; may be empty or omitted for products with no option axes. |
+| options  | Array[object] | No       | Product options with availability signals relative to the effective selections.                                                                                                                      |
 
 ### Get Product Response
 
@@ -13174,22 +13168,10 @@ Business outcomes use the JSON-RPC `result` field with messages in the response 
 
 A product in a get_product response, extended with effective selections and availability signals on option values.
 
-| Name             | Type          | Required | Description                                                                                      |
-| ---------------- | ------------- | -------- | ------------------------------------------------------------------------------------------------ |
-| id               | string        | **Yes**  | Global ID (GID) uniquely identifying this product.                                               |
-| handle           | string        | No       | URL-safe slug for SEO-friendly URLs (e.g., 'blue-runner-pro'). Use id for stable API references. |
-| title            | string        | **Yes**  | Product title.                                                                                   |
-| description      | object        | **Yes**  | Product description in one or more formats.                                                      |
-| url              | string        | No       | Canonical product page URL.                                                                      |
-| categories       | Array[object] | No       | Product categories with optional taxonomy identifiers.                                           |
-| price_range      | object        | **Yes**  | Price range across all variants.                                                                 |
-| list_price_range | object        | No       | List price range before discounts (for strikethrough display).                                   |
-| media            | Array[object] | No       | Product media (images, videos, 3D models). First item is the featured media for listings.        |
-| options          | Array[object] | No       | Product options (Size, Color, etc.).                                                             |
-| variants         | Array[object] | **Yes**  | Purchasable variants of this product. First item is the featured variant for listings.           |
-| rating           | object        | No       | Aggregate product rating.                                                                        |
-| tags             | Array[string] | No       | Product tags for categorization and search.                                                      |
-| metadata         | object        | No       | Business-defined custom data extending the standard product model.                               |
+| Name     | Type          | Required | Description                                                                                                                                                                                          |
+| -------- | ------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| selected | Array[object] | No       | Effective option selections that anchor the featured variant and availability signals. Required when the product has configurable options; may be empty or omitted for products with no option axes. |
+| options  | Array[object] | No       | Product options with availability signals relative to the effective selections.                                                                                                                      |
 
 ### Get Product Response
 
@@ -13768,9 +13750,11 @@ Capability reference in responses. Only name/version required to confirm active 
 
 ### Total
 
-| Name | Type | Required | Description |
-| ---- | ---- | -------- | ----------- |
-|      |      |          |             |
+| Name         | Type                                                           | Required | Description                                                                                                                                                                                                                                                                                 |
+| ------------ | -------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type         | string                                                         | **Yes**  | Cost category. Well-known values: subtotal, items_discount, discount, fulfillment, tax, fee, total. Businesses MAY use additional values.                                                                                                                                                   |
+| display_text | string                                                         | No       | Text to display against the amount. Should reflect appropriate method (e.g., 'Shipping', 'Delivery').                                                                                                                                                                                       |
+| amount       | [Signed Amount](/draft/specification/reference/#signed-amount) | **Yes**  | Monetary amount in the currency's minor unit as defined by ISO 4217. Refer to the currency's exponent to determine minor-to-major ratio (e.g., 2 for USD, 0 for JPY, 3 for KWD). May be negative — the sign is intrinsic to the value (e.g., discounts are negative, charges are positive). |
 
 ### UCP Response Order Schema
 
@@ -17013,10 +16997,10 @@ ______________________________________________________________________
 
 ### Detail Option Value
 
-| Name  | Type   | Required | Description                                                                                                                                           |
-| ----- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| id    | string | No       | Optional server-assigned identifier for this option value. When present in a selected_option, the server SHOULD use it for matching instead of label. |
-| label | string | **Yes**  | Display text for this option value (e.g., 'Small', 'Blue').                                                                                           |
+| Name      | Type    | Required | Description                                                                                    |
+| --------- | ------- | -------- | ---------------------------------------------------------------------------------------------- |
+| available | boolean | No       | Whether a variant matching this value and the current option selections is purchasable.        |
+| exists    | boolean | No       | Whether a variant matching this value and the current option selections exists in the catalog. |
 
 ______________________________________________________________________
 
@@ -17477,17 +17461,17 @@ ______________________________________________________________________
 
 ### Total
 
-| Name | Type | Required | Description |
-| ---- | ---- | -------- | ----------- |
-|      |      |          |             |
+| Name         | Type                                                           | Required | Description                                                                                                                                                                                                                                                                                 |
+| ------------ | -------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type         | string                                                         | **Yes**  | Cost category. Well-known values: subtotal, items_discount, discount, fulfillment, tax, fee, total. Businesses MAY use additional values.                                                                                                                                                   |
+| display_text | string                                                         | No       | Text to display against the amount. Should reflect appropriate method (e.g., 'Shipping', 'Delivery').                                                                                                                                                                                       |
+| amount       | [Signed Amount](/draft/specification/reference/#signed-amount) | **Yes**  | Monetary amount in the currency's minor unit as defined by ISO 4217. Refer to the currency's exponent to determine minor-to-major ratio (e.g., 2 for USD, 0 for JPY, 3 for KWD). May be negative — the sign is intrinsic to the value (e.g., discounts are negative, charges are positive). |
 
 ______________________________________________________________________
 
 ### Totals
 
-| Name | Type | Required | Description |
-| ---- | ---- | -------- | ----------- |
-|      |      |          |             |
+Pricing breakdown provided by the business. MUST contain exactly one subtotal and one total entry. Detail types (tax, fee, discount, fulfillment) may appear multiple times for itemization. Platforms MUST render all entries in order using display_text and amount.
 
 ______________________________________________________________________
 

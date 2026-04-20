@@ -116,9 +116,11 @@ This object MUST be one of the following types: [Shipping Destination](/draft/sp
 
 #### Total
 
-| Name | Type | Required | Description |
-| ---- | ---- | -------- | ----------- |
-|      |      |          |             |
+| Name         | Type                                                           | Required | Description                                                                                                                                                                                                                                                                                 |
+| ------------ | -------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type         | string                                                         | **Yes**  | Cost category. Well-known values: subtotal, items_discount, discount, fulfillment, tax, fee, total. Businesses MAY use additional values.                                                                                                                                                   |
+| display_text | string                                                         | No       | Text to display against the amount. Should reflect appropriate method (e.g., 'Shipping', 'Delivery').                                                                                                                                                                                       |
+| amount       | [Signed Amount](/draft/specification/reference/#signed-amount) | **Yes**  | Monetary amount in the currency's minor unit as defined by ISO 4217. Refer to the currency's exponent to determine minor-to-major ratio (e.g., 2 for USD, 0 for JPY, 3 for KWD). May be negative — the sign is intrinsic to the value (e.g., discounts are negative, charges are positive). |
 
 #### Postal Address
 

@@ -560,22 +560,10 @@ UCP metadata for catalog responses.
 
 A product in a get_product response, extended with effective selections and availability signals on option values.
 
-| Name             | Type          | Required | Description                                                                                      |
-| ---------------- | ------------- | -------- | ------------------------------------------------------------------------------------------------ |
-| id               | string        | **Yes**  | Global ID (GID) uniquely identifying this product.                                               |
-| handle           | string        | No       | URL-safe slug for SEO-friendly URLs (e.g., 'blue-runner-pro'). Use id for stable API references. |
-| title            | string        | **Yes**  | Product title.                                                                                   |
-| description      | object        | **Yes**  | Product description in one or more formats.                                                      |
-| url              | string        | No       | Canonical product page URL.                                                                      |
-| categories       | Array[object] | No       | Product categories with optional taxonomy identifiers.                                           |
-| price_range      | object        | **Yes**  | Price range across all variants.                                                                 |
-| list_price_range | object        | No       | List price range before discounts (for strikethrough display).                                   |
-| media            | Array[object] | No       | Product media (images, videos, 3D models). First item is the featured media for listings.        |
-| options          | Array[object] | No       | Product options (Size, Color, etc.).                                                             |
-| variants         | Array[object] | **Yes**  | Purchasable variants of this product. First item is the featured variant for listings.           |
-| rating           | object        | No       | Aggregate product rating.                                                                        |
-| tags             | Array[string] | No       | Product tags for categorization and search.                                                      |
-| metadata         | object        | No       | Business-defined custom data extending the standard product model.                               |
+| Name     | Type          | Required | Description                                                                                                                                                                                          |
+| -------- | ------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| selected | Array[object] | No       | Effective option selections that anchor the featured variant and availability signals. Required when the product has configurable options; may be empty or omitted for products with no option axes. |
+| options  | Array[object] | No       | Product options with availability signals relative to the effective selections.                                                                                                                      |
 
 ### Get Product Response
 

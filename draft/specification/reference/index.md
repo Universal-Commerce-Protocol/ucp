@@ -218,10 +218,10 @@ ______________________________________________________________________
 
 ### Detail Option Value
 
-| Name  | Type   | Required | Description                                                                                                                                           |
-| ----- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| id    | string | No       | Optional server-assigned identifier for this option value. When present in a selected_option, the server SHOULD use it for matching instead of label. |
-| label | string | **Yes**  | Display text for this option value (e.g., 'Small', 'Blue').                                                                                           |
+| Name      | Type    | Required | Description                                                                                    |
+| --------- | ------- | -------- | ---------------------------------------------------------------------------------------------- |
+| available | boolean | No       | Whether a variant matching this value and the current option selections is purchasable.        |
+| exists    | boolean | No       | Whether a variant matching this value and the current option selections exists in the catalog. |
 
 ______________________________________________________________________
 
@@ -682,17 +682,17 @@ ______________________________________________________________________
 
 ### Total
 
-| Name | Type | Required | Description |
-| ---- | ---- | -------- | ----------- |
-|      |      |          |             |
+| Name         | Type                                                           | Required | Description                                                                                                                                                                                                                                                                                 |
+| ------------ | -------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type         | string                                                         | **Yes**  | Cost category. Well-known values: subtotal, items_discount, discount, fulfillment, tax, fee, total. Businesses MAY use additional values.                                                                                                                                                   |
+| display_text | string                                                         | No       | Text to display against the amount. Should reflect appropriate method (e.g., 'Shipping', 'Delivery').                                                                                                                                                                                       |
+| amount       | [Signed Amount](/draft/specification/reference/#signed-amount) | **Yes**  | Monetary amount in the currency's minor unit as defined by ISO 4217. Refer to the currency's exponent to determine minor-to-major ratio (e.g., 2 for USD, 0 for JPY, 3 for KWD). May be negative — the sign is intrinsic to the value (e.g., discounts are negative, charges are positive). |
 
 ______________________________________________________________________
 
 ### Totals
 
-| Name | Type | Required | Description |
-| ---- | ---- | -------- | ----------- |
-|      |      |          |             |
+Pricing breakdown provided by the business. MUST contain exactly one subtotal and one total entry. Detail types (tax, fee, discount, fulfillment) may appear multiple times for itemization. Platforms MUST render all entries in order using display_text and amount.
 
 ______________________________________________________________________
 
