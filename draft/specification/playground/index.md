@@ -18,7 +18,7 @@ Continue →
 
 ## 2. Discovery
 
-The Platform fetches `/.well-known/ucp`. The response below is filtered to show the intersection of the Business's capabilities and the Platform's profile.
+The Platform fetches `/.well-known/ucp` from the Business.
 
 GET Request
 
@@ -28,7 +28,7 @@ Host: business.example.com
 Accept: application/json
 ```
 
-Response (Filtered)
+Response
 
 ← Back Continue →
 
