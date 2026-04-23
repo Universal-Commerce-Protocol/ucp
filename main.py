@@ -135,16 +135,6 @@ def _resolve_schema(
     raise RuntimeError(f"ucp-schema execution error: result = {result}")
 
 
-# Backward compatibility alias
-def _resolve_schema_bundled(
-  schema_path: str | Path,
-  direction: str = "response",
-  operation: str = "read",
-) -> dict[str, Any] | None:
-  """Resolve a schema with bundling (backward compat)."""
-  return _resolve_schema(schema_path, direction, operation, bundle=True)
-
-
 def define_env(env):
   """Injects custom macros into the MkDocs environment.
 
