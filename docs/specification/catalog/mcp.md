@@ -214,7 +214,7 @@ Maps to the [Catalog Search](search.md) capability.
                   "description": { "plain": "Size 10 variant" },
                   "price": { "amount": 12000, "currency": "USD" },
                   "availability": { "available": true },
-                  "selected_options": [
+                  "options": [
                     { "name": "Size", "label": "10" }
                   ],
                   "tags": ["running", "road", "neutral"],
@@ -554,7 +554,7 @@ Maps to the [Catalog Lookup](lookup.md#get-product-get_product) capability. Retu
                 "description": { "plain": "Blue, Size 10" },
                 "price": { "amount": 12000, "currency": "USD" },
                 "availability": { "available": true },
-                "selected_options": [
+                "options": [
                   { "name": "Color", "label": "Blue" },
                   { "name": "Size", "label": "10" }
                 ]
@@ -566,7 +566,7 @@ Maps to the [Catalog Lookup](lookup.md#get-product-get_product) capability. Retu
                 "description": { "plain": "Blue, Size 12" },
                 "price": { "amount": 15000, "currency": "USD" },
                 "availability": { "available": true },
-                "selected_options": [
+                "options": [
                   { "name": "Color", "label": "Blue" },
                   { "name": "Size", "label": "12" }
                 ]
@@ -623,14 +623,10 @@ UCP uses a two-layer error model separating transport errors from business outco
 
 ### Transport Errors
 
-Use JSON-RPC 2.0 error codes for protocol-level issues that prevent request processing:
-
-| Code | Meaning |
-| :--- | :--- |
-| -32600 | Invalid Request - Malformed JSON-RPC |
-| -32601 | Method not found |
-| -32602 | Invalid params - Missing required parameter |
-| -32603 | Internal error |
+Transport-level failures (authentication, rate limiting, unavailability) that
+prevent request processing are returned as JSON-RPC `error`. See the
+[Core Specification](../overview.md#error-codes) for the complete error code
+registry and JSON-RPC error code mappings.
 
 ### Business Outcomes
 

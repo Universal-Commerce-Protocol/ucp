@@ -192,6 +192,9 @@ parameters from business-specific query parameters:
 
 - `ec_version` (string, **REQUIRED**): The UCP version for this session
     (format: `YYYY-MM-DD`). Must match the version from the checkout response.
+    The version is negotiated at session initialization and **MUST** remain
+    constant for the lifetime of the ECP session — neither party may change
+    the version after the handshake.
 - `ec_auth` (string, **OPTIONAL**): Authentication token in business-defined
     format
 - `ec_delegate` (string, **OPTIONAL**): Comma-delimited list of delegations
@@ -397,91 +400,26 @@ completion.
 
 ## Transport & Messaging
 
-### Message Format
+ECP uses the shared EP transport layer. See
+[Embedded Protocol — Transport & Messaging](embedded-protocol.md#transport-messaging)
+for message format, message types, and response handling conventions.
 
-All ECP messages **MUST** use JSON-RPC 2.0 format
-([RFC 7159](https://datatracker.ietf.org/doc/html/rfc7159)). Each message **MUST** contain:
-
-- `jsonrpc`: **MUST** be `"2.0"`
-- `method`: The message name (e.g., `"ec.start"`)
-- `params`: Message-specific payload (may be empty object)
-- `id`: (Optional) Present only for requests that expect responses
-
-### Message Types
-
-**Requests** (with `id` field):
-
-- Require a response from the receiver
-- **MUST** include a unique `id` field
-- Receiver **MUST** respond with matching `id`
-- Response **MUST** be either a `result` or `error` object
-- Used for operations requiring acknowledgment or data
-
-**Notifications** (without `id` field):
-
-- Informational only, no response expected
-- **MUST NOT** include an `id` field
-- Receiver **MUST NOT** send a response
-- Used for state updates and informational events
-
-### Response Handling
-
-For requests (messages with `id`), receivers **MUST** respond with either:
-
-**Success Response:**
-
-```json
-{ "jsonrpc": "2.0", "id": "...", "result": {...} }
-```
-
-**Error Response:**
-
-```json
-{ "jsonrpc": "2.0", "id": "...", "error": {...} }
-```
+The `ucp.version` in all responses **MUST** echo the `ec_version` negotiated
+during session initialization and confirmed by the host in the `ec.ready`
+response. The version is session-bound — it **MUST NOT** change for the duration
+of the ECP session.
 
 ### Communication Channels
 
-#### Communication Channel for Web-Based Hosts
+ECP follows the shared EP communication channel model. See
+[Embedded Protocol — Communication Channels](embedded-protocol.md#communication-channels)
+for the general pattern.
 
-When the host is a web application, communication starts using `postMessage`
-between the host and Checkout windows. The host **MUST** listen for
-`postMessage` calls from the embedded window, and when a message is received,
-they **MUST** validate the origin matches the `continue_url` used to start the
-embedded checkout.
-
-Upon validation, the host **MAY** create a `MessageChannel`, and transfer one of
-its ports in the result of the [`ec.ready` response](#ecready). When a host
-responds with a `MessagePort`, all subsequent messages **MUST** be sent over
-that channel. Otherwise, the host and business **MUST** continue using
-`postMessage()` between their `window` objects, including origin validation.
-
-#### Communication Channel for Native Hosts
-
-When the host is a native application, they **MUST** inject globals into the
-Embedded Checkout that allows `postMessage` communication between the web and
-native environments. The host **MUST** create at least one of the following
-globals:
+For native hosts, the checkout-specific globals are:
 
 - `window.EmbeddedCheckoutProtocolConsumer` (preferred)
 - `window.webkit.messageHandlers.EmbeddedCheckoutProtocolConsumer`
-
-This object **MUST** implement the following interface:
-
-```javascript
-{
-  postMessage(message: string): void
-}
-```
-
-Where `message` is a JSON-stringified JSON-RPC 2.0 message. The host **MUST**
-parse the JSON string before processing.
-
-For messages traveling from the host to the Embedded Checkout, the host **MUST**
-inject JavaScript in the webview that will call
-`window.EmbeddedCheckoutProtocol.postMessage()` with the JSON RPC message. The
-Embedded Checkout **MUST** initialize this global object — and start listening
-for `postMessage()` calls — before the `ec.ready` message is sent.
+- `window.EmbeddedCheckoutProtocol` (Host → Embedded Checkout)
 
 ## Message API Reference
 
@@ -529,7 +467,7 @@ delegations were accepted, communicates whether or not additional auth exchange
 is needed, and allows the host to provide additional, display-only state for the
 checkout that was not communicated over UCP checkout actions.
 
-- **Direction:** Embedded Checkout → host
+- **Direction:** Embedded Checkout → Host
 - **Type:** Request
 - **Payload:**
     - `delegate` (array of strings, **REQUIRED**): List of delegation
@@ -578,9 +516,14 @@ checkout that was not communicated over UCP checkout actions.
 The `ec.ready` message is a request, which means that the host **MUST** respond
 to complete the handshake.
 
-- **Direction:** host → Embedded Checkout
+- **Direction:** Host → Embedded Checkout
 - **Type:** Response
 - **Result Payload:**
+    - `ucp` (object, **REQUIRED**): UCP protocol metadata. The `version`
+        confirms the negotiated `ec_version` and `status` **MUST** be
+        `"success"`. This version is session-bound — the host explicitly
+        confirms the protocol version here, and it **MUST NOT** change for
+        the duration of the session.
     - `upgrade` (object, **OPTIONAL**): An object describing how the Embedded
         Checkout should update the communication channel it uses to communicate
         with the host. When present, host **MUST NOT** include `credential`
@@ -604,6 +547,7 @@ to complete the handshake.
     "jsonrpc": "2.0",
     "id": "ready_1",
     "result": {
+        "ucp": { "version": "{{ ucp_version }}", "status": "success" },
         "credential": "fake_identity_linking_oauth_token"
     }
 }
@@ -622,6 +566,7 @@ on the host's `iframe.contentWindow.postMessage()` call):
     "jsonrpc": "2.0",
     "id": "ready_1",
     "result": {
+        "ucp": { "version": "{{ ucp_version }}", "status": "success" },
         "upgrade": {
             "port": "[Transferable MessagePort]"
         }
@@ -647,6 +592,7 @@ information:**
     "jsonrpc": "2.0",
     "id": "ready_1",
     "result": {
+        "ucp": { "version": "{{ ucp_version }}", "status": "success" },
         "checkout": {
             "payment": {
                 // The instrument structure is defined by the handler's instrument schema
@@ -672,119 +618,64 @@ information:**
 }
 ```
 
-### Authentication
+**Example Error Response:**
 
-#### `ec.auth`
-
-Embedded checkout **MAY** request authorization from the host in the following scenarios:
-
-1. Reauth: Certain authentication methods (i.e. OAuth token) have strict expiration timestamps.
-If a session lasted longer than the allowed duration, business can request for a refreshed
-authorization to be provided by the host before the session continues.
-
-- **Direction:** Embedded Checkout → Host
-- **Type:** Request
-- **Payload:**
-    - `type` (string, **REQUIRED**): The requested authorization type.
-
-**Example Message:**
+If the host cannot complete the handshake (e.g., origin validation failure or
+protocol state violation), it **MUST** respond with an `error_response` result:
 
 ```json
 {
     "jsonrpc": "2.0",
-    "id": "auth_1",
-    "method": "ec.auth",
-    "params": {
-        "type": "oauth"
-    }
-}
-```
-
-The `ec.auth` message is a request, which means that host
-**MUST** respond to exchange the authorization. The host **MUST** respond with either an error,
-or the authorization data requested by Embedded Checkout.
-
-- **Direction:** host → Embedded Checkout
-- **Type:** Response
-- **Result Payload:**
-    - `credential` (string, **REQUIRED**): The requested authorization data,
-    can be in the form of an OAuth token, JWT, API keys, etc.
-
-**Example Message:**
-
-```json
-{
-    "jsonrpc": "2.0",
-    "id": "auth_1",
+    "id": "ready_1",
     "result": {
-        "credential": "fake_identity_linking_oauth_token"
-    }
-}
-```
-
-**Example Error Message:**
-
-```json
-{
-    "jsonrpc": "2.0",
-    "id": "auth_1",
-     "result": {
         "ucp": { "version": "{{ ucp_version }}", "status": "error" },
         "messages": [
             {
                 "type": "error",
-                "code": "timeout_error",
-                "content": "An internal service timed out when fetching the required authorization data.",
-                "severity": "recoverable"
+                "code": "security_error",
+                "content": "Host origin validation failed.",
+                "severity": "unrecoverable"
             }
         ]
     }
 }
 ```
 
-If the error appears to be transient within the host (i.e. `timeout_error`) - as indicated with
-`recoverable` severity - Embedded Checkout **MAY** re-initiate this request with the host again.
-Otherwise, Embedded Checkout **MUST** issue an `ec.error` notification containing an `unrecoverable`
-error response. The same mechanism can also be used in the happy path if Embedded Checkout is
-unable to process the host-provided authorization data (i.e. credential is corrupted).
-This response **SHOULD** also contain a `continue_url` to allow buyer handoff.
+When the host responds with an error, the session cannot proceed. The host
+**MUST** tear down the embedded context and **MAY** redirect the buyer to
+`continue_url` if present. The Embedded Checkout **MUST NOT** send further
+messages after receiving a handshake error.
 
-**Example Error Response Message Through ec.error:**
+### Authentication
 
-```json
-{
-    "jsonrpc": "2.0",
-    "method": "ec.error",
-    "params": {
-        "ucp": { "version": "{{ ucp_version }}", "status": "error" },
-        "messages": [
-            {
-                "type": "error",
-                "code": "not_supported_error",
-                "content": "Requested auth credential type is not supported",
-                "severity": "unrecoverable"
-            }
-        ],
-        "continue_url": "https://merchant.example.com"
-    }
-}
-```
+#### `ec.auth`
 
-When the host receives this error response, they **MUST** tear down the iframe and **SHOULD**
-display a custom error screen to set proper buyer expectation. If a `continue_url` is present in
-the error response, host **MUST** use it to handoff the buyer for session recovery.
+`ec.auth` implements the shared EP authentication pattern — see
+[Embedded Protocol — Authentication](embedded-protocol.md#authentication) for
+the request/response contract, examples, and error escalation flow.
+
+- **Method:** `ec.auth`
+- **Direction:** Embedded Checkout → Host (request); Host → Embedded Checkout (response)
+
+When error escalation is required, Embedded Checkout **MUST** issue an
+`ec.error` notification per the
+[session error pattern](embedded-protocol.md#session-error).
 
 ### Lifecycle Messages
 
+Lifecycle notifications follow the shared EP pattern — see
+[Embedded Protocol — Lifecycle](embedded-protocol.md#lifecycle). All lifecycle
+notifications carry the full `checkout` object as their payload.
+
 #### `ec.start`
 
-Signals that checkout is visible and ready for interaction.
+Signals that checkout is visible and ready for interaction. Sent after a
+successful `ec.ready` handshake.
 
-- **Direction:** Embedded Checkout → host
+- **Direction:** Embedded Checkout → Host
 - **Type:** Notification
 - **Payload:**
-    - `checkout`: The latest state of the checkout, using the same structure
-        as the `checkout` object in UCP responses.
+    - `checkout` (object, **REQUIRED**): The full current state of the checkout.
 
 **Example Message:**
 
@@ -809,6 +700,7 @@ Signals that checkout is visible and ready for interaction.
             "line_items": [/* ... */],
             "buyer": {/* ... */},
             "payment": {/* ... */}
+            // ... other checkout fields
         }
     }
 }
@@ -818,11 +710,11 @@ Signals that checkout is visible and ready for interaction.
 
 Indicates successful checkout completion.
 
-- **Direction:** Embedded Checkout → host
+- **Direction:** Embedded Checkout → Host
 - **Type:** Notification
 - **Payload:**
-    - `checkout`: The latest state of the checkout, using the same structure
-        as the `checkout` object in UCP responses.
+    - `checkout` (object, **REQUIRED**): The final state of the checkout,
+        including the resulting `order` object.
 
 **Example Message:**
 
@@ -845,19 +737,19 @@ Indicates successful checkout completion.
 
 ### State Change Messages
 
-State change messages inform the embedder of changes that have already occurred
-in the checkout interface. These are informational only. The checkout has
-already applied the changes and rendered the updated UI.
+State change notifications follow the shared EP pattern — see
+[Embedded Protocol — State Change](embedded-protocol.md#state-change). All state
+change notifications are sent from the Embedded Checkout to the host and carry
+the full `checkout` object as their payload.
 
 #### `ec.line_items.change`
 
-Line items have been modified (quantity changed, items added/removed) in the
-checkout UI.
+Line items have been modified (quantity changed, items added/removed).
 
-- **Direction:** Embedded Checkout → host
+- **Direction:** Embedded Checkout → Host
 - **Type:** Notification
 - **Payload:**
-    - `checkout`: The latest state of the checkout
+    - `checkout` (object, **REQUIRED**): The full current state of the checkout.
 
 **Example Message:**
 
@@ -883,12 +775,12 @@ checkout UI.
 
 #### `ec.buyer.change`
 
-Buyer information has been updated in the checkout UI.
+Buyer information has been updated (email, phone, address).
 
-- **Direction:** Embedded Checkout → host
+- **Direction:** Embedded Checkout → Host
 - **Type:** Notification
 - **Payload:**
-    - `checkout`: The latest state of the checkout
+    - `checkout` (object, **REQUIRED**): The full current state of the checkout.
 
 **Example Message:**
 
@@ -914,10 +806,10 @@ Buyer information has been updated in the checkout UI.
 Checkout messages have been updated. Messages include errors, warnings, and
 informational notices about the checkout state.
 
-- **Direction:** Embedded Checkout → host
+- **Direction:** Embedded Checkout → Host
 - **Type:** Notification
 - **Payload:**
-    - `checkout`: The latest state of the checkout
+    - `checkout` (object, **REQUIRED**): The full current state of the checkout.
 
 **Example Message:**
 
@@ -960,10 +852,10 @@ When a change also triggers a domain-specific message (e.g.,
 **MUST** send the domain-specific message first, then follow it with
 `ec.totals.change`.
 
-- **Direction:** Embedded Checkout → host
+- **Direction:** Embedded Checkout → Host
 - **Type:** Notification
 - **Payload:**
-    - `checkout`: The latest state of the checkout
+    - `checkout` (object, **REQUIRED**): The full current state of the checkout.
 
 **Example Message:**
 
@@ -1005,47 +897,21 @@ When a change also triggers a domain-specific message (e.g.,
 
 #### `ec.payment.change`
 
-Payment state has been updated. See [`ec.payment.change`](#ecpaymentchange) for
-full documentation.
+Payment state has been updated. See the
+[Payment Extension](#payment-extension) for full documentation.
+
+- **Direction:** Embedded Checkout → Host
+- **Type:** Notification
+- **Payload:**
+    - `checkout` (object, **REQUIRED**): The full current state of the checkout.
 
 ### Session Error Messages
 
 #### `ec.error`
 
-Signals a session-level error unrelated to the checkout resource itself — for example,
-a terminal auth failure that prevents the session from continuing.
-
-- **Direction:** Embedded Checkout → host
-- **Type:** Notification
-- **Payload:**
-    - `ucp` (object, **REQUIRED**): UCP protocol metadata. `status` **MUST** be `"error"`.
-    - `messages` (array, **REQUIRED**): One or more messages describing the failure.
-    - `continue_url` (string, **OPTIONAL**): URL for buyer handoff or session recovery.
-
-**Example Message:**
-
-```json
-{
-    "jsonrpc": "2.0",
-    "method": "ec.error",
-    "params": {
-        "ucp": { "version": "{{ ucp_version }}", "status": "error" },
-        "messages": [
-            {
-                "type": "error",
-                "code": "not_supported_error",
-                "content": "Requested auth credential type is not supported.",
-                "severity": "unrecoverable"
-            }
-        ],
-        "continue_url": "https://merchant.example.com/checkout/abc123"
-    }
-}
-```
-
-When the host receives `ec.error`, it **MUST** tear down the embedded context and **SHOULD**
-display an appropriate error state to the buyer. If `continue_url` is present, host **MUST**
-use it to hand off the buyer for session recovery.
+`ec.error` implements the shared EP session error pattern — see
+[Embedded Protocol — Session Error](embedded-protocol.md#session-error) for the
+payload specification and host handling requirements.
 
 ## Payment Extension
 
@@ -1090,7 +956,7 @@ the host. When delegated:
 Informs the host that something has changed in the payment section of the
 checkout UI, such as a new payment method being selected.
 
-- **Direction:** Embedded Checkout → host
+- **Direction:** Embedded Checkout → Host
 - **Type:** Notification
 - **Payload:**
     - `checkout`: The latest state of the checkout
@@ -1124,7 +990,7 @@ checkout UI, such as a new payment method being selected.
 
 Requests the host to present payment instrument selection UI.
 
-- **Direction:** Embedded Checkout → host
+- **Direction:** Embedded Checkout → Host
 - **Type:** Request
 - **Payload:**
     - `checkout`: The latest state of the checkout
@@ -1156,9 +1022,10 @@ treat this update as a PUT-style change by entirely replacing the existing state
 for the provided fields, rather than attempting to merge the new data with
 existing state.
 
-- **Direction:** host → Embedded Checkout
+- **Direction:** Host → Embedded Checkout
 - **Type:** Response
 - **Payload:**
+    - `ucp`: UCP protocol metadata with `status: "success"`
     - `checkout`: The update to apply to the checkout object
 
 **Example Success Response:**
@@ -1168,6 +1035,7 @@ existing state.
     "jsonrpc": "2.0",
     "id": "payment_instruments_change_request_1",
     "result": {
+        "ucp": { "version": "{{ ucp_version }}", "status": "success" },
         "checkout": {
             "payment": {
                 // The instrument structure is defined by the handler's instrument schema
@@ -1200,9 +1068,16 @@ existing state.
 {
     "jsonrpc": "2.0",
     "id": "payment_instruments_change_request_1",
-    "error": {
-        "code": "abort_error",
-        "message": "User closed the payment sheet without authorizing."
+    "result": {
+        "ucp": { "version": "{{ ucp_version }}", "status": "error" },
+        "messages": [
+            {
+                "type": "error",
+                "code": "abort_error",
+                "content": "User closed the payment sheet without authorizing.",
+                "severity": "recoverable"
+            }
+        ]
     }
 }
 ```
@@ -1251,9 +1126,10 @@ partial update to the `checkout` object, updating the instrument with
 existing state for `payment.instruments`, rather than attempting to merge the
 new data with existing state.
 
-- **Direction:** host → Embedded Checkout
+- **Direction:** Host → Embedded Checkout
 - **Type:** Response
 - **Payload:**
+    - `ucp`: UCP protocol metadata with `status: "success"`
     - `checkout`: The update to apply to the checkout object
 
 **Example Success Response:**
@@ -1263,6 +1139,7 @@ new data with existing state.
     "jsonrpc": "2.0",
     "id": "payment_credential_request_1",
     "result": {
+        "ucp": { "version": "{{ ucp_version }}", "status": "success" },
         "checkout": {
             "payment": {
                 "instruments": [
@@ -1298,9 +1175,16 @@ new data with existing state.
 {
     "jsonrpc": "2.0",
     "id": "payment_credential_request_1",
-    "error": {
-        "code": "abort_error",
-        "message": "User closed the payment sheet without authorizing."
+    "result": {
+        "ucp": { "version": "{{ ucp_version }}", "status": "error" },
+        "messages": [
+            {
+                "type": "error",
+                "code": "abort_error",
+                "content": "User closed the payment sheet without authorizing.",
+                "severity": "recoverable"
+            }
+        ]
     }
 }
 ```
@@ -1410,7 +1294,7 @@ method.
                         "destinations": [
                             {
                                 "id": "address_123",
-                                "address_street": "456 Old Street"
+                                "street_address": "456 Old Street"
                                 // ...
                             }
                         ]
@@ -1432,9 +1316,10 @@ existing state. The Embedded Checkout **MUST** treat this update as a PUT-style
 change by entirely replacing the existing state for `fulfillment.methods`,
 rather than attempting to merge the new data with existing state.
 
-- **Direction:** host → Embedded Checkout
+- **Direction:** Host → Embedded Checkout
 - **Type:** Response
 - **Payload:**
+    - `ucp`: UCP protocol metadata with `status: "success"`
     - `checkout`: The update to apply to the checkout object
 
 **Example Success Response:**
@@ -1444,6 +1329,7 @@ rather than attempting to merge the new data with existing state.
     "jsonrpc": "2.0",
     "id": "fulfillment_address_change_request_1",
     "result": {
+        "ucp": { "version": "{{ ucp_version }}", "status": "success" },
         "checkout": {
             "fulfillment": {
                 "methods": [
@@ -1473,9 +1359,16 @@ rather than attempting to merge the new data with existing state.
 {
     "jsonrpc": "2.0",
     "id": "fulfillment_address_change_request_1",
-    "error": {
-        "code": "abort_error",
-        "message": "User cancelled address selection."
+    "result": {
+        "ucp": { "version": "{{ ucp_version }}", "status": "error" },
+        "messages": [
+            {
+                "type": "error",
+                "code": "abort_error",
+                "content": "User cancelled address selection.",
+                "severity": "recoverable"
+            }
+        ]
     }
 }
 ```
@@ -1564,7 +1457,8 @@ Requests the host to handle a link activated by the buyer within the checkout.
 
 - **Direction:** Host → Embedded Checkout
 - **Type:** Response
-- **Payload:** Empty object (`{}`).
+- **Payload:**
+    - `ucp`: UCP protocol metadata with `status: "success"`
 
 **Example Success Response:**
 
@@ -1572,7 +1466,9 @@ Requests the host to handle a link activated by the buyer within the checkout.
 {
     "jsonrpc": "2.0",
     "id": "window_1",
-    "result": {}
+    "result": {
+        "ucp": { "version": "{{ ucp_version }}", "status": "success" }
+    }
 }
 ```
 
@@ -1582,9 +1478,16 @@ Requests the host to handle a link activated by the buyer within the checkout.
 {
     "jsonrpc": "2.0",
     "id": "window_1",
-    "error": {
-        "code": "window_open_rejected_error",
-        "message": "Window open rejected by host."
+    "result": {
+        "ucp": { "version": "{{ ucp_version }}", "status": "error" },
+        "messages": [
+            {
+                "type": "error",
+                "code": "window_open_rejected_error",
+                "content": "Window open rejected by host.",
+                "severity": "unrecoverable"
+            }
+        ]
     }
 }
 ```
@@ -1593,76 +1496,24 @@ Requests the host to handle a link activated by the buyer within the checkout.
 
 ### Error Codes
 
-Responses to delegation request messages from the
-embedded checkout may resolve to errors. The message responder **SHOULD** use
-error codes mapped to
-**[W3C DOMException](https://webidl.spec.whatwg.org/#idl-DOMException)** names
-where possible.
+See [Embedded Protocol — Error Codes](embedded-protocol.md#error-codes) for
+the shared error codes. Embedded Checkout defines the following additional
+codes for delegation-specific scenarios:
 
-| Code                         | Description                                                                                                                                    |
-| :--------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------- |
-| `abort_error`                | The user cancelled the interaction (e.g., closed the sheet).                                                                                   |
-| `security_error`             | The host origin validation failed.                                                                                                             |
-| `not_supported_error`        | The requested payment method is not supported by the host.                                                                                     |
-| `invalid_state_error`        | Handshake was attempted out of order.                                                                                                          |
-| `not_allowed_error`          | The request was missing valid User Activation (see [Prevention of Unsolicited Payment Requests](#prevention-of-unsolicited-payment-requests)). |
-| `window_open_rejected_error` | Host policy prevented the navigation. The host **MAY** notify the buyer that their request was rejected.                                       |
+| Code                         | Severity        | Description                                                                                                                                    |
+| :--------------------------- | :-------------- | :--------------------------------------------------------------------------------------------------------------------------------------------- |
+| `not_allowed_error`          | `recoverable`   | The request was missing valid User Activation (see [Prevention of Unsolicited Payment Requests](#prevention-of-unsolicited-payment-requests)). |
+| `window_open_rejected_error` | `unrecoverable` | Host policy prevented the navigation. The host **MAY** notify the buyer that their request was rejected.                                       |
+
+For `not_allowed_error`, recovery requires a new [user activation](https://html.spec.whatwg.org/multipage/interaction.html#activation)
+gesture before re-attempting the delegation.
 
 ### Security for Web-Based Hosts
 
-#### Content Security Policy (CSP)
-
-To ensure security, both parties **MUST** implement appropriate
-**[Content Security Policy (CSP)](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP)**
-directives:
-
-- **Business:** **MUST** set `frame-ancestors <host_origin>;` to ensure it's
-    only embedded by trusted hosts.
-
-- **Host:**
-    - **Direct Embedding:** If the host directly embeds the business's page,
-        specifying a `frame-src` directive listing every potential business
-        origin can be impractical, especially if there are many businesses. In
-        this scenario, while a strict `frame-src` is ideal, other security
-        measures like those in [Iframe Sandbox Attributes](#iframe-sandbox-attributes)
-        and [Credentialless Iframes](#credentialless-iframes) are critical.
-    - **Intermediate Iframe:** The host **MAY** use an intermediate iframe
-        (e.g., on a host-controlled subdomain) to embed the business's page.
-        This offers better control:
-        - The host's main page only needs to allow the origin of the
-            intermediate iframe in its `frame-src` (e.g.,
-            `frame-src <intermediate_iframe_origin>;`).
-        - The intermediate iframe **MUST** implement a strict `frame-src`
-            policy, dynamically set to allow _only_ the specific
-            `<merchant_origin>` for the current embedded session (e.g.,
-            `frame-src <merchant_origin>;`). This can be set via HTTP headers
-            when serving the intermediate iframe content.
-
-#### Iframe Sandbox Attributes
-
-All business iframes **MUST** be sandboxed to restrict their capabilities. The
-following sandbox attributes **SHOULD** be applied, but a host and business
-**MAY** negotiate additional capabilities:
-
-```html
-<iframe sandbox="allow-scripts allow-forms allow-same-origin"></iframe>
-```
-
-#### Credentialless Iframes
-
-Hosts **SHOULD** use the `credentialless` attribute on the iframe to load it in
-a new, ephemeral context. This prevents the business from correlating user
-activity across contexts or accessing existing sessions, protecting user
-privacy.
-
-```html
-<iframe credentialless src="https://business.example.com/checkout"></iframe>
-```
-
-#### Strict Origin Validation
-
-Enforce strict validation of the `origin` for all `postMessage` communications
-between frames.
+ECP inherits the shared EP security requirements for CSP, iframe sandboxing,
+credentialless iframes, and strict origin validation. See
+[Embedded Protocol — Security](embedded-protocol.md#security) for the full
+specification.
 
 ### Prevention of Unsolicited Payment Requests
 

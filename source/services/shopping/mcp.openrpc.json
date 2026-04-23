@@ -31,6 +31,12 @@
           { "$ref": "../../schemas/shopping/types/error_response.json" }
         ]
       },
+      "order_result": {
+        "oneOf": [
+          { "$ref": "../../schemas/shopping/order.json" },
+          { "$ref": "../../schemas/shopping/types/error_response.json" }
+        ]
+      },
       "catalog_get_product_result": {
         "oneOf": [
           { "$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/get_product_response" },
@@ -321,6 +327,27 @@
       "result": {
         "name": "response",
         "schema": {"$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/lookup_response"}
+      }
+    },
+    {
+      "name": "get_order",
+      "summary": "Get order",
+      "description": "Get the current state of an order. Returns the full order entity as a current-state snapshot.",
+      "params": [
+        {
+          "name": "meta",
+          "required": true,
+          "schema": {"$ref": "#/components/schemas/meta"}
+        },
+        {
+          "name": "id",
+          "required": true,
+          "schema": {"type": "string", "description": "The unique identifier of the order."}
+        }
+      ],
+      "result": {
+        "name": "order",
+        "schema": {"$ref": "#/components/schemas/order_result"}
       }
     },
     {
