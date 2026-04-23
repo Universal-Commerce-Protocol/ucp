@@ -3,6 +3,24 @@
   "$id": "https://ucp.dev/schemas/shopping/types/expectation.json",
   "title": "Expectation",
   "description": "Buyer-facing fulfillment expectation representing logical groupings of items (e.g., 'package'). Can be split, merged, or adjusted post-order to set buyer expectations for when/how items arrive.",
+  "$defs": {
+    "expectation_line_item": {
+      "type": "object",
+      "title": "Expectation Line Item",
+      "required": ["id", "quantity"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Line item ID reference."
+        },
+        "quantity": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Quantity of this item in this expectation."
+        }
+      }
+    }
+  },
   "type": "object",
   "required": [
     "id",
@@ -18,19 +36,7 @@
     "line_items": {
       "type": "array",
       "items": {
-        "type": "object",
-        "required": ["id", "quantity"],
-        "properties": {
-          "id": {
-            "type": "string",
-            "description": "Line item ID reference."
-          },
-          "quantity": {
-            "type": "integer",
-            "minimum": 1,
-            "description": "Quantity of this item in this expectation."
-          }
-        }
+        "$ref": "#/$defs/expectation_line_item"
       },
       "description": "Which line items and quantities are in this expectation."
     },

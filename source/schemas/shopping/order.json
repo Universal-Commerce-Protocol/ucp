@@ -19,6 +19,27 @@
           "description": "URL where merchant sends order lifecycle events (webhooks)."
         }
       }
+    },
+    "order_fulfillment": {
+      "type": "object",
+      "title": "Order Fulfillment",
+      "description": "Fulfillment data: buyer expectations and what actually happened.",
+      "properties": {
+        "expectations": {
+          "type": "array",
+          "items": {
+            "$ref": "types/expectation.json"
+          },
+          "description": "Buyer-facing groups representing when/how items will be delivered. Can be split, merged, or adjusted post-order."
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "$ref": "types/fulfillment_event.json"
+          },
+          "description": "Append-only event log of actual shipments. Each event references line items by ID."
+        }
+      }
     }
   },
   "type": "object",
@@ -61,24 +82,7 @@
       "description": "Line items representing what was purchased — can change post-order via edits or exchanges."
     },
     "fulfillment": {
-      "type": "object",
-      "properties": {
-        "expectations": {
-          "type": "array",
-          "items": {
-            "$ref": "types/expectation.json"
-          },
-          "description": "Buyer-facing groups representing when/how items will be delivered. Can be split, merged, or adjusted post-order."
-        },
-        "events": {
-          "type": "array",
-          "items": {
-            "$ref": "types/fulfillment_event.json"
-          },
-          "description": "Append-only event log of actual shipments. Each event references line items by ID."
-        }
-      },
-      "description": "Fulfillment data: buyer expectations and what actually happened."
+      "$ref": "#/$defs/order_fulfillment"
     },
     "adjustments": {
       "type": "array",

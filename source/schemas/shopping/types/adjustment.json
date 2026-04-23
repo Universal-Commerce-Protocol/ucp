@@ -3,6 +3,23 @@
   "$id": "https://ucp.dev/schemas/shopping/types/adjustment.json",
   "title": "Adjustment",
   "description": "Post-order event that exists independently of fulfillment. Typically represents money movements but can be any post-order change. Polymorphic type that can optionally reference line items.",
+  "$defs": {
+    "adjustment_line_item": {
+      "type": "object",
+      "title": "Adjustment Line Item",
+      "required": ["id", "quantity"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Line item ID reference."
+        },
+        "quantity": {
+          "type": "integer",
+          "description": "Signed quantity affected by this adjustment. Negative values represent reductions (e.g. returns); positive values represent additions (e.g. exchanges)."
+        }
+      }
+    }
+  },
   "type": "object",
   "required": [
     "id",
@@ -36,18 +53,7 @@
     "line_items": {
       "type": "array",
       "items": {
-        "type": "object",
-        "required": ["id", "quantity"],
-        "properties": {
-          "id": {
-            "type": "string",
-            "description": "Line item ID reference."
-          },
-          "quantity": {
-            "type": "integer",
-            "description": "Signed quantity affected by this adjustment. Negative values represent reductions (e.g. returns); positive values represent additions (e.g. exchanges)."
-          }
-        }
+        "$ref": "#/$defs/adjustment_line_item"
       },
       "description": "Which line items and quantities are affected (optional)."
     },

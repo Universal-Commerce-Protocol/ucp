@@ -23,6 +23,32 @@
         }
       ]
     },
+    "lookup_product": {
+      "description": "Product with required correlation metadata for lookup responses.",
+      "allOf": [
+        { "$ref": "types/product.json" },
+        {
+          "properties": {
+            "variants": {
+              "items": { "$ref": "#/$defs/lookup_variant" }
+            }
+          }
+        }
+      ]
+    },
+    "detail_product_option": {
+      "type": "object",
+      "title": "Detail Product Option",
+      "required": ["name", "values"],
+      "properties": {
+        "name": { "type": "string" },
+        "values": {
+          "type": "array",
+          "items": { "$ref": "types/detail_option_value.json" },
+          "minItems": 1
+        }
+      }
+    },
     "lookup_request": {
       "type": "object",
       "description": "Request body for catalog lookup.",
@@ -59,16 +85,7 @@
         "products": {
           "type": "array",
           "items": {
-            "allOf": [
-              { "$ref": "types/product.json" },
-              {
-                "properties": {
-                  "variants": {
-                    "items": { "$ref": "#/$defs/lookup_variant" }
-                  }
-                }
-              }
-            ]
+            "$ref": "#/$defs/lookup_product"
           },
           "description": "Products matching the requested identifiers. May contain fewer items if some identifiers not found, or more if identifiers match multiple products."
         },
@@ -129,16 +146,7 @@
         "options": {
           "type": "array",
           "items": {
-            "type": "object",
-            "required": ["name", "values"],
-            "properties": {
-              "name": { "type": "string" },
-              "values": {
-                "type": "array",
-                "items": { "$ref": "types/detail_option_value.json" },
-                "minItems": 1
-              }
-            }
+            "$ref": "#/$defs/detail_product_option"
           },
           "description": "Product options with availability signals relative to the effective selections."
         }

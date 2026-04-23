@@ -43,6 +43,18 @@
         }
       }
     },
+    "ap2_data": {
+      "title": "AP2 Data",
+      "description": "AP2 extension data.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/ap2_with_merchant_authorization"
+        },
+        {
+          "$ref": "#/$defs/ap2_with_checkout_mandate"
+        }
+      ]
+    },
     "dev.ucp.shopping.checkout": {
       "title": "Checkout with AP2 Mandate",
       "description": "Checkout extended with AP2 mandate support.",
@@ -54,14 +66,7 @@
           "type": "object",
           "properties": {
             "ap2": {
-              "allOf": [
-                {
-                  "$ref": "#/$defs/ap2_with_merchant_authorization"
-                },
-                {
-                  "$ref": "#/$defs/ap2_with_checkout_mandate"
-                }
-              ],
+              "$ref": "#/$defs/ap2_data",
               "ucp_request": {
                 "create": "omit",
                 "update": "omit",

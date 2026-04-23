@@ -3,6 +3,23 @@
   "$id": "https://ucp.dev/schemas/shopping/types/variant.json",
   "title": "Variant",
   "description": "A purchasable variant of a product with specific option selections.",
+  "$defs": {
+    "barcode": {
+      "type": "object",
+      "title": "Barcode",
+      "required": ["type", "value"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Barcode standard. Well-known values: UPC, EAN, ISBN, GTIN, JAN."
+        },
+        "value": {
+          "type": "string",
+          "description": "Barcode value."
+        }
+      }
+    }
+  },
   "type": "object",
   "required": [
     "id",
@@ -22,18 +39,7 @@
     "barcodes": {
       "type": "array",
       "items": {
-        "type": "object",
-        "required": ["type", "value"],
-        "properties": {
-          "type": {
-            "type": "string",
-            "description": "Barcode standard. Well-known values: UPC, EAN, ISBN, GTIN, JAN."
-          },
-          "value": {
-            "type": "string",
-            "description": "Barcode value."
-          }
-        }
+        "$ref": "#/$defs/barcode"
       },
       "description": "Industry-standard product identifiers for cross-reference and correlation."
     },

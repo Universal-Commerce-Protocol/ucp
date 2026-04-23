@@ -724,6 +724,32 @@ def define_env(env):
           # Array of Primitives
           inner_type = items.get("type", "any")
           f_type = f"Array[{inner_type}]"
+        elif f_type == "object" and ("propertyNames" in details or isinstance(details.get("additionalProperties"), dict)):
+          # Map/Registry
+          key_type = "string"
+          val_type = "any"
+          
+          prop_names = details.get("propertyNames", {})
+          if "$ref" in prop_names:
+            key_type = create_link(prop_names["$ref"], spec_file_name, context)
+          elif "type" in prop_names:
+            key_type = prop_names["type"]
+            
+          add_props = details.get("additionalProperties")
+          if isinstance(add_props, dict):
+            if "$ref" in add_props:
+              val_type = create_link(add_props["$ref"], spec_file_name, context)
+            elif "type" in add_props:
+              if add_props["type"] == "array" and "items" in add_props:
+                items_schema = add_props["items"]
+                if isinstance(items_schema, dict) and "$ref" in items_schema:
+                  val_type = f"Array[{create_link(items_schema['$ref'], spec_file_name, context)}]"
+                else:
+                  val_type = f"Array[{items_schema.get('type', 'any')}]"
+              else:
+                val_type = add_props["type"]
+                
+          f_type = f"Map[{key_type}, {val_type}]"
 
         # --- Handle Description ---
         desc = ""
@@ -790,19 +816,19 @@ def define_env(env):
       full_path = Path(schemas_dir) / core_entity_name
       if not full_path.exists():
         continue
-      # Use ucp-schema to resolve the full file with bundling
-      bundled = _resolve_schema_bundled(full_path)
-      if bundled:
-        # Extract the $def from the bundled result
-        embedded_schema_data = _resolve_json_pointer(def_path, bundled)
+      # Resolve WITHOUT bundling to preserve $refs for hyperlinks
+      resolved_schema = _resolve_schema(full_path, bundle=False)
+      if resolved_schema:
+        # Extract the $def from the resolved result
+        embedded_schema_data = _resolve_json_pointer(def_path, resolved_schema)
         if embedded_schema_data is not None:
-          # Resolve internal refs (like #/$defs/base) against the bundled root
+          # Resolve internal refs (like #/$defs/base) against the resolved root
           if "allOf" in embedded_schema_data:
             new_all_of = []
             for item in embedded_schema_data["allOf"]:
               if "$ref" in item and item["$ref"].startswith("#"):
-                resolved = _resolve_json_pointer(item["$ref"], bundled)
-                new_all_of.append(resolved if resolved else item)
+                resolved_def = _resolve_json_pointer(item["$ref"], resolved_schema)
+                new_all_of.append(resolved_def if resolved_def else item)
               else:
                 new_all_of.append(item)
             embedded_schema_data = embedded_schema_data.copy()
@@ -1008,14 +1034,30 @@ def define_env(env):
             output.pop()  # remove title
             continue
         else:
+          defs = schema_data.get("$defs", {})
           rendered_table = _render_table_from_schema(
             schema_data, spec_file_name
           )
-          if rendered_table == "_No properties defined._":
-            continue
-          output.append(f"### {schema_title}\n")
-          output.append(rendered_table)
-          output.append("\n---\n")
+          
+          if rendered_table != "_No properties defined._" or defs:
+            output.append(f"### {schema_title}\n")
+            
+            if rendered_table != "_No properties defined._":
+              output.append(rendered_table)
+              output.append("\n")
+
+            for def_name, def_schema in defs.items():
+              def_title = def_schema.get(
+                "title", def_name.replace("_", " ").title()
+              )
+              output.append(f"#### {def_title}\n")
+              rendered_table = _read_schema_from_defs(
+                f"{entity_name}.json#/$defs/{def_name}", spec_file_name
+              )
+              output.append(rendered_table)
+              output.append("\n")
+
+            output.append("\n---\n")
       else:
         output.append(f"### {entity_name_base}\n")
         output.append(
