@@ -496,6 +496,28 @@
             "$ref": "../../schemas/shopping/cart.json",
             "description": "Final cart state."
           }
+        },
+        {
+          "name": "transition",
+          "schema": {
+            "type": "object",
+            "description": "Optional advertisement from business for seamless transition from cart to checkout.",
+            "required": ["checkout"],
+            "properties": {
+              "checkout": {
+                "type": "object",
+                "description": "Custom object containing data needed by host to facilitate the transition.",
+                "required": ["ucp", "url"],
+                "properties": {
+                  "ucp": { "$ref": "#/components/schemas/ucp_success" },
+                  "url": {
+                    "type": "string",
+                    "description": "The transition URL."
+                  }
+                }
+              }
+            }
+          }
         }
       ]
     },

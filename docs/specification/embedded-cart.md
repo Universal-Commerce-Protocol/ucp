@@ -361,6 +361,8 @@ proceed to initiate a checkout session based on the completed cart by issuing a
 - **Type:** Notification
 - **Payload:**
     - `cart` (object, **REQUIRED**): The final state of the cart.
+    - `transition` (object, **OPTIONAL**): Advertisement for availability to transition
+        directly into Embedded Checkout.
 
 **Example Message:**
 
@@ -380,6 +382,56 @@ proceed to initiate a checkout session based on the completed cart by issuing a
     }
 }
 ```
+
+Business **MAY** also choose to specify a `transition` field to advertise a mechanism
+for hosts to seamlessly transition into Embedded Checkout from the completed
+Embedded Cart. This is represented by `transition` containing a minimal `checkout` object:
+
+- `ucp` (object, **REQUIRED**): Metadata to fully qualify the advertisement.
+    Business **MUST** include a checkout capability and an embedded service binding
+    with `config.delegate`.
+- `url` (string, **REQUIRED**): URL representing shift to checkout. Business **MAY** choose
+    to specify a redirect URL without having the actual checkout session created.
+
+**Example Message With `transition`:**
+
+```json
+{
+    "jsonrpc": "2.0",
+    "method": "ep.cart.complete",
+    "params": {
+        "cart": { ...cart fields... },
+        "transition": {
+            "checkout": {
+                "ucp": {
+                    "version": "{{ ucp_version }}",
+                    "status": "success",
+                    "capabilities": {
+                        "dev.ucp.shopping.checkout": [ { "version": "{{ ucp_version }}" } ]
+                    },
+                    "services": {
+                        {
+                            "version": "{{ ucp_version }}",
+                            "transport": "embedded",
+                            "config": {
+                                "delegate": [...]
+                            }
+                        }
+                    }
+                },
+                "url": "https://merchant.example.com/cart-to-checkout/checkout123",
+            }
+        }
+    }
+}
+```
+
+When `transition` is received as part of `ep.cart.complete`, the host **MAY** choose
+to initiate Embedded Checkout by appending `checkout.url` with relevant parameters -
+see [Embedded Checkout - Loading an Embedded Checkout URL](embedded-checkout.md#loading-an-embedded-checkout-url).
+Host also has full flexibility over how they want to render Embedded Checkout (i.e.
+reuse the same embedded context as Embedded Cart or tear down the current one in favour
+of bootstrapping a new embedded context).
 
 ### State Change Messages
 
