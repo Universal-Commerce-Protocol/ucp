@@ -18,29 +18,29 @@ HTTP Message Signatures protect against:
 UCP uses HTTP Message Signatures ([RFC 9421](https://www.rfc-editor.org/rfc/rfc9421)) for all HTTP-based transports:
 
 ```text
-┌─────────────────────────────────────────────────────────────────┐
-│                     SHARED FOUNDATION                           │
-├─────────────────────────────────────────────────────────────────┤
-│  Signature Format: RFC 9421 (HTTP Message Signatures)           │
-│  Body Digest: RFC 9530 (Content-Digest, raw bytes)              │
-│  Algorithms: ES256 (required), ES384 (optional)                 │
-│  Key Format: JWK (RFC 7517)                                     │
-│  Key Discovery: signing_keys[] in /.well-known/ucp              │
-│  Replay Protection: idempotency-key (business layer)            │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                     HTTP TRANSPORTS                             │
-├─────────────────────────────────────────────────────────────────┤
-│  REST API: Standard HTTP requests                               │
-│  MCP: Streamable HTTP transport (JSON-RPC over HTTP)            │
-├─────────────────────────────────────────────────────────────────┤
-│  Headers:                                                       │
-│    Signature-Input    (describes signed components)             │
-│    Signature          (contains signature value)                │
-│    Content-Digest     (body hash, raw bytes)                    │
-└─────────────────────────────────────────────────────────────────┘
++-----------------------------------------------------------------+
+|                     SHARED FOUNDATION                           |
++-----------------------------------------------------------------+
+|  Signature Format: RFC 9421 (HTTP Message Signatures)           |
+|  Body Digest: RFC 9530 (Content-Digest, raw bytes)              |
+|  Algorithms: ES256 (required), ES384 (optional)                 |
+|  Key Format: JWK (RFC 7517)                                     |
+|  Key Discovery: signing_keys[] in /.well-known/ucp              |
+|  Replay Protection: idempotency-key (business layer)            |
++-----------------------------------------------------------------+
+                              |
+                              v
++-----------------------------------------------------------------+
+|                     HTTP TRANSPORTS                             |
++-----------------------------------------------------------------+
+|  REST API: Standard HTTP requests                               |
+|  MCP: Streamable HTTP transport (JSON-RPC over HTTP)            |
++-----------------------------------------------------------------+
+|  Headers:                                                       |
+|    Signature-Input    (describes signed components)             |
+|    Signature          (contains signature value)                |
+|    Content-Digest     (body hash, raw bytes)                    |
++-----------------------------------------------------------------+
 ```
 
 **Note:** UCP specifies streamable HTTP for MCP transport, replacing SSE-based transports. This allows the same RFC 9421 signature mechanism to apply uniformly across all UCP transports.
