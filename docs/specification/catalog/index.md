@@ -181,6 +181,7 @@ rendering contract.
 
 When search finds no matches, return an empty array without messages.
 
+<!-- ucp:example skip reason="catalog capability, deferred" -->
 ```json
 {
   "ucp": {...},
@@ -195,6 +196,7 @@ This is not an error - the query was valid but returned no results.
 When a product is available but has delayed fulfillment, return the product with
 a warning message. Use the `path` field to target specific variants.
 
+<!-- ucp:example skip reason="catalog capability, deferred" -->
 ```json
 {
   "ucp": {...},
@@ -238,6 +240,7 @@ When requested identifiers don't exist, return success with the found products
 (if any). The response MAY include informational messages indicating which
 identifiers were not found.
 
+<!-- ucp:example skip reason="catalog capability, deferred" -->
 ```json
 {
   "ucp": {...},
@@ -262,6 +265,7 @@ return it as a warning with `presentation: "disclosure"`. The `path` field targe
 relevant component in the response — when it targets a product, the
 disclosure applies to all of its variants.
 
+<!-- ucp:example skip reason="catalog capability, deferred" -->
 ```json
 {
   "ucp": {...},

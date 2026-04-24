@@ -25,6 +25,7 @@ This document specifies the REST binding for the [Cart Capability](cart.md).
 Businesses advertise REST transport availability through their UCP profile at
 `/.well-known/ucp`.
 
+<!-- ucp:example skip reason="discovery profile" -->
 ```json
 {
   "ucp": {
@@ -101,6 +102,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
 === "Request"
 
+    <!-- ucp:example schema=shopping/cart op=create direction=request -->
     ```json
     POST /carts HTTP/1.1
     UCP-Agent: profile="https://platform.example/profile"
@@ -125,6 +127,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/cart op=read -->
     ```json
     HTTP/1.1 201 Created
     Content-Type: application/json
@@ -174,6 +177,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
     All items out of stock — no cart resource is created:
 
+    <!-- ucp:example schema=shopping/types/error_response op=read -->
     ```json
     HTTP/1.1 200 OK
     Content-Type: application/json
@@ -206,6 +210,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
 === "Request"
 
+    <!-- ucp:example skip reason="HTTP headers only, no JSON body" -->
     ```json
     GET /carts/{id} HTTP/1.1
     UCP-Agent: profile="https://platform.example/profile"
@@ -213,6 +218,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/cart op=read -->
     ```json
     HTTP/1.1 200 OK
     Content-Type: application/json
@@ -259,6 +265,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
 === "Not Found"
 
+    <!-- ucp:example schema=shopping/types/error_response op=read -->
     ```json
     HTTP/1.1 200 OK
     Content-Type: application/json
@@ -299,6 +306,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
 === "Request"
 
+    <!-- ucp:example schema=shopping/cart op=update direction=request -->
     ```json
     PUT /carts/{id} HTTP/1.1
     UCP-Agent: profile="https://platform.example/profile"
@@ -332,6 +340,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/cart op=read -->
     ```json
     HTTP/1.1 200 OK
     Content-Type: application/json
@@ -403,6 +412,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
 === "Request"
 
+    <!-- ucp:example skip reason="HTTP headers only, no JSON body" -->
     ```json
     POST /carts/{id}/cancel HTTP/1.1
     UCP-Agent: profile="https://platform.example/profile"
@@ -413,6 +423,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/cart op=read -->
     ```json
     HTTP/1.1 200 OK
     Content-Type: application/json
@@ -507,6 +518,7 @@ code registry and transport binding examples.
 Business outcomes (including not found and validation errors) are returned with
 HTTP 200 and the UCP envelope containing `messages`:
 
+<!-- ucp:example schema=shopping/types/error_response op=read -->
 ```json
 {
   "ucp": {

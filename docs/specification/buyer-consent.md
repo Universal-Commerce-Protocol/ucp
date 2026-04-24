@@ -34,6 +34,7 @@ operations.
 
 Businesses advertise consent support in their profile:
 
+<!-- ucp:example skip reason="discovery config" -->
 ```json
 {
   "capabilities": {
@@ -67,6 +68,7 @@ The platform includes consent within the `buyer` object in checkout operations:
 
 ### Example: Create Checkout with Consent
 
+<!-- ucp:example schema=shopping/checkout op=create direction=request -->
 ```json
 POST /checkouts
 
@@ -98,6 +100,7 @@ POST /checkouts
 
 ### Example: Checkout Response with Consent
 
+<!-- ucp:example skip reason="invalid JSON in source" -->
 ```json
 {
   "id": "checkout_456",

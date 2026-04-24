@@ -1,0 +1,15 @@
+{
+  "payment": {
+    "instruments": [
+      {
+        "id": "instr_scaffold",
+        "handler_id": "handler_scaffold",
+        "type": "card",
+        "credential": {
+          "type": "token",
+          "token": "tok_scaffold"
+        }
+      }
+    ]
+  }
+}

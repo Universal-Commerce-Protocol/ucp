@@ -107,6 +107,7 @@ The handler's specification (referenced via the `spec` field) documents the
 
 #### Example Business Handler Declaration
 
+<!-- ucp:example skip reason="handler config example" -->
 ```json
 {
   "ucp": {
@@ -148,6 +149,7 @@ The response config includes runtime information about what's available for this
 
 #### Example Response Config
 
+<!-- ucp:example skip reason="handler config example" -->
 ```json
 {
   "id": "processor_tokenizer",
@@ -193,6 +195,7 @@ the specific `endpoint` defined in the handler configuration.
 Platform identifies the processor tokenizer handler and retrieves the
 business's configuration.
 
+<!-- ucp:example skip reason="handler config example" -->
 ```json
 {
   "ucp": {
@@ -230,6 +233,7 @@ credential provider **MUST** inject it into the `binding` object.
 
 Response:
 
+<!-- ucp:example skip reason="handler config example" -->
 ```json
 {
   "token": "tok_a1b2c3d4e5f6"
@@ -240,6 +244,7 @@ Response:
 
 The Platform submits the token.
 
+<!-- ucp:example skip reason="handler config example" -->
 ```json
 POST /checkout-sessions/{checkout_id}/complete
 UCP-Agent: profile="https://platform.example/profile"

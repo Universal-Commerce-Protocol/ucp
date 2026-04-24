@@ -156,6 +156,7 @@ Examples: `ucp.json` (entity base), `capability.json`, `service.json`, `payment_
 UCP organizes capabilities, services, and handlers in **registries**—objects keyed
 by `name` rather than arrays of objects with `name` fields.
 
+<!-- ucp:example skip reason="schema authoring example" -->
 ```json
 {
   "capabilities": {
@@ -202,6 +203,7 @@ Each entity type defines **three variants** for different contexts:
 
 **`platform_schema`** — Full declarations for discovery
 
+<!-- ucp:example skip reason="schema authoring example" -->
 ```json
 {
   "dev.ucp.shopping.fulfillment": [{
@@ -217,6 +219,7 @@ Each entity type defines **three variants** for different contexts:
 
 **`business_schema`** — Business-specific overrides
 
+<!-- ucp:example skip reason="schema authoring example" -->
 ```json
 {
   "dev.ucp.shopping.fulfillment": [{
@@ -230,6 +233,7 @@ Each entity type defines **three variants** for different contexts:
 
 **`response_schema`** — Minimal references in API responses
 
+<!-- ucp:example skip reason="schema authoring example" -->
 ```json
 {
   "ucp": {
@@ -242,6 +246,7 @@ Each entity type defines **three variants** for different contexts:
 
 Define all three in your schema's `$defs`:
 
+<!-- ucp:example skip reason="schema authoring example" -->
 ```json
 "$defs": {
   "platform_schema": {
@@ -262,6 +267,7 @@ Prefer **open string vocabularies** with documented well-known values over close
 `enum` arrays. Enums are a one-way door: adding a new value is a breaking change
 for strict validators, and removing one breaks existing producers.
 
+<!-- ucp:example skip reason="schema authoring example" -->
 ```json
 // PREFER: open vocabulary — extensible without schema changes
 "type": {
@@ -292,6 +298,7 @@ capabilities **may** version independently when needed.
 
 Capabilities outside `dev.ucp.*` version fully independently:
 
+<!-- ucp:example skip reason="schema authoring example" -->
 ```json
 {
   "name": "com.shopify.loyalty",
@@ -307,6 +314,7 @@ Vendor schemas follow the same self-describing requirements.
 
 A capability schema defines both payload structure and declaration variants:
 
+<!-- ucp:example skip reason="schema authoring example" -->
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",

@@ -127,6 +127,7 @@ appended to this endpoint to form the complete URL.
 
 **Example:**
 
+<!-- ucp:example skip reason="conceptual/profile fragment" -->
 ```json
 {
   "version": "{{ ucp_version }}",
@@ -164,6 +165,7 @@ functionality is supported and where to find documentation and schemas.
 An **extension** is an optional module that augments another capability.
 Extensions use the `extends` field to declare their parent(s):
 
+<!-- ucp:example skip reason="conceptual/profile fragment" -->
 ```json
 {
   "dev.ucp.shopping.fulfillment": [
@@ -181,6 +183,7 @@ Extensions use the `extends` field to declare their parent(s):
 
 Extensions **MAY** extend multiple parent capabilities by using an array:
 
+<!-- ucp:example skip reason="conceptual/profile fragment" -->
 ```json
 {
   "dev.ucp.shopping.discount": [
@@ -226,6 +229,7 @@ Extension schemas define composed types using `allOf`. The `$defs` key **MUST**
 use the full parent capability name (reverse-domain format) to enable
 deterministic schema resolution:
 
+<!-- ucp:example skip reason="conceptual/profile fragment" -->
 ```json
 {
   "$defs": {
@@ -267,6 +271,7 @@ Extension schemas **SHOULD** declare a `requires` object (alongside
 `name`, `title`, `description`) to indicate the protocol and
 capability versions required for correct operation:
 
+<!-- ucp:example skip reason="conceptual/profile fragment" -->
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -293,6 +298,7 @@ Each constraint is an object with a required `min` (inclusive) and
 optional `max` (inclusive) version. When `max` is absent, there is
 no upper bound:
 
+<!-- ucp:example skip reason="conceptual/profile fragment" -->
 ```json
 "requires": {
   "protocol": { "min": "2026-01-23", "max": "2026-09-01" },
@@ -347,6 +353,7 @@ Platforms **MUST** resolve schemas following this sequence:
 
 Businesses publish their profile at `/.well-known/ucp`. An example:
 
+<!-- ucp:example skip reason="conceptual/profile fragment" -->
 ```json
 {
   "ucp": {
@@ -466,6 +473,7 @@ requiring cryptographic verification. Capabilities **MAY** include a `config`
 object for capability-specific settings (e.g., callback URLs, feature flags). An
 example:
 
+<!-- ucp:example skip reason="conceptual/profile fragment" -->
 ```json
 {
   "ucp": {
@@ -574,6 +582,7 @@ Content-Type: application/json
 **MCP Transport:** Platforms **MUST** include a `meta` object containing request
 metadata:
 
+<!-- ucp:example skip reason="conceptual/profile fragment" -->
 ```json
 {
   "jsonrpc": "2.0",
@@ -800,6 +809,7 @@ task through the standard web interface.
 
     **Discovery Failure (JSON-RPC error):**
 
+    <!-- ucp:example skip reason="conceptual/profile fragment" -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -818,6 +828,7 @@ task through the standard web interface.
 
     **Version Unsupported (JSON-RPC error):**
 
+    <!-- ucp:example skip reason="conceptual/profile fragment" -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -836,6 +847,7 @@ task through the standard web interface.
 
     **Capabilities Incompatible (JSON-RPC result):**
 
+    <!-- ucp:example skip reason="conceptual/profile fragment" -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -865,6 +877,7 @@ task through the standard web interface.
 
     **Protocol Error — Rate Limit (JSON-RPC error):**
 
+    <!-- ucp:example skip reason="conceptual/profile fragment" -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -881,6 +894,7 @@ task through the standard web interface.
 
     **Protocol Error — Unauthorized (JSON-RPC error):**
 
+    <!-- ucp:example skip reason="conceptual/profile fragment" -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -901,6 +915,7 @@ task through the standard web interface.
 
 The `capabilities` registry in responses indicates active capabilities:
 
+<!-- ucp:example skip reason="conceptual/profile fragment" -->
 ```json
 {
   "ucp": {
@@ -1198,6 +1213,7 @@ an encrypted payment token.
 
 ##### 1. Business Advertisement (Response from Create Checkout)
 
+<!-- ucp:example skip reason="conceptual/profile fragment" -->
 ```json
 {
   "ucp": {
@@ -1262,6 +1278,7 @@ respective handler API. The handler returns the encrypted token data.
 
 The Platform wraps the payment handler response into a payment instrument.
 
+<!-- ucp:example skip reason="conceptual/profile fragment" -->
 ```json
 POST /checkout-sessions/{id}/complete
 
@@ -1310,6 +1327,7 @@ request a challenge.
 
 ##### 1. Business Advertisement
 
+<!-- ucp:example skip reason="conceptual/profile fragment" -->
 ```json
 {
   "ucp": {
@@ -1347,6 +1365,7 @@ previous legal binding connection with them and receives `tok_visa_123`
 
 ##### 3. Complete Checkout (Request to Business)
 
+<!-- ucp:example skip reason="conceptual/profile fragment" -->
 ```json
 POST /checkout-sessions/{id}/complete
 
@@ -1372,6 +1391,7 @@ POST /checkout-sessions/{id}/complete
 The business attempts the charge, but the PSP returns a "Soft Decline"
 requiring 3DS.
 
+<!-- ucp:example skip reason="conceptual/profile fragment" -->
 ```json
 HTTP/1.1 200 OK
 {
@@ -1396,6 +1416,7 @@ session token, the agent generates cryptographic mandates.
 
 ##### 1. Business Advertisement
 
+<!-- ucp:example skip reason="conceptual/profile fragment" -->
 ```json
 {
   "ucp": {
@@ -1423,6 +1444,7 @@ non-agentic surface.
 
 ##### 3. Complete Checkout
 
+<!-- ucp:example skip reason="conceptual/profile fragment" -->
 ```json
 POST /checkout-sessions/{id}/complete
 
@@ -1577,6 +1599,7 @@ which operates over JSON-RPC.
 MCP requests use the `tools/call` method with the operation name in
 `params.name` and UCP payload in `params.arguments`:
 
+<!-- ucp:example skip reason="conceptual/profile fragment" -->
 ```json
 {
   "jsonrpc": "2.0",
@@ -1603,6 +1626,7 @@ MCP servers:
 - **SHOULD** also return serialized JSON in `content[]` for backward
     compatibility with clients not supporting `structuredContent`
 
+<!-- ucp:example skip reason="conceptual/profile fragment" -->
 ```json
 {
   "jsonrpc": "2.0",
@@ -1678,6 +1702,7 @@ prevent collisions when multiple extensions contribute to the shared namespace.
 Well-known signals use the `dev.ucp` namespace (e.g., `dev.ucp.buyer_ip`);
 extension signals use their own namespace (e.g., `com.example.device_id`).
 
+<!-- ucp:example skip reason="conceptual/profile fragment" -->
 ```json
 {
   "signals": {
@@ -1703,6 +1728,7 @@ data. The `path` field identifies the requested signal; the message `type`
 determines enforcement. An `error` blocks status progression until the
 signal is provided; an `info` is advisory and non-blocking.
 
+<!-- ucp:example skip reason="conceptual/profile fragment" -->
 ```json
 {
   "messages": [
@@ -1756,6 +1782,7 @@ Both businesses and platforms declare a single version in their profiles:
 
 === "Business Profile"
 
+    <!-- ucp:example skip reason="conceptual/profile fragment" -->
     ```json
     {
       "ucp": {
@@ -1769,6 +1796,7 @@ Both businesses and platforms declare a single version in their profiles:
 
 === "Platform Profile"
 
+    <!-- ucp:example skip reason="conceptual/profile fragment" -->
     ```json
     {
       "ucp": {
@@ -1804,6 +1832,7 @@ version — including its own capabilities, services, payment handlers,
 and signing keys. When `supported_versions` is omitted, only
 `version` is supported.
 
+<!-- ucp:example skip reason="conceptual/profile fragment" -->
 ```json
 {
   "ucp": {
@@ -1859,6 +1888,7 @@ every request:
 
 Response with version confirmation:
 
+<!-- ucp:example skip reason="conceptual/profile fragment" -->
 ```json
 {
   "ucp": {
@@ -1874,6 +1904,7 @@ Response with version confirmation:
 
 Version unsupported error — no resource is created:
 
+<!-- ucp:example skip reason="conceptual/profile fragment" -->
 ```json
 {
   "ucp": { "version": "2026-01-11", "status": "error" },
