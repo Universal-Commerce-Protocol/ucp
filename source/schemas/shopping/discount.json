@@ -79,6 +79,9 @@
         }
       }
     },
+    "inapplicable_discount": {
+      "$ref": "types/inapplicable_discount.json"
+    },
     "discounts_object": {
       "type": "object",
       "description": "Discount codes input and applied discounts output.",
@@ -97,6 +100,14 @@
             "$ref": "#/$defs/applied_discount"
           },
           "description": "Discounts successfully applied (code-based and automatic)."
+        },
+        "inapplicable": {
+          "type": "array",
+          "readOnly": true,
+          "items": {
+            "$ref": "#/$defs/inapplicable_discount"
+          },
+          "description": "Submitted discount codes that could not be applied, with structured rejection reasons. Complements messages[] by providing code-scoped rejection objects directly on the discounts object."
         }
       }
     },

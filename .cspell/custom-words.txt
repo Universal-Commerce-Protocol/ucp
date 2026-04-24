@@ -6,6 +6,7 @@ Amex
 Ant
 Anytown
 Backordered
+BOGO
 Braintree
 Carrefour
 Centricity

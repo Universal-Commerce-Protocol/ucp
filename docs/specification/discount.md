@@ -181,6 +181,155 @@ via the `messages[]` array:
 | `discount_code_user_not_logged_in`     | Code requires authenticated user            |
 | `discount_code_user_ineligible`        | User does not meet eligibility criteria     |
 
+### Inapplicable Discounts
+
+In addition to `messages[]` warnings, businesses SHOULD include rejected codes
+in the `discounts.inapplicable` array. This provides structured, code-scoped
+rejection feedback directly on the discounts object.
+
+{{ extension_schema_fields('discount.json#/$defs/inapplicable_discount', 'discount') }}
+
+**Relationship to `messages[]`:**
+
+- `inapplicable` complements `messages[]` — it does not replace it
+- Businesses SHOULD include both `inapplicable` entries AND `messages[]`
+  warnings for backward compatibility
+- `inapplicable` is scoped to code-based rejections; automatic discount issues
+  remain in `messages[]` only
+
+**Agent benefit:** The `inapplicable` array gives agents a clean success/failure
+partition without parsing JSONPath in `messages[].path`. This is especially
+valuable when agents try multiple codes in sequence and need to understand which
+succeeded and which failed.
+
+**Response requirements:**
+
+- When a submitted code cannot be applied, businesses SHOULD include it in
+  `discounts.inapplicable` with a machine-readable `reason` and human-readable
+  `content`.
+- Businesses SHOULD use standard `discount_code_*` error codes for the `reason`
+  field. Freeform codes are permitted for business-specific rejection reasons.
+- For backward compatibility, businesses SHOULD also include a corresponding
+  `messages[]` warning entry.
+- `inapplicable` MUST only contain code-based rejections. Issues with automatic
+  discounts (e.g., automatic discount no longer applicable due to cart change)
+  MUST be communicated via `messages[]` only.
+
+**Invariant:** Every code in `discounts.codes` appears in exactly one of
+`discounts.applied[].code` or `discounts.inapplicable[].code` (or neither, if
+the code was silently ignored).
+
+### Example: Mixed Applied and Inapplicable Codes
+
+=== "Request"
+
+    ```json
+    {
+      "discounts": {
+        "codes": ["SUMMER20", "EXPIRED50", "VIP_ONLY"]
+      }
+    }
+    ```
+
+=== "Response"
+
+    ```json
+    {
+      "discounts": {
+        "codes": ["SUMMER20", "EXPIRED50", "VIP_ONLY"],
+        "applied": [
+          {
+            "code": "SUMMER20",
+            "title": "Summer Sale 20% Off",
+            "amount": 800,
+            "method": "each",
+            "allocations": [
+              {"path": "$.line_items[0]", "amount": 800}
+            ]
+          }
+        ],
+        "inapplicable": [
+          {
+            "code": "EXPIRED50",
+            "reason": "discount_code_expired",
+            "content": "Code 'EXPIRED50' expired on December 1, 2025"
+          },
+          {
+            "code": "VIP_ONLY",
+            "reason": "discount_code_user_ineligible",
+            "content": "This code is available to VIP members only"
+          }
+        ]
+      },
+      "totals": [
+        {"type": "subtotal", "display_text": "Subtotal", "amount": 4000},
+        {"type": "items_discount", "display_text": "Item Discounts", "amount": -800},
+        {"type": "total", "display_text": "Total", "amount": 3200}
+      ],
+      "messages": [
+        {
+          "type": "warning",
+          "code": "discount_code_expired",
+          "path": "$.discounts.codes[1]",
+          "content": "Code 'EXPIRED50' expired on December 1, 2025"
+        },
+        {
+          "type": "warning",
+          "code": "discount_code_user_ineligible",
+          "path": "$.discounts.codes[2]",
+          "content": "This code is available to VIP members only"
+        }
+      ]
+    }
+    ```
+
+Note: Both `inapplicable` and `messages[]` are populated for backward
+compatibility. Platforms supporting `inapplicable` can use the structured
+objects directly; older platforms continue using `messages[]`.
+
+### Example: Combination Conflict
+
+When codes conflict with each other or with automatic discounts:
+
+=== "Request"
+
+    ```json
+    {
+      "discounts": {
+        "codes": ["BOGO50", "FLAT20"]
+      }
+    }
+    ```
+
+=== "Response"
+
+    ```json
+    {
+      "discounts": {
+        "codes": ["BOGO50", "FLAT20"],
+        "applied": [
+          {
+            "code": "BOGO50",
+            "title": "Buy One Get One 50% Off",
+            "amount": 1500,
+            "priority": 1
+          }
+        ],
+        "inapplicable": [
+          {
+            "code": "FLAT20",
+            "reason": "discount_code_combination_disallowed",
+            "content": "Cannot combine 'FLAT20' with 'BOGO50' — only one promotional code allowed per order"
+          }
+        ]
+      }
+    }
+    ```
+
+An agent can communicate: "I applied the Buy One Get One 50% Off (-$15.00).
+Unfortunately, the 20% off code can't be combined with it — promotional codes
+are limited to one per order. The BOGO deal gives you the bigger savings here."
+
 ## Automatic Discounts
 
 Businesses may apply discounts automatically based on cart contents, customer
