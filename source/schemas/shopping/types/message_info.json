@@ -15,7 +15,7 @@
     },
     "path": {
       "type": "string",
-      "description": "RFC 9535 JSONPath to the component the message refers to."
+      "description": "RFC 9535 JSONPath to the component the message refers to (e.g., $.line_items[0])."
     },
     "code": {
       "type": "string",
