@@ -208,12 +208,11 @@ optional in `card_credential.json` but most merchants require it for
 card-not-present transactions. Named constraints give the platform a clear
 signal of what the merchant requires — no guesswork, no retry loops.
 
-| Constraint                     | Type    | Default | Description                                                                                                                      |
-|--------------------------------|---------|---------|----------------------------------------------------------------------------------------------------------------------------------|
-| `brands`                       | array   | —       | Limit to specific card brands (e.g., `["visa", "mastercard"]`)                                                                   |
-| `requires_card_verification`   | boolean | `false` | When `true`, the handler requires card verification data. For FPAN: CVC. For network tokens: cryptogram and ECI.                 |
-| `requires_billing_address`     | boolean | `false` | When `true`, the handler requires a billing address on the instrument.                                                           |
-| `requires_billing_postal_code` | boolean | `false` | When `true`, the handler requires a billing postal code for AVS verification. Ignored when `requires_billing_address` is `true`. |
+| Constraint                      | Type    | Default  | Description                                                                                                                                                            |
+|---------------------------------|---------|----------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `brands`                        | array   | -        | Limit to specific card brands (e.g. `["visa", "mastercard"]`).                                                                                                         |
+| `requires_card_verification`    | boolean | `false`  | When `true`, the handler requires card verification data appropriate to the credential type (e.g., CVC for FPAN).                                                      |
+| `requires_billing_address_data` | string  | `"none"` | Level of billing address data required. `full_address`: complete billing address. `postal_code`: postal code only (e.g. for AVS). `none`: no billing address required. |
 
 **Example — merchant requires card verification and billing address:**
 
@@ -225,7 +224,7 @@ signal of what the merchant requires — no guesswork, no retry loops.
       "constraints": {
         "brands": ["visa", "mastercard"],
         "requires_card_verification": true,
-        "requires_billing_address": true
+        "requires_billing_address_data": "full_address"
       }
     }
   ]
@@ -242,8 +241,9 @@ existing resolution flow and can vary per merchant — a handler like
 some not, and each checkout resolves the correct constraints for that
 merchant.
 
-When a constraint is absent or `false`, the handler places no additional
-requirement for that field. Platforms fall back to existing behavior.
+When a constraint is absent or set to its default value, the handler places
+no additional requirement for that field. Platforms fall back to existing
+behavior.
 
 Constraints are additive to schema requirements. If the instrument or
 credential schema marks a field as required, the corresponding constraint
@@ -323,7 +323,7 @@ and typically includes different configuration:
       "constraints": {
         "brands": ["visa", "mastercard"],
         "requires_card_verification": true,
-        "requires_billing_address": true
+        "requires_billing_address_data": "full_address"
       }
     }
   ],
@@ -572,10 +572,10 @@ specifies what constraints are valid for that instrument type. For example,
 [`card_payment_instrument.json`](site:schemas/shopping/types/card_payment_instrument.json)
 defines `available_card_payment_instrument` with card-specific constraints.
 
-| Schema                                                                                                 | Constraints                                                                                                                      |
-| :----------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------- |
-| [`available_payment_instrument.json`](site:schemas/shopping/types/available_payment_instrument.json)   | Base: type, constraints (open object)                                                                                            |
-| `card_payment_instrument.json#/$defs/available_card_payment_instrument`                                | Extends base with `constraints.brands`, `requires_card_verification`, `requires_billing_address`, `requires_billing_postal_code` |
+| Schema                                                                                                 | Constraints                                                                                           |
+| :----------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------- |
+| [`available_payment_instrument.json`](site:schemas/shopping/types/available_payment_instrument.json)   | Base: type, constraints (open object)                                                                 |
+| `card_payment_instrument.json#/$defs/available_card_payment_instrument`                                | Extends base with `constraints.brands`, `requires_card_verification`, `requires_billing_address_data` |
 
 Handlers reference these instrument-defined schemas when declaring
 `available_instruments`. The **instrument schema authors** define what
