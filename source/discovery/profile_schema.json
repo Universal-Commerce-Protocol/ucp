@@ -51,9 +51,9 @@
         "alg": {
           "type": "string",
           "description": "Algorithm (e.g., 'ES256', 'RS256')."
-        },
-        "additionalProperties": false
-      }
+        }
+      },
+      "additionalProperties": false
     },
 
     "base": {
