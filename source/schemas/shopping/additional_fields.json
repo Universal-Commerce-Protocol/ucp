@@ -1,0 +1,170 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/additional_fields.json",
+  "name": "dev.ucp.shopping.additional_fields",
+  "title": "Additional Fields Extension",
+  "description": "Extends Checkout, and optionally Cart, with merchant-defined buyer-input fields. Businesses declare fields they want the buyer to fill out (e.g., consent, delivery window, delivery instructions, gift message); platforms render them and submit `{key, value}` pairs. The business is authoritative for validation and persistence.",
+  "$defs": {
+    "input_type": {
+      "type": "string",
+      "enum": [
+        "text",
+        "multiline_text",
+        "boolean",
+        "date",
+        "choice"
+      ]
+    },
+    "additional_fields_array": {
+      "type": "array",
+      "description": "Merchant-defined buyer-input fields requested for this checkout or cart. On response, the business returns the full resolved list in intended rendering order. On request, the resolved UCP request projection accepts only `key` and `value` per entry.",
+      "items": {
+        "$ref": "types/additional_field.json"
+      }
+    },
+    "platform_config": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Configuration carried on this capability in a platform discovery profile. Declares the v1 input types the platform can render. When the entire `config` object or the `supported_input_types` array is omitted, the platform is treated as declaring support for the full v1 set (`text`, `multiline_text`, `boolean`, `date`, `choice`). Platforms that support fewer than all v1 input types MUST declare the supported subset.",
+      "properties": {
+        "supported_input_types": {
+          "type": "array",
+          "uniqueItems": true,
+          "description": "V1 input types the platform supports rendering. Omission is equivalent to declaring support for all v1 input types. Platforms that support fewer than all v1 input types MUST declare the supported subset. Future input types MUST be explicitly declared by clients that support them.",
+          "items": {
+            "$ref": "#/$defs/input_type"
+          }
+        }
+      }
+    },
+    "business_config": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Configuration carried on this capability in a business discovery profile. Declares the v1 input types the business may emit. When the entire `config` object or the `supported_input_types` array is omitted, the business is treated as declaring that it may emit any v1 type (`text`, `multiline_text`, `boolean`, `date`, `choice`). Businesses that emit fewer than all v1 input types SHOULD declare the emitted subset.",
+      "properties": {
+        "supported_input_types": {
+          "type": "array",
+          "uniqueItems": true,
+          "description": "V1 input types the business may emit on responses. Businesses MUST NOT emit fields whose `input.type` is not in the intersection with the platform's supported set.",
+          "items": {
+            "$ref": "#/$defs/input_type"
+          }
+        }
+      }
+    },
+    "extends_checkout_or_checkout_and_cart": {
+      "description": "Additional Fields MUST extend checkout and MAY also extend cart. Cart-only support is invalid.",
+      "oneOf": [
+        {
+          "const": "dev.ucp.shopping.checkout"
+        },
+        {
+          "type": "array",
+          "uniqueItems": true,
+          "minItems": 1,
+          "maxItems": 2,
+          "contains": {
+            "const": "dev.ucp.shopping.checkout"
+          },
+          "items": {
+            "enum": [
+              "dev.ucp.shopping.checkout",
+              "dev.ucp.shopping.cart"
+            ]
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.checkout": {
+      "title": "Checkout with Additional Fields",
+      "description": "Checkout extended with merchant-defined buyer-input fields.",
+      "allOf": [
+        {
+          "$ref": "checkout.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "additional_fields": {
+              "$ref": "#/$defs/additional_fields_array",
+              "ucp_request": {
+                "create": "optional",
+                "update": "optional",
+                "complete": "omit"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.cart": {
+      "title": "Cart with Additional Fields",
+      "description": "Cart extended with merchant-defined buyer-input fields. Cart support is optional and requires the extension to also extend checkout.",
+      "allOf": [
+        {
+          "$ref": "cart.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "additional_fields": {
+              "$ref": "#/$defs/additional_fields_array",
+              "ucp_request": {
+                "create": "optional",
+                "update": "optional"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.additional_fields": {
+      "platform_schema": {
+        "title": "Additional Fields Capability (Platform)",
+        "description": "Platform-level additional-fields capability configuration. Declares supported input types and the parent resources the platform supports.",
+        "allOf": [
+          {
+            "$ref": "../capability.json#/$defs/platform_schema"
+          },
+          {
+            "required": [
+              "extends"
+            ],
+            "properties": {
+              "extends": {
+                "$ref": "#/$defs/extends_checkout_or_checkout_and_cart"
+              },
+              "config": {
+                "$ref": "#/$defs/platform_config",
+                "description": "Platform additional-fields configuration."
+              }
+            }
+          }
+        ]
+      },
+      "business_schema": {
+        "title": "Additional Fields Capability (Business)",
+        "description": "Business-level additional-fields capability configuration. Declares emitted input types and the parent resources the business supports.",
+        "allOf": [
+          {
+            "$ref": "../capability.json#/$defs/business_schema"
+          },
+          {
+            "required": [
+              "extends"
+            ],
+            "properties": {
+              "extends": {
+                "$ref": "#/$defs/extends_checkout_or_checkout_and_cart"
+              },
+              "config": {
+                "$ref": "#/$defs/business_config",
+                "description": "Business additional-fields configuration."
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

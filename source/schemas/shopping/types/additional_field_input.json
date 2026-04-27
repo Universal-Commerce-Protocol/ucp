@@ -1,0 +1,156 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/additional_field_input.json",
+  "title": "Additional Field Input",
+  "description": "Typed descriptor for the kind of value an additional field accepts, plus optional validation hints. Discriminated by the `type` property. V1 supports `text`, `multiline_text`, `boolean`, `date`, and `choice`.",
+  "type": "object",
+  "required": [
+    "type"
+  ],
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": [
+        "text",
+        "multiline_text",
+        "boolean",
+        "date",
+        "choice"
+      ],
+      "description": "Input kind. V1 supports `text`, `multiline_text`, `boolean`, `date`, and `choice`. Future input types require a future UCP version or extension."
+    }
+  },
+  "oneOf": [
+    {
+      "title": "Text Input",
+      "description": "Single-line free-form text input.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "const": "text"
+        },
+        "min_length": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Inclusive minimum length, counted in Unicode code points after JSON decoding. Validation hint only — the business is authoritative."
+        },
+        "max_length": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Inclusive maximum length, counted in Unicode code points after JSON decoding. Validation hint only."
+        },
+        "pattern": {
+          "type": "string",
+          "description": "ECMA-262 regular expression the value is expected to match when present. Validation hint only — the business is authoritative. If the platform's regex engine cannot express or correctly evaluate the pattern, the platform SHOULD skip client-side validation and rely on business-side validation."
+        }
+      }
+    },
+    {
+      "title": "Multiline Text Input",
+      "description": "Multi-line free-form text input.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "const": "multiline_text"
+        },
+        "min_length": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Inclusive minimum length, counted in Unicode code points after JSON decoding. Validation hint only."
+        },
+        "max_length": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Inclusive maximum length, counted in Unicode code points after JSON decoding. Validation hint only."
+        }
+      }
+    },
+    {
+      "title": "Boolean Input",
+      "description": "Boolean input. The submitted `value` is a JSON boolean (`true` or `false`); `null` represents an untouched state, which is distinct from a deliberately-declined `false`. For consent-style use cases where the buyer must affirmatively accept, the business rejects a submitted `false` with `code: additional_field_invalid_value`.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "const": "boolean"
+        }
+      }
+    },
+    {
+      "title": "Date Input",
+      "description": "Calendar-date input. Values are serialized as RFC 3339 full-date strings (`YYYY-MM-DD`) and represent the buyer's local calendar day. Businesses are authoritative for validation; if a business needs a specific timezone (e.g., fulfillment warehouse local time), it SHOULD state that in the field's `description`.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "const": "date"
+        },
+        "min": {
+          "type": "string",
+          "format": "date",
+          "description": "Inclusive earliest accepted date (RFC 3339 full-date). Validation hint only."
+        },
+        "max": {
+          "type": "string",
+          "format": "date",
+          "description": "Inclusive latest accepted date (RFC 3339 full-date). Validation hint only."
+        }
+      }
+    },
+    {
+      "title": "Choice Input",
+      "description": "Single-select input constrained to a closed set of allowed option values.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "options"
+      ],
+      "properties": {
+        "type": {
+          "const": "choice"
+        },
+        "options": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "description": "Ordered list of allowed options. The submitted value MUST match one of the `value` entries. Exact-duplicate entries are rejected by the schema; businesses are additionally authoritative for ensuring `value` uniqueness across entries that differ only by display fields like `label`.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "value",
+              "label"
+            ],
+            "properties": {
+              "value": {
+                "type": "string",
+                "minLength": 1,
+                "description": "The canonical value submitted for this option. Stable across locales and unique within the option list."
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Resolved localized display label for this option. Plain text."
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}
