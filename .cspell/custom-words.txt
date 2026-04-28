@@ -30,6 +30,7 @@ Paymentech
 Paypal
 Preorders
 Queensway
+Quicktype
 Sephora
 Shopify
 Shopee
