@@ -92,11 +92,11 @@
         },
         "applied": {
           "type": "array",
-          "readOnly": true,
           "items": {
             "$ref": "#/$defs/applied_discount"
           },
-          "description": "Discounts successfully applied (code-based and automatic)."
+          "description": "Discounts successfully applied (code-based and automatic).",
+          "ucp_request": "omit"
         }
       }
     },
