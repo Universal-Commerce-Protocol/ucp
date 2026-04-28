@@ -25,6 +25,24 @@ repos:
       - id: check-added-large-files
       - id: check-shebang-scripts-are-executable
       - id: check-executables-have-shebangs
+  # JSON Schema: validate UCP schema files against their declared meta-schema
+  - repo: https://github.com/python-jsonschema/check-jsonschema
+    rev: 0.33.0
+    hooks:
+      - id: check-metaschema
+        files: ^source/(schemas|discovery)/.*\.json$
+      - id: check-jsonschema
+        name: Validate OpenAPI definitions
+        files: ^source/(services/.*\.openapi\.json|handlers/.*/openapi\.json)$
+        args:
+          - --schemafile
+          - https://spec.openapis.org/oas/3.1/schema/2022-10-07
+      - id: check-jsonschema
+        name: Validate OpenRPC definitions
+        files: ^source/services/.*\.openrpc\.json$
+        args:
+          - --schemafile
+          - https://meta.open-rpc.org/
   # Python: Ruff
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.14.13
