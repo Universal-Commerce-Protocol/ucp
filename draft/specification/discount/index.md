@@ -208,10 +208,9 @@ Building on the store card example from [Eligibility Verification at Completion]
   "line_items": [
     {
       "item": {
-        "id": "prod_shirt",
-        "quantity": 2,
-        "price": 2500
-      }
+        "id": "prod_shirt"
+      },
+      "quantity": 2
     }
   ]
 }
@@ -279,10 +278,8 @@ Discount codes applied during cart exploration. The cart response includes estim
     {
       "item": {
         "id": "prod_1",
-        "quantity": 2,
-        "title": "T-Shirt",
-        "price": 2000
-      }
+      },
+      "quantity": 2
     }
   ],
   "discounts": {
@@ -299,10 +296,10 @@ Discount codes applied during cart exploration. The cart response includes estim
       "id": "li_1",
       "item": {
         "id": "prod_1",
-        "quantity": 2,
         "title": "T-Shirt",
         "price": 2000
       },
+      "quantity": 2,
       "totals": [
         {"type": "subtotal", "amount": 4000},
         {"type": "items_discount", "amount": -800},
@@ -384,10 +381,10 @@ This example shows both discount types: a per-item discount (20% off) allocated 
       "id": "li_1",
       "item": {
         "id": "prod_1",
-        "quantity": 2,
         "title": "T-Shirt",
         "price": 2000
       },
+      "quantity": 2,
       "totals": [
         {"type": "subtotal", "amount": 4000},
         {"type": "items_discount", "amount": -800},
@@ -473,9 +470,11 @@ Multiple discounts applied with full allocation breakdown:
     {
       "id": "li_1",
       "item": {
+        "id": "prod_1",
         "title": "T-Shirt",
         "price": 6000
       },
+      "quantity": 1,
       "totals": [
         {"type": "subtotal", "amount": 6000},
         {"type": "items_discount", "amount": -1500},
@@ -485,9 +484,11 @@ Multiple discounts applied with full allocation breakdown:
     {
       "id": "li_2",
       "item": {
+        "id": "prod_2",
         "title": "Socks",
         "price": 4000
       },
+      "quantity": 1,
       "totals": [
         {"type": "subtotal", "amount": 4000},
         {"type": "items_discount", "amount": -1000},

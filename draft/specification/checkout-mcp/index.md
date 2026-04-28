@@ -609,10 +609,16 @@ Business outcomes (including errors like unavailable merchandise) are returned a
       "line_items": [
         {
           "id": "li_1",
-          "quantity": 100,
-          "available_quantity": 12
+           "item": {
+              "id": "item_123",
+              "title": "Blue Jeans",
+              "price": 5000
+            },
+          "quantity": 12,
+          "totals": [...]
         }
       ],
+      "totals": [...],
       "messages": [
         {
           "type": "warning",

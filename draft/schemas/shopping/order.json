@@ -104,5 +104,5 @@
       "description": "Business outcome messages (errors, warnings, informational). Present when the business needs to communicate status or issues to the platform."
     }
   },
-  "version": "2026-04-24"
+  "version": "2026-04-28"
 }
