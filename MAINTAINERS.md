@@ -21,23 +21,29 @@
 The Tech Council is responsible for the technical direction and overall
 design of the protocol.
 
-<!-- cSpell:ignore Amit Handa Anurag Sinha Chris Sauve Daniel Wyckoff Drew -->
-<!-- cSpell:ignore Olson Ilya Grigorik Imran Hoosain Lee Richmond Maxime -->
-<!-- cSpell:ignore Najim Naga Malepati Venu Vemula -->
+<!-- cSpell:ignore Amit Handa Anurag Sinha Daniel Wyckoff Drew Olson -->
+<!-- cSpell:ignore Greg Smith Ilya Grigorik Imran Hoosain Lee Richmond -->
+<!-- cSpell:ignore James Andersen Maxime Najim Najim Naga Malepati -->
+<!-- cSpell:ignore Patrick Jordan Prasad Wangikar Scot DeDeo -->
+<!-- cSpell:ignore Venu Vemula Victoria Duggan -->
 | Name | Company |
 | :--- | :--- |
-| Aaron Glazer | Shopify |
 | Amit Handa | Google |
 | Anurag Sinha | Google |
-| Chris Sauve | Shopify |
 | Daniel Wyckoff | Shopify |
 | Drew Olson | Google |
+| Greg Smith | Amazon |
 | Ilya Grigorik | Shopify |
 | Imran Hoosain | Etsy |
+| James Andersen | Meta |
+| Lee Richmond | Shopify |
 | Maxime Najim | Target |
 | Naga Malepati | Wayfair |
+| Patrick Jordan | Microsoft |
+| Prasad Wangikar | Stripe |
+| Scot DeDeo | Salesforce |
 | Venu Vemula | Google |
-| Open | to be elected |
+| Victoria Duggan | Shopify |
 
 ## Governance Council
 

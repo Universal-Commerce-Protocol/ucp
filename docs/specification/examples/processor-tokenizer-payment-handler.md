@@ -110,12 +110,12 @@ The handler's specification (referenced via the `spec` field) documents the
 ```json
 {
   "ucp": {
-    "version": "2026-01-11",
+    "version": "{{ ucp_version }}",
     "payment_handlers": {
       "com.example.processor_tokenizer": [
         {
           "id": "processor_tokenizer",
-          "version": "2026-01-11",
+          "version": "{{ ucp_version }}",
           "spec": "https://example.com/ucp/processor-tokenizer.json",
           "schema": "https://example.com/ucp/processor-tokenizer/schema.json",
           "available_instruments": [
@@ -151,7 +151,7 @@ The response config includes runtime information about what's available for this
 ```json
 {
   "id": "processor_tokenizer",
-  "version": "2026-01-11",
+  "version": "{{ ucp_version }}",
   "available_instruments": [
     {
       "type": "card",
@@ -200,7 +200,7 @@ business's configuration.
       "com.example.processor_tokenizer": [
         {
           "id": "processor_tokenizer",
-          "version": "2026-01-11",
+          "version": "{{ ucp_version }}",
           "available_instruments": [
             {"type": "card", "constraints": {"brands": ["visa", "mastercard", "amex"]}}
           ],
@@ -266,8 +266,9 @@ Content-Type: application/json
       }
     ]
   },
-  "risk_signal": {
-    // ... the key value pair for potential risk signal data
+  "signals": {
+    "dev.ucp.buyer_ip": "203.0.113.42",
+    "dev.ucp.user_agent": "Mozilla/5.0 ..."
   }
 }
 ```

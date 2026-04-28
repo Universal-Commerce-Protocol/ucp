@@ -128,6 +128,26 @@ The Cart capability defines the following logical operations.
 Creates a new cart session with line items and optional buyer/context
 information for localized pricing estimates.
 
+When **all** requested items are unavailable, the business MAY return an
+error response instead of creating a cart resource. `ucp.status` is the
+primary discriminator; the absence of `id` is a consistent secondary
+indicator:
+
+```json
+{
+  "ucp": { "version": "2026-01-15", "status": "error" },
+  "messages": [
+    {
+      "type": "error",
+      "code": "out_of_stock",
+      "content": "All requested items are currently out of stock",
+      "severity": "unrecoverable"
+    }
+  ],
+  "continue_url": "https://merchant.com/"
+}
+```
+
 * [REST Binding](cart-rest.md#create-cart)
 * [MCP Binding](cart-mcp.md#create_cart)
 
@@ -161,6 +181,10 @@ Subsequent operations for this cart ID SHOULD return `not_found`.
 Cart reuses the same entity schemas as [Checkout](checkout.md). This ensures
 consistent data structures when converting a cart to a checkout session.
 
+### UCP Response Cart {: #ucp-response-cart-schema }
+
+{{ extension_schema_fields('ucp.json#/$defs/response_cart_schema', 'cart') }}
+
 ### Line Item
 
 #### Line Item Create Request
@@ -171,9 +195,13 @@ consistent data structures when converting a cart to a checkout session.
 
 {{ schema_fields('types/line_item_update_req', 'checkout') }}
 
-#### Line Item Response
+#### Line Item
 
-{{ schema_fields('types/line_item_resp', 'checkout') }}
+{{ schema_fields('types/line_item_resp', 'cart') }}
+
+#### Item
+
+{{ schema_fields('types/item_resp', 'cart') }}
 
 ### Buyer
 
@@ -183,7 +211,20 @@ consistent data structures when converting a cart to a checkout session.
 
 {{ schema_fields('context', 'checkout') }}
 
+### Signals
+
+Environment data provided by the platform to support authorization
+and abuse prevention. Signal values MUST NOT be buyer-asserted claims. See
+[Signals](overview.md#signals) for details and privacy
+requirements.
+
+{{ schema_fields('types/signals', 'checkout') }}
+
 ### Total
+
+The same totals contract applies to cart and checkout. See
+[Checkout Totals](checkout.md#totals) for the rendering contract, accounting
+identity, well-known types, repeating types, and sub-line semantics.
 
 {{ schema_fields('types/total_resp', 'checkout') }}
 

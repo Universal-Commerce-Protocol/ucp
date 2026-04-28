@@ -1,0 +1,6 @@
+# Ignore ucp.dev dummy links
+https://ucp\.dev/specification/reference\?v=2026-01-11
+
+# Ignore latest specification links because the target version folder is not pulled down during --main-only checks
+/latest/specification/.*
+latest/specification/.*

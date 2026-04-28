@@ -221,7 +221,7 @@ select, input {
   <!-- VIEW: Discovery -->
   <div id="view-discovery" class="section">
     <h2 class="title">2. Discovery</h2>
-    <p class="desc">The Platform fetches <code>/.well-known/ucp</code>. The response below is filtered to show the intersection of the Business's capabilities and the Platform's profile.</p>
+    <p class="desc">The Platform fetches <code>/.well-known/ucp</code> from the Business.</p>
     <div class="grid">
       <div class="json-panel">
         <div class="json-header"><span class="json-title">GET Request</span></div>
@@ -230,7 +230,7 @@ Host: business.example.com
 Accept: application/json</pre>
       </div>
       <div class="json-panel">
-        <div class="json-header"><span class="json-title">Response (Filtered)</span></div>
+        <div class="json-header"><span class="json-title">Response</span></div>
         <pre id="json-disc-res" class="json-body"></pre>
       </div>
     </div>
@@ -405,18 +405,18 @@ Accept: application/json</pre>
  * ------------------------------------------------------------------
  */
 const UcpData = {
-  version: "2026-01-11",
+  version: "{{ ucp_version }}",
 
   inventory: {
     "sku_stickers": { title: "UCP Demo Sticker Pack", price: 599, image_url: "https://example.com/images/stickers.jpg" },
     "sku_mug": { title: "UCP Demo Mug", price: 1999, image_url: "https://example.com/images/mug.jpg" }
   },
 
-  payment_handlers: {
-    "com.shopify.shop_pay": [
+  business_payment_handlers: {
+    "dev.shopify.shop_pay": [
       {
         id: "shop_pay",
-        version: "2026-01-11",
+        version: "{{ ucp_version }}",
         spec: "https://shopify.dev/docs/agents/checkout/shop-pay-handler",
         config_schema: "https://shopify.dev/ucp/shop-pay-handler/2026-01-11/config.json",
         instrument_schemas: ["https://shopify.dev/ucp/shop-pay-handler/2026-01-11/instrument.json"],
@@ -426,7 +426,7 @@ const UcpData = {
     "com.google.pay": [
       {
         id: "gpay",
-        version: "2026-01-11",
+        version: "{{ ucp_version }}",
         spec: "https://pay.google.com/gp/p/ucp/2026-01-11/",
         config_schema: "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/config.json",
         instrument_schemas: [
@@ -463,27 +463,50 @@ const UcpData = {
     ]
   },
 
+  platform_payment_handlers: {
+    "dev.shopify.shop_pay": [
+      {
+        id: "shop_pay",
+        version: "2026-01-11",
+        spec: "https://shopify.dev/docs/agents/checkout/shop-pay-handler",
+        config_schema: "https://shopify.dev/ucp/shop-pay-handler/2026-01-11/config.json",
+        instrument_schemas: ["https://shopify.dev/ucp/shop-pay-handler/2026-01-11/instrument.json"]
+      }
+    ],
+    "com.google.pay": [
+      {
+        id: "gpay",
+        version: "2026-01-11",
+        spec: "https://pay.google.com/gp/p/ucp/2026-01-11/",
+        config_schema: "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/config.json",
+        instrument_schemas: [
+          "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/card_payment_instrument.json"
+        ]
+      }
+    ]
+  },
+
   capabilities: {
     "dev.ucp.shopping.checkout": [
       {
-        version: "2026-01-23",
-        spec: "https://ucp.dev/2026-01-23/specification/checkout",
-        schema: "https://ucp.dev/2026-01-23/schemas/shopping/checkout.json"
+        version: "{{ ucp_version }}",
+        spec: "https://ucp.dev/{{ ucp_version }}/specification/checkout",
+        schema: "https://ucp.dev/{{ ucp_version }}/schemas/shopping/checkout.json"
       }
     ],
     "dev.ucp.shopping.order": [
       {
-        version: "2026-01-23",
-        spec: "https://ucp.dev/2026-01-23/specification/order",
-        schema: "https://ucp.dev/2026-01-23/schemas/shopping/order.json"
+        version: "{{ ucp_version }}",
+        spec: "https://ucp.dev/{{ ucp_version }}/specification/order",
+        schema: "https://ucp.dev/{{ ucp_version }}/schemas/shopping/order.json"
       }
     ],
     "dev.ucp.shopping.fulfillment": [
       {
         extends: "dev.ucp.shopping.checkout",
-        version: "2026-01-23",
-        spec: "https://ucp.dev/2026-01-23/specification/fulfillment",
-        schema: "https://ucp.dev/2026-01-23/schemas/shopping/fulfillment.json",
+        version: "{{ ucp_version }}",
+        spec: "https://ucp.dev/{{ ucp_version }}/specification/fulfillment",
+        schema: "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json",
         config: {
           allows_multi_destination: {
             shipping: false,
@@ -499,25 +522,25 @@ const UcpData = {
     "dev.ucp.shopping.discount": [
       {
         extends: "dev.ucp.shopping.checkout",
-        version: "2026-01-23",
-        spec: "https://ucp.dev/2026-01-23/specification/discount",
-        schema: "https://ucp.dev/2026-01-23/schemas/shopping/discount.json"
+        version: "{{ ucp_version }}",
+        spec: "https://ucp.dev/{{ ucp_version }}/specification/discount",
+        schema: "https://ucp.dev/{{ ucp_version }}/schemas/shopping/discount.json"
       }
     ],
     "dev.ucp.shopping.buyer_consent": [
       {
         extends: "dev.ucp.shopping.checkout",
-        version: "2026-01-23",
-        spec: "https://ucp.dev/2026-01-23/specification/buyer-consent",
-        schema: "https://ucp.dev/2026-01-23/schemas/shopping/buyer_consent.json"
+        version: "{{ ucp_version }}",
+        spec: "https://ucp.dev/{{ ucp_version }}/specification/buyer-consent",
+        schema: "https://ucp.dev/{{ ucp_version }}/schemas/shopping/buyer_consent.json"
       }
     ],
     "dev.ucp.shopping.ap2_mandates": [
       {
         extends: "dev.ucp.shopping.checkout",
-        version: "2026-01-23",
-        spec: "https://ucp.dev/2026-01-23/specification/ap2-mandates",
-        schema: "https://ucp.dev/2026-01-23/schemas/shopping/ap2_mandate.json"
+        version: "{{ ucp_version }}",
+        spec: "https://ucp.dev/{{ ucp_version }}/specification/ap2-mandates",
+        schema: "https://ucp.dev/{{ ucp_version }}/schemas/shopping/ap2_mandate.json"
       }
     ]
   },
@@ -585,7 +608,7 @@ class UcpBackend {
       ucp: {
         version: UcpData.version,
         capabilities: UcpData.capabilities,
-        payment_handlers: UcpData.payment_handlers
+        payment_handlers: UcpData.business_payment_handlers
       }
     };
   }
@@ -632,7 +655,7 @@ class UcpBackend {
     }
 
     this.session = {
-      ucp: { version: UcpData.version, capabilities: activeCaps, payment_handlers: UcpData.payment_handlers },
+      ucp: { version: UcpData.version, capabilities: activeCaps, payment_handlers: UcpData.business_payment_handlers },
       id: this.genId('chk'),
       status: messages.length > 0 ? "incomplete" : "ready_for_complete",
       line_items: lineItems,
@@ -857,7 +880,13 @@ class UcpApp {
       }
     });
 
-    this.setJson('json-profiles', { ucp: { version: UcpData.version, capabilities, payment_handlers: UcpData.payment_handlers } });
+    this.setJson('json-profiles', {
+      ucp: {
+        version: UcpData.version,
+        capabilities,
+        payment_handlers: UcpData.platform_payment_handlers
+      }
+    });
   }
 
   runDiscovery() {
