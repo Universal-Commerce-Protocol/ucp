@@ -246,10 +246,9 @@ stacking and allocation details:
       "line_items": [
         {
           "item": {
-            "id": "prod_shirt",
-            "quantity": 2,
-            "price": 2500
-          }
+            "id": "prod_shirt"
+          },
+          "quantity": 2
         }
       ]
     }
@@ -331,10 +330,8 @@ proceeding to checkout.
         {
           "item": {
             "id": "prod_1",
-            "quantity": 2,
-            "title": "T-Shirt",
-            "price": 2000
-          }
+          },
+          "quantity": 2
         }
       ],
       "discounts": {
@@ -353,10 +350,10 @@ proceeding to checkout.
           "id": "li_1",
           "item": {
             "id": "prod_1",
-            "quantity": 2,
             "title": "T-Shirt",
             "price": 2000
           },
+          "quantity": 2,
           "totals": [
             {"type": "subtotal", "amount": 4000},
             {"type": "items_discount", "amount": -800},
@@ -448,10 +445,10 @@ to line items, and an automatic shipping discount at the order level.
           "id": "li_1",
           "item": {
             "id": "prod_1",
-            "quantity": 2,
             "title": "T-Shirt",
             "price": 2000
           },
+          "quantity": 2,
           "totals": [
             {"type": "subtotal", "amount": 4000},
             {"type": "items_discount", "amount": -800},
@@ -545,9 +542,11 @@ Multiple discounts applied with full allocation breakdown:
         {
           "id": "li_1",
           "item": {
+            "id": "prod_1",
             "title": "T-Shirt",
             "price": 6000
           },
+          "quantity": 1,
           "totals": [
             {"type": "subtotal", "amount": 6000},
             {"type": "items_discount", "amount": -1500},
@@ -557,9 +556,11 @@ Multiple discounts applied with full allocation breakdown:
         {
           "id": "li_2",
           "item": {
+            "id": "prod_2",
             "title": "Socks",
             "price": 4000
           },
+          "quantity": 1,
           "totals": [
             {"type": "subtotal", "amount": 4000},
             {"type": "items_discount", "amount": -1000},
