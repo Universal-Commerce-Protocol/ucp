@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/additional_field.json",
+  "title": "Additional Field",
+  "description": "A merchant-defined buyer-input field surfaced on a checkout or cart response. Represents extra information the business requests (e.g., consent, delivery window, delivery instructions, gift message). Platforms submit only `{key, value}` entries; the business is authoritative for validation and persistence.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "key",
+    "label",
+    "required",
+    "value",
+    "input"
+  ],
+  "properties": {
+    "key": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stable, human-readable field identifier, unique within a single checkout or cart response. Format is business-defined but SHOULD use a dot-separated namespaced form to aid debugging and prevent collisions (e.g., `custom.delivery_instructions`).",
+      "pattern": "^[A-Za-z][A-Za-z0-9_]*(?:[.:\\-]+[A-Za-z0-9_]+)*$"
+    },
+    "label": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Resolved localized display label for the field. Plain text; platforms MUST NOT interpret formatting sequences (e.g., markdown, HTML).",
+      "ucp_request": "omit"
+    },
+    "description": {
+      "type": "string",
+      "description": "Resolved localized help text for the field. Interpreted according to `description_content_type`: plain text by default, or link-only markdown when `description_content_type` is `markdown`.",
+      "ucp_request": "omit"
+    },
+    "description_content_type": {
+      "type": "string",
+      "enum": [
+        "plain",
+        "markdown"
+      ],
+      "default": "plain",
+      "description": "Content format for `description`. Defaults to `plain`. When `markdown`, platforms MAY render links only, MUST reject or strip all other markdown constructs and raw HTML, MUST require HTTPS URLs, and MAY fall back to plain-text rendering.",
+      "ucp_request": "omit"
+    },
+    "required": {
+      "type": "boolean",
+      "description": "When true, the buyer MUST submit a non-null `value` before checkout can complete, subject to type-specific emptiness rules. The business is authoritative for this flag; platforms use it as a rendering and submission hint.",
+      "ucp_request": "omit"
+    },
+    "value": {
+      "type": [
+        "string",
+        "boolean",
+        "null"
+      ],
+      "description": "Current submitted value, or `null` when unset. The JSON type of `value` matches the field's `input.type`: `boolean` fields use JSON booleans (`true` / `false`); `date` fields use RFC 3339 full-date strings (`YYYY-MM-DD`); `choice` fields use one of the strings in `input.options[].value`; `text` and `multiline_text` fields use raw strings. Platforms submit `{key, value}` pairs to set the value.",
+      "ucp_request": {
+        "create": "required",
+        "update": "required",
+        "complete": "omit"
+      }
+    },
+    "input": {
+      "$ref": "additional_field_input.json",
+      "description": "Typed descriptor for the kind of value this field accepts, plus optional validation hints.",
+      "ucp_request": "omit"
+    }
+  }
+}
