@@ -34,14 +34,9 @@ community feedback.
 To move beyond isolated transactions, we are expanding the protocol's scope to
 tackle key user journeys such as multi-item checkout, loyalty, and lifecycle
 management, while ensuring the business's brand and logic remain central to all
-shopping experiences. Key upcoming initiatives include:
+shopping experiences. With product discovery, cart building, and post-order
+management now part of the specification, key upcoming initiatives include:
 
-* **Product discovery and post-order management:** By facilitating the entire
-    journey, we help businesses maximize lifetime and average order value rather
-    than just processing a single item for checkout.
-* **Cart and basket building:** Support for multi-item checkout from a
-    business, complex basket rules (e.g., promotions, tax, shipping), and varied
-    fulfillment logic that reflects how people actually shop.
 * **Loyalty & Member benefits:** Capabilities to enable loyalty and member
     benefits to help users find the best value and businesses achieve a deeper
     connection with their consumers through account linking.
