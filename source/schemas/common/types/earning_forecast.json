@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/earning_forecast.json",
+  "title": "Earning Forecast",
+  "description": "Preview of rewards to be earned from the current transaction.",
+  "type": "object",
+  "required": ["amount"],
+  "properties": {
+    "amount": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Total rewards to be earned if the transaction completes."
+    },
+    "projected_balance": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Projected available balance after earning and any redemption from this transaction."
+    },
+    "breakdown": {
+      "type": "array",
+      "items": {
+        "$ref": "earning_breakdown.json"
+      },
+      "description": "List of breakdown of earning contributing to the total."
+    }
+  }
+}
