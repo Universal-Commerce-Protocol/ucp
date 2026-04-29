@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/loyalty_membership.json",
+  "title": "Loyalty Membership",
+  "description": "Loyalty membership that the business offers or associated with.",
+  "type": "object",
+  "required": ["id", "name", "tracks"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique loyalty membership identifier."
+    },
+    "name": {
+      "type": "string",
+      "description": "Business specific name of the loyalty membership/program."
+    },
+    "display_id": {
+      "type": "string",
+      "description": "A masked or partial version of the membership id for user recognition (e.g., '****5678')."
+    },
+    "tracks": {
+      "type": "array",
+      "items": {
+        "$ref": "membership_track.json"
+      },
+      "description": "List of tracks associated with the loyalty membership."
+    },
+    "provisional": {
+      "type": "boolean",
+      "default": false,
+      "description": "True if this membership requires additional verification."
+    }
+  }
+}

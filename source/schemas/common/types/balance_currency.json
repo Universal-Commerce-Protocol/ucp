@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/balance_currency.json",
+  "title": "Balance Currency",
+  "description": "The currency of the balance.",
+  "type": "object",
+  "required": ["name", "code"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Human-readable name of the currency (e.g. “LoyaltyStars”).",
+      "ucp_request": "omit"
+    },
+    "code": {
+      "type": "string",
+      "description": "Business-specific representation of the currency (e.g. “LST”)."
+    },
+    "decimal_places": {
+      "type": "integer",
+      "default": 0,
+      "description": "The position of a digit to the right of a decimal point. Applies to all amount related fields for balance."
+    }
+  }
+}
