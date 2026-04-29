@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/return_fee.json",
+  "title": "Return Fee",
+  "description": "The cost structure associated with a specific return method.",
+  "type": "object",
+  "required": ["type"],
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": ["free", "fixed_fee", "customer_responsibility"],
+      "description": "The cost structure for the return method."
+    },
+    "amount": {
+      "$ref": "amount.json",
+      "description": "Fixed return fee charged by the merchant, represented in minor currency units (e.g., cents). Required if type is fixed_fee."
+    },
+    "display_text": {
+      "type": "string",
+      "description": "Human-readable text to display against the fee to provide context to the buyer (e.g., 'Restocking Fee', 'Return Shipping Label')."
+    }
+  }
+}

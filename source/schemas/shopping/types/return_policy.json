@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/return_policy.json",
+  "title": "Return Policy",
+  "description": "Conditions, methods, timelines, and costs associated with returning physical items.",
+  "type": "object",
+  "required": ["id", "line_item_ids", "window_type"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the return policy."
+    },
+    "line_item_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Line items governed by this return policy, allowing distinct policies per item."
+    },
+    "window_type": {
+      "type": "string",
+      "enum": ["lifetime", "no_returns", "final_sale", "finite_window"],
+      "description": "The type of return window."
+    },
+    "return_days": {
+      "type": "integer",
+      "description": "Number of days allowed for a return, typically starting from the date of delivery. Required if category is finite_window."
+    },
+    "exchanges_allowed": {
+      "type": "boolean",
+      "description": "Indicates whether the buyer can exchange the item."
+    },
+    "methods": {
+      "type": "array",
+      "items": { "$ref": "return_method.json" },
+      "description": "Permitted physical methods for returning the item, along with their associated fee structures."
+    }
+  }
+}

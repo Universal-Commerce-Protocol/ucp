@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/return_method.json",
+  "title": "Return Method",
+  "description": "The physical method through which the buyer can return the item.",
+  "type": "object",
+  "required": ["type", "fee"],
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": ["in_store", "by_mail", "kiosk"],
+      "description": "The physical method through which the buyer can return the item."
+    },
+    "fee": {
+      "$ref": "return_fee.json",
+      "description": "The cost structure associated with this specific return method."
+    }
+  }
+}
