@@ -4,7 +4,7 @@
   "name": "dev.ucp.common.identity_linking",
   "title": "Identity Linking",
   "description": "Capability schema for identity linking. Businesses declare the user-authenticated scopes they offer in a flat 'scopes' map. Each key is the OAuth scope string as it appears on the wire ('{capability}:{scope}', e.g. 'dev.ucp.shopping.order:read'). Scope presence implies authentication is required to obtain it; operations not gated by any listed scope operate at public or agent-authenticated access.",
-  "$comment": "Auth mechanism: business-hosted OAuth 2.0 with RFC 8414 discovery. The 'config' object is open for non-breaking extension. Reserved extension point: 'providers' (map of trusted identity providers keyed by reverse-domain, with a 'type' discriminator defaulting to 'oauth2' — enabling delegated IdP, identity chaining, and future non-OAuth mechanisms such as wallet attestation). When 'providers' is absent, platforms MUST use OAuth 2.0 with RFC 8414 discovery on the business domain. Platforms MUST ignore unrecognized fields in 'config' and fall back to this default behavior.",
+  "$comment": "Auth mechanism: OAuth 2.0 with RFC 8414 discovery. When 'config.providers' is present, platforms can chain identity from a trusted provider via RFC 8693 token exchange + RFC 7523 JWT bearer; when absent, platforms run OAuth 2.0 against the business domain. The 'provider.type' discriminator defaults to 'oauth2' and reserves space for future non-OAuth provider mechanisms (e.g., wallet attestation). The 'config' object is open for non-breaking extension; platforms MUST ignore unrecognized fields and fall back to default OAuth 2.0 against the business domain.",
 
   "$defs": {
     "scope_policy": {
@@ -18,6 +18,26 @@
       "type": "string",
       "description": "OAuth scope string formed by joining a capability name and a scope name with a colon: '{capability}:{scope}', e.g. 'dev.ucp.shopping.order:read'. Capability names use reverse-DNS naming; scope names denote the permission granted, defined by each capability's spec (e.g. 'read', 'manage', 'create'). Platforms request these strings verbatim in OAuth 'scope' parameters; issued tokens carry them in the 'scope' claim.",
       "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9_]*)+:[a-z][a-z0-9_]*$"
+    },
+
+    "provider": {
+      "type": "object",
+      "title": "Identity Provider",
+      "description": "A trusted identity provider for delegated authentication. The 'type' discriminator defaults to 'oauth2' when absent; future versions may define additional types (e.g., 'wallet') without breaking the shape.",
+      "required": ["auth_url"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "default": "oauth2",
+          "description": "Provider type. Defaults to 'oauth2'. Reserved for future non-OAuth provider mechanisms."
+        },
+        "auth_url": {
+          "type": "string",
+          "format": "uri",
+          "description": "Base URL for authorization server metadata discovery. Platforms resolve metadata via RFC 8414 (/.well-known/oauth-authorization-server) with OIDC fallback (/.well-known/openid-configuration) on 404."
+        }
+      },
+      "additionalProperties": true
     },
 
     "dev.ucp.common.identity_linking": {
@@ -39,9 +59,14 @@
             "properties": {
               "config": {
                 "type": "object",
-                "$comment": "Reserved extension point: 'providers' (map of trusted identity providers keyed by reverse-domain). See schema-level $comment for details.",
                 "required": ["scopes"],
                 "properties": {
+                  "providers": {
+                    "type": "object",
+                    "description": "Map of trusted identity providers keyed by reverse-domain identifier. When present, platforms can use the Accelerated IdP Flow to obtain business-issued tokens by chaining identity from a provider, instead of running a fresh OAuth flow against the business directly. When absent, platforms run OAuth 2.0 against the business domain via RFC 8414 discovery.",
+                    "propertyNames": { "$ref": "../shopping/types/reverse_domain_name.json" },
+                    "additionalProperties": { "$ref": "#/$defs/provider" }
+                  },
                   "scopes": {
                     "type": "object",
                     "description": "Map of user-authenticated scopes offered by this business. Each key is an OAuth scope string formed as '{capability}:{scope}' (e.g. 'dev.ucp.shopping.order:read'). Scope presence in this map implies that obtaining the scope requires user authentication; operations not gated by any listed scope operate at public or agent-authenticated access. Each value is a per-scope policy object (empty object means no additional policy beyond user auth).",
