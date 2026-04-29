@@ -24,6 +24,17 @@
                   "minItems": 1,
                   "uniqueItems": true,
                   "description": "Limit to specific card brands (e.g., ['visa', 'mastercard', 'amex'])."
+                },
+                "requires_card_verification": {
+                  "type": "boolean",
+                  "default": false,
+                  "description": "When true, the handler requires card verification data appropriate to the credential type (e.g., CVC for FPAN)."
+                },
+                "requires_billing_address_data": {
+                  "type": "string",
+                  "enum": ["full_address", "postal_code", "none"],
+                  "default": "none",
+                  "description": "Specifies the level of billing address data the handler requires. full_address: complete billing address. postal_code: billing postal code only (e.g., for AVS). none: no billing address required."
                 }
               }
             }
