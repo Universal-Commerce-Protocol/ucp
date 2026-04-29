@@ -410,14 +410,17 @@ Embedded Cart. This is represented by `transition` containing a minimal `checkou
                         "dev.ucp.shopping.checkout": [ { "version": "{{ ucp_version }}" } ]
                     },
                     "services": {
-                        {
-                            "version": "{{ ucp_version }}",
-                            "transport": "embedded",
-                            "config": {
-                                "delegate": [...]
+                        "dev.ucp.shopping": [
+                            {
+                                "version": "{{ ucp_version }}",
+                                "transport": "embedded",
+                                "config": {
+                                    "delegate": [...]
+                                }
                             }
-                        }
-                    }
+                        ]
+                    },
+                    "payment_handlers": {...}
                 },
                 "url": "https://merchant.example.com/cart-to-checkout/checkout123",
             }

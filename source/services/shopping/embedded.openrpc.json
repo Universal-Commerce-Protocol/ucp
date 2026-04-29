@@ -506,12 +506,13 @@
             "properties": {
               "checkout": {
                 "type": "object",
-                "description": "Custom object containing data needed by host to facilitate the transition.",
+                "description": "Metadata required by the host to bootstrap and transition into an embedded checkout session.",
                 "required": ["ucp", "url"],
                 "properties": {
                   "ucp": { "$ref": "#/components/schemas/ucp_success" },
                   "url": {
                     "type": "string",
+                    "format": "uri",
                     "description": "The transition URL."
                   }
                 }
