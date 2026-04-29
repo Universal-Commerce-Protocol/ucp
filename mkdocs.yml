@@ -75,6 +75,7 @@ nav:
               - Processor Tokenizer: specification/examples/processor-tokenizer-payment-handler.md
               - Platform Tokenizer: specification/examples/platform-tokenizer-payment-handler.md
               - Encrypted Credential: specification/examples/encrypted-credential-handler.md
+              - UPI Intent: specification/examples/upi-intent-payment-handler.md
       - Signatures: specification/signatures.md
       - Reference: specification/reference.md
       - Playground: specification/playground.md
@@ -254,5 +255,6 @@ plugins:
           - specification/examples/processor-tokenizer-payment-handler.md
           - specification/examples/platform-tokenizer-payment-handler.md
           - specification/examples/encrypted-credential-handler.md
+          - specification/examples/upi-intent-payment-handler.md
           - specification/reference.md
           - specification/playground.md

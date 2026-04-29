@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/upi_intent_instrument.json",
+  "title": "UPI Intent Payment Instrument",
+  "description": "Payment instrument for UPI Intent deep link payments. The device operating system determines which UPI apps are available to the buyer — no app targeting or filtering by the platform is permitted per NPCI mandate.",
+  "$defs": {
+    "available_upi_intent_instrument": {
+      "title": "Available UPI Intent Payment Instrument",
+      "description": "Declares UPI Intent instrument availability. No constraints are supported — the OS determines available apps.",
+      "allOf": [
+        { "$ref": "available_payment_instrument.json" },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "upi_intent"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "$ref": "payment_instrument.json"
+    },
+    {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "upi_intent",
+          "description": "Discriminator for UPI Intent instrument."
+        },
+        "display_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Human-readable name for display in platform UI (e.g., 'Pay via UPI'). May be localized (e.g., 'UPI से भुगतान करें')."
+        },
+        "display_logo": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://",
+          "description": "HTTPS URL to a UPI logo image for display in platform UI."
+        }
+      }
+    }
+  ]
+}
