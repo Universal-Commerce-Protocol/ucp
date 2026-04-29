@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://razorpay.com/ucp/handlers/upi/types/upi_intent_instrument.json",
+  "title": "Razorpay UPI Intent Instrument",
+  "description": "Handler-level wrapper for the upi_intent instrument type used with com.razorpay.upi. Extends the base UPI Intent instrument schema and defines the available_upi_intent_instrument declaration for use in handler available_instruments.",
+
+  "$defs": {
+    "available_upi_intent_instrument": {
+      "title": "Available UPI Intent Instrument",
+      "description": "Declares support for the UPI Intent flow in handler available_instruments. No constraints are required — NPCI mandates generic intent support across all UPI apps.",
+      "allOf": [
+        { "$ref": "https://ucp.dev/schemas/shopping/types/available_payment_instrument.json" }
+      ],
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "upi_intent"
+        }
+      }
+    }
+  },
+
+  "allOf": [
+    { "$ref": "https://ucp.dev/schemas/shopping/types/upi_intent_instrument.json" }
+  ]
+}
