@@ -22,10 +22,10 @@
 ## Overview
 
 The Identity Linking capability enables a **platform** to obtain authorization
-to perform actions on behalf of a **buyer** on a **business**'s (relying
+to perform actions on behalf of a **user** on a **business**'s (relying
 party) site.
 
-This linkage is foundational for buyer-authenticated commerce experiences: accessing
+This linkage is foundational for user-authenticated commerce experiences: accessing
 loyalty benefits, personalized offers, saved addresses, wishlists, and order
 history. Capabilities without identity linking still operate at public or
 agent-authenticated access levels — identity linking upgrades the experience,
@@ -43,21 +43,22 @@ point — without breaking changes to this version (see
 
 | UCP Role | Identity Role | Description |
 | :------- | :------------ | :---------- |
-| **Platform** | User Agent | Trusted intermediary that initiates identity linking and presents buyer identity tokens to businesses on behalf of the buyer. |
-| **Business** | Authorization Server / Relying Party | Hosts its own OAuth 2.0 authorization server. Authenticates buyers and issues access tokens scoped to UCP capabilities. |
-| **Buyer** | Resource Owner | The person whose identity is being linked. Grants explicit consent to the platform during the OAuth authorization flow. |
+| **Platform** | User Agent | Trusted intermediary that initiates identity linking and presents user identity tokens to businesses on behalf of the user. |
+| **Business** | Authorization Server / Relying Party | Hosts its own OAuth 2.0 authorization server. Authenticates users and issues access tokens scoped to UCP capabilities. |
+| **User** | Resource Owner | The person whose identity is being linked. Grants explicit consent to the platform during the OAuth authorization flow. |
 
 ### Access Levels
 
-Identity linking upgrades capabilities to buyer-authenticated access.
-Capabilities are **never** excluded from negotiation based on the presence or
-absence of identity linking.
+Identity linking upgrades capabilities to user-authenticated access.
+Capabilities are **never** excluded from capability negotiation based on the
+presence or absence of identity linking — a capability is advertised and
+negotiated regardless of whether the user needs authentication.
 
 | Level | Authentication | Example |
 | :---- | :------------- | :------ |
 | **Public** | None | Browse a public catalog |
 | **Agent-authenticated** | Platform credentials (`client_id` / `client_secret`) | Guest checkout, create a cart |
-| **Buyer-authenticated** | Platform credentials + buyer identity token | Saved addresses, full order history, personalized pricing |
+| **User-authenticated** | Platform credentials + user identity token | Saved addresses, full order history, personalized pricing |
 
 ## General Guidelines
 
@@ -68,7 +69,7 @@ absence of identity linking.
     via HTTP Basic Authentication
     ([RFC 7617](https://datatracker.ietf.org/doc/html/rfc7617){ target="_blank" })
     when exchanging authorization codes for tokens.
-* **MUST** include buyer identity tokens in the HTTP `Authorization` header
+* **MUST** include user identity tokens in the HTTP `Authorization` header
     using the Bearer scheme: `Authorization: Bearer <access_token>`.
 * **MUST** implement the OAuth 2.0 Authorization Code flow
     ([RFC 6749 §4.1](https://datatracker.ietf.org/doc/html/rfc6749#section-4.1){ target="_blank" })
@@ -80,7 +81,8 @@ absence of identity linking.
     ([RFC 9207](https://datatracker.ietf.org/doc/html/rfc9207){ target="_blank" })
     to prevent Mix-Up Attacks. The platform **MUST** verify that the `iss`
     value matches the authorization server's issuer URI (as declared in its
-    RFC 8414 metadata). If the values do not match, the platform **MUST**
+    [RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414){ target="_blank" }
+    metadata). If the values do not match, the platform **MUST**
     abort and discard the authorization response.
 * **SHOULD** include a unique, unguessable `state` parameter in the
     authorization request to prevent CSRF
@@ -88,7 +90,7 @@ absence of identity linking.
 * Revocation and security events:
     * **MUST** call the business's token revocation endpoint
         ([RFC 7009](https://datatracker.ietf.org/doc/html/rfc7009){ target="_blank" })
-        when a buyer initiates an unlink action on the platform side.
+        when a user initiates an unlink action on the platform side.
     * **SHOULD** support
         [OpenID RISC Profile 1.0](https://openid.net/specs/openid-risc-1_0-final.html){ target="_blank" }
         to handle asynchronous account updates and cross-account protection
@@ -101,7 +103,9 @@ absence of identity linking.
 * **MUST** publish authorization server metadata via
     [RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414){ target="_blank" }
     at `/.well-known/oauth-authorization-server`.
-* **MUST** populate `scopes_supported` in RFC 8414 metadata to allow platforms
+* **MUST** populate `scopes_supported` in
+    [RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414){ target="_blank" }
+    metadata to allow platforms
     to detect scope mismatches before initiating an authorization flow.
 * **MUST** return the `iss` parameter in the authorization response
     ([RFC 9207](https://datatracker.ietf.org/doc/html/rfc9207){ target="_blank" }).
@@ -120,7 +124,7 @@ absence of identity linking.
     `access_token`s issued from it.
 * **MUST** support revocation requests authenticated with the same client
     credentials used at the token endpoint.
-* **SHOULD** provide an account creation flow if the buyer does not already have
+* **SHOULD** provide an account creation flow if the user does not already have
     an account, or return a `continue_url` in an `identity_required` error
     response (see [Error Handling](#error-handling)) pointing to an onboarding
     flow.
@@ -180,7 +184,7 @@ Platform                              Business AS
    |       code_challenge (S256)           |
    |       state                           |
    |                                       |
-   |       [buyer authenticates and        |
+   |       [user authenticates and         |
    |        grants consent at business]    |
    |                                       |
    |<-- (3) Authorization Response --------|
@@ -218,10 +222,10 @@ where `code_verifier` is absent or does not verify against the stored
 
 ## Scopes
 
-Scopes define the permissions an identified buyer grants to a platform for a
-given capability. Whether a capability requires buyer authentication — and what
-scopes govern buyer-scoped access — is a **business decision** declared in the
-identity linking capability config. The same capability may require buyer auth
+Scopes define the permissions an identified user grants to a platform for a
+given capability. Whether a capability requires user authentication — and what
+scopes govern user-scoped access — is a **business decision** declared in the
+identity linking capability config. The same capability may require user auth
 at one business and serve public requests at another.
 
 ### Scope Naming
@@ -251,8 +255,8 @@ Businesses declare per-capability identity requirements in
 
 | Field | Type | Default | Description |
 | :---- | :--- | :------ | :---------- |
-| *(entry absent)* | — | — | No buyer-scoped features. Capability operates at public or agent-authenticated access only. |
-| `auth_required` | boolean | `false` | When `true`, business returns `identity_required` for requests without a buyer identity token. When `false`, buyer identity upgrades the experience. |
+| *(entry absent)* | — | — | No user-scoped features. Capability operates at public or agent-authenticated access only. |
+| `auth_required` | boolean | `false` | When `true`, business returns `identity_required` for requests without a user identity token. When `false`, user identity upgrades the experience. |
 | `scopes` | string[] | *(absent)* | Sub-scope operation groups offered by this capability. When absent, the capability name is the scope. |
 
 ### Scope Derivation
@@ -270,7 +274,7 @@ linking config before initiating the account linking flow:
 
 If the derived scope set is empty (no capabilities in the intersection appear
 in `config.capabilities`), the platform **SHOULD** skip the identity linking
-flow — there are no buyer-scoped features to authorize for this business.
+flow — there are no user-scoped features to authorize for this business.
 
 ### Consent Presentation
 
@@ -286,12 +290,12 @@ view your order history".
 ### `identity_required`
 
 When a capability is configured with `auth_required: true` and a request arrives
-without a valid buyer identity token, the business **MUST** return a UCP error
+without a valid user identity token, the business **MUST** return a UCP error
 response containing a message with `code: "identity_required"`.
 
 The business **MAY** include a `continue_url` in the response body, pointing to
-a URL where the buyer can complete account creation or onboarding (e.g., terms
-acceptance). After the buyer completes the onboarding flow, the platform retries
+a URL where the user can complete account creation or onboarding (e.g., terms
+acceptance). After the user completes the onboarding flow, the platform retries
 account linking.
 
 ```json
@@ -300,7 +304,7 @@ account linking.
     {
       "type": "error",
       "code": "identity_required",
-      "content": "Buyer identity is required to access order history.",
+      "content": "User identity is required to access order history.",
       "severity": "requires_buyer_review"
     }
   ],
@@ -314,7 +318,9 @@ account linking.
   Plain PKCE (`plain`) **MUST NOT** be used. Businesses **MUST** reject
   authorization code exchanges without a valid `code_verifier`.
 * **Mix-Up Attack prevention.** Platforms **MUST** validate the `iss`
-  parameter in the authorization response (RFC 9207). Businesses **MUST**
+  parameter in the authorization response
+  ([RFC 9207](https://datatracker.ietf.org/doc/html/rfc9207){ target="_blank" }).
+  Businesses **MUST**
   return `iss` in every authorization response. Without `iss` validation,
   an attacker that controls one authorization server can redirect a
   victim's authorization code to a different server.
@@ -333,8 +339,8 @@ account linking.
   RFC 8414 metadata. Platforms **SHOULD** verify that the derived scope set is
   a subset of `scopes_supported` before initiating the authorization flow, to
   fail fast on scope mismatches rather than at the consent screen.
-* **Token revocation.** Platforms **MUST** revoke buyer identity tokens at the
-  business's revocation endpoint (RFC 7009) when a buyer unlinks their account.
+* **Token revocation.** Platforms **MUST** revoke user identity tokens at the
+  business's revocation endpoint (RFC 7009) when a user unlinks their account.
   Businesses **MUST** reject subsequent requests that present revoked tokens.
 
 ## Future Extensibility
@@ -402,12 +408,12 @@ Example metadata hosted at `/.well-known/oauth-authorization-server` per
 ```
 
 Note: `authorization_response_iss_parameter_supported: true` advertises
-RFC 9207 support. `code_challenge_methods_supported: ["S256"]` signals PKCE.
+[RFC 9207](https://datatracker.ietf.org/doc/html/rfc9207){ target="_blank" } support. `code_challenge_methods_supported: ["S256"]` signals PKCE.
 Both **MUST** be present in UCP-compliant metadata.
 
 ### Business Profile (`/.well-known/ucp`)
 
-A business that requires buyer identity for order management but serves
+A business that requires user identity for order management but serves
 checkout without it:
 
 ```json
@@ -436,13 +442,13 @@ checkout without it:
 **Reading this config:**
 
 * `dev.ucp.shopping.checkout`: present in the map, no `auth_required` flag
-  (defaults to `false`) → buyer identity upgrades the experience
+  (defaults to `false`) → user identity upgrades the experience
   (e.g., pre-filled address) but is not required. Scope token: `dev.ucp.shopping.checkout`.
 * `dev.ucp.shopping.order`: `auth_required: true` → business returns
-  `identity_required` without a buyer token. Scope tokens:
+  `identity_required` without a user token. Scope tokens:
   `dev.ucp.shopping.order:read`, `dev.ucp.shopping.order:manage`.
 * Any capability not listed (e.g., `dev.ucp.shopping.cart`) → no
-  buyer-scoped features; operates at public / agent-authenticated level only.
+  user-scoped features; operates at public / agent-authenticated level only.
 
 ### End-to-End Walkthrough
 
@@ -467,7 +473,7 @@ receives `2xx`, extracts `authorization_endpoint` and `token_endpoint`.
 Verifies `dev.ucp.shopping.order:read` is in `scopes_supported`.
 
 **Step 3 — Authorization request.** Platform generates PKCE pair
-(`code_verifier`, `code_challenge`), sends the buyer to:
+(`code_verifier`, `code_challenge`), sends the user to:
 
 ```text
 GET https://merchant.example.com/oauth2/authorize
@@ -483,7 +489,7 @@ GET https://merchant.example.com/oauth2/authorize
 Reserved characters in `redirect_uri` and `:` in scope tokens must be
 percent-encoded in the actual request; they are shown decoded here for readability.
 
-**Step 4 — Authorization response.** Buyer authenticates and consents.
+**Step 4 — Authorization response.** User authenticates and consents.
 Business redirects to:
 
 ```text
@@ -521,4 +527,4 @@ Business validates `code_verifier` against stored `code_challenge`, returns:
 ```
 
 Platform now includes `Authorization: Bearer <token>` on subsequent requests
-to buyer-authenticated capability endpoints.
+to user-authenticated capability endpoints.
