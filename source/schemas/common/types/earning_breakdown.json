@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/earning_breakdown.json",
+  "title": "Earning Breakdown",
+  "description": "Breakdown rule of the reward earnings",
+  "type": "object",
+  "required": ["amount", "source"],
+  "properties": {
+    "amount": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rewards earned from this rule."
+    },
+    "source": {
+      "type": "string",
+      "description": "JSONPath to the source benefit that offers the rewards."
+    }
+  }
+}
