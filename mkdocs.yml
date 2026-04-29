@@ -47,6 +47,7 @@ nav:
           - AP2 Mandates Extension: specification/ap2-mandates.md
           - Buyer Consent Extension: specification/buyer-consent.md
           - Discounts Extension: specification/discount.md
+          - Event Context Extension: specification/event-context.md
           - Fulfillment Extension: specification/fulfillment.md
       - Cart Capability:
           - Overview: specification/cart.md
@@ -230,6 +231,7 @@ plugins:
           - specification/ap2-mandates.md
           - specification/buyer-consent.md
           - specification/discount.md
+          - specification/event-context.md
           - specification/fulfillment.md
         Cart Capability:
           - specification/cart.md
