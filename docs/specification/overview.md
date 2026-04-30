@@ -725,6 +725,21 @@ Businesses **SHOULD** provide the most contextually relevant URL:
 This enables graceful degradation—agents can redirect buyers to complete their
 task through the standard web interface.
 
+##### The `return_url` Field
+
+`return_url` is the counterpart to `continue_url`. Where `continue_url` is
+provided by the business to hand the buyer off to a hosted UI, `return_url` is
+provided by the platform in the checkout session request to receive the buyer
+back after the hosted experience ends.
+
+When redirecting back to `return_url`, the redirecting party **MUST** append a
+`status` query parameter with value `completed` or `canceled` as a routing hint.
+Platforms **SHOULD** verify actual session state independently rather than
+relying solely on this hint.
+
+See the [Checkout specification](checkout.md#return-url) for the full
+`return_url` specification, including status values and security considerations.
+
 ##### Transport Bindings
 
 === "REST"

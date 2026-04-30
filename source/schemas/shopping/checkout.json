@@ -109,6 +109,16 @@
       "description": "URL for checkout handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements.",
       "ucp_request": "omit"
     },
+    "return_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Platform-provided URL for buyer return after hosted checkout handoff. See specification for status hint and security requirements.",
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional",
+        "complete": "omit"
+      }
+    },
     "payment": {
       "$ref": "payment.json",
       "ucp_request": {
