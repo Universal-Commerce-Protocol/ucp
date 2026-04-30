@@ -131,10 +131,11 @@ indicate ECP availability and allowed delegations for a specific session.
 ```json
 {
     "id": "checkout_abc123",
-    "status": "open",
+    "status": "incomplete",
     "continue_url": "https://merchant.example.com/checkout/abc123",
     "ucp": {
         "version": "{{ ucp_version }}",
+        "status": "success",
         "services": {
             "dev.ucp.shopping": [
                 {
