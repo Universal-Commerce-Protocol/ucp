@@ -38,7 +38,7 @@ Its primary goal is to enable:
 
 * **Platforms:** To dynamically discover and consume the capabilities a business exposes.
 * **Businesses:** To declare what they offer and how they operate — once — and have any compatible platform discover and use it without bespoke integrations.
-* **Payment & Credential Providers:** To securely hold sensitive user data and issue tokens or credentials on behalf of users, so that platforms and businesses never handle sensitive payment or identity information directly.
+* **Payment & Credential Providers:** To expose their services — tokenization, vaulting, credential issuance — once, and power secure commerce for users across any compatible platform and business.
 
 ## High level architecture
 
@@ -353,10 +353,6 @@ The 3-step payment lifecycle:
    payment instrument (token or encrypted payload) directly from the CP.
 3. **Completion** — The platform submits the instrument to the business, which
    charges funds via its PSP integration.
-
-This architecture keeps raw card data off the platform-to-business API,
-minimizing PCI scope for the platform and reducing compliance surface for the
-overall integration.
 
 ## Security & Authentication
 
