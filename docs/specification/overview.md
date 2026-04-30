@@ -1757,8 +1757,7 @@ and businesses are each responsible for compliance in their respective
 jurisdictions: platforms determine what to emit and disclose; businesses
 apply their own data handling, retention, and consent policies. The
 `buyer_consent` extension provides a structured channel for buyers to
-communicate consent state. Direct identifiers (email, phone,
-name, postal address) belong on `buyer`, not `attribution`.
+communicate consent state.
 
 Attribution appears on cart, checkout, and catalog requests as
 platform-provided attribution context; on order it appears as a
