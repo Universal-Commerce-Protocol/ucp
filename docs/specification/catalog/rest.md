@@ -152,7 +152,7 @@ Maps to the [Catalog Search](search.md) capability.
               "description": { "plain": "Size 10 variant" },
               "price": { "amount": 12000, "currency": "USD" },
               "availability": { "available": true },
-              "selected_options": [
+              "options": [
                 { "name": "Size", "label": "10" }
               ],
               "tags": ["running", "road", "neutral"],
@@ -428,7 +428,7 @@ on option values and returns variants matching the selection.
             "description": { "plain": "Blue, Size 10" },
             "price": { "amount": 12000, "currency": "USD" },
             "availability": { "available": true },
-            "selected_options": [
+            "options": [
               { "name": "Color", "label": "Blue" },
               { "name": "Size", "label": "10" }
             ]
@@ -440,7 +440,7 @@ on option values and returns variants matching the selection.
             "description": { "plain": "Blue, Size 12" },
             "price": { "amount": 15000, "currency": "USD" },
             "availability": { "available": true },
-            "selected_options": [
+            "options": [
               { "name": "Color", "label": "Blue" },
               { "name": "Size", "label": "12" }
             ]

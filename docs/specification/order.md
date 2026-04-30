@@ -397,6 +397,17 @@ payload is the same **current-state snapshot** described in
 Businesses POST order events to a webhook URL provided by the platform
 during partner onboarding. The URL format is platform-specific.
 
+Headers follow **[Standard Webhooks](https://www.standardwebhooks.com/){ target="_blank" }**;
+except for request signing, which follows [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421).
+See [Message Signatures](signatures.md) for more details.
+
+**Required Headers:**
+
+| Header               | Description                                 |
+| :------------------- | :------------------------------------------ |
+| `Webhook-Timestamp`  | Event occurrence timestamp (unix)           |
+| `Webhook-Id`         | Unique event identifier                     |
+
 {{ method_fields('order_event_webhook', 'rest.openapi.json', 'order') }}
 
 ### Webhook URL Configuration
