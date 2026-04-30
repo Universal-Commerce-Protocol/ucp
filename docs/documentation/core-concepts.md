@@ -326,9 +326,7 @@ The payment model is built on three bilateral trust relationships:
 
 1. **Business ↔ Payment Service Provider (PSP)** — Pre-existing legal and
    technical relationship; the business holds API keys and contracts with its PSP.
-2. **Platform ↔ Credential Provider (CP)** — The platform acquires a payment
-   instrument (token, encrypted payload) directly from the CP, keeping raw
-   credentials off the platform-to-business API.
+2. **Platform ↔ Credential Provider (CP)** — The platform may leverage an independent credential provider to prepare encrypted or tokenized payloads, keeping raw credentials abstracted away from the platform-to-business APIs.
 3. **Platform ↔ Business** — The platform submits the opaque token to the
    business, which processes it via its backend PSP integration.
 
