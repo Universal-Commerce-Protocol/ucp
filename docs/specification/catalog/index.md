@@ -113,6 +113,64 @@ as the first element. Platforms SHOULD treat the first element as featured.
 
 {{ schema_fields('types/variant', 'catalog') }}
 
+### Specs
+
+`specs` is an optional structured array on `Product` and `Variant` for
+measurable attributes — battery life, display size, weight, storage
+capacity. Each entry is a small object with a required `label` and `value`
+plus optional `unit`, `numeric_value`, and `key`.
+
+Specs are for measurable facts that an agent might want to compare across
+products. Use `tags` for categorical labels and `metadata` for
+business-specific data that doesn't fit elsewhere.
+
+Place specs that are constant across all variants on the product (e.g.,
+display size, screen resolution). Place specs that vary by variant (e.g.,
+storage capacity, weight by size) on the variant. Clients read whichever
+level is populated.
+
+`numeric_value` is the machine-comparable form of `value`. Populate it
+when the attribute is a single measurement so agents can filter without
+parsing display strings. Omit it for ranges (`"20-22"`) or non-numeric
+values; clients fall back to parsing `value`.
+
+```json
+{
+  "id": "prod_aurora_phone",
+  "title": "Aurora Phone",
+  "description": { "plain": "Flagship phone with all-day battery and a 6.1-inch display." },
+  "price_range": {
+    "min": { "amount": 79900, "currency": "USD" },
+    "max": { "amount": 89900, "currency": "USD" }
+  },
+  "specs": [
+    { "key": "display_size", "label": "Display", "value": "6.1", "numeric_value": 6.1, "unit": "inches" },
+    { "key": "battery_video_playback", "label": "Battery video playback", "value": "22", "numeric_value": 22, "unit": "hours" },
+    { "key": "weight", "label": "Weight", "value": "1.2", "numeric_value": 1.2, "unit": "kg" }
+  ],
+  "variants": [
+    {
+      "id": "var_aurora_128",
+      "title": "128 GB",
+      "description": { "plain": "Aurora Phone, 128 GB storage." },
+      "price": { "amount": 79900, "currency": "USD" },
+      "specs": [
+        { "key": "storage", "label": "Storage", "value": "128", "numeric_value": 128, "unit": "GB" }
+      ]
+    },
+    {
+      "id": "var_aurora_256",
+      "title": "256 GB",
+      "description": { "plain": "Aurora Phone, 256 GB storage." },
+      "price": { "amount": 89900, "currency": "USD" },
+      "specs": [
+        { "key": "storage", "label": "Storage", "value": "256", "numeric_value": 256, "unit": "GB" }
+      ]
+    }
+  ]
+}
+```
+
 ### Price
 
 {{ schema_fields('types/price', 'catalog') }}

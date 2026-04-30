@@ -81,6 +81,36 @@
       },
       "description": "Product tags for categorization and search."
     },
+    "specs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["label", "value"],
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "Optional stable machine-readable identifier (e.g., `battery_life_hours`, `display_size_inches`, `weight_kg`). Open vocabulary; clients MUST tolerate unknown keys."
+          },
+          "label": {
+            "type": "string",
+            "description": "Human-readable attribute name (e.g., `Battery life`, `Display`, `Weight`)."
+          },
+          "value": {
+            "type": "string",
+            "description": "Display value. MAY be a number (`22`), a range (`20-22`), or domain notation (`5x114.3`). For agent-comparable single values, populate `numeric_value` as well."
+          },
+          "numeric_value": {
+            "type": "number",
+            "description": "Optional machine-comparable numeric form of `value`. Populate when the attribute is a single measurement. Omit for ranges or non-numeric values; clients fall back to parsing `value`."
+          },
+          "unit": {
+            "type": "string",
+            "description": "Unit of measurement. Open vocabulary; clients MUST tolerate unknown values. Well-known values: `hours`, `inches`, `mm`, `cm`, `kg`, `g`, `lb`, `ml`, `l`, `W`, `mAh`, `GB`, `MP`."
+          }
+        }
+      },
+      "description": "Structured product attributes — measurable facts beyond title and description (e.g., battery life, display size). Place specs that are constant across variants here; specs that vary by variant belong on the variant."
+    },
     "metadata": {
       "type": "object",
       "description": "Business-defined custom data extending the standard product model."
