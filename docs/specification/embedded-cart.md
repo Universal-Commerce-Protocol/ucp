@@ -390,8 +390,9 @@ Embedded Cart. This is represented by `transition` containing a minimal `checkou
 - `ucp` (object, **REQUIRED**): Metadata to fully qualify the advertisement.
     Business **MUST** include a checkout capability and an embedded service binding
     with `config.delegate`.
-- `url` (string, **REQUIRED**): URL representing shift to checkout. Business **MAY** choose
-    to specify a redirect URL without having the actual checkout session created.
+- `url` (string, **REQUIRED**): URL representing shift to checkout. Business **MUST**
+    specify a HTTPS URL and **MAY** choose a stateless URL like permalink. See
+    [Checkout Capability - Continue URL Format](checkout.md#format).
 
 **Example Message With `transition`:**
 
