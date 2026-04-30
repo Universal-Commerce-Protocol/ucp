@@ -420,8 +420,7 @@ Embedded Cart. This is represented by `transition` containing a minimal `checkou
                                 }
                             }
                         ]
-                    },
-                    "payment_handlers": {...}
+                    }
                 },
                 "url": "https://merchant.example.com/cart-to-checkout/checkout123",
             }
