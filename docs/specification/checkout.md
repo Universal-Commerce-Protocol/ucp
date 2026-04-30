@@ -119,8 +119,10 @@ platform receives messages indicating what's needed to progress.
 The `messages` array contains errors, warnings, and informational messages
 about the checkout state. `ucp.status` is the shape discriminator —
 `"success"` means the response carries the expected payload, `"error"`
-means it carries error information instead. The `severity` field on each
-error message prescribes the recommended action:
+means it carries error information instead. Each message carries a `type`,
+`code`, `severity`, `content`, and an optional `path` that identifies the
+specific field or line item the message refers to (see [The `path` Field](#the-path-field) below).
+The `severity` field prescribes the recommended platform action:
 
 | Severity                | Meaning                                          | Platform Action                                                   |
 | :---------------------- | :----------------------------------------------- | :---------------------------------------------------------------- |
@@ -182,6 +184,7 @@ Businesses **SHOULD** surface such messages as early as possible, and platforms
       "type": "error",
       "code": "invalid_phone",
       "severity": "recoverable",
+      "path": "$.buyer.phone_number",
       "content": "Phone number format is invalid"
     },
     {
@@ -219,7 +222,11 @@ IF unrecoverable is not empty
 
 IF recoverable is not empty
   FOR EACH error IN recoverable
-    ATTEMPT to fix error (e.g., reformat phone number)
+    IF error.path is present
+      IDENTIFY the field at error.path in the request payload
+      ATTEMPT to fix that field (e.g., reformat phone at $.buyer.phone_number)
+    ELSE
+      ATTEMPT generic fix based on error.code
   CALL Update Checkout
   RETURN and re-evaluate response
 
@@ -249,6 +256,54 @@ messages or deferring to checkout completion.
 
 Example: `out_of_stock` requires specific upfront UX, whereas
 `payment_required` can be handled generically at submission.
+
+#### The `path` Field
+
+The optional `path` field on a message anchors the error to a specific
+component of the response payload. Platforms use it to associate error
+messages with the input field or line item that caused them - for example,
+highlighting a specific buyer field in a form or flagging a specific
+cart line.
+
+`path` **MUST** be an [RFC 9535](https://www.rfc-editor.org/rfc/rfc9535)
+JSONPath expression relative to the root of the UCP response object.
+Property names **MUST** use snake_case matching the request schema.
+When `path` is omitted, the message applies to the response as a whole.
+
+**Simple field reference:**
+
+```json
+{ "path": "$.buyer.email" }
+```
+
+**Indexed array element:**
+
+```json
+{ "path": "$.line_items[0].quantity" }
+```
+
+**Filter expression (optional, when referencing a specific item by ID):**
+
+```json
+{ "path": "$.line_items[?(@.id=='line-item-uuid')].quantity" }
+```
+
+Filter expressions are valid RFC 9535 syntax and **MAY** be used when
+referencing a specific line item by `id` is clearer than its index.
+Index-based paths are equally valid; the business returns indices that
+are unambiguous within the response.
+
+**Specificity rule:** A path to a specific field (e.g.,
+`$.line_items[0].quantity`) takes precedence over a path to its parent
+(e.g., `$.line_items[0]`). When multiple errors apply to the same field,
+each message **SHOULD** carry the most specific path applicable.
+
+**Create vs. Update keying:** On `create_checkout`, line item filter
+expressions key on `item.id` (the catalog item identifier). On
+`update_checkout`, they key on the line item's own `id` (the
+session-scoped line item identifier assigned in the create response).
+
+When `path` is omitted, the message applies to the response as a whole.
 
 #### Eligibility Verification at Completion
 
