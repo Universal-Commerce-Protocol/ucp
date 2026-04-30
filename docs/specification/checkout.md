@@ -493,6 +493,16 @@ platform can prefill checkout state when initiating a buy-now flow.
 > [REST transport binding](checkout-rest.md). Accessing a permalink returns a
 > redirect to the checkout UI or renders the checkout page directly.
 
+## Scopes
+
+When user authentication is required to interact with checkout sessions, the Checkout capability defines the following scope:
+
+| Scope | Description |
+| :--- | :--- |
+| `dev.ucp.shopping.checkout:manage` | Provides access to all checkout operations on behalf of the user. |
+
+Businesses declare the scopes they offer in `config.scopes` of the `dev.ucp.common.identity_linking` capability. When `dev.ucp.shopping.checkout:manage` is listed in this map, operations on the checkout capability require a user identity token (see [Identity Linking Scopes](identity-linking.md#scopes) for details).
+
 ## Guidelines
 
 (In addition to the overarching guidelines)
