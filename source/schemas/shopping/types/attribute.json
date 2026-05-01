@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/shopping/types/attribute.json",
   "title": "Attribute",
-  "description": "Structured product attribute for measurable facts (battery life, display size, weight, storage). Same shape as schema.org PropertyValue. Use tags for unstructured categorical labels, options for variant-defining axes, and metadata for business-specific data.",
+  "description": "Structured product attribute for measurable facts (battery life, display size, weight, storage). Same shape as schema.org PropertyValue. Use tags for categorical labels, options for variant-defining axes, and metadata for business-specific data.",
   "type": "object",
   "required": ["name", "value"],
   "properties": {
