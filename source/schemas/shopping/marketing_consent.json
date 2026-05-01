@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/marketing_consent.json",
+  "name": "dev.ucp.shopping.marketing_consent",
+  "title": "Marketing Consent Extension",
+  "description": "Extends Checkout with per-channel marketing consent capture, supporting both platform-collected and business-requested consent flows.",
+  "$defs": {
+    "marketing_consent_option": {
+      "type": "object",
+      "description": "A marketing channel the business offers for opt-in.",
+      "required": [
+        "channel",
+        "display_text",
+        "privacy_policy_url"
+      ],
+      "properties": {
+        "channel": {
+          "type": "string",
+          "enum": ["email", "sms"],
+          "description": "Marketing channel."
+        },
+        "display_text": {
+          "type": "string",
+          "description": "Human-readable description of what the buyer consents to receive."
+        },
+        "privacy_policy_url": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL to the business's privacy policy for this consent."
+        }
+      }
+    },
+    "marketing_consent_entry": {
+      "type": "object",
+      "description": "The buyer's opt-in decision for a marketing channel.",
+      "required": [
+        "channel",
+        "opted_in"
+      ],
+      "properties": {
+        "channel": {
+          "type": "string",
+          "enum": ["email", "sms"],
+          "description": "Channel matching a marketing_consent_option channel value."
+        },
+        "opted_in": {
+          "type": "boolean",
+          "description": "Whether the buyer consented to marketing on this channel."
+        }
+      }
+    },
+    "marketing_consent": {
+      "type": "object",
+      "description": "Marketing consent options declared by the business and consent decisions submitted by the platform.",
+      "properties": {
+        "options": {
+          "type": "array",
+          "readOnly": true,
+          "items": {
+            "$ref": "#/$defs/marketing_consent_option"
+          },
+          "description": "Marketing channels the business offers for opt-in. Business includes this in checkout responses. Platform reads but never sends.",
+          "ucp_request": "omit"
+        },
+        "consents": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/marketing_consent_entry"
+          },
+          "description": "Buyer's marketing consent decisions. Omission preserves current subscription state.",
+          "ucp_request": {
+            "create": "optional",
+            "update": "optional",
+            "complete": "optional"
+          }
+        }
+      }
+    },
+    "buyer": {
+      "title": "Buyer with Marketing Consent",
+      "description": "Buyer object extended with marketing consent.",
+      "allOf": [
+        {
+          "$ref": "types/buyer.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "marketing_consent": {
+              "$ref": "#/$defs/marketing_consent",
+              "description": "Per-channel marketing consent."
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.checkout": {
+      "title": "Checkout with Marketing Consent",
+      "description": "Checkout extended with per-channel marketing consent.",
+      "allOf": [
+        {
+          "$ref": "checkout.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "buyer": {
+              "$ref": "#/$defs/buyer",
+              "description": "Buyer with marketing consent.",
+              "ucp_request": {
+                "create": "optional",
+                "update": "optional",
+                "complete": "optional"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
