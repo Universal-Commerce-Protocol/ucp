@@ -92,10 +92,18 @@
         },
         "applied": {
           "type": "array",
+          "readOnly": true,
           "items": {
             "$ref": "#/$defs/applied_discount"
           },
-          "description": "Discounts successfully applied (code-based and automatic).",
+          "description": "Discounts successfully applied (code-based and automatic)."
+        },
+        "approaching": {
+          "type": "array",
+          "items": {
+            "$ref": "types/approaching_discount.json"
+          },
+          "description": "List of discounts that are approaching their eligibility threshold. These discounts inform the buyer about potential savings opportunities if they add to their cart to meet the discount conditions. Omitted in requests.",
           "ucp_request": "omit"
         }
       }

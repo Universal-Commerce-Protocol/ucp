@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/approaching_discount.json",
+  "title": "Approaching Discount",
+  "type": "object",
+  "description": "Approaching discount object. Contains the details of an approaching promotion",
+  "required": [
+    "approaching_discount_id",
+    "approaching_discount_message",
+    "promotion_type",
+    "condition_threshold",
+    "merchandise_total"
+  ],
+  "properties": {
+    "approaching_discount_id": {
+      "type": "string",
+      "description": "ID of the approaching promotion"
+    },
+    "approaching_discount_message": {
+      "type": "string",
+      "description": "Localized promotion message.  i.e. $10 off $50 orders"
+    },
+    "promotion_type": {
+      "type": "string",
+      "enum": ["order", "shipping"],
+      "description": "Type of approaching promotions. Order or Shipping"
+    },
+    "condition_threshold": {
+      "$ref": "amount.json",
+      "description": "Threshold amount to be within promotions purchase condition. i.e. Purchase condition $50, upsell at $40, threshold = $10."
+    },
+    "merchandise_total": {
+      "$ref": "amount.json",
+      "description": "Total merchandise amount in the cart matching the promotions conditions (could be entire cart, items in a specific category, etc.)"
+    }
+  }
+}
