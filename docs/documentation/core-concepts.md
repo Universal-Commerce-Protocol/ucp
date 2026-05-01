@@ -70,7 +70,7 @@ Its primary goal is to enable:
 ## Roles & Participants
 
 UCP defines the interactions between four distinct actors, each playing
-a specific role in the commerce lifecycle.
+a specific role in the interaction lifecycle.
 
 ### Platform (Application/Agent)
 
@@ -231,8 +231,9 @@ declared capabilities with those in the platform's profile:
 2. **Select version** — For each matched capability, compute the set of versions
    present in both the business and platform arrays. Select the highest (latest
    date). If no mutual version exists, exclude the capability.
-3. **Prune orphaned extensions** — Extensions whose parent capability is not in
-   the intersection are removed. Pruning repeats until stable (handles chains).
+3. **Prune orphaned extensions** — Extensions are removed if **none** of their
+   parent capabilities are in the intersection. Pruning repeats until stable
+   (handles chains).
 
 The result is a minimal, mutually compatible capability set. Businesses include
 the active capabilities in every response so platforms always know which features
@@ -303,7 +304,7 @@ registry — domain owners control their own namespace.
 | Name | Authority | Who governs |
 | :--- | :--- | :--- |
 | `dev.ucp.shopping.checkout` | ucp.dev | UCP governing body |
-| `dev.shopify.catalog` | shopify.com | Shopify |
+| `dev.shopify.catalog` | shopify.dev | Shopify |
 | `com.example.payments.installments` | example.com | example.com |
 
 The `spec` and `schema` URLs declared in a capability must originate from the
@@ -326,6 +327,10 @@ the N-to-N complexity problem between platforms, businesses, and payment
 processors.
 
 ### The Trust Triangle
+
+In this section, "Payment Credential Provider" refers to the CP and/or PSP
+roles defined above; depending on the payment handler, they may be the same
+entity or distinct.
 
 The payment model is built on three bilateral trust relationships:
 
@@ -388,9 +393,14 @@ UCP supports multiple authentication models:
 | **API Keys** | Pre-established | Pre-shared secrets exchanged out-of-band |
 | **mTLS** | Pre-established | Mutual TLS with client certificates |
 
-Business-to-platform webhooks **MUST** be signed. HTTP Message Signatures are
-the only mechanism that enables a platform to interact with a business without
+HTTP Message Signatures are the only mechanism that enables permissionless
+interaction — public keys are discovered from each party's profile, with no
 prior credential exchange.
+
+When a business emits updates via webhook, its identity is asserted the same
+way: the request carries a `UCP-Agent` header pointing to the business's
+profile, and the platform verifies the signature against the signing keys
+published there.
 
 ### Identity Linking
 
@@ -416,3 +426,6 @@ the date of the last backwards-incompatible change.
 Capability schemas carry their version inline, which enables independent
 versioning — a discount extension can version on a different cadence than
 the checkout capability it extends.
+
+See [Versioning](../versioning.md) for the release branch process and the
+full breaking-change procedure.
