@@ -134,7 +134,12 @@ that scope require a user identity token.
 * **MUST** enforce exact string matching for the `redirect_uri` parameter
     during authorization requests to prevent open redirects and token theft.
     The `redirect_uri` in the token request **MUST** be identical to the one
-    in the authorization request.
+    in the authorization request. **Exception — loopback redirects:** For
+    redirect URIs targeting `127.0.0.1` or `[::1]`, businesses **MUST** ignore
+    the port component and match on scheme, host, and path only, to accommodate
+    native and desktop clients that obtain an ephemeral port from the OS at
+    runtime
+    ([RFC 8252 §7.3](https://datatracker.ietf.org/doc/html/rfc8252#section-7.3){ target="_blank" }).
 * **MUST** enforce client authentication at the token endpoint.
 * **MUST** validate user identity tokens on every user-authenticated request:
     verify `iss`, `aud` (the business's resource server identifier), `exp`,
