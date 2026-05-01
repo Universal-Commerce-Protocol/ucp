@@ -88,6 +88,23 @@ SHOULD be linked for the duration of the checkout.
     on a cleared cart ID return `not_found`; the platform can start a new
     session with `create_cart`.
 
+## Scopes
+
+Cart operations are available to platforms using agent-level authentication
+without requiring user identity. When a business offers user-linked cart
+sessions — for example, persisting a cart to the user's account — the Cart
+capability defines the following scope:
+
+| Scope | Description |
+| :--- | :--- |
+| `dev.ucp.shopping.cart:manage` | Provides access to all cart operations on behalf of the user. |
+
+Businesses declare the scopes they offer in `config.scopes` of the
+`dev.ucp.common.identity_linking` capability. When
+`dev.ucp.shopping.cart:manage` is listed in this map, operations on the cart
+capability require a user identity token (see
+[Identity Linking Scopes](identity-linking.md#scopes) for details).
+
 ## Guidelines
 
 ### Platform

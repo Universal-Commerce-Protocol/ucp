@@ -264,6 +264,21 @@ Examples: `refund`, `return`, `credit`, `price_adjustment`, `dispute`,
 }
 ```
 
+## Scopes
+
+The Order capability defines the following scopes for user-authenticated
+access to order data:
+
+| Scope | Description |
+| :--- | :--- |
+| `dev.ucp.shopping.order:read` | Read access to the user's orders (e.g., Get Order) |
+| `dev.ucp.shopping.order:manage` | Write access for post-purchase operations (e.g., cancellation, returns) on the user's orders. |
+
+Businesses declare the scopes they offer in `config.scopes` of the
+`dev.ucp.common.identity_linking` capability. When these scopes are listed,
+the corresponding order operations require a user identity token (see
+[Identity Linking Scopes](identity-linking.md#scopes) for details).
+
 ## Operations
 
 The order entity is a **current-state snapshot**: the authoritative latest

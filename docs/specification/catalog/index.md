@@ -303,6 +303,23 @@ disclosure applies to all of its variants.
 See [Warning Presentation](../checkout.md#warning-presentation) for the
 full rendering contract.
 
+## Scopes
+
+Catalog operations — search and lookup — are public by default and do not
+require user authentication. Businesses that offer personalized catalog
+content (e.g., member pricing, gated inventory) **MAY** gate access using
+the following scopes:
+
+| Scope | Description |
+| :--- | :--- |
+| `dev.ucp.shopping.catalog.search:read` | Authenticated search, enabling personalized results, member pricing, or gated catalog access. |
+| `dev.ucp.shopping.catalog.lookup:read` | Authenticated lookup, enabling personalized pricing or availability for the authenticated user. |
+
+Businesses declare the scopes they offer in `config.scopes` of the
+`dev.ucp.common.identity_linking` capability. When these scopes are listed,
+the corresponding catalog operation requires a user identity token (see
+[Identity Linking Scopes](../identity-linking.md#scopes) for details).
+
 ## Transport Bindings
 
 The capabilities above are bound to specific transport protocols:
