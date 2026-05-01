@@ -4,7 +4,7 @@
   "title": "Loyalty Membership",
   "description": "Loyalty membership that the business offers or associated with.",
   "type": "object",
-  "required": ["id", "name", "tracks"],
+  "required": ["id", "name"],
   "properties": {
     "id": {
       "type": "string",

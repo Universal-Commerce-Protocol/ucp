@@ -8,8 +8,7 @@
   "properties": {
     "name": {
       "type": "string",
-      "description": "Human-readable name of the currency (e.g. “LoyaltyStars”).",
-      "ucp_request": "omit"
+      "description": "Human-readable name of the currency (e.g. “LoyaltyStars”)."
     },
     "code": {
       "type": "string",

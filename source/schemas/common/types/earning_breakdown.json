@@ -4,12 +4,20 @@
   "title": "Earning Breakdown",
   "description": "Breakdown rule of the reward earnings",
   "type": "object",
-  "required": ["amount", "source"],
+  "required": ["id", "amount", "description"],
   "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique rewards breakdown rule identifier."
+    },
     "amount": {
       "type": "integer",
       "minimum": 0,
       "description": "Rewards earned from this rule."
+    },
+    "description": {
+      "type": "string",
+      "description": "A display-ready, human-readable rationale for the specific rewards (e.g. 2x on footwear)."
     },
     "source": {
       "type": "string",

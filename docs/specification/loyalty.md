@@ -70,23 +70,30 @@ Loyalty has four main components:
 
 ## Discovery
 
-Businesses can follow standard advertisement mechanism to advertise loyalty support in the Business profile
+Businesses can follow standard advertisement mechanism to advertise loyalty support in the Business profile. Currently loyalty extension can ONLY decorate checkout capability and the profile should contain both.
 
 ```json
 {
- "ucp": {
-   "version": "2026-01-23",
-   "capabilities": {
-     "dev.ucp.common.loyalty": [
-       {
-         "version": "2026-01-23",
-         "extends": "dev.ucp.shopping.checkout",
-         "spec": "https://ucp.dev/2026-01-23/specification/loyalty",
-         "schema": "https://ucp.dev/2026-01-23/schemas/common/loyalty.json"
-       }
-     ]
-   }
- }
+  "ucp": {
+    "version": "2026-04-08",
+    "capabilities": {
+      "dev.ucp.shopping.checkout": [
+        {
+          "version": "2026-04-08",
+          "spec": "https://ucp.dev/2026-04-08/specification/checkout",
+          "schema": "https://ucp.dev/2026-04-08/schemas/shopping/checkout.json"
+        }
+      ],
+      "dev.ucp.common.loyalty": [
+        {
+          "version": "2026-04-08",
+          "extends": "dev.ucp.shopping.checkout",
+          "spec": "https://ucp.dev/2026-04-08/specification/loyalty",
+          "schema": "https://ucp.dev/2026-04-08/schemas/common/loyalty.json"
+        }
+      ]
+    }
+  }
 }
 ```
 
@@ -134,31 +141,65 @@ Businesses can follow standard advertisement mechanism to advertise loyalty supp
 
 {{ schema_fields('earning_breakdown', 'loyalty') }}
 
-## Eligibility Claims
+## Platform & Business Interactions
 
-Given almost everything related to loyalty is provisional and requires eligible membership before benefits can be applied, [Context](checkout.md#context) naturally fits here where it allows buyers to claim eligibility for loyalty benefits and businesses to verify and communicate the result with the associated effects (financial-wise and rewards-wise). When loyalty extension is active and the request contains eligibility claims about loyalty, businesses that choose to accept eligibility claims MUST surface that as an indicator of buyer’s membership status, and if applicable, effects on pricing coming from monetary benefits. Platforms MUST display those provisional loyalty discounts to the buyer. Specifically, the loyalty extension is an object keyed by reverse_domain_name — same convention as services, capabilities, and payment_handlers in the business profile. The key is the eligibility claim, and value is the membership object that contains provisional to indicate the verification result.
+When loyalty extension is active and the request contains eligibility claims about loyalty, businesses that recognize those eligibility claims MUST return them as the keys of the loyalty extension, which is an object keyed by the reverse-domain identifier — same convention as services, capabilities, and payment handlers in the business profile. The values of the returned object contain detailed membership info corresponding to the claims, and specifically contains a `provisional` field to indicate the status of the claim.
+
+If monetary price impacting loyalty benefits (e.g. member pricing/shipping) are available and discount extension is supported by both business and platform, businesses MUST set the same `provisional` value in each of `applied` object within discount extension as in the loyalty extension. Platform can then follow the same rendering pattern for discount extension to surface these loyalty benefits to buyers.
 
 ```json
-"com.example.loyalty": {
-  "tracks": [
+"discounts": {
+  "applied": [
     {
-      "tiers": [
-        {
-          "benefits": [
-            {
-              ...
-            }
-          ]
-        }
-      ],
-      "rewards": [
-        {
-          ...
-        }
-      ],
+      "title": "Loyalty benefit 1",
+      "amount": 10,
+      "provisional": false,
+      "eligibility": "com.example.loyalty_1",
+      "allocations": [
+        {"path": "$.line_items[0]", "amount": 10}
+      ]
+    },
+    {
+      "title": "Loyalty benefit 2",
+      "amount": 50,
+      "provisional": true,
+      "eligibility": "com.example.loyalty_2",
+      "allocations": [
+        {"path": "$.line_items[0]", "amount": 50}
+      ]
     }
-  ],
-  "provisional": false
+  ]
+}
+"loyalty": {
+  "com.example.loyalty_1": {
+    "tracks": [
+      {
+        "tiers": [
+          {
+            "id": "tier_1",
+            "name": "GOLD",
+            "benefits": [
+              { "id": "BEN_001", "description": "Early access to sales" }
+            ]
+          }
+        ]
+      }
+    ],
+    "provisional": false
+  },
+  "com.example.loyalty_2": {
+    "tracks": [
+      {
+        "tiers": [
+          {
+            "id": "tier_1",
+            "name": "Basic"
+          }
+        ]
+      }
+    ],
+    "provisional": true
+  }
 }
 ```
 
@@ -166,7 +207,7 @@ Given almost everything related to loyalty is provisional and requires eligible 
 
 Platforms MUST send buyer loyalty membership claims via `context.eligibility` to activate loyalty extension and claim for loyalty benefits. The key of the returned object within loyalty extension represents that buyer's claim to the loyalty program. If a business successfully verifies this claim, the business MUST update the `provisional` boolean to false and populate the `activated_tier` fields alongside the to reflect the buyer's verified status for that specific claim.
 
-If a business chooses not to synchronously verify the membership claim, the value of the returned object MUST retain `provisional: true`, and the business MUST NOT populate `activated_tier`. Any applicable price-impacting benefits MUST be surfaced in the discounts object with `provisional: true`.
+If a business chooses not to validate the membership claim, the value of the returned object MUST retain `provisional: true`, and the business MUST NOT populate `activated_tier`. Applicable price-impacting benefits MAY be surfaced by businesses in the discount extension, and if so, they MUST hold `provisional: true`.
 
 If verification fails, businesses MUST communicate the failure via a recoverable error. Platforms MAY then choose to remove the membership claim and proceed the checkout without benefits applied.
 
@@ -248,21 +289,6 @@ If verification fails, businesses MUST communicate the failure via a recoverable
         "com.example.loyalty": {
           "id": "membership_1",
           "name": "My Loyalty Program",
-          "tracks": [
-            {
-              "id": "track_1",
-              "name": "track_name_1",
-              "tiers": [
-                {
-                  "id": "tier_1",
-                  "name": "GOLD",
-                  "benefits": [
-                    { "id": "BEN_001", "description": "Early access to sales" }
-                  ]
-                }
-              ],
-            }
-          ],
           "provisional": false,
         }
       },
@@ -271,7 +297,7 @@ If verification fails, businesses MUST communicate the failure via a recoverable
           "type": "error",
           "severity": "recoverable",
           "code": "eligibility_invalid",
-          "path": "$.loyalty.memberships[0]",
+          "path": "$.loyalty['com.example.loyalty']",
           "content": "Buyer is not a valid loyalty member"
         }
       ]
@@ -284,7 +310,7 @@ With the help of the loyalty extension, the checkout capability can be further d
 
 ### Price-Impacting Benefits
 
-Alongside the discount extension, loyalty extension can provide buyer status info to allow the platform to transparently assert that correct and comprehensive member discounts are applied. In the example below, platform not only can explain the source of discounts via `discounts.applied.title` within discount extension, but also assure buyers that these member specific discounts are recognized because of their verified loyalty status via `memberships.tracks.tiers.name` within loyalty extension (e.g. “My Loyalty Program Gold and Benefit Visa Card benefit applied.”)
+Alongside the discount extension, loyalty extension can provide buyer status info to allow the platform to transparently assert that correct and comprehensive member discounts are applied. In the example below, platform not only can explain the source of discounts via `discounts.applied[0].title` within discount extension, but also assure buyers that these member specific discounts are recognized because of their verified loyalty status via `tracks[0].tiers[0].name` within loyalty extension, which can be sourced from correlating `discounts.applied[0].eligibility` to `loyalty['com.example.loyalty']` to identify which membership provides which monetary benefit. Platform can then render “My Loyalty Program Gold and Benefit Visa Card benefit applied.” for example.
 
 === "Request"
 
@@ -321,8 +347,8 @@ Alongside the discount extension, loyalty extension can provide buyer status inf
           },
           "totals": [
             {"type": "subtotal", "amount": 1000},
-            {"type": "loyalty_gold_discount", "amount": -30},
-            {"type": "loyalty_credit_card_discount", "amount": -50},
+            {"type": "items_discount", "display_text": "Loyalty member benefit", "amount": -30},
+            {"type": "items_discount", "display_text": "Credit Card Members save 5%", "amount": -50},
             {"type": "total", "amount": 920}
           ]
         }
@@ -376,7 +402,6 @@ Alongside the discount extension, loyalty extension can provide buyer status inf
         },
         "com.example.loyalty.credit_card": {
           "id": "membership_2",
-          "display_id": "****1234",
           "name": "Program Visa Card",
           "tracks": [
             {
@@ -464,8 +489,8 @@ In addition to immediate-value benefits like member pricing/shipping, delayed-va
                   "name": "Gold",
                   "benefits": [
                     { "id": "BEN_001", "description": "Early access to sales" },
-                    { "id": "BEN_002", "description": "1 point/dollar on everything" },
-                    { "id": "BEN_002", "description": "2 extra point/dollar on footwear" },
+                    { "id": "BEN_002", "description": "Birthday gift" },
+                    { "id": "BEN_003", "description": "Extended return window to 180 days" },
                   ]
                 }
               ],
@@ -479,8 +504,8 @@ In addition to immediate-value benefits like member pricing/shipping, delayed-va
                   "earning_forecast": {
                     "amount": 30,
                     "breakdown": [
-                      { "source": "$.tiers[0].benefits[1]", "amount": 10 },
-                      { "source": "$.tiers[0].benefits[2]", "amount": 20 }
+                      { "id": "RULE_1", "description": "1 point/dollar on everything", "amount": 10 },
+                      { "id": "RULE_2", "description": "2 extra point/dollar on footwear", "amount": 20 }
                     ]
                   }
                 }
