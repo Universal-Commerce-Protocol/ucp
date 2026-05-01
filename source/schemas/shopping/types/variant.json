@@ -114,6 +114,52 @@
         "status": {
           "type": "string",
           "description": "Qualifies available with fulfillment state. Well-known values: `in_stock`, `backorder`, `preorder`, `out_of_stock`, `discontinued`."
+        },
+        "quantity": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Current stock quantity. Business MAY omit if inventory tracking is not supported or if exact counts are confidential."
+        },
+        "low_stock_threshold": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Business-defined threshold below which the variant is considered low stock. When quantity is at or below this value, platforms SHOULD surface low-stock messaging to the buyer."
+        },
+        "restock_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Estimated restock date (RFC 3339). Business SHOULD provide when status is `out_of_stock` or `backorder` and a restock date is known."
+        },
+        "locations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "available"],
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Location identifier."
+              },
+              "name": {
+                "type": "string",
+                "description": "Human-readable location name (e.g., 'Downtown Store', 'Online')."
+              },
+              "available": {
+                "type": "boolean",
+                "description": "Whether the variant is available at this location."
+              },
+              "quantity": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Stock quantity at this location."
+              },
+              "status": {
+                "type": "string",
+                "description": "Location-level availability status. Same well-known values as variant-level status."
+              }
+            }
+          },
+          "description": "Per-location availability for multi-location businesses. Enables agents to guide buyers to locations where the item is in stock."
         }
       }
     },
