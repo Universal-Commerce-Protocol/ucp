@@ -41,6 +41,15 @@
         "create": "omit",
         "update": "optional"
       }
+    },
+    "buyer_notes": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "Free-text buyer instructions for this line item (e.g., customization requests, gift messages, dietary notes). Business MAY act on, echo back, or ignore.",
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional"
+      }
     }
   }
 }
