@@ -1,0 +1,27 @@
+name: 'Configure Site URL'
+description: >-
+  Resolves the GitHub Pages URL for the current repository and exports it as
+  SITE_URL and SPEC_URL environment variables for subsequent steps.
+inputs:
+  github-token:
+    description: >-
+      Token used to query the GitHub Pages API. Defaults to the workflow token.
+    required: false
+    default: ${{ github.token }}
+runs:
+  using: "composite"
+  steps:
+    - name: Resolve and export site URLs
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+      run: |
+        PAGES_URL=$(gh api "repos/${{ github.repository }}/pages" --jq '.html_url' 2>/dev/null || true)
+        if [ -z "$PAGES_URL" ] || [ "$PAGES_URL" = "null" ]; then
+          PAGES_URL="https://${{ github.repository_owner }}.github.io/${GITHUB_REPOSITORY#*/}"
+        fi
+        if [[ "$PAGES_URL" != */ ]]; then
+          PAGES_URL="${PAGES_URL}/"
+        fi
+        echo "SITE_URL=$PAGES_URL" >> "$GITHUB_ENV"
+        echo "SPEC_URL=${PAGES_URL}latest/specification/overview/" >> "$GITHUB_ENV"

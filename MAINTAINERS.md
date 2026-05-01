@@ -25,7 +25,7 @@ design of the protocol.
 <!-- cSpell:ignore Greg Smith Ilya Grigorik Imran Hoosain Lee Richmond -->
 <!-- cSpell:ignore James Andersen Maxime Najim Najim Naga Malepati -->
 <!-- cSpell:ignore Patrick Jordan Prasad Wangikar Scot DeDeo -->
-<!-- cSpell:ignore Venu Vemula Victoria Duggan -->
+<!-- cSpell:ignore Twum Djin Venu Vemula Victoria Duggan -->
 | Name | Company |
 | :--- | :--- |
 | Amit Handa | Google |
@@ -54,4 +54,6 @@ the protocol.
 | :--- | :--- |
 | Amit Handa | Google |
 | Ilya Grigorik | Shopify |
+| Twum Djin | Stripe |
+| Open | to be elected |
 | Open | to be elected |
