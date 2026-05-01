@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/attribute.json",
+  "title": "Attribute",
+  "description": "Structured product attribute for measurable facts (battery life, display size, weight, storage). Same shape as schema.org PropertyValue. Use tags for unstructured categorical labels, options for variant-defining axes, and metadata for business-specific data.",
+  "type": "object",
+  "required": ["name", "value"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Human-readable attribute name (e.g., 'Battery life', 'Display', 'Weight'). Same role as schema.org PropertyValue.name. Clients SHOULD compare names case-insensitively when correlating attributes across merchants."
+    },
+    "key": {
+      "type": "string",
+      "description": "Optional stable identifier paired with `name` for cross-merchant correlation and variant override matching. Same role as schema.org PropertyValue.propertyID. Open vocabulary; clients MUST tolerate unknown values. Vertical extensions MAY standardize keys for specific categories.",
+      "examples": ["battery_life", "display_size", "weight", "storage_capacity", "refresh_rate"]
+    },
+    "value": {
+      "type": "string",
+      "description": "Display value. Same role as schema.org PropertyValue.value. Can be a number, range, or domain notation."
+    },
+    "numeric_value": {
+      "type": "number",
+      "description": "Optional comparable numeric form of `value`. Businesses SHOULD populate this when the attribute is a single measurement so agents can filter without parsing the display string."
+    },
+    "unit": {
+      "type": "string",
+      "description": "Optional unit of measurement. Open vocabulary; clients MUST tolerate unknown values. Producers SHOULD prefer SI/UCUM-style symbols (`kg`, `mm`, `Hz`) where they exist; common catalog units (`GB`, `inches`, `hours`) are well-known alternatives.",
+      "examples": ["hours", "minutes", "days", "mm", "cm", "m", "inches", "g", "kg", "lb", "oz", "ml", "L", "fl_oz", "KB", "MB", "GB", "TB", "Hz", "ppi", "W", "Wh", "mAh", "C", "F"]
+    }
+  }
+}

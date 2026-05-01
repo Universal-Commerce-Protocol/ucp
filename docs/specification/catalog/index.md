@@ -141,6 +141,110 @@ as the first element. Platforms SHOULD treat the first element as featured.
 
 {{ schema_fields('types/rating', 'catalog') }}
 
+### Attribute
+
+Structured measurable facts about a product or variant: battery life,
+display size, weight, storage. Same shape as schema.org `PropertyValue`,
+so merchants already publishing JSON-LD on their product pages can pipe
+existing data into UCP catalog responses.
+
+This is a Working Draft. Producers and consumers MAY emit and consume
+`attributes`, but Platforms MUST tolerate their absence and MUST NOT
+depend on them for required behavior until the field reaches Candidate.
+
+#### Choosing the right field
+
+`Product` and `Variant` already have several extension points. Pick by
+the kind of data:
+
+| Field | Use for | Example |
+| :--- | :--- | :--- |
+| `attributes` | Measurable facts an agent might filter or rank on | `Battery life: 22 hours`, `Weight: 1.2 kg`, `Storage: 256 GB` |
+| `options` / `selected_option` | Axes that distinguish purchasable variants | `Color: Blue`, `Size: Large` |
+| `tags` | Categorical labels for search and merchandising | `vegan`, `new-arrival`, `staff-pick` |
+| `metadata` | Business-specific data not standardized by UCP | Internal SKU groupings, marketing campaign IDs |
+
+A categorical fact (color, fit, material) goes in `options` when it
+distinguishes variants, `tags` otherwise. A measurable fact (battery
+life, display size) goes in `attributes`, even when it doesn't
+distinguish variants.
+
+#### Placement
+
+Attributes constant across variants go on `Product` (display size,
+refresh rate). Attributes that vary go on `Variant` (storage, weight by
+size). When the same attribute appears on both, Platforms MUST match by
+`key` (if present) or case-insensitive `name`, override the Product
+entry with the Variant entry, and inherit any Product entries the
+Variant doesn't redeclare.
+
+#### Numeric values and units
+
+Businesses SHOULD populate `numeric_value` and `unit` whenever an
+attribute is a single measurement, so agents can filter without parsing
+the display string. For unit strings, prefer SI/UCUM-style symbols
+(`kg`, `mm`, `Hz`) where they exist; common catalog units (`GB`,
+`inches`, `hours`) are well-known alternatives. Clients MUST tolerate
+unknown unit strings.
+
+The `name` and `key` vocabularies are open by design. Cross-merchant
+filtering should rely on `numeric_value` plus `unit` rather than exact
+`name` matching. Vertical extensions MAY standardize `key` values for
+specific categories.
+
+#### Filtering
+
+Server-side filtering on attributes is out of scope for v1. Filtering
+happens agent-side over the catalog response. See
+[Search Filters](search.md#search-filters) for what the catalog
+capability does support.
+
+#### Worked example
+
+A phone with product-level attributes for facts that don't vary by
+variant, and variant-level attributes for storage:
+
+```json
+{
+  "id": "prod_aurora_phone",
+  "title": "Aurora Phone",
+  "description": { "plain": "Flagship phone with all-day battery." },
+  "price_range": {
+    "min": { "amount": 79900, "currency": "USD" },
+    "max": { "amount": 89900, "currency": "USD" }
+  },
+  "attributes": [
+    { "key": "battery_life", "name": "Battery life", "value": "22", "numeric_value": 22, "unit": "hours" },
+    { "key": "display_size", "name": "Display",      "value": "6.1", "numeric_value": 6.1, "unit": "inches" }
+  ],
+  "variants": [
+    {
+      "id": "var_aurora_128",
+      "title": "128 GB",
+      "description": { "plain": "Aurora Phone, 128 GB storage." },
+      "price": { "amount": 79900, "currency": "USD" },
+      "attributes": [
+        { "key": "storage_capacity", "name": "Storage", "value": "128", "numeric_value": 128, "unit": "GB" }
+      ]
+    },
+    {
+      "id": "var_aurora_256",
+      "title": "256 GB",
+      "description": { "plain": "Aurora Phone, 256 GB storage." },
+      "price": { "amount": 89900, "currency": "USD" },
+      "attributes": [
+        { "key": "storage_capacity", "name": "Storage", "value": "256", "numeric_value": 256, "unit": "GB" }
+      ]
+    }
+  ]
+}
+```
+
+`var_aurora_128` inherits `battery_life` and `display_size` from the
+product and contributes `storage_capacity` on its own.
+
+{{ schema_fields('types/attribute', 'catalog') }}
+
 ## Messages and Error Handling
 
 All catalog responses include an optional `messages` array that allows businesses
