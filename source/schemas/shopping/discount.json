@@ -67,7 +67,7 @@
           "description": "True if this discount requires additional verification."
         },
         "eligibility": {
-          "$ref": "types/reverse_domain_name.json",
+          "$ref": "../common/types/reverse_domain_name.json",
           "description": "The eligibility claim accepted by the Business for this discount. Corresponds to a value from context.eligibility. Omitted for code-based and non-eligibility automatic discounts."
         },
         "allocations": {

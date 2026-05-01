@@ -5,8 +5,82 @@
   "title": "Loyalty Extension",
   "description": "Extends various Capabilities with loyalty support using memberships info.",
   "$defs": {
+    "membership_track": {
+      "type": "object",
+      "description": "An enrollment pathway or program category that a user can join independently or simultaneously.",
+      "required": ["id", "name"],
+      "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the membership track."
+    },
+    "name": {
+      "type": "string",
+      "description": "The human-readable name of the track (e.g., “Platinum”)."
+    },
+    "tiers": {
+      "type": "array",
+      "items": {
+        "$ref": "types/membership_tier.json"
+      },
+      "description": "List of tiers associated with the membership track."
+    },
+    "activated_tier": {
+      "type": "string",
+      "description": "The tier that the customer is activated for, identified by the `id` of the Membership Tier object."
+    },
+    "rewards": {
+      "type": "array",
+      "items": {
+        "$ref": "types/membership_reward.json"
+      },
+      "description": "List of quantifiable rewards value the user holds. Each object encapsulates one type of reward the track offers."
+    }
+  }
+    },
+    "loyalty_membership": {
+      "type": "object",
+      "description": "Loyalty membership that the business offers or associated with.",
+      "required": ["id", "name"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique loyalty membership identifier."
+        },
+        "name": {
+          "type": "string",
+          "description": "Business specific name of the loyalty membership/program."
+        },
+        "display_id": {
+          "type": "string",
+          "description": "A masked or partial version of the membership id for user recognition (e.g., '****5678')."
+        },
+        "tracks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/membership_track"
+          },
+          "description": "List of tracks associated with the loyalty membership."
+        },
+        "provisional": {
+          "type": "boolean",
+          "default": false,
+          "description": "True if this membership requires additional verification."
+        }
+      }
+    },
     "loyalty": {
-      "$ref": "types/loyalty.json"
+      "type": "object",
+      "description": "Key-value pair with key represents buyer/platform asserted eligibility claims and value represents associated membership information.",
+      "propertyNames": {
+        "$ref": "types/reverse_domain_name.json",
+        "description": "Reverse-domain identifier that represents eligibility claim accepted by the Business for this membership. Corresponds to a value from context.eligibility."
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/loyalty_membership",
+        "description": "Payload that describes the membership information corresponds to the claim.",
+        "ucp_request": "omit"
+      }
     },
     "dev.ucp.shopping.checkout": {
       "title": "Checkout with Loyalty",
