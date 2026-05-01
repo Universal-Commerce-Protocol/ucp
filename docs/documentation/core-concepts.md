@@ -36,9 +36,14 @@ For a complete definition of all data models and schemas, see the
 
 Its primary goal is to enable:
 
-* **Platforms:** To dynamically discover and consume the capabilities a business exposes.
-* **Businesses:** To declare what they offer and how they operate — once — and have any compatible platform discover and use it without bespoke integrations.
-* **Payment & Credential Providers:** To expose their services — tokenization, vaulting, credential issuance — once, and power secure commerce for users across any compatible platform and business.
+* **Platforms:** To dynamically discover and consume the capabilities a
+    business exposes.
+* **Businesses:** To declare what they offer and how they operate — once —
+    and have any compatible platform discover and use it without bespoke
+    integrations.
+* **Payment & Credential Providers:** To expose their services —
+    tokenization, vaulting, credential issuance — once, and power secure
+    commerce for users across any compatible platform and business.
 
 ## High level architecture
 
@@ -58,7 +63,7 @@ Its primary goal is to enable:
     support fulfillment options or identity linking?").
 * **Security:** Facilitate secure, standards-based (OAuth 2.0, PCI-DSS
     compliant patterns) exchanges of sensitive user and payment data.
-* **Agentic Commerce:** Enable AI agents to act on behalf of any principals
+* **Agentic Commerce:** Enable AI agents to act on behalf of varied principals
     (an individual, organization, or another agent) and support different
     modalities (human-in-the-loop, fully autonomous).
 
@@ -133,14 +138,14 @@ the active feature set for a given interaction.
 
 The following are examples of capabilities defined in UCP — see the [Specification](../specification/overview.md) for the authoritative and up-to-date list.
 
-| Capability | Type | Description |
-| :--- | :--- | :--- |
-| `dev.ucp.shopping.checkout` | Core | Initiates and completes purchase sessions |
-| `dev.ucp.shopping.cart` | Core | Pre-checkout cart management |
-| `dev.ucp.shopping.catalog.search` | Core | Search across a business catalog |
-| `dev.ucp.shopping.catalog.lookup` | Core | Retrieve a specific product by ID |
-| `dev.ucp.shopping.order` | Core (webhook) | Order lifecycle events |
-| `dev.ucp.common.identity_linking` | Common | OAuth-based account linking |
+| Capability | Description |
+| :--- | :--- |
+| `dev.ucp.shopping.checkout` | Initiates and completes purchase sessions |
+| `dev.ucp.shopping.cart` | Pre-checkout cart management |
+| `dev.ucp.shopping.catalog.search` | Search across a business catalog |
+| `dev.ucp.shopping.catalog.lookup` | Retrieve a specific product by ID |
+| `dev.ucp.shopping.order` | Order lifecycle events |
+| `dev.ucp.common.identity_linking` | OAuth-based account linking |
 
 ### Extensions
 
@@ -153,10 +158,10 @@ core capabilities.
 {
   "dev.ucp.shopping.fulfillment": [
     {
-      "version": "2026-01-23",
+      "version": "2026-04-08",
       "extends": "dev.ucp.shopping.checkout",
-      "spec": "https://ucp.dev/2026-01-23/specification/fulfillment",
-      "schema": "https://ucp.dev/2026-01-23/schemas/shopping/fulfillment.json"
+      "spec": "https://ucp.dev/2026-04-08/specification/fulfillment",
+      "schema": "https://ucp.dev/2026-04-08/schemas/shopping/fulfillment.json"
     }
   ]
 }
@@ -247,35 +252,35 @@ authentication are resolved together.
 ```json
 {
   "ucp": {
-    "version": "2026-01-23",
+    "version": "2026-04-08",
     "services": {
       "dev.ucp.shopping": [
         {
-          "version": "2026-01-23",
-          "spec": "https://ucp.dev/2026-01-23/specification/overview",
+          "version": "2026-04-08",
+          "spec": "https://ucp.dev/2026-04-08/specification/overview",
           "transport": "rest",
-          "schema": "https://ucp.dev/2026-01-23/services/shopping/rest.openapi.json",
+          "schema": "https://ucp.dev/2026-04-08/services/shopping/rest.openapi.json",
           "endpoint": "https://business.example.com/ucp/v1"
         }
       ]
     },
     "capabilities": {
       "dev.ucp.shopping.checkout": [{
-        "version": "2026-01-23",
-        "spec": "https://ucp.dev/2026-01-23/specification/checkout",
-        "schema": "https://ucp.dev/2026-01-23/schemas/shopping/checkout.json"
+        "version": "2026-04-08",
+        "spec": "https://ucp.dev/2026-04-08/specification/checkout",
+        "schema": "https://ucp.dev/2026-04-08/schemas/shopping/checkout.json"
       }],
       "dev.ucp.shopping.fulfillment": [{
-        "version": "2026-01-23",
-        "spec": "https://ucp.dev/2026-01-23/specification/fulfillment",
-        "schema": "https://ucp.dev/2026-01-23/schemas/shopping/fulfillment.json",
+        "version": "2026-04-08",
+        "spec": "https://ucp.dev/2026-04-08/specification/fulfillment",
+        "schema": "https://ucp.dev/2026-04-08/schemas/shopping/fulfillment.json",
         "extends": "dev.ucp.shopping.checkout"
       }]
     },
     "payment_handlers": {
       "com.example.processor_tokenizer": [{
         "id": "processor_tokenizer",
-        "version": "2026-01-23",
+        "version": "2026-04-08",
         "spec": "https://example.com/specs/payments/processor_tokenizer",
         "schema": "https://example.com/specs/payments/merchant_tokenizer.json"
       }]
@@ -298,7 +303,7 @@ registry — domain owners control their own namespace.
 | Name | Authority | Who governs |
 | :--- | :--- | :--- |
 | `dev.ucp.shopping.checkout` | ucp.dev | UCP governing body |
-| `com.shopify.catalog` | shopify.com | Shopify |
+| `dev.shopify.catalog` | shopify.com | Shopify |
 | `com.example.payments.installments` | example.com | example.com |
 
 The `spec` and `schema` URLs declared in a capability must originate from the
@@ -324,11 +329,14 @@ processors.
 
 The payment model is built on three bilateral trust relationships:
 
-1. **Business ↔ Payment Service Provider (PSP)** — Pre-existing legal and
-   technical relationship; the business holds API keys and contracts with its PSP.
-2. **Platform ↔ Credential Provider (CP)** — The platform may leverage an independent credential provider to prepare encrypted or tokenized payloads, keeping raw credentials abstracted away from the platform-to-business APIs.
-3. **Platform ↔ Business** — The platform submits the opaque token to the
-   business, which processes it via its backend PSP integration.
+1. **Business ↔ Payment Credential Provider** — A pre-existing legal and
+   technical relationship; the business holds API keys and a contract with
+   the payment credential provider.
+2. **Platform ↔ Payment Credential Provider** — The platform interacts with
+   the payment credential provider's interface (e.g., an iframe or API) to
+   tokenize data, but is not the "owner" of the funds.
+3. **Platform ↔ Business** — The platform passes the result (a token or
+   mandate) to the business to finalize the order.
 
 Credentials flow **platform → business** only; businesses **MUST NOT** echo
 credentials back in responses.
