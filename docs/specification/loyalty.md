@@ -103,43 +103,43 @@ Businesses can follow standard advertisement mechanism to advertise loyalty supp
 
 #### Loyalty
 
-{{ schema_fields('loyalty', 'loyalty') }}
+{{ extension_schema_fields('loyalty.json#/$defs/loyalty', 'loyalty') }}
 
 #### Loyalty Membership
 
-{{ schema_fields('loyalty_membership', 'loyalty') }}
+{{ extension_schema_fields('loyalty.json#/$defs/loyalty_membership', 'loyalty') }}
 
 #### Membership Track
 
-{{ schema_fields('membership_track', 'loyalty') }}
+{{ extension_schema_fields('loyalty.json#/$defs/membership_track', 'loyalty') }}
 
 #### Membership Tier
 
-{{ schema_fields('membership_tier', 'loyalty') }}
+{{ extension_schema_fields('loyalty.json#/$defs/membership_tier', 'loyalty') }}
 
 #### Membership Tier Benefit
 
-{{ schema_fields('membership_tier_benefit', 'loyalty') }}
+{{ extension_schema_fields('loyalty.json#/$defs/membership_tier_benefit', 'loyalty') }}
 
 #### Membership Reward
 
-{{ schema_fields('membership_reward', 'loyalty') }}
+{{ extension_schema_fields('loyalty.json#/$defs/membership_reward', 'loyalty') }}
 
 #### Balance Currency
 
-{{ schema_fields('balance_currency', 'loyalty') }}
+{{ extension_schema_fields('loyalty.json#/$defs/balance_currency', 'loyalty') }}
 
 #### Membership Balance
 
-{{ schema_fields('membership_balance', 'loyalty') }}
+{{ extension_schema_fields('loyalty.json#/$defs/membership_balance', 'loyalty') }}
 
 #### Earning Forecast
 
-{{ schema_fields('earning_forecast', 'loyalty') }}
+{{ extension_schema_fields('loyalty.json#/$defs/earning_forecast', 'loyalty') }}
 
 #### Earning Breakdown
 
-{{ schema_fields('earning_breakdown', 'loyalty') }}
+{{ extension_schema_fields('loyalty.json#/$defs/earning_breakdown', 'loyalty') }}
 
 ## Platform & Business Interactions
 
