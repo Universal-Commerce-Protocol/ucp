@@ -70,7 +70,7 @@ Loyalty has four main components:
 
 ## Discovery
 
-Businesses can follow standard advertisement mechanism to advertise loyalty support in the Business profile. Currently loyalty extension can ONLY decorate checkout capability and the profile should contain both.
+Businesses can follow standard advertisement mechanism to advertise loyalty support in the Business profile. Currently loyalty extension can ONLY decorate checkout capability and thus the profile should contain both.
 
 ```json
 {
@@ -141,92 +141,70 @@ Businesses can follow standard advertisement mechanism to advertise loyalty supp
 
 {{ extension_schema_fields('loyalty.json#/$defs/earning_breakdown', 'loyalty') }}
 
-## Platform & Business Interactions
+## Loyalty behavior
 
-When loyalty extension is active and the request contains eligibility claims about loyalty, businesses that recognize those eligibility claims MUST return them as the keys of the loyalty extension, which is an object keyed by the reverse-domain identifier — same convention as services, capabilities, and payment handlers in the business profile. The values of the returned object contain detailed membership info corresponding to the claims, and specifically contains a `provisional` field to indicate the status of the claim.
+Loyalty extension holds a key-value map whose keys are reverse-domain identifiers — same convention as services, capabilities, and payment handlers in the business profile, and represent eligibility claim about loyalty memberships that businesses recognize. The values contain detailed membership info corresponding to the claims, and specifically contains a `provisional` field to indicate the status of the claim.
 
-If monetary price impacting loyalty benefits (e.g. member pricing/shipping) are available and discount extension is supported by both business and platform, businesses MUST set the same `provisional` value in each of `applied` object within discount extension as in the loyalty extension. Platform can then follow the same rendering pattern for discount extension to surface these loyalty benefits to buyers.
+Platforms MAY send buyer loyalty membership claims via `context.eligibility` in the request to activate loyalty extension and claim for loyalty benefits. Alternatively, when the buyer is authenticated and the business can determine loyalty membership from the authenticated identity, businesses MAY populate the loyalty extension without an explicit eligibility claim. In this case, the map key MUST be the same reverse-domain identifier the business would accept as a claim value.
 
-```json
-"discounts": {
-  "applied": [
-    {
-      "title": "Loyalty benefit 1",
-      "amount": 10,
-      "provisional": false,
-      "eligibility": "com.example.loyalty_1",
-      "allocations": [
-        {"path": "$.line_items[0]", "amount": 10}
-      ]
-    },
-    {
-      "title": "Loyalty benefit 2",
-      "amount": 50,
-      "provisional": true,
-      "eligibility": "com.example.loyalty_2",
-      "allocations": [
-        {"path": "$.line_items[0]", "amount": 50}
-      ]
-    }
-  ]
-}
-"loyalty": {
-  "com.example.loyalty_1": {
-    "tracks": [
-      {
-        "tiers": [
-          {
-            "id": "tier_1",
-            "name": "GOLD",
-            "benefits": [
-              { "id": "BEN_001", "description": "Early access to sales" }
-            ]
-          }
-        ]
-      }
-    ],
-    "provisional": false
-  },
-  "com.example.loyalty_2": {
-    "tracks": [
-      {
-        "tiers": [
-          {
-            "id": "tier_1",
-            "name": "Basic"
-          }
-        ]
-      }
-    ],
-    "provisional": true
-  }
-}
-```
+* When businesses successfully verify the buyer's membership (either via eligibility claim in the request, or based on authenticated identity), the business MUST update the `provisional` boolean to false and populate the `activated_tier` fields alongside the to reflect the buyer's verified status.
+* In the case when platform's request contains loyalty membership claims and businesses choose not to validate the membership claim, the value of the returned object MUST retain `provisional: true`, and the business MUST NOT populate `activated_tier`.
+* If claim is accepted but verification fails, businesses MUST communicate the failure via a recoverable `message` with `type: "error"` and `code: "eligibility_invalid"`. Platforms MAY then choose to remove the membership claim and proceed the checkout without loyalty benefits applied.
 
-### Loyalty behavior
+At checkout completion, all accepted but unverified loyalty claims MUST be resolved per the [Eligibility Verification at Completion](checkout.md#eligibility-verification-at-completion) contract defined in the checkout capability.
 
-Platforms MUST send buyer loyalty membership claims via `context.eligibility` to activate loyalty extension and claim for loyalty benefits. The key of the returned object within loyalty extension represents that buyer's claim to the loyalty program. If a business successfully verifies this claim, the business MUST update the `provisional` boolean to false and populate the `activated_tier` fields alongside the to reflect the buyer's verified status for that specific claim.
+When monetary price impacting loyalty benefits (e.g. member pricing/shipping) are available, it is worth noting that sometimes they have extra conditions besides membership requirement (e.g. Save $10 with $500+ purchase for members). In this case, businesses MUST check the eligibility of these extra conditions first regardless of membership claims/authorization identity. When the discount extension is active and the check passes (or none is needed), businesses SHOULD put them in the discount extension and MUST set the same `provisional` value in each corresponding `applied` object within the discount extension as in the loyalty extension. Platform can then follow the same rendering pattern for discount extension to surface these loyalty benefits to buyers. If the check fails, businesses SHOULD notify the buyer via `messages` with `type: "warning"`. Businesses MUST NOT put these inapplicable benefits in the discount extension. Instead they MAY set them as part of `benefits` within the loyalty extension and set the `path` within the warning message to reference back for additional context.
 
-If a business chooses not to validate the membership claim, the value of the returned object MUST retain `provisional: true`, and the business MUST NOT populate `activated_tier`. Applicable price-impacting benefits MAY be surfaced by businesses in the discount extension, and if so, they MUST hold `provisional: true`.
+When loyalty membership claims are accepted, business MAY use `type: "info"` to explain the effects of applied monetary loyalty benefits .
 
-If verification fails, businesses MUST communicate the failure via a recoverable error. Platforms MAY then choose to remove the membership claim and proceed the checkout without benefits applied.
+**Loyalty benefits message codes:**
 
-=== "Request with known buyer membership claim"
+| Type      | Code                           | When                                                    |
+| --------- | ------------------------------ | ------------------------------------------------------- |
+| `info`    | `membership_benefit_eligible`  | Specific benefit confirmed applicable to this order     |
+| `warning` | `membership_benefit_ineligible`| Benefit exists but conditions not met for this order    |
+
+Building on the store loyalty card example from [Eligibility Verification at Completion](checkout.md#eligibility-verification-at-completion), and assume it offers one unconditional pricing discount on the product and one conditional discount that current checkout cart fails to satisfy. Platform can surface the first provisional discount with disclaimers like "verified at purchase" and additionally show a warning message to disclose the inapplicability of the second discount.
+
+=== "Request"
 
     ```json
     {
       "context": {
-        "eligibility": ["com.example.loyalty"]
-      }
+        "eligibility": ["com.example.store_loyalty_card"]
+      },
+      "line_items": [
+        {
+          "item": {
+            "id": "prod_1",
+            "quantity": 1,
+            "title": "T-Shirt",
+            "price": 1000
+          }
+        }
+      ]
     }
     ```
 
-=== "Response without verification"
+=== "Response"
 
     ```json
     {
+      "discounts": {
+        "applied": [
+          {
+            "title": "Loyalty benefit 1",
+            "amount": 10,
+            "provisional": true,
+            "eligibility": "com.example.store_loyalty_card",
+            "allocations": [
+              {"path": "$.line_items[0]", "amount": 10}
+            ]
+          }
+        ]
+      },
       "loyalty": {
-        "com.example.loyalty": {
+        "com.example.store_loyalty_card": {
           "id": "membership_1",
           "name": "My Loyalty Program",
           "tracks": [
@@ -238,7 +216,8 @@ If verification fails, businesses MUST communicate the failure via a recoverable
                   "id": "tier_1",
                   "name": "GOLD",
                   "benefits": [
-                    { "id": "BEN_001", "description": "Early access to sales" }
+                    { "id": "BEN_001", "description": "Early access to sales" },
+                    { "id": "BEN_002", "description": "Save $10 with $500+ purchase for members" }
                   ]
                 }
               ]
@@ -246,16 +225,59 @@ If verification fails, businesses MUST communicate the failure via a recoverable
           ],
           "provisional": true,
         }
-      }
+      },
+      "messages": [
+        {
+          "type": "warning",
+          "code": "membership_benefit_ineligible",
+          "path": "$.loyalty['com.example.loyalty'].tracks[0].tiers[0].benefits[1]",
+          "content": "Loyalty discount exists but conditions not met for this order"
+        }
+      ]
     }
     ```
 
-=== "Response with verification and valid membership"
+Buyer can proceed with checkout without any cart update and if the claim is verified successfully by the business, the unconditional member pricing discount turns non-provisional anymore.
+
+=== "Request"
 
     ```json
     {
+      "context": {
+        "eligibility": ["com.example.store_loyalty_card"]
+      },
+      "line_items": [
+        {
+          "item": {
+            "id": "prod_1",
+            "quantity": 1,
+            "title": "T-Shirt",
+            "price": 1000
+          }
+        }
+      ]
+    }
+    ```
+
+=== "Response"
+
+    ```json
+    {
+      "discounts": {
+        "applied": [
+          {
+            "title": "Loyalty benefit 1",
+            "amount": 10,
+            "provisional": false,
+            "eligibility": "com.example.store_loyalty_card",
+            "allocations": [
+              {"path": "$.line_items[0]", "amount": 10}
+            ]
+          }
+        ]
+      },
       "loyalty": {
-        "com.example.loyalty": {
+        "com.example.store_loyalty_card": {
           "id": "membership_1",
           "display_id": "****5678",
           "name": "My Loyalty Program",
@@ -281,15 +303,36 @@ If verification fails, businesses MUST communicate the failure via a recoverable
     }
     ```
 
-=== "Response with verification and invalid membership"
+If the claim can not be verified, a recoverable error is returned from business, with the optional `path` set to support back referencing to the membership metadata that corresponds to the claim in the loyalty extension.
+
+=== "Request"
+
+    ```json
+    {
+      "context": {
+        "eligibility": ["com.example.store_loyalty_card"]
+      },
+      "line_items": [
+        {
+          "item": {
+            "id": "prod_1",
+            "quantity": 1,
+            "title": "T-Shirt",
+            "price": 1000
+          }
+        }
+      ]
+    }
+    ```
+
+=== "Response"
 
     ```json
     {
       "loyalty": {
-        "com.example.loyalty": {
+        "com.example.store_loyalty_card": {
           "id": "membership_1",
-          "name": "My Loyalty Program",
-          "provisional": false,
+          "name": "My Loyalty Program"
         }
       },
       "messages": [

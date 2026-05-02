@@ -215,7 +215,7 @@
     },
     "loyalty": {
       "type": "object",
-      "description": "Key-value pair with key represents buyer/platform asserted eligibility claims and value represents associated membership information.",
+      "description": "Key-value pair with key represents buyer/platform asserted eligibility claims and value represents associated membership information. All loyalty keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.",
       "propertyNames": {
         "$ref": "types/reverse_domain_name.json",
         "description": "Reverse-domain identifier that represents eligibility claim accepted by the Business for this membership. Corresponds to a value from context.eligibility."
