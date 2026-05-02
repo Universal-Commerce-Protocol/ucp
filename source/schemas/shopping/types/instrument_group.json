@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/instrument_group.json",
+  "title": "Instrument Group",
+  "description": "A constraint within an allowed combination that defines which instrument types can fill this group and how many are permitted.",
+  "type": "object",
+  "required": ["types"],
+  "properties": {
+    "types": {
+      "type": "array",
+      "description": "Instrument types accepted by this group (OR logic). Any listed type qualifies.",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "min": {
+      "type": "integer",
+      "minimum": 0,
+      "default": 0,
+      "description": "Minimum number of instruments required from this group. Defaults to 0 (optional)."
+    },
+    "max": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 1,
+      "description": "Maximum number of instruments allowed from this group. Defaults to 1. MUST be greater than or equal to `min`."
+    }
+  },
+  "additionalProperties": false
+}
