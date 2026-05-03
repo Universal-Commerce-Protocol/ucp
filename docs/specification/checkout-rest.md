@@ -1405,8 +1405,9 @@ authentication is required, the REST transport **MAY** use:
 
 1. **Open API**: No authentication required for public operations.
 2. **API Keys**: Via `X-API-Key` header.
-3. **OAuth 2.0**: Via `Authorization: Bearer {token}` header, following
-    [RFC 6749](https://tools.ietf.org/html/rfc6749){ target="_blank" }.
+3. **OAuth 2.0**: Via `Authorization: Bearer {token}` header. Identifies the
+   platform for agent-authenticated access, or both platform and user for
+   user-authenticated access (see [Identity Linking](identity-linking.md)).
 4. **Mutual TLS**: For high-security environments.
 5. **HTTP Message Signatures**: Per [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421)
     (see [Message Signing](#message-signing) above).

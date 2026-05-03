@@ -82,13 +82,6 @@ that scope require a user identity token.
     when exchanging authorization codes for tokens.
 * **MUST** include user identity tokens in the HTTP `Authorization` header
     using the Bearer scheme: `Authorization: Bearer <access_token>`.
-* When the platform authentication mechanism uses the `Authorization` header
-    for platform credentials (e.g., OAuth 2.0 Bearer), platforms **MUST**
-    carry the user identity token in the `UCP-Identity-Token` header instead.
-    For all other UCP-supported platform authentication mechanisms — API keys,
-    mTLS, and HTTP Message Signatures — the `Authorization` header is available
-    for the user identity token and `Authorization: Bearer <user_token>` applies
-    as specified above.
 * **MUST** implement the OAuth 2.0 Authorization Code flow
     ([RFC 6749 §4.1](https://datatracker.ietf.org/doc/html/rfc6749#section-4.1){ target="_blank" })
     as the account linking mechanism.
@@ -146,8 +139,6 @@ that scope require a user identity token.
     scopes, and `client_id` / `azp` (or equivalent) to confirm the token was
     issued to the authenticated platform client
     ([RFC 9068 §4](https://datatracker.ietf.org/doc/html/rfc9068#section-4){ target="_blank" }).
-* **MUST** accept the user identity token from the `UCP-Identity-Token` header
-    when the `Authorization` header is present with platform credentials.
 * **MUST** implement token revocation
     ([RFC 7009](https://datatracker.ietf.org/doc/html/rfc7009){ target="_blank" }).
     Revoking a `refresh_token` **MUST** also immediately invalidate all
@@ -353,11 +344,9 @@ When a request arrives with a valid user identity token but the token lacks a
 scope required by the operation (or fails a scope-level policy such as
 `min_acr` or `max_token_age`), the business **MUST** return a UCP error
 response containing a message with `code: "insufficient_scope"`. The message
-`content` **MUST** identify the missing scope(s) by name so the platform can
-construct a targeted incremental authorization request. When performing a
-scope-bump, businesses **MUST** issue the new token with a scope set that is a
-superset of the user's previously granted scopes to avoid accidental scope
-regressions.
+`content` **MUST** identify all scopes required for the operation by name so
+the platform can construct a targeted authorization request for the complete
+set.
 
 The business **MAY** include a `continue_url` pointing to the authorization
 endpoint pre-populated for the missing scope(s), so the platform can redirect
