@@ -97,6 +97,10 @@ Businesses can follow standard advertisement mechanism to advertise loyalty supp
 }
 ```
 
+**Dependencies:**
+
+* Checkout Capability
+
 ## Schema
 
 ### Entities
