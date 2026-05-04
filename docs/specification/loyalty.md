@@ -125,13 +125,9 @@ Businesses can follow standard advertisement mechanism to advertise loyalty supp
 
 {{ extension_schema_fields('loyalty.json#/$defs/membership_reward', 'loyalty') }}
 
-#### Balance Currency
+#### Reward Currency
 
-{{ extension_schema_fields('loyalty.json#/$defs/balance_currency', 'loyalty') }}
-
-#### Membership Balance
-
-{{ extension_schema_fields('loyalty.json#/$defs/membership_balance', 'loyalty') }}
+{{ extension_schema_fields('loyalty.json#/$defs/reward_currency', 'loyalty') }}
 
 #### Earning Forecast
 

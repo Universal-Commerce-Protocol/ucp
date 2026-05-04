@@ -39,11 +39,6 @@
           "minimum": 0,
           "description": "Total rewards to be earned if the transaction completes."
         },
-        "projected_balance": {
-          "type": "integer",
-          "minimum": 0,
-          "description": "Projected available balance after earning and any redemption from this transaction."
-        },
         "breakdown": {
           "type": "array",
           "items": {
@@ -53,26 +48,9 @@
         }
       }
     },
-    "membership_balance": {
+    "reward_currency": {
       "type": "object",
-      "description": "The overall balance information of the membership.",
-      "required": ["available"],
-      "properties": {
-        "available": {
-          "type": "integer",
-          "minimum": 0,
-          "description": "The amount of available/usable balance."
-        },
-        "pending": {
-          "type": "integer",
-          "minimum": 0,
-          "description": "The amount of pending balance."
-        }
-      }
-    },
-    "balance_currency": {
-      "type": "object",
-      "description": "The currency of the balance.",
+      "description": "The currency of the loyalty reward.",
       "required": ["name", "code"],
       "properties": {
         "name": {
@@ -86,7 +64,7 @@
         "decimal_places": {
           "type": "integer",
           "default": 0,
-          "description": "The position of a digit to the right of a decimal point. Applies to all amount related fields for balance."
+          "description": "The position of a digit to the right of a decimal point. Applies to all amount related fields for rewards."
         }
       }
     },
@@ -97,13 +75,8 @@
       "properties": {
         "currency": {
           "type": "object",
-          "$ref": "#/$defs/balance_currency",
+          "$ref": "#/$defs/reward_currency",
           "description": "A unit of value that customers can accumulate through various commercial activities."
-        },
-        "balance": {
-          "type": "object",
-          "$ref": "#/$defs/membership_balance",
-          "description": "The balance information of the membership, in the unit of `currency`."
         },
         "earning_forecast": {
           "type": "object",
