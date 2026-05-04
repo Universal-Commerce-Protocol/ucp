@@ -495,13 +495,15 @@ platform can prefill checkout state when initiating a buy-now flow.
 
 ## Scopes
 
-When user authentication is required to interact with checkout sessions, the Checkout capability defines the following scope:
+The Checkout capability defines the following well-known scopes for
+user-authenticated access:
 
 | Scope | Description |
 | :--- | :--- |
-| `dev.ucp.shopping.checkout:manage` | Provides access to all checkout operations on behalf of the user. |
+| `dev.ucp.shopping.checkout:manage` | All checkout operations on behalf of the authenticated user — create, update, complete, and cancel checkout sessions. |
 
-Businesses declare the scopes they offer in `config.scopes` of the `dev.ucp.common.identity_linking` capability. When `dev.ucp.shopping.checkout:manage` is listed in this map, operations on the checkout capability require a user identity token (see [Identity Linking Scopes](identity-linking.md#scopes) for details).
+Scope declaration, derivation, and rules for extending this set with
+custom scopes are defined in [Identity Linking — Scopes](identity-linking.md#scopes).
 
 ## Guidelines
 

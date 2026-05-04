@@ -266,18 +266,16 @@ Examples: `refund`, `return`, `credit`, `price_adjustment`, `dispute`,
 
 ## Scopes
 
-The Order capability defines the following scopes for user-authenticated
-access to order data:
+The Order capability defines the following well-known scopes for
+user-authenticated access:
 
 | Scope | Description |
 | :--- | :--- |
-| `dev.ucp.shopping.order:read` | Read access to the user's orders (e.g., Get Order) |
-| `dev.ucp.shopping.order:manage` | Write access for post-purchase operations (e.g., cancellation, returns) on the user's orders. |
+| `dev.ucp.shopping.order:read` | Read access to the user's orders — Get Order on resources owned by the authenticated user. |
+| `dev.ucp.shopping.order:manage` | Post-purchase operations on the user's orders — cancellation, returns, and other modifications. |
 
-Businesses declare the scopes they offer in `config.scopes` of the
-`dev.ucp.common.identity_linking` capability. When these scopes are listed,
-the corresponding order operations require a user identity token (see
-[Identity Linking Scopes](identity-linking.md#scopes) for details).
+Scope declaration, derivation, and rules for extending this set with
+custom scopes are defined in [Identity Linking — Scopes](identity-linking.md#scopes).
 
 ## Operations
 
@@ -309,12 +307,13 @@ The business **MUST** authenticate requests to order data before returning a
 response, using any supported UCP mechanism - API keys, OAuth 2.0, mutual
 TLS, or HTTP Message Signatures (see
 [Identity and Authentication](checkout-rest.md#authentication)). The
-authentication method determines the scope of accessible orders:
+authentication method determines which orders are accessible to the
+caller:
 
-| Authentication | Recommended Access Scope |
+| Authentication | Accessible Orders |
 | :------------- | :----------------------- |
 | Platform credentials | Orders originated by the platform |
-| Buyer authorization | Orders originated by the buyer, subject to granted scope |
+| Buyer authorization | Orders owned by the buyer, subject to the granted OAuth scopes |
 
 **Platform credentials** (API key, signatures, OAuth client credentials) -
 businesses **MAY** allow access for orders the platform originated. The

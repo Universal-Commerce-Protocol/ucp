@@ -90,20 +90,15 @@ SHOULD be linked for the duration of the checkout.
 
 ## Scopes
 
-Cart operations are available to platforms using agent-level authentication
-without requiring user identity. When a business offers user-linked cart
-sessions — for example, persisting a cart to the user's account — the Cart
-capability defines the following scope:
+The Cart capability defines the following well-known scopes for
+user-authenticated access:
 
 | Scope | Description |
 | :--- | :--- |
-| `dev.ucp.shopping.cart:manage` | Provides access to all cart operations on behalf of the user. |
+| `dev.ucp.shopping.cart:manage` | All cart operations on behalf of the authenticated user — create, read, update, persist. |
 
-Businesses declare the scopes they offer in `config.scopes` of the
-`dev.ucp.common.identity_linking` capability. When
-`dev.ucp.shopping.cart:manage` is listed in this map, operations on the cart
-capability require a user identity token (see
-[Identity Linking Scopes](identity-linking.md#scopes) for details).
+Scope declaration, derivation, and rules for extending this set with
+custom scopes are defined in [Identity Linking — Scopes](identity-linking.md#scopes).
 
 ## Guidelines
 

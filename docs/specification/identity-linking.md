@@ -278,9 +278,11 @@ platform. Businesses declare the scopes they offer in `config.scopes` of their
 it appears on the wire (`{capability}:{scope}`, e.g.
 `dev.ucp.shopping.order:read`); each value is a per-scope policy object.
 
-Listing a scope in `config.scopes` declares that obtaining that scope requires
-user authentication. Operations not gated by any listed scope operate at
-public or agent-authenticated access.
+Listing a scope in `config.scopes` declares that the corresponding
+operations require a user identity token. Operations *not* gated by any
+listed scope operate at whatever access level the business permits — public,
+agent-authenticated, or otherwise. The business defines the access policy
+for non-scoped operations; UCP does not prescribe a default.
 
 ### Scope Token Format
 
@@ -288,7 +290,7 @@ Scope tokens follow the convention `{capability-name}:{scope-name}`:
 
 * `dev.ucp.shopping.order:read`
 * `dev.ucp.shopping.order:manage`
-* `dev.ucp.shopping.checkout:create`
+* `dev.ucp.shopping.checkout:manage`
 
 The capability name uses UCP's reverse-DNS naming. The scope name denotes
 the **permission** being granted — typically an operation group on a
@@ -298,6 +300,15 @@ defined by each capability's specification.
 Scope names **MUST** match the pattern `^[a-z][a-z0-9_]*$`. Third-party
 capabilities follow the same convention using their own reverse-DNS name:
 `com.example.loyalty:points`.
+
+Each capability's specification defines its **well-known** scopes — the
+standard set platforms expect. Businesses **MAY** declare additional
+**custom** scopes following the same convention to gate operations at
+finer granularity (for example, to gate `complete` independently from the
+well-known `dev.ucp.shopping.checkout:manage`, or to require elevated
+authentication for high-value purchases). Platforms **MUST** treat any
+scope listed in `config.scopes` — well-known or custom — as gating its
+operations behind user authentication.
 
 ### Per-Scope Policy and Metadata
 
@@ -580,7 +591,7 @@ No guest checkout — every transaction requires an authenticated user:
         "schema": "https://ucp.dev/schemas/common/identity_linking.json",
         "config": {
           "scopes": {
-            "dev.ucp.shopping.checkout:create":  {},
+            "dev.ucp.shopping.checkout:manage":  {},
             "dev.ucp.shopping.order:read":       {},
             "dev.ucp.shopping.order:manage":     {}
           }
@@ -591,11 +602,10 @@ No guest checkout — every transaction requires an authenticated user:
 }
 ```
 
-**The difference:** `dev.ucp.shopping.checkout:create` is now listed. The
-B2C example doesn't gate checkout creation; anyone can start a guest
-session. This merchant requires the user to be authenticated before
-creating a checkout. Subsequent operations on that session (update,
-complete, cancel) are session-bound and require no additional scope.
+**The difference:** `dev.ucp.shopping.checkout:manage` is now listed. The
+B2C example doesn't gate checkout; anyone can start a guest session. This
+merchant requires the user to be authenticated for all checkout
+operations — create, update, complete, and cancel.
 
 Whether the user is B2B-eligible, what pricing they see, what payment terms
 apply — those are user attributes the merchant resolves at runtime, not
