@@ -137,10 +137,15 @@ Reading each combination:
 
 ### Error Handling
 
-A split payment either completes fully or has no financial effect. If the business cannot process an instrument with a specified amount, or cannot achieve the final total after each instrument, the business MUST void or reverse all previously
-successful authorizations and return `payment_failed` in `messages[]`.
-The message `content` SHOULD identify which instruments failed (by `id`)
-and the reason.
+A split payment either completes fully or has no financial effect. If the business cannot process an instrument with a specified
+amount, or cannot achieve the final total, the business MUST return
+`payment_failed` in `messages[]` and MUST ensure all previously
+successful authorizations are voided or reversed. This is an
+eventual-consistency requirement: the reversal MAY happen asynchronously
+(e.g., to retry a failing void or work around acquirer rate limits, or to wait and see if the buyer re-submits partially captured instruments), but
+the buyer MUST NOT remain charged for an incomplete split after checkout. The message
+`content` SHOULD identify which instruments failed (by `id`) and the
+reason.
 
 Error conditions:
 
