@@ -85,15 +85,7 @@ jobs:
 
       - uses: ./.github/actions/setup-build-env
 
-      - name: Configure Site URL
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          PAGES_URL=$(gh api "repos/${{ github.repository }}/pages" --jq '.html_url' 2>/dev/null || true)
-          if [ -z "$PAGES_URL" ] || [ "$PAGES_URL" = "null" ]; then PAGES_URL="https://${{ github.repository_owner }}.github.io/${GITHUB_REPOSITORY#*/}"; fi
-          if [[ "$PAGES_URL" != */ ]]; then PAGES_URL="${PAGES_URL}/"; fi
-          echo "SITE_URL=$PAGES_URL" >> $GITHUB_ENV
-          echo "SPEC_URL=${PAGES_URL}latest/specification/overview/" >> $GITHUB_ENV
+      - uses: ./.github/actions/configure-site-url
 
       - name: Build and Verify Documentation Site (Main/PR)
         run: |
@@ -122,15 +114,7 @@ jobs:
 
       - uses: ./.github/actions/setup-build-env
 
-      - name: Configure Site URL
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          PAGES_URL=$(gh api "repos/${{ github.repository }}/pages" --jq '.html_url' 2>/dev/null || true)
-          if [ -z "$PAGES_URL" ] || [ "$PAGES_URL" = "null" ]; then PAGES_URL="https://${{ github.repository_owner }}.github.io/${GITHUB_REPOSITORY#*/}"; fi
-          if [[ "$PAGES_URL" != */ ]]; then PAGES_URL="${PAGES_URL}/"; fi
-          echo "SITE_URL=$PAGES_URL" >> $GITHUB_ENV
-          echo "SPEC_URL=${PAGES_URL}latest/specification/overview/" >> $GITHUB_ENV
+      - uses: ./.github/actions/configure-site-url
 
       - name: Build and Verify Specification Docs (Release Branches)
         run: |
@@ -159,15 +143,7 @@ jobs:
 
       - uses: ./.github/actions/setup-build-env
 
-      - name: Configure Site URL
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          PAGES_URL=$(gh api "repos/${{ github.repository }}/pages" --jq '.html_url' 2>/dev/null || true)
-          if [ -z "$PAGES_URL" ] || [ "$PAGES_URL" = "null" ]; then PAGES_URL="https://${{ github.repository_owner }}.github.io/${GITHUB_REPOSITORY#*/}"; fi
-          if [[ "$PAGES_URL" != */ ]]; then PAGES_URL="${PAGES_URL}/"; fi
-          echo "SITE_URL=$PAGES_URL" >> $GITHUB_ENV
-          echo "SPEC_URL=${PAGES_URL}latest/specification/overview/" >> $GITHUB_ENV
+      - uses: ./.github/actions/configure-site-url
 
       - name: Deploy development version from main branch
         run: |
@@ -220,15 +196,7 @@ jobs:
 
       - uses: ./.github/actions/setup-build-env
 
-      - name: Configure Site URL
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          PAGES_URL=$(gh api "repos/${{ github.repository }}/pages" --jq '.html_url' 2>/dev/null || true)
-          if [ -z "$PAGES_URL" ] || [ "$PAGES_URL" = "null" ]; then PAGES_URL="https://${{ github.repository_owner }}.github.io/${GITHUB_REPOSITORY#*/}"; fi
-          if [[ "$PAGES_URL" != */ ]]; then PAGES_URL="${PAGES_URL}/"; fi
-          echo "SITE_URL=$PAGES_URL" >> $GITHUB_ENV
-          echo "SPEC_URL=${PAGES_URL}latest/specification/overview/" >> $GITHUB_ENV
+      - uses: ./.github/actions/configure-site-url
 
       - name: Deploy release version
         run: |
