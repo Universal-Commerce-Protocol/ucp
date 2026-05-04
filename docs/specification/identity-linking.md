@@ -75,11 +75,29 @@ that scope require a user identity token.
 
 ### For Platforms
 
-* **MUST** authenticate using `client_id` and `client_secret`
-    ([RFC 6749 §2.3.1](https://datatracker.ietf.org/doc/html/rfc6749#section-2.3.1){ target="_blank" })
-    via HTTP Basic Authentication
-    ([RFC 7617](https://datatracker.ietf.org/doc/html/rfc7617){ target="_blank" })
-    when exchanging authorization codes for tokens.
+* **MUST** authenticate token endpoint requests using a method advertised in
+    the business's `token_endpoint_auth_methods_supported` metadata
+    ([RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414){ target="_blank" }):
+    * **Confidential clients** (server-side platforms that can protect a
+        credential) **SHOULD** prefer asymmetric methods —
+        `private_key_jwt`
+        ([RFC 7523 §2.2](https://datatracker.ietf.org/doc/html/rfc7523#section-2.2){ target="_blank" })
+        or `tls_client_auth`
+        ([RFC 8705](https://datatracker.ietf.org/doc/html/rfc8705){ target="_blank" })
+        — and **MAY** use `client_secret_basic`
+        ([RFC 6749 §2.3.1](https://datatracker.ietf.org/doc/html/rfc6749#section-2.3.1){ target="_blank" },
+        [RFC 7617](https://datatracker.ietf.org/doc/html/rfc7617){ target="_blank" })
+        where the business supports it.
+    * **Public clients** (native, desktop, browser-extension, and on-device
+        agent runtimes per
+        [RFC 8252 §8.5](https://datatracker.ietf.org/doc/html/rfc8252#section-8.5){ target="_blank" })
+        **MUST** use `none` and rely on PKCE with `S256`
+        ([RFC 7636](https://datatracker.ietf.org/doc/html/rfc7636){ target="_blank" })
+        as proof-of-possession of the authorization code. Public clients
+        **MUST NOT** embed a `client_secret`.
+
+    Platforms **MUST** select the strongest method offered by the business
+    that is compatible with the platform's deployment model.
 * **MUST** include user identity tokens in the HTTP `Authorization` header
     using the Bearer scheme: `Authorization: Bearer <access_token>`.
 * **MUST** implement the OAuth 2.0 Authorization Code flow
@@ -133,7 +151,18 @@ that scope require a user identity token.
     native and desktop clients that obtain an ephemeral port from the OS at
     runtime
     ([RFC 8252 §7.3](https://datatracker.ietf.org/doc/html/rfc8252#section-7.3){ target="_blank" }).
-* **MUST** enforce client authentication at the token endpoint.
+* **MUST** declare supported client authentication methods in
+    `token_endpoint_auth_methods_supported`
+    ([RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414){ target="_blank" }) and enforce one of the declared methods at the token endpoint.
+    Businesses **SHOULD** support at least one asymmetric confidential-client
+    method (`private_key_jwt` or `tls_client_auth`) and **MAY** support `none`
+    for public clients per
+    [RFC 8252](https://datatracker.ietf.org/doc/html/rfc8252){ target="_blank" }.
+    When `none` is advertised, businesses **MUST** require PKCE with `S256` and
+    **MUST** reject any authorization code redemption that lacks a valid
+    `code_verifier`. Requests that fail the negotiated authentication method
+    **MUST** be rejected with `invalid_client`; requests that fail PKCE
+    **MUST** be rejected with `invalid_grant`.
 * **MUST** validate user identity tokens on every user-authenticated request:
     verify `iss`, `aud` (the business's resource server identifier), `exp`,
     scopes, and `client_id` / `azp` (or equivalent) to confirm the token was
@@ -218,7 +247,8 @@ Platform                              Business AS
    |       grant_type=authorization_code   |
    |       code, redirect_uri              |
    |       code_verifier                   |
-   |       client_id (Basic Auth)          |
+   |       client auth (per advertised     |
+   |       token_endpoint_auth_method)     |
    |                                       |
    |<-- (5) Token Response ----------------|
    |       access_token, refresh_token     |
@@ -377,6 +407,19 @@ the user directly to re-consent.
 * **PKCE.** PKCE (`S256`) is REQUIRED for all authorization code flows.
   Plain PKCE (`plain`) **MUST NOT** be used. Businesses **MUST** reject
   authorization code exchanges without a valid `code_verifier`.
+* **Client authentication.** Businesses negotiate client authentication via
+  `token_endpoint_auth_methods_supported`
+  ([RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414){ target="_blank" }).
+  Confidential clients **SHOULD** prefer asymmetric methods
+  (`private_key_jwt`, `tls_client_auth`) over `client_secret_basic` to
+  eliminate shared-secret leak risk. Public clients (native, desktop, and
+  on-device agents per
+  [RFC 8252 §8.5](https://datatracker.ietf.org/doc/html/rfc8252#section-8.5){ target="_blank" })
+  cannot keep a `client_secret` confidential and **MUST** use `none`; for
+  these clients PKCE with `S256` is the proof-of-possession that
+  authenticates the authorization grant. Businesses **MUST NOT** require
+  `client_secret_basic` as the only method when serving native or agent
+  platforms.
 * **Mix-Up Attack prevention.** Platforms **MUST** validate the `iss`
   parameter in the authorization response
   ([RFC 9207](https://datatracker.ietf.org/doc/html/rfc9207){ target="_blank" }).
@@ -460,7 +503,12 @@ Example metadata hosted at `/.well-known/oauth-authorization-server` per
   "response_types_supported": ["code"],
   "grant_types_supported": ["authorization_code", "refresh_token"],
   "code_challenge_methods_supported": ["S256"],
-  "token_endpoint_auth_methods_supported": ["client_secret_basic"],
+  "token_endpoint_auth_methods_supported": [
+    "private_key_jwt",
+    "tls_client_auth",
+    "client_secret_basic",
+    "none"
+  ],
   "authorization_response_iss_parameter_supported": true,
   "service_documentation": "https://merchant.example.com/docs/oauth2"
 }
@@ -469,6 +517,15 @@ Example metadata hosted at `/.well-known/oauth-authorization-server` per
 Note: `authorization_response_iss_parameter_supported: true` advertises
 [RFC 9207](https://datatracker.ietf.org/doc/html/rfc9207){ target="_blank" } support. `code_challenge_methods_supported: ["S256"]` signals PKCE.
 Both **MUST** be present in UCP-compliant metadata.
+
+`token_endpoint_auth_methods_supported` lists every method the business
+accepts. The example advertises asymmetric methods (`private_key_jwt`,
+`tls_client_auth`) for confidential clients, `client_secret_basic` for
+legacy compatibility, and `none` for public clients (native, desktop, and
+on-device agents per
+[RFC 8252](https://datatracker.ietf.org/doc/html/rfc8252){ target="_blank" });
+when `none` is advertised, PKCE with `S256` is required. Businesses that
+do not serve public clients **MAY** omit `none`.
 
 ### Business Profile (`/.well-known/ucp`)
 
