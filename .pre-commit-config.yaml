@@ -8,7 +8,7 @@ repos:
         entry: '(?i)(pkgs\.shopify\.io|us-npm\.pkg\.dev)'
         language: pygrep
         files: ^uv\.lock$
-        description: Avoid corporate URLs (PR #108, #368). Fix: 'uv lock --refresh'.
+        description: "Avoid corporate URLs (PR #108, #368). Fix: 'uv lock --refresh'."
   - repo: https://github.com/streetsidesoftware/cspell-cli
     rev: v9.3.3
     hooks:
