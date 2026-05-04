@@ -212,7 +212,7 @@ signal of what the merchant requires — no guesswork, no retry loops.
 |---------------------------------|---------|----------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `brands`                        | array   | -        | Limit to specific card brands (e.g. `["visa", "mastercard"]`).                                                                                                         |
 | `requires_card_verification`    | boolean | `false`  | When `true`, the handler requires card verification data appropriate to the credential type (e.g., CVC for FPAN).                                                      |
-| `requires_billing_address_data` | string  | `"none"` | Level of billing address data required. `full_address`: complete billing address. `postal_code`: postal code only (e.g. for AVS). `none`: no billing address required. |
+| `billing_address_granularity`   | string  | `"none"` | Level of billing address required. `full_address` — complete billing address; `postal_code` — postal code only (e.g., for AVS); `none` — not required. |
 
 **Example — merchant requires card verification and billing address:**
 
@@ -224,7 +224,7 @@ signal of what the merchant requires — no guesswork, no retry loops.
       "constraints": {
         "brands": ["visa", "mastercard"],
         "requires_card_verification": true,
-        "requires_billing_address_data": "full_address"
+        "billing_address_granularity": "full_address"
       }
     }
   ]
@@ -323,7 +323,7 @@ and typically includes different configuration:
       "constraints": {
         "brands": ["visa", "mastercard"],
         "requires_card_verification": true,
-        "requires_billing_address_data": "full_address"
+        "billing_address_granularity": "full_address"
       }
     }
   ],
@@ -575,7 +575,7 @@ defines `available_card_payment_instrument` with card-specific constraints.
 | Schema                                                                                                 | Constraints                                                                                           |
 | :----------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------- |
 | [`available_payment_instrument.json`](site:schemas/shopping/types/available_payment_instrument.json)   | Base: type, constraints (open object)                                                                 |
-| `card_payment_instrument.json#/$defs/available_card_payment_instrument`                                | Extends base with `constraints.brands`, `requires_card_verification`, `requires_billing_address_data` |
+| `card_payment_instrument.json#/$defs/available_card_payment_instrument`                                | Extends base with `constraints.brands`, `requires_card_verification`, `billing_address_granularity` |
 
 Handlers reference these instrument-defined schemas when declaring
 `available_instruments`. The **instrument schema authors** define what
