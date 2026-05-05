@@ -303,7 +303,7 @@ Buyer can proceed with checkout without any cart update and if the claim is veri
     }
     ```
 
-If the claim can not be verified, a recoverable error is returned from business, with the optional `path` set to support back referencing to the membership metadata that corresponds to the claim in the loyalty extension.
+If the claim can not be verified, a recoverable error should be returned from business via `messages[]`. Businesses MAY set the optional `path` field within to support back referencing to the membership metadata that corresponds to the claim. In this case, the loyalty extension needs to be included in the response as well.
 
 === "Request"
 
@@ -329,18 +329,11 @@ If the claim can not be verified, a recoverable error is returned from business,
 
     ```json
     {
-      "loyalty": {
-        "com.example.store_loyalty_card": {
-          "id": "membership_1",
-          "name": "My Loyalty Program"
-        }
-      },
       "messages": [
         {
           "type": "error",
           "severity": "recoverable",
           "code": "eligibility_invalid",
-          "path": "$.loyalty['com.example.loyalty']",
           "content": "Buyer is not a valid loyalty member"
         }
       ]
