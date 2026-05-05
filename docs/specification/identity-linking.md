@@ -99,7 +99,16 @@ that scope require a user identity token.
     Platforms **MUST** select the strongest method offered by the business
     that is compatible with the platform's deployment model.
 * **MUST** include user identity tokens in the HTTP `Authorization` header
-    using the Bearer scheme: `Authorization: Bearer <access_token>`.
+    using the Bearer scheme: `Authorization: Bearer <access_token>`
+    ([RFC 6750 §2.1](https://datatracker.ietf.org/doc/html/rfc6750#section-2.1){ target="_blank" }).
+* **MUST** process `WWW-Authenticate: Bearer` challenges per
+    [RFC 6750 §3](https://datatracker.ietf.org/doc/html/rfc6750#section-3){ target="_blank" }
+    on `401` and `403` responses to user-authenticated operations.
+    Platforms **MUST** extract the `scope` parameter (when present) to
+    construct subsequent authorization requests, and **SHOULD** follow
+    the `resource_metadata` pointer
+    ([RFC 9728](https://datatracker.ietf.org/doc/html/rfc9728){ target="_blank" })
+    when present to discover the protecting authorization server.
 * **MUST** implement the OAuth 2.0 Authorization Code flow
     ([RFC 6749 §4.1](https://datatracker.ietf.org/doc/html/rfc6749#section-4.1){ target="_blank" })
     as the account linking mechanism.
@@ -168,6 +177,12 @@ that scope require a user identity token.
     scopes, and `client_id` / `azp` (or equivalent) to confirm the token was
     issued to the authenticated platform client
     ([RFC 9068 §4](https://datatracker.ietf.org/doc/html/rfc9068#section-4){ target="_blank" }).
+* **MUST** emit a `WWW-Authenticate: Bearer` challenge per
+    [RFC 6750 §3](https://datatracker.ietf.org/doc/html/rfc6750#section-3){ target="_blank" }
+    on `401 Unauthorized` (`identity_required`) and `403 Forbidden`
+    (`insufficient_scope`) responses to user-authenticated operations.
+    See [Error Handling](#error-handling) for the full normative
+    requirements.
 * **MUST** implement token revocation
     ([RFC 7009](https://datatracker.ietf.org/doc/html/rfc7009){ target="_blank" }).
     Revoking a `refresh_token` **MUST** also immediately invalidate all
@@ -180,10 +195,14 @@ that scope require a user identity token.
     flow.
 * **MUST** support standard UCP scopes as defined in the
     [Scopes](#scopes) section.
-* **SHOULD** implement
-    [RFC 9728](https://datatracker.ietf.org/doc/html/rfc9728/){ target="_blank" }
-    (HTTP Resource Metadata) to allow platforms to discover the authorization
-    server associated with specific resources.
+* **SHOULD** publish protected resource metadata at
+    `/.well-known/oauth-protected-resource`
+    ([RFC 9728](https://datatracker.ietf.org/doc/html/rfc9728){ target="_blank" })
+    and reference it via the `resource_metadata` parameter in
+    `WWW-Authenticate` challenges. This lets platforms discover the
+    authorization server protecting the resource without relying on
+    domain conventions and prepares the deployment for future delegated
+    IdP scenarios where the AS may not live on the business domain.
 * **SHOULD** support
     [OpenID RISC Profile 1.0](https://openid.net/specs/openid-risc-1_0-final.html){ target="_blank" }
     to signal revocation and account state changes to platforms.
@@ -373,16 +392,44 @@ intelligibly rather than listing individual operations: for example, "Allow
 ### `identity_required`
 
 When an operation is gated by a scope listed in `config.scopes` and the
-request arrives with an absent, expired, invalid, or unverifiable user identity
-token, the business **MUST** return a UCP error response containing a message
-with `code: "identity_required"`.
+request arrives with an absent, expired, invalid, or unverifiable user
+identity token, the business **MUST** return:
 
-The business **MAY** include a `continue_url` in the response body, pointing to
-a URL where the user can complete account creation or onboarding (e.g., terms
-acceptance). After the user completes the onboarding flow, the platform retries
-account linking.
+* HTTP `401 Unauthorized`
+* A `WWW-Authenticate: Bearer` challenge header per
+    [RFC 6750 §3](https://datatracker.ietf.org/doc/html/rfc6750#section-3){ target="_blank" }
+* A UCP error response body containing a message with
+    `code: "identity_required"`
 
-```json
+The `WWW-Authenticate` header **MUST** include a `realm` parameter set to
+the business's issuer URI as declared in
+[RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414){ target="_blank" }
+metadata. When the request included a token but it was invalid, expired, or
+unverifiable, the header **MUST** also include `error="invalid_token"` and
+**MAY** include `error_description` per RFC 6750 §3. When no token was
+presented, the `error` parameter **SHOULD** be omitted (RFC 6750 §3.1).
+
+The header **SHOULD** include a `resource_metadata` parameter
+([RFC 9728 §5.1](https://datatracker.ietf.org/doc/html/rfc9728#section-5.1){ target="_blank" })
+pointing to the protected resource metadata document
+(`/.well-known/oauth-protected-resource`).
+
+The business **MAY** include a `continue_url` in the response body for
+**non-OAuth onboarding flows** (e.g., account creation, terms acceptance)
+where the user must complete a hosted step before re-authenticating.
+`continue_url` **MUST NOT** be used to convey a pre-baked OAuth
+authorization request; the platform constructs its own authorization
+request from the `WWW-Authenticate` challenge and discovered metadata,
+including PKCE values, `state`, and `redirect_uri` it owns.
+
+```http
+HTTP/1.1 401 Unauthorized
+WWW-Authenticate: Bearer realm="https://merchant.example.com",
+                  error="invalid_token",
+                  error_description="The access token expired",
+                  resource_metadata="https://merchant.example.com/.well-known/oauth-protected-resource"
+Content-Type: application/json
+
 {
   "messages": [
     {
@@ -391,26 +438,45 @@ account linking.
       "content": "User identity is required to access order history.",
       "severity": "requires_buyer_review"
     }
-  ],
-  "continue_url": "https://merchant.example.com/onboarding?return_to=..."
+  ]
 }
 ```
 
 ### `insufficient_scope`
 
-When a request arrives with a valid user identity token but the token lacks a
-scope required by the operation (or fails a scope-level policy such as
-`min_acr` or `max_token_age`), the business **MUST** return a UCP error
-response containing a message with `code: "insufficient_scope"`. The message
-`content` **MUST** identify all scopes required for the operation by name so
-the platform can construct a targeted authorization request for the complete
-set.
+When a request arrives with a valid user identity token but the token
+lacks a scope required by the operation (or fails a scope-level policy
+such as `min_acr` or `max_token_age`), the business **MUST** return:
 
-The business **MAY** include a `continue_url` pointing to the authorization
-endpoint pre-populated with the full required scope set for the operation,
-so the platform can redirect the user directly to re-consent.
+* HTTP `403 Forbidden`
+* A `WWW-Authenticate: Bearer` challenge header per RFC 6750 §3
+* A UCP error response body containing a message with
+    `code: "insufficient_scope"`
 
-```json
+The `WWW-Authenticate` header **MUST** include:
+
+* `realm="<business issuer URI>"`
+* `error="insufficient_scope"`
+* `scope="<space-separated full required scope set for the operation>"`
+
+and **SHOULD** include a `resource_metadata` parameter pointing to the
+protected resource metadata document (RFC 9728).
+
+The `scope` parameter **MUST** list the **full** set of scopes required
+for the operation, not just the missing ones. The platform compares the
+full set against scopes already granted on its current token and uses
+incremental authorization to request only the scopes it does not yet
+have, avoiding redundant consent prompts for scopes the user has already
+approved.
+
+```http
+HTTP/1.1 403 Forbidden
+WWW-Authenticate: Bearer realm="https://merchant.example.com",
+                  error="insufficient_scope",
+                  scope="dev.ucp.shopping.order:read dev.ucp.shopping.order:manage",
+                  resource_metadata="https://merchant.example.com/.well-known/oauth-protected-resource"
+Content-Type: application/json
+
 {
   "messages": [
     {
@@ -419,15 +485,9 @@ so the platform can redirect the user directly to re-consent.
       "content": "This operation requires scopes: dev.ucp.shopping.order:read, dev.ucp.shopping.order:manage",
       "severity": "requires_buyer_review"
     }
-  ],
-  "continue_url": "https://merchant.example.com/auth?scope=dev.ucp.shopping.order%3Aread+dev.ucp.shopping.order%3Amanage&..."
+  ]
 }
 ```
-
-The platform compares the full required set against scopes already
-granted on its current token and uses incremental authorization to
-request only the scopes it does not yet have, avoiding redundant consent
-prompts for scopes the user has already approved.
 
 > **Note:** `identity_required` and `insufficient_scope` are intentionally
 > distinct. Platforms **MUST NOT** retry an `insufficient_scope` response by
@@ -497,6 +557,15 @@ explain scope choices during the OAuth consent flow.
   return `iss` in every authorization response. Without `iss` validation,
   an attacker that controls one authorization server can redirect a
   victim's authorization code to a different server.
+* **Authentication challenges.** Businesses **MUST** emit
+  `WWW-Authenticate: Bearer` challenges per
+  [RFC 6750 §3](https://datatracker.ietf.org/doc/html/rfc6750#section-3){ target="_blank" }
+  on `401` and `403` responses to user-authenticated operations. Platforms
+  **MUST** process the structured `scope` and `error` parameters to drive
+  authorization flow decisions; `error_description` is a human-readable
+  hint only and **MUST NOT** be used for control-flow decisions. The
+  `realm` parameter **MUST** match the business's issuer URI so platforms
+  can correlate the challenge with the correct authorization server.
 * **`redirect_uri` exactness.** Businesses **MUST** enforce exact string
   matching for `redirect_uri`. Partial-match or prefix-match implementations
   are a common source of open redirect and token theft vulnerabilities.
