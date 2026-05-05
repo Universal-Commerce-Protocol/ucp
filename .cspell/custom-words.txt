@@ -114,3 +114,5 @@ sandboxing
 fbclid
 gclid
 ttclid
+TCPA
+whatsapp
