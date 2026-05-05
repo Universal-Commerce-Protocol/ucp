@@ -312,15 +312,18 @@ def define_env(env):
       ref_path, fragment = ref_string.split("#/$defs/", 1)
 
     # Redirect all types/ references to the reference specification
-    if ref_string.startswith("types/"):
+    if "types/" in ref_string:
       spec_file_name = "reference"
 
     # Redirect sibling refs that are types (e.g. "item.json" in
     # types/order_line_item.json)
     elif "/" not in ref_string and ref_string.endswith(".json"):
       type_path = Path("source/schemas/shopping/types") / ref_string
+      common_type_path = Path("source/schemas/common/types") / ref_string
       shopping_path = Path("source/schemas/shopping") / ref_string
-      if type_path.exists() and not shopping_path.exists():
+      if (
+        type_path.exists() or common_type_path.exists()
+      ) and not shopping_path.exists():
         spec_file_name = "reference"
 
     filename = Path(ref_path).name
@@ -926,36 +929,43 @@ def define_env(env):
   ):
     """Scan a dir for JSON schemas and generate documentation.
 
-    Scan a subdirectory within source/schemas/shopping/ for .json files
-    and generate documentation for each schema found.
+    Scan a subdirectory within source/schemas/shopping/ and
+    source/schemas/common/ for .json files and generate documentation for each
+    schema found.
 
     Args:
     ----
-      sub_dir: The subdirectory to scan, relative to source/schemas/shopping/.
+      sub_dir: The subdirectory to scan, relative to base schema directories.
       spec_file_name: The name of the spec file for link generation.
       include_extensions: If true, includes schemas with 'Extension' in title.
       include_capability: If true, includes schemas without 'Extension' in
         title.
 
     """
-    schema_base_path = SHOPPING_SCHEMAS_DIR
-    scan_path = (
-      schema_base_path / sub_dir if sub_dir != "." else schema_base_path
-    )
+    base_dirs = [SHOPPING_SCHEMAS_DIR, COMMON_SCHEMAS_DIR]
+    scan_paths = [
+      base / sub_dir if sub_dir != "." else base for base in base_dirs
+    ]
 
-    if not scan_path.is_dir():
-      return f"<p><em>Schema directory not found: {scan_path}</em></p>"
+    valid_paths = [path for path in scan_paths if path.is_dir()]
 
-    output = []
-    try:
-      schema_files = sorted(
-        [f for f in scan_path.iterdir() if f.suffix == ".json"]
+    if not valid_paths:
+      return (
+        f"<p><em>Schema directory '{sub_dir}' not found "
+        "in shopping or common paths.</em></p>"
       )
-    except FileNotFoundError:
-      return f"<p><em>Schema directory not found: {scan_path}</em></p>"
+
+    schema_files = []
+    for path in valid_paths:
+      schema_files.extend([f for f in path.iterdir() if f.suffix == ".json"])
 
     if not schema_files:
-      return f"<p><em>No schema files found in {scan_path}</em></p>"
+      paths_str = ", ".join([str(p) for p in valid_paths])
+      return f"<p><em>No schema files found in {paths_str}</em></p>"
+
+    schema_files = sorted(schema_files, key=lambda f: f.name)
+
+    output = []
 
     for schema_file in schema_files:
       entity_name_base = schema_file.stem
