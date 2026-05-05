@@ -43,6 +43,14 @@ within the UCP.
 
 {{ schema_fields('types/error_code', 'reference') }}
 
+### Warning Code {: #warning-code }
+
+{{ schema_fields('types/warning_code', 'reference') }}
+
+### Info Code {: #info-code }
+
+{{ schema_fields('types/info_code', 'reference') }}
+
 ## Extension Schemas
 
 {{ auto_generate_schema_reference('.', 'reference', include_capability=False) }}
