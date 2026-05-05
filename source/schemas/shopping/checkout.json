@@ -58,6 +58,10 @@
       "$ref": "types/signals.json",
       "ucp_request": "optional"
     },
+    "attribution": {
+      "$ref": "types/attribution.json",
+      "ucp_request": "optional"
+    },
     "status": {
       "type": "string",
       "enum": [

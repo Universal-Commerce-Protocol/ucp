@@ -89,6 +89,15 @@ and abuse prevention. Signal values MUST NOT be buyer-asserted claims. See
 
 {{ schema_fields('types/signals', 'catalog') }}
 
+### Attribution
+
+Platform-provided referral and conversion-event context — campaign IDs,
+click identifiers, and source/medium markers communicated by the platform.
+See [Attribution](../overview.md#attribution) for details and consent
+requirements.
+
+{{ schema_fields('types/attribution', 'catalog') }}
+
 ### Product
 
 A catalog item representing a sellable item with one or more purchasable variants.
