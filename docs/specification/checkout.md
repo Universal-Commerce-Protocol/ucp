@@ -493,6 +493,59 @@ platform can prefill checkout state when initiating a buy-now flow.
 > [REST transport binding](checkout-rest.md). Accessing a permalink returns a
 > redirect to the checkout UI or renders the checkout page directly.
 
+## Return URL
+
+The `return_url` field is the counterpart to `continue_url`. Where `continue_url`
+is provided by the business to hand off the buyer to a hosted UI, `return_url` is
+provided by the platform to receive the buyer back after the hosted experience ends.
+
+This mechanism applies to both checkout session handoff and payment handler redirect
+flows (e.g. hosted payment pages, bank redirects).
+
+### Availability
+
+Platforms **MAY** provide `return_url` in `create_checkout` or `update_checkout`
+requests. Businesses and payment handlers **SHOULD** redirect the buyer to
+`return_url` when the hosted UI exits for any reason.
+
+### Status Hint
+
+The redirecting party **MUST** append a `status` query parameter to `return_url`
+when redirecting:
+
+| `status` | Meaning |
+|---|---|
+| `completed` | The hosted flow completed successfully |
+| `canceled` | The hosted flow did not complete — covers buyer cancellation, unresolvable escalation, timeout, or any other non-completion exit |
+
+Example redirect:
+
+```text
+https://platform.example.com/return?status=completed
+https://platform.example.com/return?status=canceled
+```
+
+> **Note:** Platforms **SHOULD** treat `status` as a routing hint only.
+> Actual session state **MUST** be verified by fetching the checkout or payment
+> handler session — `status` is not authoritative.
+
+### Format
+
+The `return_url` **MUST** be an absolute HTTPS URL. If the URL already contains
+query parameters, the redirecting party **MUST** append `status` as an
+additional parameter.
+
+### Security
+
+Redirecting to a caller-supplied URL is an open redirect risk. Businesses and
+payment handlers **SHOULD** validate `return_url` against known URLs or origins
+for the platform before redirecting a buyer to it.
+
+> **Note:** The authenticated API relationship between platform and business
+> provides accountability, but businesses should be aware that blindly
+> redirecting buyers to any caller-supplied URL may expose them to open redirect
+> attacks.
+
 ## Guidelines
 
 (In addition to the overarching guidelines)

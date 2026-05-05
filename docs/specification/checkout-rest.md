@@ -70,7 +70,8 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
           },
           "quantity": 2
         }
-      ]
+      ],
+      "return_url": "https://platform.example.com/checkout/return"
     }
     ```
 
@@ -187,6 +188,25 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
       "continue_url": "https://merchant.com/"
     }
     ```
+
+#### Handoff and Return Flow
+
+When a business responds with `continue_url`, the platform directs the buyer to
+that URL to complete the hosted checkout UI. If the platform provided a
+`return_url` in the request, the business **SHOULD** redirect the buyer back
+when the hosted UI exits:
+
+```text
+# Buyer completes hosted checkout
+GET https://platform.example.com/checkout/return?status=completed
+
+# Buyer cancels or checkout cannot complete
+GET https://platform.example.com/checkout/return?status=canceled
+```
+
+Platforms **SHOULD** verify actual checkout session state via `GET
+/checkout-sessions/{id}` after receiving the buyer back — `status` is a routing
+hint only.
 
 ### Update Checkout
 

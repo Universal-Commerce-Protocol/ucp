@@ -181,6 +181,7 @@ Maps to the [Create Checkout](checkout.md#create-checkout) operation.
               }
             ],
             "currency": "USD",
+            "return_url": "https://platform.example.com/checkout/return",
             "fulfillment": {
               "methods": [
                 {
@@ -587,6 +588,24 @@ Maps to the [Update Checkout](checkout.md#update-checkout) operation.
       }
     }
     ```
+
+#### Handoff and Return Flow
+
+When a business responds with `continue_url`, the platform directs the buyer to
+that URL to complete the hosted checkout UI. If the platform provided a
+`return_url` in the `create_checkout` request, the business **SHOULD** redirect
+the buyer back to the platform when the hosted UI exits:
+
+```text
+# Buyer completes hosted checkout
+GET https://platform.example.com/checkout/return?status=completed
+
+# Buyer cancels or checkout cannot complete
+GET https://platform.example.com/checkout/return?status=canceled
+```
+
+Platforms **SHOULD** verify the actual checkout session state via `get_checkout`
+after receiving the buyer back — `status` is a routing hint only.
 
 ### `complete_checkout`
 
