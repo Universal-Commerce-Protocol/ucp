@@ -367,6 +367,19 @@ typos in core metadata like the `ucp` block).
 }
 ```
 
+### Property-Count Constraints (`minProperties` / `maxProperties`)
+
+By default, UCP schemas do not set `minProperties` or `maxProperties` on
+object fields:
+
+- **`maxProperties`** — Limits are deferred to implementers. The protocol
+  does not define caps because any specific limit requires judgment calls
+  that inevitably run into exceptions. Implementers are encouraged to
+  impose their own constraints and surface clear error feedback to support
+  debugging and good behavior.
+- **`minProperties`** — Empty objects (`{}`) are well-formed and harmless.
+  Implementers should accept and process them as a no-op.
+
 ## Complete Example: Capability Schema
 
 A capability schema defines both payload structure and declaration variants:
