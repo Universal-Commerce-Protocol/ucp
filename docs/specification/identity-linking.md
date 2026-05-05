@@ -315,9 +315,26 @@ operations behind user authentication.
 Each scope's value is an open object that carries per-scope policy and
 metadata. Empty `{}` means "user auth required, nothing else." Possible
 fields include authentication constraints (`min_acr`, `max_token_age`,
-`require_mfa`), declarative metadata (`claims` produced when granted,
-human-readable consent descriptions), or other scope-specific configuration.
-Platforms **MUST** ignore unrecognized fields.
+`require_mfa`), declarative metadata (`claims` produced when granted),
+or other scope-specific configuration. Platforms **MUST** ignore
+unrecognized fields.
+
+#### `description`
+
+Optional human-readable description of the scope that platforms can use
+to present and explain context (requirement and value) to the user.
+
+```json
+"dev.ucp.shopping.order:manage": {
+  "description": {
+    "plain": "Manage your orders: cancel, return, or modify post-purchase.",
+    "markdown": "**Manage your orders**: cancel, return, or modify post-purchase."
+  }
+}
+```
+
+Businesses **SHOULD** provide a description for each scope they declare.
+Platforms **MAY** display the text to inform their own consent UX.
 
 ### Scope Derivation
 
@@ -390,8 +407,8 @@ the platform can construct a targeted authorization request for the complete
 set.
 
 The business **MAY** include a `continue_url` pointing to the authorization
-endpoint pre-populated for the missing scope(s), so the platform can redirect
-the user directly to re-consent.
+endpoint pre-populated with the full required scope set for the operation,
+so the platform can redirect the user directly to re-consent.
 
 ```json
 {
@@ -399,19 +416,61 @@ the user directly to re-consent.
     {
       "type": "error",
       "code": "insufficient_scope",
-      "content": "Token is missing required scope: dev.ucp.shopping.order:manage",
+      "content": "This operation requires scopes: dev.ucp.shopping.order:read, dev.ucp.shopping.order:manage",
       "severity": "requires_buyer_review"
     }
   ],
-  "continue_url": "https://merchant.example.com/auth?scope=dev.ucp.shopping.order%3Amanage&..."
+  "continue_url": "https://merchant.example.com/auth?scope=dev.ucp.shopping.order%3Aread+dev.ucp.shopping.order%3Amanage&..."
 }
 ```
+
+The platform compares the full required set against scopes already
+granted on its current token and uses incremental authorization to
+request only the scopes it does not yet have, avoiding redundant consent
+prompts for scopes the user has already approved.
 
 > **Note:** `identity_required` and `insufficient_scope` are intentionally
 > distinct. Platforms **MUST NOT** retry an `insufficient_scope` response by
 > re-initiating a fresh account linking flow — they **MUST** instead request
 > only the missing scope(s) via incremental authorization to preserve
 > previously granted scopes.
+
+## Optional Authentication
+
+A mechanism for the platform to inform the buyer about the benefit of
+authenticating, when an operation has succeeded without it.
+
+### `identity_optional`
+
+Businesses **MAY** include this info-severity code in successful
+responses when authentication is available and would meaningfully
+unlock additional capabilities in the current context.
+
+The message functions as a contextual signal; per-scope semantics (what
+each scope unlocks, the consent text to present) are conveyed
+independently via the `description` field on scope declarations. These
+two mechanisms are distinct:
+
+* `identity_optional` is a **runtime, per-request notice**.
+* Per-scope `description` is **static, per-scope context** for the
+  OAuth consent flow.
+
+When emitting `identity_optional`, businesses **SHOULD** populate
+descriptions on the relevant scopes so platforms can present and
+explain scope choices during the OAuth consent flow.
+
+```json
+{
+  ...,
+  "messages": [
+    {
+      "type": "info",
+      "code": "identity_optional",
+      "content": "Sign in for member pricing and personalized results."
+    }
+  ]
+}
+```
 
 ## Security Considerations
 

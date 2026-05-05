@@ -19,7 +19,13 @@
     },
     "code": {
       "type": "string",
-      "description": "Info code for programmatic handling."
+      "description": "Info code for programmatic handling (e.g., identity_optional, signal, free_shipping, not_found). Each capability spec defines its own well-known info codes.",
+      "examples": [
+        "identity_optional",
+        "signal",
+        "free_shipping",
+        "not_found"
+      ]
     },
     "content_type": {
       "type": "string",
