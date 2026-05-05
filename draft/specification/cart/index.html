@@ -1250,6 +1250,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#attribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Attribution
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#total" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2632,6 +2643,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#attribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Attribution
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#total" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2896,6 +2918,12 @@ SHOULD be linked for the duration of the checkout.</p>
 <td style="text-align: left;"><a href="/draft/specification/reference/#signals">Signals</a></td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
+</tr>
+<tr>
+<td style="text-align: left;">attribution</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#attribution">Attribution</a></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.</td>
 </tr>
 <tr>
 <td style="text-align: left;">buyer</td>
@@ -3332,6 +3360,12 @@ requirements.</p>
 </tr>
 </tbody>
 </table>
+<h3 id="attribution">Attribution<a class="headerlink" href="#attribution" title="Permanent link">&para;</a></h3>
+<p>Platform-provided referral and conversion-event context — campaign IDs,
+click identifiers, and source/medium markers communicated by the platform.
+See <a href="../overview/#attribution">Attribution</a> for details and consent
+requirements.</p>
+<p>Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.</p>
 <h3 id="total">Total<a class="headerlink" href="#total" title="Permanent link">&para;</a></h3>
 <p>The same totals contract applies to cart and checkout. See
 <a href="../checkout/#totals">Checkout Totals</a> for the rendering contract, accounting

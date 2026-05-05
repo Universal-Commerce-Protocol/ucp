@@ -2089,6 +2089,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#attribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Attribution
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#available-payment-instrument" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3379,6 +3390,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#attribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Attribution
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#available-payment-instrument" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4552,6 +4574,12 @@ within the UCP.</p>
 <td style="text-align: left;">Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
 </tr>
 <tr>
+<td style="text-align: left;">attribution</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#attribution">Attribution</a></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.</td>
+</tr>
+<tr>
 <td style="text-align: left;">buyer</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#buyer">Buyer</a></td>
 <td style="text-align: left;">No</td>
@@ -4648,6 +4676,12 @@ within the UCP.</p>
 <td style="text-align: left;"><a href="/draft/specification/reference/#signals">Signals</a></td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
+</tr>
+<tr>
+<td style="text-align: left;">attribution</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#attribution">Attribution</a></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.</td>
 </tr>
 <tr>
 <td style="text-align: left;">status</td>
@@ -4783,6 +4817,12 @@ within the UCP.</p>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Business outcome messages (errors, warnings, informational). Present when the business needs to communicate status or issues to the platform.</td>
 </tr>
+<tr>
+<td style="text-align: left;">attribution</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#attribution">Attribution</a></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Snapshot of the attribution associated with the originating checkout. Read-only on the order.</td>
+</tr>
 </tbody>
 </table>
 <hr />
@@ -4885,6 +4925,9 @@ within the UCP.</p>
 <hr />
 <h3 id="amount">Amount<a class="headerlink" href="#amount" title="Permanent link">&para;</a></h3>
 <p>Monetary amount in the currency's minor unit as defined by ISO 4217. Refer to the currency's exponent to determine minor-to-major ratio (e.g., 2 for USD, 0 for JPY, 3 for KWD).</p>
+<hr />
+<h3 id="attribution">Attribution<a class="headerlink" href="#attribution" title="Permanent link">&para;</a></h3>
+<p>Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.</p>
 <hr />
 <h3 id="available-payment-instrument">Available Payment Instrument<a class="headerlink" href="#available-payment-instrument" title="Permanent link">&para;</a></h3>
 <table>
@@ -7135,6 +7178,12 @@ within the UCP.</p>
 <td style="text-align: left;">Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
 </tr>
 <tr>
+<td style="text-align: left;">attribution</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.</td>
+</tr>
+<tr>
 <td style="text-align: left;">status</td>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
@@ -7331,6 +7380,12 @@ within the UCP.</p>
 <td style="text-align: left;">object</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
+</tr>
+<tr>
+<td style="text-align: left;">attribution</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.</td>
 </tr>
 <tr>
 <td style="text-align: left;">status</td>
@@ -7559,6 +7614,12 @@ within the UCP.</p>
 <td style="text-align: left;">Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
 </tr>
 <tr>
+<td style="text-align: left;">attribution</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.</td>
+</tr>
+<tr>
 <td style="text-align: left;">buyer</td>
 <td style="text-align: left;">object</td>
 <td style="text-align: left;">No</td>
@@ -7655,6 +7716,12 @@ within the UCP.</p>
 <td style="text-align: left;">object</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
+</tr>
+<tr>
+<td style="text-align: left;">attribution</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.</td>
 </tr>
 <tr>
 <td style="text-align: left;">status</td>
@@ -7975,6 +8042,12 @@ within the UCP.</p>
 <td style="text-align: left;">object</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
+</tr>
+<tr>
+<td style="text-align: left;">attribution</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.</td>
 </tr>
 <tr>
 <td style="text-align: left;">status</td>

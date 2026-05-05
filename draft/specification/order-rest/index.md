@@ -81,6 +81,7 @@ Returns the current-state snapshot of an order.
 | currency      | string                                                                      | **Yes**  | ISO 4217 currency code. MUST match the currency from the originating checkout session.                                                        |
 | totals        | [Totals](/draft/specification/reference/#totals)                            | **Yes**  | Different totals for the order.                                                                                                               |
 | messages      | Array\[[Message](/draft/specification/reference/#message)\]                 | No       | Business outcome messages (errors, warnings, informational). Present when the business needs to communicate status or issues to the platform. |
+| attribution   | [Attribution](/draft/specification/reference/#attribution)                  | No       | Snapshot of the attribution associated with the originating checkout. Read-only on the order.                                                 |
 
 #### Example
 

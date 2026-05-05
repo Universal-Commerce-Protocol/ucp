@@ -58,6 +58,10 @@
       "$ref": "https://ucp.dev/draft/schemas/shopping/types/signals.json",
       "ucp_request": "optional"
     },
+    "attribution": {
+      "$ref": "https://ucp.dev/draft/schemas/shopping/types/attribution.json",
+      "ucp_request": "optional"
+    },
     "status": {
       "type": "string",
       "enum": [
@@ -123,5 +127,5 @@
       "ucp_request": "omit"
     }
   },
-  "version": "2026-05-01"
+  "version": "2026-05-05"
 }

@@ -5505,6 +5505,12 @@ line items, totals, and buyer information.</p>
 <td style="text-align: left;">Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
 </tr>
 <tr>
+<td style="text-align: left;">attribution</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#attribution">Attribution</a></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.</td>
+</tr>
+<tr>
 <td style="text-align: left;">status</td>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
@@ -5638,6 +5644,12 @@ confirmation details.</p>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#message">Message</a>]</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Business outcome messages (errors, warnings, informational). Present when the business needs to communicate status or issues to the platform.</td>
+</tr>
+<tr>
+<td style="text-align: left;">attribution</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#attribution">Attribution</a></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Snapshot of the attribution associated with the originating checkout. Read-only on the order.</td>
 </tr>
 </tbody>
 </table>

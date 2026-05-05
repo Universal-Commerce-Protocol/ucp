@@ -59,6 +59,12 @@ Environment data provided by the platform to support authorization and abuse pre
 | dev.ucp.buyer_ip   | string | No       | Client's IP address (IPv4 or IPv6).            |
 | dev.ucp.user_agent | string | No       | Client's HTTP User-Agent header or equivalent. |
 
+### Attribution
+
+Platform-provided referral and conversion-event context — campaign IDs, click identifiers, and source/medium markers communicated by the platform. See [Attribution](http://ucp.dev/draft/specification/overview/#attribution) for details and consent requirements.
+
+Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.
+
 ### Product
 
 A catalog item representing a sellable item with one or more purchasable variants.

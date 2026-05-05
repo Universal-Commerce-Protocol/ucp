@@ -53,6 +53,9 @@
         },
         "signals": {
           "$ref": "https://ucp.dev/draft/schemas/shopping/types/signals.json"
+        },
+        "attribution": {
+          "$ref": "https://ucp.dev/draft/schemas/shopping/types/attribution.json"
         }
       }
     },
@@ -129,6 +132,9 @@
         },
         "signals": {
           "$ref": "https://ucp.dev/draft/schemas/shopping/types/signals.json"
+        },
+        "attribution": {
+          "$ref": "https://ucp.dev/draft/schemas/shopping/types/attribution.json"
         }
       }
     },
@@ -197,5 +203,5 @@
       }
     }
   },
-  "version": "2026-05-01"
+  "version": "2026-05-05"
 }

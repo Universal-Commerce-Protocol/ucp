@@ -63,6 +63,10 @@ Expectations can be split, merged, or adjusted post-order. For example:
 - Include tracking information
 - Type is an open string field - businesses can use any values that make sense (common examples: `processing`, `shipped`, `in_transit`, `delivered`, `failed_attempt`, `canceled`, `undeliverable`, `returned_to_sender`)
 
+### Attribution
+
+Businesses MAY surface a snapshot of the originating checkout's `attribution` on the order. Read-only on the order — agents do not write `order.attribution`. See [Attribution](http://ucp.dev/draft/specification/overview/#attribution) for the underlying contract.
+
 ### Adjustments
 
 **Adjustments** are post-order events that exist independently of fulfillment:
@@ -91,6 +95,7 @@ Expectations can be split, merged, or adjusted post-order. For example:
 | currency      | string                                                                      | **Yes**  | ISO 4217 currency code. MUST match the currency from the originating checkout session.                                                        |
 | totals        | [Totals](/draft/specification/reference/#totals)                            | **Yes**  | Different totals for the order.                                                                                                               |
 | messages      | Array\[[Message](/draft/specification/reference/#message)\]                 | No       | Business outcome messages (errors, warnings, informational). Present when the business needs to communicate status or issues to the platform. |
+| attribution   | [Attribution](/draft/specification/reference/#attribution)                  | No       | Snapshot of the attribution associated with the originating checkout. Read-only on the order.                                                 |
 
 ### Order Line Item
 

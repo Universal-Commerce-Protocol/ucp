@@ -1060,6 +1060,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#attribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Attribution
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#fulfillment-option" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3293,6 +3304,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#attribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Attribution
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#fulfillment-option" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4305,6 +4327,12 @@ redirect to the checkout UI or renders the checkout page directly.</p>
 <td style="text-align: left;">Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
 </tr>
 <tr>
+<td style="text-align: left;">attribution</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#attribution">Attribution</a></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.</td>
+</tr>
+<tr>
 <td style="text-align: left;">status</td>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;"><strong>Yes</strong></td>
@@ -4434,6 +4462,12 @@ product data (price/title etc.) provided by the business through the feeds
 <td style="text-align: left;">Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
 </tr>
 <tr>
+<td style="text-align: left;">attribution</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#attribution">Attribution</a></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.</td>
+</tr>
+<tr>
 <td style="text-align: left;">payment</td>
 <td style="text-align: left;"><a href="/draft/specification/checkout/#payment">Payment</a></td>
 <td style="text-align: left;">No</td>
@@ -4519,6 +4553,12 @@ will replace the existing checkout session state on the business side.</p>
 <td style="text-align: left;">Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
 </tr>
 <tr>
+<td style="text-align: left;">attribution</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#attribution">Attribution</a></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.</td>
+</tr>
+<tr>
 <td style="text-align: left;">payment</td>
 <td style="text-align: left;"><a href="/draft/specification/checkout/#payment">Payment</a></td>
 <td style="text-align: left;">No</td>
@@ -4561,6 +4601,12 @@ as the order, and its associated items, moves through the supply chain.</p>
 <td style="text-align: left;"><a href="/draft/specification/reference/#signals">Signals</a></td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
+</tr>
+<tr>
+<td style="text-align: left;">attribution</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#attribution">Attribution</a></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.</td>
 </tr>
 <tr>
 <td style="text-align: left;">payment</td>
@@ -4739,6 +4785,12 @@ requirements.</p>
 </tr>
 </tbody>
 </table>
+<h3 id="attribution">Attribution<a class="headerlink" href="#attribution" title="Permanent link">&para;</a></h3>
+<p>Platform-provided referral and conversion-event context — campaign IDs,
+click identifiers, and source/medium markers communicated by the platform.
+See <a href="../overview/#attribution">Attribution</a> for details and consent
+requirements.</p>
+<p>Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.</p>
 <h3 id="fulfillment-option">Fulfillment Option<a class="headerlink" href="#fulfillment-option" title="Permanent link">&para;</a></h3>
 <p>A fulfillment option within a group (e.g., Standard Shipping $5, Express $15).</p>
 <table>

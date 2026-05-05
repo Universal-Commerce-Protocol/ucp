@@ -76,6 +76,13 @@
         "update": "optional"
       }
     },
+    "attribution": {
+      "$ref": "https://ucp.dev/draft/schemas/shopping/types/attribution.json",
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional"
+      }
+    },
     "buyer": {
       "$ref": "https://ucp.dev/draft/schemas/shopping/types/buyer.json",
       "description": "Optional buyer information for personalized estimates.",
@@ -123,5 +130,5 @@
       "ucp_request": "omit"
     }
   },
-  "version": "2026-05-01"
+  "version": "2026-05-05"
 }
