@@ -933,6 +933,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#property-count-constraints-minproperties-maxproperties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Property-Count Constraints (minProperties / maxProperties)
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1324,6 +1335,17 @@
     <span class="md-ellipsis">
       
         Open Objects (additionalProperties)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#property-count-constraints-minproperties-maxproperties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Property-Count Constraints (minProperties / maxProperties)
       
     </span>
   </a>
@@ -1775,6 +1797,18 @@ typos in core metadata like the <code>ucp</code> block).</p>
 </span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="w">  </span><span class="nt">&quot;additionalProperties&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
 </span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="p">}</span>
 </span></code></pre></div>
+<h3 id="property-count-constraints-minproperties-maxproperties">Property-Count Constraints (<code>minProperties</code> / <code>maxProperties</code>)<a class="headerlink" href="#property-count-constraints-minproperties-maxproperties" title="Permanent link">&para;</a></h3>
+<p>By default, UCP schemas do not set <code>minProperties</code> or <code>maxProperties</code> on
+object fields:</p>
+<ul>
+<li><strong><code>maxProperties</code></strong> — Limits are deferred to implementers. The protocol
+  does not define caps because any specific limit requires judgment calls
+  that inevitably run into exceptions. Implementers are encouraged to
+  impose their own constraints and surface clear error feedback to support
+  debugging and good behavior.</li>
+<li><strong><code>minProperties</code></strong> — Empty objects (<code>{}</code>) are well-formed and harmless.
+  Implementers should accept and process them as a no-op.</li>
+</ul>
 <h2 id="complete-example-capability-schema">Complete Example: Capability Schema<a class="headerlink" href="#complete-example-capability-schema" title="Permanent link">&para;</a></h2>
 <p>A capability schema defines both payload structure and declaration variants:</p>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="p">{</span>
