@@ -71,6 +71,26 @@ either way. If their profile *also* lists identity linking with
 `dev.ucp.shopping.order:read` in `config.scopes`, operations covered by
 that scope require a user identity token.
 
+### UCP and OAuth
+
+UCP defines commerce semantics (which scopes mean what, which gate which
+operations); OAuth ([RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414){ target="_blank" })
+defines identity machinery (endpoints, flows, accepted scope
+vocabulary); runtime messages carry per-request advisories.
+
+* **UCP `config.scopes`** declares **hard gates**: scopes that *require*
+    user authentication for the operations they cover.
+* **OAuth `scopes_supported`** (RFC 8414) declares the **accepted scope
+    vocabulary**: every scope the authorization server will honor if
+    requested.
+* The diff (`scopes_supported` ∖ `config.scopes`) is the **optional
+    layer**: scopes the merchant accepts but doesn't gate, used to
+    advertise authentication-unlocked features without requiring auth.
+* **UCP `messages[]`** carry **runtime contextual hints**: per-request
+    notices like `identity_optional` (see
+    [Optional Authentication](#optional-authentication)) signaling that
+    authenticating would unlock value in the current context.
+
 ## General Guidelines
 
 ### For Platforms
