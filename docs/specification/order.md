@@ -87,6 +87,13 @@ Expectations can be split, merged, or adjusted post-order. For example:
   (common examples: `processing`, `shipped`, `in_transit`, `delivered`,
   `failed_attempt`, `canceled`, `undeliverable`, `returned_to_sender`)
 
+### Attribution
+
+Businesses MAY surface a snapshot of the originating checkout's
+`attribution` on the order. Read-only on the order — agents do not write
+`order.attribution`. See [Attribution](overview.md#attribution) for the
+underlying contract.
+
 ### Adjustments
 
 **Adjustments** are post-order events that exist independently of
