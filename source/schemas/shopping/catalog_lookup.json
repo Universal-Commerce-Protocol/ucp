@@ -43,6 +43,9 @@
         },
         "signals": {
           "$ref": "types/signals.json"
+        },
+        "attribution": {
+          "$ref": "types/attribution.json"
         }
       }
     },
@@ -113,6 +116,9 @@
         },
         "signals": {
           "$ref": "types/signals.json"
+        },
+        "attribution": {
+          "$ref": "types/attribution.json"
         }
       }
     },

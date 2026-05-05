@@ -19,6 +19,9 @@
         "signals": {
           "$ref": "types/signals.json"
         },
+        "attribution": {
+          "$ref": "types/attribution.json"
+        },
         "filters": {
           "$ref": "types/search_filters.json"
         },
