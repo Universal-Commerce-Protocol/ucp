@@ -565,6 +565,233 @@ field conveys the business's value prompt to the platform (e.g.,
 }
 ```
 
+## Wallet Attestation
+
+A non-OAuth identity mechanism for chain-state-bound entitlements. A trusted
+third-party **provider** evaluates a business-supplied predicate (e.g.,
+*holds ERC-20 contract X with balance ≥ 1*) against the user's wallet
+on-chain state and returns a JWS-signed boolean. The **business** verifies
+the signature offline against the provider's published JWKS — no OAuth
+redirect, no token exchange, no session.
+
+This mechanism is **complementary** to OAuth identity linking, not a
+replacement. OAuth identity linking covers account-bound entitlements
+(merchant-database tier, employment role, fraud-risk profile). Wallet
+attestation covers chain-state-bound entitlements (token holdings, NFT
+ownership, allowlist membership, soulbound credentials) — applicable to
+both **human buyers** (where wallet attestation runs alongside OAuth as a
+chain-state-bound entitlement layer) and **autonomous agent buyers**
+(where OAuth is structurally unavailable and wallet attestation is the
+primary proof). A business **MAY** declare both `oauth2` and
+`wallet_attestation` provider entries in `config.providers` to cover the
+full set of entitlements its commerce flow needs.
+
+Wallet attestation also serves **agent-as-buyer** flows. Autonomous agents
+transacting on-chain have wallets but typically cannot complete OAuth flows
+that depend on browser-based user consent. The wallet's chain state
+captures durable proof of prior consent already established when the
+wallet was funded or provisioned; the attestation reads that prior consent
+rather than negotiating fresh consent per request. For these flows, wallet
+attestation is not an alternative to OAuth — it is the only available
+identity primitive.
+
+### Provider Declaration
+
+Businesses declare wallet attestation providers under `config.providers`,
+keyed by reverse-domain identifier. Each entry's `type` discriminator
+identifies the mechanism:
+
+```json
+{
+  "config": {
+    "scopes": { },
+    "providers": {
+      "com.example.attestor": {
+        "type": "wallet_attestation",
+        "provider_jwks": "https://attestor.example.com/.well-known/jwks.json",
+        "attestation_endpoint": "https://attestor.example.com/v1/attest"
+      }
+    }
+  }
+}
+```
+
+Required fields:
+
+* **`type`** **MUST** be `"wallet_attestation"`.
+* **`provider_jwks`** **MUST** be an HTTPS URI of the provider's JWKS
+    ([RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517){ target="_blank" }).
+    The JWKS document **MUST** advertise an `alg` field on each key entry;
+    `ES256`
+    ([RFC 7518](https://datatracker.ietf.org/doc/html/rfc7518){ target="_blank" })
+    is **RECOMMENDED**.
+
+Optional fields:
+
+* **`attestation_endpoint`** **MAY** be an HTTPS URI where platforms POST
+    attestation requests. Absent this field, platforms rely on a discovery
+    mechanism documented at the provider's own surface (out of scope for
+    this version).
+
+UCP does not enumerate or constrain which chains a provider supports. Chain
+context lives within the predicate; the set of chains a given provider
+covers is published at the provider's own discovery surface, not in
+`config.providers`. Businesses **MAY** declare multiple `wallet_attestation`
+provider entries to cover the union of chains they accept.
+
+### Verification Procedure
+
+When the **business** receives an attestation payload from the platform,
+the business **MUST**:
+
+1. Fetch the provider's JWKS from `provider_jwks` and select the
+    verification key by the `kid` value in the attestation header.
+2. Verify the JWS signature over the payload using the algorithm
+    declared in the JWKS entry.
+3. Check the attestation's freshness window (e.g., the `exp` claim, or an
+    `attestedAt` timestamp combined with a configured max-age policy)
+    before relying on the result. Stale attestations **MUST** be rejected.
+4. Treat the signed boolean as the entitlement decision for the gated
+    operation. Any raw chain-state metadata in the payload is informational
+    only — the business **MUST NOT** make entitlement decisions from
+    unsigned fields.
+
+The verification path is fully offline: no callback to the platform or the
+provider, no introspection endpoint, no shared session. Caching of the
+JWKS document is permitted; platforms and businesses **SHOULD** honor
+standard HTTP caching headers (`Cache-Control`, `ETag`).
+
+### Privacy Property
+
+The attestation answers *"does this wallet meet the predicate?"* and
+**MUST NOT** be required to disclose raw chain state to the business. A
+buyer proving they hold a token at or above a threshold reveals only the
+boolean result of that predicate, not the actual balance or any other
+holdings. This is a structural distinction from raw on-chain queries
+(which leak full balances) and from credential-style approaches (which
+require buyer-side wallet UX).
+
+Providers **MAY** include supporting metadata in the signed payload (e.g.,
+condition hashes, block height, attestation IDs) to enable later auditing
+or dispute resolution. Such metadata **MUST NOT** include the raw
+underlying values that the predicate evaluated.
+
+### Relationship to Scopes
+
+Wallet attestation contributes **zero** scopes to `config.scopes`. The
+mechanism is stateless and self-contained: each attestation is evaluated
+against current chain state at request time, not against a persistent
+session.
+
+* Operations gated solely by chain-state predicates do **not** appear in
+    `config.scopes`. The business defines the predicate at request time
+    and emits a `wallet_state_required` info code (see below) when the
+    attestation is missing or fails.
+* Operations gated by **both** account-state and chain-state predicates
+    **MAY** appear in `config.scopes` (for the OAuth side) and require a
+    `wallet_attestation` provider entry (for the chain-state side). In
+    this case the business emits whichever code corresponds to the missing
+    proof — `identity_required` for the OAuth gap, `wallet_state_required`
+    for the chain-state gap, or both.
+
+### `WalletAttestation` HTTP Authentication Challenge Scheme
+
+> **Provisional — open for TC review.** The scheme name and parameter set
+> defined in this section are subject to change during review and are
+> intended for IANA HTTP Authentication Scheme Registry submission if
+> Phase 3 ratifies. Implementations **SHOULD** treat this scheme as stable
+> only after explicit ratification.
+
+When an operation requires a wallet attestation that the request did not
+include, or that failed verification, the business **MUST** return:
+
+* HTTP `401 Unauthorized`
+* A `WWW-Authenticate: WalletAttestation` challenge header
+* A UCP error response body containing a message with
+    `code: "wallet_state_required"`
+
+The `WWW-Authenticate` header **MUST** include:
+
+* `realm="<business issuer URI>"`
+* `predicate="<URL-safe-encoded predicate>"`
+
+and **SHOULD** include:
+
+* `expected_kid="<provider key identifier>"` — the `kid` value the
+    business expects to find in the attestation header. Allows platforms
+    to validate provider identity before issuing the request.
+* `resource_metadata="<URI of the business's protected resource metadata>"`
+    per
+    [RFC 9728 §5.1](https://datatracker.ietf.org/doc/html/rfc9728#section-5.1){ target="_blank" }.
+
+```http
+HTTP/1.1 401 Unauthorized
+WWW-Authenticate: WalletAttestation realm="https://merchant.example.com",
+                  predicate="chain=base&erc20=0xABC...&op=gte&value=1",
+                  expected_kid="<provider-kid>",
+                  resource_metadata="https://merchant.example.com/.well-known/ucp-protected-resource"
+Content-Type: application/json
+
+{
+  "messages": [
+    {
+      "type": "error",
+      "code": "wallet_state_required",
+      "content": "Holding the VIP NFT is required to access this offer.",
+      "severity": "requires_buyer_review"
+    }
+  ]
+}
+```
+
+**Why a new scheme rather than extending `Bearer`?** `Bearer` semantics
+imply a token-issuance flow — the platform exchanges the challenge for a
+token via an authorization endpoint, then presents that token on
+subsequent requests. Wallet attestation issues no token. The challenge
+advertises a predicate-evaluation request: the platform calls the
+provider's `attestation_endpoint`, receives a signed payload, and presents
+the payload directly. A new scheme name keeps `Bearer` semantics intact
+for OAuth and avoids overloading the registered scheme with an alternative
+flow.
+
+**Predicate encoding.** The flat URL-safe encoding above is sufficient for
+single-clause predicates (a balance check, an NFT holding, an allowlist
+membership). Complex composition (multi-clause AND/OR, nested conditions,
+schema-versioned predicate dialects) is out of scope for this version and
+is expected to be the subject of a follow-up specification — likely a
+`predicate_uri="<URL>"` parameter where the predicate is published at a
+stable URL the platform fetches and caches.
+
+### `wallet_state_required`
+
+Defined above (see the WalletAttestation challenge scheme). Severity:
+error.
+
+### `wallet_state_optional`
+
+Businesses **SHOULD** include this info-severity code in successful
+responses when wallet attestation is available and would meaningfully
+unlock additional capabilities in the current context. The `content`
+field conveys the business's value prompt to the platform (e.g.,
+"Verify your wallet for member pricing on this product."). Platforms
+**MAY** present the prompt to the user.
+
+```json
+{
+  "messages": [
+    {
+      "type": "info",
+      "code": "wallet_state_optional",
+      "content": "Verify your wallet for member pricing on this product."
+    }
+  ]
+}
+```
+
+`wallet_state_optional` and `identity_optional` are **independent** —
+businesses **MAY** emit both on the same operation when the operation
+benefits from either OAuth-bound or chain-state-bound proof.
+
 ## Security Considerations
 
 * **PKCE.** PKCE (`S256`) is REQUIRED for all authorization code flows.
@@ -624,35 +851,28 @@ This specification intentionally scopes v1 to business-hosted OAuth 2.0.
 The schema and protocol are designed to accommodate additional auth patterns
 as non-breaking extensions in future versions:
 
-### Delegated Identity Providers and Mechanism Extensibility (`config.providers`)
+### Delegated Identity Providers (`config.providers` `oauth2` type)
 
-A future version will allow businesses to declare trusted identity providers in
-a `config.providers` map, keyed by reverse-domain identifier. Each entry carries
-a `type` discriminator that defaults to `oauth2`, making this a single extension
-point for both delegated OAuth IdPs and future non-OAuth mechanisms such as
-wallet attestation or verifiable credentials.
+A future version will define a structural shape for `config.providers` that
+allows businesses to declare trusted external OAuth identity providers (e.g.,
+`com.google`, `com.shopify`). Platforms that have already established an
+OAuth session with a trusted provider will be able to present a JWT-based
+authorization grant to the business's token endpoint instead of initiating a
+new browser-based OAuth flow — useful for multi-merchant agentic commerce
+where N merchants should not require N separate consent screens.
 
-For delegated OAuth IdPs (e.g., `com.google`, `com.shopify`): platforms that
-have already established an OAuth session with a trusted provider can present a
-JWT-based authorization grant to the business's token endpoint instead of
-initiating a new browser-based OAuth flow — useful for multi-merchant agentic
-commerce where N merchants should not require N separate consent screens.
-
-For non-OAuth mechanisms: entries with a non-`oauth2` `type` value enable
-wallet attestation and similar schemes. Platforms select the first entry whose
-`type` they support, using business-preference ordering — analogous to TLS
-cipher suite negotiation.
-
-When `config.providers` is present, the platform uses the provider selection
-and identity chaining flows defined in that version. When `config.providers` is
-absent (as in v1), platforms **MUST** fall back to direct OAuth 2.0 against the
-business domain via RFC 8414 discovery.
+The `wallet_attestation` mechanism type is defined in this version (see
+[Wallet Attestation](#wallet-attestation)). Future versions may add additional
+non-OAuth mechanism types under the same `config.providers` extension point;
+platforms select the first entry whose `type` they support, using
+business-preference ordering — analogous to TLS cipher suite negotiation.
 
 **Forward-compatibility rule for platforms:** When `config` contains fields
-not defined in this version of the spec (`providers` or any other future field),
-platforms **MUST** ignore those fields and proceed using OAuth 2.0 with RFC 8414
-discovery on the business domain, as defined here. This ensures v1 platform
-implementations remain valid as the spec evolves.
+not defined in this version of the spec, or `config.providers` entries with a
+`type` value not defined in this version, platforms **MUST** ignore those
+fields/entries and fall back to OAuth 2.0 with RFC 8414 discovery on the
+business domain, as defined here. This ensures v1 platform implementations
+remain valid as the spec evolves.
 
 ## Examples
 
