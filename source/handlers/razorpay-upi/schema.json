@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://razorpay.com/ucp/handlers/upi/schema.json",
+  "title": "Razorpay UPI Handler Schema",
+  "description": "Schema for the com.razorpay.upi payment handler (UPI Intent flow). The platform submits Complete Checkout with a upi_intent instrument and no credential. The business calls Razorpay, creates an order and payment, then returns requires_escalation with a upi_intent_credential (intent_uri + optional QR). The platform executes the deep link natively; the business confirms via webhook.",
+  "name": "com.razorpay.upi",
+  "version": "{{ ucp_version }}",
+
+  "$defs": {
+    "upi_intent_instrument": {
+      "$ref": "types/upi_intent_instrument.json"
+    },
+
+    "com.razorpay.upi": {
+      "payment_instrument": {
+        "title": "Razorpay UPI Payment Instrument",
+        "description": "UPI Intent instrument for com.razorpay.upi.",
+        "$ref": "#/$defs/upi_intent_instrument"
+      },
+
+      "platform_schema": {
+        "title": "Razorpay UPI (Platform)",
+        "description": "Platform-level handler declaration for discovery.",
+        "allOf": [
+          {
+            "$ref": "https://ucp.dev/{{ ucp_version }}/schemas/payment_handler.json#/$defs/platform_schema"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "config": {
+                "$ref": "types/platform_config.json",
+                "description": "Platform configuration for com.razorpay.upi."
+              }
+            }
+          }
+        ]
+      },
+
+      "business_schema": {
+        "title": "Razorpay UPI (Business)",
+        "description": "Business-level handler declaration for discovery at /.well-known/ucp.",
+        "allOf": [
+          {
+            "$ref": "https://ucp.dev/{{ ucp_version }}/schemas/payment_handler.json#/$defs/business_schema"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "config": {
+                "$ref": "types/business_config.json",
+                "description": "Business configuration for com.razorpay.upi."
+              }
+            }
+          }
+        ]
+      },
+
+      "response_schema": {
+        "title": "Razorpay UPI (Response)",
+        "description": "Runtime handler configuration in checkout responses.",
+        "allOf": [
+          {
+            "$ref": "https://ucp.dev/{{ ucp_version }}/schemas/payment_handler.json#/$defs/response_schema"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "config": {
+                "$ref": "types/response_config.json",
+                "description": "Runtime configuration for this handler."
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

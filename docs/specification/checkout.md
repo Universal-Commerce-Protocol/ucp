@@ -226,7 +226,16 @@ IF recoverable is not empty
 IF requires_buyer_input is not empty
   handoff_context = "incomplete, additional input from buyer is required"
 ELSE IF requires_buyer_review is not empty
-  handoff_context = "ready for final review by the buyer"
+  IF any error has code = "requires_buyer_authentication"
+    AND response payment instrument contains a populated credential
+    AND platform implements the corresponding handler
+      EXECUTE credential per handler spec (e.g., launch upi:// deep link, render QR)
+      POLL Get Checkout for status update
+      IF execution fails OR handler not implemented
+        FALL BACK to continue_url
+  ELSE
+    handoff_context = "ready for final review by the buyer"
+    REDIRECT to continue_url
 ```
 
 #### Standard Errors
@@ -236,11 +245,12 @@ handle with specific, appropriate UX rather than generic error treatment.
 
 | Code                     | Description                                                                |
 | :----------------------- | :------------------------------------------------------------------------- |
-| `out_of_stock`           | Specific item or variant is unavailable                                    |
-| `item_unavailable`       | Item cannot be purchased (e.g. delisted)                                   |
-| `address_undeliverable`  | Cannot deliver to the provided address                                     |
-| `payment_failed`         | Payment processing failed                                                  |
-| `eligibility_invalid`    | Eligibility claim could not be verified at completion                      |
+| `out_of_stock`                   | Specific item or variant is unavailable                                    |
+| `item_unavailable`               | Item cannot be purchased (e.g. delisted)                                   |
+| `address_undeliverable`          | Cannot deliver to the provided address                                     |
+| `payment_failed`                 | Payment processing failed                                                  |
+| `eligibility_invalid`            | Eligibility claim could not be verified at completion                      |
+| `requires_buyer_authentication`  | Buyer must authenticate via a handler-specific mechanism. Severity **MUST** be `requires_buyer_review`. The business **MUST** populate the payment instrument's `credential` field in the escalation response with the data the platform needs to execute (e.g., a UPI Intent URI). The platform **MAY** execute the credential natively per the handler specification instead of redirecting to `continue_url`. The platform **MUST** fall back to `continue_url` if execution fails or the handler is not implemented. |
 
 Businesses **SHOULD** mark standard errors with `severity: recoverable` to
 signal that platforms should provide appropriate UX (out-of-stock messaging,
@@ -521,7 +531,7 @@ custom scopes are defined in [Identity Linking — Scopes](identity-linking.md#s
     to keep adding items to the cart.
 * **MAY** provide agent context when the platform indicates that the request
     was done by an agent.
-* **MUST** use `continue_url` when checkout status is `requires_escalation`.
+* **MUST** use `continue_url` when checkout status is `requires_escalation`, unless the response contains a payment instrument with a populated `credential` and an error code of `requires_buyer_authentication` for a handler the platform implements, in which case the platform **MAY** execute the credential natively per the handler specification. The platform **MUST** fall back to `continue_url` if credential execution fails or the handler is not implemented.
 * **MAY** use `continue_url` to hand off to business UI in other situations.
 * When performing handoff, **SHOULD** prefer business-provided
     `continue_url` over platform-constructed checkout permalinks.
