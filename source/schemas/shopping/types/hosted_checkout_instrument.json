@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/hosted_checkout_instrument.json",
+  "title": "Hosted Checkout Payment Instrument",
+  "description": "Payment instrument for redirect-based checkout flows where the buyer completes payment in a provider-controlled UI via UCP escalation (requires_escalation + continue_url). Platforms SHOULD NOT attempt credential acquisition for this instrument type — no token or card data is exchanged through UCP. Payment handling occurs entirely within the hosted UI.",
+  "allOf": [
+    { "$ref": "payment_instrument.json" },
+    {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "const": "hosted_checkout",
+          "description": "Discriminator indicating a hosted checkout instrument. Signals to platforms that no credential acquisition is needed — this instrument type always resolves via requires_escalation + continue_url."
+        },
+        "display": {
+          "type": "object",
+          "description": "Display information for rendering this instrument in platform UI (e.g., a branded checkout button).",
+          "properties": {
+            "name": {
+              "type": "string",
+              "maxLength": 50,
+              "description": "Human-readable provider name shown to the buyer (e.g., 'Pay with Razorpay', 'PayPal Checkout')."
+            },
+            "logo_url": {
+              "type": "string",
+              "format": "uri",
+              "description": "HTTPS URL to the provider's logo image for use in branded checkout buttons."
+            },
+            "description": {
+              "type": "string",
+              "maxLength": 200,
+              "description": "Short description of payment methods available via the hosted UI (e.g., 'UPI, Cards, Netbanking & more')."
+            }
+          }
+        },
+        "credential": {
+          "$ref": "hosted_checkout_credential.json",
+          "description": "Reference-only credential populated by the business in the Complete Checkout response. Contains a session identifier and redirect URLs — no sensitive payment data."
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "available_hosted_checkout_instrument": {
+      "title": "Available Hosted Checkout Instrument",
+      "description": "Declares hosted checkout instrument availability in a payment handler's available_instruments list.",
+      "allOf": [
+        { "$ref": "available_payment_instrument.json" },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "hosted_checkout"
+            }
+          }
+        }
+      ]
+    }
+  }
+}
