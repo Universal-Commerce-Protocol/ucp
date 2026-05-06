@@ -109,6 +109,7 @@ yml
 jwks
 keyid
 reauth
+redeemables
 reprepare
 sandboxing
 fbclid

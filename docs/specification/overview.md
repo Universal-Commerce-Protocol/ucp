@@ -1205,6 +1205,13 @@ and cart context, then returns the resolved result. Platforms **MUST** treat the
 the [Payment Handler Guide](payment-handler-guide.md#resolving-available_instruments)
 for the full resolution semantics.
 
+**Instrument Cardinality:** A checkout submission **MUST** contain exactly one
+payment instrument unless the `dev.ucp.shopping.split_payments` capability is
+active. Businesses **MUST** reject submissions that violate this constraint with
+a `payment_failed` error in `messages[]`. See
+[Split Payments](split-payments.md) for the extension that relaxes this
+constraint.
+
 ### Implementation Scenarios
 
 The following scenarios illustrate how different payment handlers and
