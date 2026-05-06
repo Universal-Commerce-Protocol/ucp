@@ -1,6 +1,14 @@
 exclude: '^(\.github/|\.vscode/).*|CODE_OF_CONDUCT\.md|CHANGELOG\.md'
 
 repos:
+  - repo: local
+    hooks:
+      - id: block-corporate-registries
+        name: Block corporate registries in uv.lock
+        entry: '(?i)(pkgs\.shopify\.io|us-npm\.pkg\.dev)'
+        language: pygrep
+        files: ^uv\.lock$
+        description: "Avoid corporate URLs (PR #108, #368). Fix: 'uv lock --refresh'."
   - repo: https://github.com/streetsidesoftware/cspell-cli
     rev: v9.3.3
     hooks:
