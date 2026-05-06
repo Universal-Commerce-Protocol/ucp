@@ -61,6 +61,11 @@
     "parent_id": {
       "type": "string",
       "description": "Parent line item identifier for any nested structures."
+    },
+    "buyer_notes": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "Buyer instructions for this line item, preserved from checkout. Business SHOULD surface these in fulfillment workflows."
     }
   }
 }
