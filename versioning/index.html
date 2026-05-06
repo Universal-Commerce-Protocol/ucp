@@ -787,7 +787,7 @@
 
 
 <h1 id="versioning">Versioning<a class="headerlink" href="#versioning" title="Permanent link">&para;</a></h1>
-<p>UCP uses date-based version identifiers following the format YYYY-MM-DD, to
+<p>UCP uses date-based version identifiers following the format <code>YYYY-MM-DD</code> to
 indicate the last date backwards incompatible changes were made.</p>
 <p>New development occurs on the <code>main</code> branch. We will maintain long-lived
 branches for all supported releases of the spec.</p>
@@ -796,7 +796,7 @@ branches for all supported releases of the spec.</p>
   new branch named <code>release/YYYY-MM-DD</code> directly from the current state of
   <code>main</code>.<ul>
 <li>We will implement a code freeze on the release branch the moment a
-  <code>release/YYYY-MM-DD branch</code> is cut. Only critical bug fixes should move
+  <code>release/YYYY-MM-DD</code> branch is cut. Only critical bug fixes should move
   during this window.</li>
 <li>Critical issues discovered after cutting a release branch should be fixed
   in one of two ways:</li>
@@ -804,8 +804,8 @@ branches for all supported releases of the spec.</p>
 <li>The fix is made on <code>main</code> and cherry-picked to the release branch.</li>
 </ul>
 </li>
-<li>Once finalized, we will merge the release branch into <code>main</code> and tag it (e.g.
-  <code>git tag -a vYYYY-MM-DD</code>).  We will use a GitHub Action to detect the new Tag
+<li>Once finalized, we will merge the release branch into <code>main</code> and tag it (e.g.,
+  <code>git tag -a vYYYY-MM-DD</code>).  We will use a GitHub Action to detect the new tag
   and automatically generate a release notes draft and upload artifacts.</li>
 <li>Unlike temporary feature branches, release/YYYY-MM-DD branches are long-lived
   and correspond to specific versions of the spec for historical reference and
