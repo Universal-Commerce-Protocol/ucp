@@ -314,6 +314,69 @@ authoritative value returned in the `response_schema`.
 In this example, the business's PSP is not configured for Discover, so Discover
 is excluded from the response even though the platform supports it.
 
+#### Display Ordering
+
+Businesses **MAY** include a `display_order` integer on each entry in
+`available_instruments` to suggest how payment options should be presented to
+the buyer. Lower values indicate higher preference (e.g., `0` = show first).
+
+Ordering is relative across **all** `available_instruments` entries across
+**all** handlers in the response. When the same instrument type appears in
+multiple handlers (e.g., `"card"` via both a wallet and a direct tokenizer),
+each entry carries its own `display_order` — this allows the business to rank
+distinct payment paths independently (e.g., "card via Google Pay" before "card
+via direct entry").
+
+**Semantics:**
+
+- `display_order` is **suggestive only** — platforms **MAY** override based on
+    user preference, localization, A/B tests, or other factors.
+- Entries without `display_order` express no preference and **SHOULD** be
+    placed after entries that declare one.
+- When multiple entries share the same `display_order` value, the platform
+    determines their relative order.
+- `display_order` participates in the `available_instruments` resolution flow:
+    the business includes it in the resolved `response_schema`, and platforms
+    **MUST** treat the response values as authoritative.
+
+**Example:**
+
+A business advertising three payment paths with suggested ordering:
+
+```json
+{
+  "ucp": {
+    "payment_handlers": {
+      "com.google.pay": [
+        {
+          "id": "gpay_handler",
+          "version": "{{ ucp_version }}",
+          "available_instruments": [
+            {"type": "card", "display_order": 0}
+          ],
+          "config": { "..." : "..." }
+        }
+      ],
+      "com.example.tokenizer": [
+        {
+          "id": "tokenizer_handler",
+          "version": "{{ ucp_version }}",
+          "available_instruments": [
+            {"type": "card", "constraints": {"brands": ["visa", "mastercard"]}, "display_order": 1},
+            {"type": "bank", "display_order": 2}
+          ],
+          "config": { "..." : "..." }
+        }
+      ]
+    }
+  }
+}
+```
+
+In this example the business suggests: Google Pay card first, then direct card
+entry, then bank transfer. The platform may follow this suggestion or adjust
+based on buyer context.
+
 ---
 
 #### Defining the Schema

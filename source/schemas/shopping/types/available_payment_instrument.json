@@ -15,6 +15,11 @@
       "additionalProperties": true,
       "description": "Constraints on this instrument type. Structure depends on instrument type and active capabilities.",
       "minProperties": 1
+    },
+    "display_order": {
+      "type": "integer",
+      "description": "Business-suggested display priority for this instrument across all handlers. Lower values indicate higher preference. Ordering is suggestive; platforms MAY override based on user preference, localization, or other factors.",
+      "minimum": 0
     }
   }
 }
