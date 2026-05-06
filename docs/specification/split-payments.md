@@ -142,10 +142,36 @@ amount, or cannot achieve the final total, the business MUST return
 `payment_failed` in `messages[]` and MUST ensure all previously
 successful authorizations are voided or reversed. This is an
 eventual-consistency requirement: the reversal MAY happen asynchronously
-(e.g., to retry a failing void or work around acquirer rate limits, or to wait and see if the buyer re-submits partially captured instruments), but
-the buyer MUST NOT remain charged for an incomplete split after checkout. The message
-`content` SHOULD identify which instruments failed (by `id`) and the
-reason.
+(e.g., to retry a failing void or work around acquirer rate limits, or
+to wait and see if the buyer re-submits partially captured instruments),
+but the buyer MUST NOT remain charged for an incomplete split after
+checkout.
+
+**Per-instrument reporting:** when a split is incomplete or has failed,
+the business MUST emit a `payment_failed` error for each failed
+instrument, with `path` pointing at the instrument. Businesses MAY also
+emit `info` messages for succeeded instruments to convey positive
+context (e.g., "Gift card authorized for $10.00") that the platform can
+surface to the buyer:
+
+```json
+{
+  "messages": [
+    {
+      "type": "info",
+      "path": "$.payment.instruments[0]",
+      "content": "Gift card authorized for $10.00."
+    },
+    {
+      "type": "error",
+      "code": "payment_failed",
+      "path": "$.payment.instruments[1]",
+      "severity": "recoverable",
+      "content": "Card declined — insufficient funds."
+    }
+  ]
+}
+```
 
 Error conditions:
 
@@ -351,3 +377,56 @@ credit card covers the remaining $45.
 The first gift card had a $25 balance (charged in full). The second gift
 card had a $0 balance — this is not an error, it simply contributes
 nothing. The credit card covers the remaining $75.
+
+### Partial Failure with Recovery
+
+> "Pay with my gift card first, credit card for the rest." — but the
+> credit card declines. The business holds the gift card authorization
+> and signals the platform to resubmit with a replacement card.
+
+**Outbound (incomplete checkout, $50 order):**
+
+```json
+{
+  "status": "incomplete",
+  "payment": {
+    "instruments": [
+      {
+        "id": "pi_gc_1",
+        "handler_id": "example_handler_1",
+        "type": "gift_card",
+        "credential": { "token": "gc_abc123" },
+        "amount": 1000
+      },
+      {
+        "id": "pi_card_1",
+        "handler_id": "example_handler_1",
+        "type": "card",
+        "credential": { "token": "tok_visa_xxxx" },
+        "amount": 0
+      }
+    ]
+  },
+  "messages": [
+    {
+      "type": "info",
+      "path": "$.payment.instruments[0]",
+      "content": "Gift card authorized for $10.00."
+    },
+    {
+      "type": "error",
+      "code": "payment_failed",
+      "path": "$.payment.instruments[1]",
+      "severity": "recoverable",
+      "content": "Card declined — insufficient funds."
+    }
+  ]
+}
+```
+
+The business charged the gift card for $10 (held) and the card declined.
+`severity: recoverable` tells the platform it can resubmit with a
+replacement card; the gift card auth remains held until the platform
+either completes the split or abandons the checkout (at which point the
+gift card is reversed per the eventual-consistency rule).
+Outstanding amount: $50 − $10 = $40.
