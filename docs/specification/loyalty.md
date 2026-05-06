@@ -41,7 +41,7 @@ Loyalty has four main components:
 
 * Contains both delayed (e.g. “Members have access to dedicated customer service”) and immediate-value (e.g. “Members get 5% off”) benefits.
 
-**Rewards**: the fungible balances and/or stored value available for the customer to redeem on transactions
+**Rewards**: quantifiable loyalty value that may be earned from the current transaction. Note: Redeemable balances and stored value are modeled by the negotiated payment instrument or a future redemption capability, not by this loyalty extension
 
 * One membership can offer multiple types of accumulable/collectable rewards, each having its own usage and redemption rules.
 
@@ -147,9 +147,9 @@ Loyalty extension holds a key-value map whose keys are reverse-domain identifier
 
 Platforms MAY send buyer loyalty membership claims via `context.eligibility` in the request to activate loyalty extension and claim for loyalty benefits. Alternatively, when the buyer is authenticated and the business can determine loyalty membership from the authenticated identity, businesses MAY populate the loyalty extension without an explicit eligibility claim. In this case, the map key MUST be the same reverse-domain identifier the business would accept as a claim value.
 
-* When businesses successfully verify the buyer's membership (either via eligibility claim in the request, or based on authenticated identity), the business MUST update the `provisional` boolean to false and populate the `activated_tier` fields alongside the to reflect the buyer's verified status.
-* In the case when platform's request contains loyalty membership claims and businesses choose not to validate the membership claim, the value of the returned object MUST retain `provisional: true`, and the business MUST NOT populate `activated_tier`.
-* If claim is accepted but verification fails, businesses MUST communicate the failure via a recoverable `message` with `type: "error"` and `code: "eligibility_invalid"`. Platforms MAY then choose to remove the membership claim and proceed the checkout without loyalty benefits applied.
+* When a business verifies a membership claim or determines membership from authenticated identity, it MUST return `provisional: false`. For each returned active track, it MUST set `activated_tier` to the `id` of exactly one tier in that track.
+* When membership claim in the request is accepted but not verified by the business, the business MUST return `provisional: true`, MAY return display-safe program or tier context, and MUST NOT return `display_id` or `activated_tier`.
+* When membership claim in the request is accepted but cannot be verified, the business MUST communicate the failure via a recoverable `message` with `type: "error"` and `code: "eligibility_invalid"`. Platforms MAY then choose to remove the membership claim and proceed the checkout without loyalty benefits applied.
 
 At checkout completion, all accepted but unverified loyalty claims MUST be resolved per the [Eligibility Verification at Completion](checkout.md#eligibility-verification-at-completion) contract defined in the checkout capability.
 
@@ -557,3 +557,9 @@ In addition to immediate-value benefits like member pricing/shipping, delayed-va
       ]
     }
     ```
+
+## Implementation guidelines
+
+* Loyalty extension response MUST be data-minimized and MUST NOT expose raw stable member identifiers (as this would allow the platform to uniquely identifier individual buyer)
+* Loyalty extension response MUST only include `display_id` after verified/authenticated membership
+* Loyalty extension response MUST treat all `context.eligibility` values in the request as buyer claims rather than proof
