@@ -3915,8 +3915,9 @@ authentication is required, the REST transport <strong>MAY</strong> use:</p>
 <ol>
 <li><strong>Open API</strong>: No authentication required for public operations.</li>
 <li><strong>API Keys</strong>: Via <code>X-API-Key</code> header.</li>
-<li><strong>OAuth 2.0</strong>: Via <code>Authorization: Bearer {token}</code> header, following
-    <a href="https://tools.ietf.org/html/rfc6749" target="_blank">RFC 6749</a>.</li>
+<li><strong>OAuth 2.0</strong>: Via <code>Authorization: Bearer {token}</code> header. Identifies the
+   platform for agent-authenticated access, or both platform and user for
+   user-authenticated access (see <a href="../identity-linking/">Identity Linking</a>).</li>
 <li><strong>Mutual TLS</strong>: For high-security environments.</li>
 </ol>
 <p>Businesses <strong>MAY</strong> require authentication for some operations while leaving

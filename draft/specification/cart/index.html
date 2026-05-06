@@ -1022,6 +1022,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#scopes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scopes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#guidelines" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2415,6 +2426,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#scopes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scopes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#guidelines" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2859,6 +2881,25 @@ SHOULD be linked for the duration of the checkout.</p>
     session with <code>create_cart</code>.</p>
 </li>
 </ul>
+<h2 id="scopes">Scopes<a class="headerlink" href="#scopes" title="Permanent link">&para;</a></h2>
+<p>The Cart capability defines the following well-known scopes for
+user-authenticated access:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Scope</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>dev.ucp.shopping.cart:manage</code></td>
+<td style="text-align: left;">All cart operations on behalf of the authenticated user — create, read, update, persist.</td>
+</tr>
+</tbody>
+</table>
+<p>Scope declaration, derivation, and rules for extending this set with
+custom scopes are defined in <a href="../identity-linking/#scopes">Identity Linking — Scopes</a>.</p>
 <h2 id="guidelines">Guidelines<a class="headerlink" href="#guidelines" title="Permanent link">&para;</a></h2>
 <h3 id="platform">Platform<a class="headerlink" href="#platform" title="Permanent link">&para;</a></h3>
 <ul>
@@ -3478,9 +3519,9 @@ are estimates; accurate taxes are computed at checkout.</p>
 </tr>
 <tr>
 <td style="text-align: left;">code</td>
-<td style="text-align: left;">string</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#info-code">Info Code</a></td>
 <td style="text-align: left;">No</td>
-<td style="text-align: left;">Info code for programmatic handling.</td>
+<td style="text-align: left;">Info code identifying the type of informational message. Standard codes are defined in capability specs (see examples), and have standardized semantics; freeform codes are permitted.</td>
 </tr>
 <tr>
 <td style="text-align: left;">content_type</td>
@@ -3521,9 +3562,9 @@ are estimates; accurate taxes are computed at checkout.</p>
 </tr>
 <tr>
 <td style="text-align: left;">code</td>
-<td style="text-align: left;">string</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#warning-code">Warning Code</a></td>
 <td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Warning code. Machine-readable identifier for the warning type (e.g., final_sale, prop65, fulfillment_changed, age_restricted, etc.).</td>
+<td style="text-align: left;">Warning code identifying the type of warning. Standard codes are defined in capability specs (see examples), and have standardized semantics; freeform codes are permitted.</td>
 </tr>
 <tr>
 <td style="text-align: left;">content</td>

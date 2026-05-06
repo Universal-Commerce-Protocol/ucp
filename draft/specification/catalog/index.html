@@ -1544,6 +1544,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#scopes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scopes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#transport-bindings" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2698,6 +2709,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#scopes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scopes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#transport-bindings" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3448,9 +3470,9 @@ rendering contract.</p>
 </tr>
 <tr>
 <td style="text-align: left;">code</td>
-<td style="text-align: left;">string</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#warning-code">Warning Code</a></td>
 <td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Warning code. Machine-readable identifier for the warning type (e.g., final_sale, prop65, fulfillment_changed, age_restricted, etc.).</td>
+<td style="text-align: left;">Warning code identifying the type of warning. Standard codes are defined in capability specs (see examples), and have standardized semantics; freeform codes are permitted.</td>
 </tr>
 <tr>
 <td style="text-align: left;">content</td>
@@ -3509,9 +3531,9 @@ rendering contract.</p>
 </tr>
 <tr>
 <td style="text-align: left;">code</td>
-<td style="text-align: left;">string</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#info-code">Info Code</a></td>
 <td style="text-align: left;">No</td>
-<td style="text-align: left;">Info code for programmatic handling.</td>
+<td style="text-align: left;">Info code identifying the type of informational message. Standard codes are defined in capability specs (see examples), and have standardized semantics; freeform codes are permitted.</td>
 </tr>
 <tr>
 <td style="text-align: left;">content_type</td>
@@ -3634,6 +3656,29 @@ disclosure applies to all of its variants.</p>
 </span></code></pre></div>
 <p>See <a href="../checkout/#warning-presentation">Warning Presentation</a> for the
 full rendering contract.</p>
+<h2 id="scopes">Scopes<a class="headerlink" href="#scopes" title="Permanent link">&para;</a></h2>
+<p>The Catalog Search and Catalog Lookup capabilities define the following
+well-known scopes for user-authenticated access:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Scope</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>dev.ucp.shopping.catalog.search:read</code></td>
+<td style="text-align: left;">Search on behalf of the authenticated user — personalized results, member pricing, gated inventory.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>dev.ucp.shopping.catalog.lookup:read</code></td>
+<td style="text-align: left;">Lookup on behalf of the authenticated user — personalized pricing or availability for specific products.</td>
+</tr>
+</tbody>
+</table>
+<p>Scope declaration, derivation, and rules for extending this set with
+custom scopes are defined in <a href="../identity-linking/#scopes">Identity Linking — Scopes</a>.</p>
 <h2 id="transport-bindings">Transport Bindings<a class="headerlink" href="#transport-bindings" title="Permanent link">&para;</a></h2>
 <p>The capabilities above are bound to specific transport protocols:</p>
 <ul>

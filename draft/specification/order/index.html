@@ -1673,6 +1673,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#scopes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scopes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#operations" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2672,6 +2683,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#scopes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scopes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#operations" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3453,6 +3475,29 @@ sense to them.</p>
 </span><span id="__span-2-95"><a id="__codelineno-2-95" name="__codelineno-2-95" href="#__codelineno-2-95"></a><span class="w">  </span><span class="p">]</span>
 </span><span id="__span-2-96"><a id="__codelineno-2-96" name="__codelineno-2-96" href="#__codelineno-2-96"></a><span class="p">}</span>
 </span></code></pre></div>
+<h2 id="scopes">Scopes<a class="headerlink" href="#scopes" title="Permanent link">&para;</a></h2>
+<p>The Order capability defines the following well-known scopes for
+user-authenticated access:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Scope</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>dev.ucp.shopping.order:read</code></td>
+<td style="text-align: left;">Read access to the user's orders — Get Order on resources owned by the authenticated user.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>dev.ucp.shopping.order:manage</code></td>
+<td style="text-align: left;">Post-purchase operations on the user's orders — cancellation, returns, and other modifications.</td>
+</tr>
+</tbody>
+</table>
+<p>Scope declaration, derivation, and rules for extending this set with
+custom scopes are defined in <a href="../identity-linking/#scopes">Identity Linking — Scopes</a>.</p>
 <h2 id="operations">Operations<a class="headerlink" href="#operations" title="Permanent link">&para;</a></h2>
 <p>The order entity is a <strong>current-state snapshot</strong>: the authoritative latest
 state of the order at the time of retrieval or delivery. Businesses <strong>MUST</strong>
@@ -3490,12 +3535,13 @@ cases.</p>
 response, using any supported UCP mechanism - API keys, OAuth 2.0, mutual
 TLS, or HTTP Message Signatures (see
 <a href="../checkout-rest/#authentication">Identity and Authentication</a>). The
-authentication method determines the scope of accessible orders:</p>
+authentication method determines which orders are accessible to the
+caller:</p>
 <table>
 <thead>
 <tr>
 <th style="text-align: left;">Authentication</th>
-<th style="text-align: left;">Recommended Access Scope</th>
+<th style="text-align: left;">Accessible Orders</th>
 </tr>
 </thead>
 <tbody>
@@ -3505,7 +3551,7 @@ authentication method determines the scope of accessible orders:</p>
 </tr>
 <tr>
 <td style="text-align: left;">Buyer authorization</td>
-<td style="text-align: left;">Orders originated by the buyer, subject to granted scope</td>
+<td style="text-align: left;">Orders owned by the buyer, subject to the granted OAuth scopes</td>
 </tr>
 </tbody>
 </table>

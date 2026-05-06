@@ -349,6 +349,16 @@ A stateless URL that encodes checkout state directly, allowing reconstruction wi
 
 > **Note:** Checkout permalinks are a REST-specific construct that extends the [REST transport binding](http://ucp.dev/draft/specification/checkout-rest/index.md). Accessing a permalink returns a redirect to the checkout UI or renders the checkout page directly.
 
+## Scopes
+
+The Checkout capability defines the following well-known scopes for user-authenticated access:
+
+| Scope                              | Description                                                                                                           |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `dev.ucp.shopping.checkout:manage` | All checkout operations on behalf of the authenticated user — create, update, complete, and cancel checkout sessions. |
+
+Scope declaration, derivation, and rules for extending this set with custom scopes are defined in [Identity Linking — Scopes](http://ucp.dev/draft/specification/identity-linking/#scopes).
+
 ## Guidelines
 
 (In addition to the overarching guidelines)
@@ -652,26 +662,26 @@ Error code identifying the type of error. Standard errors are defined in specifi
 
 ### Message Info
 
-| Name         | Type   | Required | Description                                                    |
-| ------------ | ------ | -------- | -------------------------------------------------------------- |
-| type         | string | **Yes**  | **Constant = info**. Message type discriminator.               |
-| path         | string | No       | RFC 9535 JSONPath to the component the message refers to.      |
-| code         | string | No       | Info code for programmatic handling.                           |
-| content_type | string | No       | Content format, default = plain. **Enum:** `plain`, `markdown` |
-| content      | string | **Yes**  | Human-readable message.                                        |
+| Name         | Type                                                   | Required | Description                                                                                                                                                                            |
+| ------------ | ------------------------------------------------------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type         | string                                                 | **Yes**  | **Constant = info**. Message type discriminator.                                                                                                                                       |
+| path         | string                                                 | No       | RFC 9535 JSONPath to the component the message refers to.                                                                                                                              |
+| code         | [Info Code](/draft/specification/reference/#info-code) | No       | Info code identifying the type of informational message. Standard codes are defined in capability specs (see examples), and have standardized semantics; freeform codes are permitted. |
+| content_type | string                                                 | No       | Content format, default = plain. **Enum:** `plain`, `markdown`                                                                                                                         |
+| content      | string                                                 | **Yes**  | Human-readable message.                                                                                                                                                                |
 
 ### Message Warning
 
-| Name         | Type   | Required | Description                                                                                                                                                                                                                                         |
-| ------------ | ------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| type         | string | **Yes**  | **Constant = warning**. Message type discriminator.                                                                                                                                                                                                 |
-| path         | string | No       | JSONPath (RFC 9535) to related field (e.g., $.line_items[0]).                                                                                                                                                                                       |
-| code         | string | **Yes**  | Warning code. Machine-readable identifier for the warning type (e.g., final_sale, prop65, fulfillment_changed, age_restricted, etc.).                                                                                                               |
-| content      | string | **Yes**  | Human-readable warning message that MUST be displayed.                                                                                                                                                                                              |
-| content_type | string | No       | Content format, default = plain. **Enum:** `plain`, `markdown`                                                                                                                                                                                      |
-| presentation | string | No       | Rendering contract for this warning. 'notice' (default): platform MUST display, MAY dismiss. 'disclosure': platform MUST display in proximity to the path-referenced component, MUST NOT hide or auto-dismiss. See specification for full contract. |
-| image_url    | string | No       | URL to a required visual element (e.g., warning symbol, energy class label).                                                                                                                                                                        |
-| url          | string | No       | Reference URL for more information (e.g., regulatory site, registry entry, policy page).                                                                                                                                                            |
+| Name         | Type                                                         | Required | Description                                                                                                                                                                                                                                         |
+| ------------ | ------------------------------------------------------------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type         | string                                                       | **Yes**  | **Constant = warning**. Message type discriminator.                                                                                                                                                                                                 |
+| path         | string                                                       | No       | JSONPath (RFC 9535) to related field (e.g., $.line_items[0]).                                                                                                                                                                                       |
+| code         | [Warning Code](/draft/specification/reference/#warning-code) | **Yes**  | Warning code identifying the type of warning. Standard codes are defined in capability specs (see examples), and have standardized semantics; freeform codes are permitted.                                                                         |
+| content      | string                                                       | **Yes**  | Human-readable warning message that MUST be displayed.                                                                                                                                                                                              |
+| content_type | string                                                       | No       | Content format, default = plain. **Enum:** `plain`, `markdown`                                                                                                                                                                                      |
+| presentation | string                                                       | No       | Rendering contract for this warning. 'notice' (default): platform MUST display, MAY dismiss. 'disclosure': platform MUST display in proximity to the path-referenced component, MUST NOT hide or auto-dismiss. See specification for full contract. |
+| image_url    | string                                                       | No       | URL to a required visual element (e.g., warning symbol, energy class label).                                                                                                                                                                        |
+| url          | string                                                       | No       | Reference URL for more information (e.g., regulatory site, registry entry, policy page).                                                                                                                                                            |
 
 ### Payment
 

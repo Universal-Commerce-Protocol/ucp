@@ -347,6 +347,19 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
           "schema": "https://ucp.dev/draft/schemas/shopping/discount.json",
           "extends": "dev.ucp.shopping.checkout"
         }
+      ],
+      "dev.ucp.common.identity_linking": [
+        {
+          "version": "draft",
+          "spec": "https://ucp.dev/draft/specification/identity-linking",
+          "schema": "https://ucp.dev/draft/schemas/common/identity_linking.json",
+          "config": {
+            "scopes": {
+              "dev.ucp.shopping.order:read":   {},
+              "dev.ucp.shopping.order:manage": {}
+            }
+          }
+        }
       ]
     },
     "payment_handlers": {
@@ -437,6 +450,13 @@ Platform profiles are similar and include signing keys for capabilities requirin
           "config": {
             "webhook_url": "https://platform.example.com/webhooks/ucp/orders"
           }
+        }
+      ],
+      "dev.ucp.common.identity_linking": [
+        {
+          "version": "draft",
+          "spec": "https://ucp.dev/draft/specification/identity-linking",
+          "schema": "https://ucp.dev/draft/schemas/common/identity_linking.json"
         }
       ]
     },

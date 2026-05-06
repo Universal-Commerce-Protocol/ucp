@@ -882,6 +882,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#scopes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scopes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#guidelines" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3126,6 +3137,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#scopes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scopes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#guidelines" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4246,6 +4268,25 @@ platform can prefill checkout state when initiating a buy-now flow.</p>
 <a href="../checkout-rest/">REST transport binding</a>. Accessing a permalink returns a
 redirect to the checkout UI or renders the checkout page directly.</p>
 </blockquote>
+<h2 id="scopes">Scopes<a class="headerlink" href="#scopes" title="Permanent link">&para;</a></h2>
+<p>The Checkout capability defines the following well-known scopes for
+user-authenticated access:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Scope</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>dev.ucp.shopping.checkout:manage</code></td>
+<td style="text-align: left;">All checkout operations on behalf of the authenticated user — create, update, complete, and cancel checkout sessions.</td>
+</tr>
+</tbody>
+</table>
+<p>Scope declaration, derivation, and rules for extending this set with
+custom scopes are defined in <a href="../identity-linking/#scopes">Identity Linking — Scopes</a>.</p>
 <h2 id="guidelines">Guidelines<a class="headerlink" href="#guidelines" title="Permanent link">&para;</a></h2>
 <p>(In addition to the overarching guidelines)</p>
 <h3 id="platform">Platform<a class="headerlink" href="#platform" title="Permanent link">&para;</a></h3>
@@ -5174,9 +5215,9 @@ field or omitting them.</p>
 </tr>
 <tr>
 <td style="text-align: left;">code</td>
-<td style="text-align: left;">string</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#info-code">Info Code</a></td>
 <td style="text-align: left;">No</td>
-<td style="text-align: left;">Info code for programmatic handling.</td>
+<td style="text-align: left;">Info code identifying the type of informational message. Standard codes are defined in capability specs (see examples), and have standardized semantics; freeform codes are permitted.</td>
 </tr>
 <tr>
 <td style="text-align: left;">content_type</td>
@@ -5217,9 +5258,9 @@ field or omitting them.</p>
 </tr>
 <tr>
 <td style="text-align: left;">code</td>
-<td style="text-align: left;">string</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#warning-code">Warning Code</a></td>
 <td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Warning code. Machine-readable identifier for the warning type (e.g., final_sale, prop65, fulfillment_changed, age_restricted, etc.).</td>
+<td style="text-align: left;">Warning code identifying the type of warning. Standard codes are defined in capability specs (see examples), and have standardized semantics; freeform codes are permitted.</td>
 </tr>
 <tr>
 <td style="text-align: left;">content</td>

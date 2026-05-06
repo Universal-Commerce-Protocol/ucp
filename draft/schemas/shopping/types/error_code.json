@@ -10,6 +10,8 @@
     "item_unavailable",
     "address_undeliverable",
     "payment_failed",
-    "eligibility_invalid"
+    "eligibility_invalid",
+    "identity_required",
+    "insufficient_scope"
   ]
 }
