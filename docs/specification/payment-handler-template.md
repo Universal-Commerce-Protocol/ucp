@@ -46,7 +46,7 @@ supports.}
 > **Note on Terminology:**
 > While this specification refers to the participant as the **"business,"**
 > technical schema fields may retain the standard industry nomenclature
-> **`merchant_*`** (e.g., `merchant_id`). Mappings are documented below.
+> **`key_*`** (e.g., `key_id`). Mappings are documented below.
 
 | Participant             | Role               | Prerequisites                |
 | :---------------------- | :----------------- | :--------------------------- |
@@ -97,7 +97,7 @@ Before advertising this handler, businesses **MUST** complete:
 
 | Field                   | Description                                      |
 | :---------------------- | :----------------------------------------------- |
-| `identity.access_token` | {what identifier is assigned, e.g., business_id} |
+| `identity.access_token` | {what identifier is assigned, e.g., key_id} |
 | {additional config}     | {any additional configuration from onboarding}   |
 
 ### Handler Configuration

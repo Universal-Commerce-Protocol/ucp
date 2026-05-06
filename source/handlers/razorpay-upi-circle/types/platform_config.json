@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://razorpay.com/ucp/handlers/upi/types/platform_config.json",
+  "title": "Razorpay UPI Platform Config",
+  "description": "Platform-level configuration for the com.razorpay.upi_circle payment handler (UPI Circle flow). Declared in the platform's UCP profile.",
+  "type": "object",
+  "required": ["environment"],
+  "properties": {
+    "environment": {
+      "type": "string",
+      "enum": ["sandbox", "production"],
+      "description": "Razorpay API environment. Must match the business config environment ('sandbox' for test mode, 'production' for live mode)."
+    },
+    "upi_apps": {
+      "type": "array",
+      "description": "UPI apps the platform is capable of deep-linking to (e.g., ['gpay', 'phonepe', 'paytm', 'bhim']).",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    }
+  },
+  "additionalProperties": false
+}

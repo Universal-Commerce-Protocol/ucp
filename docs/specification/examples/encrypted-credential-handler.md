@@ -117,7 +117,7 @@ compliant** because they will handle raw PANs. This includes:
 
 ### Handler Configuration
 
-Businesses advertise the platform's handler. The `business_id` field identifies
+Businesses advertise the platform's handler. The `key_id` field identifies
 the business, which the platform uses to look up the correct public key for
 encryption.
 
@@ -136,7 +136,7 @@ have their own compliance requirements.
 | Field           | Type   | Required | Description                                         |
 | :-------------- | :----- | :------- | :-------------------------------------------------- |
 | `environment`   | string | Yes      | API environment (`sandbox` or `production`)         |
-| `business_id`   | string | Yes      | Business identifier assigned by platform            |
+| `key_id`   | string | Yes      | Business identifier assigned by platform            |
 | `public_key_id` | string | Yes      | Identifier for the business's registered public key |
 
 #### Example Business Handler Declaration
@@ -162,7 +162,7 @@ have their own compliance requirements.
           ],
           "config": {
             "environment": "production",
-            "business_id": "merchant_abc123",
+            "key_id": "merchant_abc123",
             "public_key_id": "key_2026_01"
           }
         }
@@ -179,7 +179,7 @@ The response config includes information about the encryption used.
 | Field                  | Type   | Required | Description                           |
 | :--------------------- | :----- | :------- | :------------------------------------ |
 | `environment`          | string | Yes      | API environment                       |
-| `business_id`          | string | Yes      | Business identifier                   |
+| `key_id`          | string | Yes      | Business identifier                   |
 | `encryption_algorithm` | string | Yes      | Algorithm used (e.g., `RSA-OAEP-256`) |
 | `key_id`               | string | Yes      | Key identifier used for encryption    |
 
@@ -199,7 +199,7 @@ The response config includes information about the encryption used.
   ],
   "config": {
     "environment": "production",
-    "business_id": "merchant_abc123",
+    "key_id": "merchant_abc123",
     "encryption_algorithm": "RSA-OAEP-256",
     "key_id": "key_2026_01"
   }
