@@ -3,8 +3,52 @@
   "$id": "https://ucp.dev/schemas/shopping/buyer_consent.json",
   "name": "dev.ucp.shopping.buyer_consent",
   "title": "Buyer Consent Extension",
-  "description": "Extends Checkout with buyer consent tracking for privacy compliance via the buyer object.",
+  "description": "Extends Checkout with buyer consent tracking for privacy compliance via the buyer object, and per-channel marketing consent capture via checkout-level options.",
   "$defs": {
+    "marketing_consent_option": {
+      "type": "object",
+      "description": "A marketing channel the business offers for buyer opt-in.",
+      "required": [
+        "channel",
+        "display_text",
+        "privacy_policy_url"
+      ],
+      "properties": {
+        "channel": {
+          "type": "string",
+          "enum": ["email", "sms", "whatsapp"],
+          "description": "Marketing channel."
+        },
+        "display_text": {
+          "type": "string",
+          "description": "Human-readable description of what the buyer consents to receive."
+        },
+        "privacy_policy_url": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL to the business's privacy policy for this consent."
+        }
+      }
+    },
+    "marketing_channel_consent": {
+      "type": "object",
+      "description": "The buyer's opt-in decision for a marketing channel.",
+      "required": [
+        "channel",
+        "opted_in"
+      ],
+      "properties": {
+        "channel": {
+          "type": "string",
+          "enum": ["email", "sms", "whatsapp"],
+          "description": "Channel matching a marketing_consent_option channel value."
+        },
+        "opted_in": {
+          "type": "boolean",
+          "description": "Whether the buyer consented to marketing on this channel."
+        }
+      }
+    },
     "consent": {
       "type": "object",
       "description": "User consent states for data processing",
@@ -19,11 +63,23 @@
         },
         "marketing": {
           "type": "boolean",
-          "description": "Consent for marketing communications."
+          "description": "Deprecated. Use marketing_channels for per-channel consent. When marketing_channels is present, this field SHOULD be ignored."
         },
         "sale_of_data": {
           "type": "boolean",
           "description": "Consent for selling data to third parties (CCPA)."
+        },
+        "marketing_channels": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/marketing_channel_consent"
+          },
+          "description": "Per-channel marketing consent decisions. Supersedes the marketing boolean when present. Omission preserves current subscription state.",
+          "ucp_request": {
+            "create": "omit",
+            "update": "omit",
+            "complete": "optional"
+          }
         }
       }
     },
@@ -47,7 +103,7 @@
     },
     "dev.ucp.shopping.checkout": {
       "title": "Checkout with Buyer Consent",
-      "description": "Checkout extended with consent tracking via buyer object.",
+      "description": "Checkout extended with consent tracking via buyer object and marketing consent options.",
       "allOf": [
         {
           "$ref": "checkout.json"
@@ -61,8 +117,17 @@
               "ucp_request": {
                 "create": "optional",
                 "update": "optional",
-                "complete": "omit"
+                "complete": "optional"
               }
+            },
+            "marketing_consent_options": {
+              "type": "array",
+              "readOnly": true,
+              "items": {
+                "$ref": "#/$defs/marketing_consent_option"
+              },
+              "description": "Marketing channels the business offers for buyer opt-in. Businesses include this in create and update checkout responses. Options sent in complete responses are ignored by the platform. Businesses SHOULD NOT include options for channels where the buyer is already subscribed.",
+              "ucp_request": "omit"
             }
           }
         }
