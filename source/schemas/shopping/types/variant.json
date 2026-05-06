@@ -142,6 +142,13 @@
       },
       "description": "Variant tags for categorization and search."
     },
+    "attributes": {
+      "type": "array",
+      "items": {
+        "$ref": "attribute.json"
+      },
+      "description": "Structured measurable facts that vary by variant (storage, weight by size). When the same attribute appears on the parent Product, the Variant entry overrides it (matched by `key` if present, else case-insensitively by `name`). Product entries the Variant doesn't redeclare are inherited. Use `options` for variant-defining axes, `tags` for categorical labels, and `metadata` for business-specific data."
+    },
     "metadata": {
       "type": "object",
       "description": "Business-defined custom data extending the standard variant model."

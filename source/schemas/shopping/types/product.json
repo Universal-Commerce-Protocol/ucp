@@ -81,6 +81,13 @@
       },
       "description": "Product tags for categorization and search."
     },
+    "attributes": {
+      "type": "array",
+      "items": {
+        "$ref": "attribute.json"
+      },
+      "description": "Structured measurable facts about the product (battery life, display size, weight). Facts constant across variants belong here; variant-specific measurements belong on `Variant.attributes`. Use `tags` for categorical labels, `options` for variant-defining axes, and `metadata` for business-specific data."
+    },
     "metadata": {
       "type": "object",
       "description": "Business-defined custom data extending the standard product model."
