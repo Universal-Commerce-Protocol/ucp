@@ -35,7 +35,7 @@
       "description": "Buyer claims about eligible benefits such as loyalty membership, payment instrument perks, and similar. Recognized claims MAY inform the Business response (e.g., member-only product availability, adjusted pricing in catalog, provisional discounts at cart or checkout). Businesses MUST ignore unrecognized values without error. Values MUST use reverse-domain naming (e.g., 'com.example.loyalty_gold', 'org.school.student') and MUST be non-identifying.",
       "uniqueItems": true,
       "items": {
-        "$ref": "reverse_domain_name.json"
+        "$ref": "../../common/types/reverse_domain_name.json"
       }
     }
   }

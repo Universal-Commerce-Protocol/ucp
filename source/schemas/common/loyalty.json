@@ -1,0 +1,225 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/loyalty.json",
+  "name": "dev.ucp.common.loyalty",
+  "title": "Loyalty Extension",
+  "description": "Extends various Capabilities with loyalty support using memberships info.",
+  "$defs": {
+    "earning_breakdown": {
+      "type": "object",
+      "description": "Breakdown rule of the reward earnings",
+      "required": ["id", "amount", "description"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique rewards breakdown rule identifier."
+        },
+        "amount": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Rewards earned from this rule."
+        },
+        "description": {
+          "type": "string",
+          "description": "A display-ready, human-readable rationale for the specific rewards (e.g. 2x on footwear)."
+        },
+        "source": {
+          "type": "string",
+          "description": "JSONPath to the source benefit that offers the rewards."
+        }
+      }
+    },
+    "earning_forecast": {
+      "type": "object",
+      "description": "Preview of rewards to be earned from the current transaction.",
+      "required": ["amount"],
+      "properties": {
+        "amount": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total rewards to be earned if the transaction completes."
+        },
+        "breakdown": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/earning_breakdown"
+          },
+          "description": "List of breakdown of earning contributing to the total."
+        }
+      }
+    },
+    "reward_currency": {
+      "type": "object",
+      "description": "The currency of the loyalty reward.",
+      "required": ["name", "code"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Human-readable name of the currency (e.g. “LoyaltyStars”)."
+        },
+        "code": {
+          "type": "string",
+          "description": "Business-specific representation of the currency (e.g. “LST”)."
+        },
+        "decimal_places": {
+          "type": "integer",
+          "default": 0,
+          "description": "The position of a digit to the right of a decimal point. Applies to all amount related fields for rewards."
+        }
+      }
+    },
+    "membership_reward": {
+      "type": "object",
+      "description": "Quantifiable and collectable reward of loyalty membership of the customer.",
+      "required": ["currency"],
+      "properties": {
+        "currency": {
+          "type": "object",
+          "$ref": "#/$defs/reward_currency",
+          "description": "A unit of value that customers can accumulate through various commercial activities."
+        },
+        "earning_forecast": {
+          "type": "object",
+          "$ref": "#/$defs/earning_forecast",
+          "description": "Preview of rewards to be earned from the current transaction."
+        }
+      }
+    },
+    "membership_tier_benefit": {
+      "type": "object",
+      "description": "Benefits associated with a membership tier.",
+      "required": ["id", "description"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the tier benefit."
+        },
+        "description": {
+          "type": "string",
+          "description": "Detailed complete explanation of the informational benefit (e.g. “Early access to sales”)."
+        }
+      }
+    },
+    "membership_tier": {
+      "type": "object",
+      "description": "Specific achievement ranks or status milestones within a track that unlock escalating value as a member progresses through activity or spend.",
+      "required": ["id", "name"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the membership tier."
+        },
+        "name": {
+          "type": "string",
+          "description": "The human-readable name of the tier (e.g., “Platinum”)."
+        },
+        "benefits": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/membership_tier_benefit"
+          },
+          "description": "List of possible benefits associated with this tier."
+        }
+      }
+    },
+    "membership_track": {
+      "type": "object",
+      "description": "An enrollment pathway or program category that a user can join independently or simultaneously.",
+      "required": ["id", "name"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the membership track."
+        },
+        "name": {
+          "type": "string",
+          "description": "The human-readable name of the track (e.g., “Platinum”)."
+        },
+        "tiers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/membership_tier"
+          },
+          "description": "List of tiers associated with the membership track."
+        },
+        "activated_tier": {
+          "type": "string",
+          "description": "The tier that the customer is activated for, identified by the `id` of the Membership Tier object."
+        },
+        "rewards": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/membership_reward"
+          },
+          "description": "List of quantifiable rewards value the user holds. Each object encapsulates one type of reward the track offers."
+        }
+      }
+    },
+    "loyalty_membership": {
+      "type": "object",
+      "description": "Loyalty membership that the business offers or associated with.",
+      "required": ["id", "name"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique loyalty membership identifier."
+        },
+        "name": {
+          "type": "string",
+          "description": "Business specific name of the loyalty membership/program."
+        },
+        "display_id": {
+          "type": "string",
+          "description": "A masked or partial version of the membership id for user recognition (e.g., '****5678')."
+        },
+        "tracks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/membership_track"
+          },
+          "description": "List of tracks associated with the loyalty membership."
+        },
+        "provisional": {
+          "type": "boolean",
+          "default": false,
+          "description": "True if this membership requires additional verification."
+        }
+      }
+    },
+    "loyalty": {
+      "type": "object",
+      "description": "Key-value pair with key represents buyer/platform asserted eligibility claims and value represents associated membership information. All loyalty keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.",
+      "propertyNames": {
+        "$ref": "types/reverse_domain_name.json",
+        "description": "Reverse-domain identifier that represents eligibility claim accepted by the Business for this membership. Corresponds to a value from context.eligibility."
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/loyalty_membership",
+        "description": "Payload that describes the membership information corresponds to the claim.",
+        "ucp_request": "omit"
+      }
+    },
+    "dev.ucp.shopping.checkout": {
+      "title": "Checkout with Loyalty",
+      "description": "Checkout extended with Loyalty capability.",
+      "allOf": [
+        {
+          "$ref": "../shopping/checkout.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "loyalty": {
+              "$ref": "#/$defs/loyalty",
+              "ucp_request": {
+                "create": "optional",
+                "update": "optional",
+                "complete": "omit"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

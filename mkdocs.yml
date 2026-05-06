@@ -231,6 +231,7 @@ plugins:
           - specification/buyer-consent.md
           - specification/discount.md
           - specification/fulfillment.md
+          - specification/loyalty.md
         Cart Capability:
           - specification/cart.md
           - specification/cart-rest.md
