@@ -442,6 +442,28 @@ authorization request; the platform constructs its own authorization
 request from the `WWW-Authenticate` challenge and discovered metadata,
 including PKCE values, `state`, and `redirect_uri` it owns.
 
+**No token presented** (first request to a gated operation — `error` omitted per RFC 6750 §3.1):
+
+```http
+HTTP/1.1 401 Unauthorized
+WWW-Authenticate: Bearer realm="https://merchant.example.com",
+                  resource_metadata="https://merchant.example.com/.well-known/oauth-protected-resource"
+Content-Type: application/json
+
+{
+  "messages": [
+    {
+      "type": "error",
+      "code": "identity_required",
+      "content": "User identity is required to access order history.",
+      "severity": "requires_buyer_review"
+    }
+  ]
+}
+```
+
+**Token present but invalid or expired** (`error="invalid_token"` included per RFC 6750 §3):
+
 ```http
 HTTP/1.1 401 Unauthorized
 WWW-Authenticate: Bearer realm="https://merchant.example.com",
@@ -517,27 +539,18 @@ Content-Type: application/json
 
 ## Optional Authentication
 
-A mechanism for the platform to inform the buyer about the benefit of
-authenticating, when an operation has succeeded without it.
+A mechanism for the **business** to signal to the **platform** that
+authentication is available and would provide value in the current context,
+even though the operation succeeded without it. The platform may then present
+this signal to the user.
 
 ### `identity_optional`
 
-Businesses **MAY** include this info-severity code in successful
+Businesses **SHOULD** include this info-severity code in successful
 responses when authentication is available and would meaningfully
-unlock additional capabilities in the current context.
-
-The message functions as a contextual signal; per-scope semantics (what
-each scope unlocks, the consent text to present) are conveyed
-independently via the `description` field on scope declarations. These
-two mechanisms are distinct:
-
-* `identity_optional` is a **runtime, per-request notice**.
-* Per-scope `description` is **static, per-scope context** for the
-  OAuth consent flow.
-
-When emitting `identity_optional`, businesses **SHOULD** populate
-descriptions on the relevant scopes so platforms can present and
-explain scope choices during the OAuth consent flow.
+unlock additional capabilities in the current context. The `content`
+field conveys the business's value prompt to the platform (e.g.,
+"Sign in for member pricing and personalized results.").
 
 ```json
 {
