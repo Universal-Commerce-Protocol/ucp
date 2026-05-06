@@ -1971,10 +1971,9 @@ support for multiple versions of that capability. The capability
 intersection algorithm considers only capability versions supported
 by both parties.
 
-Businesses **MUST** include only capabilities compatible with the
-negotiated protocol version in their response. A capability that
-depends on features introduced in a newer protocol version **MUST
-NOT** be included when processing at an older protocol version.
+> [!IMPORTANT]
+> **Protocol Compatibility Constraint:**
+> Businesses **MUST** include only capabilities compatible with the negotiated protocol version in their response. A capability that depends on features introduced in a newer protocol version **MUST NOT** be included when processing at an older protocol version.
 
 ### Backwards Compatibility
 
@@ -2008,8 +2007,7 @@ The following changes **MUST NOT** be introduced without a new version:
 - Each capability versions independently from other capabilities.
 - Capabilities **MUST** follow the same backwards compatibility rules as the
     protocol.
-- Businesses **MUST** validate capability version compatibility using the same
-    logic as what's described above.
+- Businesses **MUST** validate capability version compatibility using the same negotiation logic described in [Protocol Version](#protocol-version) and [Version Negotiation](#version-negotiation).
 - Transports **MAY** define their own version handling mechanisms.
 
 #### UCP Capabilities (`dev.ucp.*`)
