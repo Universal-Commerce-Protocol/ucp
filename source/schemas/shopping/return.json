@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/return.json",
+  "name": "dev.ucp.shopping.return",
+  "title": "Return Extension",
+  "description": "Extends Checkout with return policy support.",
+  "$defs": {
+    "return_policy": {
+      "$ref": "types/return_policy.json"
+    },
+    "return_method": {
+      "$ref": "types/return_method.json"
+    },
+    "return_fee": {
+      "$ref": "types/return_fee.json"
+    },
+    "dev.ucp.shopping.checkout": {
+      "title": "Checkout with Return",
+      "description": "Checkout extended with return policies.",
+      "allOf": [
+        {
+          "$ref": "checkout.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "return_policies": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/return_policy"
+              },
+              "description": "Return policies applicable to items in the checkout.",
+              "ucp_request": "omit"
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.return": {
+      "platform_schema": {
+        "title": "Return Capability (Platform)",
+        "description": "Platform-level return capability configuration",
+        "allOf": [
+          {
+            "$ref": "../capability.json#/$defs/platform_schema"
+          }
+        ]
+      },
+      "business_schema": {
+        "title": "Return Capability (Business)",
+        "description": "Business-level return capability configuration",
+        "allOf": [
+          {
+            "$ref": "../capability.json#/$defs/business_schema"
+          }
+        ]
+      }
+    }
+  }
+}
