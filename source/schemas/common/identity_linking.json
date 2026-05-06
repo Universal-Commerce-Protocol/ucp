@@ -26,6 +26,27 @@
       "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9_]*)+:[a-z][a-z0-9_]*$"
     },
 
+    "wallet_attestation_provider": {
+      "type": "object",
+      "title": "Wallet Attestation Provider",
+      "description": "Trusted third-party verifier that evaluates a business-supplied predicate against a wallet's on-chain state and signs the boolean result. Stateless: each attestation is a self-contained JWS-signed payload, verifiable offline against the provider's published JWKS.",
+      "required": ["type", "provider_jwks"],
+      "properties": {
+        "type": { "const": "wallet_attestation" },
+        "provider_jwks": {
+          "type": "string",
+          "format": "uri",
+          "description": "HTTPS URI of the provider's JWKS (RFC 7517). Businesses fetch this URL to obtain the public keys used to verify attestation signatures."
+        },
+        "attestation_endpoint": {
+          "type": "string",
+          "format": "uri",
+          "description": "Optional HTTPS URI where platforms POST attestation requests. The endpoint accepts a wallet address plus a predicate, evaluates the predicate against current chain state, and returns a JWS-signed payload (ES256 recommended per RFC 7518)."
+        }
+      },
+      "additionalProperties": false
+    },
+
     "dev.ucp.common.identity_linking": {
       "platform_schema": {
         "title": "Identity Linking (Platform)",
