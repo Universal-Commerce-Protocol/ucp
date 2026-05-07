@@ -225,6 +225,7 @@ def on_config(config):
         # Remove any section containing specification/ files
         sections_to_remove = []
         for section_name, pages in llms_conf["sections"].items():
+
           def has_spec_page(page):
             # page can be a url: description mapping or just a url string
             path = list(page.keys())[0] if isinstance(page, dict) else page
