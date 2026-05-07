@@ -673,6 +673,11 @@
         "responses": {
           "200": {
             "description": "Order retrieved or business outcome message",
+            "headers": {
+              "Signature": { "$ref": "#/components/headers/signature" },
+              "Signature-Input": { "$ref": "#/components/headers/signature_input" },
+              "Content-Digest": { "$ref": "#/components/headers/content_digest" }
+            },
             "content": {
               "application/json": {
                 "schema": { "$ref": "#/components/schemas/order_response" }
