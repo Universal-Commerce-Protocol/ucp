@@ -1,7 +1,17 @@
 # Versioning
 
-UCP uses date-based version identifiers following the format `YYYY-MM-DD` to
-indicate the last date backwards incompatible changes were made.
+UCP uses date-based version identifiers following the format `YYYY-MM-DD` to indicate the last date backwards-incompatible changes were made.
+
+## Two-Tiered Versioning
+
+To balance ecosystem stability with flexibility, versioning in UCP operates at two distinct levels:
+
+1. **Protocol Version (`ucp.version`)**: Governs core protocol mechanisms (discovery, negotiation, transport, signatures) and uses the date-based `YYYY-MM-DD` format.
+2. **Capability Versions**: Govern individual features (e.g., Cart, Checkout, Order) which version independently to allow rapid iteration. Standard UCP capabilities also use the date-based `YYYY-MM-DD` format.
+
+For details on negotiation, interaction, and lifecycles of these versions, see [Capability Versions](specification/overview.md#capability-versions) and [Independent Component Versioning](specification/overview.md#independent-component-versioning) in the Architecture Overview.
+
+## Release Process
 
 New development occurs on the `main` branch. We will maintain long-lived
 branches for all supported releases of the spec.
