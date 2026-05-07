@@ -88,6 +88,18 @@ SHOULD be linked for the duration of the checkout.
     on a cleared cart ID return `not_found`; the platform can start a new
     session with `create_cart`.
 
+## Scopes
+
+The Cart capability defines the following well-known scopes for
+user-authenticated access:
+
+| Scope | Description |
+| :--- | :--- |
+| `dev.ucp.shopping.cart:manage` | All cart operations on behalf of the authenticated user — create, read, update, persist. |
+
+Scope declaration, derivation, and rules for extending this set with
+custom scopes are defined in [Identity Linking — Scopes](identity-linking.md#scopes).
+
 ## Guidelines
 
 ### Platform
@@ -219,6 +231,15 @@ and abuse prevention. Signal values MUST NOT be buyer-asserted claims. See
 requirements.
 
 {{ schema_fields('types/signals', 'checkout') }}
+
+### Attribution
+
+Platform-provided referral and conversion-event context — campaign IDs,
+click identifiers, and source/medium markers communicated by the platform.
+See [Attribution](overview.md#attribution) for details and consent
+requirements.
+
+{{ schema_fields('types/attribution', 'checkout') }}
 
 ### Total
 

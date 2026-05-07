@@ -89,6 +89,15 @@ and abuse prevention. Signal values MUST NOT be buyer-asserted claims. See
 
 {{ schema_fields('types/signals', 'catalog') }}
 
+### Attribution
+
+Platform-provided referral and conversion-event context — campaign IDs,
+click identifiers, and source/medium markers communicated by the platform.
+See [Attribution](../overview.md#attribution) for details and consent
+requirements.
+
+{{ schema_fields('types/attribution', 'catalog') }}
+
 ### Product
 
 A catalog item representing a sellable item with one or more purchasable variants.
@@ -406,6 +415,19 @@ disclosure applies to all of its variants.
 
 See [Warning Presentation](../checkout.md#warning-presentation) for the
 full rendering contract.
+
+## Scopes
+
+The Catalog Search and Catalog Lookup capabilities define the following
+well-known scopes for user-authenticated access:
+
+| Scope | Description |
+| :--- | :--- |
+| `dev.ucp.shopping.catalog.search:read` | Search on behalf of the authenticated user — personalized results, member pricing, gated inventory. |
+| `dev.ucp.shopping.catalog.lookup:read` | Lookup on behalf of the authenticated user — personalized pricing or availability for specific products. |
+
+Scope declaration, derivation, and rules for extending this set with
+custom scopes are defined in [Identity Linking — Scopes](../identity-linking.md#scopes).
 
 ## Transport Bindings
 

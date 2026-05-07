@@ -493,6 +493,18 @@ platform can prefill checkout state when initiating a buy-now flow.
 > [REST transport binding](checkout-rest.md). Accessing a permalink returns a
 > redirect to the checkout UI or renders the checkout page directly.
 
+## Scopes
+
+The Checkout capability defines the following well-known scopes for
+user-authenticated access:
+
+| Scope | Description |
+| :--- | :--- |
+| `dev.ucp.shopping.checkout:manage` | All checkout operations on behalf of the authenticated user — create, update, complete, and cancel checkout sessions. |
+
+Scope declaration, derivation, and rules for extending this set with
+custom scopes are defined in [Identity Linking — Scopes](identity-linking.md#scopes).
+
 ## Guidelines
 
 (In addition to the overarching guidelines)
@@ -641,6 +653,15 @@ independently verifiable third-party attestations. See
 requirements.
 
 {{ schema_fields('types/signals', 'checkout') }}
+
+### Attribution
+
+Platform-provided referral and conversion-event context — campaign IDs,
+click identifiers, and source/medium markers communicated by the platform.
+See [Attribution](overview.md#attribution) for details and consent
+requirements.
+
+{{ schema_fields('types/attribution', 'checkout') }}
 
 ### Fulfillment Option
 

@@ -404,6 +404,19 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
           "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/discount.json",
           "extends": "dev.ucp.shopping.checkout"
         }
+      ],
+      "dev.ucp.common.identity_linking": [
+        {
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/identity-linking",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/common/identity_linking.json",
+          "config": {
+            "scopes": {
+              "dev.ucp.shopping.order:read":   {},
+              "dev.ucp.shopping.order:manage": {}
+            }
+          }
+        }
       ]
     },
     "payment_handlers": {
@@ -504,6 +517,13 @@ example:
           "config": {
             "webhook_url": "https://platform.example.com/webhooks/ucp/orders"
           }
+        }
+      ],
+      "dev.ucp.common.identity_linking": [
+        {
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/identity-linking",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/common/identity_linking.json"
         }
       ]
     },
@@ -1721,6 +1741,47 @@ signal is provided; an `info` is advisory and non-blocking.
   ]
 }
 ```
+
+### Attribution
+
+Platforms refer users to businesses through many channels — paid ads,
+organic recommendations, influencer links, AI agents. In a browser-based
+flow, the referral context (campaigns, click identifiers, source/medium
+markers) flows through URL query parameters. The `attribution` field
+enables platforms to communicate the same parameters to businesses.
+
+UCP does **NOT** prescribe attribution models, windows, or assignment
+logic. Platforms use their existing conventions (GA4 campaign parameters,
+click identifiers like `gclid` / `fbclid` / `ttclid`, etc.); businesses
+receive and process them according to their own analytics needs.
+
+```json
+{
+  "attribution": {
+    "campaign_id": "18234567890",
+    "campaign_source": "google",
+    "campaign_medium": "cpc",
+    "campaign_name": "spring_2026",
+    "gclid": "EAIaIQobChMI..."
+  }
+}
+```
+
+Attribution is informational and optionally provided by the platform.
+Businesses do not negotiate or advertise support; the field's presence or
+absence MUST NOT affect the response or negotiation.
+
+The data can carry pseudonymous identifiers (click IDs, session keys)
+treated as personal data under applicable data protection laws. Platforms
+and businesses are each responsible for compliance in their respective
+jurisdictions: platforms determine what to emit and disclose; businesses
+apply their own data handling, retention, and consent policies. The
+`buyer_consent` extension provides a structured channel for buyers to
+communicate consent state.
+
+Attribution appears on cart, checkout, and catalog requests as
+platform-provided attribution context; on order it appears as a
+business-emitted snapshot of the originating checkout's attribution.
 
 ### Transaction Integrity and Non-Repudiation
 
