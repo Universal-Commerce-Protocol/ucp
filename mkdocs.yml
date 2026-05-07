@@ -265,9 +265,8 @@ plugins:
               release branches.
         Specification:
           - specification/overview.md: >-
-              Master technical specification of UCP, detailing core algorithms,
-              discovery mechanisms, secure transports, error taxonomies, and
-              common currency data structures.
+              Master technical specification of UCP, discovery mechanisms,
+              secure transports, and error taxonomies
         Message Signatures:
           - specification/signatures.md: >-
               Implementation details for RFC 9421 HTTP Message Signatures and
