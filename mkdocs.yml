@@ -252,9 +252,7 @@ plugins:
               facilitate secure, agent-mediated checkout commitments and
               cryptographically signed mandates.
           - documentation/roadmap.md: >-
-              Future development and planned capabilities of UCP, including
-              loyalty integration, personalized recommendations, and
-              multi-merchant journeys.
+              Future development and planned capabilities of UCP.
           - documentation/schema-authoring.md: >-
               Comprehensive guidelines and JSON Schema design conventions when
               authoring or extending UCP schemas, including strict versioning
@@ -266,7 +264,7 @@ plugins:
         Specification:
           - specification/overview.md: >-
               Master technical specification of UCP, discovery mechanisms,
-              secure transports, and error taxonomies
+              secure transports, and error taxonomies.
         Message Signatures:
           - specification/signatures.md: >-
               Implementation details for RFC 9421 HTTP Message Signatures and
