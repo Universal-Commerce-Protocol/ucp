@@ -3,12 +3,33 @@
 > The Universal Commerce Protocol (UCP) is a solution for enabling gen AI agents to make payments on behalf of users, safely, securely, and in a decentralized and privacy protecting manner. This protocol is a part of the broader ecosystem, which includes agentic protocols like A2A and MCP, and encompasses the global nature of payments.
 
 
+This is the documentation directory for the Universal Commerce Protocol
+(UCP), an open standard that enables gen AI agents to safely, securely,
+and privately execute commerce actions (i.e., discovering, buying) on
+behalf of users.
+### Technical Specification Indices (llms.txt)
+For raw, LLM-optimized indices of our versioned technical
+specifications:
+- [Latest Stable UCP
+  Specification Index](https://ucp.dev/latest/llms.txt):
+  Standardized specifications for production deployments.
+- [UCP Specification Index
+  (2026-04-08)](https://ucp.dev/2026-04-08/llms.txt):
+  Stable spec release version 2026-04-08.
+- [UCP Specification Index
+  (2026-01-23)](https://ucp.dev/2026-01-23/llms.txt):
+  Stable spec release version 2026-01-23.
+- [UCP Specification Index
+  (2026-01-11)](https://ucp.dev/2026-01-11/llms.txt):
+  Stable spec release version 2026-01-11.
+
+
 ## Overview
 
-- [Home](http://ucp.dev/index.md)
-- [Core Concepts](http://ucp.dev/documentation/core-concepts/index.md)
-- [UCP and AP2](http://ucp.dev/documentation/ucp-and-ap2/index.md)
-- [Roadmap](http://ucp.dev/documentation/roadmap/index.md)
-- [Schema Authoring](http://ucp.dev/documentation/schema-authoring/index.md)
-- [Versioning](http://ucp.dev/versioning/index.md)
+- [Home](http://ucp.dev/index.md): High-level architecture, core value propositions, and structural capabilities of the Universal Commerce Protocol (UCP) as a common language for commerce agents.
+- [Core Concepts](http://ucp.dev/documentation/core-concepts/index.md): Fundamental UCP abstractions, including the decoupled separation of capabilities, extensions, services, and the decentralized protocol negotiation model.
+- [UCP and AP2](http://ucp.dev/documentation/ucp-and-ap2/index.md): Integration patterns with the Agent Payments Protocol (AP2) to facilitate secure, agent-mediated checkout commitments and cryptographically signed mandates.
+- [Roadmap](http://ucp.dev/documentation/roadmap/index.md): Future development and planned capabilities of UCP.
+- [Schema Authoring](http://ucp.dev/documentation/schema-authoring/index.md): Comprehensive guidelines and JSON Schema design conventions when authoring or extending UCP schemas, including strict versioning and registry patterns.
+- [Versioning](http://ucp.dev/versioning/index.md): UCP's strict date-based versioning policy (YYYY-MM-DD) and compatibility guidelines for managing breaking changes and release branches.
 
