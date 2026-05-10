@@ -37,15 +37,14 @@
           "anyOf": [
             {
               "properties": { "transport": { "const": "rest" } },
-              "required": ["schema", "endpoint"]
+              "required": ["schema"]
             },
             {
               "properties": { "transport": { "const": "mcp" } },
-              "required": ["schema", "endpoint"]
+              "required": ["schema"]
             },
             {
-              "properties": { "transport": { "const": "a2a" } },
-              "required": ["endpoint"]
+              "properties": { "transport": { "const": "a2a" } }
             },
             {
               "properties": { "transport": { "const": "embedded" } },
