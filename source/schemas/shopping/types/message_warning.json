@@ -37,7 +37,7 @@
     "presentation": {
       "type": "string",
       "default": "notice",
-      "description": "Rendering contract for this warning. 'notice' (default): platform MUST display, MAY dismiss. 'disclosure': platform MUST display in proximity to the path-referenced component, MUST NOT hide or auto-dismiss. See specification for full contract."
+      "description": "Rendering contract for this warning. 'notice' (default): platform MUST display, MAY dismiss. 'compliance': platform MUST display in proximity to the path-referenced component, MUST NOT hide or auto-dismiss. See specification for full contract."
     },
     "image_url": {
       "type": "string",

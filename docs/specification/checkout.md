@@ -332,7 +332,7 @@ The `presentation` field on warning messages controls the rendering
 contract the platform **MUST** follow. When omitted, it defaults to
 `"notice"`.
 
-| | `notice` (default) | `disclosure` |
+| | `notice` (default) | `compliance` |
 | :--- | :--- | :--- |
 | Display content | **MUST** | **MUST** |
 | Proximity to `path` | **MAY** | **MUST** |
@@ -347,9 +347,9 @@ The default rendering contract for warnings. Platforms **MUST** display
 the warning content to the buyer. Platforms **MAY** render notices in a
 banner, tray, or toast, and **MAY** allow the buyer to dismiss them.
 
-#### `disclosure`
+#### `compliance`
 
-Warnings with `presentation: "disclosure"` carry notices — safety
+Warnings with `presentation: "compliance"` carry notices — safety
 warnings, allergen declarations, compliance content, etc. — that
 **MUST** follow the prescribed rendering contract below.
 
@@ -365,7 +365,7 @@ warnings, allergen declarations, compliance content, etc. — that
   energy class label).
 * **SHOULD** render `url` as a navigable reference link when present.
 
-Warnings with `presentation: "disclosure"` **SHOULD** be given rendering
+Warnings with `presentation: "compliance"` **SHOULD** be given rendering
 priority over notices.
 
 Platforms that cannot honor the disclosure rendering contract **MUST**
@@ -374,7 +374,7 @@ downgrading to a notice.
 
 **Business requirements:**
 
-* **MUST** set `presentation: "disclosure"` when the warning content must
+* **MUST** set `presentation: "compliance"` when the warning content must
   be displayed alongside a specific component and must not be hidden or
   auto-dismissed.
 * **SHOULD** use the `path` field to associate disclosures with the
@@ -438,7 +438,7 @@ warning on a line item:
       "path": "$.line_items[0]",
       "content": "**Contains: tree nuts.** Produced in a facility that also processes peanuts, milk, and soy.",
       "content_type": "markdown",
-      "presentation": "disclosure",
+      "presentation": "compliance",
       "image_url": "https://merchant.com/allergen-tree-nuts.svg",
       "url": "https://merchant.com/allergen-info"
     }
