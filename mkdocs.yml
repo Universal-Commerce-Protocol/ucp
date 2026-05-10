@@ -221,7 +221,8 @@ plugins:
       markdown_description: |
         This is the documentation directory for the Universal Commerce Protocol
         (UCP), an open standard that enables gen AI agents to safely, securely,
-        and privately execute transactions on behalf of users.
+        and privately execute commerce actions (i.e., discovering, buying) on
+        behalf of users.
         ### Technical Specification Indices (llms.txt)
         For raw, LLM-optimized indices of our versioned technical
         specifications:
