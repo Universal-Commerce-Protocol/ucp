@@ -132,5 +132,3 @@ echo "Extracting: $EXTRACT_LIST"
 git archive "$GH_PAGES_BRANCH" $EXTRACT_LIST | tar -x -C "$OUTPUT_DIR"
 
 echo "=== Build Complete! ==="
-echo "Starting server..."
-python3 -m http.server 8000 -d "$OUTPUT_DIR"
