@@ -177,6 +177,10 @@ array contains one entry per channel the platform surfaced to the buyer.
 Platforms MUST NOT send entries for channels that were not displayed to the
 buyer. Omission of `marketing_channels` preserves current subscription state.
 
+When the business includes `marketing_consent_options` in the checkout
+response, the platform MUST use `marketing_channels` instead of the
+deprecated `marketing` boolean.
+
 ### Channel Semantics
 
 The `channel` field is a closed enum. Supported values are `email`, `sms`,
@@ -263,19 +267,6 @@ for that channel.
       }
     }
     ```
-
-### Deprecation: `marketing` Boolean
-
-The `marketing` boolean on the consent object is deprecated. Use
-`marketing_channels` for per-channel consent. When `marketing_channels` is
-present, `marketing` SHOULD be ignored.
-
-When the business includes `marketing_consent_options` in the checkout
-response, the platform MUST NOT use `marketing` and MUST use
-`marketing_channels` to submit the buyer's consent decisions.
-
-Existing implementations that only send the `marketing` boolean continue to
-work. New implementations should adopt `marketing_channels`.
 
 ## Security & Privacy Considerations
 

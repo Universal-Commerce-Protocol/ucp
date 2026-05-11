@@ -63,7 +63,17 @@
         },
         "marketing": {
           "type": "boolean",
-          "description": "Deprecated. Use marketing_channels for per-channel consent. When marketing_channels is present, this field SHOULD be ignored."
+          "deprecated": true,
+          "description": "Deprecated. Use marketing_channels for per-channel consent.",
+          "ucp_request": {
+            "complete": {
+              "transition": {
+                "from": "optional",
+                "to": "omit",
+                "description": "Replaced by marketing_channels. Platforms should use marketing_channels when marketing_consent_options is present."
+              }
+            }
+          }
         },
         "sale_of_data": {
           "type": "boolean",

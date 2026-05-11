@@ -315,7 +315,6 @@ plugins:
           - specification/fulfillment.md: >-
               Fulfillment extension for checkouts, defining delivery methods,
               pickup destinations, and method-agnostic UI rendering contracts.
-         - specification/marketing-consent.md
         Cart Capability:
           - specification/cart.md: >-
               Pre-purchase Cart Capability, detailing item collection, state
