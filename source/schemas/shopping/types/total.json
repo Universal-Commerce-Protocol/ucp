@@ -20,7 +20,7 @@
       "ucp_request": "omit"
     },
     "amount": {
-      "$ref": "signed_amount.json",
+      "$ref": "../../common/types/signed_amount.json",
       "ucp_request": "omit"
     }
   },

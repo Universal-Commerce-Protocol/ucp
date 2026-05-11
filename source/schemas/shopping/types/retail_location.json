@@ -18,7 +18,7 @@
       "description": "Location name (e.g., store name)."
     },
     "address": {
-      "$ref": "postal_address.json",
+      "$ref": "../../common/types/postal_address.json",
       "description": "Physical address of the location."
     }
   }

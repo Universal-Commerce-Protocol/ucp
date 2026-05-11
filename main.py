@@ -33,6 +33,7 @@ UCP_SCHEMA_PATH = Path("source/schemas/ucp.json")
 SCHEMAS_DIRS = [
   Path("source/handlers/google_pay"),
   Path("source/schemas"),
+  Path("source/schemas/common"),
   SHOPPING_SCHEMAS_DIR,
   SHOPPING_SCHEMAS_DIR / "types",
 ]

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/schemas/shopping/types/pagination.json",
+  "$id": "https://ucp.dev/schemas/common/types/pagination.json",
   "title": "Pagination",
   "description": "Cursor-based pagination for list operations.",
   "type": "object",

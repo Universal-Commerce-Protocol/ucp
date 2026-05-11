@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/schemas/shopping/types/error_response.json",
+  "$id": "https://ucp.dev/schemas/common/types/error_response.json",
   "title": "Error Response",
   "description": "Generic error response when business logic prevents resource creation or failed to retrieve resource. Used when no valid resource can be established.",
   "type": "object",

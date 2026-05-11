@@ -32,7 +32,7 @@
       "description": "Buyer object extended with consent tracking.",
       "allOf": [
         {
-          "$ref": "types/buyer.json"
+          "$ref": "../common/types/buyer.json"
         },
         {
           "type": "object",

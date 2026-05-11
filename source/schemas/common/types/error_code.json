@@ -1,0 +1,7 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/error_code.json",
+  "title": "Error Code",
+  "description": "Error code identifying the type of error. Standard errors are defined in capability specifications and have standardized semantics; freeform codes are permitted.",
+  "type": "string"
+}
