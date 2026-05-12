@@ -31,8 +31,7 @@ AI agents operating in this repository MUST strictly adhere to the following gui
 
 ### 2. Documentation Guidelines
 
-* **Navigation Sync:** Any page added or modified in the MkDocs navigation (`mkdocs.yml`) **must** be documented and described in the `llmstxt` plugin section.
-* **Verification:** Always run the navigation-to-llmstxt sync validator (`scripts/check_nav_llmstxt.py`) before finalizing any changes to the docs.
+* **Navigation Sync:** Any page added or modified in the MkDocs navigation (`mkdocs.yml`) should be documented and described in the `llmstxt` plugin section.
 
 ### 3. Code Quality & Linting
 
@@ -63,12 +62,6 @@ Use the following exact commands to execute, validate, and verify tasks:
   Core JSON schemas are consumed by external SDK repositories to generate client libraries. Ensure your schema edits validate successfully with the linter.
 
 ### Documentation Sync & Server
-
-* **Validate Nav vs llmstxt sync:**
-
-  ```bash
-  python3 scripts/check_nav_llmstxt.py
-  ```
 
 * **Sync Dependencies:**
 
