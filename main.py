@@ -315,10 +315,10 @@ def define_env(env):
       spec_file_name = "reference"
 
     # Redirect refs to common/types/ or shopping/types/ schemas to reference.
-    # Handles bare sibling refs ("amount.json") and path refs
-    # ("../../common/types/amount.json") by checking the resolved filename.
-    elif ref_string.endswith(".json"):
-      filename_only = Path(ref_string).name
+    # Uses ref_path (fragment stripped) so refs like
+    # "../common/types/pagination.json#/$defs/request" are handled correctly.
+    elif ref_path.endswith(".json"):
+      filename_only = Path(ref_path).name
       common_type_path = Path("source/schemas/common/types") / filename_only
       shopping_type_path = Path("source/schemas/shopping/types") / filename_only
       shopping_path = Path("source/schemas/shopping") / filename_only
