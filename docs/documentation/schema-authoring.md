@@ -101,10 +101,9 @@ Define transport bindings that appear in `ucp.services{}` registries. Each trans
 
 - **Top-level fields**: `$schema`, `$id`, `title`, `description`, `name`, `version`
 - **Variants**: `platform_schema`, `business_schema`
-- **Transport requirements**:
-    - REST/MCP: `endpoint`, `schema` (OpenAPI/OpenRPC URL)
-    - A2A: `endpoint` (Agent Card URL)
-    - Embedded: `schema` (OpenRPC URL)
+- **Transport requirements** (additional beyond the common base):
+    - Platform profile (`platform_schema`): REST/MCP/Embedded require `schema` (OpenAPI/OpenRPC URL). A2A has no additional requirements.
+    - Business profile (`business_schema`): REST/MCP/A2A require `endpoint` (Agent Card URL for A2A). Embedded has no additional requirements.
 
 ### Payment Handler Schemas
 
