@@ -144,14 +144,16 @@ Businesses **MUST** embed their signature in the checkout response body under
 
 **Checkout Response with Embedded Signature:**
 
-<!-- ucp:example skip reason="invalid JSON in source" -->
+<!-- ucp:example schema=shopping/checkout op=read -->
 ```json
 {
+  "ucp": { ... },
   "id": "chk_abc123",
   "status": "ready_for_complete",
   "currency": "USD",
-  "line_items": [...],
-  "totals": [...],
+  "line_items": [ ... ],
+  "totals": [ ... ],
+  "links": [ ... ],
   "ap2": {
     "merchant_authorization": "eyJhbGciOiJFUzI1NiIsImtpZCI6Im1lcmNoYW50XzIwMjUifQ..<signature>"
   }
@@ -342,7 +344,7 @@ request:
 
 {{ extension_schema_fields('ap2_mandate.json#/$defs/ap2_with_checkout_mandate', 'ap2-mandates') }}
 
-<!-- ucp:example skip reason="invalid JSON in source" -->
+<!-- ucp:example schema=shopping/checkout op=complete direction=request -->
 ```json
 {
   "payment": {

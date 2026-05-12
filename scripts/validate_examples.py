@@ -139,6 +139,37 @@ def unwrap_http(content: str) -> str:
   return content
 
 
+def strip_json_comments(content: str) -> str:
+  """Strip // comments and trailing commas (doc conventions).
+
+  Only strips // when it appears outside quoted strings.
+  Trailing commas before } or ] are removed.
+  """
+  lines = content.split("\n")
+  cleaned = []
+  for line in lines:
+    # Strip // comments only outside strings
+    result = []
+    in_string = False
+    i = 0
+    while i < len(line):
+      ch = line[i]
+      if ch == '"' and (i == 0 or line[i - 1] != "\\"):
+        in_string = not in_string
+        result.append(ch)
+      elif (
+        ch == "/" and not in_string and i + 1 < len(line) and line[i + 1] == "/"
+      ):
+        break  # rest of line is comment
+      else:
+        result.append(ch)
+      i += 1
+    cleaned.append("".join(result).rstrip())
+  content = "\n".join(cleaned)
+  content = re.sub(r",(\s*[}\]])", r"\1", content)
+  return content
+
+
 # -----------------------------------------------------------
 # Template expansion
 # -----------------------------------------------------------
@@ -663,7 +694,8 @@ def process_block(
   # 3. Preprocess bare ... into valid JSON
   content = preprocess_ellipsis(content)
 
-  # 4. Parse JSON
+  # 4. Strip comments and parse JSON
+  content = strip_json_comments(content)
   try:
     example = json.loads(content)
   except json.JSONDecodeError as e:

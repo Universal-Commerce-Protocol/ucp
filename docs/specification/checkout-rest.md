@@ -201,7 +201,7 @@ so clients must include all previously set fields they wish to retain.
 
 === "Request"
 
-    <!-- ucp:example skip reason="invalid JSON in source" -->
+    <!-- ucp:example schema=shopping/checkout op=update direction=request -->
     ```json
     PUT /checkout-sessions/{id} HTTP/1.1
     UCP-Agent: profile="https://platform.example/profile"
@@ -332,7 +332,7 @@ type & addresses.
 
 === "Request"
 
-    <!-- ucp:example skip reason="invalid JSON in source" -->
+    <!-- ucp:example schema=shopping/checkout op=update direction=request -->
     ```json
     PUT /checkout-sessions/{id} HTTP/1.1
     UCP-Agent: profile="https://platform.example/profile"
@@ -534,7 +534,7 @@ Follow-up calls after initial `fulfillment` data to update selection.
 
 === "Request"
 
-    <!-- ucp:example skip reason="invalid JSON in source" -->
+    <!-- ucp:example schema=shopping/checkout op=update direction=request -->
     ```json
     PUT /checkout-sessions/{id} HTTP/1.1
     UCP-Agent: profile="https://platform.example/profile"
@@ -1096,7 +1096,7 @@ place to set these expectations via `messages`.
 
 === "Response"
 
-    <!-- ucp:example skip reason="invalid JSON in source" -->
+    <!-- ucp:example schema=shopping/checkout op=read -->
     ```json
     HTTP/1.1 200 OK
     Content-Type: application/json

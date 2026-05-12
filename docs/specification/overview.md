@@ -1385,7 +1385,7 @@ previous legal binding connection with them and receives `tok_visa_123`
 
 ##### 3. Complete Checkout (Request to Business)
 
-<!-- ucp:example skip reason="invalid JSON, contains comments" -->
+<!-- ucp:example schema=shopping/checkout op=complete direction=request -->
 ```json
 POST /checkout-sessions/{id}/complete
 
@@ -1464,7 +1464,7 @@ non-agentic surface.
 
 ##### 3. Complete Checkout
 
-<!-- ucp:example skip reason="invalid JSON, contains comments" -->
+<!-- ucp:example schema=shopping/checkout op=complete direction=request -->
 ```json
 POST /checkout-sessions/{id}/complete
 

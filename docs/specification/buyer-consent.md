@@ -100,9 +100,10 @@ POST /checkouts
 
 ### Example: Checkout Response with Consent
 
-<!-- ucp:example skip reason="invalid JSON in source" -->
+<!-- ucp:example schema=shopping/checkout op=read -->
 ```json
 {
+  "ucp": { ... },
   "id": "checkout_456",
   "status": "ready_for_complete",
   "currency": "USD",
