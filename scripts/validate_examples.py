@@ -1,22 +1,108 @@
 #!/usr/bin/env python3
-"""Validate JSON examples in UCP spec documentation.
+# cspell:ignore shema directon
+"""Validate JSON examples in UCP specification documentation.
 
-Every ```json code block in the spec docs must be annotated
-with:
+UCP doc examples use a bespoke JSON capability set: strict JSON plus
+authoring conveniences that are reduced to canonical JSON before
+validation. This module owns that reduction and the validation that
+follows.
 
-    <!-- ucp:example schema=shopping/checkout
-         [path=$.totals] [op=read]
-         [direction=response] -->
-    ```json
-    { ... }
-    ```
+The author-facing contract lives in docs/documentation/schema-authoring.md
+under "Documenting JSON Examples". This docstring is the implementation
+contract: a precise, normative description of what the code enforces.
+The two MUST stay in sync.
 
-Or explicitly skipped:
+================================================================
+THE ANNOTATION CONTRACT
+================================================================
 
-    <!-- ucp:example skip [reason="..."] -->
+Every ```json fenced block in the spec docs MUST be preceded by an
+annotation comment:
 
-Unannotated blocks are hard failures.
-See artifacts/ucp-testing-proposal.md.
+    <!-- ucp:example schema=PATH [op=OP] [direction=DIR]
+                     [path=JSONPATH] [def=NAME] -->
+    <!-- ucp:example skip reason="..." -->
+
+Defaults: op=read, direction=response.
+
+Recognized attribute keys: schema, op, direction, path, def, skip,
+reason. Unknown keys are rejected (typo guard).
+
+At most one annotation per block; multiple stacked annotations
+before a fence are rejected. The annotation MUST appear on its own
+line preceding the ```json fence; blank lines between are allowed,
+any other intervening line clears the pending annotation.
+
+Annotation comments inside any ``` ... ``` fenced block are ignored
+(they are documentation of the contract, not real annotations).
+
+Unannotated ```json blocks are hard failures.
+
+================================================================
+THE THREE LAYERS
+================================================================
+
+Layer 1 — Surface syntax. What authors write. Strict JSON plus:
+
+  (a) Line comments        // to end of line
+  (b) Template variable    {{ ucp_version }} (exactly this name)
+  (c) HTTP envelope        request/status line + headers + blank
+                           line + body — body is extracted
+  (d) Elision markers      bare `...` inside [] or {}
+                           string "..." as a value
+                           list ["..."]
+                           object {"...": "..."}
+
+Not supported: trailing commas, block comments /* */, JSON5
+features (single quotes, unquoted keys, NaN, hex), interior list
+ellipsis [a, ..., b], template variables other than
+{{ ucp_version }}, HTTP methods other than GET/POST/PUT/PATCH/DELETE.
+
+Layer 2 — Canonical form. RFC 8259 JSON, produced by reducing
+Layer 1 via these stages, in order:
+
+  1. unwrap_http_envelope        (c) → body only
+  2. expand_templates            (b) → date substitution
+  3. strip_line_comments         (a) → stripped
+  4. lower_ellipsis_to_sentinels (d) → bare `...` becomes string
+                                 "..." inside containers
+
+The output is parseable by json.loads. Sentinels survive into
+Layer 3.
+
+Layer 3 — Semantic interpretation. Operates on the parsed tree:
+
+  - Ellipsis sentinels are recorded as elided JSON Pointer paths,
+    then removed from the tree.
+  - The example is deep-merged into a scaffold (a known-valid
+    fixture per schema/op/direction). Example fields win; scaffold
+    fills required gaps.
+  - Coverage walk: for each object in the example, verify every
+    schema-required field is either present or elision-acknowledged.
+  - The merged payload is validated by `ucp-schema validate`.
+  - Validation errors whose path is an elided path (or descendant)
+    are suppressed.
+
+================================================================
+KNOWN LIMITATIONS
+================================================================
+
+  - Line-comment stripper tracks string boundaries per-line and is
+    approximate. An example with a string literal containing an
+    escaped backslash followed by `//` will be misparsed. No corpus
+    example currently triggers this.
+  - The literal three-character string "..." cannot appear in an
+    example as actual data — it is reserved as the elision sentinel.
+
+================================================================
+CLI
+================================================================
+
+  validate_examples.py --schema-base source/schemas/
+  validate_examples.py --schema-base source/schemas/ --file FILE
+  validate_examples.py --schema-base source/schemas/ --audit
+
+Exit codes: 0 if all pass or skip; 1 if any block fails or errors.
 """
 
 import argparse
@@ -37,6 +123,13 @@ UCP_VERSION_PLACEHOLDER = "2026-04-08"
 ANNOTATION_RE = re.compile(r"^(\s*)<!--\s*ucp:example\s+(.*?)\s*-->")
 FENCE_OPEN_RE = re.compile(r"^(\s*)```json\s*$")
 FENCE_CLOSE_RE = re.compile(r"^(\s*)```\s*$")
+# Any fenced code block (json or otherwise). Annotations inside such
+# blocks are documentation of the contract, not real annotations.
+FENCE_ANY_OPEN_RE = re.compile(r"^(\s*)```(\S*)\s*$")
+
+# Recognized annotation attribute keys. Unknown keys are rejected at
+# parse time to catch typos like `shema=` or `directon=`.
+_KNOWN_ATTRS = frozenset({"schema", "op", "direction", "path", "def"})
 
 # -----------------------------------------------------------
 # Annotation parsing
@@ -44,7 +137,12 @@ FENCE_CLOSE_RE = re.compile(r"^(\s*)```\s*$")
 
 
 def parse_annotation(text: str) -> dict:
-  """Parse annotation attributes from the comment body."""
+  """Parse annotation attributes from the comment body.
+
+  Returns a dict of attribute key/values. Defaults op=read,
+  direction=response are applied. Unknown attribute keys are
+  reported via a reserved "_error" key (consumed by process_block).
+  """
   text = text.strip()
   if text.startswith("skip"):
     reason_match = re.search(r'reason="([^"]*)"', text)
@@ -52,10 +150,20 @@ def parse_annotation(text: str) -> dict:
       "skip": True,
       "reason": (reason_match.group(1) if reason_match else ""),
     }
-  attrs = {}
+  attrs: dict = {}
+  unknown: list[str] = []
   for m in re.finditer(r'(\w+)=(?:"([^"]+)"|(\S+))', text):
-    attrs[m.group(1)] = m.group(2) if m.group(2) is not None else m.group(3)
-  # Defaults
+    key = m.group(1)
+    value = m.group(2) if m.group(2) is not None else m.group(3)
+    if key in _KNOWN_ATTRS:
+      attrs[key] = value
+    else:
+      unknown.append(key)
+  if unknown:
+    attrs["_error"] = (
+      f"unknown annotation attribute(s): {', '.join(sorted(set(unknown)))}"
+      f" — recognized keys: {', '.join(sorted(_KNOWN_ATTRS))}"
+    )
   attrs.setdefault("op", "read")
   attrs.setdefault("direction", "response")
   return attrs
@@ -67,27 +175,29 @@ def parse_annotation(text: str) -> dict:
 
 
 def extract_blocks(filepath: Path) -> list[dict]:
-  """Extract ```json blocks with their annotations."""
+  """Extract ```json blocks with their annotations.
+
+  Tracks non-json fence state so annotation comments inside other
+  fenced blocks (e.g. the contract documentation in schema-authoring.md)
+  are not parsed as real annotations.
+
+  Detects stacked annotations — two ucp:example comments before a
+  fence with no intervening fence — and emits an error block for the
+  second one. Per contract, at most one annotation per block.
+  """
   lines = filepath.read_text().splitlines()
   blocks: list[dict] = []
   i = 0
   pending_annotation = None
+  pending_annotation_line = 0
 
   while i < len(lines):
     line = lines[i]
 
-    # Check for annotation comment
-    ann_match = ANNOTATION_RE.match(line)
-    if ann_match:
-      pending_annotation = parse_annotation(ann_match.group(2))
-      i += 1
-      continue
-
-    # Check for code fence opening
-    fence_match = FENCE_OPEN_RE.match(line)
-    if fence_match:
-      fence_indent = fence_match.group(1)
-      # Collect content until closing fence
+    # JSON fence opening — collect content until matching close
+    json_match = FENCE_OPEN_RE.match(line)
+    if json_match:
+      fence_indent = json_match.group(1)
       content_lines: list[str] = []
       start_line = i + 1
       i += 1
@@ -102,20 +212,62 @@ def extract_blocks(filepath: Path) -> list[dict]:
         content_lines.append(content_line)
         i += 1
 
-      block = {
-        "file": str(filepath),
-        "line": start_line,
-        "content": "\n".join(content_lines),
-        "annotation": pending_annotation,
-      }
-      blocks.append(block)
+      blocks.append(
+        {
+          "file": str(filepath),
+          "line": start_line,
+          "content": "\n".join(content_lines),
+          "annotation": pending_annotation,
+        }
+      )
       pending_annotation = None
+      pending_annotation_line = 0
       i += 1
       continue
 
-    # Non-blank, non-annotation line clears pending
+    # Non-JSON fence — skip its contents entirely. Annotations inside
+    # are documentation, not directives. Any pending annotation is
+    # cleared because a fence isn't a valid carrier for it.
+    any_fence_match = FENCE_ANY_OPEN_RE.match(line)
+    if any_fence_match:
+      fence_indent = any_fence_match.group(1)
+      pending_annotation = None
+      pending_annotation_line = 0
+      i += 1
+      while i < len(lines):
+        close_match = FENCE_CLOSE_RE.match(lines[i])
+        if close_match and len(close_match.group(1)) <= len(fence_indent):
+          i += 1  # consume the close
+          break
+        i += 1
+      continue
+
+    # Annotation comment (only outside fences — fence cases handled above)
+    ann_match = ANNOTATION_RE.match(line)
+    if ann_match:
+      if pending_annotation is not None:
+        # Stacked annotation: emit an error block for the second one.
+        blocks.append(
+          {
+            "file": str(filepath),
+            "line": i + 1,
+            "content": "",
+            "annotation": None,
+            "error": (
+              f"multiple stacked annotations before fence "
+              f"(previous at line {pending_annotation_line})"
+            ),
+          }
+        )
+      pending_annotation = parse_annotation(ann_match.group(2))
+      pending_annotation_line = i + 1
+      i += 1
+      continue
+
+    # Non-blank, non-annotation, non-fence line clears pending
     if pending_annotation and line.strip():
       pending_annotation = None
+      pending_annotation_line = 0
 
     i += 1
 
@@ -123,14 +275,17 @@ def extract_blocks(filepath: Path) -> list[dict]:
 
 
 # -----------------------------------------------------------
-# HTTP unwrap
+# Layer 1 → Layer 2: text reduction stages
 # -----------------------------------------------------------
 
+# Recognized HTTP methods for envelope detection. Other methods
+# (OPTIONS, HEAD, CONNECT, TRACE) are not recognized — a block
+# starting with one would parse as JSON and fail.
 HTTP_METHOD_RE = re.compile(r"^(GET|POST|PUT|PATCH|DELETE)\s|^HTTP/")
 
 
-def unwrap_http(content: str) -> str:
-  """Extract JSON body after blank line in HTTP blocks."""
+def unwrap_http_envelope(content: str) -> str:
+  """Stage 1. Extract JSON body after blank line in HTTP blocks."""
   first_line = content.lstrip().split("\n")[0]
   if HTTP_METHOD_RE.match(first_line):
     parts = content.split("\n\n", 1)
@@ -139,16 +294,24 @@ def unwrap_http(content: str) -> str:
   return content
 
 
-def strip_json_comments(content: str) -> str:
-  """Strip // comments and trailing commas (doc conventions).
+def expand_templates(content: str) -> str:
+  """Stage 2. Substitute {{ ucp_version }} with a valid date.
 
-  Only strips // when it appears outside quoted strings.
-  Trailing commas before } or ] are removed.
+  Strict allowlist of one variable. Other {{ name }} survive into
+  json.loads and produce a parse error — intentional.
+  """
+  return content.replace("{{ ucp_version }}", UCP_VERSION_PLACEHOLDER)
+
+
+def strip_line_comments(content: str) -> str:
+  """Stage 3. Strip // line comments outside string literals.
+
+  Per-line string-boundary tracking. Approximate — see module
+  docstring for the documented edge case.
   """
   lines = content.split("\n")
   cleaned = []
   for line in lines:
-    # Strip // comments only outside strings
     result = []
     in_string = False
     i = 0
@@ -165,38 +328,42 @@ def strip_json_comments(content: str) -> str:
         result.append(ch)
       i += 1
     cleaned.append("".join(result).rstrip())
-  content = "\n".join(cleaned)
-  content = re.sub(r",(\s*[}\]])", r"\1", content)
-  return content
+  return "\n".join(cleaned)
 
 
-# -----------------------------------------------------------
-# Template expansion
-# -----------------------------------------------------------
-
-
-def expand_templates(content: str) -> str:
-  """Replace {{ ucp_version }} with a valid date."""
-  return content.replace("{{ ucp_version }}", UCP_VERSION_PLACEHOLDER)
-
-
-# -----------------------------------------------------------
-# Ellipsis handling
-# -----------------------------------------------------------
-
-# Bare ... inside [] or {} — convert to valid JSON before
-# json.loads.  Authors write [ ... ] for arrays, { ... } for
-# objects.  Preprocessing converts these to ["..."] and
-# {"...":"..."} respectively.
+# Bare ... inside an otherwise-empty [] or {} container. Authors
+# write `[ ... ]` and `{ ... }` to mean "non-empty container,
+# contents elided." These are converted to string-sentinel form
+# (`["..."]`, `{"...": "..."}`) so json.loads accepts them; the
+# Layer 3 walker recognizes the sentinels as elision markers.
+#
+# The string-sentinel form is also accepted directly. Interior bare
+# dots (e.g. `[1, ..., 3]`) are not supported — only whole-container
+# bare-dot ellipsis. For partial elision use the string form
+# (`[1, "...", 3]`).
 _BARE_ELLIPSIS_ARRAY = re.compile(r"(\[\s*)\.\.\.(\s*\])")
 _BARE_ELLIPSIS_OBJECT = re.compile(r"(\{\s*)\.\.\.(\s*\})")
 
 
-def preprocess_ellipsis(content: str) -> str:
-  """Convert bare ... to valid JSON placeholders."""
+def lower_ellipsis_to_sentinels(content: str) -> str:
+  """Stage 4. Lower bare `...` to string-sentinel form."""
   content = _BARE_ELLIPSIS_ARRAY.sub(r'\1"..."\2', content)
   content = _BARE_ELLIPSIS_OBJECT.sub(r'\1"...": "..."\2', content)
   return content
+
+
+def reduce_to_canonical_json(raw: str) -> str:
+  """Layer 1 → Layer 2. Pure text transformation, no JSON parse.
+
+  Applies the four authoring conveniences in order. Output is
+  parseable by json.loads. String-sentinel "..." survives into
+  Layer 3 and is interpreted there as an elision marker.
+  """
+  raw = unwrap_http_envelope(raw)
+  raw = expand_templates(raw)
+  raw = strip_line_comments(raw)
+  raw = lower_ellipsis_to_sentinels(raw)
+  return raw
 
 
 def _is_ellipsis(value) -> bool:
@@ -651,18 +818,47 @@ class Result:
     return line
 
 
+def parse_example(raw: str):
+  """Layer 2 boundary. Reduce text to JSON, parse to a tree.
+
+  The returned tree still contains string-sentinel "..." markers
+  where the source had ellipsis. Layer 3 walkers (check_coverage,
+  strip_ellipsis) interpret the sentinels in semantic order:
+  coverage first (sentinels signal acknowledged-but-elided fields),
+  then strip (sentinels are removed for scaffold merge + validate).
+
+  May raise json.JSONDecodeError if the reduced text isn't valid JSON.
+  """
+  canonical = reduce_to_canonical_json(raw)
+  return json.loads(canonical)
+
+
 def process_block(
   block: dict,
   schema_base: Path,
   scaffolds_dir: Path,
 ) -> Result:
-  """Run the validation pipeline on one block."""
+  """Run the validation pipeline on one block.
+
+  Three layers, in order:
+    Layer 1→2: reduce_to_canonical_json (text → strict JSON)
+    Layer 2→3: parse_example (JSON → tree + elided paths)
+    Layer 3:    coverage + scaffold merge + schema validate
+  """
   file, line = block["file"], block["line"]
   annotation = block["annotation"]
+
+  # Structural errors from extract_blocks (stacked annotations etc.)
+  if block.get("error"):
+    return Result(file, line, "error", block["error"])
 
   # Unannotated block
   if annotation is None:
     return Result(file, line, "error", "unannotated JSON block")
+
+  # Annotation parse error (unknown attribute, etc.)
+  if annotation.get("_error"):
+    return Result(file, line, "error", annotation["_error"], annotation)
 
   # Skip
   if annotation.get("skip"):
@@ -685,33 +881,17 @@ def process_block(
   subtree_path = annotation.get("path")
   schema_def = annotation.get("def")
 
-  # 1. Unwrap HTTP
-  content = unwrap_http(block["content"])
-
-  # 2. Expand templates
-  content = expand_templates(content)
-
-  # 3. Preprocess bare ... into valid JSON
-  content = preprocess_ellipsis(content)
-
-  # 4. Strip comments and parse JSON
-  content = strip_json_comments(content)
+  # Layers 1→2: reduce text to JSON, parse to tree (with sentinels)
   try:
-    example = json.loads(content)
+    example = parse_example(block["content"])
   except json.JSONDecodeError as e:
-    return Result(
-      file,
-      line,
-      "fail",
-      f"invalid JSON: {e}",
-      annotation,
-    )
+    return Result(file, line, "fail", f"invalid JSON: {e}", annotation)
 
-  # 5. Empty body — trivially valid (e.g. GET, cancel)
+  # Empty body — trivially valid (e.g. GET, cancel)
   if example == {}:
     return Result(file, line, "ok", annotation=annotation)
 
-  # 5. Resolve schema
+  # Layer 3: resolve schema
   try:
     resolved = resolve_schema(schema_path, direction, op, schema_base)
   except RuntimeError as e:

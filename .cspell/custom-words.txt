@@ -75,7 +75,9 @@ linkignore
 llms
 llmstxt
 mastercard
+grepable
 midsole
+misparsed
 mkdocs
 mtok
 openapi

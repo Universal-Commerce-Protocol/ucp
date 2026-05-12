@@ -434,3 +434,226 @@ Key points:
 - **Top-level `name` and `version`** make the schema self-describing
 - **`$defs` variants** enable validation in different contexts
 - **Payload properties** define the actual checkout response structure
+
+## Documenting JSON Examples
+
+UCP's specification documents are validated mechanically. Every ` ```json `
+block is either checked against the schemas the spec defines or explicitly
+marked as out-of-scope. Schema drift breaks CI instead of silently misleading
+readers.
+
+To make this work, UCP examples use a **bespoke JSON capability set**: strict
+JSON plus a small, fixed set of authoring conveniences. The validator reduces
+these conveniences to canonical JSON before validating against schema. Authors
+write enriched JSON; the wire format remains strict JSON.
+
+### The annotation contract
+
+Every ` ```json ` block in the spec **MUST** be preceded by an annotation
+comment. Unannotated blocks fail CI.
+
+<!-- ucp:example skip reason="example validation guide" -->
+```json
+<!-- ucp:example schema=shopping/checkout op=read -->
+{ ... }
+```
+
+#### Annotation grammar
+
+```text
+<!-- ucp:example schema=PATH [op=OP] [direction=DIR] [path=JSONPATH] [def=NAME] -->
+<!-- ucp:example skip reason="..." -->
+```
+
+| Attribute     | Required          | Default    | Purpose                                                                    |
+| ------------- | ----------------- | ---------- | -------------------------------------------------------------------------- |
+| `schema`      | yes (unless skip) | —          | Schema to validate against, e.g. `shopping/checkout`                       |
+| `op`          | no                | `read`     | Operation: `create`, `read`, `update`, `complete`, `cancel`, etc.          |
+| `direction`   | no                | `response` | `request` or `response`                                                    |
+| `path`        | no                | (whole)    | JSONPath into the schema; example replaces a sub-tree                      |
+| `def`         | no                | —          | Pull `$defs/<name>` out of the schema and validate against that            |
+| `skip reason` | yes (with skip)   | —          | Free-form prose explaining why this block can't be validated               |
+
+#### Placement rules
+
+- The annotation **MUST** appear on its own line preceding the ` ```json `
+  fence. Blank lines between are allowed.
+- One annotation per block. **Multiple stacked annotations are rejected.**
+<!-- cspell:ignore shema -->
+- **Unknown attribute names are rejected.** A typo like `shema=` fails CI
+  rather than silently dropping the attribute.
+
+### Authoring conveniences
+
+The validator accepts these features beyond strict JSON. Use them where they
+aid clarity; default to strict JSON otherwise.
+
+#### Line comments
+
+`//` to end-of-line. Stripped before validation.
+
+<!-- ucp:example skip reason="example validation guide" -->
+```json
+{
+  "currency": "USD",       // ISO 4217
+  "amount": 5000           // minor units (cents)
+}
+```
+
+Block comments (`/* */`) are **not** supported. Use multiple `//` lines if you
+need a multi-line note.
+
+**Limitation:** the `//` stripper tracks string boundaries per-line and is
+approximate. An example containing a string literal with an escaped backslash
+followed by `//` will be misparsed. No corpus example currently triggers this;
+if you hit it, restructure the example.
+
+#### Template variable
+
+Exactly one variable is substituted: `{{ ucp_version }}` becomes a valid date
+stamp. No other template variables are recognized — any other `{{ name }}`
+will survive into JSON parse and fail.
+
+#### HTTP envelope
+
+If the first non-blank line matches an HTTP request line
+(`GET|POST|PUT|PATCH|DELETE`) or status line (`HTTP/`), the validator extracts
+the JSON body after the first blank line. Headers between are ignored.
+
+<!-- ucp:example skip reason="example validation guide" -->
+```json
+POST /checkout-sessions HTTP/1.1
+Host: api.example.com
+Content-Type: application/json
+
+{ "line_items": [ ... ] }
+```
+
+Other HTTP methods (`OPTIONS`, `HEAD`, `CONNECT`, `TRACE`) are not recognized
+as envelopes — they would be parsed as JSON and fail.
+
+#### Elision markers
+
+The validator understands shapes that mean **"this required field is present;
+its value is not asserted."** Coverage check still verifies the field is
+acknowledged. Schema validation errors at the elided sub-tree are suppressed.
+
+| Shape                | Meaning                                                |
+| -------------------- | ------------------------------------------------------ |
+| `"..."`              | A field's value is elided                              |
+| `[ ... ]`            | A non-empty array; contents elided                     |
+| `{ ... }`            | A non-empty object; contents elided                    |
+| `[ "..." ]`          | Equivalent to `[ ... ]`                                |
+| `{ "...": "..." }`   | Equivalent to `{ ... }`                                |
+
+<!-- ucp:example skip reason="example validation guide" -->
+```json
+{
+  "ucp": { ... },
+  "id": "chk_abc",
+  "currency": "USD",
+  "line_items": [ ... ],
+  "totals": [ ... ]
+}
+```
+
+The bare-form `[ ... ]` and `{ ... }` are the canonical way to elide
+container contents. They communicate the right semantics: *a non-empty
+container whose members exist but are not shown.* The string-sentinel forms
+(`["..."]`, `{"...": "..."}`) are accepted for parser convenience but say
+something subtly wrong literally — they describe *an array containing one
+string* or *an object with one key.* Prefer the bare form in new examples.
+
+**Limitations:**
+
+- Bare `...` is recognized only as the **sole content** of an array or object.
+  Interior bare-dot forms like `[a, ..., b]` are not supported.
+- For partial elision (some items shown, some elided), use the string form
+  `"..."` at the position to elide: `[1, "...", 3]`.
+- The literal three-character string `"..."` cannot appear in an example as
+  actual data — it is reserved as the elision sentinel. Use a Unicode escape
+  (`"\u002e\u002e\u002e"`) if you genuinely need it.
+
+### What is not supported
+
+- **Trailing commas** before `}` or `]`. Strict JSON only; the wire format is
+  strict, the spec stays honest.
+- **Block comments** `/* */`.
+- **JSON5 features**: single-quoted strings, unquoted keys, hex literals,
+  `NaN` / `Infinity`, multi-line strings.
+- **Multiple template variables** beyond `{{ ucp_version }}`.
+- **Interior bare ellipsis** `[a, ..., b]`.
+
+### Skip reasons
+
+When a block can't be validated, use `skip` with a precise reason. Skip
+reasons are CI-grepable; they track what's not yet covered.
+
+Established categories — extend as needed, but be specific:
+
+- `"JSON-RPC transport binding"` — wrapped in JSON-RPC envelope
+- `"embedded protocol binding"` — Embedded Protocol transport wrapper
+- `"A2A transport binding"` — A2A transport wrapper
+- `"profile document, no wrapper schema"` — top-level `ucp` block, no
+  enclosing entity
+- `"schema authoring example"` — JSON Schema fragments, not UCP payloads
+- `"handler config example"` / `"handler schema definition"` — payment
+  handler internals
+- `"capability declaration fragment"` — capability registry snippet
+- `"OAuth metadata, not UCP payload"` — third-party protocol payloads
+- `"cryptographic material, not UCP payload"` — keys, signatures
+- `"<feature> fragment"` — incomplete object showing one nested field
+
+Avoid vague reasons like `"conceptual example"`. The taxonomy is how we
+prioritize what to validate next.
+
+### Common patterns
+
+**Full request or response.** The default case. The example is a complete
+payload for the named operation.
+
+```text
+<!-- ucp:example schema=shopping/cart op=create direction=request -->
+```
+
+**Sub-tree with surrounding context.** Use `path=` when the example focuses
+on one field. The example is spliced into a known-valid scaffold at that
+path; the rest uses the scaffold's defaults.
+
+```text
+<!-- ucp:example schema=shopping/checkout path=$.totals -->
+```
+
+**Schema with `$defs`.** Some schemas (e.g. catalog) define request/response
+inside `$defs`. Use `def=` to extract and validate against the named
+definition.
+
+```text
+<!-- ucp:example schema=shopping/catalog_search def=request_schema direction=request -->
+```
+
+**Empty body.** A `{}` payload (e.g. cancel, GET) validates trivially against
+the matching op + direction. No special syntax needed.
+
+### What authors don't do
+
+- **Don't invent skip reasons that hide bugs.** If validation fails because
+  the example is wrong, fix the example.
+- **Don't put validation directives in comments.** Comments are documentation
+  for human readers; they are not interpreted by the validator.
+- **Don't use unsupported syntax.** The "what is not supported" list above is
+  exhaustive — additions require updating the contract and the validator
+  together, not stretching the parser.
+- **Don't nest ` ```json ` blocks** or place annotations in indented contexts
+  where the markdown parser might miss them.
+
+### Running the validator locally
+
+```bash
+python3 scripts/validate_examples.py --schema-base source/schemas/
+python3 scripts/validate_examples.py --schema-base source/schemas/ --file docs/specification/checkout-rest.md
+python3 scripts/validate_examples.py --schema-base source/schemas/ --audit
+```
+
+The `--audit` mode lists blocks without validating them — useful for counting
+skips and identifying unannotated blocks.
