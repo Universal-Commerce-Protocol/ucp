@@ -34,6 +34,7 @@ SCHEMAS_DIRS = [
   Path("source/handlers/google_pay"),
   Path("source/schemas"),
   Path("source/schemas/common"),
+  Path("source/schemas/common/types"),
   SHOPPING_SCHEMAS_DIR,
   SHOPPING_SCHEMAS_DIR / "types",
 ]
