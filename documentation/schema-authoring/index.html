@@ -1542,10 +1542,9 @@ breaking capability negotiation.</p>
 <ul>
 <li><strong>Top-level fields</strong>: <code>$schema</code>, <code>$id</code>, <code>title</code>, <code>description</code>, <code>name</code>, <code>version</code></li>
 <li><strong>Variants</strong>: <code>platform_schema</code>, <code>business_schema</code></li>
-<li><strong>Transport requirements</strong>:<ul>
-<li>REST/MCP: <code>endpoint</code>, <code>schema</code> (OpenAPI/OpenRPC URL)</li>
-<li>A2A: <code>endpoint</code> (Agent Card URL)</li>
-<li>Embedded: <code>schema</code> (OpenRPC URL)</li>
+<li><strong>Transport requirements</strong> (additional beyond the common base):<ul>
+<li>Platform profile (<code>platform_schema</code>): REST/MCP/Embedded require <code>schema</code> (OpenAPI/OpenRPC URL). A2A has no additional requirements.</li>
+<li>Business profile (<code>business_schema</code>): REST/MCP/A2A require <code>endpoint</code> (Agent Card URL for A2A). Embedded has no additional requirements.</li>
 </ul>
 </li>
 </ul>
