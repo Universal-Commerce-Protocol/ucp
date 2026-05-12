@@ -553,7 +553,7 @@ Follow-up calls after initial `fulfillment` data to update selection.
             "id": "item_123"
           },
           "id": "li_1",
-          "quantity": 2,
+          "quantity": 2
         }
       ],
       "fulfillment": {

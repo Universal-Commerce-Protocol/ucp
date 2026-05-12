@@ -355,7 +355,7 @@ request:
         "type": "card",
         "selected": true,
         "display": {
-          "description": "Visa •••• 1234",
+          "description": "Visa •••• 1234"
         },
         "billing_address": {
           "street_address": "123 Main St",

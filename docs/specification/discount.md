@@ -338,7 +338,7 @@ proceeding to checkout.
       "line_items": [
         {
           "item": {
-            "id": "prod_1",
+            "id": "prod_1"
           },
           "quantity": 2
         }

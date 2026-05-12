@@ -1476,7 +1476,7 @@ POST /checkout-sessions/{id}/complete
         // other required instruments fields
         "credential": {
           "type": "card",
-          "token": "eyJhbGciOiJ...", // Token would contain payment_mandate, the signed proof of funds auth
+          "token": "eyJhbGciOiJ..." // Token would contain payment_mandate, the signed proof of funds auth
         }
       }
     ]
@@ -1486,7 +1486,7 @@ POST /checkout-sessions/{id}/complete
     "com.example.risk_score": 0.95
   },
   "ap2": {
-    "checkout_mandate": "eyJhbGciOiJ...", // Signed proof of checkout terms
+    "checkout_mandate": "eyJhbGciOiJ..." // Signed proof of checkout terms
   }
 }
 ```
