@@ -32,6 +32,10 @@
     "display": {
       "type": "object",
       "description": "Display information for this payment instrument. Each payment instrument schema defines its specific display properties, as outlined by the payment handler."
+    },
+    "challenge": {
+      "$ref": "challenge.json",
+      "description": "Details for challenge or step-up authentication flows (e.g., 3DS2) if applicable."
     }
   },
   "additionalProperties": true,

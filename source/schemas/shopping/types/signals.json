@@ -11,11 +11,64 @@
   "properties": {
     "dev.ucp.buyer_ip": {
       "type": "string",
-      "description": "Client's IP address (IPv4 or IPv6)."
+      "description": "Client's IP address (IPv4 or IPv6).",
+      "examples": ["203.0.113.42"]
     },
     "dev.ucp.user_agent": {
       "type": "string",
-      "description": "Client's HTTP User-Agent header or equivalent."
+      "description": "Client's HTTP User-Agent header or equivalent. Deprecated: Use dev.ucp.browser.user_agent instead.",
+      "deprecated": true,
+      "examples": ["Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"]
+    },
+    "dev.ucp.browser.accept_headers": {
+      "type": "string",
+      "description": "Browser Accept Headers.",
+      "examples": ["text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8"]
+    },
+    "dev.ucp.browser.buyer_ip": {
+      "type": "string",
+      "description": "Browser IP Address as captured in the browser context.",
+      "examples": ["203.0.113.42"]
+    },
+    "dev.ucp.browser.java_enabled": {
+      "type": "string",
+      "description": "Browser Java Enabled.",
+      "examples": ["true", "false"]
+    },
+    "dev.ucp.browser.javascript_enabled": {
+      "type": "string",
+      "description": "Browser JavaScript Enabled.",
+      "examples": ["true", "false"]
+    },
+    "dev.ucp.browser.language": {
+      "type": "string",
+      "description": "Browser Language.",
+      "examples": ["en-US"]
+    },
+    "dev.ucp.browser.color_depth": {
+      "type": "string",
+      "description": "Browser Screen Color Depth.",
+      "examples": ["24"]
+    },
+    "dev.ucp.browser.screen_height": {
+      "type": "string",
+      "description": "Browser Screen Height in pixels.",
+      "examples": ["1080"]
+    },
+    "dev.ucp.browser.screen_width": {
+      "type": "string",
+      "description": "Browser Screen Width in pixels.",
+      "examples": ["1920"]
+    },
+    "dev.ucp.browser.timezone": {
+      "type": "string",
+      "description": "Browser Time Zone offset or name.",
+      "examples": ["America/Los_Angeles", "-480"]
+    },
+    "dev.ucp.browser.user_agent": {
+      "type": "string",
+      "description": "Browser User-Agent.",
+      "examples": ["Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"]
     }
   },
   "additionalProperties": true

@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/challenge.json",
+  "title": "Challenge",
+  "description": "Schema for handling challenge or step-up authentication actions and results (e.g., 3DS2).",
+  "type": "object",
+  "properties": {
+    "callback_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "The URL where the result should be sent or where the interaction completes."
+    },
+    "action": {
+      "type": "object",
+      "description": "Action requested by the merchant.",
+      "properties": {
+        "intent": {
+          "type": "string",
+          "description": "The intent of the action. Well-known values: `device_data_collection`, `challenge`.",
+          "examples": [
+            "device_data_collection",
+            "challenge"
+          ]
+        },
+        "type": {
+          "type": "string",
+          "description": "The mechanism for the action. Well-known values: `hidden_iframe`, `popup`.",
+          "examples": [
+            "hidden_iframe",
+            "popup"
+          ]
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "The URL to load or post to."
+        },
+        "request_data": {
+          "type": "object",
+          "description": "Data to be sent with the request. For form posts (POST), this should be a flat set of key-value pairs where both keys and values are strings.",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "request_method": {
+          "type": "string",
+          "description": "HTTP method to use.",
+          "examples": [
+            "POST",
+            "GET"
+          ]
+        }
+      }
+    },
+    "result": {
+      "type": "object",
+      "description": "Result reported by the host.",
+      "properties": {
+        "intent": {
+          "type": "string",
+          "description": "The intent of the completed action.",
+          "examples": [
+            "device_data_collection",
+            "challenge"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "description": "The status of the action.",
+          "examples": [
+            "success",
+            "failure"
+          ]
+        },
+        "response_data": {
+          "type": "object",
+          "description": "Data returned from the interaction. For form posts, this is typically a flat set of key-value pairs where both keys and values are strings.",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

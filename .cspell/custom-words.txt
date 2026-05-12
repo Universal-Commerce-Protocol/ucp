@@ -114,3 +114,6 @@ sandboxing
 fbclid
 gclid
 ttclid
+creq
+cres
+apng
