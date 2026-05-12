@@ -158,6 +158,7 @@ Extensions optionally augment a base capability. They use the
 using JSON Schema `allOf`. Extensions appear in `ucp.capabilities[]` alongside
 core capabilities.
 
+<!-- ucp:example skip reason="capability declaration fragment" -->
 ```json
 {
   "dev.ucp.shopping.fulfillment": [
@@ -258,6 +259,7 @@ between the two: the business profile uses a business-specific schema (hosted at
 — capabilities *and* keys in a single document — means discovery and
 authentication are resolved together.
 
+<!-- ucp:example skip reason="profile document, no wrapper schema" -->
 ```json
 {
   "ucp": {

@@ -1781,6 +1781,7 @@ logic. Platforms use their existing conventions (GA4 campaign parameters,
 click identifiers like `gclid` / `fbclid` / `ttclid`, etc.); businesses
 receive and process them according to their own analytics needs.
 
+<!-- ucp:example skip reason="attribution fragment" -->
 ```json
 {
   "attribution": {

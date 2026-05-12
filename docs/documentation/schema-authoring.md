@@ -328,6 +328,7 @@ Instead, define a standard `string`, document the requirement to ignore unknown 
 (e.g., combining `anyOf` with `const`), as they frequently confuse client-side code generators and make schemas
 difficult to read.
 
+<!-- ucp:example skip reason="schema authoring example" -->
 ```json
 "cancellation_reason": {
   "type": "string",
@@ -342,6 +343,7 @@ Use strict `enum` or `const` only for permanently fixed domains or when unknown 
 Reserve  them for cases where adding a new value inherently requires integrators to update their code (e.g., protocol
 versions, strict type discriminators, or days of the week).
 
+<!-- ucp:example skip reason="schema authoring example" -->
 ```json
 "status": {
   "type": "string",
@@ -363,6 +365,7 @@ typos in core metadata like the `ucp` block).
 
 **Anti-Pattern (Prevents adding new fields without a reversion):**
 
+<!-- ucp:example skip reason="schema authoring example" -->
 ```json
 "totals": {
   "type": "object",

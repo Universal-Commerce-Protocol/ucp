@@ -1307,6 +1307,7 @@ with HTTP 200 and the UCP envelope containing `messages`:
   },
   "id": "checkout_abc123",
   "status": "incomplete",
+  "currency": "USD",
   "line_items": [
     {
       "id": "li_1",
@@ -1320,6 +1321,7 @@ with HTTP 200 and the UCP envelope containing `messages`:
     }
   ],
   "totals": [...],
+  "links": [...],
   "messages": [
     {
       "type": "warning",
