@@ -314,12 +314,17 @@ def define_env(env):
     if ref_string.startswith("types/"):
       spec_file_name = "reference"
 
-    # Redirect sibling refs that are types (e.g. "item.json" in
-    # types/order_line_item.json)
-    elif "/" not in ref_string and ref_string.endswith(".json"):
-      type_path = Path("source/schemas/shopping/types") / ref_string
-      shopping_path = Path("source/schemas/shopping") / ref_string
-      if type_path.exists() and not shopping_path.exists():
+    # Redirect refs to common/types/ or shopping/types/ schemas to reference.
+    # Handles bare sibling refs ("amount.json") and path refs
+    # ("../../common/types/amount.json") by checking the resolved filename.
+    elif ref_string.endswith(".json"):
+      filename_only = Path(ref_string).name
+      common_type_path = Path("source/schemas/common/types") / filename_only
+      shopping_type_path = Path("source/schemas/shopping/types") / filename_only
+      shopping_path = Path("source/schemas/shopping") / filename_only
+      if common_type_path.exists() or (
+        shopping_type_path.exists() and not shopping_path.exists()
+      ):
         spec_file_name = "reference"
 
     filename = Path(ref_path).name
@@ -922,22 +927,24 @@ def define_env(env):
     spec_file_name="reference",
     include_extensions=True,
     include_capability=True,
+    base_dir=None,
   ):
     """Scan a dir for JSON schemas and generate documentation.
 
-    Scan a subdirectory within source/schemas/shopping/ for .json files
-    and generate documentation for each schema found.
+    Scan a subdirectory for .json files and generate documentation for each
+    schema found. Defaults to scanning source/schemas/shopping/.
 
     Args:
     ----
-      sub_dir: The subdirectory to scan, relative to source/schemas/shopping/.
+      sub_dir: The subdirectory to scan, relative to base_dir.
       spec_file_name: The name of the spec file for link generation.
       include_extensions: If true, includes schemas with 'Extension' in title.
       include_capability: If true, includes schemas without 'Extension' in
         title.
+      base_dir: Override the base directory to scan (default: shopping schemas).
 
     """
-    schema_base_path = SHOPPING_SCHEMAS_DIR
+    schema_base_path = Path(base_dir) if base_dir else SHOPPING_SCHEMAS_DIR
     scan_path = (
       schema_base_path / sub_dir if sub_dir != "." else schema_base_path
     )
