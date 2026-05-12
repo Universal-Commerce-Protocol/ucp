@@ -72,7 +72,7 @@ A **service** defines the API surface for a vertical (shopping, common, etc.). S
 
 #### Service Definition
 
-Full service declaration for platform-level discovery. All transports require `version`, `spec`, and `transport`. REST and MCP additionally require `schema` and `endpoint`; A2A requires `endpoint`; embedded requires `schema`.
+Full service declaration for platform-level discovery. All transports require `version`, `spec`, and `transport`. REST, MCP, and embedded additionally require `schema`.
 
 | Name      | Type   | Required | Description                                                                                     |
 | --------- | ------ | -------- | ----------------------------------------------------------------------------------------------- |
