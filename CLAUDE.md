@@ -1,3 +1,3 @@
 # Claude AI Assistant Instructions
 
-Please refer to the primary AI Contributor Playbook located in [AGENTS.md](AGENTS.md) for full operating guidelines, schema constraints, and verification commands. Always follow the rules defined in that document.
+When working in this repository, consult [AGENTS.md](AGENTS.md) for domain-specific constraints, commit message standards, and verification commands relevant to the specific files you are modifying (e.g., schema rules for `source/`, MkDocs rules for documentation).
