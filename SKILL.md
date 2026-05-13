@@ -41,6 +41,20 @@ AI agents operating in this repository MUST strictly adhere to the following gui
 ### 4. Commit Standards
 
 * **Conventional Commits:** Every pull request title and commit message must follow **Conventional Commits** (`type: description`).
+    * **Common Types:**
+        * `feat`: A new feature
+        * `fix`: A bug fix
+        * `docs`: Documentation only changes
+        * `style`: Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc.)
+        * `refactor`: A code change that neither fixes a bug nor adds a feature
+        * `perf`: A change to the code that improves performance
+        * `test`: Adding missing tests or correcting existing tests
+        * `chore`: Changes to the build process or auxiliary tools and libraries
+    * **Examples:**
+        * `feat: add new payment gateway`
+        * `fix: resolve crash on checkout`
+        * `docs: update setup guide`
+        * `feat!: remove deprecated buyer field from checkout`
 * **Breaking Changes:** If a change introduces a breaking schema or protocol adjustment (e.g., removing a schema field or file), you **must** append `!` to the type (e.g., `feat!: remove deprecated buyer field from checkout`).
 
 ---
