@@ -26,7 +26,7 @@ This document specifies the Model Context Protocol (MCP) binding for the
 Businesses advertise MCP transport availability through their UCP profile at
 `/.well-known/ucp`.
 
-<!-- ucp:example skip reason="JSON-RPC transport binding" -->
+<!-- ucp:example schema=profile def=business_schema op=read direction=response -->
 ```json
 {
   "ucp": {
@@ -82,7 +82,7 @@ Businesses advertise MCP transport availability through their UCP profile at
 MCP clients **MUST** include a `meta` object in every request containing
 protocol metadata:
 
-<!-- ucp:example skip reason="JSON-RPC transport binding" -->
+<!-- ucp:example schema=shopping/checkout op=create direction=request extract=$.params.arguments.checkout -->
 ```json
 {
   "jsonrpc": "2.0",
@@ -97,7 +97,7 @@ protocol metadata:
         },
         "idempotency-key": "550e8400-e29b-41d4-a716-446655440000"
       },
-      "checkout": { ... }
+      "checkout": { "line_items": [ ... ] }
     }
   }
 }
@@ -154,7 +154,7 @@ Maps to the [Create Checkout](checkout.md#create-checkout) operation.
 
 === "Request"
 
-    <!-- ucp:example skip reason="JSON-RPC transport binding" -->
+    <!-- ucp:example schema=shopping/checkout op=create direction=request extract=$.params.arguments.checkout -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -208,7 +208,7 @@ Maps to the [Create Checkout](checkout.md#create-checkout) operation.
 
 === "Response"
 
-    <!-- ucp:example skip reason="JSON-RPC transport binding" -->
+    <!-- ucp:example schema=shopping/checkout op=read direction=response extract=$.result.structuredContent -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -336,7 +336,7 @@ Maps to the [Create Checkout](checkout.md#create-checkout) operation.
         "content": [
           {
             "type": "text",
-            "text": "{\"ucp\":{...},\"id\":\"checkout_abc123\",...}"
+            "text": "{\"ucp\":{…},…}"
           }
         ]
       }
@@ -347,7 +347,7 @@ Maps to the [Create Checkout](checkout.md#create-checkout) operation.
 
     All items out of stock — no checkout resource is created:
 
-    <!-- ucp:example skip reason="JSON-RPC transport binding" -->
+    <!-- ucp:example schema=shopping/types/error_response op=read direction=response extract=$.result.structuredContent -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -366,7 +366,7 @@ Maps to the [Create Checkout](checkout.md#create-checkout) operation.
           "continue_url": "https://merchant.com/"
         },
         "content": [
-          {"type": "text", "text": "{\"ucp\":{...},\"messages\":[...]}"}
+          {"type": "text", "text": "{\"ucp\":{…},…}"}
         ]
       }
     }
@@ -407,7 +407,7 @@ Maps to the [Update Checkout](checkout.md#update-checkout) operation.
 
 === "Request"
 
-    <!-- ucp:example skip reason="JSON-RPC transport binding" -->
+    <!-- ucp:example schema=shopping/checkout op=update direction=request extract=$.params.arguments.checkout -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -460,7 +460,7 @@ Maps to the [Update Checkout](checkout.md#update-checkout) operation.
 
 === "Response"
 
-    <!-- ucp:example skip reason="JSON-RPC transport binding" -->
+    <!-- ucp:example schema=shopping/checkout op=read direction=response extract=$.result.structuredContent -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -588,7 +588,7 @@ Maps to the [Update Checkout](checkout.md#update-checkout) operation.
         "content": [
           {
             "type": "text",
-            "text": "{\"ucp\":{...},\"id\":\"checkout_abc123\",...}"
+            "text": "{\"ucp\":{…},…}"
           }
         ]
       }
@@ -646,7 +646,7 @@ Business outcomes (including errors like unavailable merchandise) are returned
 as JSON-RPC `result` with `structuredContent` containing the UCP envelope and
 `messages`:
 
-<!-- ucp:example skip reason="JSON-RPC transport binding" -->
+<!-- ucp:example schema=shopping/checkout op=read direction=response extract=$.result.structuredContent -->
 ```json
 {
   "jsonrpc": "2.0",
@@ -655,6 +655,7 @@ as JSON-RPC `result` with `structuredContent` containing the UCP envelope and
     "structuredContent": {
       "ucp": {
         "version": "{{ ucp_version }}",
+        "payment_handlers": {},
         "capabilities": {
           "dev.ucp.shopping.checkout": [{"version": "{{ ucp_version }}"}]
         }
@@ -674,6 +675,8 @@ as JSON-RPC `result` with `structuredContent` containing the UCP envelope and
         }
       ],
       "totals": [...],
+      "currency": "USD",
+      "links": [],
       "messages": [
         {
           "type": "warning",
@@ -685,7 +688,7 @@ as JSON-RPC `result` with `structuredContent` containing the UCP envelope and
       "continue_url": "https://merchant.com/checkout/checkout_abc123"
     },
     "content": [
-      {"type": "text", "text": "{\"ucp\":{...},\"id\":\"checkout_abc123\",...}"}
+      {"type": "text", "text": "{\"ucp\":{…},…}"}
     ]
   }
 }
@@ -694,7 +697,7 @@ as JSON-RPC `result` with `structuredContent` containing the UCP envelope and
 For `create_checkout`, when all items unavailable and no checkout can be created,
 JSON-RPC `result` with `structuredContent` containing the UCP envelope and `messages`:
 
-<!-- ucp:example skip reason="JSON-RPC transport binding" -->
+<!-- ucp:example schema=shopping/types/error_response op=read direction=response extract=$.result.structuredContent -->
 ```json
 {
   "jsonrpc": "2.0",
@@ -714,7 +717,7 @@ JSON-RPC `result` with `structuredContent` containing the UCP envelope and `mess
       "continue_url": "https://merchant.com/"
     },
     "content": [
-      {"type": "text", "text": "{\"ucp\":{...},\"messages\":[...]}"}
+      {"type": "text", "text": "{\"ucp\":{…},…}"}
     ]
   }
 }
@@ -826,7 +829,7 @@ transformation:
 
 **Example:** Given the `complete_checkout` operation defined in OpenRPC:
 
-<!-- ucp:example skip reason="JSON-RPC transport binding" -->
+<!-- ucp:example schema=shopping/checkout op=complete direction=request extract=$.params.checkout -->
 ```json
 {
   "method": "complete_checkout",
@@ -843,7 +846,7 @@ transformation:
 
 Implementers **MUST** expose this as an MCP `tools/call` endpoint:
 
-<!-- ucp:example skip reason="JSON-RPC transport binding" -->
+<!-- ucp:example schema=shopping/checkout op=complete direction=request extract=$.params.arguments.checkout -->
 ```json
 {
   "jsonrpc": "2.0",

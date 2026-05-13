@@ -26,7 +26,7 @@ This document specifies the Model Context Protocol (MCP) binding for the
 Businesses advertise MCP transport availability through their UCP profile at
 `/.well-known/ucp`.
 
-<!-- ucp:example skip reason="catalog capability, deferred" -->
+<!-- ucp:example schema=profile def=business_schema -->
 ```json
 {
   "ucp": {
@@ -53,7 +53,8 @@ Businesses advertise MCP transport availability through their UCP profile at
         "spec": "https://ucp.dev/{{ ucp_version }}/specification/catalog/lookup",
         "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/catalog_lookup.json"
       }]
-    }
+    },
+    "payment_handlers": {}
   }
 }
 ```
@@ -63,7 +64,7 @@ Businesses advertise MCP transport availability through their UCP profile at
 MCP clients **MUST** include a `meta` object in every request containing
 protocol metadata:
 
-<!-- ucp:example skip reason="catalog capability, deferred" -->
+<!-- ucp:example schema=shopping/catalog_search def=search_request op=create direction=request extract=$.params.arguments.catalog -->
 ```json
 {
   "jsonrpc": "2.0",
@@ -120,7 +121,7 @@ Maps to the [Catalog Search](search.md) capability.
 
 === "Request"
 
-    <!-- ucp:example skip reason="catalog capability, deferred" -->
+    <!-- ucp:example schema=shopping/catalog_search def=search_request op=create direction=request extract=$.params.arguments.catalog -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -158,7 +159,7 @@ Maps to the [Catalog Search](search.md) capability.
 
 === "Response"
 
-    <!-- ucp:example skip reason="catalog capability, deferred" -->
+    <!-- ucp:example schema=shopping/catalog_search def=search_response op=read direction=response extract=$.result.structuredContent -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -280,7 +281,7 @@ The `catalog.ids` parameter accepts an array of identifiers and optional context
 
 === "Request"
 
-    <!-- ucp:example skip reason="catalog capability, deferred" -->
+    <!-- ucp:example schema=shopping/catalog_lookup def=lookup_request op=create direction=request extract=$.params.arguments.catalog -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -307,7 +308,7 @@ The `catalog.ids` parameter accepts an array of identifiers and optional context
 
 === "Response"
 
-    <!-- ucp:example skip reason="catalog capability, deferred" -->
+    <!-- ucp:example schema=shopping/catalog_lookup def=lookup_response op=read direction=response extract=$.result.structuredContent -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -403,7 +404,7 @@ The `catalog.ids` parameter accepts an array of identifiers and optional context
 When some identifiers are not found, the response includes the found products. The
 response MAY include informational messages indicating which identifiers were not found.
 
-<!-- ucp:example skip reason="catalog capability, deferred" -->
+<!-- ucp:example schema=shopping/catalog_lookup def=lookup_response op=read extract=$.result.structuredContent -->
 ```json
 {
   "jsonrpc": "2.0",
@@ -422,11 +423,14 @@ response MAY include informational messages indicating which identifiers were no
         {
           "id": "prod_abc123",
           "title": "Blue Runner Pro",
+          "description": {
+            "plain": "A comfortable everyday running shoe."
+          },
           "price_range": {
             "min": { "amount": 12000, "currency": "USD" },
             "max": { "amount": 12000, "currency": "USD" }
           },
-          "variants": []
+          "variants": [ ... ]
         }
       ],
       "messages": [
@@ -467,7 +471,7 @@ Maps to the [Catalog Lookup](lookup.md#get-product-get_product) capability. Retu
 
 === "Request"
 
-    <!-- ucp:example skip reason="catalog capability, deferred" -->
+    <!-- ucp:example schema=shopping/catalog_lookup def=get_product_request op=create direction=request extract=$.params.arguments.catalog -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -498,7 +502,7 @@ Maps to the [Catalog Lookup](lookup.md#get-product-get_product) capability. Retu
 
 === "Response"
 
-    <!-- ucp:example skip reason="catalog capability, deferred" -->
+    <!-- ucp:example schema=shopping/catalog_lookup def=get_product_response op=read direction=response extract=$.result.structuredContent -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -598,7 +602,7 @@ When the identifier does not resolve to a product, the server returns a
 successful JSON-RPC result with `ucp.status: "error"` and a descriptive
 message. This is an application outcome, not a transport error.
 
-<!-- ucp:example skip reason="catalog capability, deferred" -->
+<!-- ucp:example schema=shopping/types/error_response op=read direction=response extract=$.result.structuredContent -->
 ```json
 {
   "jsonrpc": "2.0",
@@ -650,7 +654,7 @@ When all requested identifiers fail to resolve, the response contains an empty `
 array. The response MAY include informational messages indicating which identifiers were
 not found.
 
-<!-- ucp:example skip reason="catalog capability, deferred" -->
+<!-- ucp:example schema=shopping/catalog_lookup def=lookup_response op=read direction=response extract=$.result.structuredContent -->
 ```json
 {
   "jsonrpc": "2.0",

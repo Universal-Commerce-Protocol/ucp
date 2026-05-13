@@ -65,30 +65,35 @@ Businesses declare support by adding `dev.ucp.shopping.ap2_mandate` to their
 
 **Business Profile Example:**
 
-<!-- ucp:example skip reason="AP2 capability config" -->
+<!-- ucp:example schema=profile def=business_schema -->
 ```json
 {
-  "capabilities": {
-    "dev.ucp.shopping.checkout": [
-      {
-        "version": "{{ ucp_version }}",
-        "spec": "https://ucp.dev/{{ ucp_version }}/specification/checkout",
-        "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/checkout.json"
-      }
-    ],
-    "dev.ucp.shopping.ap2_mandate": [
-      {
-        "version": "{{ ucp_version }}",
-        "spec": "https://ucp.dev/{{ ucp_version }}/specification/ap2-mandates",
-        "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/ap2_mandate.json",
-        "extends": "dev.ucp.shopping.checkout",
-        "config": {
-          "vp_formats_supported": {
-            "dc+sd-jwt": { }
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "services": {},
+    "capabilities": {
+      "dev.ucp.shopping.checkout": [
+        {
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/checkout",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/checkout.json"
+        }
+      ],
+      "dev.ucp.shopping.ap2_mandate": [
+        {
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/ap2-mandates",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/ap2_mandate.json",
+          "extends": "dev.ucp.shopping.checkout",
+          "config": {
+            "vp_formats_supported": {
+              "dc+sd-jwt": { }
+            }
           }
         }
-      }
-    ]
+      ]
+    },
+    "payment_handlers": {}
   }
 }
 ```

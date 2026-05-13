@@ -26,7 +26,7 @@ This document specifies the HTTP/REST binding for the
 Businesses advertise REST transport availability through their UCP profile at
 `/.well-known/ucp`.
 
-<!-- ucp:example skip reason="catalog capability, deferred" -->
+<!-- ucp:example schema=profile def=business_schema -->
 ```json
 {
   "ucp": {
@@ -53,7 +53,8 @@ Businesses advertise REST transport availability through their UCP profile at
         "spec": "https://ucp.dev/{{ ucp_version }}/specification/catalog/lookup",
         "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/catalog_lookup.json"
       }]
-    }
+    },
+    "payment_handlers": {}
   }
 }
 ```

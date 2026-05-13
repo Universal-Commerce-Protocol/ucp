@@ -50,7 +50,7 @@ the `embedded` transport in their `/.well-known/ucp` profile, all cart
 
 **Service Discovery Example:**
 
-<!-- ucp:example skip reason="embedded protocol binding" -->
+<!-- ucp:example schema=profile def=business_schema extract=$.services target=$.ucp.services -->
 ```json
 {
     "services": {
@@ -89,7 +89,7 @@ indicate ECaP availability and allowed delegations for a specific session.
 
 **Cart Response Example:**
 
-<!-- ucp:example skip reason="embedded protocol binding" -->
+<!-- ucp:example schema=shopping/cart op=read direction=response extract=$.ucp.services target=$.ucp.services -->
 ```json
 {
     "id": "cart_123",
@@ -468,7 +468,7 @@ informational notices about the cart state.
 
 **Example Message:**
 
-<!-- ucp:example skip reason="embedded protocol binding" -->
+<!-- ucp:example schema=shopping/cart op=read direction=response extract=$.params.cart.messages target=$.messages -->
 ```json
 {
     "jsonrpc": "2.0",

@@ -26,7 +26,7 @@ This document specifies the Model Context Protocol (MCP) binding for the
 Businesses advertise MCP transport availability through their UCP profile at
 `/.well-known/ucp`.
 
-<!-- ucp:example skip reason="JSON-RPC transport binding" -->
+<!-- ucp:example schema=profile def=business_schema -->
 ```json
 {
   "ucp": {
@@ -50,7 +50,8 @@ Businesses advertise MCP transport availability through their UCP profile at
           "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/order.json"
         }
       ]
-    }
+    },
+    "payment_handlers": {}
   }
 }
 ```
@@ -132,7 +133,7 @@ current-state snapshot of an order.
 
 === "Response"
 
-    <!-- ucp:example skip reason="JSON-RPC transport binding" -->
+    <!-- ucp:example schema=shopping/order op=read direction=response extract=$.result.structuredContent -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -200,7 +201,7 @@ current-state snapshot of an order.
         "content": [
           {
             "type": "text",
-            "text": "{\"ucp\":{...},\"id\":\"order_abc123\",...}"
+            "text": "{\"ucp\":{…},…}"
           }
         ]
       }
@@ -209,7 +210,7 @@ current-state snapshot of an order.
 
 === "Not Found"
 
-    <!-- ucp:example skip reason="JSON-RPC transport binding" -->
+    <!-- ucp:example schema=shopping/types/error_response op=read direction=response extract=$.result.structuredContent -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -244,7 +245,7 @@ current-state snapshot of an order.
 
 === "Not Authorized"
 
-    <!-- ucp:example skip reason="JSON-RPC transport binding" -->
+    <!-- ucp:example schema=shopping/types/error_response op=read direction=response extract=$.result.structuredContent -->
     ```json
     {
       "jsonrpc": "2.0",

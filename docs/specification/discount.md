@@ -38,7 +38,7 @@ to be shared between the platform and the business.
 Businesses advertise discount support in their profile. The capability can
 extend cart, checkout, or both:
 
-<!-- ucp:example skip reason="discovery config" -->
+<!-- ucp:example schema=profile def=business_schema extract=$.ucp.capabilities target=$.ucp.capabilities -->
 ```json
 {
   "ucp": {
@@ -152,18 +152,16 @@ standard rejection codes.
 When a submitted discount code cannot be applied, businesses communicate this
 via the `messages[]` array:
 
-<!-- ucp:example skip reason="message fragment" -->
+<!-- ucp:example schema=shopping/cart target=$.messages -->
 ```json
-{
-  "messages": [
-    {
-      "type": "warning",
-      "code": "discount_code_expired",
-      "path": "$.discounts.codes[0]",
-      "content": "Code 'SUMMER20' expired on December 1st"
-    }
-  ]
-}
+[
+  {
+    "type": "warning",
+    "code": "discount_code_expired",
+    "path": "$.discounts.codes[0]",
+    "content": "Code 'SUMMER20' expired on December 1st"
+  }
+]
 ```
 
 > **Implementation guidance:** Operations that affect order totals, or the

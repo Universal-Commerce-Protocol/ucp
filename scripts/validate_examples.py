@@ -20,13 +20,14 @@ Every ```json fenced block in the spec docs MUST be preceded by an
 annotation comment:
 
     <!-- ucp:example schema=PATH [op=OP] [direction=DIR]
-                     [path=JSONPATH] [def=NAME] -->
+                     [extract=JSONPATH] [target=JSONPATH]
+                     [def=NAME] -->
     <!-- ucp:example skip reason="..." -->
 
 Defaults: op=read, direction=response.
 
-Recognized attribute keys: schema, op, direction, path, def, skip,
-reason. Unknown keys are rejected (typo guard).
+Recognized attribute keys: schema, op, direction, extract, target,
+def, skip, reason. Unknown keys are rejected (typo guard).
 
 At most one annotation per block; multiple stacked annotations
 before a fence are rejected. The annotation MUST appear on its own
@@ -72,6 +73,8 @@ Layer 3.
 
 Layer 3 — Semantic interpretation. Operates on the parsed tree:
 
+  - If extract= is present, the indicated subtree is selected from
+    the parsed displayed example before semantic validation.
   - Ellipsis sentinels are recorded as elided JSON Pointer paths,
     then removed from the tree.
   - The example is deep-merged into a scaffold (a known-valid
@@ -129,7 +132,9 @@ FENCE_ANY_OPEN_RE = re.compile(r"^(\s*)```(\S*)\s*$")
 
 # Recognized annotation attribute keys. Unknown keys are rejected at
 # parse time to catch typos like `shema=` or `directon=`.
-_KNOWN_ATTRS = frozenset({"schema", "op", "direction", "path", "def"})
+_KNOWN_ATTRS = frozenset(
+  {"schema", "op", "direction", "extract", "target", "def"}
+)
 
 # -----------------------------------------------------------
 # Annotation parsing
@@ -416,6 +421,38 @@ def strip_ellipsis(obj, _path="", _paths=None):
 # -----------------------------------------------------------
 
 _SEGMENT_RE = re.compile(r"^(\w+)(?:\[(\d+)\])?$")
+
+
+def jsonpath_to_pointer(path: str) -> str:
+  """Convert the supported JSONPath subset to a JSON Pointer prefix."""
+  if path == "$":
+    return ""
+  pointer_parts: list[str] = []
+  for seg in path.lstrip("$").lstrip(".").split("."):
+    m = _SEGMENT_RE.match(seg)
+    if not m:
+      return ""
+    name, idx = m.group(1), m.group(2)
+    pointer_parts.append(name)
+    if idx is not None:
+      pointer_parts.append(idx)
+  return "".join(f"/{part}" for part in pointer_parts)
+
+
+def jsonpath_get(obj, path: str):
+  """Get a value from an object using the supported JSONPath subset."""
+  if path == "$":
+    return obj
+  current = obj
+  for seg in path.lstrip("$").lstrip(".").split("."):
+    m = _SEGMENT_RE.match(seg)
+    if not m:
+      raise KeyError(seg)
+    name, idx = m.group(1), m.group(2)
+    current = current[name]
+    if idx is not None:
+      current = current[int(idx)]
+  return current
 
 
 def jsonpath_set(obj: dict, path: str, value):
@@ -800,8 +837,10 @@ class Result:
       parts: list[str] = []
       if "schema" in self.annotation:
         parts.append(f"schema={self.annotation['schema']}")
-      if self.annotation.get("path"):
-        parts.append(f"path={self.annotation['path']}")
+      if self.annotation.get("extract"):
+        parts.append(f"extract={self.annotation['extract']}")
+      if self.annotation.get("target"):
+        parts.append(f"target={self.annotation['target']}")
       parts.append(f"op={self.annotation.get('op', 'read')}")
       schema_info = f"  [{' '.join(parts)}]"
 
@@ -878,14 +917,31 @@ def process_block(
 
   op = annotation["op"]
   direction = annotation["direction"]
-  subtree_path = annotation.get("path")
+  extract_path = annotation.get("extract", "$")
+  target_path = annotation.get("target")
   schema_def = annotation.get("def")
 
-  # Layers 1→2: reduce text to JSON, parse to tree (with sentinels)
+  # Layers 1→2: reduce text to JSON, parse to tree (with sentinels),
+  # then select the authored payload if the displayed block is an envelope.
   try:
-    example = parse_example(block["content"])
+    parsed_example = parse_example(block["content"])
   except json.JSONDecodeError as e:
     return Result(file, line, "fail", f"invalid JSON: {e}", annotation)
+
+  try:
+    example = jsonpath_get(parsed_example, extract_path)
+  except (
+    KeyError,
+    IndexError,
+    TypeError,
+  ) as e:
+    return Result(
+      file,
+      line,
+      "error",
+      f"extract path not found: {extract_path}: {e}",
+      annotation,
+    )
 
   # Empty body — trivially valid (e.g. GET, cancel)
   if example == {}:
@@ -897,7 +953,10 @@ def process_block(
   except RuntimeError as e:
     return Result(file, line, "error", str(e), annotation)
 
-  # 6. Coverage check — select sub-schema if def= given
+  # 6. Coverage check — def= selects the base validation schema;
+  # target= optionally selects a sub-schema within that base for
+  # partial examples. Final validation still runs against the full
+  # selected base schema after scaffold merge.
   if schema_def:
     defs = resolved.get("$defs", {})
     if schema_def not in defs:
@@ -908,33 +967,46 @@ def process_block(
         f"$defs/{schema_def} not found in schema",
         annotation,
       )
-    coverage_schema = defs[schema_def]
-  elif subtree_path:
-    coverage_schema = jsonpath_get_schema(resolved, subtree_path)
+    validation_schema = defs[schema_def]
   else:
-    coverage_schema = resolved
+    validation_schema = resolved
+
+  if target_path:
+    coverage_schema = jsonpath_get_schema(validation_schema, target_path)
+  else:
+    coverage_schema = validation_schema
 
   coverage_errors = check_coverage(example, coverage_schema)
 
-  # 7. Strip ellipsis (track paths for error suppression)
+  # 7. Strip ellipsis (track paths for error suppression). When the example
+  # is inserted at target=, validation errors are reported against the merged
+  # payload, so relative elision paths need the same target prefix.
   stripped, ellipsis_paths = strip_ellipsis(example)
+  if target_path and ellipsis_paths:
+    target_pointer = jsonpath_to_pointer(target_path)
+    ellipsis_paths = {f"{target_pointer}{path}" for path in ellipsis_paths}
 
   # 8. Load scaffold and merge
   scaffold = load_scaffold(schema_path, direction, op, scaffolds_dir)
   if scaffold is None:
-    return Result(
-      file,
-      line,
-      "error",
-      f"no scaffold for {schema_path} ({direction}/{op})",
-      annotation,
-    )
+    if target_path:
+      return Result(
+        file,
+        line,
+        "error",
+        f"no scaffold for {schema_path} ({direction}/{op})",
+        annotation,
+      )
+    # Full examples do not need a seed object: coverage already checks the
+    # displayed payload against required fields before validation. Scaffolds are
+    # only mandatory when target= needs a concrete parent object to insert into.
+    scaffold = {}
 
-  if subtree_path:
+  if target_path:
     # deep copy
     merged = json.loads(json.dumps(scaffold))
     try:
-      jsonpath_set(merged, subtree_path, stripped)
+      jsonpath_set(merged, target_path, stripped)
     except (
       KeyError,
       IndexError,
@@ -944,7 +1016,7 @@ def process_block(
         file,
         line,
         "error",
-        f"scaffold navigation failed at {subtree_path}: {e}",
+        f"scaffold navigation failed at {target_path}: {e}",
         annotation,
       )
   else:
@@ -953,7 +1025,7 @@ def process_block(
   # 9. Validate — use extracted $def schema if specified
   if schema_def:
     valid, val_errors = validate_payload_with_schema(
-      merged, coverage_schema, direction, op, schema_base
+      merged, validation_schema, direction, op, schema_base
     )
   else:
     valid, val_errors = validate_payload(

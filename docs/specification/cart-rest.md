@@ -25,7 +25,7 @@ This document specifies the REST binding for the [Cart Capability](cart.md).
 Businesses advertise REST transport availability through their UCP profile at
 `/.well-known/ucp`.
 
-<!-- ucp:example skip reason="discovery profile" -->
+<!-- ucp:example schema=profile def=business_schema -->
 ```json
 {
   "ucp": {
@@ -56,7 +56,8 @@ Businesses advertise REST transport availability through their UCP profile at
           "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/cart.json"
         }
       ]
-    }
+    },
+    "payment_handlers": {}
   }
 }
 ```

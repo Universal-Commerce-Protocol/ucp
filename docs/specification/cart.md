@@ -56,7 +56,7 @@ When the cart capability is negotiated, platforms can convert a cart to checkout
 by providing `cart_id` in the Create Checkout request. The cart contents
 (`line_items`, `context`, `buyer`) initialize the checkout session.
 
-<!-- ucp:example skip reason="structural fragment" -->
+<!-- ucp:example schema=shopping/cart def=checkout op=create direction=request -->
 ```json
 {
   "cart_id": "cart_abc123",

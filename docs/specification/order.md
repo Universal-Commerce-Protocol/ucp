@@ -123,7 +123,7 @@ Line items reflect what was purchased at checkout and their current state.
 
 **Quantity Structure:**
 
-<!-- ucp:example skip reason="structural fragment" -->
+<!-- ucp:example schema=shopping/types/order_line_item target=$.quantity -->
 ```json
 {
   "original": 3,   // Quantity from the original checkout
@@ -445,12 +445,14 @@ platform's profile and uses it to send order lifecycle events.
 
 **Example:**
 
-<!-- ucp:example skip reason="capability config fragment" -->
+<!-- ucp:example schema=profile def=platform_schema target=$.ucp.capabilities -->
 ```json
 {
   "dev.ucp.shopping.order": [
     {
       "version": "{{ ucp_version }}",
+      "spec": "https://ucp.dev/{{ ucp_version }}/specification/order",
+      "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/order.json",
       "config": {
         "webhook_url": "https://platform.example.com/webhooks/ucp/orders"
       }

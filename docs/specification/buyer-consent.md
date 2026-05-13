@@ -34,7 +34,7 @@ operations.
 
 Businesses advertise consent support in their profile:
 
-<!-- ucp:example skip reason="discovery config" -->
+<!-- ucp:example schema=profile def=business_schema extract=$.capabilities target=$.ucp.capabilities -->
 ```json
 {
   "capabilities": {

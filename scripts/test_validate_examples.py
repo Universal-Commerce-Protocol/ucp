@@ -245,13 +245,24 @@ def test_annotation_parsing() -> None:
     f"got {ann!r}",
   )
 
-  # Path and def attributes recognized
-  ann = v.parse_annotation("schema=x path=$.totals def=request_schema")
+  # Extract, target, and def attributes recognized
+  ann = v.parse_annotation(
+    "schema=x extract=$.result.payload target=$.totals def=request_schema"
+  )
   _check(
-    "annotation_path_and_def_recognized",
+    "annotation_extract_target_and_def_recognized",
     "_error" not in ann
-    and ann.get("path") == "$.totals"
+    and ann.get("extract") == "$.result.payload"
+    and ann.get("target") == "$.totals"
     and ann.get("def") == "request_schema",
+    f"got {ann!r}",
+  )
+
+  # Legacy path= is intentionally not recognized in the final contract.
+  ann = v.parse_annotation("schema=x path=$.totals")
+  _check(
+    "annotation_legacy_path_rejected",
+    "_error" in ann and "path" in ann["_error"],
     f"got {ann!r}",
   )
 
@@ -409,6 +420,72 @@ def test_process_block_integration() -> None:
   _check(
     "process_unknown_annotation_attribute",
     result.status == "error" and "shema" in result.message,
+    f"got {result.status}: {result.message}",
+  )
+
+  # def= selects a schema variant; target= selects a sub-schema within it.
+  md = (
+    "<!-- ucp:example schema=profile def=business_schema target=$.ucp.capabilities -->\n"  # noqa: E501
+    '```json\n{ "dev.ucp.shopping.checkout": [{ "version": "{{ ucp_version }}" }] }\n```\n'  # noqa: E501
+  )
+  result = _process(md)
+  _check(
+    "process_def_and_target_compose",
+    result.status == "ok",
+    f"got {result.status}: {result.message}",
+  )
+
+  # Complete examples validate without a scaffold. Scaffolds are only required
+  # when target= needs a parent object to insert the displayed fragment into.
+  md = (
+    "<!-- ucp:example schema=common/identity_linking def=scope_policy -->\n"
+    '```json\n{ "description": { "plain": "Manage orders" } }\n```\n'
+  )
+  path = _write_md(md)
+  blocks = v.extract_blocks(path)
+  with tempfile.TemporaryDirectory() as empty_scaffolds:
+    result = v.process_block(blocks[0], _SCHEMA_BASE, Path(empty_scaffolds))
+  _check(
+    "process_full_example_no_scaffold_ok",
+    result.status == "ok",
+    f"got {result.status}: {result.message}",
+  )
+
+  # extract= reads a payload subtree from the displayed JSON block before
+  # normal target/scaffold validation.
+  md = (
+    "<!-- ucp:example schema=profile def=business_schema extract=$.ucp.payment_handlers target=$.ucp.payment_handlers -->\n"  # noqa: E501
+    '```json\n{ "ucp": { "payment_handlers": { "com.example.handler": [{ "id": "h1", "version": "{{ ucp_version }}" }] } } }\n```\n'  # noqa: E501
+  )
+  result = _process(md)
+  _check(
+    "process_extract_then_target_ok",
+    result.status == "ok",
+    f"got {result.status}: {result.message}",
+  )
+
+  # Missing extract= path is a hard annotation/runtime error, not skip/fail.
+  md = (
+    "<!-- ucp:example schema=profile def=business_schema extract=$.missing target=$.ucp.payment_handlers -->\n"  # noqa: E501
+    "```json\n{}\n```\n"
+  )
+  result = _process(md)
+  _check(
+    "process_extract_missing_path_errors",
+    result.status == "error" and "extract path not found" in result.message,
+    f"got {result.status}: {result.message}",
+  )
+
+  # Ellipsis paths inside a target= fragment are reported by validators at
+  # their merged payload path, so suppression must include the target prefix.
+  md = (
+    "<!-- ucp:example schema=profile def=business_schema target=$.ucp.payment_handlers -->\n"  # noqa: E501
+    '```json\n{ "com.example.handler": [{ "id": "h1", "version": "{{ ucp_version }}", "available_instruments": [ ... ] }] }\n```\n'  # noqa: E501
+  )
+  result = _process(md)
+  _check(
+    "process_target_ellipsis_paths_prefixed",
+    result.status == "ok",
     f"got {result.status}: {result.message}",
   )
 

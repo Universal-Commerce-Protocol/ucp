@@ -175,7 +175,7 @@ The latter two require handoff and serve as explicit signals to the platform.
 Businesses **SHOULD** surface such messages as early as possible, and platforms
 **SHOULD** prioritize resolving recoverable errors before initiating handoff.
 
-<!-- ucp:example schema=shopping/checkout path=$.messages op=read -->
+<!-- ucp:example schema=shopping/checkout target=$.messages op=read -->
 ```json
 [
   {
@@ -864,7 +864,7 @@ when provided.
 
 **Split tax, itemized at top-level:**
 
-<!-- ucp:example schema=shopping/checkout path=$.totals op=read -->
+<!-- ucp:example schema=shopping/checkout target=$.totals op=read -->
 ```json
 [
   { "type": "subtotal",    "display_text": "Subtotal",    "amount": 5750 },
@@ -877,7 +877,7 @@ when provided.
 
 **Collapsed fees with optional breakdown:**
 
-<!-- ucp:example schema=shopping/checkout path=$.totals op=read -->
+<!-- ucp:example schema=shopping/checkout target=$.totals op=read -->
 ```json
 [
   { "type": "subtotal", "display_text": "Subtotal", "amount": 4999 },
@@ -895,7 +895,7 @@ when provided.
 
 **Discount and account credit — negative amounts:**
 
-<!-- ucp:example schema=shopping/checkout path=$.totals op=read -->
+<!-- ucp:example schema=shopping/checkout target=$.totals op=read -->
 ```json
 [
   { "type": "subtotal",       "display_text": "Subtotal",       "amount": 10000 },

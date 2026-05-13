@@ -25,7 +25,7 @@ This document specifies the REST binding for the [Order Capability](order.md).
 Businesses advertise REST transport availability through their UCP profile at
 `/.well-known/ucp`.
 
-<!-- ucp:example skip reason="discovery profile" -->
+<!-- ucp:example schema=profile def=business_schema -->
 ```json
 {
   "ucp": {
@@ -49,7 +49,8 @@ Businesses advertise REST transport availability through their UCP profile at
           "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/order.json"
         }
       ]
-    }
+    },
+    "payment_handlers": {}
   }
 }
 ```

@@ -25,7 +25,7 @@ Businesses that support A2A transport must specify the agent card endpoint as
 part of `services` in UCP Profile at `/.well-known/ucp`. This allows capable
 platforms to interact with the business services over A2A Protocol.
 
-<!-- ucp:example skip reason="A2A transport binding" -->
+<!-- ucp:example schema=profile def=business_schema extract=$.ucp.services target=$.ucp.services -->
 ```json
 {
   "ucp": {

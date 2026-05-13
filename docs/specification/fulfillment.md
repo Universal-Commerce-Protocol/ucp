@@ -296,13 +296,37 @@ single-group responses. The response shape is always
 `methods[].groups[]`—the difference is whether `groups.length` can exceed 1
 within each method.
 
-<!-- ucp:example skip reason="capability config" -->
-```json
-// Default: single group per method
-{ "dev.ucp.shopping.fulfillment": [{"version": "{{ ucp_version }}"}] }
+Default declaration (single group per method):
 
-// Opt-in: business MAY return multiple groups per method
-{ "dev.ucp.shopping.fulfillment": [{"version": "{{ ucp_version }}", "config": { "supports_multi_group": true }}] }
+<!-- ucp:example schema=profile def=platform_schema target=$.ucp.capabilities -->
+```json
+{
+  "dev.ucp.shopping.fulfillment": [
+    {
+      "version": "{{ ucp_version }}",
+      "spec": "https://ucp.dev/{{ ucp_version }}/specification/fulfillment",
+      "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json",
+      "extends": "dev.ucp.shopping.checkout"
+    }
+  ]
+}
+```
+
+Opt-in declaration (business MAY return multiple groups per method):
+
+<!-- ucp:example schema=profile def=platform_schema target=$.ucp.capabilities -->
+```json
+{
+  "dev.ucp.shopping.fulfillment": [
+    {
+      "version": "{{ ucp_version }}",
+      "spec": "https://ucp.dev/{{ ucp_version }}/specification/fulfillment",
+      "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json",
+      "extends": "dev.ucp.shopping.checkout",
+      "config": { "supports_multi_group": true }
+    }
+  ]
+}
 ```
 
 ### Business Profile
@@ -312,22 +336,23 @@ Businesses declare what fulfillment configurations they support using
 
 {{ schema_fields('types/merchant_fulfillment_config', 'fulfillment') }}
 
-<!-- ucp:example skip reason="capability config" -->
+<!-- ucp:example schema=profile def=business_schema target=$.ucp.capabilities -->
 ```json
 {
-  "capabilities": {
-    "dev.ucp.shopping.fulfillment": [
-      {
-        "version": "{{ ucp_version }}",
-        "config": {
-          "allows_multi_destination": {
-            "shipping": true
-          },
-          "allows_method_combinations": [["shipping", "pickup"]]
-        }
+  "dev.ucp.shopping.fulfillment": [
+    {
+      "version": "{{ ucp_version }}",
+      "spec": "https://ucp.dev/{{ ucp_version }}/specification/fulfillment",
+      "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json",
+      "extends": "dev.ucp.shopping.checkout",
+      "config": {
+        "allows_multi_destination": {
+          "shipping": true
+        },
+        "allows_method_combinations": [["shipping", "pickup"]]
       }
-    ]
-  }
+    }
+  ]
 }
 ```
 

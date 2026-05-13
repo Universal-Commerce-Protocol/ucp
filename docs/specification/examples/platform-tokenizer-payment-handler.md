@@ -192,7 +192,7 @@ credential type (e.g., PCI DSS for cards).
 
 #### Example Business Handler Declaration
 
-<!-- ucp:example skip reason="handler config example" -->
+<!-- ucp:example schema=profile def=business_schema extract=$.ucp.payment_handlers target=$.ucp.payment_handlers -->
 ```json
 {
   "ucp": {
@@ -235,7 +235,7 @@ The response config includes runtime token lifecycle information.
 
 #### Example Response Config
 
-<!-- ucp:example skip reason="handler config example" -->
+<!-- ucp:example schema=payment_handler def=response_schema -->
 ```json
 {
   "id": "platform_wallet",
@@ -270,7 +270,7 @@ For option B, see section [PSP Integration](#psp-integration).
 
 #### Detokenize Request Example (Business)
 
-<!-- ucp:example skip reason="handler config example" -->
+<!-- ucp:example skip reason="tokenization API, not UCP payload" -->
 ```json
 POST https://provider.platform.example.com/ucp/detokenize
 Content-Type: application/json
@@ -326,7 +326,7 @@ registry using `platform_config`.
 
 #### Example Platform Handler Declaration
 
-<!-- ucp:example skip reason="handler config example" -->
+<!-- ucp:example schema=profile def=business_schema extract=$.ucp.payment_handlers target=$.ucp.payment_handlers -->
 ```json
 {
   "ucp": {
@@ -377,7 +377,7 @@ access to sensitive instrument details.
 The platform application submits the checkout with the token (received from its
 payment credential provider):
 
-<!-- ucp:example skip reason="handler config example" -->
+<!-- ucp:example schema=shopping/checkout op=complete direction=request -->
 ```json
 POST /checkout-sessions/{checkout_id}/complete
 Content-Type: application/json
@@ -446,7 +446,7 @@ When the business forwards a token to the PSP:
 
 #### Detokenize Request Example (PSP)
 
-<!-- ucp:example skip reason="handler config example" -->
+<!-- ucp:example skip reason="tokenization API, not UCP payload" -->
 ```json
 POST https://provider.platform.example.com/ucp/detokenize
 Content-Type: application/json

@@ -363,9 +363,9 @@ unrecognized fields.
 Optional human-readable description of the scope that platforms can use
 to present and explain context (requirement and value) to the user.
 
-<!-- ucp:example skip reason="scope metadata fragment" -->
+<!-- ucp:example schema=common/identity_linking def=scope_policy -->
 ```json
-"dev.ucp.shopping.order:manage": {
+{
   "description": {
     "plain": "Manage your orders: cancel, return, or modify post-purchase.",
     "markdown": "**Manage your orders**: cancel, return, or modify post-purchase."
@@ -553,10 +553,9 @@ unlock additional capabilities in the current context. The `content`
 field conveys the business's value prompt to the platform (e.g.,
 "Sign in for member pricing and personalized results.").
 
-<!-- ucp:example skip reason="incomplete checkout fragment" -->
+<!-- ucp:example schema=shopping/checkout extract=$.messages target=$.messages -->
 ```json
 {
-  ...,
   "messages": [
     {
       "type": "info",
@@ -711,13 +710,15 @@ The shape of `config.scopes` reflects the business's policy.
 Public catalog, guest checkout (no scope required), user-bound order
 operations gated:
 
-<!-- ucp:example skip reason="profile document, no wrapper schema" -->
+<!-- ucp:example schema=profile def=business_schema -->
 ```json
 {
   "ucp": {
+    "version": "{{ ucp_version }}",
+    "services": {},
     "capabilities": {
       "dev.ucp.common.identity_linking": [{
-        "version": "Working Draft",
+        "version": "{{ ucp_version }}",
         "spec": "https://ucp.dev/specification/identity-linking",
         "schema": "https://ucp.dev/schemas/common/identity_linking.json",
         "config": {
@@ -727,7 +728,8 @@ operations gated:
           }
         }
       }]
-    }
+    },
+    "payment_handlers": {}
   }
 }
 ```
@@ -746,13 +748,15 @@ operations gated:
 
 No guest checkout — every transaction requires an authenticated user:
 
-<!-- ucp:example skip reason="profile document, no wrapper schema" -->
+<!-- ucp:example schema=profile def=business_schema -->
 ```json
 {
   "ucp": {
+    "version": "{{ ucp_version }}",
+    "services": {},
     "capabilities": {
       "dev.ucp.common.identity_linking": [{
-        "version": "Working Draft",
+        "version": "{{ ucp_version }}",
         "spec": "https://ucp.dev/specification/identity-linking",
         "schema": "https://ucp.dev/schemas/common/identity_linking.json",
         "config": {
@@ -763,7 +767,8 @@ No guest checkout — every transaction requires an authenticated user:
           }
         }
       }]
-    }
+    },
+    "payment_handlers": {}
   }
 }
 ```

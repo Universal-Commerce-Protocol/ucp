@@ -461,7 +461,7 @@ comment. Unannotated blocks fail CI.
 #### Annotation grammar
 
 ```text
-<!-- ucp:example schema=PATH [op=OP] [direction=DIR] [path=JSONPATH] [def=NAME] -->
+<!-- ucp:example schema=PATH [op=OP] [direction=DIR] [extract=JSONPATH] [target=JSONPATH] [def=NAME] -->
 <!-- ucp:example skip reason="..." -->
 ```
 
@@ -470,7 +470,8 @@ comment. Unannotated blocks fail CI.
 | `schema`      | yes (unless skip) | —          | Schema to validate against, e.g. `shopping/checkout`                       |
 | `op`          | no                | `read`     | Operation: `create`, `read`, `update`, `complete`, `cancel`, etc.          |
 | `direction`   | no                | `response` | `request` or `response`                                                    |
-| `path`        | no                | (whole)    | JSONPath into the schema; example replaces a sub-tree                      |
+| `extract`     | no                | `$`        | JSONPath inside the displayed block; selected subtree becomes the example  |
+| `target`      | no                | `$`        | JSONPath into the schema/scaffold; example replaces a sub-tree             |
 | `def`         | no                | —          | Pull `$defs/<name>` out of the schema and validate against that            |
 | `skip reason` | yes (with skip)   | —          | Free-form prose explaining why this block can't be validated               |
 
@@ -531,6 +532,25 @@ Content-Type: application/json
 
 Other HTTP methods (`OPTIONS`, `HEAD`, `CONNECT`, `TRACE`) are not recognized
 as envelopes — they would be parsed as JSON and fail.
+
+#### Extracting from envelopes
+
+Use `extract=` when the displayed JSON block is a transport or wrapper object
+but the UCP payload to validate is nested inside it. `extract=` reads from the
+displayed example; `target=` writes the extracted value into the validation
+scaffold.
+
+```text
+<!-- ucp:example schema=shopping/checkout op=create direction=request extract=$.params.arguments.checkout -->
+```
+
+```text
+<!-- ucp:example schema=shopping/checkout extract=$.result.structuredContent.totals target=$.totals -->
+```
+
+The first example validates the nested checkout request. The second extracts a
+`totals` fragment from a displayed envelope, inserts it into `$.totals` of the
+checkout scaffold, and validates the merged checkout.
 
 #### Elision markers
 
@@ -616,12 +636,19 @@ payload for the named operation.
 <!-- ucp:example schema=shopping/cart op=create direction=request -->
 ```
 
-**Sub-tree with surrounding context.** Use `path=` when the example focuses
+**Sub-tree with surrounding context.** Use `target=` when the example focuses
 on one field. The example is spliced into a known-valid scaffold at that
-path; the rest uses the scaffold's defaults.
+target path; the rest uses the scaffold's defaults.
 
 ```text
-<!-- ucp:example schema=shopping/checkout path=$.totals -->
+<!-- ucp:example schema=shopping/checkout target=$.totals -->
+```
+
+**Displayed envelope with nested payload.** Use `extract=` when the code block
+shows an envelope but only a subtree is the UCP payload under validation.
+
+```text
+<!-- ucp:example schema=shopping/checkout op=create direction=request extract=$.params.arguments.checkout -->
 ```
 
 **Schema with `$defs`.** Some schemas (e.g. catalog) define request/response
