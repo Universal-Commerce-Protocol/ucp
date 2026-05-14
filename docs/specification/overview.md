@@ -669,6 +669,58 @@ for a session:
 The result is the set of capabilities both parties support at mutually
 compatible versions, with extension dependencies satisfied.
 
+#### Capability-to-Operation Mapping
+
+After the intersection algorithm produces the active capability set, platforms
+must determine which transport operations are available to invoke. Root
+capabilities declare their operations explicitly via the `operations` field in
+their capability entry. The actual path or method for each operation ID is
+resolved from the service's transport definition (OpenAPI for REST, OpenRPC
+for MCP).
+
+**Declaration:**
+
+Root capabilities **SHOULD** declare an `operations` array listing the
+operation IDs they enable:
+
+```json
+{
+  "capabilities": {
+    "dev.ucp.shopping.checkout": [
+      {
+        "version": "{{ ucp_version }}",
+        "spec": "https://ucp.dev/{{ ucp_version }}/specification/checkout",
+        "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/checkout.json",
+        "operations": [
+          "create_checkout",
+          "get_checkout",
+          "update_checkout",
+          "complete_checkout",
+          "cancel_checkout"
+        ]
+      }
+    ]
+  }
+}
+```
+
+**Rules:**
+
+- Each string in `operations` **MUST** match an `operationId` in the
+    service's OpenAPI document (REST) or a method `name` in the service's
+    OpenRPC document (MCP). The transport definition resolves the operation
+    to its concrete path and HTTP method.
+- Extensions **MUST NOT** declare `operations`. Extensions augment the
+    payload of their parent capability's operations; they do not introduce
+    new ones.
+- Platforms **MUST** invoke only the operations listed in the `operations`
+    arrays of root capabilities present in the active capability set.
+    Operations whose root capability was excluded by the intersection
+    algorithm **MUST NOT** be called.
+- If `operations` is absent from a capability entry, platforms **SHOULD**
+    fall back to the static mapping defined in the capability's transport
+    binding specification.
+
 #### Error Handling
 
 UCP negotiation can fail in two ways:
