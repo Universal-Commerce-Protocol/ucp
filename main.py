@@ -39,6 +39,41 @@ SCHEMAS_DIRS = [
   SHOPPING_SCHEMAS_DIR / "types",
 ]
 
+COMMON_TYPES_DIR = Path("source/schemas/common/types")
+VERTICAL_TYPES_DIRS = [
+  SHOPPING_SCHEMAS_DIR / "types",
+  # Add new vertical types directories here as verticals are introduced.
+]
+
+
+def _validate_common_vertical_uniqueness() -> None:
+  """Fail fast if any common/types filename collides with a vertical types dir.
+
+  A file present in both common/types/ and a vertical's types/ directory
+  creates an ambiguous basename that the docs macro system resolves silently
+  by SCHEMAS_DIRS order — wrong anchors, wrong spec redirects, no error.
+  Two verticals sharing a filename is intentional; common/vertical collision
+  is always a design mistake.
+  """
+  if not COMMON_TYPES_DIR.exists():
+    return
+  common_names = {p.name for p in COMMON_TYPES_DIR.glob("*.json")}
+  for vertical_dir in VERTICAL_TYPES_DIRS:
+    if not vertical_dir.exists():
+      continue
+    for p in vertical_dir.glob("*.json"):
+      if p.name in common_names:
+        raise RuntimeError(
+          f"Schema filename collision between common and vertical: "
+          f"'{p.name}' exists in both {COMMON_TYPES_DIR} and {vertical_dir}. "
+          f"A type cannot be defined in both common/types/ and a vertical — "
+          f"remove it from one or rename it."
+        )
+
+
+_validate_common_vertical_uniqueness()
+
+
 # Cache for resolved schemas to avoid repeated subprocess calls
 _resolved_schema_cache: dict[str, dict] = {}
 
