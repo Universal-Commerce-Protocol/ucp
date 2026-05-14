@@ -38,7 +38,7 @@
       }
     },
     "buyer": {
-      "$ref": "../common/types/buyer.json",
+      "$ref": "types/buyer.json",
       "description": "Representation of the buyer.",
       "ucp_request": {
         "create": "optional",

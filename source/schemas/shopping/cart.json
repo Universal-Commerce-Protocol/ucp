@@ -84,7 +84,7 @@
       }
     },
     "buyer": {
-      "$ref": "../common/types/buyer.json",
+      "$ref": "types/buyer.json",
       "description": "Optional buyer information for personalized estimates.",
       "ucp_request": {
         "create": "optional",
