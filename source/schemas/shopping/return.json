@@ -6,13 +6,91 @@
   "description": "Extends Checkout with return policy support.",
   "$defs": {
     "return_policy": {
-      "$ref": "types/return_policy.json"
+      "title": "Return Policy",
+      "description": "Conditions, methods, timelines, and costs associated with returning physical items.",
+      "type": "object",
+      "required": [
+        "line_item_ids"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the return policy."
+        },
+        "line_item_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Line items governed by this return policy, allowing distinct policies per item."
+        },
+        "return_days": {
+          "type": "integer",
+          "description": "Length of the merchant's return window in days, measured from the date of delivery. This is a policy statement — it communicates the window duration, not a pre-computed deadline."
+        },
+        "exchanges_allowed": {
+          "type": "boolean",
+          "description": "Indicates whether the buyer can exchange the item."
+        },
+        "methods": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/return_method"
+          },
+          "description": "Permitted physical methods for returning the item, along with their associated fee structures."
+        }
+      }
     },
     "return_method": {
-      "$ref": "types/return_method.json"
+      "title": "Return Method",
+      "description": "The physical method through which the buyer can return the item.",
+      "type": "object",
+      "required": [
+        "type",
+        "fee"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Physical return channel. Clients MUST tolerate unknown values. Well-known values: `in_store` (buyer returns at a retail location), `by_mail` (buyer ships item back via carrier), `kiosk` (buyer drops off at a self-service kiosk or designated drop point).",
+          "examples": [
+            "in_store",
+            "by_mail",
+            "kiosk"
+          ]
+        },
+        "fee": {
+          "$ref": "#/$defs/return_fee",
+          "description": "The cost structure associated with this specific return method."
+        }
+      }
     },
     "return_fee": {
-      "$ref": "types/return_fee.json"
+      "title": "Return Fee",
+      "description": "The cost structure associated with a specific return method.",
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Cost structure for this return method. Clients MUST tolerate unknown values. Well-known values: `free` (merchant covers return costs), `fixed_fee` (flat fee charged, see amount), `customer_responsibility` (buyer arranges and pays for return shipping).",
+          "examples": [
+            "free",
+            "fixed_fee",
+            "customer_responsibility"
+          ]
+        },
+        "amount": {
+          "$ref": "types/amount.json",
+          "description": "Fixed return fee charged by the merchant, represented in minor currency units (e.g., cents). Required if type is fixed_fee."
+        },
+        "display_text": {
+          "type": "string",
+          "description": "Human-readable text to display against the fee to provide context to the buyer (e.g., 'Restocking Fee', 'Return Shipping Label')."
+        }
+      }
     },
     "dev.ucp.shopping.checkout": {
       "title": "Checkout with Return",

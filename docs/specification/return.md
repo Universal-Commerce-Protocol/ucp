@@ -25,8 +25,7 @@ By exposing the return policy natively in the UCP schema, AI agents and platform
 This extension adds a `return_policies` field to Checkout containing:
 
 * `return_policies[]` — conditions governed by the merchant for specific items.
-    * `window_type` — the category of return window (finite, lifetime, final sale, etc.)
-    * `return_days` — the number of days in the window.
+    * `return_days` — the number of days allowed for the return.
     * `methods[]` — permitted physical methods (in-store, by-mail, etc.)
         * `fee` — the cost structure for that specific method.
 
@@ -34,15 +33,38 @@ This extension adds a `return_policies` field to Checkout containing:
 
 * `return_policies[0]` Standard Apparel
     * `line_item_ids` 👕👖
-    * `window_type` = `finite_window` 🗓️ 30 Days
+    * `return_days` = 30 Days 🗓️
     * `methods[0]` In-Store 🏬
         * `fee` = `free` ✅
     * `methods[1]` By Mail 📦
         * `fee` = `fixed_fee` $5.00 💸
-* `return_policies[1]` Final Sale
+* `return_policies[1]` Non-Returnable / Final Sale
     * `line_item_ids` ⌚
-    * `window_type` = `final_sale` 🚫
     * `exchanges_allowed` = `false`
+
+## Discovery
+
+Businesses advertise return policy support in their profile by registering the extension under `capabilities`:
+
+```json
+{
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "capabilities": {
+      "dev.ucp.shopping.return": [
+        {
+          "version": "{{ ucp_version }}",
+          "extends": ["dev.ucp.shopping.checkout"],
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/return",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/return.json"
+        }
+      ]
+    }
+  }
+}
+```
+
+Platforms SHOULD check for this capability before attempting to render `return_policies` from a checkout response.
 
 ## Schema
 
@@ -50,21 +72,21 @@ Return policies apply to physical items in a checkout session. Items not governe
 
 ### Properties
 
-{{ extension_fields('return', 'return_policies') }}
+{{ extension_fields('return', 'return') }}
 
 ### Entities
 
 #### Return Policy
 
-{{ schema_fields('types/return_policy', 'return') }}
+{{ extension_schema_fields('return.json#/$defs/return_policy', 'return') }}
 
 #### Return Method
 
-{{ schema_fields('types/return_method', 'return') }}
+{{ extension_schema_fields('return.json#/$defs/return_method', 'return') }}
 
 #### Return Fee
 
-{{ schema_fields('types/return_fee', 'return') }}
+{{ extension_schema_fields('return.json#/$defs/return_fee', 'return') }}
 
 ## Rendering
 
@@ -80,10 +102,9 @@ Return policies are designed for proactive disclosures by the merchant. Platform
 
 ### Business Responsibilities
 
-**For `window_type`:**
+**For `return_days`:**
 
-* **MUST** accurately reflect the merchant's legal and commercial policy.
-* **MUST** provide `return_days` if the type is `finite_window`.
+* **MUST** accurately reflect the merchant's legal and commercial return window duration.
 
 **For `return_method.fee`:**
 
@@ -110,7 +131,6 @@ In this example, apparel items have a standard window, while a custom item is fi
     {
       "id": "rp_apparel",
       "line_item_ids": ["shirt", "pants"],
-      "window_type": "finite_window",
       "return_days": 30,
       "exchanges_allowed": true,
       "methods": [
@@ -134,7 +154,6 @@ In this example, apparel items have a standard window, while a custom item is fi
     {
       "id": "rp_final_sale",
       "line_item_ids": ["custom_engraved_watch"],
-      "window_type": "final_sale",
       "exchanges_allowed": false
     }
   ]
