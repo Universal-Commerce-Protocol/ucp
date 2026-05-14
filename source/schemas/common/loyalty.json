@@ -22,9 +22,9 @@
           "type": "string",
           "description": "A display-ready, human-readable rationale for the specific rewards (e.g. 2x on footwear)."
         },
-        "source": {
+        "benefit_id": {
           "type": "string",
-          "description": "JSONPath to the source benefit that offers the rewards."
+          "description": "Optional `id` of the membership_tier_benefit that produced this rewards rule. Resolves against `membership_tier_benefit.id` within the same parent loyalty membership."
         }
       }
     },
@@ -100,7 +100,7 @@
     },
     "membership_tier": {
       "type": "object",
-      "description": "Specific achievement ranks or status milestones within a track that unlock escalating value as a member progresses through activity or spend.",
+      "description": "Specific achievement rank or status milestone that unlocks escalating value as a member progresses through activity or spend.",
       "required": ["id", "name"],
       "properties": {
         "id": {
@@ -140,23 +140,19 @@
           },
           "description": "List of tiers associated with the membership track."
         },
-        "activated_tier": {
-          "type": "string",
-          "description": "The tier that the customer is activated for, identified by the `id` of the Membership Tier object."
-        },
         "rewards": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/membership_reward"
+            "$ref": "#/$defs/reward_currency"
           },
-          "description": "List of quantifiable rewards value the user holds. Each object encapsulates one type of reward the track offers."
+          "description": "List of reward currencies associated with the membership track."
         }
       }
     },
     "loyalty_membership": {
       "type": "object",
-      "description": "Loyalty membership that the business offers or associated with.",
-      "required": ["id", "name"],
+      "description": "Loyalty membership the business has accepted for the eligibility claim represented by the parent map key. Programs that can be joined independently MUST be modeled as separate sibling entries under the loyalty map, distinguished by reverse-domain naming (e.g., 'com.target.circle' and 'com.target.circle.card').",
+      "required": ["id", "name", "provisional"],
       "properties": {
         "id": {
           "type": "string",
@@ -170,16 +166,22 @@
           "type": "string",
           "description": "A masked or partial version of the membership id for user recognition (e.g., '****5678')."
         },
-        "tracks": {
+        "tiers": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/membership_track"
+            "$ref": "#/$defs/membership_tier"
           },
-          "description": "List of tracks associated with the loyalty membership."
+          "description": "Active tier(s) the buyer holds within this membership. Most programs are single-status (one entry); programs with parallel status dimensions (e.g., current and lifetime) populate one entry per active tier. Omitted when no tier has been resolved (typically when provisional is true)."
+        },
+        "rewards": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/membership_reward"
+          },
+          "description": "List of quantifiable rewards the buyer holds within this membership. Each object encapsulates one type of reward."
         },
         "provisional": {
           "type": "boolean",
-          "default": false,
           "description": "True if this membership requires additional verification."
         }
       }

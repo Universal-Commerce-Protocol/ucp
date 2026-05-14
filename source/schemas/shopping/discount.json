@@ -67,8 +67,15 @@
           "description": "True if this discount requires additional verification."
         },
         "eligibility": {
-          "$ref": "../common/types/reverse_domain_name.json",
-          "description": "The eligibility claim accepted by the Business for this discount. Corresponds to a value from context.eligibility. Omitted for code-based and non-eligibility automatic discounts."
+          "description": "The eligibility claim(s) accepted by the Business for this discount. A single string corresponds to one accepted claim from context.eligibility; an array indicates conjunctive eligibility (ALL listed claims were required to unlock the discount, e.g., a multiplicative benefit available only when the buyer holds multiple programs simultaneously). Omitted for code-based and non-eligibility automatic discounts.",
+          "oneOf": [
+            { "$ref": "../common/types/reverse_domain_name.json" },
+            {
+              "type": "array",
+              "items": { "$ref": "../common/types/reverse_domain_name.json" },
+              "uniqueItems": true
+            }
+          ]
         },
         "allocations": {
           "type": "array",

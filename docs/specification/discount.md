@@ -210,15 +210,33 @@ attribution to display to the buyer.
 
 Eligibility-triggered discounts use the following fields:
 
-| Field         | Value                      | Purpose                                 |
-| ------------- | -------------------------- | --------------------------------------- |
-| `automatic`   | `true`                     | No code required                        |
-| `provisional` | `true`                     | Requires verification at completion     |
-| `eligibility` | `"com.example.store_card"` | The accepted claim                      |
-| `code`        | *(omitted)*                | Not code-based                          |
+| Field         | Value                                                | Purpose                                  |
+| ------------- | ---------------------------------------------------- | ---------------------------------------- |
+| `automatic`   | `true`                                               | No code required                         |
+| `provisional` | `true`                                               | Requires verification at completion      |
+| `eligibility` | `"com.example.store_card"` *or* `["...", "..."]`     | The accepted claim(s) (see below)        |
+| `code`        | *(omitted)*                                          | Not code-based                           |
 
 Standard `priority`, `method`, and `allocations` fields apply for stacking with
 other discounts.
+
+#### Conjunctive eligibility
+
+For multiplicative benefits unlocked only when the buyer holds two or more
+programs simultaneously, `eligibility` **MUST** be an array of every claim
+required. Semantics are conjunctive (ALL listed claims required):
+
+```json
+{
+  "title": "Loyalty + Card Bonus 2%",
+  "amount": 100,
+  "automatic": true,
+  "eligibility": ["com.example.loyalty", "com.example.loyalty.card"]
+}
+```
+
+Disjunctive (any-of) eligibility **SHOULD** be modeled as separate `applied`
+entries, one per claim that independently unlocks the benefit.
 
 ### Verification at Checkout
 
