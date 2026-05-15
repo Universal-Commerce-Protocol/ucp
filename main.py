@@ -357,9 +357,9 @@ def define_env(env):
     # "../common/types/pagination.json#/$defs/request" are handled correctly.
     elif ref_path.endswith(".json"):
       filename_only = Path(ref_path).name
-      common_type_path = Path("source/schemas/common/types") / filename_only
-      shopping_type_path = Path("source/schemas/shopping/types") / filename_only
-      shopping_path = Path("source/schemas/shopping") / filename_only
+      common_type_path = COMMON_TYPES_DIR / filename_only
+      shopping_type_path = SHOPPING_TYPES_DIR / filename_only
+      shopping_path = SHOPPING_SCHEMAS_DIR / filename_only
       if common_type_path.exists() or (
         shopping_type_path.exists() and not shopping_path.exists()
       ):
