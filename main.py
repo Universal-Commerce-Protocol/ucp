@@ -28,14 +28,79 @@ from typing import Any
 # --- CONFIGURATION ---
 # Base directories for schema resolution
 OPENAPI_DIR = Path("source/services/shopping")
-SHOPPING_SCHEMAS_DIR = Path("source/schemas/shopping")
-UCP_SCHEMA_PATH = Path("source/schemas/ucp.json")
-SCHEMAS_DIRS = [
-  Path("source/handlers/google_pay"),
-  Path("source/schemas"),
-  SHOPPING_SCHEMAS_DIR,
-  SHOPPING_SCHEMAS_DIR / "types",
+SCHEMAS_DIR = Path("source/schemas")
+HANDLERS_GOOGLE_PAY_DIR = Path("source/handlers/google_pay")
+COMMON_SCHEMAS_DIR = SCHEMAS_DIR / "common"
+COMMON_TYPES_DIR = COMMON_SCHEMAS_DIR / "types"
+UCP_SCHEMA_PATH = SCHEMAS_DIR / "ucp.json"
+
+
+# common/ is the protocol namespace; every other immediate subdir of
+# source/schemas/ is a vertical. Discovered at module load so adding a
+# vertical requires zero config changes here.
+def _discover_vertical_dirs() -> list[Path]:
+  if not SCHEMAS_DIR.exists():
+    return []
+  return sorted(
+    p for p in SCHEMAS_DIR.iterdir() if p.is_dir() and p.name != "common"
+  )
+
+
+VERTICAL_DIRS = _discover_vertical_dirs()
+VERTICAL_TYPES_DIRS = [
+  v / "types" for v in VERTICAL_DIRS if (v / "types").exists()
 ]
+# Retained for call sites that reference shopping specifically (e.g.
+# auto_generate_schema_reference default, create_link redirect logic).
+SHOPPING_SCHEMAS_DIR = SCHEMAS_DIR / "shopping"
+SHOPPING_TYPES_DIR = SHOPPING_SCHEMAS_DIR / "types"
+SCHEMAS_DIRS = [
+  HANDLERS_GOOGLE_PAY_DIR,
+  SCHEMAS_DIR,
+  COMMON_SCHEMAS_DIR,
+  COMMON_TYPES_DIR,
+  *VERTICAL_DIRS,
+  *VERTICAL_TYPES_DIRS,
+]
+
+
+def _validate_common_namespace_exclusivity() -> None:
+  """Fail fast if any vertical schema shadows a common-namespace filename.
+
+  The docs macro system resolves schemas by basename across SCHEMAS_DIRS
+  (first match wins), while JSON Schema's $ref resolves by full path.
+  Once a basename is claimed by common/ (top-level or types/), it is the
+  protocol's canonical definition; a vertical file with the same basename
+  would silently resolve to the wrong file in rendered docs. Verticals
+  are autonomous siblings and may freely share filenames with each
+  other — this guard only protects the common namespace.
+  """
+  common_names: dict[str, Path] = {}
+  for d in (COMMON_SCHEMAS_DIR, COMMON_TYPES_DIR):
+    if not d.exists():
+      continue
+    for p in d.glob("*.json"):
+      common_names[p.name] = p
+
+  for v in VERTICAL_DIRS:
+    for sub in (v, v / "types"):
+      if not sub.exists():
+        continue
+      for p in sub.glob("*.json"):
+        if p.name in common_names:
+          raise RuntimeError(
+            f"Schema filename '{p.name}' is claimed by common "
+            f"({common_names[p.name]}) and shadowed by {p}. Once a "
+            f"basename exists in common/ (top-level or types/), no "
+            f"vertical may reuse it — doc resolution is basename-based "
+            f"and would silently bind to the wrong file. Rename or "
+            f"remove the vertical file. Verticals may share filenames "
+            f"with each other; this rule only protects common."
+          )
+
+
+_validate_common_namespace_exclusivity()
+
 
 # Cache for resolved schemas to avoid repeated subprocess calls
 _resolved_schema_cache: dict[str, dict] = {}
@@ -312,12 +377,17 @@ def define_env(env):
     if ref_string.startswith("types/"):
       spec_file_name = "reference"
 
-    # Redirect sibling refs that are types (e.g. "item.json" in
-    # types/order_line_item.json)
-    elif "/" not in ref_string and ref_string.endswith(".json"):
-      type_path = Path("source/schemas/shopping/types") / ref_string
-      shopping_path = Path("source/schemas/shopping") / ref_string
-      if type_path.exists() and not shopping_path.exists():
+    # Redirect refs to common/types/ or shopping/types/ schemas to reference.
+    # Uses ref_path (fragment stripped) so refs like
+    # "../common/types/pagination.json#/$defs/request" are handled correctly.
+    elif ref_path.endswith(".json"):
+      filename_only = Path(ref_path).name
+      common_type_path = COMMON_TYPES_DIR / filename_only
+      shopping_type_path = SHOPPING_TYPES_DIR / filename_only
+      shopping_path = SHOPPING_SCHEMAS_DIR / filename_only
+      if common_type_path.exists() or (
+        shopping_type_path.exists() and not shopping_path.exists()
+      ):
         spec_file_name = "reference"
 
     filename = Path(ref_path).name
@@ -920,22 +990,24 @@ def define_env(env):
     spec_file_name="reference",
     include_extensions=True,
     include_capability=True,
+    base_dir=None,
   ):
     """Scan a dir for JSON schemas and generate documentation.
 
-    Scan a subdirectory within source/schemas/shopping/ for .json files
-    and generate documentation for each schema found.
+    Scan a subdirectory for .json files and generate documentation for each
+    schema found. Defaults to scanning source/schemas/shopping/.
 
     Args:
     ----
-      sub_dir: The subdirectory to scan, relative to source/schemas/shopping/.
+      sub_dir: The subdirectory to scan, relative to base_dir.
       spec_file_name: The name of the spec file for link generation.
       include_extensions: If true, includes schemas with 'Extension' in title.
       include_capability: If true, includes schemas without 'Extension' in
         title.
+      base_dir: Override the base directory to scan (default: shopping schemas).
 
     """
-    schema_base_path = SHOPPING_SCHEMAS_DIR
+    schema_base_path = Path(base_dir) if base_dir else SHOPPING_SCHEMAS_DIR
     scan_path = (
       schema_base_path / sub_dir if sub_dir != "." else schema_base_path
     )

@@ -89,7 +89,7 @@ jobs:
 
       - name: Build and Verify Documentation Site (Main/PR)
         run: |
-          bash scripts/build_local.sh --main-only
+          bash scripts/build_local.sh --draft-only
           uv run python scripts/check_links.py local_preview
 
   build_and_verify_release:
