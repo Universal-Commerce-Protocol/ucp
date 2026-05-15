@@ -30,51 +30,72 @@ from typing import Any
 OPENAPI_DIR = Path("source/services/shopping")
 SCHEMAS_DIR = Path("source/schemas")
 HANDLERS_GOOGLE_PAY_DIR = Path("source/handlers/google_pay")
-SHOPPING_SCHEMAS_DIR = SCHEMAS_DIR / "shopping"
-SHOPPING_TYPES_DIR = SHOPPING_SCHEMAS_DIR / "types"
 COMMON_SCHEMAS_DIR = SCHEMAS_DIR / "common"
 COMMON_TYPES_DIR = COMMON_SCHEMAS_DIR / "types"
-VERTICAL_TYPES_DIRS = [
-  SHOPPING_TYPES_DIR,
-  # Add new vertical types directories here as verticals are introduced.
-]
 UCP_SCHEMA_PATH = SCHEMAS_DIR / "ucp.json"
+
+
+# common/ is the protocol namespace; every other immediate subdir of
+# source/schemas/ is a vertical. Discovered at module load so adding a
+# vertical requires zero config changes here.
+def _discover_vertical_dirs() -> list[Path]:
+  if not SCHEMAS_DIR.exists():
+    return []
+  return sorted(
+    p for p in SCHEMAS_DIR.iterdir() if p.is_dir() and p.name != "common"
+  )
+
+
+VERTICAL_DIRS = _discover_vertical_dirs()
+VERTICAL_TYPES_DIRS = [
+  v / "types" for v in VERTICAL_DIRS if (v / "types").exists()
+]
+# Retained for call sites that reference shopping specifically (e.g.
+# auto_generate_schema_reference default, create_link redirect logic).
+SHOPPING_SCHEMAS_DIR = SCHEMAS_DIR / "shopping"
+SHOPPING_TYPES_DIR = SHOPPING_SCHEMAS_DIR / "types"
 SCHEMAS_DIRS = [
   HANDLERS_GOOGLE_PAY_DIR,
   SCHEMAS_DIR,
   COMMON_SCHEMAS_DIR,
   COMMON_TYPES_DIR,
-  SHOPPING_SCHEMAS_DIR,
-  SHOPPING_TYPES_DIR,
+  *VERTICAL_DIRS,
+  *VERTICAL_TYPES_DIRS,
 ]
 
 
-def _validate_common_vertical_uniqueness() -> None:
-  """Fail fast if any common/types filename collides with a vertical types dir.
+def _validate_type_basename_uniqueness() -> None:
+  """Fail fast on basename collisions across all type namespaces.
 
-  A file present in both common/types/ and a vertical's types/ directory
-  creates an ambiguous basename that the docs macro system resolves silently
-  by SCHEMAS_DIRS order — wrong anchors, wrong spec redirects, no error.
-  Two verticals sharing a filename is intentional; common/vertical collision
-  is always a design mistake.
+  The docs macro system resolves schemas by basename across SCHEMAS_DIRS
+  (first match wins), while JSON Schema's $ref resolves by full path. A
+  collision between any two type namespaces — common/vertical OR
+  vertical/vertical — silently resolves to the wrong file in the
+  rendered docs with no error. common/ is the protocol namespace and
+  verticals are siblings; no two type namespaces may share a basename.
+  If two verticals genuinely need parallel concepts (e.g. a "checkout"
+  type in both), give them distinct filenames or refactor the resolver
+  to be path-aware.
   """
-  if not COMMON_TYPES_DIR.exists():
-    return
-  common_names = {p.name for p in COMMON_TYPES_DIR.glob("*.json")}
-  for vertical_dir in VERTICAL_TYPES_DIRS:
-    if not vertical_dir.exists():
-      continue
-    for p in vertical_dir.glob("*.json"):
-      if p.name in common_names:
+  type_dirs: list[Path] = []
+  if COMMON_TYPES_DIR.exists():
+    type_dirs.append(COMMON_TYPES_DIR)
+  type_dirs.extend(d for d in VERTICAL_TYPES_DIRS if d.exists())
+
+  seen: dict[str, Path] = {}
+  for d in type_dirs:
+    for p in d.glob("*.json"):
+      if p.name in seen:
         raise RuntimeError(
-          f"Schema filename collision between common and vertical: "
-          f"'{p.name}' exists in both {COMMON_TYPES_DIR} and {vertical_dir}. "
-          f"A type cannot be defined in both common/types/ and a vertical — "
-          f"remove it from one or rename it."
+          f"Schema type filename collision: '{p.name}' exists in both "
+          f"{seen[p.name]} and {p}. Type filenames must be unique across "
+          f"common/types/ and all vertical types/ directories — doc "
+          f"resolution is basename-based."
         )
+      seen[p.name] = p
 
 
-_validate_common_vertical_uniqueness()
+_validate_type_basename_uniqueness()
 
 
 # Cache for resolved schemas to avoid repeated subprocess calls
