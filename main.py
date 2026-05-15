@@ -28,21 +28,24 @@ from typing import Any
 # --- CONFIGURATION ---
 # Base directories for schema resolution
 OPENAPI_DIR = Path("source/services/shopping")
-SHOPPING_SCHEMAS_DIR = Path("source/schemas/shopping")
-UCP_SCHEMA_PATH = Path("source/schemas/ucp.json")
-SCHEMAS_DIRS = [
-  Path("source/handlers/google_pay"),
-  Path("source/schemas"),
-  Path("source/schemas/common"),
-  Path("source/schemas/common/types"),
-  SHOPPING_SCHEMAS_DIR,
-  SHOPPING_SCHEMAS_DIR / "types",
-]
-
-COMMON_TYPES_DIR = Path("source/schemas/common/types")
+SCHEMAS_DIR = Path("source/schemas")
+HANDLERS_GOOGLE_PAY_DIR = Path("source/handlers/google_pay")
+SHOPPING_SCHEMAS_DIR = SCHEMAS_DIR / "shopping"
+SHOPPING_TYPES_DIR = SHOPPING_SCHEMAS_DIR / "types"
+COMMON_SCHEMAS_DIR = SCHEMAS_DIR / "common"
+COMMON_TYPES_DIR = COMMON_SCHEMAS_DIR / "types"
 VERTICAL_TYPES_DIRS = [
-  SHOPPING_SCHEMAS_DIR / "types",
+  SHOPPING_TYPES_DIR,
   # Add new vertical types directories here as verticals are introduced.
+]
+UCP_SCHEMA_PATH = SCHEMAS_DIR / "ucp.json"
+SCHEMAS_DIRS = [
+  HANDLERS_GOOGLE_PAY_DIR,
+  SCHEMAS_DIR,
+  COMMON_SCHEMAS_DIR,
+  COMMON_TYPES_DIR,
+  SHOPPING_SCHEMAS_DIR,
+  SHOPPING_TYPES_DIR,
 ]
 
 
