@@ -15,7 +15,8 @@
 
 
 site_name: Universal Commerce Protocol (UCP)
-site_url: !ENV [SITE_URL, "https://ucp.dev/"]  # Required for the llmstxt plugin to work.
+# Required for the llmstxt plugin to work.
+site_url: !ENV [SITE_URL, "https://ucp.dev/"]
 site_description: >
   The Universal Commerce Protocol (UCP) is a solution for enabling gen AI agents
   to make payments on behalf of users, safely, securely, and in a decentralized
@@ -30,7 +31,10 @@ nav:
   - Overview:
       - Home: index.md
       - Core Concepts: documentation/core-concepts.md
-      - Specification: !ENV [SPEC_URL, "https://ucp.dev/latest/specification/overview/"]
+      - Specification: !ENV [
+          SPEC_URL,
+          "https://ucp.dev/latest/specification/overview/",
+        ]
       - UCP and AP2: documentation/ucp-and-ap2.md
       - Roadmap: documentation/roadmap.md
       - Schema Authoring: documentation/schema-authoring.md
@@ -72,9 +76,12 @@ nav:
           - Template: specification/payment-handler-template.md
           - Tokenization Guide: specification/tokenization-guide.md
           - Examples:
-              - Processor Tokenizer: specification/examples/processor-tokenizer-payment-handler.md
-              - Platform Tokenizer: specification/examples/platform-tokenizer-payment-handler.md
-              - Encrypted Credential: specification/examples/encrypted-credential-handler.md
+              - Processor Tokenizer: "specification/examples/\
+                  processor-tokenizer-payment-handler.md"
+              - Platform Tokenizer: "specification/examples/\
+                  platform-tokenizer-payment-handler.md"
+              - Encrypted Credential: "specification/examples/\
+                  encrypted-credential-handler.md"
       - Signatures: specification/signatures.md
       - Reference: specification/reference.md
       - Playground: specification/playground.md
@@ -83,7 +90,10 @@ repo_name: UCP on GitHub # Override repo name to be shorter on site header.
 repo_url: https://github.com/Universal-Commerce-Protocol/ucp
 
 # Copyright
-copyright: Copyright 2026 UCP Authors. Licensed under the <a href="https://github.com/Universal-Commerce-Protocol/ucp/blob/main/LICENSE">Apache License, Version 2.0</a>.
+copyright: >-
+  Copyright 2026 UCP Authors. Licensed under the <a
+  href="https://github.com/Universal-Commerce-Protocol/ucp/blob/main/LICENSE"
+  >Apache License, Version 2.0</a>.
 
 # Custom CSS
 extra_css:
@@ -208,51 +218,190 @@ plugins:
   - social
   - llmstxt:
       full_output: llms-full.txt
+      markdown_description: |
+        This is the documentation directory for the Universal Commerce Protocol
+        (UCP), an open standard that enables gen AI agents to safely, securely,
+        and privately execute commerce actions (i.e., discovering, buying) on
+        behalf of users.
+        ### Technical Specification Indices (llms.txt)
+        For raw, LLM-optimized indices of our versioned technical
+        specifications:
+        - [Latest Stable UCP
+          Specification Index](https://ucp.dev/latest/llms.txt):
+          Standardized specifications for production deployments.
+        - [UCP Specification Index
+          (2026-04-08)](https://ucp.dev/2026-04-08/llms.txt):
+          Stable spec release version 2026-04-08.
+        - [UCP Specification Index
+          (2026-01-23)](https://ucp.dev/2026-01-23/llms.txt):
+          Stable spec release version 2026-01-23.
+        - [UCP Specification Index
+          (2026-01-11)](https://ucp.dev/2026-01-11/llms.txt):
+          Stable spec release version 2026-01-11.
       sections:
         Overview:
-          - index.md
-          - documentation/core-concepts.md
-          - documentation/ucp-and-ap2.md
-          - documentation/roadmap.md
-          - documentation/schema-authoring.md
-          - versioning.md
+          - index.md: >-
+              High-level architecture, core value propositions, and structural
+              capabilities of the Universal Commerce Protocol (UCP) as a common
+              language for commerce agents.
+          - documentation/core-concepts.md: >-
+              Fundamental UCP abstractions, including the decoupled separation
+              of capabilities, extensions, services, and the decentralized
+              protocol negotiation model.
+          - documentation/ucp-and-ap2.md: >-
+              Integration patterns with the Agent Payments Protocol (AP2) to
+              facilitate secure, agent-mediated checkout commitments and
+              cryptographically signed mandates.
+          - documentation/roadmap.md: >-
+              Future development and planned capabilities of UCP.
+          - documentation/schema-authoring.md: >-
+              Comprehensive guidelines and JSON Schema design conventions when
+              authoring or extending UCP schemas, including strict versioning
+              and registry patterns.
+          - versioning.md: >-
+              UCP's strict date-based versioning policy (YYYY-MM-DD) and
+              compatibility guidelines for managing breaking changes and
+              release branches.
         Specification:
-          - specification/overview.md
+          - specification/overview.md: >-
+              Master technical specification of UCP, discovery mechanisms,
+              secure transports, and error taxonomies.
         Message Signatures:
-          - specification/signatures.md
+          - specification/signatures.md: >-
+              Implementation details for RFC 9421 HTTP Message Signatures and
+              RFC 9530 Content-Digests to achieve secure, transport-agnostic
+              request authentication and replay protection.
         Checkout Capability:
-          - specification/checkout.md
-          - specification/checkout-rest.md
-          - specification/checkout-mcp.md
-          - specification/checkout-a2a.md
-          - specification/embedded-protocol.md
-          - specification/embedded-checkout.md
-          - specification/ap2-mandates.md
-          - specification/buyer-consent.md
-          - specification/discount.md
-          - specification/fulfillment.md
+          - specification/checkout.md: >-
+              Core Checkout Capability specifications detailing session state
+              lifecycles, totals calculation rules, and buyer input validation
+              severity states.
+          - specification/checkout-rest.md: >-
+              HTTP REST transport binding for Checkout operations, specifying
+              standard headers, API endpoints, status codes, and payload
+              structures.
+          - specification/checkout-mcp.md: >-
+              Model Context Protocol (MCP) transport binding for Checkout
+              operations, mapping UCP capabilities to JSON-RPC tools with
+              agent metadata rules.
+          - specification/checkout-a2a.md: >-
+              Agent2Agent Protocol (A2A) binding for Checkout Capability,
+              detailing transport discovery, agent card profile advertisement,
+              and message negotiation flows.
+          - specification/embedded-protocol.md: >-
+              Core Embedded Protocol (EP) transport binding, defining message
+              formats, handshake patterns, communication channels, security
+              constraints, and shared error handling structures for
+              iframe/webview integrations.
+          - specification/embedded-checkout.md: >-
+              Embedded Checkout Protocol (ECP) specification, detailing
+              per-session delegation negotiation, URL parameters, native UI
+              event mappings, W3C Payment Request conceptual alignment, and
+              core lifecycle messages.
+          - specification/ap2-mandates.md: >-
+              AP2 Mandates Extension, detailing secure, cryptographically bound
+              checkout commitments (using SD-JWT+kb digital credentials and
+              detached JWS signatures) between business, platform, and payment
+              providers.
+          - specification/buyer-consent.md: >-
+              Buyer Consent Extension, defining data schemas for transmitting
+              buyer privacy choices (analytics, marketing, personalization) to
+              assist with privacy compliance (CCPA/GDPR).
+          - specification/discount.md: >-
+              Discount Extension, covering discount code discovery, applied
+              discounts, allocation method stacking orders, rejected code
+              message handling, and automatic or provisional eligibility
+              promotions.
+          - specification/fulfillment.md: >-
+              Fulfillment extension for checkouts, defining delivery methods,
+              pickup destinations, and method-agnostic UI rendering contracts.
         Cart Capability:
-          - specification/cart.md
-          - specification/cart-rest.md
-          - specification/cart-mcp.md
-          - specification/embedded-protocol.md
-          - specification/embedded-cart.md
+          - specification/cart.md: >-
+              Pre-purchase Cart Capability, detailing item collection, state
+              modification, and seamless transition handoff to active checkout
+              sessions.
+          - specification/cart-rest.md: >-
+              HTTP REST transport binding for Cart operations, including
+              endpoints for session creation, modification, retrieval, and
+              cancellation.
+          - specification/cart-mcp.md: >-
+              Model Context Protocol (MCP) transport binding for
+              Cart operations, mapping item management to JSON-RPC
+              tools for AI shopping agents.
+          - specification/embedded-protocol.md: >-
+              Core Embedded Protocol (EP) transport binding, defining message
+              formats, handshake patterns, communication channels, security
+              constraints, and shared error handling structures for
+              iframe/webview integrations.
+          - specification/embedded-cart.md: >-
+              Embedded Cart Protocol (ECaP), enabling secure, cross-origin
+              iframe communication and synchronized event states between
+              platform agents and business websites.
         Catalog Capability:
-          - specification/catalog/index.md
-          - specification/catalog/search.md
-          - specification/catalog/lookup.md
-          - specification/catalog/rest.md
-          - specification/catalog/mcp.md
+          - specification/catalog/index.md: >-
+              Core Catalog Capability, detailing high-level product discovery
+              models, variant structures, merchant attribution, and real-time
+              pricing context.
+          - specification/catalog/search.md: >-
+              Product discovery via the Search Catalog capability, specifying
+              text queries, category browsing, and multi-attribute filtering
+              contracts.
+          - specification/catalog/lookup.md: >-
+              Direct item retrieval via the Lookup Catalog capability,
+              specifying variant resolution logic, batch identifiers,
+              and interactive option selection.
+          - specification/catalog/rest.md: >-
+              HTTP REST transport binding for the Catalog Capability,
+              detailing search, batch lookup, and product detail
+              endpoints with JSON payload examples.
+          - specification/catalog/mcp.md: >-
+              Model Context Protocol (MCP) transport binding for the Catalog
+              Capability, mapping discovery operations to JSON-RPC tools with
+              metadata validation rules.
         Other Capabilities:
-          - specification/order.md
-          - specification/order-rest.md
-          - specification/order-mcp.md
-          - specification/identity-linking.md
-          - specification/payment-handler-guide.md
-          - specification/payment-handler-template.md
-          - specification/tokenization-guide.md
-          - specification/examples/processor-tokenizer-payment-handler.md
-          - specification/examples/platform-tokenizer-payment-handler.md
-          - specification/examples/encrypted-credential-handler.md
-          - specification/reference.md
-          - specification/playground.md
+          - specification/order.md: >-
+              Post-purchase tracking via the Order Capability, detailing line
+              item updates, fulfillment expectations, shipment events,
+              adjustments, and webhook-based status updates.
+          - specification/order-rest.md: >-
+              HTTP REST transport binding for the Order Capability, detailing
+              endpoints, HTTP headers, payload schemas, and error structures.
+          - specification/order-mcp.md: >-
+              Model Context Protocol (MCP) transport binding for the Order
+              Capability, detailing the JSON-RPC tool interface and parameters
+              for fetching order states.
+          - specification/identity-linking.md: >-
+              User authentication via the Identity Linking Capability,
+              specifying direct B2C/B2B OAuth 2.0 flows (with PKCE and
+              RFC 9207) to unlock personalized commerce data.
+          - specification/payment-handler-guide.md: >-
+              Architectural framework and standard vocabulary for specifying UCP
+              payment handlers, covering configuration declarations and
+              transaction execution.
+          - specification/payment-handler-template.md: >-
+              Standard Markdown template and integration checklist
+              when authoring new UCP payment handler specifications.
+          - specification/tokenization-guide.md: >-
+              Shared API, security requirements, and lifecycle policies
+              (single-use, TTL, session-scoped) for building compliant
+              tokenization payment handlers.
+          - specification/examples/processor-tokenizer-payment-handler.md: >-
+              Concrete payment handler example utilizing a 'Tokenize to Process'
+              flow, where a single enterprise vault or PSP tokenizes
+              credentials and resolves them internally.
+          - specification/examples/platform-tokenizer-payment-handler.md: >-
+              Concrete payment handler example utilizing a
+              'Platform-as-Tokenizer' flow, where a platform's wallet
+              generates tokens and hosts a secure detokenization endpoint.
+          - specification/examples/encrypted-credential-handler.md: >-
+              Concrete payment handler example utilizing a 'Direct Encryption'
+              flow, where a platform encrypts payment data with a business's
+              public key for local decryption.
+          - specification/reference.md: >-
+              Complete reference directory of all core UCP, type, and extension
+              JSON schemas, including platform/business profiles and metadata
+              objects.
+          - specification/playground.md: >-
+              Interactive, browser-based UCP Playground simulator for walking
+              through step-by-step checkout sessions, payment handling, and
+              backend webhooks.
