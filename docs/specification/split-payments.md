@@ -18,6 +18,16 @@
 
 * **Capability Name:** `dev.ucp.shopping.split_payments`
 
+> **Note on examples:** Instrument `type` strings used in this spec
+> (`card`, `gift_card`, `store_credit`, `loyalty`) are illustrative.
+> Only `card` has a normative instrument schema in the base spec
+> (`card_payment_instrument.json`); the others are handler-defined.
+> Credential shapes shown in examples are similarly illustrative —
+> real handlers MUST publish their credential schemas. Each usage
+> example below assumes a business `allowed_combinations` config that
+> admits the instrument set shown; the "Example Configuration" block
+> later in this doc is one such config, not the only one.
+
 ## Overview
 
 The Split Payments extension lets buyers pay with more than one payment
@@ -69,11 +79,7 @@ A set of instruments is valid if it matches **any** combination in the array.
 Each group within a combination defines a "slot" that accepts certain
 instrument types:
 
-| Field | Type | Default | Description |
-| ----- | ---- | ------- | ----------- |
-| `types` | string[] | *(required)* | Instrument types accepted by this group (OR logic). Any listed type qualifies. |
-| `min` | integer | `0` | Minimum number of instruments required from this group. |
-| `max` | integer | `1` | Maximum number of instruments allowed from this group. |
+{{ schema_fields('types/instrument_group', 'split_payments') }}
 
 **Matching algorithm:** for a given combination, each submitted instrument must
 be assignable to exactly one group whose `types` list includes that
@@ -173,6 +179,11 @@ surface to the buyer:
 }
 ```
 
+Severity is `recoverable` because the platform's API supports collecting
+a replacement instrument and re-submitting. This contrasts with
+`requires_buyer_input`, which is reserved for cases where the API cannot
+programmatically collect what the merchant needs.
+
 Error conditions:
 
 * If any instrument cannot be processed (invalid credentials, fraud flag,
@@ -207,13 +218,13 @@ actual contribution and return it.
         "id": "pi_gc_1",
         "handler_id": "example_handler_1",
         "type": "gift_card",
-        "credential": { "token": "gc_abc123" }
+        "credential": { "type": "gift_card", "token": "gc_abc123" }
       },
       {
         "id": "pi_card_1",
         "handler_id": "example_handler_1",
         "type": "card",
-        "credential": { "token": "tok_visa_xxxx" }
+        "credential": { "type": "card", "token": "tok_visa_xxxx" }
       }
     ]
   }
@@ -232,14 +243,14 @@ Neither instrument includes `amount` — the business determines both.
         "id": "pi_gc_1",
         "handler_id": "example_handler_1",
         "type": "gift_card",
-        "credential": { "token": "gc_abc123" },
+        "credential": { "type": "gift_card", "token": "gc_abc123" },
         "amount": 1000
       },
       {
         "id": "pi_card_1",
         "handler_id": "example_handler_1",
         "type": "card",
-        "credential": { "token": "tok_visa_xxxx" },
+        "credential": { "type": "card", "token": "tok_visa_xxxx" },
         "amount": 4000
       }
     ]
@@ -264,14 +275,14 @@ and charged the credit card for the remaining $40.
         "id": "pi_lp_1",
         "handler_id": "example_handler_1",
         "type": "loyalty",
-        "credential": { "token": "lp_abc123" },
+        "credential": { "type": "loyalty", "token": "lp_abc123" },
         "amount": 500
       },
       {
         "id": "pi_card_1",
         "handler_id": "example_handler_1",
         "type": "card",
-        "credential": { "token": "tok_visa_xxxx" }
+        "credential": { "type": "card", "token": "tok_visa_xxxx" }
       }
     ]
   }
@@ -291,14 +302,14 @@ customer chose to redeem exactly 500 points). The credit card covers the rest.
         "id": "pi_lp_1",
         "handler_id": "example_handler_1",
         "type": "loyalty",
-        "credential": { "token": "lp_abc123" },
+        "credential": { "type": "loyalty", "token": "lp_abc123" },
         "amount": 500
       },
       {
         "id": "pi_card_1",
         "handler_id": "example_handler_1",
         "type": "card",
-        "credential": { "token": "tok_visa_xxxx" },
+        "credential": { "type": "card", "token": "tok_visa_xxxx" },
         "amount": 4500
       }
     ]
@@ -323,19 +334,19 @@ credit card covers the remaining $45.
         "id": "pi_gc_1",
         "handler_id": "handler_gc",
         "type": "gift_card",
-        "credential": { "token": "gc_abc123" }
+        "credential": { "type": "gift_card", "token": "gc_abc123" }
       },
       {
         "id": "pi_gc_2",
         "handler_id": "handler_gc",
         "type": "gift_card",
-        "credential": { "token": "gc_def456" }
+        "credential": { "type": "gift_card", "token": "gc_def456" }
       },
       {
         "id": "pi_card_1",
         "handler_id": "handler_card",
         "type": "card",
-        "credential": { "token": "tok_visa_xxxx" }
+        "credential": { "type": "card", "token": "tok_visa_xxxx" }
       }
     ]
   }
@@ -352,21 +363,21 @@ credit card covers the remaining $45.
         "id": "pi_gc_1",
         "handler_id": "handler_gc",
         "type": "gift_card",
-        "credential": { "token": "gc_abc123" },
+        "credential": { "type": "gift_card", "token": "gc_abc123" },
         "amount": 2500
       },
       {
         "id": "pi_gc_2",
         "handler_id": "handler_gc",
         "type": "gift_card",
-        "credential": { "token": "gc_def456" },
+        "credential": { "type": "gift_card", "token": "gc_def456" },
         "amount": 0
       },
       {
         "id": "pi_card_1",
         "handler_id": "handler_card",
         "type": "card",
-        "credential": { "token": "tok_visa_xxxx" },
+        "credential": { "type": "card", "token": "tok_visa_xxxx" },
         "amount": 7500
       }
     ]
@@ -395,14 +406,14 @@ nothing. The credit card covers the remaining $75.
         "id": "pi_gc_1",
         "handler_id": "example_handler_1",
         "type": "gift_card",
-        "credential": { "token": "gc_abc123" },
+        "credential": { "type": "gift_card", "token": "gc_abc123" },
         "amount": 1000
       },
       {
         "id": "pi_card_1",
         "handler_id": "example_handler_1",
         "type": "card",
-        "credential": { "token": "tok_visa_xxxx" },
+        "credential": { "type": "card", "token": "tok_visa_xxxx" },
         "amount": 0
       }
     ]
