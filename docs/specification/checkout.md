@@ -565,6 +565,11 @@ To be invoked by the platform when the user has expressed purchase intent
 product data (price/title etc.) provided by the business through the feeds
 **SHOULD** match the actual attributes returned in the response.
 
+When the [Cart](cart.md) capability is negotiated, the request payload
+accepts an additional `cart_id` field for cart-to-checkout conversion. See
+[Cart → Cart-to-Checkout Conversion](cart.md#cart-to-checkout-conversion) for
+the field contract.
+
 {{ method_fields('create_checkout', 'rest.openapi.json', 'checkout') }}
 
 ### Get Checkout
