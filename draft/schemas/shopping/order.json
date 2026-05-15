@@ -99,7 +99,7 @@
     "messages": {
       "type": "array",
       "items": {
-        "$ref": "https://ucp.dev/draft/schemas/shopping/types/message.json"
+        "$ref": "https://ucp.dev/draft/schemas/common/types/message.json"
       },
       "description": "Business outcome messages (errors, warnings, informational). Present when the business needs to communicate status or issues to the platform."
     },
@@ -109,5 +109,5 @@
       "ucp_request": "omit"
     }
   },
-  "version": "2026-05-12"
+  "version": "2026-05-15"
 }

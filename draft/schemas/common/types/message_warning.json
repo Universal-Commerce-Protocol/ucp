@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/draft/schemas/shopping/types/message_warning.json",
+  "$id": "https://ucp.dev/draft/schemas/common/types/message_warning.json",
   "title": "Message Warning",
   "type": "object",
   "required": [
@@ -19,7 +19,7 @@
       "description": "JSONPath (RFC 9535) to related field (e.g., $.line_items[0])."
     },
     "code": {
-      "$ref": "https://ucp.dev/draft/schemas/shopping/types/warning_code.json"
+      "$ref": "https://ucp.dev/draft/schemas/common/types/warning_code.json"
     },
     "content": {
       "type": "string",

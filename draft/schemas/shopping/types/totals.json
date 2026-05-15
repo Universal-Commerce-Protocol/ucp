@@ -26,7 +26,7 @@
                   "description": "Human-readable label for this sub-line."
                 },
                 "amount": {
-                  "$ref": "https://ucp.dev/draft/schemas/shopping/types/signed_amount.json"
+                  "$ref": "https://ucp.dev/draft/schemas/common/types/signed_amount.json"
                 }
               },
               "description": "Sub-line entry. Additional metadata MAY be included."

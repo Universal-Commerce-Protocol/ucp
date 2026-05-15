@@ -20,7 +20,7 @@
       "ucp_request": "omit"
     },
     "amount": {
-      "$ref": "https://ucp.dev/draft/schemas/shopping/types/signed_amount.json",
+      "$ref": "https://ucp.dev/draft/schemas/common/types/signed_amount.json",
       "ucp_request": "omit"
     }
   },

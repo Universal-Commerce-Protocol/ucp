@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/draft/schemas/shopping/types/message_error.json",
+  "$id": "https://ucp.dev/draft/schemas/common/types/message_error.json",
   "title": "Message Error",
   "type": "object",
   "required": [
@@ -16,7 +16,7 @@
       "description": "Message type discriminator."
     },
     "code": {
-      "$ref": "https://ucp.dev/draft/schemas/shopping/types/error_code.json"
+      "$ref": "https://ucp.dev/draft/schemas/common/types/error_code.json"
     },
     "path": {
       "type": "string",

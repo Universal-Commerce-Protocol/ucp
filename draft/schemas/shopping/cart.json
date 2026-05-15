@@ -104,7 +104,7 @@
     "messages": {
       "type": "array",
       "items": {
-        "$ref": "https://ucp.dev/draft/schemas/shopping/types/message.json"
+        "$ref": "https://ucp.dev/draft/schemas/common/types/message.json"
       },
       "description": "Validation messages, warnings, or informational notices.",
       "ucp_request": "omit"
@@ -112,7 +112,7 @@
     "links": {
       "type": "array",
       "items": {
-        "$ref": "https://ucp.dev/draft/schemas/shopping/types/link.json"
+        "$ref": "https://ucp.dev/draft/schemas/common/types/link.json"
       },
       "description": "Optional merchant links (policies, FAQs).",
       "ucp_request": "omit"
@@ -130,5 +130,5 @@
       "ucp_request": "omit"
     }
   },
-  "version": "2026-05-12"
+  "version": "2026-05-15"
 }

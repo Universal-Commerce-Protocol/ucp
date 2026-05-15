@@ -92,7 +92,7 @@
         "messages": {
           "type": "array",
           "items": {
-            "$ref": "https://ucp.dev/draft/schemas/shopping/types/message.json"
+            "$ref": "https://ucp.dev/draft/schemas/common/types/message.json"
           },
           "description": "Errors, warnings, or informational messages about the requested items."
         }
@@ -196,12 +196,12 @@
         "messages": {
           "type": "array",
           "items": {
-            "$ref": "https://ucp.dev/draft/schemas/shopping/types/message.json"
+            "$ref": "https://ucp.dev/draft/schemas/common/types/message.json"
           },
           "description": "Warnings or informational messages about the product (e.g., price recently changed, limited availability)."
         }
       }
     }
   },
-  "version": "2026-05-12"
+  "version": "2026-05-15"
 }

@@ -88,7 +88,7 @@
     "messages": {
       "type": "array",
       "items": {
-        "$ref": "https://ucp.dev/draft/schemas/shopping/types/message.json"
+        "$ref": "https://ucp.dev/draft/schemas/common/types/message.json"
       },
       "description": "List of messages with error and info about the checkout session state.",
       "ucp_request": "omit"
@@ -96,7 +96,7 @@
     "links": {
       "type": "array",
       "items": {
-        "$ref": "https://ucp.dev/draft/schemas/shopping/types/link.json"
+        "$ref": "https://ucp.dev/draft/schemas/common/types/link.json"
       },
       "description": "Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.",
       "ucp_request": "omit"
@@ -127,5 +127,5 @@
       "ucp_request": "omit"
     }
   },
-  "version": "2026-05-12"
+  "version": "2026-05-15"
 }

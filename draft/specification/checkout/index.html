@@ -4517,7 +4517,7 @@ product data (price/title etc.) provided by the business through the feeds
 </tbody>
 </table>
 <p><strong>Output</strong></p>
-<p>This object MUST be one of the following types: <a href="/draft/specification/checkout/#checkout">Checkout</a>, <a href="/draft/specification/checkout/#error-response">Error Response</a>.</p>
+<p>This object MUST be one of the following types: <a href="/draft/specification/checkout/#checkout">Checkout</a>, <a href="/draft/specification/reference/#error-response">Error Response</a>.</p>
 <h3 id="get-checkout">Get Checkout<a class="headerlink" href="#get-checkout" title="Permanent link">&para;</a></h3>
 <p>It provides the latest state of the checkout resource. After cancellation or
 completion it is up to the business on what to return (i.e this can be a long
@@ -4546,7 +4546,7 @@ time of checkout session creation.</p>
 </tbody>
 </table>
 <p><strong>Output</strong></p>
-<p>This object MUST be one of the following types: <a href="/draft/specification/checkout/#checkout">Checkout</a>, <a href="/draft/specification/checkout/#error-response">Error Response</a>.</p>
+<p>This object MUST be one of the following types: <a href="/draft/specification/checkout/#checkout">Checkout</a>, <a href="/draft/specification/reference/#error-response">Error Response</a>.</p>
 <h3 id="update-checkout">Update Checkout<a class="headerlink" href="#update-checkout" title="Permanent link">&para;</a></h3>
 <p>Performs a full replacement of the checkout resource.
 The platform is <strong>REQUIRED</strong> to send the entire checkout resource containing any
@@ -4608,7 +4608,7 @@ will replace the existing checkout session state on the business side.</p>
 </tbody>
 </table>
 <p><strong>Output</strong></p>
-<p>This object MUST be one of the following types: <a href="/draft/specification/checkout/#checkout">Checkout</a>, <a href="/draft/specification/checkout/#error-response">Error Response</a>.</p>
+<p>This object MUST be one of the following types: <a href="/draft/specification/checkout/#checkout">Checkout</a>, <a href="/draft/specification/reference/#error-response">Error Response</a>.</p>
 <h3 id="complete-checkout">Complete Checkout<a class="headerlink" href="#complete-checkout" title="Permanent link">&para;</a></h3>
 <p>This is the final checkout placement call. To be invoked when the user has
 committed to pay and place an order for the chosen items. The response of this
@@ -4658,7 +4658,7 @@ as the order, and its associated items, moves through the supply chain.</p>
 </tbody>
 </table>
 <p><strong>Output</strong></p>
-<p>This object MUST be one of the following types: <a href="/draft/specification/checkout/#checkout">Checkout</a>, <a href="/draft/specification/checkout/#error-response">Error Response</a>.</p>
+<p>This object MUST be one of the following types: <a href="/draft/specification/checkout/#checkout">Checkout</a>, <a href="/draft/specification/reference/#error-response">Error Response</a>.</p>
 <h3 id="cancel-checkout">Cancel Checkout<a class="headerlink" href="#cancel-checkout" title="Permanent link">&para;</a></h3>
 <p>This operation will be used to cancel a checkout session, if it can be canceled.
 If the checkout session cannot be canceled (e.g. checkout session is
@@ -4685,7 +4685,7 @@ that is not equal to <code>completed</code> or <code>canceled</code> <strong>SHO
 </tbody>
 </table>
 <p><strong>Output</strong></p>
-<p>This object MUST be one of the following types: <a href="/draft/specification/checkout/#checkout">Checkout</a>, <a href="/draft/specification/checkout/#error-response">Error Response</a>.</p>
+<p>This object MUST be one of the following types: <a href="/draft/specification/checkout/#checkout">Checkout</a>, <a href="/draft/specification/reference/#error-response">Error Response</a>.</p>
 <h2 id="transport-bindings">Transport Bindings<a class="headerlink" href="#transport-bindings" title="Permanent link">&para;</a></h2>
 <p>The abstract operations above are bound to specific transport protocols as
 defined below:</p>
@@ -5160,7 +5160,7 @@ field or omitting them.</p>
 <td style="text-align: left;">code</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#error-code">Error Code</a></td>
 <td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Error code identifying the type of error. Standard errors are defined in specification (see examples), and have standardized semantics; freeform codes are permitted.</td>
+<td style="text-align: left;">Error code identifying the type of error. Standard errors are defined in capability specifications (see examples) and have standardized semantics; freeform codes are permitted.</td>
 </tr>
 <tr>
 <td style="text-align: left;">path</td>
@@ -5189,7 +5189,7 @@ field or omitting them.</p>
 </tbody>
 </table>
 <h4 id="error-code">Error Code<a class="headerlink" href="#error-code" title="Permanent link">&para;</a></h4>
-<p>Error code identifying the type of error. Standard errors are defined in specification (see examples), and have standardized semantics; freeform codes are permitted.</p>
+<p>Error code identifying the type of error. Standard errors are defined in capability specifications (see examples) and have standardized semantics; freeform codes are permitted.</p>
 <h3 id="message-info">Message Info<a class="headerlink" href="#message-info" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -5217,7 +5217,7 @@ field or omitting them.</p>
 <td style="text-align: left;">code</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#info-code">Info Code</a></td>
 <td style="text-align: left;">No</td>
-<td style="text-align: left;">Info code identifying the type of informational message. Standard codes are defined in capability specs (see examples), and have standardized semantics; freeform codes are permitted.</td>
+<td style="text-align: left;">Info code identifying the type of informational message. Standard codes are defined in capability specifications (see examples) and have standardized semantics; freeform codes are permitted.</td>
 </tr>
 <tr>
 <td style="text-align: left;">content_type</td>
@@ -5260,7 +5260,7 @@ field or omitting them.</p>
 <td style="text-align: left;">code</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#warning-code">Warning Code</a></td>
 <td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Warning code identifying the type of warning. Standard codes are defined in capability specs (see examples), and have standardized semantics; freeform codes are permitted.</td>
+<td style="text-align: left;">Warning code identifying the type of warning. Standard codes are defined in capability specifications (see examples) and have standardized semantics; freeform codes are permitted.</td>
 </tr>
 <tr>
 <td style="text-align: left;">content</td>

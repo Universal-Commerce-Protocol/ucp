@@ -19,7 +19,7 @@
       "ucp_request": "omit"
     },
     "price": {
-      "$ref": "https://ucp.dev/draft/schemas/shopping/types/amount.json",
+      "$ref": "https://ucp.dev/draft/schemas/common/types/amount.json",
       "description": "Unit price in ISO 4217 minor units.",
       "ucp_request": "omit"
     },

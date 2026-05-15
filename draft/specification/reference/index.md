@@ -88,6 +88,163 @@ ______________________________________________________________________
 
 ## Type Schemas
 
+### Amount
+
+Monetary amount in the currency's minor unit as defined by ISO 4217. Refer to the currency's exponent to determine minor-to-major ratio (e.g., 2 for USD, 0 for JPY, 3 for KWD).
+
+______________________________________________________________________
+
+### Description
+
+| Name     | Type   | Required | Description                                                                                                                                                               |
+| -------- | ------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| plain    | string | No       | Plain text content.                                                                                                                                                       |
+| html     | string | No       | HTML-formatted content. Security: Platforms MUST sanitize before rendering—strip scripts, event handlers, and untrusted elements. Treat all rich text as untrusted input. |
+| markdown | string | No       | Markdown-formatted content.                                                                                                                                               |
+
+______________________________________________________________________
+
+### Error Code
+
+Error code identifying the type of error. Standard errors are defined in capability specifications (see examples) and have standardized semantics; freeform codes are permitted.
+
+______________________________________________________________________
+
+### Error Response
+
+| Name         | Type                                                        | Required | Description                                                       |
+| ------------ | ----------------------------------------------------------- | -------- | ----------------------------------------------------------------- |
+| ucp          | any                                                         | **Yes**  | UCP protocol metadata. Status MUST be 'error' for error response. |
+| messages     | Array\[[Message](/draft/specification/reference/#message)\] | **Yes**  | Array of messages describing why the operation failed.            |
+| continue_url | string                                                      | No       | URL for buyer handoff or session recovery.                        |
+
+______________________________________________________________________
+
+### Info Code
+
+Info code identifying the type of informational message. Standard codes are defined in capability specifications (see examples) and have standardized semantics; freeform codes are permitted.
+
+______________________________________________________________________
+
+### Link
+
+| Name  | Type   | Required | Description                                                                                                                                                                                                                          |
+| ----- | ------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| type  | string | **Yes**  | Type of link. Well-known values: `privacy_policy`, `terms_of_service`, `refund_policy`, `shipping_policy`, `faq`. Consumers SHOULD handle unknown values gracefully by displaying them using the `title` field or omitting the link. |
+| url   | string | **Yes**  | The actual URL pointing to the content to be displayed.                                                                                                                                                                              |
+| title | string | No       | Optional display text for the link. When provided, use this instead of generating from type.                                                                                                                                         |
+
+______________________________________________________________________
+
+### Media
+
+| Name     | Type    | Required | Description                                                  |
+| -------- | ------- | -------- | ------------------------------------------------------------ |
+| type     | string  | **Yes**  | Media type. Well-known values: `image`, `video`, `model_3d`. |
+| url      | string  | **Yes**  | URL to the media resource.                                   |
+| alt_text | string  | No       | Accessibility text describing the media.                     |
+| width    | integer | No       | Width in pixels (for images/video).                          |
+| height   | integer | No       | Height in pixels (for images/video).                         |
+
+______________________________________________________________________
+
+### Message
+
+This object MUST be one of the following types: [Message Error](/draft/specification/reference/#message-error), [Message Warning](/draft/specification/reference/#message-warning), [Message Info](/draft/specification/reference/#message-info).
+
+______________________________________________________________________
+
+### Message Error
+
+| Name         | Type                                                     | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| ------------ | -------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type         | string                                                   | **Yes**  | **Constant = error**. Message type discriminator.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| code         | [Error Code](/draft/specification/reference/#error-code) | **Yes**  | Error code identifying the type of error. Standard errors are defined in capability specifications (see examples) and have standardized semantics; freeform codes are permitted.                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| path         | string                                                   | No       | RFC 9535 JSONPath to the component the message refers to (e.g., $.items[1]).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| content_type | string                                                   | No       | Content format, default = plain. **Enum:** `plain`, `markdown`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| content      | string                                                   | **Yes**  | Human-readable message.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| severity     | string                                                   | **Yes**  | Reflects the resource state and recommended action. 'recoverable': platform can resolve by modifying inputs and retrying via API. 'requires_buyer_input': merchant requires information their API doesn't support collecting programmatically (checkout incomplete). 'requires_buyer_review': buyer must authorize before order placement due to policy, regulatory, or entitlement rules. 'unrecoverable': no valid resource exists to act on, retry with new resource or inputs. Errors with 'requires\_*' severity contribute to 'status: requires_escalation'.* *Enum:*\* `recoverable`, `requires_buyer_input`, `requires_buyer_review`, `unrecoverable` |
+
+______________________________________________________________________
+
+### Message Info
+
+| Name         | Type                                                   | Required | Description                                                                                                                                                                                    |
+| ------------ | ------------------------------------------------------ | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type         | string                                                 | **Yes**  | **Constant = info**. Message type discriminator.                                                                                                                                               |
+| path         | string                                                 | No       | RFC 9535 JSONPath to the component the message refers to.                                                                                                                                      |
+| code         | [Info Code](/draft/specification/reference/#info-code) | No       | Info code identifying the type of informational message. Standard codes are defined in capability specifications (see examples) and have standardized semantics; freeform codes are permitted. |
+| content_type | string                                                 | No       | Content format, default = plain. **Enum:** `plain`, `markdown`                                                                                                                                 |
+| content      | string                                                 | **Yes**  | Human-readable message.                                                                                                                                                                        |
+
+______________________________________________________________________
+
+### Message Warning
+
+| Name         | Type                                                         | Required | Description                                                                                                                                                                                                                                         |
+| ------------ | ------------------------------------------------------------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type         | string                                                       | **Yes**  | **Constant = warning**. Message type discriminator.                                                                                                                                                                                                 |
+| path         | string                                                       | No       | JSONPath (RFC 9535) to related field (e.g., $.line_items[0]).                                                                                                                                                                                       |
+| code         | [Warning Code](/draft/specification/reference/#warning-code) | **Yes**  | Warning code identifying the type of warning. Standard codes are defined in capability specifications (see examples) and have standardized semantics; freeform codes are permitted.                                                                 |
+| content      | string                                                       | **Yes**  | Human-readable warning message that MUST be displayed.                                                                                                                                                                                              |
+| content_type | string                                                       | No       | Content format, default = plain. **Enum:** `plain`, `markdown`                                                                                                                                                                                      |
+| presentation | string                                                       | No       | Rendering contract for this warning. 'notice' (default): platform MUST display, MAY dismiss. 'disclosure': platform MUST display in proximity to the path-referenced component, MUST NOT hide or auto-dismiss. See specification for full contract. |
+| image_url    | string                                                       | No       | URL to a required visual element (e.g., warning symbol, energy class label).                                                                                                                                                                        |
+| url          | string                                                       | No       | Reference URL for more information (e.g., regulatory site, registry entry, policy page).                                                                                                                                                            |
+
+______________________________________________________________________
+
+### Pagination
+
+Cursor-based pagination for list operations.
+
+______________________________________________________________________
+
+### Postal Address
+
+| Name             | Type   | Required | Description                                                                                                                                                                                                                               |
+| ---------------- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| extended_address | string | No       | An address extension such as an apartment number, C/O or alternative name.                                                                                                                                                                |
+| street_address   | string | No       | The street address.                                                                                                                                                                                                                       |
+| address_locality | string | No       | The locality in which the street address is, and which is in the region. For example, Mountain View.                                                                                                                                      |
+| address_region   | string | No       | The region in which the locality is, and which is in the country. Required for applicable countries (i.e. state in US, province in CA). For example, California or another appropriate first-level Administrative division.               |
+| address_country  | string | No       | The country. Recommended to be in 2-letter ISO 3166-1 alpha-2 format, for example "US". For backward compatibility, a 3-letter ISO 3166-1 alpha-3 country code such as "SGP" or a full country name such as "Singapore" can also be used. |
+| postal_code      | string | No       | The postal code. For example, 94043.                                                                                                                                                                                                      |
+| first_name       | string | No       | Optional. First name of the contact associated with the address.                                                                                                                                                                          |
+| last_name        | string | No       | Optional. Last name of the contact associated with the address.                                                                                                                                                                           |
+| phone_number     | string | No       | Optional. Phone number of the contact associated with the address.                                                                                                                                                                        |
+
+______________________________________________________________________
+
+### Price
+
+| Name     | Type                                             | Required | Description                                           |
+| -------- | ------------------------------------------------ | -------- | ----------------------------------------------------- |
+| amount   | [Amount](/draft/specification/reference/#amount) | **Yes**  | Amount in ISO 4217 minor units. Use 0 for free items. |
+| currency | string                                           | **Yes**  | ISO 4217 currency code (e.g., 'USD', 'EUR', 'GBP').   |
+
+______________________________________________________________________
+
+### Reverse Domain Name
+
+Reverse-domain identifier used for collision-safe namespacing of capabilities, services, handlers, eligibility claims, and extension-contributed keys. Must contain at least two dot-separated segments (e.g., 'dev.ucp.shopping.checkout', 'com.example.loyalty_gold').
+
+**Pattern:** `^[a-z][a-z0-9]*(?:\.[a-z][a-z0-9_]*)+$`
+
+______________________________________________________________________
+
+### Signed Amount
+
+Monetary amount in the currency's minor unit as defined by ISO 4217. Refer to the currency's exponent to determine minor-to-major ratio (e.g., 2 for USD, 0 for JPY, 3 for KWD). May be negative — the sign is intrinsic to the value (e.g., discounts are negative, charges are positive).
+
+______________________________________________________________________
+
+### Warning Code
+
+Warning code identifying the type of warning. Standard codes are defined in capability specifications (see examples) and have standardized semantics; freeform codes are permitted.
+
+______________________________________________________________________
+
 ### Payment Account Info
 
 | Name                      | Type   | Required | Description                                                                                                                                   |
@@ -107,12 +264,6 @@ ______________________________________________________________________
 | line_items  | Array[object]                                           | No       | Which line items and quantities are affected (optional).                                                                                                                                        |
 | totals      | Array\[[Total](/draft/specification/reference/#total)\] | No       | Adjustment totals breakdown. Signed values - negative for money returned to buyer (refunds, credits), positive for additional charges (exchanges).                                              |
 | description | string                                                  | No       | Human-readable reason or description (e.g., 'Defective item', 'Customer requested').                                                                                                            |
-
-______________________________________________________________________
-
-### Amount
-
-Monetary amount in the currency's minor unit as defined by ISO 4217. Refer to the currency's exponent to determine minor-to-major ratio (e.g., 2 for USD, 0 for JPY, 3 for KWD).
 
 ______________________________________________________________________
 
@@ -215,38 +366,12 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-### Description
-
-| Name     | Type   | Required | Description                                                                                                                                                               |
-| -------- | ------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| plain    | string | No       | Plain text content.                                                                                                                                                       |
-| html     | string | No       | HTML-formatted content. Security: Platforms MUST sanitize before rendering—strip scripts, event handlers, and untrusted elements. Treat all rich text as untrusted input. |
-| markdown | string | No       | Markdown-formatted content.                                                                                                                                               |
-
-______________________________________________________________________
-
 ### Detail Option Value
 
 | Name      | Type    | Required | Description                                                                                    |
 | --------- | ------- | -------- | ---------------------------------------------------------------------------------------------- |
 | available | boolean | No       | Whether a variant matching this value and the current option selections is purchasable.        |
 | exists    | boolean | No       | Whether a variant matching this value and the current option selections exists in the catalog. |
-
-______________________________________________________________________
-
-### Error Code
-
-Error code identifying the type of error. Standard errors are defined in specification (see examples), and have standardized semantics; freeform codes are permitted.
-
-______________________________________________________________________
-
-### Error Response
-
-| Name         | Type                                                        | Required | Description                                                       |
-| ------------ | ----------------------------------------------------------- | -------- | ----------------------------------------------------------------- |
-| ucp          | any                                                         | **Yes**  | UCP protocol metadata. Status MUST be 'error' for error response. |
-| messages     | Array\[[Message](/draft/specification/reference/#message)\] | **Yes**  | Array of messages describing why the operation failed.            |
-| continue_url | string                                                      | No       | URL for buyer handoff or session recovery.                        |
 
 ______________________________________________________________________
 
@@ -342,12 +467,6 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-### Info Code
-
-Info code identifying the type of informational message. Standard codes are defined in capability specs (see examples), and have standardized semantics; freeform codes are permitted.
-
-______________________________________________________________________
-
 ### Input Correlation
 
 | Name  | Type   | Required | Description                                                                                                                                                                                                                                                                                                                   |
@@ -380,80 +499,12 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-### Link
-
-| Name  | Type   | Required | Description                                                                                                                                                                                                                          |
-| ----- | ------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| type  | string | **Yes**  | Type of link. Well-known values: `privacy_policy`, `terms_of_service`, `refund_policy`, `shipping_policy`, `faq`. Consumers SHOULD handle unknown values gracefully by displaying them using the `title` field or omitting the link. |
-| url   | string | **Yes**  | The actual URL pointing to the content to be displayed.                                                                                                                                                                              |
-| title | string | No       | Optional display text for the link. When provided, use this instead of generating from type.                                                                                                                                         |
-
-______________________________________________________________________
-
-### Media
-
-| Name     | Type    | Required | Description                                                  |
-| -------- | ------- | -------- | ------------------------------------------------------------ |
-| type     | string  | **Yes**  | Media type. Well-known values: `image`, `video`, `model_3d`. |
-| url      | string  | **Yes**  | URL to the media resource.                                   |
-| alt_text | string  | No       | Accessibility text describing the media.                     |
-| width    | integer | No       | Width in pixels (for images/video).                          |
-| height   | integer | No       | Height in pixels (for images/video).                         |
-
-______________________________________________________________________
-
 ### Merchant Fulfillment Config
 
 | Name                       | Type         | Required | Description                                    |
 | -------------------------- | ------------ | -------- | ---------------------------------------------- |
 | allows_multi_destination   | object       | No       | Permits multiple destinations per method type. |
 | allows_method_combinations | Array[array] | No       | Allowed method type combinations.              |
-
-______________________________________________________________________
-
-### Message
-
-This object MUST be one of the following types: [Message Error](/draft/specification/reference/#message-error), [Message Warning](/draft/specification/reference/#message-warning), [Message Info](/draft/specification/reference/#message-info).
-
-______________________________________________________________________
-
-### Message Error
-
-| Name         | Type                                                     | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| ------------ | -------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| type         | string                                                   | **Yes**  | **Constant = error**. Message type discriminator.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| code         | [Error Code](/draft/specification/reference/#error-code) | **Yes**  | Error code identifying the type of error. Standard errors are defined in specification (see examples), and have standardized semantics; freeform codes are permitted.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| path         | string                                                   | No       | RFC 9535 JSONPath to the component the message refers to (e.g., $.items[1]).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| content_type | string                                                   | No       | Content format, default = plain. **Enum:** `plain`, `markdown`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| content      | string                                                   | **Yes**  | Human-readable message.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| severity     | string                                                   | **Yes**  | Reflects the resource state and recommended action. 'recoverable': platform can resolve by modifying inputs and retrying via API. 'requires_buyer_input': merchant requires information their API doesn't support collecting programmatically (checkout incomplete). 'requires_buyer_review': buyer must authorize before order placement due to policy, regulatory, or entitlement rules. 'unrecoverable': no valid resource exists to act on, retry with new resource or inputs. Errors with 'requires\_*' severity contribute to 'status: requires_escalation'.* *Enum:*\* `recoverable`, `requires_buyer_input`, `requires_buyer_review`, `unrecoverable` |
-
-______________________________________________________________________
-
-### Message Info
-
-| Name         | Type                                                   | Required | Description                                                                                                                                                                            |
-| ------------ | ------------------------------------------------------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| type         | string                                                 | **Yes**  | **Constant = info**. Message type discriminator.                                                                                                                                       |
-| path         | string                                                 | No       | RFC 9535 JSONPath to the component the message refers to.                                                                                                                              |
-| code         | [Info Code](/draft/specification/reference/#info-code) | No       | Info code identifying the type of informational message. Standard codes are defined in capability specs (see examples), and have standardized semantics; freeform codes are permitted. |
-| content_type | string                                                 | No       | Content format, default = plain. **Enum:** `plain`, `markdown`                                                                                                                         |
-| content      | string                                                 | **Yes**  | Human-readable message.                                                                                                                                                                |
-
-______________________________________________________________________
-
-### Message Warning
-
-| Name         | Type                                                         | Required | Description                                                                                                                                                                                                                                         |
-| ------------ | ------------------------------------------------------------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| type         | string                                                       | **Yes**  | **Constant = warning**. Message type discriminator.                                                                                                                                                                                                 |
-| path         | string                                                       | No       | JSONPath (RFC 9535) to related field (e.g., $.line_items[0]).                                                                                                                                                                                       |
-| code         | [Warning Code](/draft/specification/reference/#warning-code) | **Yes**  | Warning code identifying the type of warning. Standard codes are defined in capability specs (see examples), and have standardized semantics; freeform codes are permitted.                                                                         |
-| content      | string                                                       | **Yes**  | Human-readable warning message that MUST be displayed.                                                                                                                                                                                              |
-| content_type | string                                                       | No       | Content format, default = plain. **Enum:** `plain`, `markdown`                                                                                                                                                                                      |
-| presentation | string                                                       | No       | Rendering contract for this warning. 'notice' (default): platform MUST display, MAY dismiss. 'disclosure': platform MUST display in proximity to the path-referenced component, MUST NOT hide or auto-dismiss. See specification for full contract. |
-| image_url    | string                                                       | No       | URL to a required visual element (e.g., warning symbol, energy class label).                                                                                                                                                                        |
-| url          | string                                                       | No       | Reference URL for more information (e.g., regulatory site, registry entry, policy page).                                                                                                                                                            |
 
 ______________________________________________________________________
 
@@ -486,12 +537,6 @@ ______________________________________________________________________
 | totals    | Array\[[Total](/draft/specification/reference/#total)\] | **Yes**  | Line item totals breakdown.                                                                                                                                                                                                                                         |
 | status    | string                                                  | **Yes**  | Derived status: removed if quantity.total == 0, fulfilled if quantity.total > 0 and quantity.fulfilled == quantity.total, partial if quantity.total > 0 and quantity.fulfilled > 0, otherwise processing. **Enum:** `processing`, `partial`, `fulfilled`, `removed` |
 | parent_id | string                                                  | No       | Parent line item identifier for any nested structures.                                                                                                                                                                                                              |
-
-______________________________________________________________________
-
-### Pagination
-
-Cursor-based pagination for list operations.
 
 ______________________________________________________________________
 
@@ -529,31 +574,6 @@ ______________________________________________________________________
 | Name                 | Type    | Required | Description                         |
 | -------------------- | ------- | -------- | ----------------------------------- |
 | supports_multi_group | boolean | No       | Enables multiple groups per method. |
-
-______________________________________________________________________
-
-### Postal Address
-
-| Name             | Type   | Required | Description                                                                                                                                                                                                                               |
-| ---------------- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| extended_address | string | No       | An address extension such as an apartment number, C/O or alternative name.                                                                                                                                                                |
-| street_address   | string | No       | The street address.                                                                                                                                                                                                                       |
-| address_locality | string | No       | The locality in which the street address is, and which is in the region. For example, Mountain View.                                                                                                                                      |
-| address_region   | string | No       | The region in which the locality is, and which is in the country. Required for applicable countries (i.e. state in US, province in CA). For example, California or another appropriate first-level Administrative division.               |
-| address_country  | string | No       | The country. Recommended to be in 2-letter ISO 3166-1 alpha-2 format, for example "US". For backward compatibility, a 3-letter ISO 3166-1 alpha-3 country code such as "SGP" or a full country name such as "Singapore" can also be used. |
-| postal_code      | string | No       | The postal code. For example, 94043.                                                                                                                                                                                                      |
-| first_name       | string | No       | Optional. First name of the contact associated with the address.                                                                                                                                                                          |
-| last_name        | string | No       | Optional. Last name of the contact associated with the address.                                                                                                                                                                           |
-| phone_number     | string | No       | Optional. Phone number of the contact associated with the address.                                                                                                                                                                        |
-
-______________________________________________________________________
-
-### Price
-
-| Name     | Type                                             | Required | Description                                           |
-| -------- | ------------------------------------------------ | -------- | ----------------------------------------------------- |
-| amount   | [Amount](/draft/specification/reference/#amount) | **Yes**  | Amount in ISO 4217 minor units. Use 0 for free items. |
-| currency | string                                           | **Yes**  | ISO 4217 currency code (e.g., 'USD', 'EUR', 'GBP').   |
 
 ______________________________________________________________________
 
@@ -626,14 +646,6 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-### Reverse Domain Name
-
-Reverse-domain identifier used for collision-safe namespacing of capabilities, services, handlers, eligibility claims, and extension-contributed keys. Must contain at least two dot-separated segments (e.g., 'dev.ucp.shopping.checkout', 'com.example.loyalty_gold').
-
-**Pattern:** `^[a-z][a-z0-9]*(?:\.[a-z][a-z0-9_]*)+$`
-
-______________________________________________________________________
-
 ### Search Filters
 
 | Name       | Type                                                         | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
@@ -676,12 +688,6 @@ ______________________________________________________________________
 | ------------------ | ------ | -------- | ---------------------------------------------- |
 | dev.ucp.buyer_ip   | string | No       | Client's IP address (IPv4 or IPv6).            |
 | dev.ucp.user_agent | string | No       | Client's HTTP User-Agent header or equivalent. |
-
-______________________________________________________________________
-
-### Signed Amount
-
-Monetary amount in the currency's minor unit as defined by ISO 4217. Refer to the currency's exponent to determine minor-to-major ratio (e.g., 2 for USD, 0 for JPY, 3 for KWD). May be negative — the sign is intrinsic to the value (e.g., discounts are negative, charges are positive).
 
 ______________________________________________________________________
 
@@ -736,12 +742,6 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-### Warning Code
-
-Warning code identifying the type of warning. Standard codes are defined in capability specs (see examples), and have standardized semantics; freeform codes are permitted.
-
-______________________________________________________________________
-
 ### Selected Payment Instrument
 
 A payment instrument with selection state.
@@ -777,15 +777,15 @@ Pagination information in responses.
 
 ### Error Code
 
-Error code identifying the type of error. Standard errors are defined in specification (see examples), and have standardized semantics; freeform codes are permitted.
+Error code identifying the type of error. Standard errors are defined in capability specifications (see examples) and have standardized semantics; freeform codes are permitted.
 
 ### Warning Code
 
-Warning code identifying the type of warning. Standard codes are defined in capability specs (see examples), and have standardized semantics; freeform codes are permitted.
+Warning code identifying the type of warning. Standard codes are defined in capability specifications (see examples) and have standardized semantics; freeform codes are permitted.
 
 ### Info Code
 
-Info code identifying the type of informational message. Standard codes are defined in capability specs (see examples), and have standardized semantics; freeform codes are permitted.
+Info code identifying the type of informational message. Standard codes are defined in capability specifications (see examples) and have standardized semantics; freeform codes are permitted.
 
 ## Extension Schemas
 

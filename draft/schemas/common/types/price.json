@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/draft/schemas/shopping/types/price.json",
+  "$id": "https://ucp.dev/draft/schemas/common/types/price.json",
   "title": "Price",
   "description": "Price with explicit currency.",
   "type": "object",
@@ -10,7 +10,7 @@
   ],
   "properties": {
     "amount": {
-      "$ref": "https://ucp.dev/draft/schemas/shopping/types/amount.json",
+      "$ref": "https://ucp.dev/draft/schemas/common/types/amount.json",
       "description": "Amount in ISO 4217 minor units. Use 0 for free items."
     },
     "currency": {

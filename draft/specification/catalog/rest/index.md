@@ -353,7 +353,7 @@ Maps to the [Catalog Lookup](http://ucp.dev/draft/specification/catalog/lookup/#
 
 **Output**
 
-This object MUST be one of the following types: [Catalog Lookup Get Product Response](/draft/specification/catalog/rest/#catalog-lookup-get-product-response), [Error Response](/draft/specification/catalog/rest/#error-response).
+This object MUST be one of the following types: [Catalog Lookup Get Product Response](/draft/specification/catalog/rest/#catalog-lookup-get-product-response), [Error Response](/draft/specification/reference/#error-response).
 
 #### Example: With Option Selection
 

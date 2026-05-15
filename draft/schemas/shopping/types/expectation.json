@@ -47,7 +47,7 @@
       "description": "Delivery method type (shipping, pickup, digital)."
     },
     "destination": {
-      "$ref": "https://ucp.dev/draft/schemas/shopping/types/postal_address.json",
+      "$ref": "https://ucp.dev/draft/schemas/common/types/postal_address.json",
       "description": "Delivery destination address."
     },
     "description": {

@@ -39,7 +39,7 @@
           "type": "object",
           "description": "Required capability versions, keyed by capability name. Keys must be a subset of the extension's $defs keys.",
           "propertyNames": {
-            "$ref": "https://ucp.dev/draft/schemas/shopping/types/reverse_domain_name.json"
+            "$ref": "https://ucp.dev/draft/schemas/common/types/reverse_domain_name.json"
           },
           "additionalProperties": {
             "$ref": "#/$defs/version_constraint"
@@ -103,7 +103,7 @@
           "type": "object",
           "description": "Service registry keyed by reverse-domain name.",
           "propertyNames": {
-            "$ref": "https://ucp.dev/draft/schemas/shopping/types/reverse_domain_name.json"
+            "$ref": "https://ucp.dev/draft/schemas/common/types/reverse_domain_name.json"
           },
           "additionalProperties": {
             "type": "array",
@@ -116,7 +116,7 @@
           "type": "object",
           "description": "Capability registry keyed by reverse-domain name.",
           "propertyNames": {
-            "$ref": "https://ucp.dev/draft/schemas/shopping/types/reverse_domain_name.json"
+            "$ref": "https://ucp.dev/draft/schemas/common/types/reverse_domain_name.json"
           },
           "additionalProperties": {
             "type": "array",
@@ -129,7 +129,7 @@
           "type": "object",
           "description": "Payment handler registry keyed by reverse-domain name.",
           "propertyNames": {
-            "$ref": "https://ucp.dev/draft/schemas/shopping/types/reverse_domain_name.json"
+            "$ref": "https://ucp.dev/draft/schemas/common/types/reverse_domain_name.json"
           },
           "additionalProperties": {
             "type": "array",

@@ -434,7 +434,7 @@ To be invoked by the platform when the user has expressed purchase intent (e.g.,
 
 **Output**
 
-This object MUST be one of the following types: [Checkout](/draft/specification/checkout/#checkout), [Error Response](/draft/specification/checkout/#error-response).
+This object MUST be one of the following types: [Checkout](/draft/specification/checkout/#checkout), [Error Response](/draft/specification/reference/#error-response).
 
 ### Get Checkout
 
@@ -450,7 +450,7 @@ The platform will honor the TTL provided by the business via `expires_at` at the
 
 **Output**
 
-This object MUST be one of the following types: [Checkout](/draft/specification/checkout/#checkout), [Error Response](/draft/specification/checkout/#error-response).
+This object MUST be one of the following types: [Checkout](/draft/specification/checkout/#checkout), [Error Response](/draft/specification/reference/#error-response).
 
 ### Update Checkout
 
@@ -470,7 +470,7 @@ Performs a full replacement of the checkout resource. The platform is **REQUIRED
 
 **Output**
 
-This object MUST be one of the following types: [Checkout](/draft/specification/checkout/#checkout), [Error Response](/draft/specification/checkout/#error-response).
+This object MUST be one of the following types: [Checkout](/draft/specification/checkout/#checkout), [Error Response](/draft/specification/reference/#error-response).
 
 ### Complete Checkout
 
@@ -489,7 +489,7 @@ After this call, other details will be updated through subsequent events as the 
 
 **Output**
 
-This object MUST be one of the following types: [Checkout](/draft/specification/checkout/#checkout), [Error Response](/draft/specification/checkout/#error-response).
+This object MUST be one of the following types: [Checkout](/draft/specification/checkout/#checkout), [Error Response](/draft/specification/reference/#error-response).
 
 ### Cancel Checkout
 
@@ -503,7 +503,7 @@ This operation will be used to cancel a checkout session, if it can be canceled.
 
 **Output**
 
-This object MUST be one of the following types: [Checkout](/draft/specification/checkout/#checkout), [Error Response](/draft/specification/checkout/#error-response).
+This object MUST be one of the following types: [Checkout](/draft/specification/checkout/#checkout), [Error Response](/draft/specification/reference/#error-response).
 
 ## Transport Bindings
 
@@ -650,7 +650,7 @@ This object MUST be one of the following types: [Message Error](/draft/specifica
 | Name         | Type                                                     | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | ------------ | -------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | type         | string                                                   | **Yes**  | **Constant = error**. Message type discriminator.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| code         | [Error Code](/draft/specification/reference/#error-code) | **Yes**  | Error code identifying the type of error. Standard errors are defined in specification (see examples), and have standardized semantics; freeform codes are permitted.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| code         | [Error Code](/draft/specification/reference/#error-code) | **Yes**  | Error code identifying the type of error. Standard errors are defined in capability specifications (see examples) and have standardized semantics; freeform codes are permitted.                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | path         | string                                                   | No       | RFC 9535 JSONPath to the component the message refers to (e.g., $.items[1]).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | content_type | string                                                   | No       | Content format, default = plain. **Enum:** `plain`, `markdown`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | content      | string                                                   | **Yes**  | Human-readable message.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
@@ -658,17 +658,17 @@ This object MUST be one of the following types: [Message Error](/draft/specifica
 
 #### Error Code
 
-Error code identifying the type of error. Standard errors are defined in specification (see examples), and have standardized semantics; freeform codes are permitted.
+Error code identifying the type of error. Standard errors are defined in capability specifications (see examples) and have standardized semantics; freeform codes are permitted.
 
 ### Message Info
 
-| Name         | Type                                                   | Required | Description                                                                                                                                                                            |
-| ------------ | ------------------------------------------------------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| type         | string                                                 | **Yes**  | **Constant = info**. Message type discriminator.                                                                                                                                       |
-| path         | string                                                 | No       | RFC 9535 JSONPath to the component the message refers to.                                                                                                                              |
-| code         | [Info Code](/draft/specification/reference/#info-code) | No       | Info code identifying the type of informational message. Standard codes are defined in capability specs (see examples), and have standardized semantics; freeform codes are permitted. |
-| content_type | string                                                 | No       | Content format, default = plain. **Enum:** `plain`, `markdown`                                                                                                                         |
-| content      | string                                                 | **Yes**  | Human-readable message.                                                                                                                                                                |
+| Name         | Type                                                   | Required | Description                                                                                                                                                                                    |
+| ------------ | ------------------------------------------------------ | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type         | string                                                 | **Yes**  | **Constant = info**. Message type discriminator.                                                                                                                                               |
+| path         | string                                                 | No       | RFC 9535 JSONPath to the component the message refers to.                                                                                                                                      |
+| code         | [Info Code](/draft/specification/reference/#info-code) | No       | Info code identifying the type of informational message. Standard codes are defined in capability specifications (see examples) and have standardized semantics; freeform codes are permitted. |
+| content_type | string                                                 | No       | Content format, default = plain. **Enum:** `plain`, `markdown`                                                                                                                                 |
+| content      | string                                                 | **Yes**  | Human-readable message.                                                                                                                                                                        |
 
 ### Message Warning
 
@@ -676,7 +676,7 @@ Error code identifying the type of error. Standard errors are defined in specifi
 | ------------ | ------------------------------------------------------------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | type         | string                                                       | **Yes**  | **Constant = warning**. Message type discriminator.                                                                                                                                                                                                 |
 | path         | string                                                       | No       | JSONPath (RFC 9535) to related field (e.g., $.line_items[0]).                                                                                                                                                                                       |
-| code         | [Warning Code](/draft/specification/reference/#warning-code) | **Yes**  | Warning code identifying the type of warning. Standard codes are defined in capability specs (see examples), and have standardized semantics; freeform codes are permitted.                                                                         |
+| code         | [Warning Code](/draft/specification/reference/#warning-code) | **Yes**  | Warning code identifying the type of warning. Standard codes are defined in capability specifications (see examples) and have standardized semantics; freeform codes are permitted.                                                                 |
 | content      | string                                                       | **Yes**  | Human-readable warning message that MUST be displayed.                                                                                                                                                                                              |
 | content_type | string                                                       | No       | Content format, default = plain. **Enum:** `plain`, `markdown`                                                                                                                                                                                      |
 | presentation | string                                                       | No       | Rendering contract for this warning. 'notice' (default): platform MUST display, MAY dismiss. 'disclosure': platform MUST display in proximity to the path-referenced component, MUST NOT hide or auto-dismiss. See specification for full contract. |
