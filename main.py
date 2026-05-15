@@ -64,38 +64,42 @@ SCHEMAS_DIRS = [
 ]
 
 
-def _validate_type_basename_uniqueness() -> None:
-  """Fail fast on basename collisions across all type namespaces.
+def _validate_common_namespace_exclusivity() -> None:
+  """Fail fast if any vertical schema shadows a common-namespace filename.
 
   The docs macro system resolves schemas by basename across SCHEMAS_DIRS
-  (first match wins), while JSON Schema's $ref resolves by full path. A
-  collision between any two type namespaces — common/vertical OR
-  vertical/vertical — silently resolves to the wrong file in the
-  rendered docs with no error. common/ is the protocol namespace and
-  verticals are siblings; no two type namespaces may share a basename.
-  If two verticals genuinely need parallel concepts (e.g. a "checkout"
-  type in both), give them distinct filenames or refactor the resolver
-  to be path-aware.
+  (first match wins), while JSON Schema's $ref resolves by full path.
+  Once a basename is claimed by common/ (top-level or types/), it is the
+  protocol's canonical definition; a vertical file with the same basename
+  would silently resolve to the wrong file in rendered docs. Verticals
+  are autonomous siblings and may freely share filenames with each
+  other — this guard only protects the common namespace.
   """
-  type_dirs: list[Path] = []
-  if COMMON_TYPES_DIR.exists():
-    type_dirs.append(COMMON_TYPES_DIR)
-  type_dirs.extend(d for d in VERTICAL_TYPES_DIRS if d.exists())
-
-  seen: dict[str, Path] = {}
-  for d in type_dirs:
+  common_names: dict[str, Path] = {}
+  for d in (COMMON_SCHEMAS_DIR, COMMON_TYPES_DIR):
+    if not d.exists():
+      continue
     for p in d.glob("*.json"):
-      if p.name in seen:
-        raise RuntimeError(
-          f"Schema type filename collision: '{p.name}' exists in both "
-          f"{seen[p.name]} and {p}. Type filenames must be unique across "
-          f"common/types/ and all vertical types/ directories — doc "
-          f"resolution is basename-based."
-        )
-      seen[p.name] = p
+      common_names[p.name] = p
+
+  for v in VERTICAL_DIRS:
+    for sub in (v, v / "types"):
+      if not sub.exists():
+        continue
+      for p in sub.glob("*.json"):
+        if p.name in common_names:
+          raise RuntimeError(
+            f"Schema filename '{p.name}' is claimed by common "
+            f"({common_names[p.name]}) and shadowed by {p}. Once a "
+            f"basename exists in common/ (top-level or types/), no "
+            f"vertical may reuse it — doc resolution is basename-based "
+            f"and would silently bind to the wrong file. Rename or "
+            f"remove the vertical file. Verticals may share filenames "
+            f"with each other; this rule only protects common."
+          )
 
 
-_validate_type_basename_uniqueness()
+_validate_common_namespace_exclusivity()
 
 
 # Cache for resolved schemas to avoid repeated subprocess calls
