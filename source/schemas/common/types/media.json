@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/schemas/shopping/types/media.json",
+  "$id": "https://ucp.dev/schemas/common/types/media.json",
   "title": "Media",
-  "description": "Product media item (image, video, etc.).",
+  "description": "Media item (image, video, etc.).",
   "type": "object",
   "required": [
     "type",

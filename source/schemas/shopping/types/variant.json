@@ -46,7 +46,7 @@
       "description": "Variant display title (e.g., 'Blue / Large')."
     },
     "description": {
-      "$ref": "description.json",
+      "$ref": "../../common/types/description.json",
       "description": "Variant description in one or more formats."
     },
     "url": {
@@ -62,11 +62,11 @@
       "description": "Variant categories with optional taxonomy identifiers."
     },
     "price": {
-      "$ref": "price.json",
+      "$ref": "../../common/types/price.json",
       "description": "Current selling price."
     },
     "list_price": {
-      "$ref": "price.json",
+      "$ref": "../../common/types/price.json",
       "description": "List price before discounts (for strikethrough display)."
     },
     "unit_price": {
@@ -75,7 +75,7 @@
       "required": ["amount", "currency", "measure", "reference"],
       "properties": {
         "amount": {
-          "$ref": "amount.json",
+          "$ref": "../../common/types/amount.json",
           "description": "Unit price in ISO 4217 minor units. Business MUST return precomputed unit price value: (variant.price / measure.value) * reference.value."
         },
         "currency": {
@@ -127,7 +127,7 @@
     "media": {
       "type": "array",
       "items": {
-        "$ref": "media.json"
+        "$ref": "../../common/types/media.json"
       },
       "description": "Variant media (images, videos, 3D models). First item is the featured media for listings."
     },
@@ -157,7 +157,7 @@
         "links": {
           "type": "array",
           "items": {
-            "$ref": "link.json"
+            "$ref": "../../common/types/link.json"
           },
           "description": "Seller policy and information links."
         }
