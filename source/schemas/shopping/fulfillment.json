@@ -137,7 +137,7 @@
                 }
               },
               {
-                "$ref": "types/error_response.json"
+                "$ref": "../common/types/error_response.json"
               }
             ]
           }

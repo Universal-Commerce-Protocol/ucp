@@ -25,7 +25,7 @@
       "description": "Product title."
     },
     "description": {
-      "$ref": "description.json",
+      "$ref": "../../common/types/description.json",
       "description": "Product description in one or more formats."
     },
     "url": {
@@ -51,7 +51,7 @@
     "media": {
       "type": "array",
       "items": {
-        "$ref": "media.json"
+        "$ref": "../../common/types/media.json"
       },
       "description": "Product media (images, videos, 3D models). First item is the featured media for listings."
     },

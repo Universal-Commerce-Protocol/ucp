@@ -26,7 +26,7 @@
                   "description": "Human-readable label for this sub-line."
                 },
                 "amount": {
-                  "$ref": "signed_amount.json"
+                  "$ref": "../../common/types/signed_amount.json"
                 }
               },
               "description": "Sub-line entry. Additional metadata MAY be included."
