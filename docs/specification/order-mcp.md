@@ -97,7 +97,6 @@ current-state snapshot of an order.
 
 #### Input Schema
 
-* `meta` (Object, required): Request metadata with `ucp-agent.profile`.
 * `id` (String, required): The ID of the order.
 
 #### Output Schema
@@ -273,9 +272,19 @@ current-state snapshot of an order.
 
 ## Error Handling
 
-When the business cannot return an order, the response includes a `messages`
-array describing the outcome. Platforms **MUST** check `messages` before
-accessing order fields.
+UCP distinguishes between protocol errors and business outcomes. See the
+[Core Specification](overview.md#error-handling) for the complete error code
+registry and transport binding examples.
+
+* **Protocol errors**: Transport-level failures (authentication, rate limiting,
+    unavailability) that prevent request processing. Returned as JSON-RPC
+    `error` with code `-32000` (or `-32001` for discovery errors).
+* **Business outcomes**: Application-level results from successful request
+    processing, returned as JSON-RPC `result` with UCP envelope and `messages`.
+    Platforms **MUST** check `messages` before accessing order fields.
+
+See the [`Not Found`](#get_order) and [`Not Authorized`](#get_order) tabs
+under `get_order` for worked JSON-RPC business-outcome envelopes.
 
 ## Conformance
 
