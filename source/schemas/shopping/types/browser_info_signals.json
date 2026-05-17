@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/browser_info_signals.json",
+  "title": "Browser Info Signals",
+  "description": "Browser signals defined by EMVCo for 3DS2.",
+  "type": "object",
+  "properties": {
+    "accept_headers": {
+      "type": "string",
+      "description": "Browser Accept Headers.",
+      "examples": ["text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8"]
+    },
+    "java_enabled": {
+      "type": "string",
+      "description": "Browser Java Enabled.",
+      "examples": ["true", "false"]
+    },
+    "javascript_enabled": {
+      "type": "string",
+      "description": "Browser JavaScript Enabled.",
+      "examples": ["true", "false"]
+    },
+    "language": {
+      "type": "string",
+      "description": "Browser Language.",
+      "examples": ["en-US"]
+    },
+    "color_depth": {
+      "type": "string",
+      "description": "Browser Screen Color Depth.",
+      "examples": ["24"]
+    },
+    "screen_height": {
+      "type": "string",
+      "description": "Browser Screen Height in pixels.",
+      "examples": ["1080"]
+    },
+    "screen_width": {
+      "type": "string",
+      "description": "Browser Screen Width in pixels.",
+      "examples": ["1920"]
+    },
+    "timezone": {
+      "type": "string",
+      "description": "Browser Time Zone offset or name.",
+      "examples": ["America/Los_Angeles", "-480"]
+    },
+    "user_agent": {
+      "type": "string",
+      "description": "Browser User-Agent.",
+      "examples": ["Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"]
+    }
+  }
+}

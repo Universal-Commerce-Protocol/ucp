@@ -27,8 +27,6 @@ extension is supported.
 The business remains the Merchant of Record (MoR), and they don't need to become
 PCI DSS compliant to accept card payments through this Capability.
 
-For handling 3DS2 challenge flows in a vendor-agnostic manner, see the [Checkout 3DS2 Guide](checkout-3ds2-guide.md).
-
 ### Flow overview
 
 ![High-level checkout flow sequence diagram](site:specification/images/ucp-checkout-flow.png)
@@ -604,6 +602,9 @@ to construct the order representation (i.e. information like `line_items`,
 
 After this call, other details will be updated through subsequent events
 as the order, and its associated items, moves through the supply chain.
+
+> [!NOTE]
+> For detailed instructions on handling 3DS2 challenges and device data collection during this operation, see the [Checkout 3DS2 Guide](checkout-3ds2-guide.md).
 
 {{ method_fields('complete_checkout', 'rest.openapi.json', 'checkout') }}
 

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/client_callback.json",
+  "title": "Client Callback",
+  "description": "Schema for client-side callback configuration and status.",
+  "type": "object",
+  "properties": {
+    "url": {
+      "type": "string",
+      "format": "uri",
+      "description": "The URL where the result should be sent or where the interaction completes."
+    },
+    "status": {
+      "type": "string",
+      "description": "The status of the action.",
+      "enum": [
+        "callback_received",
+        "abandoned"
+      ]
+    }
+  }
+}

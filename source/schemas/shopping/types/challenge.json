@@ -5,81 +5,49 @@
   "description": "Schema for handling challenge or step-up authentication actions and results (e.g., 3DS2).",
   "type": "object",
   "properties": {
-    "callback_url": {
+    "client_callback": {
+      "$ref": "client_callback.json"
+    },
+    "intent": {
       "type": "string",
-      "format": "uri",
-      "description": "The URL where the result should be sent or where the interaction completes."
+      "description": "The intent of the action.",
+      "enum": [
+        "device_data_collection",
+        "challenge"
+      ]
+    },
+    "display": {
+      "type": "string",
+      "description": "The display mode for the action.",
+      "enum": [
+        "hidden",
+        "visible"
+      ]
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC 3339 expiry timestamp indicating how long the host should wait for the action to complete."
+    },
+    "status": {
+      "type": "string",
+      "description": "The outcome of the authentication flow (e.g., 'authenticated', 'frictionless', 'attempted'). Optional, for platform observability and metrics.",
+      "enum": [
+        "authenticated",
+        "frictionless",
+        "attempted",
+        "failed"
+      ]
     },
     "action": {
       "type": "object",
-      "description": "Action requested by the merchant.",
-      "properties": {
-        "intent": {
-          "type": "string",
-          "description": "The intent of the action. Well-known values: `device_data_collection`, `challenge`.",
-          "examples": [
-            "device_data_collection",
-            "challenge"
-          ]
-        },
-        "type": {
-          "type": "string",
-          "description": "The mechanism for the action. Well-known values: `hidden_iframe`, `popup`.",
-          "examples": [
-            "hidden_iframe",
-            "popup"
-          ]
-        },
-        "url": {
-          "type": "string",
-          "format": "uri",
-          "description": "The URL to load or post to."
-        },
-        "request_data": {
-          "type": "object",
-          "description": "Data to be sent with the request. For form posts (POST), this should be a flat set of key-value pairs where both keys and values are strings.",
-          "additionalProperties": {
-            "type": "string"
-          }
-        },
-        "request_method": {
-          "type": "string",
-          "description": "HTTP method to use.",
-          "examples": [
-            "POST",
-            "GET"
-          ]
-        }
-      }
+      "description": "Action requested by the business. Open-ended for Vendor-specific payloads.",
+      "additionalProperties": true
     },
-    "result": {
+    "action_result": {
       "type": "object",
-      "description": "Result reported by the host.",
-      "properties": {
-        "intent": {
-          "type": "string",
-          "description": "The intent of the completed action.",
-          "examples": [
-            "device_data_collection",
-            "challenge"
-          ]
-        },
-        "status": {
-          "type": "string",
-          "description": "The status of the action.",
-          "examples": [
-            "success",
-            "failure"
-          ]
-        },
-        "response_data": {
-          "type": "object",
-          "description": "Data returned from the interaction. For form posts, this is typically a flat set of key-value pairs where both keys and values are strings.",
-          "additionalProperties": {
-            "type": "string"
-          }
-        }
-      }
+      "description": "Result reported by the platform. Open-ended for Vendor-specific result payloads.",
+      "additionalProperties": true
     }
   }
 }
