@@ -29,8 +29,7 @@ Specifically the following core use cases of benefit recognition for known membe
 addressed:
 
 * Price-Impacting Benefits: Real-time application of member-only discounts and free
-  shipping offers with clear attribution of benefit sources, including multiplicative
-  benefits unlocked by concurrent memberships.
+  shipping offers with clear attribution of benefit sources.
 * Non-Price Benefits: Transparent display of rewards earned or rewards applicable to
   future purchases.
 * Status Recognition: Verification and display of the buyers’ specific loyalty tier within
@@ -243,16 +242,14 @@ MUST evaluate those conditions before applying the benefit.
 When the benefit applies, businesses MUST surface the price impact through the base
 capability's price fields. Catalog responses use `price` / `list_price` and
 `price_range` / `list_price_range`; cart and checkout responses use `totals` or
-`line_items[].totals` with `type: "items_discount"` and `display_text` to attribute the
-loyalty source when possible.
+`line_items[].totals` with `type: "items_discount"` (for member pricing) / `type: "discount"`
+(for member shipping) and `display_text` to attribute the loyalty source when possible.
 
 For cart and checkout responses, when the discount extension is active, businesses
 SHOULD also populate `discounts.applied[]` for structured attribution. In that case,
-`eligibility` identifies the claim or claims required for the discount. An eligibility
-array is conjunctive: all listed claims are required. Disjunctive (any-of) eligibility
-MUST be modeled as separate `discounts.applied[]` objects, one per independent path. If
-the discount still requires verification, for example because one or more accepted loyalty
-claims remain unverified, the corresponding applied discount MUST set `provisional: true`.
+`eligibility` identifies the claim required for the discount. If the discount still
+requires verification, for example because one or more accepted loyalty claims remain
+unverified, the corresponding applied discount MUST set `provisional: true`.
 
 If the benefit does not apply, businesses SHOULD notify the buyer via messages with
 `type: "warning"` and explain the inapplicability of those monetary loyalty benefits.
@@ -446,7 +443,7 @@ With the help of the loyalty extension, the catalog, cart, and checkout capabili
 be further decorated to provide full visibility into buyers’ member-exclusive perks and
 allow the platform to render the extra information to facilitate the transaction.
 
-### Compound Price-Impacting Benefits
+### Price-Impacting Benefits
 
 The loyalty extension can provide buyer status information that helps the platform
 explain member discounts. Price-impacting loyalty benefits are reflected in the base
@@ -454,10 +451,9 @@ capability's price fields. When the discount extension is also active, the platf
 explain each discount via `discounts.applied[].title` and correlate
 `discounts.applied[].eligibility` back to `loyalty` entries to show which accepted
 membership claims produced the monetary benefit. In the example below, the buyer
-receives a 15% bonus discount because they hold both the Retail Club membership and the
-Retail Card, and the `eligibility` array reflects this conjunction natively. The
-platform can then render “Retail Club Gold Member and Retail Card benefits applied,” for
-example.
+receives a 15% bonus discount and free shipping benefit respectively because they
+hold the Retail Club membership and the Retail Card. The platform can then render
+“Retail Club Gold Member and Retail Card benefits applied,” for example.
 
 === "Request"
 
@@ -495,7 +491,7 @@ example.
           "quantity": 1,
           "totals": [
             {"type": "subtotal", "amount": 1000},
-            {"type": "items_discount", "display_text": "Loyalty member benefit", "amount": -150},
+            {"type": "items_discount", "display_text": "Club member benefit", "amount": -150},
             {"type": "total", "amount": 850}
           ]
         }
@@ -503,17 +499,21 @@ example.
       "discounts": {
         "applied": [
           {
-            "title": "Club Member + Cardholder 15% Bonus",
+            "title": "Club Members get 15% Bonus",
             "amount": 150,
             "method": "each",
             "provisional": false,
-            "eligibility": [
-              "com.example.retail_club",
-              "com.example.retail_card"
-            ],
+            "eligibility": "com.example.retail_club",
             "allocations": [
               {"path": "$.line_items[0]", "amount": 150}
             ]
+          },
+          {
+            "title": "Free shipping for Retail Card holder",
+            "amount": 199,
+            "automatic": true,
+            "provisional": false,
+            "eligibility": "com.example.retail_card"
           }
         ]
       },
@@ -543,7 +543,7 @@ example.
               "id": "cardholder",
               "name": "Retail Card",
               "benefits": [
-                { "id": "BEN_002", "description": "Free standard shipping" }
+                { "id": "BEN_002", "description": "Exclusive customer support" }
               ]
             }
           ]
@@ -551,8 +551,10 @@ example.
       },
       "totals": [
         {"type": "subtotal", "display_text": "Subtotal", "amount": 1000},
-        {"type": "items_discount", "display_text": "Loyalty member benefit", "amount": -150},
-        {"type": "total", "display_text": "Estimated Total", "amount": 850}
+        {"type": "items_discount", "display_text": "Club member benefit", "amount": -150},
+        {"type": "discount", "display_text": "Free shipping for Retail Card holder", "amount": -199},
+        {"type": "fulfillment", "display_text": "Shipping", "amount": 0},
+        {"type": "total", "display_text": "Estimated Total", "amount": 651}
       ]
     }
     ```
