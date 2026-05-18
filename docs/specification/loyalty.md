@@ -205,8 +205,7 @@ The loyalty extension holds a key-value map whose keys are reverse-domain identi
 the same convention as services, capabilities, and payment handlers in the business
 profile. The keys represent eligibility claims about loyalty memberships that
 businesses recognize. The values contain membership information corresponding to those
-claims and use the `provisional` field to indicate the verification state when
-additional verification is required.
+claims and use the required `provisional` field to indicate the verification state.
 
 Programs that can be joined independently MUST be modeled as separate sibling entries
 under the loyalty map, distinguished by their reverse-domain naming.
@@ -227,13 +226,9 @@ identifier the business would accept as a claim value.
   tier context for the state accepted during the session, and MUST NOT return
   `display_id` until the membership is verified.
 * When a membership claim in the request is accepted but cannot be verified, the business
-  MAY optionally echoes back the invalid membership via loyalty extension. However, the
-  business MUST communicate the failure via a recoverable `message` with `type: "error"`
-  and `code: "eligibility_invalid"`. It MAY additionally set the error message `path` to
-  reference the relevant membership for better attribution. If invalid membership is
-  returned, the business MUST return `provisional: true` and MUST NOT return `display_id`
-  or `tiers` in this case.  Platforms MAY then choose to remove the membership claim and
-  proceed through checkout without loyalty benefits applied.
+  MUST communicate the failure via a recoverable `message` with `type: "error"` and
+  `code: "eligibility_invalid"`. Platforms MAY then choose to remove the membership claim
+  and proceed through checkout without loyalty benefits applied.
 
 At checkout completion, all accepted but unverified loyalty claims MUST be resolved per
 the [Eligibility Verification at Completion](checkout.md#eligibility-verification-at-completion)
@@ -410,9 +405,7 @@ non-provisional and `display_id` is returned.
     ```
 
 If the claim cannot be verified, the business MUST return a recoverable error via
-`messages[]`  with `code: "eligibility_invalid"`. Businesses MAY set the optional `path`
-field to reference the membership metadata that corresponds to the claim. In this
-case, the loyalty extension needs to be included in the response as well.
+`messages[]`  with `code: "eligibility_invalid"`.
 
 === "Request"
 
@@ -436,19 +429,11 @@ case, the loyalty extension needs to be included in the response as well.
 
     ```json
     {
-      "loyalty": {
-        "com.example.loyalty.store_card": {
-          "id": "membership_1",
-          "name": "My Loyalty Program",
-          "provisional": true
-        }
-      },
       "messages": [
         {
           "type": "error",
           "severity": "recoverable",
           "code": "eligibility_invalid",
-          "path": "$.loyalty['com.example.loyalty.store_card']",
           "content": "Buyer is not a store card holder."
         }
       ]
