@@ -68,7 +68,7 @@ Layer 1 via these stages, in order:
   4. lower_ellipsis_to_sentinels (d) → bare `...` becomes string
                                  "..." inside containers
 
-The output is parseable by json.loads. Sentinels survive into
+The output is parsable by json.loads. Sentinels survive into
 Layer 3.
 
 Layer 3 — Semantic interpretation. Operates on the parsed tree:
@@ -361,7 +361,7 @@ def reduce_to_canonical_json(raw: str) -> str:
   """Layer 1 → Layer 2. Pure text transformation, no JSON parse.
 
   Applies the four authoring conveniences in order. Output is
-  parseable by json.loads. String-sentinel "..." survives into
+  parsable by json.loads. String-sentinel "..." survives into
   Layer 3 and is interpreted there as an elision marker.
   """
   raw = unwrap_http_envelope(raw)

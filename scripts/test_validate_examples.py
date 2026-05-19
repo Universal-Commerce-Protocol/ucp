@@ -382,7 +382,9 @@ def test_process_block_integration() -> None:
     )
     return
 
-  # Trailing comma is now rejected (was tolerated before)
+  # Trailing comma is now rejected (was tolerated before). Assert on the
+  # validator's "invalid JSON:" prefix; Python's JSONDecodeError text isn't
+  # stable across versions.
   md = (
     "<!-- ucp:example schema=shopping/checkout op=read -->\n"
     '```json\n{ "a": 1, }\n```\n'
@@ -390,7 +392,7 @@ def test_process_block_integration() -> None:
   result = _process(md)
   _check(
     "process_trailing_comma_rejected",
-    result.status == "fail" and "trailing comma" in result.message.lower(),
+    result.status == "fail" and result.message.startswith("invalid JSON:"),
     f"got {result.status}: {result.message}",
   )
 
