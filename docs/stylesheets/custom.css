@@ -539,6 +539,29 @@ p.hero-description {
   display: flex;
 }
 
+/* Make this section always the size of the maximum height needed for the tabs combined */
+#industry-tabs + div {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+#industry-tabs + div > .tab-pane {
+  grid-column: 1;
+  grid-row: 1;
+  display: flex !important;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+
+#industry-tabs + div > .tab-pane.active {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+
 .tab-pane.shopping-tab-pane {
   flex-direction: column !important;
   align-items: center !important;
