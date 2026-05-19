@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/challenge.json",
+  "title": "Challenge",
+  "description": "Schema for handling challenge or step-up authentication actions and results (e.g., 3DS2).",
+  "type": "object",
+  "properties": {
+    "client_callback": {
+      "$ref": "client_callback.json"
+    },
+    "intent": {
+      "type": "string",
+      "description": "The intent of the action.",
+      "enum": [
+        "device_data_collection",
+        "challenge"
+      ]
+    },
+    "display": {
+      "type": "string",
+      "description": "The display mode for the action.",
+      "enum": [
+        "hidden",
+        "visible"
+      ]
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC 3339 expiry timestamp indicating how long the host should wait for the action to complete."
+    },
+    "status": {
+      "type": "string",
+      "description": "The outcome of the authentication flow (e.g., 'authenticated', 'frictionless', 'attempted'). Optional, for platform observability and metrics.",
+      "enum": [
+        "authenticated",
+        "frictionless",
+        "attempted",
+        "failed"
+      ]
+    },
+    "action": {
+      "type": "object",
+      "description": "Action requested by the business. Open-ended for Vendor-specific payloads.",
+      "additionalProperties": true
+    },
+    "action_result": {
+      "type": "object",
+      "description": "Result reported by the platform. Open-ended for Vendor-specific result payloads.",
+      "additionalProperties": true
+    }
+  }
+}

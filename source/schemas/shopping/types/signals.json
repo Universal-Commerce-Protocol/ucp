@@ -11,11 +11,17 @@
   "properties": {
     "dev.ucp.buyer_ip": {
       "type": "string",
-      "description": "Client's IP address (IPv4 or IPv6)."
+      "description": "Client's IP address (IPv4 or IPv6).",
+      "examples": ["203.0.113.42"]
     },
     "dev.ucp.user_agent": {
       "type": "string",
-      "description": "Client's HTTP User-Agent header or equivalent."
+      "description": "Client's HTTP User-Agent header or equivalent. Deprecated: Use dev.ucp.browser_info.user_agent instead.",
+      "deprecated": true,
+      "examples": ["Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"]
+    },
+    "dev.ucp.browser_info": {
+      "$ref": "browser_info_signals.json"
     }
   },
   "additionalProperties": true

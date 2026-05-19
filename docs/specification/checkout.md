@@ -603,6 +603,9 @@ to construct the order representation (i.e. information like `line_items`,
 After this call, other details will be updated through subsequent events
 as the order, and its associated items, moves through the supply chain.
 
+> [!NOTE]
+> For detailed instructions on handling 3DS2 challenges and device data collection during this operation, see the [Checkout 3DS2 Guide](checkout-3ds2-guide.md).
+
 {{ method_fields('complete_checkout', 'rest.openapi.json', 'checkout') }}
 
 ### Cancel Checkout
