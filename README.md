@@ -131,8 +131,11 @@ Agents use [ucp-schema](https://github.com/universal-commerce-protocol/ucp-schem
    ```
 
 2. Make updates to JSON files in `source/`
-3. Run `ucp-schema lint source/` to validate syntax and references
-
+3. Run
+   ```bash
+   ucp-schema lint source/
+   ```
+   to validate syntax and references
 
 ### Documentation Development
 
