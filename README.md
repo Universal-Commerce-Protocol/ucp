@@ -154,7 +154,7 @@ This will build the site and start a local server. You can use the `--draft-only
 ```bash
 ./scripts/build_local.sh --draft-only
 ```
-You can start the documenation server locally by running
+You can start the documentation server locally by running
 ```bash
 python3 -m http.server 8000 -d "local_preview"
 ```
