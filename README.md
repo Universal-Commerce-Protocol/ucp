@@ -123,6 +123,7 @@ We welcome community contributions to enhance and evolve UCP.
 Schemas live in `source/` and are published with `ucp_*` annotations intact.
 Agents use [ucp-schema](https://github.com/universal-commerce-protocol/ucp-schema)
  to resolve annotations for specific operations at runtime.
+
 1. Ensure `ucp-schema` is installed:
 
    ```bash
@@ -132,14 +133,17 @@ Agents use [ucp-schema](https://github.com/universal-commerce-protocol/ucp-schem
 
 2. Make updates to JSON files in `source/`
 3. Run
+
    ```bash
    ucp-schema lint source/
    ```
+
    to validate syntax and references
 
 ### Documentation Development
 
 This project uses [uv](https://docs.astral.sh/uv/) for Python dependency management.
+
 1. Install Python dependencies: `uv sync`
 2. Ensure `ucp-schema` is installed (see above)
 3. Run the development server: `uv run mkdocs serve --watch source`
@@ -147,18 +151,25 @@ This project uses [uv](https://docs.astral.sh/uv/) for Python dependency managem
 5. Before submitting, run `uv run mkdocs build --strict` to check for warnings/errors
 
 Alternatively, you can use the local build script to build the full site including spec versions:
+
 ```bash
 ./scripts/build_local.sh
 ```
+
 This will build the site and start a local server. You can use the `--draft-only` flag to skip release branches and only build the current draft:
+
 ```bash
 ./scripts/build_local.sh --draft-only
 ```
+
 You can start the documentation server locally by running
+
 ```bash
 python3 -m http.server 8000 -d "local_preview"
 ```
+
 The local version of the documentation website will then be available at **<http://127.0.0.1:8000>**
+
 
 ## What's Next
 
