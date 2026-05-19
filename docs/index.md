@@ -587,7 +587,7 @@ image: assets/banner.png
   if (industryTabsContainer) {
     industryTabsContainer.addEventListener('mouseenter', stopAutoplay);
     industryTabsContainer.addEventListener('mouseleave', startAutoplay);
-    
+
     tabButtons.forEach((btn, idx) => {
       btn.addEventListener('click', () => {
         currentTabIdx = idx;
