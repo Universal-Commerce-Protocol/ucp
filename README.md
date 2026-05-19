@@ -124,17 +124,15 @@ Schemas live in `source/` and are published with `ucp_*` annotations intact.
 Agents use [ucp-schema](https://github.com/universal-commerce-protocol/ucp-schema)
  to resolve annotations for specific operations at runtime.
 1. Ensure `ucp-schema` is installed:
+
    ```bash
    cargo install ucp-schema                 # from crates.io
    cargo install --git https://github.com/universal-commerce-protocol/ucp-schema  # from git
    ```
+
 2. Make updates to JSON files in `source/`
 3. Run `ucp-schema lint source/` to validate syntax and references
-If you change any JSON schemas, you may need to regenerate SDK client libraries.
-For example, to regenerate Python Pydantic models run
-`bash sdk/python/generate_models.sh`. Our CI system runs
-`scripts/ci_check_models.sh` to verify that models can be generated
-successfully from the schemas.
+
 
 ### Documentation Development
 
