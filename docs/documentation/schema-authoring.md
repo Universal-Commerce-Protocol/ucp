@@ -702,11 +702,59 @@ file path isn't part of it.
 
 ### Running the validator locally
 
+The validator is pure stdlib Python and shells out to the
+[`ucp-schema`](https://github.com/universal-commerce-protocol/ucp-schema)
+binary for schema resolution and payload validation. First-time setup:
+
+```bash
+uv sync                                   # Python deps
+cargo install ucp-schema                  # validator backend
+uv tool install pre-commit                # if not already installed
+pre-commit install --hook-type pre-commit --hook-type pre-push
+```
+
+The `--hook-type pre-push` flag is important: pre-commit only installs the
+`pre-commit` stage hook by default, but this repo also uses `pre-push`
+hooks as a safety net. Pass both to opt into the full enforcement story.
+
+Manual invocation:
+
 ```bash
 python3 scripts/validate_examples.py --schema-base source/schemas/
-python3 scripts/validate_examples.py --schema-base source/schemas/ --file docs/specification/checkout-rest.md
+python3 scripts/validate_examples.py --schema-base source/schemas/ --file docs/specification/checkout-rest.md docs/specification/cart.md
 python3 scripts/validate_examples.py --schema-base source/schemas/ --audit
 ```
 
 The `--audit` mode lists blocks without validating them — useful for counting
-skips and identifying unannotated blocks.
+skips and identifying unannotated blocks. `--file` accepts one or more paths
+for incremental validation.
+
+#### What runs automatically
+
+The "schema drift breaks CI" claim above is enforced by three surfaces:
+
+| Surface | Scope | When |
+| --- | --- | --- |
+| `pre-commit` stage hook | Changed `docs/*.md` files only | Every `git commit` (if installed) |
+| `pre-commit` stage hook | Full corpus | Every `git commit` that touches `source/schemas/` or the validator itself |
+| `pre-push` stage hook | Same as pre-commit | Every `git push` — catches `--no-verify` bypasses |
+| CI (`.github/workflows/docs.yml`) | Full corpus | Every PR — the mandatory backstop |
+
+The pre-commit hooks are opt-in (require the install commands above);
+CI is unconditional. Skipping local hooks doesn't break anything — PRs
+with unannotated blocks or broken validation will fail CI — but local
+hooks give earlier feedback than waiting for the GitHub Actions run.
+
+#### When the full-corpus check fires (and why)
+
+The pre-commit/pre-push split between "changed files only" and "full
+corpus" is intentional:
+
+- **Doc edits** (`docs/*.md`) validate only the changed files. Catches
+  direct errors — unannotated blocks, wrong schema name, broken example
+  payload — in the file you're editing, fast.
+- **Schema or validator-code edits** trigger a full-corpus check. A
+  single change to `source/schemas/shopping/cart.json` (or to
+  `validate_examples.py` itself) can invalidate examples across many
+  unrelated docs. The full check is the only way to catch that
+  cross-file regression locally before it hits CI.
