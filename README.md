@@ -170,7 +170,6 @@ python3 -m http.server 8000 -d "local_preview"
 
 The local version of the documentation website will then be available at **<http://127.0.0.1:8000>**
 
-
 ## What's Next
 
 Take a look at [our roadmap on ucp.dev](https://ucp.dev/documentation/roadmap/).
