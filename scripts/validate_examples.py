@@ -1093,8 +1093,9 @@ def main() -> int:
   parser.add_argument(
     "--file",
     type=Path,
+    nargs="+",
     default=None,
-    help="Validate a single file instead of all",
+    help="Validate one or more files instead of the full corpus.",
   )
   parser.add_argument(
     "--audit",
@@ -1115,7 +1116,7 @@ def main() -> int:
   docs_dir = args.docs or repo_root / "docs"
 
   # Collect markdown files
-  md_files = [args.file] if args.file else sorted(docs_dir.rglob("*.md"))
+  md_files = args.file if args.file else sorted(docs_dir.rglob("*.md"))
 
   # Extract all blocks
   all_blocks: list[dict] = []
