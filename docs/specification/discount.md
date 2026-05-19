@@ -605,3 +605,4 @@ Multiple discounts applied with full allocation breakdown:
 
 With this data, an agent can explain:
 > "Your T-Shirt ($60) got $12 off from the 20% summer sale, plus $3 from your
+> loyalty reward (split proportionally). Total savings on this item: $15.
