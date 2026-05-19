@@ -118,6 +118,47 @@ We welcome community contributions to enhance and evolve UCP.
 * **Contribution Guide:** See our [CONTRIBUTING.md](https://github.com/Universal-Commerce-Protocol/.github/blob/main/CONTRIBUTING.md)
     for details on how to contribute.
 
+### Schema Development
+
+Schemas live in `source/` and are published with `ucp_*` annotations intact.
+Agents use [ucp-schema](https://github.com/universal-commerce-protocol/ucp-schema)
+ to resolve annotations for specific operations at runtime.
+1. Ensure `ucp-schema` is installed:
+   ```bash
+   cargo install ucp-schema                 # from crates.io
+   cargo install --git https://github.com/universal-commerce-protocol/ucp-schema  # from git
+   ```
+2. Make updates to JSON files in `source/`
+3. Run `ucp-schema lint source/` to validate syntax and references
+If you change any JSON schemas, you may need to regenerate SDK client libraries.
+For example, to regenerate Python Pydantic models run
+`bash sdk/python/generate_models.sh`. Our CI system runs
+`scripts/ci_check_models.sh` to verify that models can be generated
+successfully from the schemas.
+
+### Documentation Development
+
+This project uses [uv](https://docs.astral.sh/uv/) for Python dependency management.
+1. Install Python dependencies: `uv sync`
+2. Ensure `ucp-schema` is installed (see above)
+3. Run the development server: `uv run mkdocs serve --watch source`
+4. Open **<http://127.0.0.1:8000>** in your browser
+5. Before submitting, run `uv run mkdocs build --strict` to check for warnings/errors
+
+Alternatively, you can use the local build script to build the full site including spec versions:
+```bash
+./scripts/build_local.sh
+```
+This will build the site and start a local server. You can use the `--draft-only` flag to skip release branches and only build the current draft:
+```bash
+./scripts/build_local.sh --draft-only
+```
+You can start the documenation server locally by running
+```bash
+python3 -m http.server 8000 -d "local_preview"
+```
+The local version of the documentation website will then be available at **<http://127.0.0.1:8000>**
+
 ## What's Next
 
 Take a look at [our roadmap on ucp.dev](https://ucp.dev/documentation/roadmap/).
