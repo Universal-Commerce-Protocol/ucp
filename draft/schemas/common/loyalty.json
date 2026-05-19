@@ -1,0 +1,294 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/draft/schemas/common/loyalty.json",
+  "name": "dev.ucp.common.loyalty",
+  "title": "Loyalty Extension",
+  "description": "Extends various Capabilities with loyalty support using memberships info.",
+  "$defs": {
+    "reward_amount": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Non-negative integer amount denominated in the minor unit of the associated reward currency. The associated reward currency's `decimal_places` defines the minor-to-major ratio and defaults to 0 when omitted."
+    },
+    "earning_breakdown": {
+      "type": "object",
+      "description": "Breakdown rule of the reward earnings",
+      "required": [
+        "id",
+        "amount",
+        "description"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique rewards breakdown rule identifier."
+        },
+        "amount": {
+          "$ref": "#/$defs/reward_amount",
+          "description": "Rewards earned from this rule."
+        },
+        "description": {
+          "type": "string",
+          "description": "A display-ready, human-readable rationale for the specific rewards (e.g. 2x on footwear)."
+        },
+        "benefit_id": {
+          "type": "string",
+          "description": "Optional `id` of the membership_tier_benefit that produced this rewards rule. Resolves against `membership_tier_benefit.id` within the same parent loyalty membership."
+        }
+      }
+    },
+    "earning_forecast": {
+      "type": "object",
+      "description": "Preview of rewards to be earned from the current transaction.",
+      "required": [
+        "amount"
+      ],
+      "properties": {
+        "amount": {
+          "$ref": "#/$defs/reward_amount",
+          "description": "Total rewards to be earned if the transaction completes."
+        },
+        "breakdown": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/earning_breakdown"
+          },
+          "description": "List of breakdown of earning contributing to the total."
+        }
+      }
+    },
+    "reward_currency": {
+      "type": "object",
+      "description": "The currency of the loyalty reward.",
+      "required": [
+        "name",
+        "code"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Human-readable name of the currency (e.g. 'LoyaltyStars')."
+        },
+        "code": {
+          "type": "string",
+          "description": "Business-specific representation of the currency (e.g. 'LST')."
+        },
+        "decimal_places": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 0,
+          "description": "The position of a digit to the right of a decimal point. Applies to all amount related fields for rewards."
+        }
+      }
+    },
+    "membership_reward": {
+      "type": "object",
+      "description": "Quantifiable reward type and optional earning forecast for the current transaction.",
+      "required": [
+        "currency"
+      ],
+      "properties": {
+        "currency": {
+          "type": "object",
+          "$ref": "#/$defs/reward_currency",
+          "description": "A unit of value that customers can accumulate through various commercial activities."
+        },
+        "earning_forecast": {
+          "type": "object",
+          "$ref": "#/$defs/earning_forecast",
+          "description": "Preview of rewards to be earned from the current transaction."
+        }
+      }
+    },
+    "membership_tier_benefit": {
+      "type": "object",
+      "description": "Benefits associated with a membership tier.",
+      "required": [
+        "id",
+        "description"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the tier benefit."
+        },
+        "description": {
+          "type": "string",
+          "description": "A display-ready, human-readable explanation of this benefit (e.g. 'Early access to sales')."
+        }
+      }
+    },
+    "membership_tier": {
+      "type": "object",
+      "description": "Specific achievement rank or status milestone that unlocks escalating value as a member progresses through activity or spend.",
+      "required": [
+        "id",
+        "name"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the membership tier."
+        },
+        "name": {
+          "type": "string",
+          "description": "The human-readable name of the tier (e.g., 'Platinum')."
+        },
+        "benefits": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/membership_tier_benefit"
+          },
+          "description": "List of benefits associated with this tier."
+        }
+      }
+    },
+    "loyalty_membership": {
+      "type": "object",
+      "description": "Loyalty membership the business has accepted for the eligibility claim represented by the parent map key. Programs that can be joined independently MUST be modeled as separate sibling entries under the loyalty map, distinguished by reverse-domain naming (e.g., 'com.example.rewards' and 'com.example.rewards.card').",
+      "required": [
+        "id",
+        "name",
+        "provisional"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique loyalty membership identifier."
+        },
+        "name": {
+          "type": "string",
+          "description": "Business specific name of the loyalty membership/program."
+        },
+        "display_id": {
+          "type": "string",
+          "description": "A masked or partial version of the membership id for user recognition (e.g., '****5678'). MUST NOT be set if the membership has not been verified."
+        },
+        "tiers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/membership_tier"
+          },
+          "description": "Active or display-safe tier context for this membership. Most programs are single-status (one entry); programs with parallel status dimensions (e.g., current and lifetime) populate one entry per active tier. Omitted when no tier context has been resolved."
+        },
+        "rewards": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/membership_reward"
+          },
+          "description": "Reward types and earning forecasts associated with this membership. Each object encapsulates one type of reward."
+        },
+        "provisional": {
+          "type": "boolean",
+          "description": "True if this membership requires additional verification."
+        }
+      }
+    },
+    "loyalty": {
+      "type": "object",
+      "description": "Key-value map whose keys represent buyer/platform asserted eligibility claims and whose values represent associated membership information. All loyalty keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.",
+      "propertyNames": {
+        "$ref": "https://ucp.dev/draft/schemas/common/types/reverse_domain_name.json",
+        "description": "Reverse-domain identifier that represents eligibility claim accepted by the Business for this membership."
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/loyalty_membership",
+        "description": "Payload that describes the membership information corresponding to the claim.",
+        "ucp_request": "omit"
+      }
+    },
+    "dev.ucp.shopping.catalog.search": {
+      "title": "Catalog Search with Loyalty",
+      "description": "Catalog Search response extended with Loyalty capability.",
+      "allOf": [
+        {
+          "$ref": "https://ucp.dev/draft/schemas/shopping/catalog_search.json#/$defs/search_response"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "loyalty": {
+              "$ref": "#/$defs/loyalty",
+              "ucp_request": "omit"
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.catalog.lookup": {
+      "title": "Catalog Lookup with Loyalty",
+      "description": "Catalog Lookup response extended with Loyalty capability.",
+      "oneOf": [
+        {
+          "allOf": [
+            {
+              "$ref": "https://ucp.dev/draft/schemas/shopping/catalog_lookup.json#/$defs/lookup_response"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "loyalty": {
+                  "$ref": "#/$defs/loyalty",
+                  "ucp_request": "omit"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "https://ucp.dev/draft/schemas/shopping/catalog_lookup.json#/$defs/get_product_response"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "loyalty": {
+                  "$ref": "#/$defs/loyalty",
+                  "ucp_request": "omit"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "dev.ucp.shopping.cart": {
+      "title": "Cart with Loyalty",
+      "description": "Cart extended with Loyalty capability.",
+      "allOf": [
+        {
+          "$ref": "https://ucp.dev/draft/schemas/shopping/cart.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "loyalty": {
+              "$ref": "#/$defs/loyalty",
+              "ucp_request": "omit"
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.checkout": {
+      "title": "Checkout with Loyalty",
+      "description": "Checkout extended with Loyalty capability.",
+      "allOf": [
+        {
+          "$ref": "https://ucp.dev/draft/schemas/shopping/checkout.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "loyalty": {
+              "$ref": "#/$defs/loyalty",
+              "ucp_request": "omit"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "version": "2026-05-19"
+}

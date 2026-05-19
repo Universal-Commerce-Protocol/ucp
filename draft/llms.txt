@@ -44,6 +44,7 @@ specifications:
 - [Buyer Consent Extension](http://ucp.dev/draft/specification/buyer-consent/index.md): Buyer Consent Extension, defining data schemas for transmitting buyer privacy choices (analytics, marketing, personalization) to assist with privacy compliance (CCPA/GDPR).
 - [Discounts Extension](http://ucp.dev/draft/specification/discount/index.md): Discount Extension, covering discount code discovery, applied discounts, allocation method stacking orders, rejected code message handling, and automatic or provisional eligibility promotions.
 - [Fulfillment Extension](http://ucp.dev/draft/specification/fulfillment/index.md): Fulfillment extension for checkouts, defining delivery methods, pickup destinations, and method-agnostic UI rendering contracts.
+- [Loyalty Extension](http://ucp.dev/draft/specification/loyalty/index.md): Loyalty Extension, enabling high-fidelity member benefit recognition during catalog, cart, and checkout by defining schemas for memberships, tiers, benefits, and reward earning forecasts while managing provisional eligibility claims and enforcing data-minimization privacy rules.
 
 ## Cart Capability
 
