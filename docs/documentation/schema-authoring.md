@@ -662,6 +662,32 @@ definition.
 **Empty body.** A `{}` payload (e.g. cancel, GET) validates trivially against
 the matching op + direction. No special syntax needed.
 
+### Keep validator wiring invisible
+
+The validation contract is repo infrastructure: annotations, scaffolds, and
+schema file paths. Readers of the rendered specification see only protocol
+prose and JSON examples — never the wiring.
+
+This works because:
+
+- Annotations live in HTML comments (`<!-- ucp:example ... -->`) that don't
+  render.
+- Scaffolds live under `scripts/scaffolds/`.
+- Validator schemas live under `source/schemas/` (and
+  `source/schemas/transports/` for envelope schemas).
+
+When you add a JSON example, pointing the validator at the right schema is
+**annotation work, not prose work.** The annotation already names the schema
+and the validator already enforces its scope. Sentences like *"this binding
+is schema-defined by `transports/X.json`, which validates A but not B"*
+duplicate what the annotation says and leak validator internals into
+reader-facing pages.
+
+If a binding has genuine scope confusion worth preempting — e.g. *"UCP's
+A2A binding does not redefine the A2A protocol"* — say it in **protocol
+terms**, not as a schema-coverage note. The protocol concern is real; the
+file path isn't part of it.
+
 ### What authors don't do
 
 - **Don't invent skip reasons that hide bugs.** If validation fails because
