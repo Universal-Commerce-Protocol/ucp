@@ -37,10 +37,16 @@ combinations they support in `allowed_combinations`.
 Each instrument is submitted in one of two modes:
 
 * **Specified-amount** (`amount` present): the platform requests a
-  specific contribution, in ISO 4217 minor units.
+  specific contribution.
 * **Open-amount** (`amount` omitted): the business determines the
   instrument's contribution at processing time (e.g., by querying a
   gift card's available balance).
+
+All `amount` values on instruments are expressed in `checkout.currency`
+minor units (ISO 4217). Handlers using foreign-currency-denominated
+instruments (e.g., a CAD gift card in a USD checkout) or non-currency
+instruments like loyalty points MUST convert each instrument's
+contribution to the checkout currency.
 
 Instruments are submitted in **allocation priority order** — the first
 instrument gets first claim on the checkout total, the second gets next
@@ -81,11 +87,15 @@ instrument types:
 
 {{ schema_fields('types/instrument_group', 'split_payments') }}
 
-**Matching algorithm:** for a given combination, each submitted instrument must
-be assignable to exactly one group whose `types` list includes that
-instrument's type. After assignment, every group must have between `min` and
-`max` instruments (inclusive). If all constraints are satisfied, the
-combination matches.
+**Matching algorithm:** a submission matches a combination if there exists
+an assignment of each submitted instrument to exactly one group such that
+
+* the instrument's `type` is in the assigned group's `types`, and
+* every group's instrument count falls within its `min` and `max`
+  (inclusive).
+
+The business MAY use any algorithm to find such an assignment;
+if any valid assignment exists, the combination matches.
 
 #### Example Configuration
 
@@ -198,9 +208,11 @@ Error conditions:
 ### Response: Actual Charges
 
 On the checkout response, the business MUST set `amount` on every
-instrument to reflect the actual amount that will be charged. This includes
-instruments submitted without `amount`: the business MUST derive their
-actual contribution and return it.
+instrument that was authorized or charged, to reflect the actual amount of funds moved. This includes instruments submitted without `amount`: the business MUST derive their actual contribution and return it.
+
+This is important for completed, immutable checkouts to convey the final amount authorized or captured for each instrument.
+
+This can also be used by the business to convey held funds in the case of a failure while processing part of the submitted, open-amount instruments. The platform can resubmit, either acknowledging to hold those amounts static or re-submitting the instruments with new amounts (including omitted, for open-amount) to release and replace the prior authorization.
 
 ## Examples
 
@@ -413,8 +425,7 @@ nothing. The credit card covers the remaining $75.
         "id": "pi_card_1",
         "handler_id": "example_handler_1",
         "type": "card",
-        "credential": { "type": "card", "token": "tok_visa_xxxx" },
-        "amount": 0
+        "credential": { "type": "card", "token": "tok_visa_xxxx" }
       }
     ]
   },

@@ -24,7 +24,7 @@
           "properties": {
             "amount": {
               "$ref": "types/amount.json",
-              "description": "Requested contribution for this instrument in ISO 4217 minor units. On request: the platform's requested amount (omit for business-determined). On response: the actual amount contributed (always present)."
+              "description": "Requested contribution for this instrument in ISO 4217 minor units. On request: the platform's requested amount (omit for business-determined). On response: the actual amount authorized or charged."
             }
           }
         }
