@@ -103,47 +103,47 @@ extended.
 ```json
 {
   "ucp": {
-    "version": "2026-04-08",
+    "version": "{{ ucp_version }}",
     "capabilities": {
       "dev.ucp.shopping.catalog.search": [
         {
-          "version": "2026-04-08",
-          "spec": "https://ucp.dev/2026-04-08/specification/catalog/search",
-          "schema": "https://ucp.dev/2026-04-08/schemas/shopping/catalog_search.json"
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/catalog/search",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/catalog_search.json"
         }
       ],
       "dev.ucp.shopping.catalog.lookup": [
         {
-          "version": "2026-04-08",
-          "spec": "https://ucp.dev/2026-04-08/specification/catalog/lookup",
-          "schema": "https://ucp.dev/2026-04-08/schemas/shopping/catalog_lookup.json"
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/catalog/lookup",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/catalog_lookup.json"
         }
       ],
       "dev.ucp.shopping.cart": [
         {
-          "version": "2026-04-08",
-          "spec": "https://ucp.dev/2026-04-08/specification/cart",
-          "schema": "https://ucp.dev/2026-04-08/schemas/shopping/cart.json"
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/cart",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/cart.json"
         }
       ],
       "dev.ucp.shopping.checkout": [
         {
-          "version": "2026-04-08",
-          "spec": "https://ucp.dev/2026-04-08/specification/checkout",
-          "schema": "https://ucp.dev/2026-04-08/schemas/shopping/checkout.json"
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/checkout",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/checkout.json"
         }
       ],
       "dev.ucp.common.loyalty": [
         {
-          "version": "2026-04-08",
+          "version": "{{ ucp_version }}",
           "extends": [
             "dev.ucp.shopping.catalog.search",
             "dev.ucp.shopping.catalog.lookup",
             "dev.ucp.shopping.cart",
             "dev.ucp.shopping.checkout"
           ],
-          "spec": "https://ucp.dev/2026-04-08/specification/loyalty",
-          "schema": "https://ucp.dev/2026-04-08/schemas/common/loyalty.json"
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/loyalty",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/common/loyalty.json"
         }
       ]
     }
