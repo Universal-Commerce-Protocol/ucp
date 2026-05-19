@@ -211,8 +211,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
 === "Request"
 
-    <!-- ucp:example skip reason="HTTP headers only, no JSON body" -->
-    ```json
+    ```http
     GET /carts/{id} HTTP/1.1
     UCP-Agent: profile="https://platform.example/profile"
     ```
@@ -413,7 +412,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
 === "Request"
 
-    <!-- ucp:example skip reason="HTTP headers only, no JSON body" -->
+    <!-- ucp:example schema=shopping/cart op=cancel direction=request -->
     ```json
     POST /carts/{id}/cancel HTTP/1.1
     UCP-Agent: profile="https://platform.example/profile"

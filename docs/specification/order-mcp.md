@@ -61,7 +61,7 @@ Businesses advertise MCP transport availability through their UCP profile at
 MCP clients **MUST** include a `meta` object in every request containing
 protocol metadata:
 
-<!-- ucp:example skip reason="JSON-RPC transport binding" -->
+<!-- ucp:example schema=transports/mcp_tool_call def=request direction=request -->
 ```json
 {
   "jsonrpc": "2.0",
@@ -111,7 +111,7 @@ current-state snapshot of an order.
 
 === "Request"
 
-    <!-- ucp:example skip reason="JSON-RPC transport binding" -->
+    <!-- ucp:example schema=transports/mcp_tool_call def=request direction=request -->
     ```json
     {
       "jsonrpc": "2.0",

@@ -97,8 +97,7 @@ Returns the current-state snapshot of an order.
 
 === "Request"
 
-    <!-- ucp:example skip reason="HTTP headers only, no JSON body" -->
-    ```json
+    ```http
     GET /orders/order_abc123 HTTP/1.1
     UCP-Agent: profile="https://platform.example/.well-known/ucp"
     Accept: application/json

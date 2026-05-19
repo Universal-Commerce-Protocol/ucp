@@ -848,7 +848,7 @@ task through the standard web interface.
 
     **Discovery Failure (JSON-RPC error):**
 
-    <!-- ucp:example skip reason="JSON-RPC error format" -->
+    <!-- ucp:example schema=transports/jsonrpc def=error_response -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -867,7 +867,7 @@ task through the standard web interface.
 
     **Version Unsupported (JSON-RPC error):**
 
-    <!-- ucp:example skip reason="JSON-RPC error format" -->
+    <!-- ucp:example schema=transports/jsonrpc def=error_response -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -886,7 +886,7 @@ task through the standard web interface.
 
     **Capabilities Incompatible (JSON-RPC result):**
 
-    <!-- ucp:example skip reason="JSON-RPC error format" -->
+    <!-- ucp:example schema=shopping/types/error_response extract=$.result.structuredContent -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -908,7 +908,7 @@ task through the standard web interface.
           "continue_url": "https://merchant.com"
         },
         "content": [
-          {"type": "text", "text": "{\"ucp\":{...},\"messages\":[...],\"continue_url\":\"...\"}"}
+          {"type": "text", "text": "{\"ucp\":{…},…}"}
         ]
       }
     }
@@ -916,7 +916,7 @@ task through the standard web interface.
 
     **Protocol Error — Rate Limit (JSON-RPC error):**
 
-    <!-- ucp:example skip reason="JSON-RPC error format" -->
+    <!-- ucp:example schema=transports/jsonrpc def=error_response -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -933,7 +933,7 @@ task through the standard web interface.
 
     **Protocol Error — Unauthorized (JSON-RPC error):**
 
-    <!-- ucp:example skip reason="JSON-RPC error format" -->
+    <!-- ucp:example schema=transports/jsonrpc def=error_response -->
     ```json
     {
       "jsonrpc": "2.0",

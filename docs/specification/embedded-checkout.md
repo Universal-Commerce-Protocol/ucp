@@ -216,8 +216,7 @@ parameters from business-specific query parameters:
 
 **Example (Informative - JWT-based):**
 
-<!-- ucp:example skip reason="embedded protocol binding" -->
-```json
+```text
 // One possible implementation using JWT
 {
   "alg": "HS256",
@@ -486,7 +485,7 @@ checkout that was not communicated over UCP checkout actions.
 
 **Example Message (no delegations accepted):**
 
-<!-- ucp:example skip reason="embedded protocol binding" -->
+<!-- ucp:example schema=transports/embedded_message def=request direction=request -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -503,7 +502,7 @@ checkout that was not communicated over UCP checkout actions.
 
 **Example Message (delegations accepted):**
 
-<!-- ucp:example skip reason="embedded protocol binding" -->
+<!-- ucp:example schema=transports/embedded_message def=request direction=request -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -547,7 +546,7 @@ to complete the handshake.
 
 **Example Message:**
 
-<!-- ucp:example skip reason="embedded protocol binding" -->
+<!-- ucp:example schema=transports/embedded_message def=response -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -567,7 +566,7 @@ on the host's `iframe.contentWindow.postMessage()` call):
 
 **Example Message:**
 
-<!-- ucp:example skip reason="embedded protocol binding" -->
+<!-- ucp:example schema=transports/embedded_message def=response -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -688,7 +687,7 @@ successful `ec.ready` handshake.
 
 **Example Message:**
 
-<!-- ucp:example skip reason="embedded protocol binding" -->
+<!-- ucp:example schema=transports/embedded_message def=request direction=request -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -706,10 +705,10 @@ successful `ec.ready` handshake.
                     "severity": "recoverable"
                 }
             ],
-            "totals": [/* ... */],
-            "line_items": [/* ... */],
-            "buyer": {/* ... */},
-            "payment": {/* ... */}
+            "totals": [ ... ],
+            "line_items": [ ... ],
+            "buyer": { ... },
+            "payment": { ... }
             // ... other checkout fields
         }
     }
@@ -728,7 +727,7 @@ Indicates successful checkout completion.
 
 **Example Message:**
 
-<!-- ucp:example skip reason="embedded protocol binding" -->
+<!-- ucp:example schema=transports/embedded_message def=request direction=request -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -764,7 +763,7 @@ Line items have been modified (quantity changed, items added/removed).
 
 **Example Message:**
 
-<!-- ucp:example skip reason="embedded protocol binding" -->
+<!-- ucp:example schema=transports/embedded_message def=request direction=request -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -773,12 +772,8 @@ Line items have been modified (quantity changed, items added/removed).
         "checkout": {
             "id": "checkout_123",
             // The entire checkout object is provided, including the updated line items and totals
-            "totals": [
-                /* ... */
-            ],
-            "line_items": [
-                /* ... */
-            ]
+            "totals": [ ... ],
+            "line_items": [ ... ]
             // ...
         }
     }
@@ -796,7 +791,7 @@ Buyer information has been updated (email, phone, address).
 
 **Example Message:**
 
-<!-- ucp:example skip reason="embedded protocol binding" -->
+<!-- ucp:example schema=transports/embedded_message def=request direction=request -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -805,9 +800,7 @@ Buyer information has been updated (email, phone, address).
         "checkout": {
             "id": "checkout_123",
             // The entire checkout object is provided, including the updated buyer information
-            "buyer": {
-                /* ... */
-            }
+            "buyer": { ... }
             // ...
         }
     }
@@ -978,7 +971,7 @@ checkout UI, such as a new payment method being selected.
 
 **Example Message:**
 
-<!-- ucp:example skip reason="embedded protocol binding" -->
+<!-- ucp:example schema=transports/embedded_message def=request direction=request -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -992,7 +985,7 @@ checkout UI, such as a new payment method being selected.
                     {
                         "id": "payment_instrument_123",
                         "selected": true
-                        /* ... */
+                        // ... additional instrument fields
                     }
                 ]
             }
@@ -1013,7 +1006,7 @@ Requests the host to present payment instrument selection UI.
 
 **Example Message:**
 
-<!-- ucp:example skip reason="embedded protocol binding" -->
+<!-- ucp:example schema=transports/embedded_message def=request direction=request -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -1023,9 +1016,7 @@ Requests the host to present payment instrument selection UI.
         "checkout": {
             "id": "checkout_123",
             // The entire checkout object is provided, including the current payment details
-            "payment": {
-                /* ... */
-            }
+            "payment": { ... }
             // ...
         }
     }
@@ -1113,7 +1104,7 @@ submission.
 
 **Example Message:**
 
-<!-- ucp:example skip reason="embedded protocol binding" -->
+<!-- ucp:example schema=transports/embedded_message def=request direction=request -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -1128,7 +1119,7 @@ submission.
                     {
                         "id": "payment_instrument_123",
                         "selected": true
-                        /* ... */
+                        // ... additional instrument fields
                     }
                 ]
             }
@@ -1269,7 +1260,7 @@ UI.
 
 **Example Message:**
 
-<!-- ucp:example skip reason="embedded protocol binding" -->
+<!-- ucp:example schema=transports/embedded_message def=request direction=request -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -1278,9 +1269,7 @@ UI.
         "checkout": {
             "id": "checkout_123",
             // The entire checkout object is provided, including the updated fulfillment details
-            "fulfillment": {
-                /* ... */
-            }
+            "fulfillment": { ... }
             // ...
         }
     }
@@ -1470,7 +1459,7 @@ Requests the host to handle a link activated by the buyer within the checkout.
 
 **Example Message:**
 
-<!-- ucp:example skip reason="embedded protocol binding" -->
+<!-- ucp:example schema=transports/embedded_message def=request direction=request -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -1489,7 +1478,7 @@ Requests the host to handle a link activated by the buyer within the checkout.
 
 **Example Success Response:**
 
-<!-- ucp:example skip reason="embedded protocol binding" -->
+<!-- ucp:example schema=transports/embedded_message def=response -->
 ```json
 {
     "jsonrpc": "2.0",

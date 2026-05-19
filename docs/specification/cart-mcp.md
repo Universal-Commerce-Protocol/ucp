@@ -265,7 +265,7 @@ Maps to the [Get Cart](cart.md#get-cart) operation.
 
 === "Request"
 
-    <!-- ucp:example skip reason="JSON-RPC transport binding" -->
+    <!-- ucp:example schema=transports/mcp_tool_call def=request direction=request -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -395,7 +395,7 @@ Maps to the [Update Cart](cart.md#update-cart) operation.
 
 === "Request"
 
-    <!-- ucp:example skip reason="JSON-RPC transport binding" -->
+    <!-- ucp:example schema=transports/mcp_tool_call def=request direction=request -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -521,7 +521,7 @@ Maps to the [Cancel Cart](cart.md#cancel-cart) operation.
 
 === "Request"
 
-    <!-- ucp:example skip reason="JSON-RPC transport binding" -->
+    <!-- ucp:example schema=transports/mcp_tool_call def=request direction=request -->
     ```json
     {
       "jsonrpc": "2.0",
