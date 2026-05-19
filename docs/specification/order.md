@@ -348,7 +348,7 @@ that includes a `messages` array describing the outcome:
 
 **Order not found:**
 
-<!-- ucp:example schema=shopping/types/error_response op=read -->
+<!-- ucp:example schema=common/types/error_response op=read -->
 ```json
 {
   "ucp": {
@@ -371,7 +371,7 @@ that includes a `messages` array describing the outcome:
 
 **Not authorized:**
 
-<!-- ucp:example schema=shopping/types/error_response op=read -->
+<!-- ucp:example schema=common/types/error_response op=read -->
 ```json
 {
   "ucp": {

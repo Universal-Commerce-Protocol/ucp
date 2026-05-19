@@ -146,7 +146,7 @@ response body. When no resource exists to act on, messages SHOULD use
 For example, a business may reject a create checkout request where all
 items are unavailable:
 
-<!-- ucp:example schema=shopping/types/error_response op=read -->
+<!-- ucp:example schema=common/types/error_response op=read -->
 ```json
 {
   "ucp": { "version": "2026-01-11", "status": "error" },

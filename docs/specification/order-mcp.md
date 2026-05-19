@@ -210,7 +210,7 @@ current-state snapshot of an order.
 
 === "Not Found"
 
-    <!-- ucp:example schema=shopping/types/error_response op=read direction=response extract=$.result.structuredContent -->
+    <!-- ucp:example schema=common/types/error_response op=read direction=response extract=$.result.structuredContent -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -245,7 +245,7 @@ current-state snapshot of an order.
 
 === "Not Authorized"
 
-    <!-- ucp:example schema=shopping/types/error_response op=read direction=response extract=$.result.structuredContent -->
+    <!-- ucp:example schema=common/types/error_response op=read direction=response extract=$.result.structuredContent -->
     ```json
     {
       "jsonrpc": "2.0",

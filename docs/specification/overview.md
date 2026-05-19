@@ -886,7 +886,7 @@ task through the standard web interface.
 
     **Capabilities Incompatible (JSON-RPC result):**
 
-    <!-- ucp:example schema=shopping/types/error_response extract=$.result.structuredContent -->
+    <!-- ucp:example schema=common/types/error_response extract=$.result.structuredContent -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -1987,7 +1987,7 @@ Response with version confirmation:
 
 Version unsupported error — no resource is created:
 
-<!-- ucp:example schema=shopping/types/error_response op=read -->
+<!-- ucp:example schema=common/types/error_response op=read -->
 ```json
 {
   "ucp": { "version": "2026-01-11", "status": "error" },

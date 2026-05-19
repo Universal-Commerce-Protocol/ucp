@@ -175,7 +175,7 @@ Returns the current-state snapshot of an order.
 
 === "Not Found"
 
-    <!-- ucp:example schema=shopping/types/error_response op=read -->
+    <!-- ucp:example schema=common/types/error_response op=read -->
     ```json
     HTTP/1.1 200 OK
     Content-Type: application/json
@@ -201,7 +201,7 @@ Returns the current-state snapshot of an order.
 
 === "Not Authorized"
 
-    <!-- ucp:example schema=shopping/types/error_response op=read -->
+    <!-- ucp:example schema=common/types/error_response op=read -->
     ```json
     HTTP/1.1 200 OK
     Content-Type: application/json

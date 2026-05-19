@@ -481,7 +481,7 @@ with `ucp.status: "error"` and a descriptive message. This is an application
 outcome, not a transport error — the handler executed and reports its result
 via the UCP envelope.
 
-<!-- ucp:example schema=shopping/types/error_response op=read -->
+<!-- ucp:example schema=common/types/error_response op=read -->
 ```json
 {
   "ucp": {

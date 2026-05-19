@@ -178,7 +178,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
     All items out of stock — no cart resource is created:
 
-    <!-- ucp:example schema=shopping/types/error_response op=read -->
+    <!-- ucp:example schema=common/types/error_response op=read -->
     ```json
     HTTP/1.1 200 OK
     Content-Type: application/json
@@ -265,7 +265,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
 === "Not Found"
 
-    <!-- ucp:example schema=shopping/types/error_response op=read -->
+    <!-- ucp:example schema=common/types/error_response op=read -->
     ```json
     HTTP/1.1 200 OK
     Content-Type: application/json
@@ -518,7 +518,7 @@ code registry and transport binding examples.
 Business outcomes (including not found and validation errors) are returned with
 HTTP 200 and the UCP envelope containing `messages`:
 
-<!-- ucp:example schema=shopping/types/error_response op=read -->
+<!-- ucp:example schema=common/types/error_response op=read -->
 ```json
 {
   "ucp": {

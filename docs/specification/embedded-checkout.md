@@ -630,7 +630,7 @@ information:**
 If the host cannot complete the handshake (e.g., origin validation failure or
 protocol state violation), it **MUST** respond with an `error_response` result:
 
-<!-- ucp:example schema=shopping/types/error_response op=read direction=response extract=$.result -->
+<!-- ucp:example schema=common/types/error_response op=read direction=response extract=$.result -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -1073,7 +1073,7 @@ existing state.
 
 **Example Error Response:**
 
-<!-- ucp:example schema=shopping/types/error_response op=read direction=response extract=$.result -->
+<!-- ucp:example schema=common/types/error_response op=read direction=response extract=$.result -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -1183,7 +1183,7 @@ new data with existing state.
 
 **Example Error Response:**
 
-<!-- ucp:example schema=shopping/types/error_response op=read direction=response extract=$.result -->
+<!-- ucp:example schema=common/types/error_response op=read direction=response extract=$.result -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -1369,7 +1369,7 @@ rather than attempting to merge the new data with existing state.
 
 **Example Error Response:**
 
-<!-- ucp:example schema=shopping/types/error_response op=read direction=response extract=$.result -->
+<!-- ucp:example schema=common/types/error_response op=read direction=response extract=$.result -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -1491,7 +1491,7 @@ Requests the host to handle a link activated by the buyer within the checkout.
 
 **Example Error Response:**
 
-<!-- ucp:example schema=shopping/types/error_response op=read direction=response extract=$.result -->
+<!-- ucp:example schema=common/types/error_response op=read direction=response extract=$.result -->
 ```json
 {
     "jsonrpc": "2.0",

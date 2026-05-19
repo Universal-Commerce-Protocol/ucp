@@ -172,7 +172,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
 
     All items out of stock — no checkout resource is created:
 
-    <!-- ucp:example schema=shopping/types/error_response op=read -->
+    <!-- ucp:example schema=common/types/error_response op=read -->
     ```json
     HTTP/1.1 200 OK
     Content-Type: application/json
@@ -1337,7 +1337,7 @@ with HTTP 200 and the UCP envelope containing `messages`:
 For `create_checkout`, when all items unavailable and no checkout can be created, returns
 HTTP 200 and the UCP envelope containing `messages`
 
-<!-- ucp:example schema=shopping/types/error_response op=read -->
+<!-- ucp:example schema=common/types/error_response op=read -->
 ```json
 {
   "ucp": { "version": "2026-01-11", "status": "error" },

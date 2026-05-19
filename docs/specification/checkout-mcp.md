@@ -347,7 +347,7 @@ Maps to the [Create Checkout](checkout.md#create-checkout) operation.
 
     All items out of stock — no checkout resource is created:
 
-    <!-- ucp:example schema=shopping/types/error_response op=read direction=response extract=$.result.structuredContent -->
+    <!-- ucp:example schema=common/types/error_response op=read direction=response extract=$.result.structuredContent -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -697,7 +697,7 @@ as JSON-RPC `result` with `structuredContent` containing the UCP envelope and
 For `create_checkout`, when all items unavailable and no checkout can be created,
 JSON-RPC `result` with `structuredContent` containing the UCP envelope and `messages`:
 
-<!-- ucp:example schema=shopping/types/error_response op=read direction=response extract=$.result.structuredContent -->
+<!-- ucp:example schema=common/types/error_response op=read direction=response extract=$.result.structuredContent -->
 ```json
 {
   "jsonrpc": "2.0",
