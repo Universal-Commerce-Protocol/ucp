@@ -1,14 +1,18 @@
+UCP is expanding to new industries, starting with Lodging and Food
+
+Detailed specifications coming soon!
+
 # Universal Commerce Protocol
 
-The common language for platforms, agents and businesses.
+The common language for platforms, agents, and businesses.
 
-UCP defines building blocks for agentic commerce—from discovering and buying to post purchase experiences—allowing the ecosystem to interoperate through one standard, without custom builds.
+UCP provides building blocks for agentic commerce across industries—from discovery to checkout and beyond—allowing the ecosystem to operate through one standard, without custom builds.
 
 ### Learn
 
 Protocol overview, core concepts, and design principles
 
-[Read the docs](http://ucp.dev/latest/specification/overview/index.md)
+[Get Started](http://ucp.dev/latest/specification/overview/index.md)
 
 ### Implement
 
@@ -16,9 +20,11 @@ GitHub repo, technical spec, SDKs, and reference implementations
 
 [View on GitHub](https://github.com/Universal-Commerce-Protocol/ucp)
 
-## Co-developed and adopted by industry leaders
+## Co-developed by industry leaders
 
-UCP was built by the industry, for the industry to solve for fragmented commerce journeys that lead to abandoned carts and frustrated shoppers, and enable agentic commerce.
+UCP is built by the industry, to enable seamless agentic experiences. It solves fragmented user journeys that lead to frustrated users and conversion drop off.
+
+Shopping Lodging Food
 
 Google
 
@@ -32,21 +38,55 @@ Target
 
 Walmart
 
+Amazon
+
+Microsoft
+
+Meta
+
+Salesforce
+
+Stripe
+
+Amadeus
+
+Booking.com
+
+Expedia Group
+
+Google
+
+Hilton
+
+Marriott
+
+Trip.com
+
+DoorDash
+
+Google
+
+Square
+
+Toast
+
+Uber Eats
+
 ## Built for flexibility, security, and scale
 
-Agentic commerce demands interoperability. UCP is built on industry standards — REST and JSON-RPC transports; [Agent Payments Protocol (AP2)](https://ap2-protocol.org/), [Agent2Agent (A2A)](https://a2a-protocol.org/latest/), and [Model Context Protocol (MCP)](https://modelcontextprotocol.io/docs/getting-started/intro) support built-in — so different systems can work together without custom integration.
+Agentic commerce requires interoperability. UCP is built on industry standards — REST and JSON-RPC transports; [Agent Payments Protocol (AP2)](https://ap2-protocol.org/), [Agent2Agent (A2A)](https://a2a-protocol.org/latest/), and [Model Context Protocol (MCP)](https://modelcontextprotocol.io/docs/getting-started/intro) support built-in — so different systems can work together without custom integration.
 
 ### Scalable and universal
 
-Surface-agnostic design that can scale to support any commerce entity (from small businesses to enterprise scale) and all modalities (chat, visual commerce, voice, etc).
+Surface-agnostic design that scales to support any business (from small to enterprise), in every industry, across all modalities, including chat, visual commerce, and voice.
 
 ### Businesses at the center
 
-Built to facilitate commerce, ensuring retailers retain control of their business rules and remain the Merchant of Record with full ownership of the customer relationship.
+Built to facilitate commerce, ensuring businesses retain control and remain the Merchant of Record, with full ownership of customer relationships.
 
 ### Open and extensible
 
-Open and extensible by design, enabling development of community-driven capabilities and extensions across verticals.
+Open and extensible by design, enabling development of community-driven capabilities and extensions across industries.
 
 ### Secure and private
 
@@ -54,21 +94,21 @@ Built on proven security standards for account linking (OAuth 2.0) and secure pa
 
 ### Frictionless payments
 
-Open wallet ecosystem with interoperability between providers to ensure buyers can pay with their preferred payment methods.
+Open wallet ecosystem with interoperability between providers, ensuring buyers can use their preferred payment methods.
 
 ## See it in action
 
-UCP is designed to facilitate the entire commerce lifecycle, from initial product discovery and search to final sale and post-purchase support. The protocol's initial launch focuses on three core capabilities: Checkout, Identity Linking, and Order Management.
+UCP is designed to facilitate the entire commerce lifecycle, from discovery and search to final sale and post-purchase support. The protocol supports a range of core capabilities, including: Catalog Search and Lookup, Cart Building, Identity Linking, Checkout, and Order Management.
+
+Shopping Lodging Food
 
 Checkout Identity Linking Order
-
-SEE IT IN ACTION
 
 ### Checkout
 
 Support complex cart logic, dynamic pricing, tax calculations, and more across millions of businesses through unified checkout sessions.
 
-[Learn more](http://ucp.dev/latest/specification/checkout-rest/index.md)
+[Get Started](/latest/specification/checkout/)
 
 ```json
 {
@@ -135,13 +175,11 @@ Support complex cart logic, dynamic pricing, tax calculations, and more across m
 }
 ```
 
-SEE IT IN ACTION
-
 ### Identity Linking
 
 OAuth 2.0 standard enables agents to maintain secure, authorized relationships without sharing credentials.
 
-[Learn more](http://ucp.dev/latest/specification/identity-linking/index.md)
+[Get Started](http://ucp.dev/latest/specification/identity-linking/index.md)
 
 ```json
 Sample of /.well-known/oauth-authorization-server
@@ -168,13 +206,11 @@ Sample of /.well-known/oauth-authorization-server
 }
 ```
 
-SEE IT IN ACTION
-
 ### Order
 
 From purchase confirmation to delivery. Real-time webhooks power status updates, shipment tracking, and return processing across every channel.
 
-[Learn more](http://ucp.dev/latest/specification/order/index.md)
+[Get Started](http://ucp.dev/latest/specification/order/index.md)
 
 ```json
 {
@@ -230,17 +266,33 @@ From purchase confirmation to delivery. Real-time webhooks power status updates,
 }
 ```
 
+### Lodging
+
+Enables high-quality booking flows within AI surfaces—complete with real-time pricing and availability checks, smooth handling of complex rate plans, easy guest registration, and secure checkout.
+
+[Learn more](https://developers.google.com/hotels/ucp)
+
+Detailed specifications coming soon
+
+### Food
+
+Powers conversational food ordering journeys that seamlessly handle nuanced meal customization, real-time availability and deals, tipping, and delivery instructions through a scalable checkout experience on AI surfaces.
+
+[Learn more](https://developers.google.com/actions-center/verticals/ordering/ucp)
+
+Detailed specifications coming soon
+
 ### Power native checkout
 
 Integrate and negotiate directly with a seller's checkout API to power native UI and workflows for your platform.
 
-[See how it works](http://ucp.dev/latest/specification/checkout-rest/index.md)
+[Get Started](http://ucp.dev/latest/specification/checkout-rest/index.md)
 
 ### Embed business checkout
 
 Embed and render business checkout UI to support complex checkout flows, with advanced capabilities like bidirectional communication, and payment and shipping address delegation.
 
-[Learn more](http://ucp.dev/latest/specification/embedded-checkout/index.md)
+[See how it works](http://ucp.dev/latest/specification/embedded-checkout/index.md)
 
 ## Designed for the entire commerce ecosystem
 
@@ -252,13 +304,13 @@ Build the future of commerce on an open foundation. Join our community in evolvi
 
 ### For Businesses
 
-UCP empowers retailers to meet customers wherever they are—AI assistants, shopping agents, embedded experiences—without rebuilding your checkout for each. You remain the Merchant of Record and your business logic stays intact.
+UCP empowers businesses to meet customers wherever they are—AI assistants, agents, embedded experiences—without rebuilding your checkout for each. You remain the Merchant of Record and your business logic stays intact.
 
 [Integrate with UCP](https://developers.google.com/merchant/ucp/)
 
 ### For AI Platforms
 
-Simplify business onboarding with standardized APIs and provide your audience with an integrated shopping experience. Compatible with MCP, A2A, and existing agent frameworks.
+Simplify business onboarding with standardized APIs and provide your audience with an integrated agentic commerce experience. Compatible with MCP, A2A, and existing agent frameworks.
 
 [Learn more about UCP core concepts](http://ucp.dev/documentation/core-concepts/index.md)
 
@@ -270,9 +322,15 @@ Universal payments that are provable—every authorization backed by cryptograph
 
 ## Endorsed across the ecosystem
 
+Accor
+
+Adore Beauty
+
 Adyen
 
 Affirm
+
+Amadeus
 
 Amex
 
@@ -282,13 +340,23 @@ Best Buy
 
 Block
 
+Booking.com
+
+Bunnings
+
 Carrefour
 
 Checkout.com
 
 Chewy
 
+Choice Hotels
+
 Commerce
+
+DoorDash
+
+Expedia Group
 
 Fiserv
 
@@ -296,7 +364,13 @@ Flipkart
 
 Gap
 
+Hilton
+
+IHG
+
 Klarna
+
+Kogan
 
 Kroger
 
@@ -304,11 +378,17 @@ Lowe's
 
 Macy's
 
+Marriott
+
 Mastercard
 
 Paypal
 
+Petbarn
+
 Salesforce
+
+SAP
 
 Sephora
 
@@ -316,21 +396,39 @@ Shopee
 
 Splitit
 
+Square
+
 Stripe
 
 The Home Depot
+
+Toast
+
+Trip.com
+
+Uber Eats
 
 Ulta
 
 Visa
 
+VTEX
+
 Worldpay
+
+Wyndham
 
 Zalando
 
+Accor
+
+Adore Beauty
+
 Adyen
 
 Affirm
+
+Amadeus
 
 Amex
 
@@ -340,13 +438,23 @@ Best Buy
 
 Block
 
+Booking.com
+
+Bunnings
+
 Carrefour
 
 Checkout.com
 
 Chewy
 
+Choice Hotels
+
 Commerce
+
+DoorDash
+
+Expedia Group
 
 Fiserv
 
@@ -354,7 +462,13 @@ Flipkart
 
 Gap
 
+Hilton
+
+IHG
+
 Klarna
+
+Kogan
 
 Kroger
 
@@ -362,11 +476,17 @@ Lowe's
 
 Macy's
 
+Marriott
+
 Mastercard
 
 Paypal
 
+Petbarn
+
 Salesforce
+
+SAP
 
 Sephora
 
@@ -374,15 +494,27 @@ Shopee
 
 Splitit
 
+Square
+
 Stripe
 
 The Home Depot
+
+Toast
+
+Trip.com
+
+Uber Eats
 
 Ulta
 
 Visa
 
+VTEX
+
 Worldpay
+
+Wyndham
 
 Zalando
 
