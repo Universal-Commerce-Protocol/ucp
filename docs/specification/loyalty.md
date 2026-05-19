@@ -216,10 +216,12 @@ the authenticated identity, businesses MAY populate the loyalty extension withou
 explicit eligibility claim. In this case, the map key MUST be the same reverse-domain
 identifier the business would accept as a claim value.
 
-* When a business verifies a membership claim or determines membership from authenticated
-  identity, it MUST return `provisional: false`. It also MUST populate the active tier(s)
-  the buyer holds within the `tiers` array and SHOULD set `display_id` as a masked unique
-  identifier for the buyer.
+* When a business verifies a membership claim or determines membership from
+  authenticated identity, it MUST return `provisional: false`. It MUST populate the
+  active tier(s) the buyer holds within the `tiers` array **when the program has
+  tier structure** — for programs with no tier concept (flat-rate cashback,
+  single-status memberships), businesses MAY omit `tiers`. It also SHOULD set
+  `display_id` as a masked unique identifier for the buyer.
 * When a membership claim in the request is recognized and accepted but not verified by
   the business, the business MUST return `provisional: true`. It MAY return display-safe
   tier context for the state accepted during the session, and MUST NOT return
