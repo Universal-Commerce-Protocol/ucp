@@ -212,7 +212,7 @@ instrument that was authorized or charged, to reflect the actual amount of funds
 
 This is important for completed, immutable checkouts to convey the final amount authorized or captured for each instrument.
 
-This can also be used by the business to convey held funds in the case of a failure while processing part of the submitted, open-amount instruments. The platform can resubmit, either acknowledging to hold those amounts static or re-submitting the instruments with new amounts (including omitted, for open-amount) to release and replace the prior authorization.
+This can also be used by the business to convey held funds in the case of a failure while processing part of the submitted, open-amount instruments. The platform can resubmit, echoing these static values or replacing them.
 
 ## Examples
 
