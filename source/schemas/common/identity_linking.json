@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/identity_linking.json",
+  "name": "dev.ucp.common.identity_linking",
+  "title": "Identity Linking",
+  "description": "Capability schema for identity linking. Businesses declare the user-authenticated scopes they offer in a flat 'scopes' map. Each key is the OAuth scope string as it appears on the wire ('{capability}:{scope}', e.g. 'dev.ucp.shopping.order:read'). Scope presence implies that the corresponding operations require user authentication. Operations not gated by any listed scope operate at whatever access level the business permits; UCP does not prescribe a default.",
+  "$comment": "Auth mechanism: business-hosted OAuth 2.0 with RFC 8414 discovery. The 'config' object is open for non-breaking extension. Reserved extension point: 'providers' (map of trusted identity providers keyed by reverse-domain, with a 'type' discriminator defaulting to 'oauth2' — enabling delegated IdP, identity chaining, and future non-OAuth mechanisms such as wallet attestation). When 'providers' is absent, platforms MUST use OAuth 2.0 with RFC 8414 discovery on the business domain. Platforms MUST ignore unrecognized fields in 'config' and fall back to this default behavior.",
+
+  "$defs": {
+    "scope_policy": {
+      "type": "object",
+      "title": "Scope Policy",
+      "description": "Per-scope policy and metadata — auth constraints (e.g. min_acr, max_token_age), declarative metadata (e.g. claims produced, consent descriptions), or any other scope-specific configuration. An empty object means user authentication is required with no additional policy. Open for non-breaking extension.",
+      "properties": {
+        "description": {
+          "$ref": "../shopping/types/description.json",
+          "description": "Optional human-readable description of the scope that platforms can use to present and explain context (requirement and value) to the user."
+        }
+      },
+      "additionalProperties": true
+    },
+
+    "scope_token": {
+      "type": "string",
+      "description": "OAuth scope string formed by joining a capability name and a scope name with a colon: '{capability}:{scope}', e.g. 'dev.ucp.shopping.order:read'. Capability names use reverse-DNS naming; scope names denote the permission granted, defined by each capability's spec (e.g. 'read', 'manage', 'create'). Platforms request these strings verbatim in OAuth 'scope' parameters; issued tokens carry them in the 'scope' claim.",
+      "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9_]*)+:[a-z][a-z0-9_]*$"
+    },
+
+    "dev.ucp.common.identity_linking": {
+      "platform_schema": {
+        "title": "Identity Linking (Platform)",
+        "description": "Platform-level identity linking capability declaration. Platforms advertise support for identity linking; no auth-specific config is required.",
+        "allOf": [
+          { "$ref": "../capability.json#/$defs/platform_schema" }
+        ]
+      },
+      "business_schema": {
+        "title": "Identity Linking (Business)",
+        "description": "Business-level identity linking configuration. Businesses declare the user-authenticated scopes they offer in 'config.scopes'.",
+        "allOf": [
+          { "$ref": "../capability.json#/$defs/business_schema" },
+          {
+            "type": "object",
+            "required": ["config"],
+            "properties": {
+              "config": {
+                "type": "object",
+                "$comment": "Reserved extension point: 'providers' (map of trusted identity providers keyed by reverse-domain). See schema-level $comment for details.",
+                "required": ["scopes"],
+                "properties": {
+                  "scopes": {
+                    "type": "object",
+                    "description": "Map of user-authenticated scopes offered by this business. Each key is an OAuth scope string formed as '{capability}:{scope}' (e.g. 'dev.ucp.shopping.order:read'). Scope presence in this map declares that the corresponding operations require a user identity token. Operations not gated by any listed scope operate at whatever access level the business permits; UCP does not prescribe a default. Each value is a per-scope policy object (empty object means user auth required with no additional policy).",
+                    "propertyNames": { "$ref": "#/$defs/scope_token" },
+                    "additionalProperties": { "$ref": "#/$defs/scope_policy" }
+                  }
+                },
+                "additionalProperties": true
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}
