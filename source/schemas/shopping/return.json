@@ -18,13 +18,17 @@
           },
           "description": "Line items governed by this return policy, allowing distinct policies per item."
         },
-        "return_days": {
+        "return_period_in_days": {
           "type": "integer",
           "description": "Length of the merchant's return window in days, measured from the date of delivery. This is a policy statement — it communicates the window duration, not a pre-computed deadline."
         },
-        "exchanges_allowed": {
-          "type": "boolean",
-          "description": "Indicates whether the buyer can exchange the item."
+        "supported_resolutions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "The resolution method. Well-known values: `original_payment_method` (refund to original payment method), `store_credit` (refund for store credit), `gift_card` (refund as gift card), `exchange` (exchange for different item), `replacement` (replace with same item). Clients MUST tolerate unknown values."
+          },
+          "description": "Supported outcomes for the return. An empty array `[]` explicitly indicates the items are non-returnable (final sale)."
         },
         "methods": {
           "type": "array",
@@ -94,26 +98,6 @@
           }
         }
       ]
-    },
-    "dev.ucp.shopping.return": {
-      "platform_schema": {
-        "title": "Return Capability (Platform)",
-        "description": "Platform-level return capability configuration",
-        "allOf": [
-          {
-            "$ref": "../capability.json#/$defs/platform_schema"
-          }
-        ]
-      },
-      "business_schema": {
-        "title": "Return Capability (Business)",
-        "description": "Business-level return capability configuration",
-        "allOf": [
-          {
-            "$ref": "../capability.json#/$defs/business_schema"
-          }
-        ]
-      }
     }
   }
 }

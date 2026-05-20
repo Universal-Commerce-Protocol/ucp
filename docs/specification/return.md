@@ -30,7 +30,8 @@ user to leave the platform to hunt for a policy on the merchant's website.
 This extension adds a `return_policies` field to Checkout containing:
 
 - `return_policies[]` — conditions governed by the merchant for specific items.
-    - `return_days` — the number of days allowed for the return.
+    - `return_period_in_days` — the number of days allowed for the return.
+    - `supported_resolutions[]` — allowed outcomes (refund, exchange, etc.).
     - `methods[]` — permitted physical methods (in-store, by-mail, etc.)
         - `fee` — the cost structure for that specific method.
 
@@ -38,14 +39,15 @@ This extension adds a `return_policies` field to Checkout containing:
 
 - `return_policies[0]` Standard Apparel
     - `line_item_ids` 👕👖
-    - `return_days` = 30 Days 🗓️
+    - `return_period_in_days` = 30 Days 🗓️
+    - `supported_resolutions` = `["original_payment_method", "exchange"]`
     - `methods[0]` In-Store 🏬
         - `fee` = `free` ✅
     - `methods[1]` By Mail 📦
         - `fee` = `fixed_fee` $5.00 💸
 - `return_policies[1]` Non-Returnable / Final Sale
     - `line_item_ids` ⌚
-    - `exchanges_allowed` = `false`
+    - `supported_resolutions` = `[]`
 
 ## Discovery
 
@@ -105,18 +107,24 @@ requirements of a purchase before completion.
 
 ### Human-Readable Fields
 
-| Location            | Field          | Required | Purpose                                       |
-| ------------------- | -------------- | -------- | --------------------------------------------- |
-| `return_policy`     | `return_days`  | No       | Quantitative window for the return.           |
-| `return_method.fee` | `display_text` | No       | Context for the fee (e.g., "Restocking Fee"). |
-| `return_method.fee` | `amount`       | No       | Price in minor units for fixed fees.          |
+| Location            | Field                   | Required | Purpose                                       |
+| ------------------- | ----------------------- | -------- | --------------------------------------------- |
+| `return_policy`     | `return_period_in_days` | No       | Quantitative window for the return.           |
+| `return_policy`     | `supported_resolutions` | No       | Allowed outcomes (refund, exchange, etc.).    |
+| `return_method.fee` | `display_text`          | No       | Context for the fee (e.g., "Restocking Fee"). |
+| `return_method.fee` | `amount`                | No       | Price in minor units for fixed fees.          |
 
 ### Business Responsibilities
 
-**For `return_days`:**
+**For `return_period_in_days`:**
 
 - **MUST** accurately reflect the merchant's legal and commercial return window
   duration.
+
+**For `supported_resolutions`:**
+
+- **MUST** list all resolutions supported by the merchant (e.g. if exchange is
+  supported it must be explicitly listed).
 
 **For `return_method.fee`:**
 
@@ -132,8 +140,8 @@ assurance:
 - Surface "Final Sale" warnings early in the checkout flow.
 - Answer specific questions like "Is return shipping free?" by inspecting the
   `by_mail` method fee.
-- Use `return_days` to calculate and display the specific return deadline based
-  on the delivery date.
+- Use `return_period_in_days` to calculate and display the specific return
+  deadline based on the delivery date.
 
 ## Examples
 
@@ -147,8 +155,8 @@ final sale.
     "return_policies": [
         {
             "line_item_ids": ["shirt", "pants"],
-            "return_days": 30,
-            "exchanges_allowed": true,
+            "return_period_in_days": 30,
+            "supported_resolutions": ["original_payment_method", "exchange"],
             "methods": [
                 {
                     "type": "in_store",
@@ -169,7 +177,7 @@ final sale.
         },
         {
             "line_item_ids": ["custom_engraved_watch"],
-            "exchanges_allowed": false
+            "supported_resolutions": []
         }
     ]
 }
