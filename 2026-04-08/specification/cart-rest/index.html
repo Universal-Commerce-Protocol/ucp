@@ -3746,6 +3746,11 @@ operations unless otherwise noted.</p>
 <td style="text-align: left;">Identifies the user agent string making the call.</td>
 </tr>
 <tr>
+<td style="text-align: left;"><code>UCP-Agent</code></td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Identifies the UCP agent making the call. All requests MUST include the UCP-Agent header containing the signer's profile URI using RFC 8941 Dictionary syntax. The URL MUST point to /.well-known/ucp. Format: profile="https://example.com/.well-known/ucp".</td>
+</tr>
+<tr>
 <td style="text-align: left;"><code>Content-Type</code></td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Representation Metadata. Tells the receiver what the data in the message body actually is.</td>

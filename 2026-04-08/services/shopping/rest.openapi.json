@@ -441,6 +441,9 @@
             "$ref": "#/components/parameters/user_agent"
           },
           {
+            "$ref": "#/components/parameters/ucp_agent"
+          },
+          {
             "$ref": "#/components/parameters/content_type"
           },
           {
