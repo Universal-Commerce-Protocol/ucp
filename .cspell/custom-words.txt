@@ -114,3 +114,7 @@ sandboxing
 fbclid
 gclid
 ttclid
+Accor
+Kogan
+Petbarn
+VTEX
