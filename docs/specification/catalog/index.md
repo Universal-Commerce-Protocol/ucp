@@ -170,7 +170,12 @@ declarations, safety warnings) that platforms must not hide or dismiss. See
 [Warning Presentation](../checkout.md#warning-presentation) for the full
 rendering contract.
 
-**Note**: All catalog errors use `severity: "recoverable"` - agents handle them programmatically (retry, inform user, show alternatives).
+**Note**: Most catalog errors use `severity: "recoverable"` - agents
+handle them programmatically (retry, inform user, show alternatives).
+`get_product` returns `severity: "unrecoverable"` when an identifier
+doesn't resolve; agents MUST NOT retry the same `id` (see the
+[REST](rest.md#product-not-found) and [MCP](mcp.md#product-not-found)
+examples).
 
 #### Message (Error)
 
