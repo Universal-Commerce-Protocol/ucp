@@ -210,9 +210,7 @@ Error conditions:
 On the checkout response, the business MUST set `amount` on every
 instrument that was authorized or charged, to reflect the actual amount of funds moved. This includes instruments submitted without `amount`: the business MUST derive their actual contribution and return it.
 
-This is important for completed, immutable checkouts to convey the final amount authorized or captured for each instrument.
-
-This can also be used by the business to convey held funds in the case of a failure while processing part of the submitted, open-amount instruments. The platform can resubmit, echoing these static values or replacing them.
+This is important to convey the final amount authorized or captured for each instrument, and can be used to communicate what balances were discovered and potentially authorized during a checkout. The platform can resubmit, echoing these static values or replacing them.
 
 ## Examples
 
