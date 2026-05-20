@@ -312,6 +312,19 @@ disclosure applies to all of its variants.
 See [Warning Presentation](../checkout.md#warning-presentation) for the
 full rendering contract.
 
+## Scopes
+
+The Catalog Search and Catalog Lookup capabilities define the following
+well-known scopes for user-authenticated access:
+
+| Scope | Description |
+| :--- | :--- |
+| `dev.ucp.shopping.catalog.search:read` | Search on behalf of the authenticated user — personalized results, member pricing, gated inventory. |
+| `dev.ucp.shopping.catalog.lookup:read` | Lookup on behalf of the authenticated user — personalized pricing or availability for specific products. |
+
+Scope declaration, derivation, and rules for extending this set with
+custom scopes are defined in [Identity Linking — Scopes](../identity-linking.md#scopes).
+
 ## Transport Bindings
 
 The capabilities above are bound to specific transport protocols:
