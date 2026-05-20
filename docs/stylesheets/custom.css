@@ -552,7 +552,9 @@ p.hero-description {
   visibility: hidden;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.4s ease, visibility 0.4s ease;
+  transition:
+    opacity 0.4s ease,
+    visibility 0.4s ease;
 }
 
 #industry-tabs + div > .tab-pane.active {
@@ -560,7 +562,6 @@ p.hero-description {
   opacity: 1;
   pointer-events: auto;
 }
-
 
 .tab-pane.shopping-tab-pane {
   flex-direction: column !important;
