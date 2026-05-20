@@ -98,6 +98,15 @@
           "description": "Discounts successfully applied (code-based and automatic).",
           "ucp_request": "omit"
         }
+      },
+      "approaching": {
+          "type": "array",
+          "items": {
+            "$ref": "types/approaching_discount.json"
+          },
+          "description": "List of discounts that are approaching their eligibility threshold. These discounts inform the buyer about potential savings opportunities if they add to their cart to meet the discount conditions. Omitted in requests.",
+          "ucp_request": "omit"
+        }
       }
     },
     "dev.ucp.shopping.cart": {
