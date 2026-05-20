@@ -42,11 +42,16 @@ Each instrument is submitted in one of two modes:
   instrument's contribution at processing time (e.g., by querying a
   gift card's available balance).
 
-All `amount` values on instruments are expressed in `checkout.currency`
-minor units (ISO 4217). Handlers using foreign-currency-denominated
-instruments (e.g., a CAD gift card in a USD checkout) or non-currency
-instruments like loyalty points MUST convert each instrument's
-contribution to the checkout currency.
+On the response, the business reports the actual amount authorized or
+charged for each successfully-processed instrument in the same `amount`
+field. Response `amount` is informational only; see "Response: Actual
+Charges" below.
+
+All `amount` values are expressed in `checkout.currency` minor units
+(ISO 4217). Handlers using foreign-currency-denominated instruments
+(e.g., a CAD gift card in a USD checkout) or non-currency instruments
+like loyalty points MUST convert each instrument's contribution to the
+checkout currency.
 
 Instruments are submitted in **allocation priority order** — the first
 instrument gets first claim on the checkout total, the second gets next
@@ -153,15 +158,18 @@ Reading each combination:
 
 ### Error Handling
 
-A split payment either completes fully or has no financial effect. If the business cannot process an instrument with a specified
-amount, or cannot achieve the final total, the business MUST return
-`payment_failed` in `messages[]` and MUST ensure all previously
-successful authorizations are voided or reversed. This is an
-eventual-consistency requirement: the reversal MAY happen asynchronously
-(e.g., to retry a failing void or work around acquirer rate limits, or
-to wait and see if the buyer re-submits partially captured instruments),
-but the buyer MUST NOT remain charged for an incomplete split after
-checkout.
+A split payment either completes fully or has no financial effect. If
+the business cannot process an instrument with a specified amount, or
+cannot achieve the final total, the business MUST return
+`payment_failed` in `messages[]` and MUST void or reverse any
+authorizations it made. Reversal MAY retry transiently (e.g., to work
+around acquirer rate limits or a failing void call), but the buyer
+MUST NOT remain charged for an incomplete split.
+
+At the protocol layer, each request is processed independently —
+split-payments state does not persist between requests. The business
+MUST process each request as a fresh, full submission, without
+reference to prior requests or responses.
 
 **Per-instrument reporting:** when a split is incomplete or has failed,
 the business MUST emit a `payment_failed` error for each failed
@@ -208,9 +216,20 @@ Error conditions:
 ### Response: Actual Charges
 
 On the checkout response, the business MUST set `amount` on every
-instrument that was authorized or charged, to reflect the actual amount of funds moved. This includes instruments submitted without `amount`: the business MUST derive their actual contribution and return it.
+instrument that was authorized or charged, reflecting the actual
+contribution. For open-amount instruments (submitted without `amount`),
+the business MUST derive and report the actual contribution. The
+business MUST omit `amount` on all other instruments (e.g., a
+provisional authorization that was voided when a later instrument
+failed, or an instrument the business never attempted).
 
-This is important to convey the final amount authorized or captured for each instrument, and can be used to communicate what balances were discovered and potentially authorized during a checkout. The platform can resubmit, echoing these static values or replacing them.
+Response `amount` is informational. It conveys what the business
+processed for buyer-facing UX and audit (e.g., "$10.00 charged to your
+gift card"). The platform MUST NOT treat prior response `amount` values
+as preserved state on subsequent requests, and the business MUST NOT
+rely on the platform echoing them. Each request is fresh intent — the
+platform sets `amount` to specify a contribution or omits it for
+open-amount, independent of any prior response.
 
 ## Examples
 
@@ -300,7 +319,8 @@ and charged the credit card for the remaining $40.
 ```
 
 The platform specifies `amount: 500` on the loyalty instrument (the
-customer chose to redeem exactly 500 points). The credit card covers the rest.
+customer chose to redeem exactly 500 points). The credit card covers
+the rest.
 
 **Outbound (completed checkout, $50 order):**
 
@@ -402,10 +422,12 @@ nothing. The credit card covers the remaining $75.
 ### Partial Failure with Recovery
 
 > "Pay with my gift card first, credit card for the rest." — but the
-> credit card declines. The business holds the gift card authorization
-> and signals the platform to resubmit with a replacement card.
+> credit card declines. The business voids the gift card authorization
+> and signals the platform that the checkout can be retried with a
+> replacement card.
 
-**Outbound (incomplete checkout, $50 order):**
+**Outbound (incomplete checkout, $50 order — gift card auth was voided
+per the atomic invariant):**
 
 ```json
 {
@@ -416,8 +438,7 @@ nothing. The credit card covers the remaining $75.
         "id": "pi_gc_1",
         "handler_id": "example_handler_1",
         "type": "gift_card",
-        "credential": { "type": "gift_card", "token": "gc_abc123" },
-        "amount": 1000
+        "credential": { "type": "gift_card", "token": "gc_abc123" }
       },
       {
         "id": "pi_card_1",
@@ -431,7 +452,7 @@ nothing. The credit card covers the remaining $75.
     {
       "type": "info",
       "path": "$.payment.instruments[0]",
-      "content": "Gift card authorized for $10.00."
+      "content": "Gift card has $10.00 available balance."
     },
     {
       "type": "error",
@@ -444,9 +465,36 @@ nothing. The credit card covers the remaining $75.
 }
 ```
 
-The business charged the gift card for $10 (held) and the card declined.
-`severity: recoverable` tells the platform it can resubmit with a
-replacement card; the gift card auth remains held until the platform
-either completes the split or abandons the checkout (at which point the
-gift card is reversed per the eventual-consistency rule).
-Outstanding amount: $50 − $10 = $40.
+Both instruments omit `amount` because neither contributed funds —
+the gift card was provisionally authorized and then voided when the
+card declined, and the card declined outright. The `info` message
+conveys the discovered gift card balance so the platform can render
+accurate buyer UX; the `payment_failed` error identifies the failing
+instrument with `severity: recoverable`.
+
+**Inbound (platform re-submits with a replacement card, $50 order):**
+
+```json
+{
+  "payment": {
+    "instruments": [
+      {
+        "id": "pi_gc_1",
+        "handler_id": "example_handler_1",
+        "type": "gift_card",
+        "credential": { "type": "gift_card", "token": "gc_abc123" }
+      },
+      {
+        "id": "pi_card_2",
+        "handler_id": "example_handler_1",
+        "type": "card",
+        "credential": { "type": "card", "token": "tok_visa_yyyy" }
+      }
+    ]
+  }
+}
+```
+
+The platform submits a new request — the gift card is re-submitted
+as open-amount and the failing card is replaced. The business processes
+this as new intent.

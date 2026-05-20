@@ -16,15 +16,15 @@
     },
     "payment_instrument": {
       "title": "Payment Instrument (Split Payments)",
-      "description": "Payment instrument extended with an optional amount for split payments.",
+      "description": "Payment instrument extended with an optional per-instrument amount for split payments.",
       "allOf": [
         { "$ref": "types/payment_instrument.json" },
         {
           "type": "object",
           "properties": {
             "amount": {
-              "$ref": "types/amount.json",
-              "description": "Requested contribution for this instrument in ISO 4217 minor units. On request: the platform's requested amount (omit for business-determined). On response: the actual amount authorized or charged."
+              "$ref": "../common/types/amount.json",
+              "description": "Contribution amount for this instrument in `checkout.currency` minor units (ISO 4217). On request: the platform's requested contribution (omit for open-amount). On response: the actual amount authorized or charged (omitted when not finally processed)."
             }
           }
         }
