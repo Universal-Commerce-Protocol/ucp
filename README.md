@@ -122,9 +122,13 @@ We welcome community contributions to enhance and evolve UCP.
 ### Schema Development
 
 Schemas live in `source/` and are published with `ucp_*` annotations intact.
-Agents use
-[ucp-schema](https://github.com/universal-commerce-protocol/ucp-schema) to
-resolve annotations for specific operations at runtime.
+**Agents** (such as AI assistants or platforms participating
+in the protocol) can use the
+[ucp-schema](https://github.com/universal-commerce-protocol/ucp-schema) tool to
+resolve these annotations at runtime. This enables them to generate
+operation-specific schema variants (e.g., for 'create', 'update', or 'read'
+operations) from the master schemas, ensuring they only process fields relevant
+to the current action and direction (request vs. response).
 
 1. Ensure `ucp-schema` is installed:
 
