@@ -279,10 +279,12 @@ p.hero-description {
 .partner-logo {
   display: flex;
   align-items: center;
+  justify-content: center;
   opacity: 0.9;
   transition: opacity 0.3s;
   padding: 0 40px;
   min-height: 65px;
+  flex: 0 0 auto;
 }
 
 .partner-logo:hover {
@@ -292,8 +294,33 @@ p.hero-description {
 .partner-logo img {
   max-height: 65px;
   max-width: 180px;
+  min-height: 32px;
+  min-width: 100px;
   height: auto;
   width: auto;
+  object-fit: contain;
+  flex: 0 0 auto;
+}
+
+.partner-logo img.partner-logo-stripe {
+  max-height: 35px;
+}
+
+.partner-logo img[src*="Affirm"] {
+  max-height: 45px;
+}
+
+.partner-logo img[src*="Amadeus"],
+.partner-logo img[src*="Block"],
+.partner-logo img[src*="Booking"],
+.partner-logo img[src*="Choice"],
+.partner-logo img[src*="Kogan"],
+.partner-logo img[src*="marriott"],
+.partner-logo img[src*="Square"],
+.partner-logo img[src*="Toast"],
+.partner-logo img[src*="Trip-com"],
+.partner-logo img[src*="uber-eats"] {
+  max-height: 35px;
 }
 
 .partner-logo span {
@@ -302,6 +329,42 @@ p.hero-description {
   color: #202124;
   font-size: 1.4rem;
   white-space: nowrap;
+}
+
+.tab-pane-inner {
+  width: 100%;
+}
+
+.partner-logo-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 40px 60px;
+  margin: 32px 0;
+}
+
+.lodging-logos,
+.food-logos {
+  gap: 20px 60px;
+}
+
+.flex-break {
+  flex-basis: 100%;
+  height: 0;
+}
+
+.tab-pane .partner-logo {
+  padding: 0;
+}
+
+.tab-action-container {
+  text-align: center;
+  margin-top: 24px;
+}
+
+.sub-tab-content {
+  width: 100%;
 }
 
 /* The Animation Loop */
@@ -319,6 +382,44 @@ p.hero-description {
 @media (width <= 768px) {
   .partner-logo img {
     height: 45px; /* Smaller logos on phone */
+  }
+
+  /* Specific overrides for big logos on mobile */
+  .partner-logo img[src*="Square"],
+  .partner-logo img[src*="Toast"],
+  .partner-logo img[src*="uber-eats"] {
+    height: 25px;
+  }
+
+  .lodging-logos .partner-logo img:not([src*="Google"]) {
+    height: 30px;
+  }
+
+  /* Specific override for Amadeus to make it smaller */
+  .lodging-logos .partner-logo img[src*="Amadeus"] {
+    height: 25px;
+  }
+
+  /* Increase Google slightly in Lodging */
+  .lodging-logos .partner-logo img[src*="Google"] {
+    height: 50px;
+  }
+
+  .partner-logo img[src*="Microsoft"] {
+    min-width: auto;
+    max-width: 80px;
+    height: auto;
+  }
+
+  .partner-logo img[src*="Stripe"] {
+    min-width: auto;
+    max-width: 60px;
+    height: auto;
+  }
+
+  /* Increase Google slightly in Food */
+  .food-logos .partner-logo img[src*="Google"] {
+    height: 50px;
   }
 
   .partner-track {
@@ -356,6 +457,11 @@ p.hero-description {
   margin-bottom: 60px;
 }
 
+/* When retail tab is active, bring the sub menu right under the main tabs */
+.action-carousel-section:has(#action-tab-retail.active) .main-action-tabs {
+  margin-bottom: 16px;
+}
+
 .tab-btn {
   background: transparent;
   border: none;
@@ -379,13 +485,45 @@ p.hero-description {
   box-shadow: 0 1px 2px rgb(0 0 0 / 30%);
 }
 
+/* Submenu Tabs */
+.sub-action-tabs {
+  display: inline-flex;
+  gap: 24px;
+  margin-bottom: 60px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.sub-tab-btn {
+  background: transparent;
+  border: none;
+  padding: 8px 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #5f6368;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  font-family: inherit;
+  border-bottom: 3px solid transparent;
+}
+
+.sub-tab-btn:hover {
+  color: #202124;
+}
+
+.sub-tab-btn.active {
+  color: #1a73e8;
+  border-bottom: 3px solid #1a73e8;
+}
+
 /* Content Area */
 .carousel-content {
   min-height: 500px;
   position: relative;
 }
 
-.tab-pane {
+.tab-pane,
+.sub-tab-pane {
   display: none;
   flex-direction: row;
   justify-content: center;
@@ -396,8 +534,15 @@ p.hero-description {
   width: 100%;
 }
 
-.tab-pane.active {
+.tab-pane.active,
+.sub-tab-pane.active {
   display: flex;
+}
+
+.tab-pane.shopping-tab-pane {
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 0 !important;
 }
 
 @keyframes fade-in {
@@ -512,9 +657,24 @@ p.hero-description {
   display: none;
 }
 
+.coming-soon-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  border: 1px solid #dadce0;
+  background-color: #f8f9fa;
+  width: 100%;
+  min-height: 520px;
+  font-family: "Roboto Mono", monospace;
+  font-size: 0.85rem;
+  color: #5f6368;
+}
+
 /* --- INTERMEDIATE RESPONSIVENESS (< 1200px) --- */
 @media (width <= 1200px) {
-  .tab-pane {
+  .tab-pane,
+  .sub-tab-pane {
     flex-direction: column;
     align-items: center;
     gap: 40px;
@@ -565,7 +725,8 @@ p.hero-description {
     gap: 1.5rem;
   }
 
-  .tab-pane {
+  .tab-pane,
+  .sub-tab-pane {
     flex-direction: column; /* Stack vertically on mobile */
     align-items: center;
     gap: 40px;
@@ -834,4 +995,69 @@ p.hero-description {
 /* Hide the page title that replaces the site title on scroll */
 [class~="md-header__title"] [class~="md-header__topic"]:nth-child(2) {
   display: none !important;
+}
+
+/* --- Top Announcement Banner --- */
+.custom-announce-banner {
+  background-color: #f8f9fa;
+  color: #202124;
+  border-radius: 50px; /* Premium pill shape matching the site's styling */
+  padding: 10px 16px 10px 24px;
+  margin: 0 auto 40px;
+  max-width: 1200px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 5%);
+}
+
+.custom-banner-container {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.custom-banner-icon {
+  height: 28px;
+  width: auto;
+  flex-shrink: 0;
+}
+
+.custom-banner-text {
+  font-family: "Google Sans", sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #202124;
+}
+
+.banner-title {
+  font-weight: 700;
+  font-size: 1rem;
+  margin-bottom: 2px;
+}
+
+.banner-subtitle {
+  font-weight: 400;
+  font-size: 0.8rem;
+  color: #5f6368;
+}
+
+.custom-banner-close {
+  background-color: #fff;
+  color: #202124;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 5%);
+  transition: background-color 0.2s ease;
+}
+
+.custom-banner-close:hover {
+  background-color: #e9ecef;
 }

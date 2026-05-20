@@ -122,7 +122,7 @@ extra:
 
 # Configuration
 theme:
-  logo: assets/updated-icon.svg
+  logo: assets/UCP-small.svg
   favicon: assets/favicon.png
   name: material
   font:
