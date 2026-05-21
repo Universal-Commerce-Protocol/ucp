@@ -1,11 +1,9 @@
-/* eslint-disable no-console */
 /**
  * @param {Object} params
  * @param {import('@actions/github').GitHub} params.github
  * @param {import('@actions/github').Context} params.context
- * @param {import('@actions/core')} params.core
  */
-module.exports = async function triageAutomation({ github, context, core }) {
+module.exports = async function triageAutomation({ github, context }) {
   const { owner, repo } = context.repo;
   const eventName = context.eventName;
   
