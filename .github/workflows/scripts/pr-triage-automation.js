@@ -10,7 +10,7 @@ module.exports = async function triageAutomation({ github, context }) {
   let prNumber;
   if (context.payload.pull_request) {
     prNumber = context.payload.pull_request.number;
-  } else if (context.payload.issue && context.payload.issue.pull_request) {
+  } else if (context.payload.issue?.pull_request) {
     prNumber = context.payload.issue.number;
   } else {
     console.log('Not a pull request or pull request comment. Skipping.');
