@@ -183,7 +183,7 @@ Both business and platform profiles share a common base structure — a `ucp` ob
       }]
     }
   },
-  "signing_keys": [{ "kid": "key_2026", "kty": "EC", "crv": "P-256", "alg": "ES256" }]
+  "signing_keys": [{ "kid": "key_2026", "kty": "EC", "crv": "P-256", "x": "WbbXwVYGdJoP4Xm3qCkGvBRcRvKtEfXDbWvPzpPS8LA", "y": "sP4jHHxYqC89HBo8TjrtVOAGHfJDflYxw7MFMxuFMPY", "alg": "ES256" }]
 }
 ```
 
