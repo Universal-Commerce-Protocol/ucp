@@ -527,6 +527,14 @@ const UcpData = {
         schema: "https://ucp.dev/{{ ucp_version }}/schemas/shopping/discount.json"
       }
     ],
+    "dev.ucp.shopping.additional_fields": [
+      {
+        extends: "dev.ucp.shopping.checkout",
+        version: "{{ ucp_version }}",
+        spec: "https://ucp.dev/{{ ucp_version }}/specification/additional-fields",
+        schema: "https://ucp.dev/{{ ucp_version }}/schemas/shopping/additional_fields.json"
+      }
+    ],
     "dev.ucp.shopping.buyer_consent": [
       {
         extends: "dev.ucp.shopping.checkout",
@@ -553,8 +561,8 @@ const UcpData = {
     },
     full: {
       label: "Full",
-      description: "Supports core + Fulfillment and Discount extensions.",
-      caps: ["dev.ucp.shopping.checkout", "dev.ucp.shopping.order", "dev.ucp.shopping.fulfillment", "dev.ucp.shopping.discount", "dev.ucp.shopping.buyer_consent", "dev.ucp.shopping.ap2_mandates"]
+      description: "Supports core checkout extensions.",
+      caps: ["dev.ucp.shopping.checkout", "dev.ucp.shopping.order", "dev.ucp.shopping.fulfillment", "dev.ucp.shopping.discount", "dev.ucp.shopping.additional_fields", "dev.ucp.shopping.buyer_consent", "dev.ucp.shopping.ap2_mandates"]
     }
   },
 
