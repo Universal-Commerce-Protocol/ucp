@@ -4,7 +4,7 @@
  * @param {import('@actions/github').Context} params.context
  * @param {import('@actions/core')} params.core
  */
-module.exports = async ({ github, context, core }) => {
+module.exports = async function staleTracker({ github, context, core }) {
   const { owner, repo } = context.repo;
   const STALE_THRESHOLD_DAYS = 30;
   const thirtyDaysAgo = new Date();
