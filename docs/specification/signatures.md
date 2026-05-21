@@ -118,6 +118,7 @@ defined in [RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517).
 
 **Example:**
 
+<!-- ucp:example schema=profile extract=$ target=$.signing_keys[0] -->
 ```json
 {
   "kid": "key-2024-01-15",
@@ -580,6 +581,7 @@ Content-Type: application/json
 
 ### MCP Error Response
 
+<!-- ucp:example schema=transports/jsonrpc def=error_response -->
 ```json
 {
   "jsonrpc": "2.0",
