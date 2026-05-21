@@ -85,6 +85,7 @@ POST /checkouts
 
 ```json
 {
+  "ucp": { ... },
   "id": "checkout_456",
   "status": "ready_for_complete",
   "currency": "USD",

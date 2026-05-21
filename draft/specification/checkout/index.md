@@ -108,29 +108,26 @@ See [REST](http://ucp.dev/draft/specification/checkout-rest/#create-checkout) an
 When status is `incomplete` or `requires_escalation`, platforms should process errors as a prioritized stack. The example below illustrates a checkout with three error types: a recoverable error (invalid phone), a buyer input requirement (delivery scheduling), and a review requirement (high-value order). The latter two require handoff and serve as explicit signals to the platform. Businesses **SHOULD** surface such messages as early as possible, and platforms **SHOULD** prioritize resolving recoverable errors before initiating handoff.
 
 ```json
-{
-  "status": "requires_escalation",
-  "messages": [
-    {
-      "type": "error",
-      "code": "invalid_phone",
-      "severity": "recoverable",
-      "content": "Phone number format is invalid"
-    },
-    {
-      "type": "error",
-      "code": "schedule_delivery",
-      "severity": "requires_buyer_input",
-      "content": "Select delivery window for your purchase"
-    },
-    {
-      "type": "error",
-      "code": "high_value_order",
-      "severity": "requires_buyer_review",
-      "content": "Orders over $500 require additional verification"
-    }
-  ]
-}
+[
+  {
+    "type": "error",
+    "code": "invalid_phone",
+    "severity": "recoverable",
+    "content": "Phone number format is invalid"
+  },
+  {
+    "type": "error",
+    "code": "schedule_delivery",
+    "severity": "requires_buyer_input",
+    "content": "Select delivery window for your purchase"
+  },
+  {
+    "type": "error",
+    "code": "high_value_order",
+    "severity": "requires_buyer_review",
+    "content": "Orders over $500 require additional verification"
+  }
+]
 ```
 
 Example error processing algorithm:
@@ -207,11 +204,13 @@ For example, the Platform claims a store card benefit via `context.eligibility`.
 
 ```json
 {
-  "ucp": { "version": "2026-01-11", "status": "success" },
+  "ucp": { "version": "2026-01-11", "status": "success", "payment_handlers": { ... } },
   "id": "checkout_abc",
   "status": "ready_for_complete",
-  "line_items": [ "..." ],
-  "totals": [ "..." ],
+  "currency": "...",
+  "line_items": [ ... ],
+  "totals": [ ... ],
+  "links": [ ... ],
   "messages": [
     {
       "type": "error",
@@ -281,19 +280,25 @@ A checkout response containing both a recoverable error and a disclosure warning
 
 ```json
 {
-  "ucp": { "version": "draft", "status": "success" },
+  "ucp": { "version": "draft", "status": "success", "payment_handlers": { ... } },
   "id": "chk_abc123",
   "status": "incomplete",
   "currency": "USD",
   "line_items": [
     {
       "id": "li_1",
-      "item": { "id": "item_456", "title": "Artisan Nut Butter Collection", "image_url": "https://merchant.com/nut-butter.jpg" },
+      "item": { "id": "item_456", "title": "Artisan Nut Butter Collection", "price": 1299, "image_url": "https://merchant.com/nut-butter.jpg" },
       "quantity": 1,
-      "totals": [{ "type": "subtotal", "amount": 1299 }]
+      "totals": [
+        { "type": "subtotal", "amount": 1299 },
+        { "type": "total", "amount": 1299 }
+      ]
     }
   ],
-  "totals": [{ "type": "total", "amount": 1299 }],
+  "totals": [
+    { "type": "subtotal", "amount": 1299 },
+    { "type": "total", "amount": 1299 }
+  ],
   "messages": [
     {
       "type": "error",
@@ -817,7 +822,7 @@ The business controls what MUST be rendered (top-level entries) versus what MAY 
 **Split tax, itemized at top-level:**
 
 ```json
-"totals": [
+[
   { "type": "subtotal",    "display_text": "Subtotal",    "amount": 5750 },
   { "type": "fulfillment", "display_text": "Shipping",    "amount": 899 },
   { "type": "tax",         "display_text": "Federal Tax", "amount": 332 },
@@ -829,7 +834,7 @@ The business controls what MUST be rendered (top-level entries) versus what MAY 
 **Collapsed fees with optional breakdown:**
 
 ```json
-"totals": [
+[
   { "type": "subtotal", "display_text": "Subtotal", "amount": 4999 },
   {
     "type": "fee", "display_text": "Fees", "amount": 549,
@@ -846,7 +851,7 @@ The business controls what MUST be rendered (top-level entries) versus what MAY 
 **Discount and account credit — negative amounts:**
 
 ```json
-"totals": [
+[
   { "type": "subtotal",       "display_text": "Subtotal",       "amount": 10000 },
   { "type": "discount",       "display_text": "Summer Sale",    "amount": -1500 },
   { "type": "tax",            "display_text": "Tax",            "amount": 680 },

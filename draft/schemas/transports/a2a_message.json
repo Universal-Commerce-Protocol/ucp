@@ -1,0 +1,165 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/draft/schemas/transports/a2a_message.json",
+  "title": "A2A UCP Message Envelope",
+  "description": "Minimal A2A envelope shapes used by UCP's A2A checkout binding. This schema validates UCP's transport mapping points — Agent Card extension advertisement, inbound A2A Message requests, and JSON-RPC responses carrying A2A Message results — without attempting to re-specify the full A2A protocol.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/agent_card"
+    },
+    {
+      "$ref": "#/$defs/message_request"
+    },
+    {
+      "$ref": "#/$defs/message_response"
+    }
+  ],
+  "$defs": {
+    "extension": {
+      "type": "object",
+      "description": "A2A Agent Card extension advertisement for UCP.",
+      "required": [
+        "uri"
+      ],
+      "properties": {
+        "uri": {
+          "type": "string",
+          "format": "uri",
+          "description": "Extension URI. UCP uses its versioned reference URI."
+        },
+        "description": {
+          "type": "string"
+        },
+        "params": {
+          "type": "object",
+          "description": "Extension parameters such as advertised UCP capabilities.",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "agent_card": {
+      "type": "object",
+      "description": "A2A Agent Card fragment advertising UCP support through extensions.",
+      "required": [
+        "extensions"
+      ],
+      "properties": {
+        "extensions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/extension"
+          },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": true
+    },
+    "part": {
+      "type": "object",
+      "description": "A2A message part. UCP examples use text parts for natural language and data parts for structured UCP payloads.",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "data": {
+          "type": "object",
+          "description": "Structured data payload. UCP reserves a2a.ucp.* keys for UCP payloads."
+        }
+      },
+      "additionalProperties": true
+    },
+    "message": {
+      "type": "object",
+      "description": "A2A Message carrying natural-language or structured UCP data parts.",
+      "required": [
+        "role",
+        "parts",
+        "messageId",
+        "kind",
+        "contextId"
+      ],
+      "properties": {
+        "role": {
+          "type": "string",
+          "enum": [
+            "user",
+            "agent"
+          ],
+          "description": "Message sender role."
+        },
+        "parts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/part"
+          },
+          "minItems": 1
+        },
+        "messageId": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string",
+          "const": "message"
+        },
+        "contextId": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    },
+    "message_request": {
+      "description": "A2A message/send JSON-RPC request whose params carry a UCP-bearing Message from the platform to the business agent.",
+      "allOf": [
+        {
+          "$ref": "https://ucp.dev/draft/schemas/transports/jsonrpc.json#/$defs/request"
+        },
+        {
+          "type": "object",
+          "required": [
+            "params"
+          ],
+          "properties": {
+            "method": {
+              "const": "message/send"
+            },
+            "params": {
+              "type": "object",
+              "required": [
+                "message"
+              ],
+              "properties": {
+                "message": {
+                  "$ref": "#/$defs/message"
+                }
+              },
+              "additionalProperties": true
+            }
+          }
+        }
+      ]
+    },
+    "message_response": {
+      "description": "JSON-RPC success response whose result is an A2A Message from the business agent.",
+      "allOf": [
+        {
+          "$ref": "https://ucp.dev/draft/schemas/transports/jsonrpc.json#/$defs/success_response"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "result": {
+              "$ref": "#/$defs/message"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

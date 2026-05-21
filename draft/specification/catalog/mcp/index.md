@@ -34,7 +34,8 @@ Businesses advertise MCP transport availability through their UCP profile at `/.
         "spec": "https://ucp.dev/draft/specification/catalog/lookup",
         "schema": "https://ucp.dev/draft/schemas/shopping/catalog_lookup.json"
       }]
-    }
+    },
+    "payment_handlers": {}
   }
 }
 ```
@@ -401,11 +402,14 @@ When some identifiers are not found, the response includes the found products. T
         {
           "id": "prod_abc123",
           "title": "Blue Runner Pro",
+          "description": {
+            "plain": "A comfortable everyday running shoe."
+          },
           "price_range": {
             "min": { "amount": 12000, "currency": "USD" },
             "max": { "amount": 12000, "currency": "USD" }
           },
-          "variants": []
+          "variants": [ ... ]
         }
       ],
       "messages": [

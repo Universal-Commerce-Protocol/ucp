@@ -32,27 +32,32 @@ Businesses declare support by adding `dev.ucp.shopping.ap2_mandate` to their `ca
 
 ```json
 {
-  "capabilities": {
-    "dev.ucp.shopping.checkout": [
-      {
-        "version": "draft",
-        "spec": "https://ucp.dev/draft/specification/checkout",
-        "schema": "https://ucp.dev/draft/schemas/shopping/checkout.json"
-      }
-    ],
-    "dev.ucp.shopping.ap2_mandate": [
-      {
-        "version": "draft",
-        "spec": "https://ucp.dev/draft/specification/ap2-mandates",
-        "schema": "https://ucp.dev/draft/schemas/shopping/ap2_mandate.json",
-        "extends": "dev.ucp.shopping.checkout",
-        "config": {
-          "vp_formats_supported": {
-            "dc+sd-jwt": { }
+  "ucp": {
+    "version": "draft",
+    "services": {},
+    "capabilities": {
+      "dev.ucp.shopping.checkout": [
+        {
+          "version": "draft",
+          "spec": "https://ucp.dev/draft/specification/checkout",
+          "schema": "https://ucp.dev/draft/schemas/shopping/checkout.json"
+        }
+      ],
+      "dev.ucp.shopping.ap2_mandate": [
+        {
+          "version": "draft",
+          "spec": "https://ucp.dev/draft/specification/ap2-mandates",
+          "schema": "https://ucp.dev/draft/schemas/shopping/ap2_mandate.json",
+          "extends": "dev.ucp.shopping.checkout",
+          "config": {
+            "vp_formats_supported": {
+              "dc+sd-jwt": { }
+            }
           }
         }
-      }
-    ]
+      ]
+    },
+    "payment_handlers": {}
   }
 }
 ```
@@ -98,11 +103,13 @@ Businesses **MUST** embed their signature in the checkout response body under `a
 
 ```json
 {
+  "ucp": { ... },
   "id": "chk_abc123",
   "status": "ready_for_complete",
   "currency": "USD",
-  "line_items": [...],
-  "totals": [...],
+  "line_items": [ ... ],
+  "totals": [ ... ],
+  "links": [ ... ],
   "ap2": {
     "merchant_authorization": "eyJhbGciOiJFUzI1NiIsImtpZCI6Im1lcmNoYW50XzIwMjUifQ..<signature>"
   }
@@ -204,6 +211,7 @@ Checkout extended with AP2 mandate support.
 
 ```json
 {
+  "ucp": { ... },
   "id": "chk_abc123",
   "status": "ready_for_complete",
   "currency": "USD",
@@ -223,6 +231,7 @@ Checkout extended with AP2 mandate support.
     {"type": "tax", "amount": 400},
     {"type": "total", "amount": 5400}
   ],
+  "links": [ ... ],
   "ap2": {
     "merchant_authorization": "eyJhbGciOiJFUzI1NiIsImtpZCI6Im1lcmNoYW50XzIwMjUifQ..<signature>"
   }
@@ -291,7 +300,7 @@ AP2 extension data including checkout mandate.
         "type": "card",
         "selected": true,
         "display": {
-          "description": "Visa •••• 1234",
+          "description": "Visa •••• 1234"
         },
         "billing_address": {
           "street_address": "123 Main St",

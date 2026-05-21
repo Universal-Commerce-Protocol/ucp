@@ -314,6 +314,14 @@ Platforms **MUST** resolve schemas following this sequence:
 
 ### Profile Structure
 
+Profile documents are machine-readable discovery documents. Businesses publish their profile at `/.well-known/ucp`; platforms publish their profile at the URI advertised in `UCP-Agent`.
+
+A profile document is a JSON object with a required `ucp` member. The `ucp` member contains protocol metadata: protocol version, services, optional capabilities, and payment handlers.
+
+For both business and platform profiles, `ucp.version`, `ucp.services`, and `ucp.payment_handlers` are required. The `services` and `payment_handlers` registries **MUST** be present even when empty. `ucp.capabilities` is optional and **MAY** be omitted, though useful commerce profiles normally advertise at least one capability.
+
+Profiles **MAY** include `signing_keys`, an array of public EC JSON Web Keys used for HTTP Message Signatures and signed webhooks. See [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md) for key format, algorithms, lookup, and rotation.
+
 #### Business Profile
 
 Businesses publish their profile at `/.well-known/ucp`. An example:
@@ -432,7 +440,7 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
 }
 ```
 
-The `ucp` object contains protocol metadata: version, services, capabilities, and payment handlers. The `signing_keys` array contains public keys (JWK format) used to verify signatures on webhooks and other authenticated messages from the business. See [Key Discovery](#key-discovery) for key lookup and resolution, and [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md) for signing mechanics.
+The business profile advertises the business's available transports, capabilities, payment handlers, and public verification keys. See [Key Discovery](#key-discovery) for key lookup and resolution, and [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md) for signing mechanics.
 
 Businesses that support older protocol versions **SHOULD** include a `supported_versions` object mapping each older version to a version-specific profile URI. See [Protocol Version](#protocol-version) for details.
 
@@ -450,7 +458,8 @@ Platform profiles are similar and include signing keys for capabilities requirin
           "version": "draft",
           "spec": "https://ucp.dev/draft/specification/overview",
           "transport": "rest",
-          "schema": "https://ucp.dev/draft/services/shopping/rest.openapi.json"
+          "schema": "https://ucp.dev/draft/services/shopping/rest.openapi.json",
+          "endpoint": "https://platform.example.com/ucp/v1"
         }
       ]
     },
@@ -508,7 +517,7 @@ Platform profiles are similar and include signing keys for capabilities requirin
           ]
         }
       ],
-      "dev.ucp.processor_tokenizer": [
+      "com.example.processor_tokenizer": [
         {
           "id": "processor_tokenizer",
           "version": "draft",
@@ -795,7 +804,7 @@ Protocol errors use standard HTTP status codes and headers. Response bodies are 
       "continue_url": "https://merchant.com"
     },
     "content": [
-      {"type": "text", "text": "{\"ucp\":{...},\"messages\":[...],\"continue_url\":\"...\"}"}
+      {"type": "text", "text": "{\"ucp\":{…},…}"}
     ]
   }
 }
@@ -855,8 +864,11 @@ The `capabilities` registry in responses indicates active capabilities:
     }
   },
   "id": "checkout_123",
-  "line_items": [...]
-  ... other fields
+  "status": "incomplete",
+  "currency": "USD",
+  "line_items": [ ... ],
+  "totals": [ ... ],
+  "links": [ ... ]
 }
 ```
 
@@ -1035,9 +1047,8 @@ In this scenario, the platform identifies a payment credential provider (e.g., `
 
 ```json
 {
-  "ucp": {
-    "version": "draft",
-    "payment_handlers": {
+  "version": "draft",
+  "payment_handlers": {
       "com.google.pay": [
         {
           "id": "8c9202bd-63cc-4241-8d24-d57ce69ea31c",
@@ -1084,7 +1095,6 @@ In this scenario, the platform identifies a payment credential provider (e.g., `
         }
       ]
     }
-  }
 }
 ```
 
@@ -1143,9 +1153,9 @@ In this scenario, the platform uses a generic tokenizer to request a session tok
 
 ```json
 {
-  "ucp": {
-    "payment_handlers": {
-      "com.example.tokenizer": [
+  "version": "draft",
+  "payment_handlers": {
+    "com.example.tokenizer": [
         {
           "id": "merchant_tokenizer",
           "version": "draft",
@@ -1165,7 +1175,6 @@ In this scenario, the platform uses a generic tokenizer to request a session tok
           }
         }
       ]
-    }
   }
 }
 ```
@@ -1202,6 +1211,7 @@ The business attempts the charge, but the PSP returns a "Soft Decline" requiring
 
 ```json
 HTTP/1.1 200 OK
+
 {
   "status": "requires_escalation",
   "messages": [{
@@ -1224,9 +1234,9 @@ This scenario demonstrates the **Recommended Flow for Agents**. Instead of a ses
 
 ```json
 {
-  "ucp": {
-    "payment_handlers": {
-      "dev.ucp.ap2_mandate_compatible_handlers": [
+  "version": "draft",
+  "payment_handlers": {
+    "dev.ucp.ap2_mandate_compatible_handlers": [
         {
           "id": "ap2_234352",
           "version": "draft",
@@ -1237,7 +1247,6 @@ This scenario demonstrates the **Recommended Flow for Agents**. Instead of a ses
           ]
         }
       ]
-    }
   }
 }
 ```
@@ -1259,7 +1268,7 @@ POST /checkout-sessions/{id}/complete
         // other required instruments fields
         "credential": {
           "type": "card",
-          "token": "eyJhbGciOiJ...", // Token would contain payment_mandate, the signed proof of funds auth
+          "token": "eyJhbGciOiJ..." // Token would contain payment_mandate, the signed proof of funds auth
         }
       }
     ]
@@ -1269,7 +1278,7 @@ POST /checkout-sessions/{id}/complete
     "com.example.risk_score": 0.95
   },
   "ap2": {
-    "checkout_mandate": "eyJhbGciOiJ...", // Signed proof of checkout terms
+    "checkout_mandate": "eyJhbGciOiJ..." // Signed proof of checkout terms
   }
 }
 ```
@@ -1392,7 +1401,7 @@ MCP tool responses use a dual-output pattern for backward compatibility. UCP MCP
 
 - **MUST** return the UCP response payload in `structuredContent`
 - **SHOULD** declare `outputSchema` in tool definitions, referencing the appropriate UCP JSON Schema for the capability
-- **SHOULD** also return serialized JSON in `content[]` for backward compatibility with clients not supporting `structuredContent`
+- **SHOULD** also return serialized JSON in `content[]` for backward compatibility with clients not supporting `structuredContent`. Documentation examples abbreviate that serialized JSON string with `…` for readability.
 
 ```json
 {
@@ -1400,13 +1409,17 @@ MCP tool responses use a dual-output pattern for backward compatibility. UCP MCP
   "id": 1,
   "result": {
     "structuredContent": {
-      "ucp": {"version": "draft", "capabilities": {...}},
+      "ucp": {
+        "version": "draft",
+        "payment_handlers": {},
+        "capabilities": {...}
+      },
       "id": "checkout_abc123",
-      "status": "incomplete",
-      ...
+      "status": "incomplete"
+      // ... other checkout fields
     },
     "content": [
-      {"type": "text", "text": "{\"ucp\":{...},\"id\":\"checkout_abc123\",...}"}
+      {"type": "text", "text": "{\"ucp\":{…},…}"}
     ]
   }
 }
@@ -1455,15 +1468,13 @@ All signal keys **MUST** use reverse-domain naming to ensure provenance and prev
 
 ```json
 {
-  "signals": {
-    "dev.ucp.buyer_ip": "203.0.113.42",
-    "dev.ucp.user_agent": "Mozilla/5.0 ...",
-    "com.example.attestation": {
-      "provider_jwks": "https://example.com/.well-known/jwks.json",
-      "kid": "example-key-2026-01",
-      "payload": { "id": "att-7c3e9f", "pass": true, "...": "..." },
-      "sig": "base64url..."
-    }
+  "dev.ucp.buyer_ip": "203.0.113.42",
+  "dev.ucp.user_agent": "Mozilla/5.0 ...",
+  "com.example.attestation": {
+    "provider_jwks": "https://example.com/.well-known/jwks.json",
+    "kid": "example-key-2026-01",
+    "payload": { "id": "att-7c3e9f", "pass": true, "...": "..." },
+    "sig": "base64url..."
   }
 }
 ```
@@ -1473,22 +1484,21 @@ Signal fields may contain personally identifiable information (PII). Platforms *
 Businesses **MAY** use messages with code `signal` to request additional data. The `path` field identifies the requested signal; the message `type` determines enforcement. An `error` blocks status progression until the signal is provided; an `info` is advisory and non-blocking.
 
 ```json
-{
-  "messages": [
-    {
-      "type": "error",
-      "code": "signal",
-      "path": "$.signals['dev.ucp.buyer_ip']",
-      "content": "Buyer IP is required to proceed."
-    },
-    {
-      "type": "info",
-      "code": "signal",
-      "path": "$.signals['dev.ucp.user_agent']",
-      "content": "Providing user agent may improve checkout outcomes."
-    }
-  ]
-}
+[
+  {
+    "type": "error",
+    "code": "signal",
+    "path": "$.signals['dev.ucp.buyer_ip']",
+    "content": "Buyer IP is required to proceed.",
+    "severity": "recoverable"
+  },
+  {
+    "type": "info",
+    "code": "signal",
+    "path": "$.signals['dev.ucp.user_agent']",
+    "content": "Providing user agent may improve checkout outcomes."
+  }
+]
 ```
 
 ### Attribution
@@ -1499,13 +1509,11 @@ UCP does **NOT** prescribe attribution models, windows, or assignment logic. Pla
 
 ```json
 {
-  "attribution": {
-    "campaign_id": "18234567890",
-    "campaign_source": "google",
-    "campaign_medium": "cpc",
-    "campaign_name": "spring_2026",
-    "gclid": "EAIaIQobChMI..."
-  }
+  "campaign_id": "18234567890",
+  "campaign_source": "google",
+  "campaign_medium": "cpc",
+  "campaign_name": "spring_2026",
+  "gclid": "EAIaIQobChMI..."
 }
 ```
 
@@ -1578,7 +1586,9 @@ Businesses that support older protocol versions **SHOULD** declare a `supported_
     "version": "2026-01-23",
     "supported_versions": {
       "2026-01-11": "https://business.example.com/.well-known/ucp/2026-01-11"
-    }
+    },
+    "services": {},
+    "payment_handlers": {}
   }
 }
 ```
@@ -1616,7 +1626,7 @@ Response with version confirmation:
   },
   "id": "checkout_123",
   "status": "incomplete"
-  ...other checkout fields
+  // ... other checkout fields
 }
 ```
 
@@ -2346,29 +2356,26 @@ See [REST](http://ucp.dev/draft/specification/checkout-rest/#create-checkout) an
 When status is `incomplete` or `requires_escalation`, platforms should process errors as a prioritized stack. The example below illustrates a checkout with three error types: a recoverable error (invalid phone), a buyer input requirement (delivery scheduling), and a review requirement (high-value order). The latter two require handoff and serve as explicit signals to the platform. Businesses **SHOULD** surface such messages as early as possible, and platforms **SHOULD** prioritize resolving recoverable errors before initiating handoff.
 
 ```json
-{
-  "status": "requires_escalation",
-  "messages": [
-    {
-      "type": "error",
-      "code": "invalid_phone",
-      "severity": "recoverable",
-      "content": "Phone number format is invalid"
-    },
-    {
-      "type": "error",
-      "code": "schedule_delivery",
-      "severity": "requires_buyer_input",
-      "content": "Select delivery window for your purchase"
-    },
-    {
-      "type": "error",
-      "code": "high_value_order",
-      "severity": "requires_buyer_review",
-      "content": "Orders over $500 require additional verification"
-    }
-  ]
-}
+[
+  {
+    "type": "error",
+    "code": "invalid_phone",
+    "severity": "recoverable",
+    "content": "Phone number format is invalid"
+  },
+  {
+    "type": "error",
+    "code": "schedule_delivery",
+    "severity": "requires_buyer_input",
+    "content": "Select delivery window for your purchase"
+  },
+  {
+    "type": "error",
+    "code": "high_value_order",
+    "severity": "requires_buyer_review",
+    "content": "Orders over $500 require additional verification"
+  }
+]
 ```
 
 Example error processing algorithm:
@@ -2445,11 +2452,13 @@ For example, the Platform claims a store card benefit via `context.eligibility`.
 
 ```json
 {
-  "ucp": { "version": "2026-01-11", "status": "success" },
+  "ucp": { "version": "2026-01-11", "status": "success", "payment_handlers": { ... } },
   "id": "checkout_abc",
   "status": "ready_for_complete",
-  "line_items": [ "..." ],
-  "totals": [ "..." ],
+  "currency": "...",
+  "line_items": [ ... ],
+  "totals": [ ... ],
+  "links": [ ... ],
   "messages": [
     {
       "type": "error",
@@ -2519,19 +2528,25 @@ A checkout response containing both a recoverable error and a disclosure warning
 
 ```json
 {
-  "ucp": { "version": "draft", "status": "success" },
+  "ucp": { "version": "draft", "status": "success", "payment_handlers": { ... } },
   "id": "chk_abc123",
   "status": "incomplete",
   "currency": "USD",
   "line_items": [
     {
       "id": "li_1",
-      "item": { "id": "item_456", "title": "Artisan Nut Butter Collection", "image_url": "https://merchant.com/nut-butter.jpg" },
+      "item": { "id": "item_456", "title": "Artisan Nut Butter Collection", "price": 1299, "image_url": "https://merchant.com/nut-butter.jpg" },
       "quantity": 1,
-      "totals": [{ "type": "subtotal", "amount": 1299 }]
+      "totals": [
+        { "type": "subtotal", "amount": 1299 },
+        { "type": "total", "amount": 1299 }
+      ]
     }
   ],
-  "totals": [{ "type": "total", "amount": 1299 }],
+  "totals": [
+    { "type": "subtotal", "amount": 1299 },
+    { "type": "total", "amount": 1299 }
+  ],
   "messages": [
     {
       "type": "error",
@@ -3055,7 +3070,7 @@ The business controls what MUST be rendered (top-level entries) versus what MAY 
 **Split tax, itemized at top-level:**
 
 ```json
-"totals": [
+[
   { "type": "subtotal",    "display_text": "Subtotal",    "amount": 5750 },
   { "type": "fulfillment", "display_text": "Shipping",    "amount": 899 },
   { "type": "tax",         "display_text": "Federal Tax", "amount": 332 },
@@ -3067,7 +3082,7 @@ The business controls what MUST be rendered (top-level entries) versus what MAY 
 **Collapsed fees with optional breakdown:**
 
 ```json
-"totals": [
+[
   { "type": "subtotal", "display_text": "Subtotal", "amount": 4999 },
   {
     "type": "fee", "display_text": "Fees", "amount": 549,
@@ -3084,7 +3099,7 @@ The business controls what MUST be rendered (top-level entries) versus what MAY 
 **Discount and account credit — negative amounts:**
 
 ```json
-"totals": [
+[
   { "type": "subtotal",       "display_text": "Subtotal",       "amount": 10000 },
   { "type": "discount",       "display_text": "Summer Sale",    "amount": -1500 },
   { "type": "tax",            "display_text": "Tax",            "amount": 680 },
@@ -3629,7 +3644,7 @@ Content-Type: application/json
         "id": "item_123"
       },
       "id": "li_1",
-      "quantity": 2,
+      "quantity": 2
     }
   ],
   "fulfillment": {
@@ -4358,12 +4373,15 @@ Business outcomes (including errors like unavailable merchandise) are returned w
 {
   "ucp": {
     "version": "draft",
+    "status": "success",
+    "payment_handlers": { ... },
     "capabilities": {
       "dev.ucp.shopping.checkout": [{"version": "draft"}]
     }
   },
   "id": "checkout_abc123",
   "status": "incomplete",
+  "currency": "USD",
   "line_items": [
     {
       "id": "li_1",
@@ -4377,6 +4395,7 @@ Business outcomes (including errors like unavailable merchandise) are returned w
     }
   ],
   "totals": [...],
+  "links": [...],
   "messages": [
     {
       "type": "warning",
@@ -4555,7 +4574,7 @@ MCP clients **MUST** include a `meta` object in every request containing protoco
         },
         "idempotency-key": "550e8400-e29b-41d4-a716-446655440000"
       },
-      "checkout": { ... }
+      "checkout": { "line_items": [ ... ] }
     }
   }
 }
@@ -4780,7 +4799,7 @@ Maps to the [Create Checkout](http://ucp.dev/draft/specification/checkout/#creat
     "content": [
       {
         "type": "text",
-        "text": "{\"ucp\":{...},\"id\":\"checkout_abc123\",...}"
+        "text": "{\"ucp\":{…},…}"
       }
     ]
   }
@@ -4807,7 +4826,7 @@ All items out of stock — no checkout resource is created:
       "continue_url": "https://merchant.com/"
     },
     "content": [
-      {"type": "text", "text": "{\"ucp\":{...},\"messages\":[...]}"}
+      {"type": "text", "text": "{\"ucp\":{…},…}"}
     ]
   }
 }
@@ -5022,7 +5041,7 @@ Maps to the [Update Checkout](http://ucp.dev/draft/specification/checkout/#updat
     "content": [
       {
         "type": "text",
-        "text": "{\"ucp\":{...},\"id\":\"checkout_abc123\",...}"
+        "text": "{\"ucp\":{…},…}"
       }
     ]
   }
@@ -5079,6 +5098,7 @@ Business outcomes (including errors like unavailable merchandise) are returned a
     "structuredContent": {
       "ucp": {
         "version": "draft",
+        "payment_handlers": {},
         "capabilities": {
           "dev.ucp.shopping.checkout": [{"version": "draft"}]
         }
@@ -5098,6 +5118,8 @@ Business outcomes (including errors like unavailable merchandise) are returned a
         }
       ],
       "totals": [...],
+      "currency": "USD",
+      "links": [],
       "messages": [
         {
           "type": "warning",
@@ -5109,7 +5131,7 @@ Business outcomes (including errors like unavailable merchandise) are returned a
       "continue_url": "https://merchant.com/checkout/checkout_abc123"
     },
     "content": [
-      {"type": "text", "text": "{\"ucp\":{...},\"id\":\"checkout_abc123\",...}"}
+      {"type": "text", "text": "{\"ucp\":{…},…}"}
     ]
   }
 }
@@ -5136,7 +5158,7 @@ For `create_checkout`, when all items unavailable and no checkout can be created
       "continue_url": "https://merchant.com/"
     },
     "content": [
-      {"type": "text", "text": "{\"ucp\":{...},\"messages\":[...]}"}
+      {"type": "text", "text": "{\"ucp\":{…},…}"}
     ]
   }
 }
@@ -5301,7 +5323,7 @@ Businesses that support A2A transport must specify the agent card endpoint as pa
 
 Shopping platforms interacting with the business agent must send their profile URI as `UCP-Agent` request headers with every request.
 
-```json
+```http
 UCP-Agent: profile="https://agent.example/profiles/v2025-11/shopping-agent.json"
 Content-Type: application/json
 ```
@@ -5375,17 +5397,22 @@ Examples:
 
 ```json
 {
-  "message": {
-    "role": "user",
-    "parts": [
-      {
-        "type": "text",
-        "text": "add Pixel 10 Pro to my checkout"
-      }
-    ],
-    "messageId": "69da8f87-991b-479e-80dc-ed92fcb57cbe",
-    "kind": "message",
-    "contextId": "aad14abc-4082-4748-84ca-4afff85aedfa"
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "message/send",
+  "params": {
+    "message": {
+      "role": "user",
+      "parts": [
+        {
+          "type": "text",
+          "text": "add Pixel 10 Pro to my checkout"
+        }
+      ],
+      "messageId": "69da8f87-991b-479e-80dc-ed92fcb57cbe",
+      "kind": "message",
+      "contextId": "aad14abc-4082-4748-84ca-4afff85aedfa"
+    }
   }
 }
 ```
@@ -5394,21 +5421,26 @@ Examples:
 
 ```json
 {
-  "message": {
-    "role": "user",
-    "parts": [
-      {
-        "type": "data",
-        "data": {
-          "action": "add_to_checkout",
-          "product_id": "PIXEL-10-PRO",
-          "quantity": 1
+  "jsonrpc": "2.0",
+  "id": 2,
+  "method": "message/send",
+  "params": {
+    "message": {
+      "role": "user",
+      "parts": [
+        {
+          "type": "data",
+          "data": {
+            "action": "add_to_checkout",
+            "product_id": "PIXEL-10-PRO",
+            "quantity": 1
+          }
         }
-      }
-    ],
-    "messageId": "e94a8c10-69f4-4c4c-b988-21a298302da6",
-    "kind": "message",
-    "contextId": "aad14abc-4082-4748-84ca-4afff85aedfa"
+      ],
+      "messageId": "e94a8c10-69f4-4c4c-b988-21a298302da6",
+      "kind": "message",
+      "contextId": "aad14abc-4082-4748-84ca-4afff85aedfa"
+    }
   }
 }
 ```
@@ -5426,7 +5458,7 @@ Examples:
     "parts": [
       {
         "data": {
-          "a2a.ucp.checkout": {...checkoutObject}
+          "a2a.ucp.checkout": { ... }
         },
         "kind": "data"
       }
@@ -5446,29 +5478,32 @@ Upon completion of the checkout process, the business agent must return the chec
 
 ```json
 {
-  "message": {
-    "role": "user",
-    "parts": [
-      {
-        "type": "data",
-        "data": {"action":"complete_checkout"}
-      },
-      {
-        "kind": "data",
-        "data": {
-          "a2a.ucp.checkout.payment": {
-            ...paymentObject
-          },
-          "a2a.ucp.checkout.signals": {
-            "dev.ucp.buyer_ip": "203.0.113.42",
-            "dev.ucp.user_agent": "Mozilla/5.0 ..."
+  "jsonrpc": "2.0",
+  "id": 3,
+  "method": "message/send",
+  "params": {
+    "message": {
+      "role": "user",
+      "parts": [
+        {
+          "type": "data",
+          "data": {"action":"complete_checkout"}
+        },
+        {
+          "kind": "data",
+          "data": {
+            "a2a.ucp.checkout.payment": { ... },
+            "a2a.ucp.checkout.signals": {
+              "dev.ucp.buyer_ip": "203.0.113.42",
+              "dev.ucp.user_agent": "Mozilla/5.0 ..."
+            }
           }
         }
-      }
-    ],
-    "messageId": "e94a8c10-69f4-4c4c-b988-21a298302da6",
-    "kind": "message",
-    "contextId": "aad14abc-4082-4748-84ca-4afff85aedfa"
+      ],
+      "messageId": "e94a8c10-69f4-4c4c-b988-21a298302da6",
+      "kind": "message",
+      "contextId": "aad14abc-4082-4748-84ca-4afff85aedfa"
+    }
   }
 }
 ```
@@ -5486,7 +5521,7 @@ Upon completion of the checkout process, the business agent must return the chec
     "parts": [
       {
         "data": {
-          "a2a.ucp.checkout": { ...checkoutObject }
+          "a2a.ucp.checkout": { ... }
         },
         "kind": "data"
       }
@@ -5514,7 +5549,6 @@ When AP2 mandates extension is enabled, the business agent must create a detache
       {
         "data": {
           "a2a.ucp.checkout": {
-            ...checkoutObject,
             "ap2": {
               "merchant_authorization": "<detached jws signature>"
             }
@@ -5534,44 +5568,49 @@ When the user confirms the payment on a platform, the user signed checkout and p
 
 ```json
 {
-  "message": {
-    "role": "user",
-    "parts": [
-      {
-        "type": "data",
-        "data": {
-          "action": "complete_checkout"
-        }
-      },
-      {
-        "kind": "data",
-        "data": {
-          "a2a.ucp.checkout.payment": {
-            "id": "instr_1",
-            "handler_id": "gpay",
-            "type": "card",
-            "description": "Visa •••• 1234",
-            "billing_address": {
-              "street_address": "123 Main St",
-              "address_locality": "Anytown",
-              "address_region": "CA",
-              "address_country": "US",
-              "postal_code": "12345"
+  "jsonrpc": "2.0",
+  "id": 4,
+  "method": "message/send",
+  "params": {
+    "message": {
+      "role": "user",
+      "parts": [
+        {
+          "type": "data",
+          "data": {
+            "action": "complete_checkout"
+          }
+        },
+        {
+          "kind": "data",
+          "data": {
+            "a2a.ucp.checkout.payment": {
+              "id": "instr_1",
+              "handler_id": "gpay",
+              "type": "card",
+              "description": "Visa •••• 1234",
+              "billing_address": {
+                "street_address": "123 Main St",
+                "address_locality": "Anytown",
+                "address_region": "CA",
+                "address_country": "US",
+                "postal_code": "12345"
+              },
+              "credential": {
+                "type": "PAYMENT_GATEWAY",
+                "token": "examplePaymentMethodToken"
+              }
             },
-            "credential": {
-              "type": "PAYMENT_GATEWAY",
-              "token": "examplePaymentMethodToken"
+            "ap2": {
+              "checkout_mandate": "eyJhbGciOiJFUz..."
             }
-          },
-          "ap2": {
-            "checkout_mandate": "eyJhbGciOiJFUz..."
           }
         }
-      }
-    ],
-    "messageId": "e94a8c10-69f4-4c4c-b988-21a298302da6",
-    "kind": "message",
-    "contextId": "aad14abc-4082-4748-84ca-4afff85aedfa"
+      ],
+      "messageId": "e94a8c10-69f4-4c4c-b988-21a298302da6",
+      "kind": "message",
+      "contextId": "aad14abc-4082-4748-84ca-4afff85aedfa"
+    }
   }
 }
 ```
@@ -5638,10 +5677,10 @@ For requests (messages with `id`), receivers **MUST** respond with a `result`. B
 ```json
 {
   "jsonrpc": "2.0",
-  "id": "...",
+  "id": "req_1",
   "result": {
-    "ucp": { "version": "draft", "status": "success" },
-    ...
+    "ucp": { "version": "draft", "status": "success" }
+    // ... result fields
   }
 }
 ```
@@ -5866,9 +5905,9 @@ Both are notifications — the host **MUST NOT** respond.
         "cart": {
             "id": "cart_123",
             "currency": "USD",
-            "totals": [/* ... */],
-            "line_items": [/* ... */],
-            "buyer": {/* ... */}
+            "totals": [ ... ],
+            "line_items": [ ... ],
+            "buyer": { ... }
         }
     }
 }
@@ -5908,8 +5947,8 @@ Each capability defines its own set of state change methods covering the relevan
     "params": {
         "checkout": {
             "id": "checkout_123",
-            "totals": [/* ... */],
-            "line_items": [/* ... */]
+            "totals": [ ... ],
+            "line_items": [ ... ]
             // ... other checkout fields
         }
     }
@@ -5925,7 +5964,7 @@ Each capability defines its own set of state change methods covering the relevan
     "params": {
         "cart": {
             "id": "cart_123",
-            "line_items": [/* ... */],
+            "line_items": [ ... ],
             "messages": [
                 {
                     "type": "error",
@@ -6142,7 +6181,7 @@ All ECP parameters are passed via URL query string, not HTTP headers, to ensure 
 
 **Example (Informative - JWT-based):**
 
-```json
+```text
 // One possible implementation using JWT
 {
   "alg": "HS256",
@@ -6521,10 +6560,10 @@ Signals that checkout is visible and ready for interaction. Sent after a success
                     "severity": "recoverable"
                 }
             ],
-            "totals": [/* ... */],
-            "line_items": [/* ... */],
-            "buyer": {/* ... */},
-            "payment": {/* ... */}
+            "totals": [ ... ],
+            "line_items": [ ... ],
+            "buyer": { ... },
+            "payment": { ... }
             // ... other checkout fields
         }
     }
@@ -6582,12 +6621,8 @@ Line items have been modified (quantity changed, items added/removed).
         "checkout": {
             "id": "checkout_123",
             // The entire checkout object is provided, including the updated line items and totals
-            "totals": [
-                /* ... */
-            ],
-            "line_items": [
-                /* ... */
-            ]
+            "totals": [ ... ],
+            "line_items": [ ... ]
             // ...
         }
     }
@@ -6613,9 +6648,7 @@ Buyer information has been updated (email, phone, address).
         "checkout": {
             "id": "checkout_123",
             // The entire checkout object is provided, including the updated buyer information
-            "buyer": {
-                /* ... */
-            }
+            "buyer": { ... }
             // ...
         }
     }
@@ -6769,7 +6802,7 @@ Informs the host that something has changed in the payment section of the checko
                     {
                         "id": "payment_instrument_123",
                         "selected": true
-                        /* ... */
+                        // ... additional instrument fields
                     }
                 ]
             }
@@ -6799,9 +6832,7 @@ Requests the host to present payment instrument selection UI.
         "checkout": {
             "id": "checkout_123",
             // The entire checkout object is provided, including the current payment details
-            "payment": {
-                /* ... */
-            }
+            "payment": { ... }
             // ...
         }
     }
@@ -6895,7 +6926,7 @@ Requests a credential for the selected payment instrument during checkout submis
                     {
                         "id": "payment_instrument_123",
                         "selected": true
-                        /* ... */
+                        // ... additional instrument fields
                     }
                 ]
             }
@@ -7020,9 +7051,7 @@ Informs the host that the fulfillment details have been changed in the checkout 
         "checkout": {
             "id": "checkout_123",
             // The entire checkout object is provided, including the updated fulfillment details
-            "fulfillment": {
-                /* ... */
-            }
+            "fulfillment": { ... }
             // ...
         }
     }
@@ -7432,27 +7461,32 @@ Businesses declare support by adding `dev.ucp.shopping.ap2_mandate` to their `ca
 
 ```json
 {
-  "capabilities": {
-    "dev.ucp.shopping.checkout": [
-      {
-        "version": "draft",
-        "spec": "https://ucp.dev/draft/specification/checkout",
-        "schema": "https://ucp.dev/draft/schemas/shopping/checkout.json"
-      }
-    ],
-    "dev.ucp.shopping.ap2_mandate": [
-      {
-        "version": "draft",
-        "spec": "https://ucp.dev/draft/specification/ap2-mandates",
-        "schema": "https://ucp.dev/draft/schemas/shopping/ap2_mandate.json",
-        "extends": "dev.ucp.shopping.checkout",
-        "config": {
-          "vp_formats_supported": {
-            "dc+sd-jwt": { }
+  "ucp": {
+    "version": "draft",
+    "services": {},
+    "capabilities": {
+      "dev.ucp.shopping.checkout": [
+        {
+          "version": "draft",
+          "spec": "https://ucp.dev/draft/specification/checkout",
+          "schema": "https://ucp.dev/draft/schemas/shopping/checkout.json"
+        }
+      ],
+      "dev.ucp.shopping.ap2_mandate": [
+        {
+          "version": "draft",
+          "spec": "https://ucp.dev/draft/specification/ap2-mandates",
+          "schema": "https://ucp.dev/draft/schemas/shopping/ap2_mandate.json",
+          "extends": "dev.ucp.shopping.checkout",
+          "config": {
+            "vp_formats_supported": {
+              "dc+sd-jwt": { }
+            }
           }
         }
-      }
-    ]
+      ]
+    },
+    "payment_handlers": {}
   }
 }
 ```
@@ -7498,11 +7532,13 @@ Businesses **MUST** embed their signature in the checkout response body under `a
 
 ```json
 {
+  "ucp": { ... },
   "id": "chk_abc123",
   "status": "ready_for_complete",
   "currency": "USD",
-  "line_items": [...],
-  "totals": [...],
+  "line_items": [ ... ],
+  "totals": [ ... ],
+  "links": [ ... ],
   "ap2": {
     "merchant_authorization": "eyJhbGciOiJFUzI1NiIsImtpZCI6Im1lcmNoYW50XzIwMjUifQ..<signature>"
   }
@@ -7604,6 +7640,7 @@ Checkout extended with AP2 mandate support.
 
 ```json
 {
+  "ucp": { ... },
   "id": "chk_abc123",
   "status": "ready_for_complete",
   "currency": "USD",
@@ -7623,6 +7660,7 @@ Checkout extended with AP2 mandate support.
     {"type": "tax", "amount": 400},
     {"type": "total", "amount": 5400}
   ],
+  "links": [ ... ],
   "ap2": {
     "merchant_authorization": "eyJhbGciOiJFUzI1NiIsImtpZCI6Im1lcmNoYW50XzIwMjUifQ..<signature>"
   }
@@ -7691,7 +7729,7 @@ AP2 extension data including checkout mandate.
         "type": "card",
         "selected": true,
         "display": {
-          "description": "Visa •••• 1234",
+          "description": "Visa •••• 1234"
         },
         "billing_address": {
           "street_address": "123 Main St",
@@ -7893,6 +7931,7 @@ POST /checkouts
 
 ```json
 {
+  "ucp": { ... },
   "id": "checkout_456",
   "status": "ready_for_complete",
   "currency": "USD",
@@ -8066,16 +8105,14 @@ Discount codes are submitted via standard cart or checkout create/update operati
 When a submitted discount code cannot be applied, businesses communicate this via the `messages[]` array:
 
 ```json
-{
-  "messages": [
-    {
-      "type": "warning",
-      "code": "discount_code_expired",
-      "path": "$.discounts.codes[0]",
-      "content": "Code 'SUMMER20' expired on December 1st"
-    }
-  ]
-}
+[
+  {
+    "type": "warning",
+    "code": "discount_code_expired",
+    "path": "$.discounts.codes[0]",
+    "content": "Code 'SUMMER20' expired on December 1st"
+  }
+]
 ```
 
 > **Implementation guidance:** Operations that affect order totals, or the user's expectation of the total, **SHOULD** use `type: "warning"` to ensure they are surfaced to the user rather than silently handled by platforms. Rejected discounts are a prime example—the user expects a discount but won't receive it, so they should be informed.
@@ -8145,6 +8182,10 @@ Building on the store card example from [Eligibility Verification at Completion]
 
 ```json
 {
+  "ucp": { ... },
+  "id": "...",
+  "currency": "...",
+  "line_items": [ ... ],
   "discounts": {
     "applied": [
       {
@@ -8204,7 +8245,7 @@ Discount codes applied during cart exploration. The cart response includes estim
   "line_items": [
     {
       "item": {
-        "id": "prod_1",
+        "id": "prod_1"
       },
       "quantity": 2
     }
@@ -8217,7 +8258,9 @@ Discount codes applied during cart exploration. The cart response includes estim
 
 ```json
 {
+  "ucp": { ... },
   "id": "cart_abc123",
+  "currency": "USD",
   "line_items": [
     {
       "id": "li_1",
@@ -8248,7 +8291,6 @@ Discount codes applied during cart exploration. The cart response includes estim
       }
     ]
   },
-  "currency": "USD",
   "totals": [
     {"type": "subtotal", "display_text": "Subtotal", "amount": 4000},
     {"type": "items_discount", "display_text": "Item Discounts", "amount": -800},
@@ -8263,6 +8305,8 @@ A flat discount applied to the order total. No allocations—the discount applie
 
 ```json
 {
+  "id": "...",
+  "line_items": [ ... ],
   "discounts": {
     "codes": ["SAVE10"]
   }
@@ -8271,6 +8315,10 @@ A flat discount applied to the order total. No allocations—the discount applie
 
 ```json
 {
+  "ucp": { ... },
+  "id": "...",
+  "currency": "...",
+  "line_items": [ ... ],
   "discounts": {
     "codes": ["SAVE10"],
     "applied": [
@@ -8295,6 +8343,8 @@ This example shows both discount types: a per-item discount (20% off) allocated 
 
 ```json
 {
+  "id": "...",
+  "line_items": [ ... ],
   "discounts": {
     "codes": ["SUMMER20"]
   }
@@ -8303,6 +8353,9 @@ This example shows both discount types: a per-item discount (20% off) allocated 
 
 ```json
 {
+  "ucp": { ... },
+  "id": "...",
+  "currency": "...",
   "line_items": [
     {
       "id": "li_1",
@@ -8353,6 +8406,8 @@ When a discount code cannot be applied, the rejection is communicated via the `m
 
 ```json
 {
+  "id": "...",
+  "line_items": [ ... ],
   "discounts": {
     "codes": ["SAVE10", "EXPIRED50"]
   }
@@ -8361,6 +8416,10 @@ When a discount code cannot be applied, the rejection is communicated via the `m
 
 ```json
 {
+  "ucp": { ... },
+  "id": "...",
+  "currency": "...",
+  "line_items": [ ... ],
   "discounts": {
     "codes": ["SAVE10", "EXPIRED50"],
     "applied": [
@@ -8393,6 +8452,9 @@ Multiple discounts applied with full allocation breakdown:
 
 ```json
 {
+  "ucp": { ... },
+  "id": "...",
+  "currency": "...",
   "line_items": [
     {
       "id": "li_1",
@@ -8604,6 +8666,13 @@ This object MUST be one of the following types: [Shipping Destination](/draft/sp
 
 ```json
 {
+  "ucp": { ... },
+  "id": "...",
+  "status": "...",
+  "currency": "...",
+  "line_items": [ ... ],
+  "totals": [ ... ],
+  "links": [ ... ],
   "fulfillment": {
     "methods": [
       {
@@ -8718,6 +8787,13 @@ Available methods indicate whether an item can be fulfilled with a given method,
 
 ```json
 {
+  "ucp": { ... },
+  "id": "...",
+  "status": "...",
+  "currency": "...",
+  "line_items": [ ... ],
+  "totals": [ ... ],
+  "links": [ ... ],
   "fulfillment": {
     "methods": [
       {
@@ -8768,12 +8844,35 @@ Platforms declare their rendering capabilities using `platform_schema`:
 
 Platforms that omit config or set `supports_multi_group: false` receive single-group responses. The response shape is always `methods[].groups[]`—the difference is whether `groups.length` can exceed 1 within each method.
 
-```json
-// Default: single group per method
-{ "dev.ucp.shopping.fulfillment": [{"version": "draft"}] }
+Default declaration (single group per method):
 
-// Opt-in: business MAY return multiple groups per method
-{ "dev.ucp.shopping.fulfillment": [{"version": "draft", "config": { "supports_multi_group": true }}] }
+```json
+{
+  "dev.ucp.shopping.fulfillment": [
+    {
+      "version": "draft",
+      "spec": "https://ucp.dev/draft/specification/fulfillment",
+      "schema": "https://ucp.dev/draft/schemas/shopping/fulfillment.json",
+      "extends": "dev.ucp.shopping.checkout"
+    }
+  ]
+}
+```
+
+Opt-in declaration (business MAY return multiple groups per method):
+
+```json
+{
+  "dev.ucp.shopping.fulfillment": [
+    {
+      "version": "draft",
+      "spec": "https://ucp.dev/draft/specification/fulfillment",
+      "schema": "https://ucp.dev/draft/schemas/shopping/fulfillment.json",
+      "extends": "dev.ucp.shopping.checkout",
+      "config": { "supports_multi_group": true }
+    }
+  ]
+}
 ```
 
 ### Business Profile
@@ -8787,19 +8886,20 @@ Businesses declare what fulfillment configurations they support using `merchant_
 
 ```json
 {
-  "capabilities": {
-    "dev.ucp.shopping.fulfillment": [
-      {
-        "version": "draft",
-        "config": {
-          "allows_multi_destination": {
-            "shipping": true
-          },
-          "allows_method_combinations": [["shipping", "pickup"]]
-        }
+  "dev.ucp.shopping.fulfillment": [
+    {
+      "version": "draft",
+      "spec": "https://ucp.dev/draft/specification/fulfillment",
+      "schema": "https://ucp.dev/draft/schemas/shopping/fulfillment.json",
+      "extends": "dev.ucp.shopping.checkout",
+      "config": {
+        "allows_multi_destination": {
+          "shipping": true
+        },
+        "allows_method_combinations": [["shipping", "pickup"]]
       }
-    ]
-  }
+    }
+  ]
 }
 ```
 
@@ -8837,6 +8937,13 @@ Note: Platform's `supports_multi_group` is method-agnostic (single boolean), so 
 
 ```json
 {
+  "ucp": { ... },
+  "id": "...",
+  "status": "...",
+  "currency": "...",
+  "line_items": [ ... ],
+  "totals": [ ... ],
+  "links": [ ... ],
   "fulfillment": {
     "methods": [
       {
@@ -8899,6 +9006,13 @@ Business splits items into multiple packages; buyer selects shipping rate per pa
 
 ```json
 {
+  "ucp": { ... },
+  "id": "...",
+  "status": "...",
+  "currency": "...",
+  "line_items": [ ... ],
+  "totals": [ ... ],
+  "links": [ ... ],
   "fulfillment": {
     "methods": [
       {
@@ -8966,6 +9080,13 @@ Shirt ships to mom (US), pants ship to grandma (Hong Kong). Two methods of the s
 
 ```json
 {
+  "ucp": { ... },
+  "id": "...",
+  "status": "...",
+  "currency": "...",
+  "line_items": [ ... ],
+  "totals": [ ... ],
+  "links": [ ... ],
   "fulfillment": {
     "methods": [
       {
@@ -9997,7 +10118,8 @@ Businesses advertise REST transport availability through their UCP profile at `/
           "schema": "https://ucp.dev/draft/schemas/shopping/cart.json"
         }
       ]
-    }
+    },
+    "payment_handlers": {}
   }
 }
 ```
@@ -10171,7 +10293,7 @@ Content-Type: application/json
 
 #### Example
 
-```json
+```http
 GET /carts/{id} HTTP/1.1
 UCP-Agent: profile="https://platform.example/profile"
 ```
@@ -10577,7 +10699,8 @@ Businesses advertise MCP transport availability through their UCP profile at `/.
           "schema": "https://ucp.dev/draft/schemas/shopping/cart.json"
         }
       ]
-    }
+    },
+    "payment_handlers": {}
   }
 }
 ```
@@ -10599,7 +10722,7 @@ MCP clients **MUST** include a `meta` object in every request containing protoco
           "profile": "https://platform.example/profiles/shopping-agent.json"
         }
       },
-      "cart": { ... }
+      "cart": { "line_items": [ ... ] }
     }
   }
 }
@@ -10739,7 +10862,7 @@ Maps to the [Create Cart](http://ucp.dev/draft/specification/cart/#create-cart) 
     "content": [
       {
         "type": "text",
-        "text": "{\"ucp\":{...},\"id\":\"cart_abc123\",...}"
+        "text": "{\"ucp\":{…},…}"
       }
     ]
   }
@@ -10766,7 +10889,7 @@ All items out of stock — no cart resource is created:
       "continue_url": "https://merchant.com/"
     },
     "content": [
-      {"type": "text", "text": "{\"ucp\":{...},\"messages\":[...]}"}
+      {"type": "text", "text": "{\"ucp\":{…},…}"}
     ]
   }
 }
@@ -10865,7 +10988,7 @@ Maps to the [Get Cart](http://ucp.dev/draft/specification/cart/#get-cart) operat
     "content": [
       {
         "type": "text",
-        "text": "{\"ucp\":{...},\"id\":\"cart_abc123\",...}"
+        "text": "{\"ucp\":{…},…}"
       }
     ]
   }
@@ -10880,6 +11003,7 @@ Maps to the [Get Cart](http://ucp.dev/draft/specification/cart/#get-cart) operat
     "structuredContent": {
       "ucp": {
         "version": "draft",
+        "status": "error",
         "capabilities": {
           "dev.ucp.shopping.cart": [{"version": "draft"}]
         }
@@ -10897,7 +11021,7 @@ Maps to the [Get Cart](http://ucp.dev/draft/specification/cart/#get-cart) operat
     "content": [
       {
         "type": "text",
-        "text": "{\"ucp\":{...},\"messages\":[...],\"continue_url\":\"...\"}"
+        "text": "{\"ucp\":{…},…}"
       }
     ]
   }
@@ -11040,7 +11164,7 @@ Maps to the [Update Cart](http://ucp.dev/draft/specification/cart/#update-cart) 
     "content": [
       {
         "type": "text",
-        "text": "{\"ucp\":{...},\"id\":\"cart_abc123\",...}"
+        "text": "{\"ucp\":{…},…}"
       }
     ]
   }
@@ -11140,7 +11264,7 @@ Maps to the [Cancel Cart](http://ucp.dev/draft/specification/cart/#cancel-cart) 
     "content": [
       {
         "type": "text",
-        "text": "{\"ucp\":{...},\"id\":\"cart_abc123\",...}"
+        "text": "{\"ucp\":{…},…}"
       }
     ]
   }
@@ -11166,6 +11290,7 @@ Business outcomes (including not found and validation errors) are returned as JS
     "structuredContent": {
       "ucp": {
         "version": "draft",
+        "status": "error",
         "capabilities": {
           "dev.ucp.shopping.cart": [{"version": "draft"}]
         }
@@ -11181,7 +11306,7 @@ Business outcomes (including not found and validation errors) are returned as JS
       "continue_url": "https://merchant.com/"
     },
     "content": [
-      {"type": "text", "text": "{\"ucp\":{...},\"messages\":[...]}"}
+      {"type": "text", "text": "{\"ucp\":{…},…}"}
     ]
   }
 }
@@ -11260,10 +11385,10 @@ For requests (messages with `id`), receivers **MUST** respond with a `result`. B
 ```json
 {
   "jsonrpc": "2.0",
-  "id": "...",
+  "id": "req_1",
   "result": {
-    "ucp": { "version": "draft", "status": "success" },
-    ...
+    "ucp": { "version": "draft", "status": "success" }
+    // ... result fields
   }
 }
 ```
@@ -11488,9 +11613,9 @@ Both are notifications — the host **MUST NOT** respond.
         "cart": {
             "id": "cart_123",
             "currency": "USD",
-            "totals": [/* ... */],
-            "line_items": [/* ... */],
-            "buyer": {/* ... */}
+            "totals": [ ... ],
+            "line_items": [ ... ],
+            "buyer": { ... }
         }
     }
 }
@@ -11530,8 +11655,8 @@ Each capability defines its own set of state change methods covering the relevan
     "params": {
         "checkout": {
             "id": "checkout_123",
-            "totals": [/* ... */],
-            "line_items": [/* ... */]
+            "totals": [ ... ],
+            "line_items": [ ... ]
             // ... other checkout fields
         }
     }
@@ -11547,7 +11672,7 @@ Each capability defines its own set of state change methods covering the relevan
     "params": {
         "cart": {
             "id": "cart_123",
-            "line_items": [/* ... */],
+            "line_items": [ ... ],
             "messages": [
                 {
                     "type": "error",
@@ -11857,9 +11982,9 @@ Signals that cart is visible and ready for interaction. Sent after a successful 
         "cart": {
             "id": "cart_123",
             "currency": "USD",
-            "totals": [/* ... */],
-            "line_items": [/* ... */],
-            "buyer": {/* ... */},
+            "totals": [ ... ],
+            "line_items": [ ... ],
+            "buyer": { ... }
             // ...other cart fields...
         }
     }
@@ -11887,9 +12012,9 @@ This marks the completion of Embedded Cart. If `dev.ucp.shopping.checkout` is pa
         "cart": {
             "id": "cart_123",
             "currency": "USD",
-            "totals": [/* ... */],
-            "line_items": [/* ... */],
-            "buyer": {/* ... */},
+            "totals": [ ... ],
+            "line_items": [ ... ],
+            "buyer": { ... }
             // ...other cart fields...
         }
     }
@@ -11919,12 +12044,8 @@ Line items have been modified (quantity changed, items added/removed).
         "cart": {
             "id": "cart_123",
             // The entire cart object is provided, including the updated line items and estimated totals
-            "totals": [
-                /* ... */
-            ],
-            "line_items": [
-                /* ... */
-            ]
+            "totals": [ ... ],
+            "line_items": [ ... ]
             // ...
         }
     }
@@ -11950,9 +12071,7 @@ Buyer information has been updated (email, phone, name).
         "cart": {
             "id": "cart_123",
             // The entire cart object is provided, including the updated buyer information
-            "buyer": {
-                /* ... */
-            }
+            "buyer": { ... }
             // ...
         }
     }
@@ -12346,16 +12465,23 @@ When a product requires a disclosure (e.g., allergen notice, safety warning), re
     {
       "id": "prod_nut_butter",
       "title": "Artisan Nut Butter Collection",
+      "description": { "plain": "Assorted artisan nut butters." },
+      "price_range": {
+        "min": { "amount": 1299, "currency": "USD" },
+        "max": { "amount": 1499, "currency": "USD" }
+      },
       "variants": [
         {
           "id": "var_almond",
           "title": "Almond Butter",
+          "description": { "plain": "Smooth almond butter." },
           "price": { "amount": 1299, "currency": "USD" },
           "availability": { "available": true }
         },
         {
           "id": "var_cashew",
           "title": "Cashew Butter",
+          "description": { "plain": "Creamy cashew butter." },
           "price": { "amount": 1499, "currency": "USD" },
           "availability": { "available": true }
         }
@@ -12682,7 +12808,8 @@ Businesses advertise REST transport availability through their UCP profile at `/
         "spec": "https://ucp.dev/draft/specification/catalog/lookup",
         "schema": "https://ucp.dev/draft/schemas/shopping/catalog_lookup.json"
       }]
-    }
+    },
+    "payment_handlers": {}
   }
 }
 ```
@@ -12923,6 +13050,7 @@ Content-Type: application/json
           "id": "prod_def456_size10",
           "sku": "TBX-GRN-10",
           "title": "Talla 10",
+          "description": { "plain": "Variante talla 10" },
           "price": { "amount": 15000, "currency": "USD" },
           "availability": { "available": true },
           "inputs": [
@@ -12959,6 +13087,8 @@ When some identifiers in the batch are not found, the response includes the foun
     {
       "id": "prod_abc123",
       "title": "Blue Runner Pro",
+      "description": { "plain": "Lightweight running shoes." },
+      "variants": [ ... ],
       "price_range": {
         "min": { "amount": 12000, "currency": "USD" },
         "max": { "amount": 12000, "currency": "USD" }
@@ -12967,6 +13097,8 @@ When some identifiers in the batch are not found, the response includes the foun
     {
       "id": "prod_def456",
       "title": "Trail Blazer X",
+      "description": { "plain": "Trail shoes with superior traction." },
+      "variants": [ ... ],
       "price_range": {
         "min": { "amount": 15000, "currency": "USD" },
         "max": { "amount": 15000, "currency": "USD" }
@@ -13278,7 +13410,8 @@ Businesses advertise MCP transport availability through their UCP profile at `/.
         "spec": "https://ucp.dev/draft/specification/catalog/lookup",
         "schema": "https://ucp.dev/draft/schemas/shopping/catalog_lookup.json"
       }]
-    }
+    },
+    "payment_handlers": {}
   }
 }
 ```
@@ -13645,11 +13778,14 @@ When some identifiers are not found, the response includes the found products. T
         {
           "id": "prod_abc123",
           "title": "Blue Runner Pro",
+          "description": {
+            "plain": "A comfortable everyday running shoe."
+          },
           "price_range": {
             "min": { "amount": 12000, "currency": "USD" },
             "max": { "amount": 12000, "currency": "USD" }
           },
-          "variants": []
+          "variants": [ ... ]
         }
       ],
       "messages": [
@@ -14375,6 +14511,8 @@ Platform's order capability configuration.
   "dev.ucp.shopping.order": [
     {
       "version": "draft",
+      "spec": "https://ucp.dev/draft/specification/order",
+      "schema": "https://ucp.dev/draft/schemas/shopping/order.json",
       "config": {
         "webhook_url": "https://platform.example.com/webhooks/ucp/orders"
       }
@@ -14551,7 +14689,8 @@ Businesses advertise REST transport availability through their UCP profile at `/
           "schema": "https://ucp.dev/draft/schemas/shopping/order.json"
         }
       ]
-    }
+    },
+    "payment_handlers": {}
   }
 }
 ```
@@ -14605,7 +14744,7 @@ Returns the current-state snapshot of an order.
 
 #### Example
 
-```json
+```http
 GET /orders/order_abc123 HTTP/1.1
 UCP-Agent: profile="https://platform.example/.well-known/ucp"
 Accept: application/json
@@ -14804,7 +14943,8 @@ Businesses advertise MCP transport availability through their UCP profile at `/.
           "schema": "https://ucp.dev/draft/schemas/shopping/order.json"
         }
       ]
-    }
+    },
+    "payment_handlers": {}
   }
 }
 ```
@@ -14956,7 +15096,7 @@ Maps to the [Get Order](http://ucp.dev/draft/specification/order/#get-order) ope
     "content": [
       {
         "type": "text",
-        "text": "{\"ucp\":{...},\"id\":\"order_abc123\",...}"
+        "text": "{\"ucp\":{…},…}"
       }
     ]
   }
@@ -15210,7 +15350,7 @@ Each scope's value is an open object that carries per-scope policy and metadata.
 Optional human-readable description of the scope that platforms can use to present and explain context (requirement and value) to the user.
 
 ```json
-"dev.ucp.shopping.order:manage": {
+{
   "description": {
     "plain": "Manage your orders: cancel, return, or modify post-purchase.",
     "markdown": "**Manage your orders**: cancel, return, or modify post-purchase."
@@ -15343,7 +15483,6 @@ Businesses **SHOULD** include this info-severity code in successful responses wh
 
 ```json
 {
-  ...,
   "messages": [
     {
       "type": "info",
@@ -15428,9 +15567,11 @@ Public catalog, guest checkout (no scope required), user-bound order operations 
 ```json
 {
   "ucp": {
+    "version": "draft",
+    "services": {},
     "capabilities": {
       "dev.ucp.common.identity_linking": [{
-        "version": "Working Draft",
+        "version": "draft",
         "spec": "https://ucp.dev/specification/identity-linking",
         "schema": "https://ucp.dev/schemas/common/identity_linking.json",
         "config": {
@@ -15440,7 +15581,8 @@ Public catalog, guest checkout (no scope required), user-bound order operations 
           }
         }
       }]
-    }
+    },
+    "payment_handlers": {}
   }
 }
 ```
@@ -15457,9 +15599,11 @@ No guest checkout — every transaction requires an authenticated user:
 ```json
 {
   "ucp": {
+    "version": "draft",
+    "services": {},
     "capabilities": {
       "dev.ucp.common.identity_linking": [{
-        "version": "Working Draft",
+        "version": "draft",
         "spec": "https://ucp.dev/specification/identity-linking",
         "schema": "https://ucp.dev/schemas/common/identity_linking.json",
         "config": {
@@ -15470,7 +15614,8 @@ No guest checkout — every transaction requires an authenticated user:
           }
         }
       }]
-    }
+    },
+    "payment_handlers": {}
   }
 }
 ```
@@ -15680,24 +15825,18 @@ The handler declaration conforms to the [`PaymentHandler`](/draft/schemas/paymen
 
 ```json
 {
-  "ucp": {
-    "payment_handlers": {
-      "com.example.handler": [
-        {
-          "id": "processor_tokenizer_1234",
-          "version": "draft",
-          "spec": "https://example.com/ucp/handler",
-          "schema": "https://example.com/ucp/handler/schema.json",
-          "available_instruments": [
-            // Instrument types this handler supports
-          ],
-          "config": {
-            // Handler-specific configuration (see Config Shapes)
-          }
-        }
-      ]
+  "com.example.handler": [
+    {
+      "id": "processor_tokenizer_1234",
+      "version": "draft",
+      "spec": "https://example.com/ucp/handler",
+      "schema": "https://example.com/ucp/handler/schema.json",
+      "available_instruments": [ ... ],
+      "config": {
+        // Handler-specific configuration (see Config Shapes)
+      }
     }
-  }
+  ]
 }
 ```
 

@@ -129,24 +129,18 @@ The handler declaration conforms to the [`PaymentHandler`](/draft/schemas/paymen
 
 ```json
 {
-  "ucp": {
-    "payment_handlers": {
-      "com.example.handler": [
-        {
-          "id": "processor_tokenizer_1234",
-          "version": "draft",
-          "spec": "https://example.com/ucp/handler",
-          "schema": "https://example.com/ucp/handler/schema.json",
-          "available_instruments": [
-            // Instrument types this handler supports
-          ],
-          "config": {
-            // Handler-specific configuration (see Config Shapes)
-          }
-        }
-      ]
+  "com.example.handler": [
+    {
+      "id": "processor_tokenizer_1234",
+      "version": "draft",
+      "spec": "https://example.com/ucp/handler",
+      "schema": "https://example.com/ucp/handler/schema.json",
+      "available_instruments": [ ... ],
+      "config": {
+        // Handler-specific configuration (see Config Shapes)
+      }
     }
-  }
+  ]
 }
 ```
 

@@ -437,6 +437,8 @@ Platform's order capability configuration.
   "dev.ucp.shopping.order": [
     {
       "version": "draft",
+      "spec": "https://ucp.dev/draft/specification/order",
+      "schema": "https://ucp.dev/draft/schemas/shopping/order.json",
       "config": {
         "webhook_url": "https://platform.example.com/webhooks/ucp/orders"
       }

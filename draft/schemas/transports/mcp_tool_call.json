@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/draft/schemas/transports/mcp_tool_call.json",
+  "title": "MCP Tool Call Envelope",
+  "description": "UCP's MCP transport envelope for JSON-RPC tools/call messages. The schema validates the MCP mapping layer: operation name in params.name, UCP metadata and domain arguments in params.arguments, and UCP output in result.structuredContent.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/request"
+    },
+    {
+      "$ref": "#/$defs/response"
+    },
+    {
+      "$ref": "https://ucp.dev/draft/schemas/transports/jsonrpc.json#/$defs/error_response"
+    }
+  ],
+  "$defs": {
+    "ucp_agent": {
+      "type": "object",
+      "description": "UCP-Agent metadata carried inside MCP tool arguments.",
+      "required": [
+        "profile"
+      ],
+      "properties": {
+        "profile": {
+          "type": "string",
+          "format": "uri-reference",
+          "description": "Platform profile URI advertised to the business."
+        }
+      },
+      "additionalProperties": true
+    },
+    "meta": {
+      "type": "object",
+      "description": "UCP request metadata passed through MCP params.arguments.meta.",
+      "properties": {
+        "ucp-agent": {
+          "$ref": "#/$defs/ucp_agent"
+        },
+        "idempotency-key": {
+          "type": "string",
+          "description": "Optional idempotency key for retry-safe mutating operations."
+        }
+      },
+      "additionalProperties": true
+    },
+    "arguments": {
+      "type": "object",
+      "description": "MCP tool arguments. UCP reserves meta for transport metadata; operation payload fields such as checkout, cart, order id, or catalog inputs are operation-specific.",
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/meta"
+        }
+      },
+      "additionalProperties": true
+    },
+    "request": {
+      "description": "MCP tools/call request envelope for invoking a UCP operation.",
+      "allOf": [
+        {
+          "$ref": "https://ucp.dev/draft/schemas/transports/jsonrpc.json#/$defs/request"
+        },
+        {
+          "type": "object",
+          "required": [
+            "params"
+          ],
+          "properties": {
+            "method": {
+              "const": "tools/call"
+            },
+            "params": {
+              "type": "object",
+              "required": [
+                "name",
+                "arguments"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "MCP tool name matching the UCP operation binding, such as create_checkout or get_cart."
+                },
+                "arguments": {
+                  "$ref": "#/$defs/arguments"
+                }
+              },
+              "additionalProperties": true
+            }
+          }
+        }
+      ]
+    },
+    "content_part": {
+      "type": "object",
+      "description": "MCP content part returned for clients that do not consume structuredContent.",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    },
+    "response": {
+      "description": "MCP tools/call response envelope. UCP payloads are carried in result.structuredContent; content is compatibility output.",
+      "allOf": [
+        {
+          "$ref": "https://ucp.dev/draft/schemas/transports/jsonrpc.json#/$defs/success_response"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "result": {
+              "type": "object",
+              "required": [
+                "structuredContent"
+              ],
+              "properties": {
+                "structuredContent": {
+                  "type": "object",
+                  "description": "The UCP response payload for the operation."
+                },
+                "content": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/content_part"
+                  }
+                }
+              },
+              "additionalProperties": true
+            }
+          }
+        }
+      ]
+    }
+  }
+}

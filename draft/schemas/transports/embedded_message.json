@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/draft/schemas/transports/embedded_message.json",
+  "title": "Embedded Protocol Message Envelope",
+  "description": "JSON-RPC envelope for UCP Embedded Protocol (EP) messages exchanged between a host and an embedded context. This schema constrains the shared transport envelope and method namespace while leaving capability-specific params and result payloads to their capability schemas.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/request"
+    },
+    {
+      "$ref": "#/$defs/response"
+    },
+    {
+      "$ref": "#/$defs/error_response"
+    }
+  ],
+  "$defs": {
+    "method": {
+      "type": "string",
+      "pattern": "^(ec|ep\\.cart)\\.[a-z][a-z0-9_]*(?:\\.[a-z][a-z0-9_]*)*$",
+      "description": "Embedded Protocol method name. Checkout methods use ec.* and cart methods use ep.cart.*."
+    },
+    "request": {
+      "description": "Embedded Protocol request or notification envelope. Messages with id expect a response; messages without id are notifications.",
+      "allOf": [
+        {
+          "$ref": "https://ucp.dev/draft/schemas/transports/jsonrpc.json#/$defs/request"
+        },
+        {
+          "type": "object",
+          "required": [
+            "params"
+          ],
+          "properties": {
+            "method": {
+              "$ref": "#/$defs/method"
+            },
+            "params": {
+              "type": "object",
+              "description": "Capability-specific EP parameters."
+            }
+          }
+        }
+      ]
+    },
+    "response": {
+      "description": "Embedded Protocol success response envelope. UCP application-level success and error outcomes are both carried in result.ucp.status.",
+      "allOf": [
+        {
+          "$ref": "https://ucp.dev/draft/schemas/transports/jsonrpc.json#/$defs/success_response"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "result": {
+              "type": "object",
+              "description": "Capability-specific EP result. Application-level status is defined by capability schemas; see Embedded Protocol response handling.",
+              "additionalProperties": true
+            }
+          }
+        }
+      ]
+    },
+    "error_response": {
+      "description": "JSON-RPC transport-level error response for EP messages. Application-level failures use the response result with result.ucp.status=error instead.",
+      "$ref": "https://ucp.dev/draft/schemas/transports/jsonrpc.json#/$defs/error_response"
+    }
+  }
+}

@@ -286,6 +286,14 @@ Platforms **MUST** resolve schemas following this sequence:
 
 ### Profile Structure
 
+Profile documents are machine-readable discovery documents. Businesses publish their profile at `/.well-known/ucp`; platforms publish their profile at the URI advertised in `UCP-Agent`.
+
+A profile document is a JSON object with a required `ucp` member. The `ucp` member contains protocol metadata: protocol version, services, optional capabilities, and payment handlers.
+
+For both business and platform profiles, `ucp.version`, `ucp.services`, and `ucp.payment_handlers` are required. The `services` and `payment_handlers` registries **MUST** be present even when empty. `ucp.capabilities` is optional and **MAY** be omitted, though useful commerce profiles normally advertise at least one capability.
+
+Profiles **MAY** include `signing_keys`, an array of public EC JSON Web Keys used for HTTP Message Signatures and signed webhooks. See [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md) for key format, algorithms, lookup, and rotation.
+
 #### Business Profile
 
 Businesses publish their profile at `/.well-known/ucp`. An example:
@@ -404,7 +412,7 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
 }
 ```
 
-The `ucp` object contains protocol metadata: version, services, capabilities, and payment handlers. The `signing_keys` array contains public keys (JWK format) used to verify signatures on webhooks and other authenticated messages from the business. See [Key Discovery](#key-discovery) for key lookup and resolution, and [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md) for signing mechanics.
+The business profile advertises the business's available transports, capabilities, payment handlers, and public verification keys. See [Key Discovery](#key-discovery) for key lookup and resolution, and [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md) for signing mechanics.
 
 Businesses that support older protocol versions **SHOULD** include a `supported_versions` object mapping each older version to a version-specific profile URI. See [Protocol Version](#protocol-version) for details.
 
@@ -422,7 +430,8 @@ Platform profiles are similar and include signing keys for capabilities requirin
           "version": "draft",
           "spec": "https://ucp.dev/draft/specification/overview",
           "transport": "rest",
-          "schema": "https://ucp.dev/draft/services/shopping/rest.openapi.json"
+          "schema": "https://ucp.dev/draft/services/shopping/rest.openapi.json",
+          "endpoint": "https://platform.example.com/ucp/v1"
         }
       ]
     },
@@ -480,7 +489,7 @@ Platform profiles are similar and include signing keys for capabilities requirin
           ]
         }
       ],
-      "dev.ucp.processor_tokenizer": [
+      "com.example.processor_tokenizer": [
         {
           "id": "processor_tokenizer",
           "version": "draft",
@@ -767,7 +776,7 @@ Protocol errors use standard HTTP status codes and headers. Response bodies are 
       "continue_url": "https://merchant.com"
     },
     "content": [
-      {"type": "text", "text": "{\"ucp\":{...},\"messages\":[...],\"continue_url\":\"...\"}"}
+      {"type": "text", "text": "{\"ucp\":{…},…}"}
     ]
   }
 }
@@ -827,8 +836,11 @@ The `capabilities` registry in responses indicates active capabilities:
     }
   },
   "id": "checkout_123",
-  "line_items": [...]
-  ... other fields
+  "status": "incomplete",
+  "currency": "USD",
+  "line_items": [ ... ],
+  "totals": [ ... ],
+  "links": [ ... ]
 }
 ```
 
@@ -1007,9 +1019,8 @@ In this scenario, the platform identifies a payment credential provider (e.g., `
 
 ```json
 {
-  "ucp": {
-    "version": "draft",
-    "payment_handlers": {
+  "version": "draft",
+  "payment_handlers": {
       "com.google.pay": [
         {
           "id": "8c9202bd-63cc-4241-8d24-d57ce69ea31c",
@@ -1056,7 +1067,6 @@ In this scenario, the platform identifies a payment credential provider (e.g., `
         }
       ]
     }
-  }
 }
 ```
 
@@ -1115,9 +1125,9 @@ In this scenario, the platform uses a generic tokenizer to request a session tok
 
 ```json
 {
-  "ucp": {
-    "payment_handlers": {
-      "com.example.tokenizer": [
+  "version": "draft",
+  "payment_handlers": {
+    "com.example.tokenizer": [
         {
           "id": "merchant_tokenizer",
           "version": "draft",
@@ -1137,7 +1147,6 @@ In this scenario, the platform uses a generic tokenizer to request a session tok
           }
         }
       ]
-    }
   }
 }
 ```
@@ -1174,6 +1183,7 @@ The business attempts the charge, but the PSP returns a "Soft Decline" requiring
 
 ```json
 HTTP/1.1 200 OK
+
 {
   "status": "requires_escalation",
   "messages": [{
@@ -1196,9 +1206,9 @@ This scenario demonstrates the **Recommended Flow for Agents**. Instead of a ses
 
 ```json
 {
-  "ucp": {
-    "payment_handlers": {
-      "dev.ucp.ap2_mandate_compatible_handlers": [
+  "version": "draft",
+  "payment_handlers": {
+    "dev.ucp.ap2_mandate_compatible_handlers": [
         {
           "id": "ap2_234352",
           "version": "draft",
@@ -1209,7 +1219,6 @@ This scenario demonstrates the **Recommended Flow for Agents**. Instead of a ses
           ]
         }
       ]
-    }
   }
 }
 ```
@@ -1231,7 +1240,7 @@ POST /checkout-sessions/{id}/complete
         // other required instruments fields
         "credential": {
           "type": "card",
-          "token": "eyJhbGciOiJ...", // Token would contain payment_mandate, the signed proof of funds auth
+          "token": "eyJhbGciOiJ..." // Token would contain payment_mandate, the signed proof of funds auth
         }
       }
     ]
@@ -1241,7 +1250,7 @@ POST /checkout-sessions/{id}/complete
     "com.example.risk_score": 0.95
   },
   "ap2": {
-    "checkout_mandate": "eyJhbGciOiJ...", // Signed proof of checkout terms
+    "checkout_mandate": "eyJhbGciOiJ..." // Signed proof of checkout terms
   }
 }
 ```
@@ -1364,7 +1373,7 @@ MCP tool responses use a dual-output pattern for backward compatibility. UCP MCP
 
 - **MUST** return the UCP response payload in `structuredContent`
 - **SHOULD** declare `outputSchema` in tool definitions, referencing the appropriate UCP JSON Schema for the capability
-- **SHOULD** also return serialized JSON in `content[]` for backward compatibility with clients not supporting `structuredContent`
+- **SHOULD** also return serialized JSON in `content[]` for backward compatibility with clients not supporting `structuredContent`. Documentation examples abbreviate that serialized JSON string with `…` for readability.
 
 ```json
 {
@@ -1372,13 +1381,17 @@ MCP tool responses use a dual-output pattern for backward compatibility. UCP MCP
   "id": 1,
   "result": {
     "structuredContent": {
-      "ucp": {"version": "draft", "capabilities": {...}},
+      "ucp": {
+        "version": "draft",
+        "payment_handlers": {},
+        "capabilities": {...}
+      },
       "id": "checkout_abc123",
-      "status": "incomplete",
-      ...
+      "status": "incomplete"
+      // ... other checkout fields
     },
     "content": [
-      {"type": "text", "text": "{\"ucp\":{...},\"id\":\"checkout_abc123\",...}"}
+      {"type": "text", "text": "{\"ucp\":{…},…}"}
     ]
   }
 }
@@ -1427,15 +1440,13 @@ All signal keys **MUST** use reverse-domain naming to ensure provenance and prev
 
 ```json
 {
-  "signals": {
-    "dev.ucp.buyer_ip": "203.0.113.42",
-    "dev.ucp.user_agent": "Mozilla/5.0 ...",
-    "com.example.attestation": {
-      "provider_jwks": "https://example.com/.well-known/jwks.json",
-      "kid": "example-key-2026-01",
-      "payload": { "id": "att-7c3e9f", "pass": true, "...": "..." },
-      "sig": "base64url..."
-    }
+  "dev.ucp.buyer_ip": "203.0.113.42",
+  "dev.ucp.user_agent": "Mozilla/5.0 ...",
+  "com.example.attestation": {
+    "provider_jwks": "https://example.com/.well-known/jwks.json",
+    "kid": "example-key-2026-01",
+    "payload": { "id": "att-7c3e9f", "pass": true, "...": "..." },
+    "sig": "base64url..."
   }
 }
 ```
@@ -1445,22 +1456,21 @@ Signal fields may contain personally identifiable information (PII). Platforms *
 Businesses **MAY** use messages with code `signal` to request additional data. The `path` field identifies the requested signal; the message `type` determines enforcement. An `error` blocks status progression until the signal is provided; an `info` is advisory and non-blocking.
 
 ```json
-{
-  "messages": [
-    {
-      "type": "error",
-      "code": "signal",
-      "path": "$.signals['dev.ucp.buyer_ip']",
-      "content": "Buyer IP is required to proceed."
-    },
-    {
-      "type": "info",
-      "code": "signal",
-      "path": "$.signals['dev.ucp.user_agent']",
-      "content": "Providing user agent may improve checkout outcomes."
-    }
-  ]
-}
+[
+  {
+    "type": "error",
+    "code": "signal",
+    "path": "$.signals['dev.ucp.buyer_ip']",
+    "content": "Buyer IP is required to proceed.",
+    "severity": "recoverable"
+  },
+  {
+    "type": "info",
+    "code": "signal",
+    "path": "$.signals['dev.ucp.user_agent']",
+    "content": "Providing user agent may improve checkout outcomes."
+  }
+]
 ```
 
 ### Attribution
@@ -1471,13 +1481,11 @@ UCP does **NOT** prescribe attribution models, windows, or assignment logic. Pla
 
 ```json
 {
-  "attribution": {
-    "campaign_id": "18234567890",
-    "campaign_source": "google",
-    "campaign_medium": "cpc",
-    "campaign_name": "spring_2026",
-    "gclid": "EAIaIQobChMI..."
-  }
+  "campaign_id": "18234567890",
+  "campaign_source": "google",
+  "campaign_medium": "cpc",
+  "campaign_name": "spring_2026",
+  "gclid": "EAIaIQobChMI..."
 }
 ```
 
@@ -1550,7 +1558,9 @@ Businesses that support older protocol versions **SHOULD** declare a `supported_
     "version": "2026-01-23",
     "supported_versions": {
       "2026-01-11": "https://business.example.com/.well-known/ucp/2026-01-11"
-    }
+    },
+    "services": {},
+    "payment_handlers": {}
   }
 }
 ```
@@ -1588,7 +1598,7 @@ Response with version confirmation:
   },
   "id": "checkout_123",
   "status": "incomplete"
-  ...other checkout fields
+  // ... other checkout fields
 }
 ```
 

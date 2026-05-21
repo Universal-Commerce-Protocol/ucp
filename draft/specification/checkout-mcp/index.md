@@ -76,7 +76,7 @@ MCP clients **MUST** include a `meta` object in every request containing protoco
         },
         "idempotency-key": "550e8400-e29b-41d4-a716-446655440000"
       },
-      "checkout": { ... }
+      "checkout": { "line_items": [ ... ] }
     }
   }
 }
@@ -301,7 +301,7 @@ Maps to the [Create Checkout](http://ucp.dev/draft/specification/checkout/#creat
     "content": [
       {
         "type": "text",
-        "text": "{\"ucp\":{...},\"id\":\"checkout_abc123\",...}"
+        "text": "{\"ucp\":{…},…}"
       }
     ]
   }
@@ -328,7 +328,7 @@ All items out of stock — no checkout resource is created:
       "continue_url": "https://merchant.com/"
     },
     "content": [
-      {"type": "text", "text": "{\"ucp\":{...},\"messages\":[...]}"}
+      {"type": "text", "text": "{\"ucp\":{…},…}"}
     ]
   }
 }
@@ -543,7 +543,7 @@ Maps to the [Update Checkout](http://ucp.dev/draft/specification/checkout/#updat
     "content": [
       {
         "type": "text",
-        "text": "{\"ucp\":{...},\"id\":\"checkout_abc123\",...}"
+        "text": "{\"ucp\":{…},…}"
       }
     ]
   }
@@ -600,6 +600,7 @@ Business outcomes (including errors like unavailable merchandise) are returned a
     "structuredContent": {
       "ucp": {
         "version": "draft",
+        "payment_handlers": {},
         "capabilities": {
           "dev.ucp.shopping.checkout": [{"version": "draft"}]
         }
@@ -619,6 +620,8 @@ Business outcomes (including errors like unavailable merchandise) are returned a
         }
       ],
       "totals": [...],
+      "currency": "USD",
+      "links": [],
       "messages": [
         {
           "type": "warning",
@@ -630,7 +633,7 @@ Business outcomes (including errors like unavailable merchandise) are returned a
       "continue_url": "https://merchant.com/checkout/checkout_abc123"
     },
     "content": [
-      {"type": "text", "text": "{\"ucp\":{...},\"id\":\"checkout_abc123\",...}"}
+      {"type": "text", "text": "{\"ucp\":{…},…}"}
     ]
   }
 }
@@ -657,7 +660,7 @@ For `create_checkout`, when all items unavailable and no checkout can be created
       "continue_url": "https://merchant.com/"
     },
     "content": [
-      {"type": "text", "text": "{\"ucp\":{...},\"messages\":[...]}"}
+      {"type": "text", "text": "{\"ucp\":{…},…}"}
     ]
   }
 }

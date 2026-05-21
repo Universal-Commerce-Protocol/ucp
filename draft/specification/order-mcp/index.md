@@ -31,7 +31,8 @@ Businesses advertise MCP transport availability through their UCP profile at `/.
           "schema": "https://ucp.dev/draft/schemas/shopping/order.json"
         }
       ]
-    }
+    },
+    "payment_handlers": {}
   }
 }
 ```
@@ -183,7 +184,7 @@ Maps to the [Get Order](http://ucp.dev/draft/specification/order/#get-order) ope
     "content": [
       {
         "type": "text",
-        "text": "{\"ucp\":{...},\"id\":\"order_abc123\",...}"
+        "text": "{\"ucp\":{…},…}"
       }
     ]
   }

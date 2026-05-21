@@ -150,7 +150,7 @@ All ECP parameters are passed via URL query string, not HTTP headers, to ensure 
 
 **Example (Informative - JWT-based):**
 
-```json
+```text
 // One possible implementation using JWT
 {
   "alg": "HS256",
@@ -529,10 +529,10 @@ Signals that checkout is visible and ready for interaction. Sent after a success
                     "severity": "recoverable"
                 }
             ],
-            "totals": [/* ... */],
-            "line_items": [/* ... */],
-            "buyer": {/* ... */},
-            "payment": {/* ... */}
+            "totals": [ ... ],
+            "line_items": [ ... ],
+            "buyer": { ... },
+            "payment": { ... }
             // ... other checkout fields
         }
     }
@@ -590,12 +590,8 @@ Line items have been modified (quantity changed, items added/removed).
         "checkout": {
             "id": "checkout_123",
             // The entire checkout object is provided, including the updated line items and totals
-            "totals": [
-                /* ... */
-            ],
-            "line_items": [
-                /* ... */
-            ]
+            "totals": [ ... ],
+            "line_items": [ ... ]
             // ...
         }
     }
@@ -621,9 +617,7 @@ Buyer information has been updated (email, phone, address).
         "checkout": {
             "id": "checkout_123",
             // The entire checkout object is provided, including the updated buyer information
-            "buyer": {
-                /* ... */
-            }
+            "buyer": { ... }
             // ...
         }
     }
@@ -777,7 +771,7 @@ Informs the host that something has changed in the payment section of the checko
                     {
                         "id": "payment_instrument_123",
                         "selected": true
-                        /* ... */
+                        // ... additional instrument fields
                     }
                 ]
             }
@@ -807,9 +801,7 @@ Requests the host to present payment instrument selection UI.
         "checkout": {
             "id": "checkout_123",
             // The entire checkout object is provided, including the current payment details
-            "payment": {
-                /* ... */
-            }
+            "payment": { ... }
             // ...
         }
     }
@@ -903,7 +895,7 @@ Requests a credential for the selected payment instrument during checkout submis
                     {
                         "id": "payment_instrument_123",
                         "selected": true
-                        /* ... */
+                        // ... additional instrument fields
                     }
                 ]
             }
@@ -1028,9 +1020,7 @@ Informs the host that the fulfillment details have been changed in the checkout 
         "checkout": {
             "id": "checkout_123",
             // The entire checkout object is provided, including the updated fulfillment details
-            "fulfillment": {
-                /* ... */
-            }
+            "fulfillment": { ... }
             // ...
         }
     }

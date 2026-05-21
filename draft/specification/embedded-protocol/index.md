@@ -60,10 +60,10 @@ For requests (messages with `id`), receivers **MUST** respond with a `result`. B
 ```json
 {
   "jsonrpc": "2.0",
-  "id": "...",
+  "id": "req_1",
   "result": {
-    "ucp": { "version": "draft", "status": "success" },
-    ...
+    "ucp": { "version": "draft", "status": "success" }
+    // ... result fields
   }
 }
 ```
@@ -288,9 +288,9 @@ Both are notifications — the host **MUST NOT** respond.
         "cart": {
             "id": "cart_123",
             "currency": "USD",
-            "totals": [/* ... */],
-            "line_items": [/* ... */],
-            "buyer": {/* ... */}
+            "totals": [ ... ],
+            "line_items": [ ... ],
+            "buyer": { ... }
         }
     }
 }
@@ -330,8 +330,8 @@ Each capability defines its own set of state change methods covering the relevan
     "params": {
         "checkout": {
             "id": "checkout_123",
-            "totals": [/* ... */],
-            "line_items": [/* ... */]
+            "totals": [ ... ],
+            "line_items": [ ... ]
             // ... other checkout fields
         }
     }
@@ -347,7 +347,7 @@ Each capability defines its own set of state change methods covering the relevan
     "params": {
         "cart": {
             "id": "cart_123",
-            "line_items": [/* ... */],
+            "line_items": [ ... ],
             "messages": [
                 {
                     "type": "error",

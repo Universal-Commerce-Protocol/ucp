@@ -38,7 +38,8 @@ Businesses advertise REST transport availability through their UCP profile at `/
           "schema": "https://ucp.dev/draft/schemas/shopping/cart.json"
         }
       ]
-    }
+    },
+    "payment_handlers": {}
   }
 }
 ```
@@ -212,7 +213,7 @@ Content-Type: application/json
 
 #### Example
 
-```json
+```http
 GET /carts/{id} HTTP/1.1
 UCP-Agent: profile="https://platform.example/profile"
 ```

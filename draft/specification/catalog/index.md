@@ -310,16 +310,23 @@ When a product requires a disclosure (e.g., allergen notice, safety warning), re
     {
       "id": "prod_nut_butter",
       "title": "Artisan Nut Butter Collection",
+      "description": { "plain": "Assorted artisan nut butters." },
+      "price_range": {
+        "min": { "amount": 1299, "currency": "USD" },
+        "max": { "amount": 1499, "currency": "USD" }
+      },
       "variants": [
         {
           "id": "var_almond",
           "title": "Almond Butter",
+          "description": { "plain": "Smooth almond butter." },
           "price": { "amount": 1299, "currency": "USD" },
           "availability": { "available": true }
         },
         {
           "id": "var_cashew",
           "title": "Cashew Butter",
+          "description": { "plain": "Creamy cashew butter." },
           "price": { "amount": 1499, "currency": "USD" },
           "availability": { "available": true }
         }

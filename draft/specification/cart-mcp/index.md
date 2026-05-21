@@ -38,7 +38,8 @@ Businesses advertise MCP transport availability through their UCP profile at `/.
           "schema": "https://ucp.dev/draft/schemas/shopping/cart.json"
         }
       ]
-    }
+    },
+    "payment_handlers": {}
   }
 }
 ```
@@ -60,7 +61,7 @@ MCP clients **MUST** include a `meta` object in every request containing protoco
           "profile": "https://platform.example/profiles/shopping-agent.json"
         }
       },
-      "cart": { ... }
+      "cart": { "line_items": [ ... ] }
     }
   }
 }
@@ -200,7 +201,7 @@ Maps to the [Create Cart](http://ucp.dev/draft/specification/cart/#create-cart) 
     "content": [
       {
         "type": "text",
-        "text": "{\"ucp\":{...},\"id\":\"cart_abc123\",...}"
+        "text": "{\"ucp\":{…},…}"
       }
     ]
   }
@@ -227,7 +228,7 @@ All items out of stock — no cart resource is created:
       "continue_url": "https://merchant.com/"
     },
     "content": [
-      {"type": "text", "text": "{\"ucp\":{...},\"messages\":[...]}"}
+      {"type": "text", "text": "{\"ucp\":{…},…}"}
     ]
   }
 }
@@ -326,7 +327,7 @@ Maps to the [Get Cart](http://ucp.dev/draft/specification/cart/#get-cart) operat
     "content": [
       {
         "type": "text",
-        "text": "{\"ucp\":{...},\"id\":\"cart_abc123\",...}"
+        "text": "{\"ucp\":{…},…}"
       }
     ]
   }
@@ -341,6 +342,7 @@ Maps to the [Get Cart](http://ucp.dev/draft/specification/cart/#get-cart) operat
     "structuredContent": {
       "ucp": {
         "version": "draft",
+        "status": "error",
         "capabilities": {
           "dev.ucp.shopping.cart": [{"version": "draft"}]
         }
@@ -358,7 +360,7 @@ Maps to the [Get Cart](http://ucp.dev/draft/specification/cart/#get-cart) operat
     "content": [
       {
         "type": "text",
-        "text": "{\"ucp\":{...},\"messages\":[...],\"continue_url\":\"...\"}"
+        "text": "{\"ucp\":{…},…}"
       }
     ]
   }
@@ -501,7 +503,7 @@ Maps to the [Update Cart](http://ucp.dev/draft/specification/cart/#update-cart) 
     "content": [
       {
         "type": "text",
-        "text": "{\"ucp\":{...},\"id\":\"cart_abc123\",...}"
+        "text": "{\"ucp\":{…},…}"
       }
     ]
   }
@@ -601,7 +603,7 @@ Maps to the [Cancel Cart](http://ucp.dev/draft/specification/cart/#cancel-cart) 
     "content": [
       {
         "type": "text",
-        "text": "{\"ucp\":{...},\"id\":\"cart_abc123\",...}"
+        "text": "{\"ucp\":{…},…}"
       }
     ]
   }
@@ -627,6 +629,7 @@ Business outcomes (including not found and validation errors) are returned as JS
     "structuredContent": {
       "ucp": {
         "version": "draft",
+        "status": "error",
         "capabilities": {
           "dev.ucp.shopping.cart": [{"version": "draft"}]
         }
@@ -642,7 +645,7 @@ Business outcomes (including not found and validation errors) are returned as JS
       "continue_url": "https://merchant.com/"
     },
     "content": [
-      {"type": "text", "text": "{\"ucp\":{...},\"messages\":[...]}"}
+      {"type": "text", "text": "{\"ucp\":{…},…}"}
     ]
   }
 }

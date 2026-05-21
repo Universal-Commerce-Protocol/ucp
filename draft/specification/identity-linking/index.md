@@ -163,7 +163,7 @@ Each scope's value is an open object that carries per-scope policy and metadata.
 Optional human-readable description of the scope that platforms can use to present and explain context (requirement and value) to the user.
 
 ```json
-"dev.ucp.shopping.order:manage": {
+{
   "description": {
     "plain": "Manage your orders: cancel, return, or modify post-purchase.",
     "markdown": "**Manage your orders**: cancel, return, or modify post-purchase."
@@ -296,7 +296,6 @@ Businesses **SHOULD** include this info-severity code in successful responses wh
 
 ```json
 {
-  ...,
   "messages": [
     {
       "type": "info",
@@ -381,9 +380,11 @@ Public catalog, guest checkout (no scope required), user-bound order operations 
 ```json
 {
   "ucp": {
+    "version": "draft",
+    "services": {},
     "capabilities": {
       "dev.ucp.common.identity_linking": [{
-        "version": "Working Draft",
+        "version": "draft",
         "spec": "https://ucp.dev/specification/identity-linking",
         "schema": "https://ucp.dev/schemas/common/identity_linking.json",
         "config": {
@@ -393,7 +394,8 @@ Public catalog, guest checkout (no scope required), user-bound order operations 
           }
         }
       }]
-    }
+    },
+    "payment_handlers": {}
   }
 }
 ```
@@ -410,9 +412,11 @@ No guest checkout — every transaction requires an authenticated user:
 ```json
 {
   "ucp": {
+    "version": "draft",
+    "services": {},
     "capabilities": {
       "dev.ucp.common.identity_linking": [{
-        "version": "Working Draft",
+        "version": "draft",
         "spec": "https://ucp.dev/specification/identity-linking",
         "schema": "https://ucp.dev/schemas/common/identity_linking.json",
         "config": {
@@ -423,7 +427,8 @@ No guest checkout — every transaction requires an authenticated user:
           }
         }
       }]
-    }
+    },
+    "payment_handlers": {}
   }
 }
 ```

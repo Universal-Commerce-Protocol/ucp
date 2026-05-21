@@ -139,16 +139,14 @@ Discount codes are submitted via standard cart or checkout create/update operati
 When a submitted discount code cannot be applied, businesses communicate this via the `messages[]` array:
 
 ```json
-{
-  "messages": [
-    {
-      "type": "warning",
-      "code": "discount_code_expired",
-      "path": "$.discounts.codes[0]",
-      "content": "Code 'SUMMER20' expired on December 1st"
-    }
-  ]
-}
+[
+  {
+    "type": "warning",
+    "code": "discount_code_expired",
+    "path": "$.discounts.codes[0]",
+    "content": "Code 'SUMMER20' expired on December 1st"
+  }
+]
 ```
 
 > **Implementation guidance:** Operations that affect order totals, or the user's expectation of the total, **SHOULD** use `type: "warning"` to ensure they are surfaced to the user rather than silently handled by platforms. Rejected discounts are a prime example—the user expects a discount but won't receive it, so they should be informed.
@@ -218,6 +216,10 @@ Building on the store card example from [Eligibility Verification at Completion]
 
 ```json
 {
+  "ucp": { ... },
+  "id": "...",
+  "currency": "...",
+  "line_items": [ ... ],
   "discounts": {
     "applied": [
       {
@@ -277,7 +279,7 @@ Discount codes applied during cart exploration. The cart response includes estim
   "line_items": [
     {
       "item": {
-        "id": "prod_1",
+        "id": "prod_1"
       },
       "quantity": 2
     }
@@ -290,7 +292,9 @@ Discount codes applied during cart exploration. The cart response includes estim
 
 ```json
 {
+  "ucp": { ... },
   "id": "cart_abc123",
+  "currency": "USD",
   "line_items": [
     {
       "id": "li_1",
@@ -321,7 +325,6 @@ Discount codes applied during cart exploration. The cart response includes estim
       }
     ]
   },
-  "currency": "USD",
   "totals": [
     {"type": "subtotal", "display_text": "Subtotal", "amount": 4000},
     {"type": "items_discount", "display_text": "Item Discounts", "amount": -800},
@@ -336,6 +339,8 @@ A flat discount applied to the order total. No allocations—the discount applie
 
 ```json
 {
+  "id": "...",
+  "line_items": [ ... ],
   "discounts": {
     "codes": ["SAVE10"]
   }
@@ -344,6 +349,10 @@ A flat discount applied to the order total. No allocations—the discount applie
 
 ```json
 {
+  "ucp": { ... },
+  "id": "...",
+  "currency": "...",
+  "line_items": [ ... ],
   "discounts": {
     "codes": ["SAVE10"],
     "applied": [
@@ -368,6 +377,8 @@ This example shows both discount types: a per-item discount (20% off) allocated 
 
 ```json
 {
+  "id": "...",
+  "line_items": [ ... ],
   "discounts": {
     "codes": ["SUMMER20"]
   }
@@ -376,6 +387,9 @@ This example shows both discount types: a per-item discount (20% off) allocated 
 
 ```json
 {
+  "ucp": { ... },
+  "id": "...",
+  "currency": "...",
   "line_items": [
     {
       "id": "li_1",
@@ -426,6 +440,8 @@ When a discount code cannot be applied, the rejection is communicated via the `m
 
 ```json
 {
+  "id": "...",
+  "line_items": [ ... ],
   "discounts": {
     "codes": ["SAVE10", "EXPIRED50"]
   }
@@ -434,6 +450,10 @@ When a discount code cannot be applied, the rejection is communicated via the `m
 
 ```json
 {
+  "ucp": { ... },
+  "id": "...",
+  "currency": "...",
+  "line_items": [ ... ],
   "discounts": {
     "codes": ["SAVE10", "EXPIRED50"],
     "applied": [
@@ -466,6 +486,9 @@ Multiple discounts applied with full allocation breakdown:
 
 ```json
 {
+  "ucp": { ... },
+  "id": "...",
+  "currency": "...",
   "line_items": [
     {
       "id": "li_1",

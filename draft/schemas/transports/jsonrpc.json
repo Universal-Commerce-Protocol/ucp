@@ -1,0 +1,136 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/draft/schemas/transports/jsonrpc.json",
+  "title": "JSON-RPC 2.0 Envelope",
+  "description": "Common JSON-RPC 2.0 transport envelope used by UCP JSON-RPC-based bindings. This schema intentionally validates only the protocol envelope; binding-specific params and result payloads are validated by transport-specific schemas or extracted UCP payload schemas.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/request"
+    },
+    {
+      "$ref": "#/$defs/success_response"
+    },
+    {
+      "$ref": "#/$defs/error_response"
+    }
+  ],
+  "$defs": {
+    "id": {
+      "description": "JSON-RPC request identifier. Notifications omit id; responses echo the request id, or use null when the request id could not be determined.",
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "error": {
+      "type": "object",
+      "description": "JSON-RPC transport-level error object. UCP business outcomes use result payloads with UCP messages instead of this object.",
+      "required": [
+        "code",
+        "message"
+      ],
+      "properties": {
+        "code": {
+          "type": "integer",
+          "description": "JSON-RPC error code. Standard codes are negative integers; UCP bindings reserve business errors for UCP messages."
+        },
+        "message": {
+          "type": "string",
+          "description": "Short transport-level error description."
+        },
+        "data": {
+          "description": "Optional machine-readable transport error details."
+        }
+      },
+      "additionalProperties": true
+    },
+    "request": {
+      "type": "object",
+      "description": "JSON-RPC request or notification envelope. Presence of id makes the message a request; absence of id makes it a notification.",
+      "required": [
+        "jsonrpc",
+        "method"
+      ],
+      "properties": {
+        "jsonrpc": {
+          "type": "string",
+          "const": "2.0",
+          "description": "JSON-RPC protocol version."
+        },
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "method": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Transport method name. Binding-specific schemas constrain the method namespace."
+        },
+        "params": {
+          "description": "Method parameters. Binding-specific schemas define the object shape.",
+          "oneOf": [
+            {
+              "type": "object"
+            },
+            {
+              "type": "array"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "success_response": {
+      "type": "object",
+      "description": "JSON-RPC success response envelope.",
+      "required": [
+        "jsonrpc",
+        "id",
+        "result"
+      ],
+      "properties": {
+        "jsonrpc": {
+          "type": "string",
+          "const": "2.0",
+          "description": "JSON-RPC protocol version."
+        },
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "result": {
+          "description": "Successful transport result. UCP bindings define the nested result payload."
+        }
+      },
+      "additionalProperties": false
+    },
+    "error_response": {
+      "type": "object",
+      "description": "JSON-RPC transport error response envelope. This is for protocol-level failures, not UCP application-level messages.",
+      "required": [
+        "jsonrpc",
+        "id",
+        "error"
+      ],
+      "properties": {
+        "jsonrpc": {
+          "type": "string",
+          "const": "2.0",
+          "description": "JSON-RPC protocol version."
+        },
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "error": {
+          "$ref": "#/$defs/error"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

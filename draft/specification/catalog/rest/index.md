@@ -34,7 +34,8 @@ Businesses advertise REST transport availability through their UCP profile at `/
         "spec": "https://ucp.dev/draft/specification/catalog/lookup",
         "schema": "https://ucp.dev/draft/schemas/shopping/catalog_lookup.json"
       }]
-    }
+    },
+    "payment_handlers": {}
   }
 }
 ```
@@ -275,6 +276,7 @@ Content-Type: application/json
           "id": "prod_def456_size10",
           "sku": "TBX-GRN-10",
           "title": "Talla 10",
+          "description": { "plain": "Variante talla 10" },
           "price": { "amount": 15000, "currency": "USD" },
           "availability": { "available": true },
           "inputs": [
@@ -311,6 +313,8 @@ When some identifiers in the batch are not found, the response includes the foun
     {
       "id": "prod_abc123",
       "title": "Blue Runner Pro",
+      "description": { "plain": "Lightweight running shoes." },
+      "variants": [ ... ],
       "price_range": {
         "min": { "amount": 12000, "currency": "USD" },
         "max": { "amount": 12000, "currency": "USD" }
@@ -319,6 +323,8 @@ When some identifiers in the batch are not found, the response includes the foun
     {
       "id": "prod_def456",
       "title": "Trail Blazer X",
+      "description": { "plain": "Trail shoes with superior traction." },
+      "variants": [ ... ],
       "price_range": {
         "min": { "amount": 15000, "currency": "USD" },
         "max": { "amount": 15000, "currency": "USD" }

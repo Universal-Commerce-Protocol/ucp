@@ -31,7 +31,8 @@ Businesses advertise REST transport availability through their UCP profile at `/
           "schema": "https://ucp.dev/draft/schemas/shopping/order.json"
         }
       ]
-    }
+    },
+    "payment_handlers": {}
   }
 }
 ```
@@ -85,7 +86,7 @@ Returns the current-state snapshot of an order.
 
 #### Example
 
-```json
+```http
 GET /orders/order_abc123 HTTP/1.1
 UCP-Agent: profile="https://platform.example/.well-known/ucp"
 Accept: application/json

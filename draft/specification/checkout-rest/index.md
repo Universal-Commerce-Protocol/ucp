@@ -503,7 +503,7 @@ Content-Type: application/json
         "id": "item_123"
       },
       "id": "li_1",
-      "quantity": 2,
+      "quantity": 2
     }
   ],
   "fulfillment": {
@@ -1232,12 +1232,15 @@ Business outcomes (including errors like unavailable merchandise) are returned w
 {
   "ucp": {
     "version": "draft",
+    "status": "success",
+    "payment_handlers": { ... },
     "capabilities": {
       "dev.ucp.shopping.checkout": [{"version": "draft"}]
     }
   },
   "id": "checkout_abc123",
   "status": "incomplete",
+  "currency": "USD",
   "line_items": [
     {
       "id": "li_1",
@@ -1251,6 +1254,7 @@ Business outcomes (including errors like unavailable merchandise) are returned w
     }
   ],
   "totals": [...],
+  "links": [...],
   "messages": [
     {
       "type": "warning",

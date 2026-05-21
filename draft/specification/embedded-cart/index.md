@@ -243,9 +243,9 @@ Signals that cart is visible and ready for interaction. Sent after a successful 
         "cart": {
             "id": "cart_123",
             "currency": "USD",
-            "totals": [/* ... */],
-            "line_items": [/* ... */],
-            "buyer": {/* ... */},
+            "totals": [ ... ],
+            "line_items": [ ... ],
+            "buyer": { ... }
             // ...other cart fields...
         }
     }
@@ -273,9 +273,9 @@ This marks the completion of Embedded Cart. If `dev.ucp.shopping.checkout` is pa
         "cart": {
             "id": "cart_123",
             "currency": "USD",
-            "totals": [/* ... */],
-            "line_items": [/* ... */],
-            "buyer": {/* ... */},
+            "totals": [ ... ],
+            "line_items": [ ... ],
+            "buyer": { ... }
             // ...other cart fields...
         }
     }
@@ -305,12 +305,8 @@ Line items have been modified (quantity changed, items added/removed).
         "cart": {
             "id": "cart_123",
             // The entire cart object is provided, including the updated line items and estimated totals
-            "totals": [
-                /* ... */
-            ],
-            "line_items": [
-                /* ... */
-            ]
+            "totals": [ ... ],
+            "line_items": [ ... ]
             // ...
         }
     }
@@ -336,9 +332,7 @@ Buyer information has been updated (email, phone, name).
         "cart": {
             "id": "cart_123",
             // The entire cart object is provided, including the updated buyer information
-            "buyer": {
-                /* ... */
-            }
+            "buyer": { ... }
             // ...
         }
     }

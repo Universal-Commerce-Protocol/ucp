@@ -140,6 +140,13 @@ This object MUST be one of the following types: [Shipping Destination](/draft/sp
 
 ```json
 {
+  "ucp": { ... },
+  "id": "...",
+  "status": "...",
+  "currency": "...",
+  "line_items": [ ... ],
+  "totals": [ ... ],
+  "links": [ ... ],
   "fulfillment": {
     "methods": [
       {
@@ -254,6 +261,13 @@ Available methods indicate whether an item can be fulfilled with a given method,
 
 ```json
 {
+  "ucp": { ... },
+  "id": "...",
+  "status": "...",
+  "currency": "...",
+  "line_items": [ ... ],
+  "totals": [ ... ],
+  "links": [ ... ],
   "fulfillment": {
     "methods": [
       {
@@ -304,12 +318,35 @@ Platforms declare their rendering capabilities using `platform_schema`:
 
 Platforms that omit config or set `supports_multi_group: false` receive single-group responses. The response shape is always `methods[].groups[]`—the difference is whether `groups.length` can exceed 1 within each method.
 
-```json
-// Default: single group per method
-{ "dev.ucp.shopping.fulfillment": [{"version": "draft"}] }
+Default declaration (single group per method):
 
-// Opt-in: business MAY return multiple groups per method
-{ "dev.ucp.shopping.fulfillment": [{"version": "draft", "config": { "supports_multi_group": true }}] }
+```json
+{
+  "dev.ucp.shopping.fulfillment": [
+    {
+      "version": "draft",
+      "spec": "https://ucp.dev/draft/specification/fulfillment",
+      "schema": "https://ucp.dev/draft/schemas/shopping/fulfillment.json",
+      "extends": "dev.ucp.shopping.checkout"
+    }
+  ]
+}
+```
+
+Opt-in declaration (business MAY return multiple groups per method):
+
+```json
+{
+  "dev.ucp.shopping.fulfillment": [
+    {
+      "version": "draft",
+      "spec": "https://ucp.dev/draft/specification/fulfillment",
+      "schema": "https://ucp.dev/draft/schemas/shopping/fulfillment.json",
+      "extends": "dev.ucp.shopping.checkout",
+      "config": { "supports_multi_group": true }
+    }
+  ]
+}
 ```
 
 ### Business Profile
@@ -323,19 +360,20 @@ Businesses declare what fulfillment configurations they support using `merchant_
 
 ```json
 {
-  "capabilities": {
-    "dev.ucp.shopping.fulfillment": [
-      {
-        "version": "draft",
-        "config": {
-          "allows_multi_destination": {
-            "shipping": true
-          },
-          "allows_method_combinations": [["shipping", "pickup"]]
-        }
+  "dev.ucp.shopping.fulfillment": [
+    {
+      "version": "draft",
+      "spec": "https://ucp.dev/draft/specification/fulfillment",
+      "schema": "https://ucp.dev/draft/schemas/shopping/fulfillment.json",
+      "extends": "dev.ucp.shopping.checkout",
+      "config": {
+        "allows_multi_destination": {
+          "shipping": true
+        },
+        "allows_method_combinations": [["shipping", "pickup"]]
       }
-    ]
-  }
+    }
+  ]
 }
 ```
 
@@ -373,6 +411,13 @@ Note: Platform's `supports_multi_group` is method-agnostic (single boolean), so 
 
 ```json
 {
+  "ucp": { ... },
+  "id": "...",
+  "status": "...",
+  "currency": "...",
+  "line_items": [ ... ],
+  "totals": [ ... ],
+  "links": [ ... ],
   "fulfillment": {
     "methods": [
       {
@@ -435,6 +480,13 @@ Business splits items into multiple packages; buyer selects shipping rate per pa
 
 ```json
 {
+  "ucp": { ... },
+  "id": "...",
+  "status": "...",
+  "currency": "...",
+  "line_items": [ ... ],
+  "totals": [ ... ],
+  "links": [ ... ],
   "fulfillment": {
     "methods": [
       {
@@ -502,6 +554,13 @@ Shirt ships to mom (US), pants ship to grandma (Hong Kong). Two methods of the s
 
 ```json
 {
+  "ucp": { ... },
+  "id": "...",
+  "status": "...",
+  "currency": "...",
+  "line_items": [ ... ],
+  "totals": [ ... ],
+  "links": [ ... ],
   "fulfillment": {
     "methods": [
       {
