@@ -18,8 +18,9 @@ jobs:
         with:
           script: |
             const { owner, repo } = context.repo;
+            const STALE_THRESHOLD_DAYS = 30;
             const thirtyDaysAgo = new Date();
-            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - STALE_THRESHOLD_DAYS);
 
             console.log(`Scanning for open pull requests with no activity since ${thirtyDaysAgo.toISOString()}`);
 
