@@ -1,3 +1,9 @@
+/**
+ * @param {Object} params
+ * @param {import('@actions/github').GitHub} params.github
+ * @param {import('@actions/github').Context} params.context
+ * @param {import('@actions/core')} params.core
+ */
 module.exports = async ({ github, context, core }) => {
   const { owner, repo } = context.repo;
   const STALE_THRESHOLD_DAYS = 30;
