@@ -1,0 +1,18 @@
+{
+  "id": "oli_scaffold",
+  "item": {
+    "id": "item_scaffold",
+    "title": "Scaffold Item",
+    "price": 1000
+  },
+  "quantity": {
+    "original": 1,
+    "total": 1,
+    "fulfilled": 0
+  },
+  "totals": [
+    { "type": "subtotal", "amount": 1000 },
+    { "type": "total", "amount": 1000 }
+  ],
+  "status": "processing"
+}

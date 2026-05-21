@@ -78,7 +78,7 @@
         "messages": {
           "type": "array",
           "items": {
-            "$ref": "types/message.json"
+            "$ref": "../common/types/message.json"
           },
           "description": "Errors, warnings, or informational messages about the requested items."
         }
@@ -167,7 +167,7 @@
         "messages": {
           "type": "array",
           "items": {
-            "$ref": "types/message.json"
+            "$ref": "../common/types/message.json"
           },
           "description": "Warnings or informational messages about the product (e.g., price recently changed, limited availability)."
         }
