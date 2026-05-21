@@ -181,6 +181,7 @@ up-to-date list.
 
 | Extension | Extends | Description |
 | :--- | :--- | :--- |
+| `dev.ucp.shopping.additional_fields` | checkout, order | Merchant-configured checkout data collection fields and read-only order values |
 | `dev.ucp.shopping.discount` | checkout, cart | Discount codes and promotions |
 | `dev.ucp.shopping.fulfillment` | checkout | Shipping and delivery options |
 | `dev.ucp.shopping.ap2_mandate` | checkout | Non-repudiable authorization for autonomous commerce |

@@ -51,6 +51,14 @@ Fulfillment is optional in the checkout object. This is done to enable a
 platform to perform checkout for digital goods without needing to furnish
 fulfillment details more relevant for physical goods.
 
+### Additional Fields
+
+Additional checkout data collection is modelled as an extension. When the
+[Additional Fields Extension](additional-fields.md) is negotiated, businesses
+can return an `additional_fields` array containing field definitions and current
+values. Platforms submit updates as `key` plus `value` entries through standard
+checkout create and update operations.
+
 ### Checkout Status Lifecycle
 
 The checkout `status` field indicates the current phase of the session and
