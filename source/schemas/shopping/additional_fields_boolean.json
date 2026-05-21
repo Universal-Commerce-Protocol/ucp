@@ -1,0 +1,157 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/additional_fields_boolean.json",
+  "name": "dev.ucp.shopping.additional_fields_boolean",
+  "title": "Boolean Additional Fields Extension",
+  "description": "Extends Additional Fields with boolean input semantics for checkout and boolean input type identifiers for read-only order additional fields.",
+  "$defs": {
+    "boolean_input": {
+      "title": "Boolean Input",
+      "type": "object",
+      "description": "Boolean field semantics. Values are still submitted as strings.",
+      "required": [
+        "type"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "boolean",
+          "description": "Use boolean for true/false fields. Submit checked as true and unchecked as false.",
+          "examples": [
+            "boolean"
+          ]
+        }
+      }
+    },
+    "dev.ucp.shopping.additional_fields": {
+      "title": "Additional Fields with Boolean Type",
+      "description": "Additional Fields extended with boolean input semantics.",
+      "type": "object",
+      "properties": {
+        "additional_fields": {
+          "type": "array",
+          "description": "Merchant-defined additional checkout fields with boolean input semantics.",
+          "items": {
+            "allOf": [
+              {
+                "$ref": "additional_fields.json#/$defs/additional_field"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "input": {
+                    "description": "Input control configuration.",
+                    "ucp_request": "omit",
+                    "allOf": [
+                      {
+                        "$ref": "additional_fields.json#/$defs/additional_field_input"
+                      },
+                      {
+                        "type": "object",
+                        "additionalProperties": true,
+                        "allOf": [
+                          {
+                            "if": {
+                              "properties": {
+                                "type": {
+                                  "const": "boolean"
+                                }
+                              },
+                              "required": [
+                                "type"
+                              ]
+                            },
+                            "then": {
+                              "$ref": "#/$defs/boolean_input"
+                            }
+                          }
+                        ],
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "description": "Field type identifier. This extension defines boolean in addition to the base text type."
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          "ucp_request": {
+            "create": "optional",
+            "update": "optional",
+            "complete": "omit"
+          }
+        }
+      }
+    },
+    "dev.ucp.shopping.checkout": {
+      "title": "Checkout with Boolean Additional Fields",
+      "description": "Checkout additional fields extended with boolean input semantics.",
+      "type": "object",
+      "properties": {
+        "additional_fields": {
+          "type": "array",
+          "description": "Merchant-defined additional checkout fields with boolean input semantics.",
+          "items": {
+            "$ref": "#/$defs/dev.ucp.shopping.additional_fields/properties/additional_fields/items"
+          },
+          "ucp_request": {
+            "create": "optional",
+            "update": "optional",
+            "complete": "omit"
+          }
+        }
+      }
+    },
+    "dev.ucp.shopping.order": {
+      "title": "Order with Boolean Additional Fields",
+      "description": "Order additional fields extended with boolean input type identifiers.",
+      "type": "object",
+      "properties": {
+        "additional_fields": {
+          "type": "array",
+          "description": "Read-only additional field values captured during checkout, with boolean input type identifiers.",
+          "items": {
+            "allOf": [
+              {
+                "$ref": "additional_fields.json#/$defs/order_additional_field"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "input": {
+                    "description": "Input metadata for the captured field.",
+                    "allOf": [
+                      {
+                        "$ref": "additional_fields.json#/$defs/order_additional_field_input"
+                      },
+                      {
+                        "type": "object",
+                        "additionalProperties": true,
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "description": "Field type identifier. This extension defines boolean in addition to the base text type.",
+                            "examples": [
+                              "text",
+                              "boolean"
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          "ucp_request": "omit"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,126 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/additional_fields_text_validation.json",
+  "name": "dev.ucp.shopping.additional_fields_text_validation",
+  "title": "Text Validation Additional Fields Extension",
+  "description": "Extends Additional Fields with text validation hints for checkout text additional fields.",
+  "$defs": {
+    "text_validation_input": {
+      "title": "Text Validation Input",
+      "type": "object",
+      "description": "Text field semantics with optional validation hints. The base multiline hint remains defined by the base Additional Fields extension.",
+      "required": [
+        "type"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "text",
+          "description": "Use text for text fields.",
+          "examples": [
+            "text"
+          ]
+        },
+        "min_length": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Minimum number of characters accepted by the business."
+        },
+        "max_length": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Maximum number of characters accepted by the business."
+        },
+        "pattern": {
+          "type": "string",
+          "format": "regex",
+          "description": "Regular expression the submitted value should match."
+        }
+      }
+    },
+    "dev.ucp.shopping.additional_fields": {
+      "title": "Additional Fields with Text Validation",
+      "description": "Additional Fields extended with text validation hints.",
+      "type": "object",
+      "properties": {
+        "additional_fields": {
+          "type": "array",
+          "description": "Merchant-defined additional checkout fields with text validation hints.",
+          "items": {
+            "allOf": [
+              {
+                "$ref": "additional_fields.json#/$defs/additional_field"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "input": {
+                    "description": "Input control configuration.",
+                    "ucp_request": "omit",
+                    "allOf": [
+                      {
+                        "$ref": "additional_fields.json#/$defs/additional_field_input"
+                      },
+                      {
+                        "type": "object",
+                        "additionalProperties": true,
+                        "allOf": [
+                          {
+                            "if": {
+                              "properties": {
+                                "type": {
+                                  "const": "text"
+                                }
+                              },
+                              "required": [
+                                "type"
+                              ]
+                            },
+                            "then": {
+                              "$ref": "#/$defs/text_validation_input"
+                            }
+                          }
+                        ],
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "description": "Field type identifier. This extension adds validation hints to the base text type."
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          "ucp_request": {
+            "create": "optional",
+            "update": "optional",
+            "complete": "omit"
+          }
+        }
+      }
+    },
+    "dev.ucp.shopping.checkout": {
+      "title": "Checkout with Text Validation Additional Fields",
+      "description": "Checkout additional fields extended with text validation hints.",
+      "type": "object",
+      "properties": {
+        "additional_fields": {
+          "type": "array",
+          "description": "Merchant-defined additional checkout fields with text validation hints.",
+          "items": {
+            "$ref": "#/$defs/dev.ucp.shopping.additional_fields/properties/additional_fields/items"
+          },
+          "ucp_request": {
+            "create": "optional",
+            "update": "optional",
+            "complete": "omit"
+          }
+        }
+      }
+    }
+  }
+}

@@ -181,6 +181,11 @@ up-to-date list.
 
 | Extension | Extends | Description |
 | :--- | :--- | :--- |
+| `dev.ucp.shopping.additional_fields` | checkout, order | Merchant-configured checkout text fields and read-only order field summaries |
+| `dev.ucp.shopping.additional_fields_text_validation` | additional_fields | Text validation hints for additional fields |
+| `dev.ucp.shopping.additional_fields_boolean` | additional_fields | Boolean additional field type |
+| `dev.ucp.shopping.additional_fields_date` | additional_fields | Date additional field type |
+| `dev.ucp.shopping.additional_fields_choice` | additional_fields | Choice additional field type |
 | `dev.ucp.shopping.discount` | checkout, cart | Discount codes and promotions |
 | `dev.ucp.shopping.fulfillment` | checkout | Shipping and delivery options |
 | `dev.ucp.shopping.ap2_mandate` | checkout | Non-repudiable authorization for autonomous commerce |
