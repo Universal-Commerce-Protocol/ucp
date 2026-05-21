@@ -527,6 +527,22 @@ const UcpData = {
         schema: "https://ucp.dev/{{ ucp_version }}/schemas/shopping/discount.json"
       }
     ],
+    "dev.ucp.shopping.additional_fields": [
+      {
+        extends: ["dev.ucp.shopping.checkout", "dev.ucp.shopping.order"],
+        version: "{{ ucp_version }}",
+        spec: "https://ucp.dev/{{ ucp_version }}/specification/additional-fields",
+        schema: "https://ucp.dev/{{ ucp_version }}/schemas/shopping/additional_fields.json"
+      }
+    ],
+    "dev.ucp.shopping.additional_fields_advanced": [
+      {
+        extends: "dev.ucp.shopping.additional_fields",
+        version: "{{ ucp_version }}",
+        spec: "https://ucp.dev/{{ ucp_version }}/specification/additional-fields-advanced",
+        schema: "https://ucp.dev/{{ ucp_version }}/schemas/shopping/additional_fields_advanced.json"
+      }
+    ],
     "dev.ucp.shopping.buyer_consent": [
       {
         extends: "dev.ucp.shopping.checkout",
@@ -553,8 +569,8 @@ const UcpData = {
     },
     full: {
       label: "Full",
-      description: "Supports core + Fulfillment and Discount extensions.",
-      caps: ["dev.ucp.shopping.checkout", "dev.ucp.shopping.order", "dev.ucp.shopping.fulfillment", "dev.ucp.shopping.discount", "dev.ucp.shopping.buyer_consent", "dev.ucp.shopping.ap2_mandates"]
+      description: "Supports core checkout extensions.",
+      caps: ["dev.ucp.shopping.checkout", "dev.ucp.shopping.order", "dev.ucp.shopping.fulfillment", "dev.ucp.shopping.discount", "dev.ucp.shopping.additional_fields", "dev.ucp.shopping.additional_fields_advanced", "dev.ucp.shopping.buyer_consent", "dev.ucp.shopping.ap2_mandates"]
     }
   },
 
@@ -747,6 +763,14 @@ class UcpBackend {
         };
     }
 
+    const additionalFields = (this.session.additional_fields || []).map(field => ({
+      key: field.key,
+      label: field.label,
+      description: field.description,
+      type: field.input?.type || field.type || "text",
+      value: field.value ?? null
+    }));
+
     const order = {
       ucp: {
           version: UcpData.version,
@@ -760,6 +784,10 @@ class UcpBackend {
       adjustments: [],
       totals: this.session.totals
     };
+
+    if (additionalFields.length > 0) {
+      order.additional_fields = additionalFields;
+    }
 
     this.session.status = "completed";
     this.currentOrder = order;

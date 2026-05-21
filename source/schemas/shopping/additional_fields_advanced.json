@@ -1,0 +1,358 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/additional_fields_advanced.json",
+  "name": "dev.ucp.shopping.additional_fields_advanced",
+  "title": "Advanced Additional Fields Extension",
+  "description": "Extends Additional Fields with advanced input types and validation hints for checkout, and advanced input type identifiers for read-only order additional fields.",
+  "$defs": {
+    "choice_option": {
+      "title": "Choice Option",
+      "type": "object",
+      "description": "A selectable option for a choice additional field.",
+      "required": [
+        "value",
+        "label"
+      ],
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Submitted value for this option."
+        },
+        "label": {
+          "type": "string",
+          "description": "Human-readable option label."
+        }
+      }
+    },
+    "text_input": {
+      "title": "Text Input",
+      "type": "object",
+      "description": "Text field semantics with optional validation hints.",
+      "required": [
+        "type"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "text",
+          "description": "Use text for text fields.",
+          "examples": [
+            "text"
+          ]
+        },
+        "min_length": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Minimum number of characters accepted by the business."
+        },
+        "max_length": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Maximum number of characters accepted by the business."
+        },
+        "pattern": {
+          "type": "string",
+          "format": "regex",
+          "description": "Regular expression the submitted value should match."
+        }
+      }
+    },
+    "boolean_input": {
+      "title": "Boolean Input",
+      "type": "object",
+      "description": "Boolean field semantics. Values are still submitted as strings.",
+      "required": [
+        "type"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "boolean",
+          "description": "Use boolean for true/false fields. Submit checked as true and unchecked as false.",
+          "examples": [
+            "boolean"
+          ]
+        }
+      }
+    },
+    "date_input": {
+      "title": "Date Input",
+      "type": "object",
+      "description": "Date field semantics with optional date range hints.",
+      "required": [
+        "type"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "date",
+          "description": "Use date for calendar-date fields.",
+          "examples": [
+            "date"
+          ]
+        },
+        "min": {
+          "type": "string",
+          "format": "date",
+          "description": "Earliest accepted date in YYYY-MM-DD format."
+        },
+        "max": {
+          "type": "string",
+          "format": "date",
+          "description": "Latest accepted date in YYYY-MM-DD format."
+        }
+      }
+    },
+    "choice_input": {
+      "title": "Choice Input",
+      "type": "object",
+      "description": "Select-from-list field semantics.",
+      "required": [
+        "type",
+        "options"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "choice",
+          "description": "Use choice when the submitted value must be selected from options.",
+          "examples": [
+            "choice"
+          ]
+        },
+        "options": {
+          "type": "array",
+          "description": "Available choices. Platforms display label and submit value.",
+          "items": {
+            "$ref": "#/$defs/choice_option"
+          },
+          "minItems": 1
+        }
+      }
+    },
+    "order_choice_input": {
+      "title": "Order Choice Input",
+      "type": "object",
+      "description": "Choice input metadata included on order additional fields.",
+      "required": [
+        "type",
+        "value_label"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "choice",
+          "description": "Use choice when the captured value was selected from options.",
+          "examples": [
+            "choice"
+          ]
+        },
+        "value_label": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Display label for the captured value. Null when value is null."
+        }
+      }
+    },
+    "dev.ucp.shopping.additional_fields": {
+      "title": "Additional Fields with Advanced Types",
+      "description": "Additional Fields extended with advanced input types and validation hints.",
+      "type": "object",
+      "properties": {
+        "additional_fields": {
+          "type": "array",
+          "description": "Merchant-defined additional checkout fields with advanced input semantics.",
+          "items": {
+            "allOf": [
+              {
+                "$ref": "additional_fields.json#/$defs/additional_field"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "input": {
+                    "description": "Input control configuration.",
+                    "ucp_request": "omit",
+                    "allOf": [
+                      {
+                        "$ref": "additional_fields.json#/$defs/additional_field_input"
+                      },
+                      {
+                        "type": "object",
+                        "additionalProperties": true,
+                        "allOf": [
+                          {
+                            "if": {
+                              "properties": {
+                                "type": {
+                                  "const": "text"
+                                }
+                              },
+                              "required": [
+                                "type"
+                              ]
+                            },
+                            "then": {
+                              "$ref": "#/$defs/text_input"
+                            }
+                          },
+                          {
+                            "if": {
+                              "properties": {
+                                "type": {
+                                  "const": "boolean"
+                                }
+                              },
+                              "required": [
+                                "type"
+                              ]
+                            },
+                            "then": {
+                              "$ref": "#/$defs/boolean_input"
+                            }
+                          },
+                          {
+                            "if": {
+                              "properties": {
+                                "type": {
+                                  "const": "date"
+                                }
+                              },
+                              "required": [
+                                "type"
+                              ]
+                            },
+                            "then": {
+                              "$ref": "#/$defs/date_input"
+                            }
+                          },
+                          {
+                            "if": {
+                              "properties": {
+                                "type": {
+                                  "const": "choice"
+                                }
+                              },
+                              "required": [
+                                "type"
+                              ]
+                            },
+                            "then": {
+                              "$ref": "#/$defs/choice_input"
+                            }
+                          }
+                        ],
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "description": "Field type identifier. Advanced values include text, boolean, date, and choice."
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          "ucp_request": {
+            "create": "optional",
+            "update": "optional",
+            "complete": "omit"
+          }
+        }
+      }
+    },
+    "dev.ucp.shopping.checkout": {
+      "title": "Checkout with Advanced Additional Fields",
+      "description": "Checkout additional fields extended with advanced input types and validation hints.",
+      "type": "object",
+      "properties": {
+        "additional_fields": {
+          "type": "array",
+          "description": "Merchant-defined additional checkout fields with advanced input semantics.",
+          "items": {
+            "$ref": "#/$defs/dev.ucp.shopping.additional_fields/properties/additional_fields/items"
+          },
+          "ucp_request": {
+            "create": "optional",
+            "update": "optional",
+            "complete": "omit"
+          }
+        }
+      }
+    },
+    "dev.ucp.shopping.order": {
+      "title": "Order with Advanced Additional Fields",
+      "description": "Order additional fields extended with advanced input type identifiers.",
+      "type": "object",
+      "properties": {
+        "additional_fields": {
+          "type": "array",
+          "description": "Read-only additional field values captured during checkout, with advanced input type identifiers.",
+          "items": {
+            "allOf": [
+              {
+                "$ref": "additional_fields.json#/$defs/order_additional_field"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "input": {
+                    "description": "Input metadata for the captured field. Choice fields include the display label for the captured value.",
+                    "allOf": [
+                      {
+                        "$ref": "additional_fields.json#/$defs/order_additional_field_input"
+                      },
+                      {
+                        "type": "object",
+                        "additionalProperties": true,
+                        "allOf": [
+                          {
+                            "if": {
+                              "properties": {
+                                "type": {
+                                  "const": "choice"
+                                }
+                              },
+                              "required": [
+                                "type"
+                              ]
+                            },
+                            "then": {
+                              "$ref": "#/$defs/order_choice_input"
+                            }
+                          }
+                        ],
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "description": "Field type identifier. Advanced values include text, boolean, date, and choice.",
+                            "examples": [
+                              "text",
+                              "boolean",
+                              "date",
+                              "choice"
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          "ucp_request": "omit"
+        }
+      }
+    }
+  }
+}
