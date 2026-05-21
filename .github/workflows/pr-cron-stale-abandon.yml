@@ -1,3 +1,4 @@
+---
 name: PR Stale and Abandon Tracker
 
 on:
@@ -21,5 +22,7 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const script = require('./.github/workflows/scripts/pr-cron-stale-abandon.js');
+            const path =
+              './.github/workflows/scripts/pr-cron-stale-abandon.js';
+            const script = require(path);
             await script({ github, context, core });

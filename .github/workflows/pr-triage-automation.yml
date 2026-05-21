@@ -1,3 +1,4 @@
+---
 name: PR Triage Automation
 
 on:
@@ -23,5 +24,7 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const script = require('./.github/workflows/scripts/pr-triage-automation.js');
+            const path =
+              './.github/workflows/scripts/pr-triage-automation.js';
+            const script = require(path);
             await script({ github, context, core });

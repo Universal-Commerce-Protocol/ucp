@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /**
  * @param {Object} params
  * @param {import('@actions/github').GitHub} params.github
@@ -50,7 +51,7 @@ module.exports = async function triageAutomation({ github, context, core }) {
           issue_number: prNumber,
           name: 'status:needs-triage'
         });
-      } catch (e) {
+      } catch {
         console.log('status:needs-triage label was not present');
       }
     }
@@ -65,7 +66,7 @@ module.exports = async function triageAutomation({ github, context, core }) {
           issue_number: prNumber,
           name: 'status:under-review'
         });
-      } catch (e) {
+      } catch {
         console.log('status:under-review label was not present');
       }
     }
@@ -95,9 +96,9 @@ module.exports = async function triageAutomation({ github, context, core }) {
           issue_number: prNumber,
           name: 'blocked'
         });
-      } catch (e) {
+      } catch {
         console.log('blocked label was not present');
       }
     }
   }
-};
+}

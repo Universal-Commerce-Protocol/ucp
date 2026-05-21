@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /**
  * @param {Object} params
  * @param {import('@actions/github').GitHub} params.github
@@ -53,4 +54,4 @@ module.exports = async function staleTracker({ github, context, core }) {
       }
     }
   }
-};
+}
