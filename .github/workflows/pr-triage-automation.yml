@@ -6,6 +6,8 @@ on:
     types: [opened, ready_for_review, synchronize, labeled]
   issue_comment:
     types: [created]
+  check_suite:
+    types: [completed]
 
 permissions:
   pull-requests: write
@@ -27,4 +29,4 @@ jobs:
             const path =
               './.github/workflows/scripts/pr-triage-automation.js';
             const script = require(path);
-            await script({ github, context, core });
+            await script({ github, context });
