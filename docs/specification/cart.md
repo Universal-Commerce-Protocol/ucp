@@ -232,6 +232,15 @@ requirements.
 
 {{ schema_fields('types/signals', 'checkout') }}
 
+### Attribution
+
+Platform-provided referral and conversion-event context — campaign IDs,
+click identifiers, and source/medium markers communicated by the platform.
+See [Attribution](overview.md#attribution) for details and consent
+requirements.
+
+{{ schema_fields('types/attribution', 'checkout') }}
+
 ### Total
 
 The same totals contract applies to cart and checkout. See

@@ -509,7 +509,7 @@ image: assets/banner.png
       </div>
       <div class="partner-logo">
         <img src="assets/partner/endorsed/CheckoutCom.svg" alt="Checkout.com" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
-        <span>Chewy</span>
+        <span>Checkout.com</span>
       </div>
       <div class="partner-logo">
         <img src="assets/partner/endorsed/Chewy.svg" alt="Chewy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
@@ -626,7 +626,7 @@ image: assets/banner.png
       </div>
       <div class="partner-logo">
         <img src="assets/partner/endorsed/CheckoutCom.svg" alt="Checkout.com" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
-        <span>Chewy</span>
+        <span>Checkout.com</span>
       </div>
       <div class="partner-logo">
         <img src="assets/partner/endorsed/Chewy.svg" alt="Chewy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">

@@ -30,6 +30,7 @@ Paymentech
 Paypal
 Preorders
 Queensway
+Quicktype
 Sephora
 Shopify
 Shopee
@@ -110,3 +111,6 @@ keyid
 reauth
 reprepare
 sandboxing
+fbclid
+gclid
+ttclid
