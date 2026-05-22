@@ -40,23 +40,28 @@ import validate_examples as v  # noqa: E402
 # Test harness (minimal, no deps)
 # -----------------------------------------------------------
 
-_RESULTS: list[tuple[str, bool, str]] = []
+_RESULTS: list[tuple[str, str, str]] = []
 
 
 def _check(name: str, condition: bool, detail: str = "") -> None:
   """Record a test result."""
-  _RESULTS.append((name, condition, detail))
+  _RESULTS.append((name, "PASS" if condition else "FAIL", detail))
+
+
+def _skip(name: str, detail: str) -> None:
+  """Record a skipped test."""
+  _RESULTS.append((name, "SKIP", detail))
 
 
 def _report() -> int:
   """Print results and return exit code."""
-  passed = sum(1 for _, ok, _ in _RESULTS if ok)
-  failed = [(n, d) for n, ok, d in _RESULTS if not ok]
-  for name, ok, detail in _RESULTS:
-    status = "PASS" if ok else "FAIL"
-    suffix = f" \u2014 {detail}" if detail and not ok else ""
+  passed = sum(1 for _, status, _ in _RESULTS if status == "PASS")
+  skipped = sum(1 for _, status, _ in _RESULTS if status == "SKIP")
+  failed = [(n, d) for n, status, d in _RESULTS if status == "FAIL"]
+  for name, status, detail in _RESULTS:
+    suffix = f" \u2014 {detail}" if detail and status != "PASS" else ""
     print(f"  {status}  {name}{suffix}")
-  print(f"\n{passed} passed, {len(failed)} failed")
+  print(f"\n{passed} passed, {skipped} skipped, {len(failed)} failed")
   return 0 if not failed else 1
 
 
@@ -375,10 +380,9 @@ def _process(md: str) -> v.Result:
 def test_process_block_integration() -> None:
   """End-to-end through process_block. Requires ucp-schema on PATH."""
   if not _has_ucp_schema():
-    _check(
+    _skip(
       "process_block_integration",
-      False,
-      "SKIPPED: ucp-schema binary not on PATH",
+      "ucp-schema binary not on PATH",
     )
     return
 
