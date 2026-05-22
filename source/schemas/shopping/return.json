@@ -9,15 +9,7 @@
       "title": "Return Policy",
       "description": "Conditions, methods, timelines, and costs associated with returning physical items.",
       "type": "object",
-      "required": ["line_item_ids"],
       "properties": {
-        "line_item_ids": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "description": "Line items governed by this return policy, allowing distinct policies per item."
-        },
         "return_period_in_days": {
           "type": "integer",
           "description": "Length of the merchant's return window in days, measured from the date of delivery. This is a policy statement — it communicates the window duration, not a pre-computed deadline."
@@ -36,6 +28,10 @@
             "$ref": "#/$defs/return_method"
           },
           "description": "Permitted physical methods for returning the item, along with their associated fee structures."
+        },
+        "reason": {
+          "type": "string",
+          "description": "Human-readable explanation of why this return policy applies. Helps platforms and agents explain policy provenance to buyers (e.g., 'Custom engraved items are non-returnable per our personalization policy'). Optional."
         }
       }
     },
@@ -88,12 +84,31 @@
           "type": "object",
           "properties": {
             "return_policies": {
-              "type": "array",
-              "items": {
+              "type": "object",
+              "additionalProperties": {
                 "$ref": "#/$defs/return_policy"
               },
-              "description": "Return policies applicable to items in the checkout.",
+              "description": "Registry of return policies, keyed by policy ID. Line items reference these policies by key.",
               "ucp_request": "omit"
+            },
+            "line_items": {
+              "type": "array",
+              "items": {
+                "allOf": [
+                  {
+                    "$ref": "types/line_item.json"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "return_policy_id": {
+                        "type": "string",
+                        "description": "ID of the return policy that applies to this line item. Must reference a key in the top-level return_policies map."
+                      }
+                    }
+                  }
+                ]
+              }
             }
           }
         }

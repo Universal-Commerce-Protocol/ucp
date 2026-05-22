@@ -27,27 +27,30 @@ platforms can intelligently answer user queries like _"Can I return this
 in-store?"_ or _"How many days do I have to return this?"_ without forcing the
 user to leave the platform to hunt for a policy on the merchant's website.
 
-This extension adds a `return_policies` field to Checkout containing:
+This extension adds a `return_policies` registry to Checkout and a reference on line items:
 
-- `return_policies[]` — conditions governed by the merchant for specific items.
+- `line_items[].return_policy_id` — reference to the policy that applies to this item.
+- `return_policies` — map of policy definitions keyed by ID, containing:
     - `return_period_in_days` — the number of days allowed for the return.
     - `supported_resolutions[]` — allowed outcomes (refund, exchange, etc.).
     - `methods[]` — permitted physical methods (in-store, by-mail, etc.)
         - `fee` — the cost structure for that specific method.
+    - `reason` — human-readable explanation of why this policy applies.
 
 **Mental model:**
 
-- `return_policies[0]` Standard Apparel
-    - `line_item_ids` 👕👖
-    - `return_period_in_days` = 30 Days 🗓️
-    - `supported_resolutions` = `["original_payment_method", "exchange"]`
-    - `methods[0]` In-Store 🏬
-        - `fee` = `free` ✅
-    - `methods[1]` By Mail 📦
-        - `fee` = `fixed_fee` $5.00 💸
-- `return_policies[1]` Non-Returnable / Final Sale
-    - `line_item_ids` ⌚
-    - `supported_resolutions` = `[]`
+- **Line Items:**
+    - 👕 (Shirt) -> `return_policy_id` = `"rp_standard"`
+    - 👖 (Pants) -> `return_policy_id` = `"rp_standard"`
+    - ⌚ (Watch) -> `return_policy_id` = `"rp_final_sale"`
+- **Return Policies Registry:**
+    - `"rp_standard"`:
+        - `return_period_in_days` = 30 Days 🗓️
+        - `supported_resolutions` = `["original_payment_method", "exchange"]`
+        - `methods`: In-Store (free) 🏬, By Mail ($5.00) 📦
+    - `"rp_final_sale"`:
+        - `supported_resolutions` = `[]` (Final Sale)
+        - `reason` = "Clearance items are non-returnable." 🚫
 
 ## Discovery
 
@@ -107,12 +110,13 @@ requirements of a purchase before completion.
 
 ### Human-Readable Fields
 
-| Location            | Field                   | Required | Purpose                                       |
-| ------------------- | ----------------------- | -------- | --------------------------------------------- |
-| `return_policy`     | `return_period_in_days` | No       | Quantitative window for the return.           |
-| `return_policy`     | `supported_resolutions` | No       | Allowed outcomes (refund, exchange, etc.).    |
-| `return_method.fee` | `display_text`          | No       | Context for the fee (e.g., "Restocking Fee"). |
-| `return_method.fee` | `amount`                | No       | Price in minor units for fixed fees.          |
+| Location            | Field                   | Required | Purpose                                            |
+| ------------------- | ----------------------- | -------- | -------------------------------------------------- |
+| `return_policy`     | `return_period_in_days` | No       | Quantitative window for the return.                |
+| `return_policy`     | `reason`                | No       | Human-readable explanation of policy application.  |
+| `return_policy`     | `supported_resolutions` | No       | Allowed outcomes (refund, exchange, etc.).         |
+| `return_method.fee` | `display_text`          | No       | Context for the fee (e.g., "Restocking Fee").      |
+| `return_method.fee` | `amount`                | No       | Price in minor units for fixed fees.               |
 
 ### Business Responsibilities
 
@@ -147,38 +151,50 @@ assurance:
 
 ### Mixed Cart
 
-In this example, apparel items have a standard window, while a custom item is
-final sale.
+In this example, apparel items reference a standard policy, while a custom item references a final sale policy with a reason.
 
 ```json
 {
-    "return_policies": [
+  "line_items": [
+    {
+      "id": "shirt",
+      "return_policy_id": "rp_standard"
+    },
+    {
+      "id": "pants",
+      "return_policy_id": "rp_standard"
+    },
+    {
+      "id": "custom_engraved_watch",
+      "return_policy_id": "rp_final_sale"
+    }
+  ],
+  "return_policies": {
+    "rp_standard": {
+      "return_period_in_days": 30,
+      "supported_resolutions": ["original_payment_method", "exchange"],
+      "methods": [
         {
-            "line_item_ids": ["shirt", "pants"],
-            "return_period_in_days": 30,
-            "supported_resolutions": ["original_payment_method", "exchange"],
-            "methods": [
-                {
-                    "type": "in_store",
-                    "fee": {
-                        "type": "free",
-                        "display_text": "Free In-Store Return"
-                    }
-                },
-                {
-                    "type": "by_mail",
-                    "fee": {
-                        "type": "fixed_fee",
-                        "amount": 500,
-                        "display_text": "Return Shipping Fee"
-                    }
-                }
-            ]
+          "type": "in_store",
+          "fee": {
+            "type": "free",
+            "display_text": "Free In-Store Return"
+          }
         },
         {
-            "line_item_ids": ["custom_engraved_watch"],
-            "supported_resolutions": []
+          "type": "by_mail",
+          "fee": {
+            "type": "fixed_fee",
+            "amount": 500,
+            "display_text": "Return Shipping Fee"
+          }
         }
-    ]
+      ]
+    },
+    "rp_final_sale": {
+      "supported_resolutions": [],
+      "reason": "Custom engraved items are final sale."
+    }
+  }
 }
 ```
