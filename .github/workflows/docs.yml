@@ -34,6 +34,7 @@ on:
       - "hooks.py"
       - "docs/**"
       - "source/**"
+      - "scripts/**"
 
 jobs:
   lint:
@@ -65,6 +66,16 @@ jobs:
         if: steps.source_files_changed.outputs.any_changed == 'true' || github.event_name == 'workflow_dispatch'
         run: ucp-schema lint source/
 
+      # Enforce the schema-authoring contract end-to-end: every ```json block
+      # in the spec docs either validates against its declared schema, or is
+      # explicitly skipped with a precise reason. The validator is pure stdlib
+      # Python and shells out to the already-installed ucp-schema binary.
+      - name: Validate documentation examples
+        run: uv run python scripts/validate_examples.py --schema-base source/schemas/
+
+      - name: Run validator unit tests
+        run: uv run python scripts/test_validate_examples.py
+
   build_and_verify_main:
     needs: lint
     runs-on: ubuntu-latest
@@ -89,7 +100,7 @@ jobs:
 
       - name: Build and Verify Documentation Site (Main/PR)
         run: |
-          bash scripts/build_local.sh --main-only
+          bash scripts/build_local.sh --draft-only
           uv run python scripts/check_links.py local_preview
 
   build_and_verify_release:

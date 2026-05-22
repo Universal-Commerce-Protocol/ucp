@@ -26,7 +26,7 @@
           "$ref": "types/search_filters.json"
         },
         "pagination": {
-          "$ref": "types/pagination.json#/$defs/request"
+          "$ref": "../common/types/pagination.json#/$defs/request"
         }
       }
     },
@@ -48,12 +48,12 @@
           "description": "Products matching the search criteria."
         },
         "pagination": {
-          "$ref": "types/pagination.json#/$defs/response"
+          "$ref": "../common/types/pagination.json#/$defs/response"
         },
         "messages": {
           "type": "array",
           "items": {
-            "$ref": "types/message.json"
+            "$ref": "../common/types/message.json"
           },
           "description": "Errors, warnings, or informational messages about the search results."
         }

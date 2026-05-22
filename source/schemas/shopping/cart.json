@@ -104,7 +104,7 @@
     "messages": {
       "type": "array",
       "items": {
-        "$ref": "types/message.json"
+        "$ref": "../common/types/message.json"
       },
       "description": "Validation messages, warnings, or informational notices.",
       "ucp_request": "omit"
@@ -112,7 +112,7 @@
     "links": {
       "type": "array",
       "items": {
-        "$ref": "types/link.json"
+        "$ref": "../common/types/link.json"
       },
       "description": "Optional merchant links (policies, FAQs).",
       "ucp_request": "omit"
