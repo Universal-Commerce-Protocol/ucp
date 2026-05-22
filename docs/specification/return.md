@@ -36,6 +36,16 @@ This extension adds a `return_policies` registry to Checkout and a reference on 
     - `methods[]` — permitted physical methods (in-store, by-mail, etc.)
         - `fee` — the cost structure for that specific method.
     - `reason` — human-readable explanation of why this policy applies.
+    - `policy_url` — URL to the merchant's full return policy document.
+
+### Relationship to Other Extensions
+
+The Return Extension is independent of the Fulfillment Extension. Businesses MAY use information from `fulfillment` to compute return options (e.g., in-store return locations may correlate with fulfillment retail locations), but this extension does NOT model that relationship. Platforms MUST NOT assume any structural correlation between return methods and fulfillment methods.
+
+### Scope and Future Directions
+
+- **Pre-Purchase Disclosure Only**: This extension addresses pre-purchase disclosure of return policy only. Post-purchase return initiation, label generation, refund processing, and exchange execution are out of scope. A future `dev.ucp.shopping.return_action` extension may address these workflows; implementers MUST NOT extend this schema for those purposes.
+- **Product-Level Returns**: A return policy is fundamentally a property of a product (or its category), not a property of a checkout. A separate Product or Catalog capability could expose return policies at the catalog level in the future. For v1, checkout-time exposure is used for simplicity.
 
 **Mental model:**
 
@@ -114,11 +124,16 @@ requirements of a purchase before completion.
 | ------------------- | ----------------------- | -------- | -------------------------------------------------- |
 | `return_policy`     | `return_period_in_days` | No       | Quantitative window for the return.                |
 | `return_policy`     | `reason`                | No       | Human-readable explanation of policy application.  |
+| `return_policy`     | `policy_url`            | No       | URL to the merchant's full return policy document. |
 | `return_policy`     | `supported_resolutions` | No       | Allowed outcomes (refund, exchange, etc.).         |
 | `return_method.fee` | `display_text`          | No       | Context for the fee (e.g., "Restocking Fee").      |
 | `return_method.fee` | `amount`                | No       | Price in minor units for fixed fees.               |
 
 ### Business Responsibilities
+
+**For Policy Locking:**
+
+- **MUST** honor the return policy that was in effect at the time of order placement; that policy MUST be sourced from the Order resource (when available) rather than recomputed from current merchant rules. The return policy returned at checkout response time is the policy in effect for the buyer at that moment.
 
 **For `return_period_in_days`:**
 
@@ -147,6 +162,23 @@ assurance:
 - Use `return_period_in_days` to calculate and display the specific return
   deadline based on the delivery date.
 
+**For Partial Quantity Returns:**
+
+- **SHOULD** assume return policies apply to individual units within a line item. Unless specified otherwise (e.g., for bundled items), any subset of quantities is subject to the same return policy.
+
+**For Absent Policy Data:**
+
+- **MUST NOT** infer items are non-returnable if the Return capability is advertised in discovery but `return_policies` is absent or empty in a checkout response. Platforms SHOULD fall back to general merchant return info (e.g., via the merchant's profile URL).
+
+**Interpretation of Policy States:**
+
+Platforms MUST interpret combinations of `methods` and `return_period_in_days` as follows:
+
+- `methods` absent or empty (`[]`): Treat as "no return methods supported" (i.e., non-returnable/final sale).
+- `return_period_in_days` is `0`: Treat as "non-returnable" (final sale).
+- `return_period_in_days` absent, but `methods` present: Treat as "no time limit on returns".
+- `return_period_in_days` present, but `methods` absent/empty: Ambiguous. Interpret as returnable, but client/buyer must arrange their own return shipment, or consult the full policy link if provided.
+
 ## Examples
 
 ### Mixed Cart
@@ -172,6 +204,7 @@ In this example, apparel items reference a standard policy, while a custom item 
   "return_policies": {
     "rp_standard": {
       "return_period_in_days": 30,
+      "policy_url": "https://example.com/returns",
       "supported_resolutions": ["original_payment_method", "exchange"],
       "methods": [
         {

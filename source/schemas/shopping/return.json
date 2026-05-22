@@ -32,6 +32,11 @@
         "reason": {
           "type": "string",
           "description": "Human-readable explanation of why this return policy applies. Helps platforms and agents explain policy provenance to buyers (e.g., 'Custom engraved items are non-returnable per our personalization policy'). Optional."
+        },
+        "policy_url": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL to the merchant's full return policy document. Platforms SHOULD surface this link alongside the structured policy data so buyers can review complete terms."
         }
       }
     },
