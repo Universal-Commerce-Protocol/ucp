@@ -93,6 +93,7 @@ Maps to the [Get Order](http://ucp.dev/2026-04-08/specification/order/#get-order
 | currency      | string                                                                           | **Yes**  | ISO 4217 currency code. MUST match the currency from the originating checkout session.                                                        |
 | totals        | [Totals](/2026-04-08/specification/reference/#totals)                            | **Yes**  | Different totals for the order.                                                                                                               |
 | messages      | Array\[[Message](/2026-04-08/specification/reference/#message)\]                 | No       | Business outcome messages (errors, warnings, informational). Present when the business needs to communicate status or issues to the platform. |
+| attribution   | [Attribution](/2026-04-08/specification/reference/#attribution)                  | No       | Snapshot of the attribution associated with the originating checkout. Read-only on the order.                                                 |
 
 #### Example
 
@@ -121,70 +122,68 @@ Maps to the [Get Order](http://ucp.dev/2026-04-08/specification/order/#get-order
   "id": 1,
   "result": {
     "structuredContent": {
-      "order": {
-        "ucp": {
-          "version": "2026-04-08",
-          "capabilities": {
-            "dev.ucp.shopping.order": [{"version": "2026-04-08"}]
-          }
-        },
-        "id": "order_abc123",
-        "checkout_id": "checkout_xyz789",
-        "permalink_url": "https://business.example.com/orders/abc123",
-        "currency": "USD",
-        "line_items": [
+      "ucp": {
+        "version": "2026-04-08",
+        "capabilities": {
+          "dev.ucp.shopping.order": [{"version": "2026-04-08"}]
+        }
+      },
+      "id": "order_abc123",
+      "checkout_id": "checkout_xyz789",
+      "permalink_url": "https://business.example.com/orders/abc123",
+      "currency": "USD",
+      "line_items": [
+        {
+          "id": "li_shoes",
+          "item": { "id": "prod_shoes", "title": "Running Shoes", "price": 3000 },
+          "quantity": { "total": 1, "fulfilled": 1 },
+          "totals": [
+            {"type": "subtotal", "amount": 3000},
+            {"type": "total", "amount": 3000}
+          ],
+          "status": "fulfilled"
+        }
+      ],
+      "fulfillment": {
+        "expectations": [
           {
-            "id": "li_shoes",
-            "item": { "id": "prod_shoes", "title": "Running Shoes", "price": 3000 },
-            "quantity": { "total": 1, "fulfilled": 1 },
-            "totals": [
-              {"type": "subtotal", "amount": 3000},
-              {"type": "total", "amount": 3000}
-            ],
-            "status": "fulfilled"
+            "id": "exp_1",
+            "line_items": [{ "id": "li_shoes", "quantity": 1 }],
+            "method_type": "shipping",
+            "destination": {
+              "street_address": "123 Main St",
+              "address_locality": "Austin",
+              "address_region": "TX",
+              "address_country": "US",
+              "postal_code": "78701"
+            },
+            "description": "Delivered"
           }
         ],
-        "fulfillment": {
-          "expectations": [
-            {
-              "id": "exp_1",
-              "line_items": [{ "id": "li_shoes", "quantity": 1 }],
-              "method_type": "shipping",
-              "destination": {
-                "street_address": "123 Main St",
-                "address_locality": "Austin",
-                "address_region": "TX",
-                "address_country": "US",
-                "postal_code": "78701"
-              },
-              "description": "Delivered"
-            }
-          ],
-          "events": [
-            {
-              "id": "evt_1",
-              "occurred_at": "2026-01-08T10:30:00Z",
-              "type": "delivered",
-              "line_items": [{ "id": "li_shoes", "quantity": 1 }],
-              "tracking_number": "1Z999AA10123456784",
-              "tracking_url": "https://ups.com/track/1Z999AA10123456784",
-              "description": "Delivered to front door"
-            }
-          ]
-        },
-        "adjustments": [],
-        "totals": [
-          { "type": "subtotal", "amount": 3000 },
-          { "type": "fulfillment", "amount": 800 },
-          { "type": "tax", "amount": 304 },
-          { "type": "total", "amount": 4104 }
+        "events": [
+          {
+            "id": "evt_1",
+            "occurred_at": "2026-01-08T10:30:00Z",
+            "type": "delivered",
+            "line_items": [{ "id": "li_shoes", "quantity": 1 }],
+            "tracking_number": "1Z999AA10123456784",
+            "tracking_url": "https://ups.com/track/1Z999AA10123456784",
+            "description": "Delivered to front door"
+          }
         ]
-      }
+      },
+      "adjustments": [],
+      "totals": [
+        { "type": "subtotal", "amount": 3000 },
+        { "type": "fulfillment", "amount": 800 },
+        { "type": "tax", "amount": 304 },
+        { "type": "total", "amount": 4104 }
+      ]
     },
     "content": [
       {
         "type": "text",
-        "text": "{\"order\":{\"ucp\":{...},\"id\":\"order_abc123\",...}}"
+        "text": "{\"ucp\":{...},\"id\":\"order_abc123\",...}"
       }
     ]
   }
@@ -197,23 +196,21 @@ Maps to the [Get Order](http://ucp.dev/2026-04-08/specification/order/#get-order
   "id": 1,
   "result": {
     "structuredContent": {
-      "order": {
-        "ucp": {
-          "version": "2026-04-08",
-          "status": "error",
-          "capabilities": {
-            "dev.ucp.shopping.order": [{"version": "2026-04-08"}]
-          }
-        },
-        "messages": [
-          {
-            "type": "error",
-            "code": "not_found",
-            "severity": "unrecoverable",
-            "content": "Order not found."
-          }
-        ]
-      }
+      "ucp": {
+        "version": "2026-04-08",
+        "status": "error",
+        "capabilities": {
+          "dev.ucp.shopping.order": [{"version": "2026-04-08"}]
+        }
+      },
+      "messages": [
+        {
+          "type": "error",
+          "code": "not_found",
+          "severity": "unrecoverable",
+          "content": "Order not found."
+        }
+      ]
     },
     "content": [
       {
@@ -231,23 +228,21 @@ Maps to the [Get Order](http://ucp.dev/2026-04-08/specification/order/#get-order
   "id": 1,
   "result": {
     "structuredContent": {
-      "order": {
-        "ucp": {
-          "version": "2026-04-08",
-          "status": "error",
-          "capabilities": {
-            "dev.ucp.shopping.order": [{"version": "2026-04-08"}]
-          }
-        },
-        "messages": [
-          {
-            "type": "error",
-            "code": "unauthorized",
-            "severity": "unrecoverable",
-            "content": "Not authorized to access this order."
-          }
-        ]
-      }
+      "ucp": {
+        "version": "2026-04-08",
+        "status": "error",
+        "capabilities": {
+          "dev.ucp.shopping.order": [{"version": "2026-04-08"}]
+        }
+      },
+      "messages": [
+        {
+          "type": "error",
+          "code": "unauthorized",
+          "severity": "unrecoverable",
+          "content": "Not authorized to access this order."
+        }
+      ]
     },
     "content": [
       {

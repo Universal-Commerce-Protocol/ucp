@@ -1372,15 +1372,13 @@ MCP tool responses use a dual-output pattern for backward compatibility. UCP MCP
   "id": 1,
   "result": {
     "structuredContent": {
-      "checkout": {
-        "ucp": {"version": "2026-04-08", "capabilities": {...}},
-        "id": "checkout_abc123",
-        "status": "incomplete",
-        ...
-      }
+      "ucp": {"version": "2026-04-08", "capabilities": {...}},
+      "id": "checkout_abc123",
+      "status": "incomplete",
+      ...
     },
     "content": [
-      {"type": "text", "text": "{\"checkout\":{\"ucp\":{...},\"id\":\"checkout_abc123\",...}}"}
+      {"type": "text", "text": "{\"ucp\":{...},\"id\":\"checkout_abc123\",...}"}
     ]
   }
 }
@@ -1464,6 +1462,30 @@ Businesses **MAY** use messages with code `signal` to request additional data. T
   ]
 }
 ```
+
+### Attribution
+
+Platforms refer users to businesses through many channels — paid ads, organic recommendations, influencer links, AI agents. In a browser-based flow, the referral context (campaigns, click identifiers, source/medium markers) flows through URL query parameters. The `attribution` field enables platforms to communicate the same parameters to businesses.
+
+UCP does **NOT** prescribe attribution models, windows, or assignment logic. Platforms use their existing conventions (GA4 campaign parameters, click identifiers like `gclid` / `fbclid` / `ttclid`, etc.); businesses receive and process them according to their own analytics needs.
+
+```json
+{
+  "attribution": {
+    "campaign_id": "18234567890",
+    "campaign_source": "google",
+    "campaign_medium": "cpc",
+    "campaign_name": "spring_2026",
+    "gclid": "EAIaIQobChMI..."
+  }
+}
+```
+
+Attribution is informational and optionally provided by the platform. Businesses do not negotiate or advertise support; the field's presence or absence MUST NOT affect the response or negotiation.
+
+The data can carry pseudonymous identifiers (click IDs, session keys) treated as personal data under applicable data protection laws. Platforms and businesses are each responsible for compliance in their respective jurisdictions: platforms determine what to emit and disclose; businesses apply their own data handling, retention, and consent policies. The `buyer_consent` extension provides a structured channel for buyers to communicate consent state.
+
+Attribution appears on cart, checkout, and catalog requests as platform-provided attribution context; on order it appears as a business-emitted snapshot of the originating checkout's attribution.
 
 ### Transaction Integrity and Non-Repudiation
 
@@ -1641,17 +1663,4 @@ Capabilities outside the `dev.ucp.*` namespace version fully independently. Vend
 
 ## Glossary
 
-| Term                              | Acronym | Definition                                                                                                                                                |
-| --------------------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Agent Payments Protocol**       | AP2     | An open protocol designed to enable AI agents to securely interoperate and complete payments autonomously. UCP leverages AP2 for secure payment mandates. |
-| **Agent2Agent Protocol**          | A2A     | An open standard for secure, collaborative communication between diverse AI agents. UCP can use A2A as a transport layer.                                 |
-| **Capability**                    | -       | A standalone core feature that a business supports (e.g., Checkout, Identity Linking). Capabilities are the fundamental "verbs" of UCP.                   |
-| **Credential Provider**           | CP      | A trusted entity (like a digital wallet) responsible for securely managing and executing the user's payment and identity credentials.                     |
-| **Extension**                     | -       | An optional capability that augments another capability via the `extends` field. Extensions appear in `ucp.capabilities[]` alongside core capabilities.   |
-| **Profile**                       | -       | A JSON document hosted by businesses and platforms at a well-known URI, declaring their identity, supported capabilities, and endpoints.                  |
-| **Business**                      | -       | The entity selling goods or services. In UCP, they act as the **Merchant of Record (MoR)**, retaining financial liability and ownership of the order.     |
-| **Model Context Protocol**        | MCP     | A protocol standardizing how AI models connect to external data and tools. UCP capabilities map 1:1 to MCP tools.                                         |
-| **Universal Commerce Protocol**   | UCP     | The standard defined in this document, enabling interoperability between commerce entities via standardized capabilities and discovery.                   |
-| **Payment Service Provider**      | PSP     | The financial infrastructure provider that processes payments, authorizations, and settlements on behalf of the business.                                 |
-| **Platform**                      | -       | The consumer-facing surface (AI agent, app, website) acting on behalf of the user to discover businesses and facilitate commerce.                         |
-| **Verifiable Digital Credential** | VDC     | An Issuer-signed credential (set of claims) whose authenticity can be verified cryptographically. Used in UCP for secure payment authorizations.          |
+For definitions of acronyms and terms used throughout the UCP specification, see the [Glossary](http://ucp.dev/2026-04-08/specification/glossary/index.md).

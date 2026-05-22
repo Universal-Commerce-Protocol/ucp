@@ -2727,6 +2727,12 @@
 <td style="text-align: left;">Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
 </tr>
 <tr>
+<td style="text-align: left;">attribution</td>
+<td style="text-align: left;"><a href="/2026-04-08/specification/reference/#attribution">Attribution</a></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.</td>
+</tr>
+<tr>
 <td style="text-align: left;">filters</td>
 <td style="text-align: left;"><a href="/2026-04-08/specification/reference/#search-filters">Search Filters</a></td>
 <td style="text-align: left;">No</td>
@@ -2933,6 +2939,12 @@ applies to all lookups in the batch.</p>
 <td style="text-align: left;"><a href="/2026-04-08/specification/reference/#signals">Signals</a></td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
+</tr>
+<tr>
+<td style="text-align: left;">attribution</td>
+<td style="text-align: left;"><a href="/2026-04-08/specification/reference/#attribution">Attribution</a></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.</td>
 </tr>
 </tbody>
 </table>
@@ -3149,6 +3161,12 @@ messages indicating which identifiers were not found.</p>
 <td style="text-align: left;"><a href="/2026-04-08/specification/reference/#signals">Signals</a></td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
+</tr>
+<tr>
+<td style="text-align: left;">attribution</td>
+<td style="text-align: left;"><a href="/2026-04-08/specification/reference/#attribution">Attribution</a></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.</td>
 </tr>
 </tbody>
 </table>
@@ -3423,88 +3441,16 @@ MAY include informational messages indicating which identifiers were not found.<
 </thead>
 <tbody>
 <tr>
-<td style="text-align: left;">id</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Global ID (GID) uniquely identifying this product.</td>
-</tr>
-<tr>
-<td style="text-align: left;">handle</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">URL-safe slug for SEO-friendly URLs (e.g., 'blue-runner-pro'). Use id for stable API references.</td>
-</tr>
-<tr>
-<td style="text-align: left;">title</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Product title.</td>
-</tr>
-<tr>
-<td style="text-align: left;">description</td>
-<td style="text-align: left;">object</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Product description in one or more formats.</td>
-</tr>
-<tr>
-<td style="text-align: left;">url</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Canonical product page URL.</td>
-</tr>
-<tr>
-<td style="text-align: left;">categories</td>
+<td style="text-align: left;">selected</td>
 <td style="text-align: left;">Array[object]</td>
 <td style="text-align: left;">No</td>
-<td style="text-align: left;">Product categories with optional taxonomy identifiers.</td>
-</tr>
-<tr>
-<td style="text-align: left;">price_range</td>
-<td style="text-align: left;">object</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Price range across all variants.</td>
-</tr>
-<tr>
-<td style="text-align: left;">list_price_range</td>
-<td style="text-align: left;">object</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">List price range before discounts (for strikethrough display).</td>
-</tr>
-<tr>
-<td style="text-align: left;">media</td>
-<td style="text-align: left;">Array[object]</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Product media (images, videos, 3D models). First item is the featured media for listings.</td>
+<td style="text-align: left;">Effective option selections that anchor the featured variant and availability signals. Required when the product has configurable options; may be empty or omitted for products with no option axes.</td>
 </tr>
 <tr>
 <td style="text-align: left;">options</td>
 <td style="text-align: left;">Array[object]</td>
 <td style="text-align: left;">No</td>
-<td style="text-align: left;">Product options (Size, Color, etc.).</td>
-</tr>
-<tr>
-<td style="text-align: left;">variants</td>
-<td style="text-align: left;">Array[object]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Purchasable variants of this product. First item is the featured variant for listings.</td>
-</tr>
-<tr>
-<td style="text-align: left;">rating</td>
-<td style="text-align: left;">object</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Aggregate product rating.</td>
-</tr>
-<tr>
-<td style="text-align: left;">tags</td>
-<td style="text-align: left;">Array[string]</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Product tags for categorization and search.</td>
-</tr>
-<tr>
-<td style="text-align: left;">metadata</td>
-<td style="text-align: left;">object</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Business-defined custom data extending the standard product model.</td>
+<td style="text-align: left;">Product options with availability signals relative to the effective selections.</td>
 </tr>
 </tbody>
 </table>
@@ -3658,7 +3604,7 @@ MAY include informational messages indicating which identifiers were not found.<
       <div class="md-copyright">
   
     <div class="md-copyright__highlight">
-      Copyright 2026 UCP Authors. Licensed under the <a href="https://github.com/Universal-Commerce-Protocol/ucp/blob/main/LICENSE">Apache License, Version 2.0</a>.
+      Copyright 2026 UCP Authors. Licensed under the <a href="https://github.com/Universal-Commerce-Protocol/ucp/blob/main/LICENSE" >Apache License, Version 2.0</a>.
     </div>
   
   

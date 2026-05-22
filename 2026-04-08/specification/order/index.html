@@ -1563,6 +1563,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#attribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Attribution
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#adjustments" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2562,6 +2573,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#attribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Attribution
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#adjustments" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3009,6 +3031,11 @@ it will be delivered, and what has happened since order placement.</p>
   (common examples: <code>processing</code>, <code>shipped</code>, <code>in_transit</code>, <code>delivered</code>,
   <code>failed_attempt</code>, <code>canceled</code>, <code>undeliverable</code>, <code>returned_to_sender</code>)</li>
 </ul>
+<h3 id="attribution">Attribution<a class="headerlink" href="#attribution" title="Permanent link">&para;</a></h3>
+<p>Businesses MAY surface a snapshot of the originating checkout's
+<code>attribution</code> on the order. Read-only on the order — agents do not write
+<code>order.attribution</code>. See <a href="../overview/#attribution">Attribution</a> for the
+underlying contract.</p>
 <h3 id="adjustments">Adjustments<a class="headerlink" href="#adjustments" title="Permanent link">&para;</a></h3>
 <p><strong>Adjustments</strong> are post-order events that exist independently of
 fulfillment:</p>
@@ -3100,6 +3127,12 @@ fulfillment:</p>
 <td style="text-align: left;">Array[<a href="/2026-04-08/specification/reference/#message">Message</a>]</td>
 <td style="text-align: left;">No</td>
 <td style="text-align: left;">Business outcome messages (errors, warnings, informational). Present when the business needs to communicate status or issues to the platform.</td>
+</tr>
+<tr>
+<td style="text-align: left;">attribution</td>
+<td style="text-align: left;"><a href="/2026-04-08/specification/reference/#attribution">Attribution</a></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Snapshot of the attribution associated with the originating checkout. Read-only on the order.</td>
 </tr>
 </tbody>
 </table>
@@ -4024,10 +4057,22 @@ zero-downtime key rotation procedures.</p>
 </thead>
 <tbody>
 <tr>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
+<td style="text-align: left;">type</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Cost category. Well-known values: subtotal, items_discount, discount, fulfillment, tax, fee, total. Businesses MAY use additional values.</td>
+</tr>
+<tr>
+<td style="text-align: left;">display_text</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Text to display against the amount. Should reflect appropriate method (e.g., 'Shipping', 'Delivery').</td>
+</tr>
+<tr>
+<td style="text-align: left;">amount</td>
+<td style="text-align: left;"><a href="/2026-04-08/specification/reference/#signed-amount">Signed Amount</a></td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Monetary amount in the currency's minor unit as defined by ISO 4217. Refer to the currency's exponent to determine minor-to-major ratio (e.g., 2 for USD, 0 for JPY, 3 for KWD). May be negative — the sign is intrinsic to the value (e.g., discounts are negative, charges are positive).</td>
 </tr>
 </tbody>
 </table>
@@ -4160,7 +4205,7 @@ zero-downtime key rotation procedures.</p>
       <div class="md-copyright">
   
     <div class="md-copyright__highlight">
-      Copyright 2026 UCP Authors. Licensed under the <a href="https://github.com/Universal-Commerce-Protocol/ucp/blob/main/LICENSE">Apache License, Version 2.0</a>.
+      Copyright 2026 UCP Authors. Licensed under the <a href="https://github.com/Universal-Commerce-Protocol/ucp/blob/main/LICENSE" >Apache License, Version 2.0</a>.
     </div>
   
   

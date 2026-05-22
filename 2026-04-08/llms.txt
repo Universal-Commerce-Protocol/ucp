@@ -3,55 +3,76 @@
 > The Universal Commerce Protocol (UCP) is a solution for enabling gen AI agents to make payments on behalf of users, safely, securely, and in a decentralized and privacy protecting manner. This protocol is a part of the broader ecosystem, which includes agentic protocols like A2A and MCP, and encompasses the global nature of payments.
 
 
+This is the documentation directory for the Universal Commerce Protocol
+(UCP), an open standard that enables gen AI agents to safely, securely,
+and privately execute commerce actions (i.e., discovering, buying) on
+behalf of users.
+### Technical Specification Indices (llms.txt)
+For raw, LLM-optimized indices of our versioned technical
+specifications:
+- [Latest Stable UCP
+  Specification Index](https://ucp.dev/latest/llms.txt):
+  Standardized specifications for production deployments.
+- [UCP Specification Index
+  (2026-04-08)](https://ucp.dev/2026-04-08/llms.txt):
+  Stable spec release version 2026-04-08.
+- [UCP Specification Index
+  (2026-01-23)](https://ucp.dev/2026-01-23/llms.txt):
+  Stable spec release version 2026-01-23.
+- [UCP Specification Index
+  (2026-01-11)](https://ucp.dev/2026-01-11/llms.txt):
+  Stable spec release version 2026-01-11.
+
+
 ## Specification
 
-- [Overview](http://ucp.dev/2026-04-08/specification/overview/index.md)
+- [Overview](http://ucp.dev/2026-04-08/specification/overview/index.md): Master technical specification of UCP, discovery mechanisms, secure transports, and error taxonomies.
 
 ## Message Signatures
 
-- [Signatures](http://ucp.dev/2026-04-08/specification/signatures/index.md)
+- [Signatures](http://ucp.dev/2026-04-08/specification/signatures/index.md): Implementation details for RFC 9421 HTTP Message Signatures and RFC 9530 Content-Digests to achieve secure, transport-agnostic request authentication and replay protection.
 
 ## Checkout Capability
 
-- [Overview](http://ucp.dev/2026-04-08/specification/checkout/index.md)
-- [REST](http://ucp.dev/2026-04-08/specification/checkout-rest/index.md)
-- [MCP](http://ucp.dev/2026-04-08/specification/checkout-mcp/index.md)
-- [A2A](http://ucp.dev/2026-04-08/specification/checkout-a2a/index.md)
-- [Embedded protocol](http://ucp.dev/2026-04-08/specification/embedded-protocol/index.md)
-- [Embedded](http://ucp.dev/2026-04-08/specification/embedded-checkout/index.md)
-- [AP2 Mandates Extension](http://ucp.dev/2026-04-08/specification/ap2-mandates/index.md)
-- [Buyer Consent Extension](http://ucp.dev/2026-04-08/specification/buyer-consent/index.md)
-- [Discounts Extension](http://ucp.dev/2026-04-08/specification/discount/index.md)
-- [Fulfillment Extension](http://ucp.dev/2026-04-08/specification/fulfillment/index.md)
+- [Overview](http://ucp.dev/2026-04-08/specification/checkout/index.md): Core Checkout Capability specifications detailing session state lifecycles, totals calculation rules, and buyer input validation severity states.
+- [REST](http://ucp.dev/2026-04-08/specification/checkout-rest/index.md): HTTP REST transport binding for Checkout operations, specifying standard headers, API endpoints, status codes, and payload structures.
+- [MCP](http://ucp.dev/2026-04-08/specification/checkout-mcp/index.md): Model Context Protocol (MCP) transport binding for Checkout operations, mapping UCP capabilities to JSON-RPC tools with agent metadata rules.
+- [A2A](http://ucp.dev/2026-04-08/specification/checkout-a2a/index.md): Agent2Agent Protocol (A2A) binding for Checkout Capability, detailing transport discovery, agent card profile advertisement, and message negotiation flows.
+- [Embedded protocol](http://ucp.dev/2026-04-08/specification/embedded-protocol/index.md): Core Embedded Protocol (EP) transport binding, defining message formats, handshake patterns, communication channels, security constraints, and shared error handling structures for iframe/webview integrations.
+- [Embedded](http://ucp.dev/2026-04-08/specification/embedded-checkout/index.md): Embedded Checkout Protocol (ECP) specification, detailing per-session delegation negotiation, URL parameters, native UI event mappings, W3C Payment Request conceptual alignment, and core lifecycle messages.
+- [AP2 Mandates Extension](http://ucp.dev/2026-04-08/specification/ap2-mandates/index.md): AP2 Mandates Extension, detailing secure, cryptographically bound checkout commitments (using SD-JWT+kb digital credentials and detached JWS signatures) between business, platform, and payment providers.
+- [Buyer Consent Extension](http://ucp.dev/2026-04-08/specification/buyer-consent/index.md): Buyer Consent Extension, defining data schemas for transmitting buyer privacy choices (analytics, marketing, personalization) to assist with privacy compliance (CCPA/GDPR).
+- [Discounts Extension](http://ucp.dev/2026-04-08/specification/discount/index.md): Discount Extension, covering discount code discovery, applied discounts, allocation method stacking orders, rejected code message handling, and automatic or provisional eligibility promotions.
+- [Fulfillment Extension](http://ucp.dev/2026-04-08/specification/fulfillment/index.md): Fulfillment extension for checkouts, defining delivery methods, pickup destinations, and method-agnostic UI rendering contracts.
 
 ## Cart Capability
 
-- [Overview](http://ucp.dev/2026-04-08/specification/cart/index.md)
-- [REST](http://ucp.dev/2026-04-08/specification/cart-rest/index.md)
-- [MCP](http://ucp.dev/2026-04-08/specification/cart-mcp/index.md)
-- [Embedded protocol](http://ucp.dev/2026-04-08/specification/embedded-protocol/index.md)
-- [Embedded](http://ucp.dev/2026-04-08/specification/embedded-cart/index.md)
+- [Overview](http://ucp.dev/2026-04-08/specification/cart/index.md): Pre-purchase Cart Capability, detailing item collection, state modification, and seamless transition handoff to active checkout sessions.
+- [REST](http://ucp.dev/2026-04-08/specification/cart-rest/index.md): HTTP REST transport binding for Cart operations, including endpoints for session creation, modification, retrieval, and cancellation.
+- [MCP](http://ucp.dev/2026-04-08/specification/cart-mcp/index.md): Model Context Protocol (MCP) transport binding for Cart operations, mapping item management to JSON-RPC tools for AI shopping agents.
+- [Embedded protocol](http://ucp.dev/2026-04-08/specification/embedded-protocol/index.md): Core Embedded Protocol (EP) transport binding, defining message formats, handshake patterns, communication channels, security constraints, and shared error handling structures for iframe/webview integrations.
+- [Embedded](http://ucp.dev/2026-04-08/specification/embedded-cart/index.md): Embedded Cart Protocol (ECaP), enabling secure, cross-origin iframe communication and synchronized event states between platform agents and business websites.
 
 ## Catalog Capability
 
-- [Overview](http://ucp.dev/2026-04-08/specification/catalog/index.md)
-- [Search](http://ucp.dev/2026-04-08/specification/catalog/search/index.md)
-- [Lookup](http://ucp.dev/2026-04-08/specification/catalog/lookup/index.md)
-- [REST](http://ucp.dev/2026-04-08/specification/catalog/rest/index.md)
-- [MCP](http://ucp.dev/2026-04-08/specification/catalog/mcp/index.md)
+- [Overview](http://ucp.dev/2026-04-08/specification/catalog/index.md): Core Catalog Capability, detailing high-level product discovery models, variant structures, merchant attribution, and real-time pricing context.
+- [Search](http://ucp.dev/2026-04-08/specification/catalog/search/index.md): Product discovery via the Search Catalog capability, specifying text queries, category browsing, and multi-attribute filtering contracts.
+- [Lookup](http://ucp.dev/2026-04-08/specification/catalog/lookup/index.md): Direct item retrieval via the Lookup Catalog capability, specifying variant resolution logic, batch identifiers, and interactive option selection.
+- [REST](http://ucp.dev/2026-04-08/specification/catalog/rest/index.md): HTTP REST transport binding for the Catalog Capability, detailing search, batch lookup, and product detail endpoints with JSON payload examples.
+- [MCP](http://ucp.dev/2026-04-08/specification/catalog/mcp/index.md): Model Context Protocol (MCP) transport binding for the Catalog Capability, mapping discovery operations to JSON-RPC tools with metadata validation rules.
 
 ## Other Capabilities
 
-- [Overview](http://ucp.dev/2026-04-08/specification/order/index.md)
-- [REST](http://ucp.dev/2026-04-08/specification/order-rest/index.md)
-- [MCP](http://ucp.dev/2026-04-08/specification/order-mcp/index.md)
-- [Identity Linking Capability](http://ucp.dev/2026-04-08/specification/identity-linking/index.md)
-- [Guide](http://ucp.dev/2026-04-08/specification/payment-handler-guide/index.md)
-- [Template](http://ucp.dev/2026-04-08/specification/payment-handler-template/index.md)
-- [Tokenization Guide](http://ucp.dev/2026-04-08/specification/tokenization-guide/index.md)
-- [Processor Tokenizer](http://ucp.dev/2026-04-08/specification/examples/processor-tokenizer-payment-handler/index.md)
-- [Platform Tokenizer](http://ucp.dev/2026-04-08/specification/examples/platform-tokenizer-payment-handler/index.md)
-- [Encrypted Credential](http://ucp.dev/2026-04-08/specification/examples/encrypted-credential-handler/index.md)
-- [Reference](http://ucp.dev/2026-04-08/specification/reference/index.md)
-- [Playground](http://ucp.dev/2026-04-08/specification/playground/index.md)
+- [Overview](http://ucp.dev/2026-04-08/specification/order/index.md): Post-purchase tracking via the Order Capability, detailing line item updates, fulfillment expectations, shipment events, adjustments, and webhook-based status updates.
+- [REST](http://ucp.dev/2026-04-08/specification/order-rest/index.md): HTTP REST transport binding for the Order Capability, detailing endpoints, HTTP headers, payload schemas, and error structures.
+- [MCP](http://ucp.dev/2026-04-08/specification/order-mcp/index.md): Model Context Protocol (MCP) transport binding for the Order Capability, detailing the JSON-RPC tool interface and parameters for fetching order states.
+- [Identity Linking Capability](http://ucp.dev/2026-04-08/specification/identity-linking/index.md): User authentication via the Identity Linking Capability, specifying direct B2C/B2B OAuth 2.0 flows (with PKCE and RFC 9207) to unlock personalized commerce data.
+- [Guide](http://ucp.dev/2026-04-08/specification/payment-handler-guide/index.md): Architectural framework and standard vocabulary for specifying UCP payment handlers, covering configuration declarations and transaction execution.
+- [Template](http://ucp.dev/2026-04-08/specification/payment-handler-template/index.md): Standard Markdown template and integration checklist when authoring new UCP payment handler specifications.
+- [Tokenization Guide](http://ucp.dev/2026-04-08/specification/tokenization-guide/index.md): Shared API, security requirements, and lifecycle policies (single-use, TTL, session-scoped) for building compliant tokenization payment handlers.
+- [Processor Tokenizer](http://ucp.dev/2026-04-08/specification/examples/processor-tokenizer-payment-handler/index.md): Concrete payment handler example utilizing a 'Tokenize to Process' flow, where a single enterprise vault or PSP tokenizes credentials and resolves them internally.
+- [Platform Tokenizer](http://ucp.dev/2026-04-08/specification/examples/platform-tokenizer-payment-handler/index.md): Concrete payment handler example utilizing a 'Platform-as-Tokenizer' flow, where a platform's wallet generates tokens and hosts a secure detokenization endpoint.
+- [Encrypted Credential](http://ucp.dev/2026-04-08/specification/examples/encrypted-credential-handler/index.md): Concrete payment handler example utilizing a 'Direct Encryption' flow, where a platform encrypts payment data with a business's public key for local decryption.
+- [Reference](http://ucp.dev/2026-04-08/specification/reference/index.md): Complete reference directory of all core UCP, type, and extension JSON schemas, including platform/business profiles and metadata objects.
+- [Playground](http://ucp.dev/2026-04-08/specification/playground/index.md): Interactive, browser-based UCP Playground simulator for walking through step-by-step checkout sessions, payment handling, and backend webhooks.
 

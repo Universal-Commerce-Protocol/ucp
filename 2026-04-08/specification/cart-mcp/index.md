@@ -93,12 +93,13 @@ Maps to the [Create Cart](http://ucp.dev/2026-04-08/specification/cart/#create-c
 
 #### Input Schema
 
-| Name       | Type                                                                 | Required | Description                                                                                                                                                                                                                                                                                                                                                                                             |
-| ---------- | -------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| line_items | Array\[[Line Item](/2026-04-08/specification/reference/#line-item)\] | **Yes**  | Cart line items. Same structure as checkout. Full replacement on update.                                                                                                                                                                                                                                                                                                                                |
-| context    | [Context](/2026-04-08/specification/reference/#context)              | No       | Buyer signals for localization (country, region, postal_code). Merchant uses for pricing, availability, currency. Falls back to geo-IP if omitted.                                                                                                                                                                                                                                                      |
-| signals    | [Signals](/2026-04-08/specification/reference/#signals)              | No       | Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace. |
-| buyer      | [Buyer](/2026-04-08/specification/reference/#buyer)                  | No       | Optional buyer information for personalized estimates.                                                                                                                                                                                                                                                                                                                                                  |
+| Name        | Type                                                                 | Required | Description                                                                                                                                                                                                                                                                                                                                                                                             |
+| ----------- | -------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| line_items  | Array\[[Line Item](/2026-04-08/specification/reference/#line-item)\] | **Yes**  | Cart line items. Same structure as checkout. Full replacement on update.                                                                                                                                                                                                                                                                                                                                |
+| context     | [Context](/2026-04-08/specification/reference/#context)              | No       | Buyer signals for localization (country, region, postal_code). Merchant uses for pricing, availability, currency. Falls back to geo-IP if omitted.                                                                                                                                                                                                                                                      |
+| signals     | [Signals](/2026-04-08/specification/reference/#signals)              | No       | Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace. |
+| attribution | [Attribution](/2026-04-08/specification/reference/#attribution)      | No       | Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.                                                                                                                                                                                        |
+| buyer       | [Buyer](/2026-04-08/specification/reference/#buyer)                  | No       | Optional buyer information for personalized estimates.                                                                                                                                                                                                                                                                                                                                                  |
 
 #### Output Schema
 
@@ -109,6 +110,7 @@ Maps to the [Create Cart](http://ucp.dev/2026-04-08/specification/cart/#create-c
 | line_items   | Array\[[Line Item Response](/2026-04-08/specification/reference/#line-item)\] | **Yes**  | Cart line items. Same structure as checkout. Full replacement on update.                                                                                                                                                                                                                                                                                                                                |
 | context      | [Context](/2026-04-08/specification/reference/#context)                       | No       | Buyer signals for localization (country, region, postal_code). Merchant uses for pricing, availability, currency. Falls back to geo-IP if omitted.                                                                                                                                                                                                                                                      |
 | signals      | [Signals](/2026-04-08/specification/reference/#signals)                       | No       | Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace. |
+| attribution  | [Attribution](/2026-04-08/specification/reference/#attribution)               | No       | Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.                                                                                                                                                                                        |
 | buyer        | [Buyer](/2026-04-08/specification/reference/#buyer)                           | No       | Optional buyer information for personalized estimates.                                                                                                                                                                                                                                                                                                                                                  |
 | currency     | string                                                                        | **Yes**  | ISO 4217 currency code. Determined by merchant based on context or geo-IP.                                                                                                                                                                                                                                                                                                                              |
 | totals       | [Totals](/2026-04-08/specification/reference/#totals)                         | **Yes**  | Estimated cost breakdown. May be partial if shipping/tax not yet calculable.                                                                                                                                                                                                                                                                                                                            |
@@ -158,49 +160,47 @@ Maps to the [Create Cart](http://ucp.dev/2026-04-08/specification/cart/#create-c
   "id": 1,
   "result": {
     "structuredContent": {
-      "cart": {
-        "ucp": {
-          "version": "2026-04-08",
-          "capabilities": {
-            "dev.ucp.shopping.checkout": [{"version": "2026-04-08"}],
-            "dev.ucp.shopping.cart": [{"version": "2026-04-08"}]
-          }
-        },
-        "id": "cart_abc123",
-        "line_items": [
-          {
-            "id": "li_1",
-            "item": {
-              "id": "item_123",
-              "title": "Red T-Shirt",
-              "price": 2500
-            },
-            "quantity": 2,
-            "totals": [
-              {"type": "subtotal", "amount": 5000},
-              {"type": "total", "amount": 5000}
-            ]
-          }
-        ],
-        "currency": "USD",
-        "totals": [
-          {
-            "type": "subtotal",
-            "amount": 5000
+      "ucp": {
+        "version": "2026-04-08",
+        "capabilities": {
+          "dev.ucp.shopping.checkout": [{"version": "2026-04-08"}],
+          "dev.ucp.shopping.cart": [{"version": "2026-04-08"}]
+        }
+      },
+      "id": "cart_abc123",
+      "line_items": [
+        {
+          "id": "li_1",
+          "item": {
+            "id": "item_123",
+            "title": "Red T-Shirt",
+            "price": 2500
           },
-          {
-            "type": "total",
-            "amount": 5000
-          }
-        ],
-        "continue_url": "https://business.example.com/checkout?cart=cart_abc123",
-        "expires_at": "2026-01-16T12:00:00Z"
-      }
+          "quantity": 2,
+          "totals": [
+            {"type": "subtotal", "amount": 5000},
+            {"type": "total", "amount": 5000}
+          ]
+        }
+      ],
+      "currency": "USD",
+      "totals": [
+        {
+          "type": "subtotal",
+          "amount": 5000
+        },
+        {
+          "type": "total",
+          "amount": 5000
+        }
+      ],
+      "continue_url": "https://business.example.com/checkout?cart=cart_abc123",
+      "expires_at": "2026-01-16T12:00:00Z"
     },
     "content": [
       {
         "type": "text",
-        "text": "{\"cart\":{\"ucp\":{...},\"id\":\"cart_abc123\",...}}"
+        "text": "{\"ucp\":{...},\"id\":\"cart_abc123\",...}"
       }
     ]
   }
@@ -250,6 +250,7 @@ Maps to the [Get Cart](http://ucp.dev/2026-04-08/specification/cart/#get-cart) o
 | line_items   | Array\[[Line Item Response](/2026-04-08/specification/reference/#line-item)\] | **Yes**  | Cart line items. Same structure as checkout. Full replacement on update.                                                                                                                                                                                                                                                                                                                                |
 | context      | [Context](/2026-04-08/specification/reference/#context)                       | No       | Buyer signals for localization (country, region, postal_code). Merchant uses for pricing, availability, currency. Falls back to geo-IP if omitted.                                                                                                                                                                                                                                                      |
 | signals      | [Signals](/2026-04-08/specification/reference/#signals)                       | No       | Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace. |
+| attribution  | [Attribution](/2026-04-08/specification/reference/#attribution)               | No       | Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.                                                                                                                                                                                        |
 | buyer        | [Buyer](/2026-04-08/specification/reference/#buyer)                           | No       | Optional buyer information for personalized estimates.                                                                                                                                                                                                                                                                                                                                                  |
 | currency     | string                                                                        | **Yes**  | ISO 4217 currency code. Determined by merchant based on context or geo-IP.                                                                                                                                                                                                                                                                                                                              |
 | totals       | [Totals](/2026-04-08/specification/reference/#totals)                         | **Yes**  | Estimated cost breakdown. May be partial if shipping/tax not yet calculable.                                                                                                                                                                                                                                                                                                                            |
@@ -285,49 +286,47 @@ Maps to the [Get Cart](http://ucp.dev/2026-04-08/specification/cart/#get-cart) o
   "id": 1,
   "result": {
     "structuredContent": {
-      "cart": {
-        "ucp": {
-          "version": "2026-04-08",
-          "capabilities": {
-            "dev.ucp.shopping.checkout": [{"version": "2026-04-08"}],
-            "dev.ucp.shopping.cart": [{"version": "2026-04-08"}]
-          }
-        },
-        "id": "cart_abc123",
-        "line_items": [
-          {
-            "id": "li_1",
-            "item": {
-              "id": "item_123",
-              "title": "Red T-Shirt",
-              "price": 2500
-            },
-            "quantity": 2,
-            "totals": [
-              {"type": "subtotal", "amount": 5000},
-              {"type": "total", "amount": 5000}
-            ]
-          }
-        ],
-        "currency": "USD",
-        "totals": [
-          {
-            "type": "subtotal",
-            "amount": 5000
+      "ucp": {
+        "version": "2026-04-08",
+        "capabilities": {
+          "dev.ucp.shopping.checkout": [{"version": "2026-04-08"}],
+          "dev.ucp.shopping.cart": [{"version": "2026-04-08"}]
+        }
+      },
+      "id": "cart_abc123",
+      "line_items": [
+        {
+          "id": "li_1",
+          "item": {
+            "id": "item_123",
+            "title": "Red T-Shirt",
+            "price": 2500
           },
-          {
-            "type": "total",
-            "amount": 5000
-          }
-        ],
-        "continue_url": "https://business.example.com/checkout?cart=cart_abc123",
-        "expires_at": "2026-01-16T12:00:00Z"
-      }
+          "quantity": 2,
+          "totals": [
+            {"type": "subtotal", "amount": 5000},
+            {"type": "total", "amount": 5000}
+          ]
+        }
+      ],
+      "currency": "USD",
+      "totals": [
+        {
+          "type": "subtotal",
+          "amount": 5000
+        },
+        {
+          "type": "total",
+          "amount": 5000
+        }
+      ],
+      "continue_url": "https://business.example.com/checkout?cart=cart_abc123",
+      "expires_at": "2026-01-16T12:00:00Z"
     },
     "content": [
       {
         "type": "text",
-        "text": "{\"cart\":{\"ucp\":{...},\"id\":\"cart_abc123\",...}}"
+        "text": "{\"ucp\":{...},\"id\":\"cart_abc123\",...}"
       }
     ]
   }
@@ -340,23 +339,21 @@ Maps to the [Get Cart](http://ucp.dev/2026-04-08/specification/cart/#get-cart) o
   "id": 1,
   "result": {
     "structuredContent": {
-      "cart": {
-        "ucp": {
-          "version": "2026-04-08",
-          "capabilities": {
-            "dev.ucp.shopping.cart": [{"version": "2026-04-08"}]
-          }
-        },
-        "messages": [
-          {
-            "type": "error",
-            "code": "not_found",
-            "content": "Cart not found or has expired",
-            "severity": "unrecoverable"
-          }
-        ],
-        "continue_url": "https://merchant.com/"
-      }
+      "ucp": {
+        "version": "2026-04-08",
+        "capabilities": {
+          "dev.ucp.shopping.cart": [{"version": "2026-04-08"}]
+        }
+      },
+      "messages": [
+        {
+          "type": "error",
+          "code": "not_found",
+          "content": "Cart not found or has expired",
+          "severity": "unrecoverable"
+        }
+      ],
+      "continue_url": "https://merchant.com/"
     },
     "content": [
       {
@@ -376,13 +373,14 @@ Maps to the [Update Cart](http://ucp.dev/2026-04-08/specification/cart/#update-c
 
 - `id` (String, required): The ID of the cart session to update.
 
-| Name       | Type                                                                 | Required | Description                                                                                                                                                                                                                                                                                                                                                                                             |
-| ---------- | -------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| id         | string                                                               | **Yes**  | Unique cart identifier.                                                                                                                                                                                                                                                                                                                                                                                 |
-| line_items | Array\[[Line Item](/2026-04-08/specification/reference/#line-item)\] | **Yes**  | Cart line items. Same structure as checkout. Full replacement on update.                                                                                                                                                                                                                                                                                                                                |
-| context    | [Context](/2026-04-08/specification/reference/#context)              | No       | Buyer signals for localization (country, region, postal_code). Merchant uses for pricing, availability, currency. Falls back to geo-IP if omitted.                                                                                                                                                                                                                                                      |
-| signals    | [Signals](/2026-04-08/specification/reference/#signals)              | No       | Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace. |
-| buyer      | [Buyer](/2026-04-08/specification/reference/#buyer)                  | No       | Optional buyer information for personalized estimates.                                                                                                                                                                                                                                                                                                                                                  |
+| Name        | Type                                                                 | Required | Description                                                                                                                                                                                                                                                                                                                                                                                             |
+| ----------- | -------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| id          | string                                                               | **Yes**  | Unique cart identifier.                                                                                                                                                                                                                                                                                                                                                                                 |
+| line_items  | Array\[[Line Item](/2026-04-08/specification/reference/#line-item)\] | **Yes**  | Cart line items. Same structure as checkout. Full replacement on update.                                                                                                                                                                                                                                                                                                                                |
+| context     | [Context](/2026-04-08/specification/reference/#context)              | No       | Buyer signals for localization (country, region, postal_code). Merchant uses for pricing, availability, currency. Falls back to geo-IP if omitted.                                                                                                                                                                                                                                                      |
+| signals     | [Signals](/2026-04-08/specification/reference/#signals)              | No       | Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace. |
+| attribution | [Attribution](/2026-04-08/specification/reference/#attribution)      | No       | Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.                                                                                                                                                                                        |
+| buyer       | [Buyer](/2026-04-08/specification/reference/#buyer)                  | No       | Optional buyer information for personalized estimates.                                                                                                                                                                                                                                                                                                                                                  |
 
 #### Output Schema
 
@@ -393,6 +391,7 @@ Maps to the [Update Cart](http://ucp.dev/2026-04-08/specification/cart/#update-c
 | line_items   | Array\[[Line Item Response](/2026-04-08/specification/reference/#line-item)\] | **Yes**  | Cart line items. Same structure as checkout. Full replacement on update.                                                                                                                                                                                                                                                                                                                                |
 | context      | [Context](/2026-04-08/specification/reference/#context)                       | No       | Buyer signals for localization (country, region, postal_code). Merchant uses for pricing, availability, currency. Falls back to geo-IP if omitted.                                                                                                                                                                                                                                                      |
 | signals      | [Signals](/2026-04-08/specification/reference/#signals)                       | No       | Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace. |
+| attribution  | [Attribution](/2026-04-08/specification/reference/#attribution)               | No       | Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.                                                                                                                                                                                        |
 | buyer        | [Buyer](/2026-04-08/specification/reference/#buyer)                           | No       | Optional buyer information for personalized estimates.                                                                                                                                                                                                                                                                                                                                                  |
 | currency     | string                                                                        | **Yes**  | ISO 4217 currency code. Determined by merchant based on context or geo-IP.                                                                                                                                                                                                                                                                                                                              |
 | totals       | [Totals](/2026-04-08/specification/reference/#totals)                         | **Yes**  | Estimated cost breakdown. May be partial if shipping/tax not yet calculable.                                                                                                                                                                                                                                                                                                                            |
@@ -449,62 +448,60 @@ Maps to the [Update Cart](http://ucp.dev/2026-04-08/specification/cart/#update-c
   "id": 2,
   "result": {
     "structuredContent": {
-      "cart": {
-        "ucp": {
-          "version": "2026-04-08",
-          "capabilities": {
-            "dev.ucp.shopping.checkout": [{"version": "2026-04-08"}],
-            "dev.ucp.shopping.cart": [{"version": "2026-04-08"}]
-          }
+      "ucp": {
+        "version": "2026-04-08",
+        "capabilities": {
+          "dev.ucp.shopping.checkout": [{"version": "2026-04-08"}],
+          "dev.ucp.shopping.cart": [{"version": "2026-04-08"}]
+        }
+      },
+      "id": "cart_abc123",
+      "line_items": [
+        {
+          "id": "li_1",
+          "item": {
+            "id": "item_123",
+            "title": "Red T-Shirt",
+            "price": 2500
+          },
+          "quantity": 3,
+          "totals": [
+            {"type": "subtotal", "amount": 7500},
+            {"type": "total", "amount": 7500}
+          ]
         },
-        "id": "cart_abc123",
-        "line_items": [
-          {
-            "id": "li_1",
-            "item": {
-              "id": "item_123",
-              "title": "Red T-Shirt",
-              "price": 2500
-            },
-            "quantity": 3,
-            "totals": [
-              {"type": "subtotal", "amount": 7500},
-              {"type": "total", "amount": 7500}
-            ]
+        {
+          "id": "li_2",
+          "item": {
+            "id": "item_456",
+            "title": "Blue Jeans",
+            "price": 7500
           },
-          {
-            "id": "li_2",
-            "item": {
-              "id": "item_456",
-              "title": "Blue Jeans",
-              "price": 7500
-            },
-            "quantity": 1,
-            "totals": [
-              {"type": "subtotal", "amount": 7500},
-              {"type": "total", "amount": 7500}
-            ]
-          }
-        ],
-        "currency": "USD",
-        "totals": [
-          {
-            "type": "subtotal",
-            "amount": 15000
-          },
-          {
-            "type": "total",
-            "amount": 15000
-          }
-        ],
-        "continue_url": "https://business.example.com/checkout?cart=cart_abc123",
-        "expires_at": "2026-01-16T12:00:00Z"
-      }
+          "quantity": 1,
+          "totals": [
+            {"type": "subtotal", "amount": 7500},
+            {"type": "total", "amount": 7500}
+          ]
+        }
+      ],
+      "currency": "USD",
+      "totals": [
+        {
+          "type": "subtotal",
+          "amount": 15000
+        },
+        {
+          "type": "total",
+          "amount": 15000
+        }
+      ],
+      "continue_url": "https://business.example.com/checkout?cart=cart_abc123",
+      "expires_at": "2026-01-16T12:00:00Z"
     },
     "content": [
       {
         "type": "text",
-        "text": "{\"cart\":{\"ucp\":{...},\"id\":\"cart_abc123\",...}}"
+        "text": "{\"ucp\":{...},\"id\":\"cart_abc123\",...}"
       }
     ]
   }
@@ -528,6 +525,7 @@ Maps to the [Cancel Cart](http://ucp.dev/2026-04-08/specification/cart/#cancel-c
 | line_items   | Array\[[Line Item Response](/2026-04-08/specification/reference/#line-item)\] | **Yes**  | Cart line items. Same structure as checkout. Full replacement on update.                                                                                                                                                                                                                                                                                                                                |
 | context      | [Context](/2026-04-08/specification/reference/#context)                       | No       | Buyer signals for localization (country, region, postal_code). Merchant uses for pricing, availability, currency. Falls back to geo-IP if omitted.                                                                                                                                                                                                                                                      |
 | signals      | [Signals](/2026-04-08/specification/reference/#signals)                       | No       | Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace. |
+| attribution  | [Attribution](/2026-04-08/specification/reference/#attribution)               | No       | Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.                                                                                                                                                                                        |
 | buyer        | [Buyer](/2026-04-08/specification/reference/#buyer)                           | No       | Optional buyer information for personalized estimates.                                                                                                                                                                                                                                                                                                                                                  |
 | currency     | string                                                                        | **Yes**  | ISO 4217 currency code. Determined by merchant based on context or geo-IP.                                                                                                                                                                                                                                                                                                                              |
 | totals       | [Totals](/2026-04-08/specification/reference/#totals)                         | **Yes**  | Estimated cost breakdown. May be partial if shipping/tax not yet calculable.                                                                                                                                                                                                                                                                                                                            |
@@ -564,48 +562,46 @@ Maps to the [Cancel Cart](http://ucp.dev/2026-04-08/specification/cart/#cancel-c
   "id": 1,
   "result": {
     "structuredContent": {
-      "cart": {
-        "ucp": {
-          "version": "2026-04-08",
-          "capabilities": {
-            "dev.ucp.shopping.checkout": [{"version": "2026-04-08"}],
-            "dev.ucp.shopping.cart": [{"version": "2026-04-08"}]
-          }
-        },
-        "id": "cart_abc123",
-        "line_items": [
-          {
-            "id": "li_1",
-            "item": {
-              "id": "item_123",
-              "title": "Red T-Shirt",
-              "price": 2500
-            },
-            "quantity": 2,
-            "totals": [
-              {"type": "subtotal", "amount": 5000},
-              {"type": "total", "amount": 5000}
-            ]
-          }
-        ],
-        "currency": "USD",
-        "totals": [
-          {
-            "type": "subtotal",
-            "amount": 5000
+      "ucp": {
+        "version": "2026-04-08",
+        "capabilities": {
+          "dev.ucp.shopping.checkout": [{"version": "2026-04-08"}],
+          "dev.ucp.shopping.cart": [{"version": "2026-04-08"}]
+        }
+      },
+      "id": "cart_abc123",
+      "line_items": [
+        {
+          "id": "li_1",
+          "item": {
+            "id": "item_123",
+            "title": "Red T-Shirt",
+            "price": 2500
           },
-          {
-            "type": "total",
-            "amount": 5000
-          }
-        ],
-        "continue_url": "https://business.example.com/checkout?cart=cart_abc123"
-      }
+          "quantity": 2,
+          "totals": [
+            {"type": "subtotal", "amount": 5000},
+            {"type": "total", "amount": 5000}
+          ]
+        }
+      ],
+      "currency": "USD",
+      "totals": [
+        {
+          "type": "subtotal",
+          "amount": 5000
+        },
+        {
+          "type": "total",
+          "amount": 5000
+        }
+      ],
+      "continue_url": "https://business.example.com/checkout?cart=cart_abc123"
     },
     "content": [
       {
         "type": "text",
-        "text": "{\"cart\":{\"ucp\":{...},\"id\":\"cart_abc123\",...}}"
+        "text": "{\"ucp\":{...},\"id\":\"cart_abc123\",...}"
       }
     ]
   }
@@ -629,23 +625,21 @@ Business outcomes (including not found and validation errors) are returned as JS
   "id": 1,
   "result": {
     "structuredContent": {
-      "cart": {
-        "ucp": {
-          "version": "2026-04-08",
-          "capabilities": {
-            "dev.ucp.shopping.cart": [{"version": "2026-04-08"}]
-          }
-        },
-        "messages": [
-          {
-            "type": "error",
-            "code": "not_found",
-            "content": "Cart not found or has expired",
-            "severity": "unrecoverable"
-          }
-        ],
-        "continue_url": "https://merchant.com/"
-      }
+      "ucp": {
+        "version": "2026-04-08",
+        "capabilities": {
+          "dev.ucp.shopping.cart": [{"version": "2026-04-08"}]
+        }
+      },
+      "messages": [
+        {
+          "type": "error",
+          "code": "not_found",
+          "content": "Cart not found or has expired",
+          "severity": "unrecoverable"
+        }
+      ],
+      "continue_url": "https://merchant.com/"
     },
     "content": [
       {"type": "text", "text": "{\"ucp\":{...},\"messages\":[...]}"}

@@ -19,6 +19,9 @@
         "signals": {
           "$ref": "https://ucp.dev/2026-04-08/schemas/shopping/types/signals.json"
         },
+        "attribution": {
+          "$ref": "https://ucp.dev/2026-04-08/schemas/shopping/types/attribution.json"
+        },
         "filters": {
           "$ref": "https://ucp.dev/2026-04-08/schemas/shopping/types/search_filters.json"
         },

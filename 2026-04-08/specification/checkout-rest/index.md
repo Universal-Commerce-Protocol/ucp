@@ -223,7 +223,7 @@ Content-Type: application/json
     {
       "type": "error",
       "code": "missing",
-      "path": "$.fulfillment.method[0].selected_destination_id",
+      "path": "$.fulfillment.methods[0].selected_destination_id",
       "content": "Fulfillment address is required",
       "severity": "recoverable"
     }
@@ -417,7 +417,7 @@ Content-Type: application/json
       {
         "id": "shipping_1",
         "type": "shipping",
-        "line_item_ids": ["item_123"],
+        "line_item_ids": ["li_1"],
         "selected_destination_id": "dest_home",
         "destinations": [
           {
@@ -432,7 +432,7 @@ Content-Type: application/json
         "groups": [
           {
             "id": "package_1",
-            "line_item_ids": ["item_123"],
+            "line_item_ids": ["li_1"],
             "selected_option_id": "standard",
             "options": [
               {
@@ -511,7 +511,7 @@ Content-Type: application/json
       {
         "id": "shipping_1",
         "type": "shipping",
-        "line_item_ids": ["item_123"],
+        "line_item_ids": ["li_1"],
         "selected_destination_id": "dest_home",
         "destinations": [
           {
@@ -610,7 +610,7 @@ Content-Type: application/json
       {
         "id": "shipping_1",
         "type": "shipping",
-        "line_item_ids": ["item_123"],
+        "line_item_ids": ["li_1"],
         "selected_destination_id": "dest_home",
         "destinations": [
           {
@@ -625,7 +625,7 @@ Content-Type: application/json
         "groups": [
           {
             "id": "package_1",
-            "line_item_ids": ["item_123"],
+            "line_item_ids": ["li_1"],
             "selected_option_id": "express",
             "options": [
               {
@@ -799,7 +799,7 @@ Content-Type: application/json
       {
         "id": "shipping_1",
         "type": "shipping",
-        "line_item_ids": ["item_123"],
+        "line_item_ids": ["li_1"],
         "selected_destination_id": "dest_home",
         "destinations": [
           {
@@ -814,7 +814,7 @@ Content-Type: application/json
         "groups": [
           {
             "id": "package_1",
-            "line_item_ids": ["item_123"],
+            "line_item_ids": ["li_1"],
             "selected_option_id": "express",
             "options": [
               {
@@ -952,7 +952,7 @@ Content-Type: application/json
       {
         "id": "shipping_1",
         "type": "shipping",
-        "line_item_ids": ["item_123"],
+        "line_item_ids": ["li_1"],
         "selected_destination_id": "dest_home",
         "destinations": [
           {
@@ -967,7 +967,7 @@ Content-Type: application/json
         "groups": [
           {
             "id": "package_1",
-            "line_item_ids": ["item_123"],
+            "line_item_ids": ["li_1"],
             "selected_option_id": "express",
             "options": [
               {
@@ -1103,7 +1103,7 @@ Content-Type: application/json
       {
         "id": "shipping_1",
         "type": "shipping",
-        "line_item_ids": ["item_123"],
+        "line_item_ids": ["li_1"],
         "selected_destination_id": "dest_home",
         "destinations": [
           {
@@ -1118,7 +1118,7 @@ Content-Type: application/json
         "groups": [
           {
             "id": "package_1",
-            "line_item_ids": ["item_123"],
+            "line_item_ids": ["li_1"],
             "selected_option_id": "express",
             "options": [
               {
@@ -1240,11 +1240,17 @@ Business outcomes (including errors like unavailable merchandise) are returned w
   "status": "incomplete",
   "line_items": [
     {
-      "id": "item_456",
-      "quantity": 100,
-      "available_quantity": 12
+      "id": "li_1",
+        "item": {
+          "id": "item_123",
+          "title": "Blue Jeans",
+          "price": 5000
+        },
+      "quantity": 12,
+      "totals": [...]
     }
   ],
+  "totals": [...],
   "messages": [
     {
       "type": "warning",
