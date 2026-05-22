@@ -13,7 +13,7 @@
       "description": "Per-scope policy and metadata — auth constraints (e.g. min_acr, max_token_age), declarative metadata (e.g. claims produced, consent descriptions), or any other scope-specific configuration. An empty object means user authentication is required with no additional policy. Open for non-breaking extension.",
       "properties": {
         "description": {
-          "$ref": "../shopping/types/description.json",
+          "$ref": "types/description.json",
           "description": "Optional human-readable description of the scope that platforms can use to present and explain context (requirement and value) to the user."
         }
       },

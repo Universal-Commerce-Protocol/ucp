@@ -127,6 +127,7 @@ appended to this endpoint to form the complete URL.
 
 **Example:**
 
+<!-- ucp:example schema=service def=business_schema -->
 ```json
 {
   "version": "{{ ucp_version }}",
@@ -164,6 +165,7 @@ functionality is supported and where to find documentation and schemas.
 An **extension** is an optional module that augments another capability.
 Extensions use the `extends` field to declare their parent(s):
 
+<!-- ucp:example schema=profile def=business_schema target=$.ucp.capabilities -->
 ```json
 {
   "dev.ucp.shopping.fulfillment": [
@@ -181,6 +183,7 @@ Extensions use the `extends` field to declare their parent(s):
 
 Extensions **MAY** extend multiple parent capabilities by using an array:
 
+<!-- ucp:example schema=profile def=business_schema target=$.ucp.capabilities -->
 ```json
 {
   "dev.ucp.shopping.discount": [
@@ -226,6 +229,7 @@ Extension schemas define composed types using `allOf`. The `$defs` key **MUST**
 use the full parent capability name (reverse-domain format) to enable
 deterministic schema resolution:
 
+<!-- ucp:example skip reason="schema definition" -->
 ```json
 {
   "$defs": {
@@ -267,6 +271,7 @@ Extension schemas **SHOULD** declare a `requires` object (alongside
 `name`, `title`, `description`) to indicate the protocol and
 capability versions required for correct operation:
 
+<!-- ucp:example skip reason="schema definition" -->
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -293,6 +298,7 @@ Each constraint is an object with a required `min` (inclusive) and
 optional `max` (inclusive) version. When `max` is absent, there is
 no upper bound:
 
+<!-- ucp:example skip reason="schema definition" -->
 ```json
 "requires": {
   "protocol": { "min": "2026-01-23", "max": "2026-09-01" },
@@ -343,10 +349,30 @@ Platforms **MUST** resolve schemas following this sequence:
 
 ### Profile Structure
 
+Profile documents are machine-readable discovery documents. Businesses publish
+their profile at `/.well-known/ucp`; platforms publish their profile at the URI
+advertised in `UCP-Agent`.
+
+A profile document is a JSON object with a required `ucp` member. The `ucp`
+member contains protocol metadata: protocol version, services, optional
+capabilities, and payment handlers.
+
+For both business and platform profiles, `ucp.version`, `ucp.services`, and
+`ucp.payment_handlers` are required. The `services` and `payment_handlers`
+registries **MUST** be present even when empty. `ucp.capabilities` is optional
+and **MAY** be omitted, though useful commerce profiles normally advertise at
+least one capability.
+
+Profiles **MAY** include `signing_keys`, an array of public EC JSON Web Keys
+used for HTTP Message Signatures and signed webhooks. See
+[Message Signatures](signatures.md) for key format, algorithms, lookup, and
+rotation.
+
 #### Business Profile
 
 Businesses publish their profile at `/.well-known/ucp`. An example:
 
+<!-- ucp:example schema=profile def=business_schema -->
 ```json
 {
   "ucp": {
@@ -464,11 +490,10 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
 }
 ```
 
-The `ucp` object contains protocol metadata: version, services, capabilities,
-and payment handlers. The `signing_keys` array contains public keys (JWK format)
-used to verify signatures on webhooks and other authenticated messages from the
-business. See [Key Discovery](#key-discovery) for key lookup and resolution,
-and [Message Signatures](signatures.md) for signing mechanics.
+The business profile advertises the business's available transports,
+capabilities, payment handlers, and public verification keys. See
+[Key Discovery](#key-discovery) for key lookup and resolution, and
+[Message Signatures](signatures.md) for signing mechanics.
 
 Businesses that support older protocol versions **SHOULD** include a
 `supported_versions` object mapping each older version to a
@@ -482,6 +507,7 @@ requiring cryptographic verification. Capabilities **MAY** include a `config`
 object for capability-specific settings (e.g., callback URLs, feature flags). An
 example:
 
+<!-- ucp:example schema=profile def=platform_schema -->
 ```json
 {
   "ucp": {
@@ -492,7 +518,8 @@ example:
           "version": "{{ ucp_version }}",
           "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview",
           "transport": "rest",
-          "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/rest.openapi.json"
+          "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/rest.openapi.json",
+          "endpoint": "https://platform.example.com/ucp/v1"
         }
       ]
     },
@@ -550,7 +577,7 @@ example:
           ]
         }
       ],
-      "dev.ucp.processor_tokenizer": [
+      "com.example.processor_tokenizer": [
         {
           "id": "processor_tokenizer",
           "version": "{{ ucp_version }}",
@@ -597,6 +624,7 @@ Content-Type: application/json
 **MCP Transport:** Platforms **MUST** include a `meta` object containing request
 metadata:
 
+<!-- ucp:example schema=shopping/checkout op=create direction=request extract=$.params.arguments.checkout -->
 ```json
 {
   "jsonrpc": "2.0",
@@ -823,6 +851,7 @@ task through the standard web interface.
 
     **Discovery Failure (JSON-RPC error):**
 
+    <!-- ucp:example schema=transports/jsonrpc def=error_response -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -841,6 +870,7 @@ task through the standard web interface.
 
     **Version Unsupported (JSON-RPC error):**
 
+    <!-- ucp:example schema=transports/jsonrpc def=error_response -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -859,6 +889,7 @@ task through the standard web interface.
 
     **Capabilities Incompatible (JSON-RPC result):**
 
+    <!-- ucp:example schema=common/types/error_response extract=$.result.structuredContent -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -880,7 +911,7 @@ task through the standard web interface.
           "continue_url": "https://merchant.com"
         },
         "content": [
-          {"type": "text", "text": "{\"ucp\":{...},\"messages\":[...],\"continue_url\":\"...\"}"}
+          {"type": "text", "text": "{\"ucp\":{…},…}"}
         ]
       }
     }
@@ -888,6 +919,7 @@ task through the standard web interface.
 
     **Protocol Error — Rate Limit (JSON-RPC error):**
 
+    <!-- ucp:example schema=transports/jsonrpc def=error_response -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -904,6 +936,7 @@ task through the standard web interface.
 
     **Protocol Error — Unauthorized (JSON-RPC error):**
 
+    <!-- ucp:example schema=transports/jsonrpc def=error_response -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -924,6 +957,7 @@ task through the standard web interface.
 
 The `capabilities` registry in responses indicates active capabilities:
 
+<!-- ucp:example schema=shopping/checkout op=read -->
 ```json
 {
   "ucp": {
@@ -943,8 +977,11 @@ The `capabilities` registry in responses indicates active capabilities:
     }
   },
   "id": "checkout_123",
-  "line_items": [...]
-  ... other fields
+  "status": "incomplete",
+  "currency": "USD",
+  "line_items": [ ... ],
+  "totals": [ ... ],
+  "links": [ ... ]
 }
 ```
 
@@ -1221,11 +1258,11 @@ an encrypted payment token.
 
 ##### 1. Business Advertisement (Response from Create Checkout)
 
+<!-- ucp:example schema=shopping/checkout target=$.ucp -->
 ```json
 {
-  "ucp": {
-    "version": "{{ ucp_version }}",
-    "payment_handlers": {
+  "version": "{{ ucp_version }}",
+  "payment_handlers": {
       "com.google.pay": [
         {
           "id": "8c9202bd-63cc-4241-8d24-d57ce69ea31c",
@@ -1272,7 +1309,6 @@ an encrypted payment token.
         }
       ]
     }
-  }
 }
 ```
 
@@ -1285,6 +1321,7 @@ respective handler API. The handler returns the encrypted token data.
 
 The Platform wraps the payment handler response into a payment instrument.
 
+<!-- ucp:example schema=shopping/checkout op=complete direction=request -->
 ```json
 POST /checkout-sessions/{id}/complete
 
@@ -1333,11 +1370,12 @@ request a challenge.
 
 ##### 1. Business Advertisement
 
+<!-- ucp:example schema=shopping/checkout target=$.ucp -->
 ```json
 {
-  "ucp": {
-    "payment_handlers": {
-      "com.example.tokenizer": [
+  "version": "{{ ucp_version }}",
+  "payment_handlers": {
+    "com.example.tokenizer": [
         {
           "id": "merchant_tokenizer",
           "version": "{{ ucp_version }}",
@@ -1357,7 +1395,6 @@ request a challenge.
           }
         }
       ]
-    }
   }
 }
 ```
@@ -1370,6 +1407,7 @@ previous legal binding connection with them and receives `tok_visa_123`
 
 ##### 3. Complete Checkout (Request to Business)
 
+<!-- ucp:example schema=shopping/checkout op=complete direction=request -->
 ```json
 POST /checkout-sessions/{id}/complete
 
@@ -1395,8 +1433,10 @@ POST /checkout-sessions/{id}/complete
 The business attempts the charge, but the PSP returns a "Soft Decline"
 requiring 3DS.
 
+<!-- ucp:example schema=shopping/checkout extract=$.messages target=$.messages -->
 ```json
 HTTP/1.1 200 OK
+
 {
   "status": "requires_escalation",
   "messages": [{
@@ -1419,11 +1459,12 @@ session token, the agent generates cryptographic mandates.
 
 ##### 1. Business Advertisement
 
+<!-- ucp:example schema=shopping/checkout target=$.ucp -->
 ```json
 {
-  "ucp": {
-    "payment_handlers": {
-      "dev.ucp.ap2_mandate_compatible_handlers": [
+  "version": "{{ ucp_version }}",
+  "payment_handlers": {
+    "dev.ucp.ap2_mandate_compatible_handlers": [
         {
           "id": "ap2_234352",
           "version": "{{ ucp_version }}",
@@ -1434,7 +1475,6 @@ session token, the agent generates cryptographic mandates.
           ]
         }
       ]
-    }
   }
 }
 ```
@@ -1446,6 +1486,7 @@ non-agentic surface.
 
 ##### 3. Complete Checkout
 
+<!-- ucp:example schema=shopping/checkout op=complete direction=request -->
 ```json
 POST /checkout-sessions/{id}/complete
 
@@ -1457,7 +1498,7 @@ POST /checkout-sessions/{id}/complete
         // other required instruments fields
         "credential": {
           "type": "card",
-          "token": "eyJhbGciOiJ...", // Token would contain payment_mandate, the signed proof of funds auth
+          "token": "eyJhbGciOiJ..." // Token would contain payment_mandate, the signed proof of funds auth
         }
       }
     ]
@@ -1467,7 +1508,7 @@ POST /checkout-sessions/{id}/complete
     "com.example.risk_score": 0.95
   },
   "ap2": {
-    "checkout_mandate": "eyJhbGciOiJ...", // Signed proof of checkout terms
+    "checkout_mandate": "eyJhbGciOiJ..." // Signed proof of checkout terms
   }
 }
 ```
@@ -1600,6 +1641,7 @@ which operates over JSON-RPC.
 MCP requests use the `tools/call` method with the operation name in
 `params.name` and UCP payload in `params.arguments`:
 
+<!-- ucp:example schema=shopping/checkout op=create direction=request extract=$.params.arguments.checkout -->
 ```json
 {
   "jsonrpc": "2.0",
@@ -1624,21 +1666,27 @@ MCP servers:
 - **SHOULD** declare `outputSchema` in tool definitions, referencing the
     appropriate UCP JSON Schema for the capability
 - **SHOULD** also return serialized JSON in `content[]` for backward
-    compatibility with clients not supporting `structuredContent`
+    compatibility with clients not supporting `structuredContent`. Documentation
+    examples abbreviate that serialized JSON string with `…` for readability.
 
+<!-- ucp:example schema=shopping/checkout extract=$.result.structuredContent.ucp target=$.ucp -->
 ```json
 {
   "jsonrpc": "2.0",
   "id": 1,
   "result": {
     "structuredContent": {
-      "ucp": {"version": "{{ ucp_version }}", "capabilities": {...}},
+      "ucp": {
+        "version": "{{ ucp_version }}",
+        "payment_handlers": {},
+        "capabilities": {...}
+      },
       "id": "checkout_abc123",
-      "status": "incomplete",
-      ...
+      "status": "incomplete"
+      // ... other checkout fields
     },
     "content": [
-      {"type": "text", "text": "{\"ucp\":{...},\"id\":\"checkout_abc123\",...}"}
+      {"type": "text", "text": "{\"ucp\":{…},…}"}
     ]
   }
 }
@@ -1701,17 +1749,16 @@ prevent collisions when multiple extensions contribute to the shared namespace.
 Well-known signals use the `dev.ucp` namespace (e.g., `dev.ucp.buyer_ip`);
 extension signals use their own namespace (e.g., `com.example.device_id`).
 
+<!-- ucp:example schema=shopping/checkout op=create direction=request target=$.signals -->
 ```json
 {
-  "signals": {
-    "dev.ucp.buyer_ip": "203.0.113.42",
-    "dev.ucp.user_agent": "Mozilla/5.0 ...",
-    "com.example.attestation": {
-      "provider_jwks": "https://example.com/.well-known/jwks.json",
-      "kid": "example-key-2026-01",
-      "payload": { "id": "att-7c3e9f", "pass": true, "...": "..." },
-      "sig": "base64url..."
-    }
+  "dev.ucp.buyer_ip": "203.0.113.42",
+  "dev.ucp.user_agent": "Mozilla/5.0 ...",
+  "com.example.attestation": {
+    "provider_jwks": "https://example.com/.well-known/jwks.json",
+    "kid": "example-key-2026-01",
+    "payload": { "id": "att-7c3e9f", "pass": true, "...": "..." },
+    "sig": "base64url..."
   }
 }
 ```
@@ -1726,23 +1773,23 @@ data. The `path` field identifies the requested signal; the message `type`
 determines enforcement. An `error` blocks status progression until the
 signal is provided; an `info` is advisory and non-blocking.
 
+<!-- ucp:example schema=shopping/checkout target=$.messages -->
 ```json
-{
-  "messages": [
-    {
-      "type": "error",
-      "code": "signal",
-      "path": "$.signals['dev.ucp.buyer_ip']",
-      "content": "Buyer IP is required to proceed."
-    },
-    {
-      "type": "info",
-      "code": "signal",
-      "path": "$.signals['dev.ucp.user_agent']",
-      "content": "Providing user agent may improve checkout outcomes."
-    }
-  ]
-}
+[
+  {
+    "type": "error",
+    "code": "signal",
+    "path": "$.signals['dev.ucp.buyer_ip']",
+    "content": "Buyer IP is required to proceed.",
+    "severity": "recoverable"
+  },
+  {
+    "type": "info",
+    "code": "signal",
+    "path": "$.signals['dev.ucp.user_agent']",
+    "content": "Providing user agent may improve checkout outcomes."
+  }
+]
 ```
 
 ### Attribution
@@ -1758,15 +1805,14 @@ logic. Platforms use their existing conventions (GA4 campaign parameters,
 click identifiers like `gclid` / `fbclid` / `ttclid`, etc.); businesses
 receive and process them according to their own analytics needs.
 
+<!-- ucp:example schema=shopping/checkout op=create direction=request target=$.attribution -->
 ```json
 {
-  "attribution": {
-    "campaign_id": "18234567890",
-    "campaign_source": "google",
-    "campaign_medium": "cpc",
-    "campaign_name": "spring_2026",
-    "gclid": "EAIaIQobChMI..."
-  }
+  "campaign_id": "18234567890",
+  "campaign_source": "google",
+  "campaign_medium": "cpc",
+  "campaign_name": "spring_2026",
+  "gclid": "EAIaIQobChMI..."
 }
 ```
 
@@ -1820,6 +1866,7 @@ Both businesses and platforms declare a single version in their profiles:
 
 === "Business Profile"
 
+    <!-- ucp:example schema=profile def=business_schema -->
     ```json
     {
       "ucp": {
@@ -1833,6 +1880,7 @@ Both businesses and platforms declare a single version in their profiles:
 
 === "Platform Profile"
 
+    <!-- ucp:example schema=profile def=platform_schema -->
     ```json
     {
       "ucp": {
@@ -1868,13 +1916,16 @@ version — including its own capabilities, services, payment handlers,
 and signing keys. When `supported_versions` is omitted, only
 `version` is supported.
 
+<!-- ucp:example schema=profile def=business_schema -->
 ```json
 {
   "ucp": {
     "version": "2026-01-23",
     "supported_versions": {
       "2026-01-11": "https://business.example.com/.well-known/ucp/2026-01-11"
-    }
+    },
+    "services": {},
+    "payment_handlers": {}
   }
 }
 ```
@@ -1923,6 +1974,7 @@ every request:
 
 Response with version confirmation:
 
+<!-- ucp:example schema=shopping/checkout extract=$.ucp target=$.ucp -->
 ```json
 {
   "ucp": {
@@ -1932,12 +1984,13 @@ Response with version confirmation:
   },
   "id": "checkout_123",
   "status": "incomplete"
-  ...other checkout fields
+  // ... other checkout fields
 }
 ```
 
 Version unsupported error — no resource is created:
 
+<!-- ucp:example schema=common/types/error_response op=read -->
 ```json
 {
   "ucp": { "version": "2026-01-11", "status": "error" },

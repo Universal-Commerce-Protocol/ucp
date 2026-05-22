@@ -75,7 +75,9 @@ linkignore
 llms
 llmstxt
 mastercard
+grepable
 midsole
+misparsed
 mkdocs
 mtok
 openapi
@@ -115,3 +117,7 @@ fbclid
 gclid
 ttclid
 ietf
+Accor
+Kogan
+Petbarn
+VTEX

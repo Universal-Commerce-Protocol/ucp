@@ -25,6 +25,8 @@ within the UCP.
 
 ## Type Schemas
 
+{{ auto_generate_schema_reference('types', 'reference', include_extensions=False, base_dir='source/schemas/common') }}
+
 {{ auto_generate_schema_reference('types', 'reference', include_extensions=False) }}
 
 ### Selected Payment Instrument {: #payment-instrument-selected-payment-instrument }
