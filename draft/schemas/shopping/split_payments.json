@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/draft/schemas/shopping/split_payments.json",
+  "name": "dev.ucp.shopping.split_payments",
+  "title": "Split Payments Extension",
+  "description": "Enables buyers to use multiple payment instruments for a single checkout.",
+  "requires": {
+    "protocol": {
+      "min": "2026-01-23"
+    },
+    "capabilities": {
+      "dev.ucp.shopping.checkout": {
+        "min": "2026-01-23"
+      }
+    }
+  },
+  "$defs": {
+    "instrument_group": {
+      "$ref": "https://ucp.dev/draft/schemas/shopping/types/instrument_group.json"
+    },
+    "payment_instrument": {
+      "title": "Payment Instrument (Split Payments)",
+      "description": "Payment instrument extended with an optional per-instrument amount for split payments.",
+      "allOf": [
+        {
+          "$ref": "https://ucp.dev/draft/schemas/shopping/types/payment_instrument.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "amount": {
+              "$ref": "https://ucp.dev/draft/schemas/common/types/amount.json",
+              "description": "Contribution amount for this instrument in `checkout.currency` minor units (ISO 4217). On request: the platform's requested contribution (omit for open-amount). On response: the actual amount authorized or charged (omitted when not finally processed)."
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.checkout": {
+      "title": "Checkout with Split Payments",
+      "description": "Checkout extended with split payment instrument amounts.",
+      "allOf": [
+        {
+          "$ref": "https://ucp.dev/draft/schemas/shopping/checkout.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "payment": {
+              "type": "object",
+              "properties": {
+                "instruments": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/payment_instrument"
+                  },
+                  "description": "Payment instruments in allocation priority order.",
+                  "ucp_request": {
+                    "create": "optional",
+                    "update": "optional",
+                    "complete": "required"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.split_payments": {
+      "business_schema": {
+        "title": "Split Payments Capability (Business)",
+        "description": "Business-level split payments capability configuration.",
+        "allOf": [
+          {
+            "$ref": "https://ucp.dev/draft/schemas/capability.json#/$defs/business_schema"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "config": {
+                "$ref": "https://ucp.dev/draft/schemas/shopping/types/business_split_payments_config.json",
+                "description": "Business split payments configuration"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "version": "2026-05-23"
+}

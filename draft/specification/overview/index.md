@@ -1007,6 +1007,8 @@ Payment handlers allow for a variety of different payment instruments and token-
 
 **Available Instrument Resolution:** Within each active handler, both the platform and the business independently advertise `available_instruments` — the set of instrument types and constraints each party supports. The business is responsible for resolving these into an authoritative value in the checkout response. The platform's declaration (from its profile) signals what it can handle; the business intersects that with its own `business_schema` declaration and cart context, then returns the resolved result. Platforms **MUST** treat the `available_instruments` in the response as authoritative for that checkout. See the [Payment Handler Guide](http://ucp.dev/draft/specification/payment-handler-guide/#resolving-available_instruments) for the full resolution semantics.
 
+**Instrument Cardinality:** A checkout submission **MUST** contain exactly one payment instrument unless the `dev.ucp.shopping.split_payments` capability is active. Businesses **MUST** reject submissions that violate this constraint with a `payment_failed` error in `messages[]`. See [Split Payments](http://ucp.dev/draft/specification/split-payments/index.md) for the extension that relaxes this constraint.
+
 ### Implementation Scenarios
 
 The following scenarios illustrate how different payment handlers and instruments are negotiated and executed using concrete data examples.

@@ -2226,6 +2226,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../split-payments/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Split Payments Extension
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -6052,6 +6080,12 @@ and cart context, then returns the resolved result. Platforms <strong>MUST</stro
 <code>available_instruments</code> in the response as authoritative for that checkout. See
 the <a href="../payment-handler-guide/#resolving-available_instruments">Payment Handler Guide</a>
 for the full resolution semantics.</p>
+<p><strong>Instrument Cardinality:</strong> A checkout submission <strong>MUST</strong> contain exactly one
+payment instrument unless the <code>dev.ucp.shopping.split_payments</code> capability is
+active. Businesses <strong>MUST</strong> reject submissions that violate this constraint with
+a <code>payment_failed</code> error in <code>messages[]</code>. See
+<a href="../split-payments/">Split Payments</a> for the extension that relaxes this
+constraint.</p>
 <h3 id="implementation-scenarios">Implementation Scenarios<a class="headerlink" href="#implementation-scenarios" title="Permanent link">&para;</a></h3>
 <p>The following scenarios illustrate how different payment handlers and
 instruments are negotiated and executed using concrete data examples.</p>
