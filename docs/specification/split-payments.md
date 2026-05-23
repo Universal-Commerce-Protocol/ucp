@@ -107,6 +107,7 @@ if any valid assignment exists, the combination matches.
 A business that supports (a) a card with up to 2 redeemables, (b) up to 5
 gift cards alone, and (c) two credit cards:
 
+<!-- ucp:example skip reason="illustrative business profile fragment showing allowed_combinations shape" -->
 ```json
 {
   "capabilities": [{
@@ -182,6 +183,7 @@ emit `info` messages for succeeded instruments to convey positive
 context (e.g., "Gift card authorized for $10.00") that the platform can
 surface to the buyer:
 
+<!-- ucp:example schema=shopping/checkout extract=$.messages target=$.messages -->
 ```json
 {
   "messages": [
@@ -243,6 +245,7 @@ open-amount, independent of any prior response.
 
 **Inbound (buyer's selection):**
 
+<!-- ucp:example schema=shopping/checkout op=complete direction=request extract=$.payment target=$.payment -->
 ```json
 {
   "payment": {
@@ -268,6 +271,7 @@ Neither instrument includes `amount` — the business determines both.
 
 **Outbound (completed checkout, $50 order):**
 
+<!-- ucp:example schema=shopping/checkout extract=$.payment target=$.payment -->
 ```json
 {
   "payment": {
@@ -300,6 +304,7 @@ and charged the credit card for the remaining $40.
 
 **Inbound (buyer's selection):**
 
+<!-- ucp:example schema=shopping/checkout op=complete direction=request extract=$.payment target=$.payment -->
 ```json
 {
   "payment": {
@@ -328,6 +333,7 @@ the rest.
 
 **Outbound (completed checkout, $50 order):**
 
+<!-- ucp:example schema=shopping/checkout extract=$.payment target=$.payment -->
 ```json
 {
   "payment": {
@@ -360,6 +366,7 @@ credit card covers the remaining $45.
 
 **Inbound:**
 
+<!-- ucp:example schema=shopping/checkout op=complete direction=request extract=$.payment target=$.payment -->
 ```json
 {
   "payment": {
@@ -389,6 +396,7 @@ credit card covers the remaining $45.
 
 **Outbound (completed checkout, $100 order):**
 
+<!-- ucp:example schema=shopping/checkout extract=$.payment target=$.payment -->
 ```json
 {
   "payment": {
@@ -433,6 +441,7 @@ nothing. The credit card covers the remaining $75.
 **Outbound (incomplete checkout, $50 order — gift card auth was voided
 per the atomic invariant):**
 
+<!-- ucp:example skip reason="illustrative full response combining status, payment, and messages; per-subtree validation shown elsewhere" -->
 ```json
 {
   "status": "incomplete",
@@ -478,6 +487,7 @@ instrument with `severity: recoverable`.
 
 **Inbound (platform re-submits with a replacement card, $50 order):**
 
+<!-- ucp:example schema=shopping/checkout op=complete direction=request extract=$.payment target=$.payment -->
 ```json
 {
   "payment": {
