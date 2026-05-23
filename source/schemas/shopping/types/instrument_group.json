@@ -26,6 +26,5 @@
       "default": 1,
       "description": "Maximum number of instruments allowed from this group. Defaults to 1. MUST be greater than or equal to `min`."
     }
-  },
-  "additionalProperties": false
+  }
 }
