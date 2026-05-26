@@ -48,8 +48,10 @@ for all HTTP-based transports:
 +-----------------------------------------------------------------+
 |  Signature Format: RFC 9421 (HTTP Message Signatures)           |
 |  Body Digest: RFC 9530 (Content-Digest, raw bytes)              |
-|  Algorithms: ES256 (required), ES384 (optional)                 |
-|  Key Format: JWK (RFC 7517)                                     |
+|  Algorithms: ES256 (required); EdDSA (Ed25519) optional,        |
+|              required when supporting Web Bot Auth interop;     |
+|              ES384 optional                                     |
+|  Key Format: JWK (RFC 7517 + RFC 8037 for Ed25519)              |
 |  Key Discovery: signing_keys[] in /.well-known/ucp              |
 |  Replay Protection: idempotency-key (business layer)            |
 +-----------------------------------------------------------------+
@@ -78,45 +80,96 @@ The following cryptographic primitives are shared across all UCP HTTP transports
 
 ### Signature Algorithms
 
-UCP supports ECDSA signatures with the following curves:
+UCP recognizes two algorithm families: ECDSA (over NIST P-curves) and
+EdDSA (Ed25519). ECDSA P-256 is the universal baseline; EdDSA is an
+additive option that unlocks Web Bot Auth (WBA) interop.
 
-| Curve | JWK `alg` | Hash |
-| :---- | :--------- | :--- |
-| P-256 | `ES256` | SHA-256 |
-| P-384 | `ES384` | SHA-384 |
+| Family | JWK `kty` / `crv` | JWA `alg` | Hash |
+| :----- | :---------------- | :-------- | :--- |
+| ECDSA P-256 | `EC` / `P-256` | `ES256` | SHA-256 |
+| ECDSA P-384 | `EC` / `P-384` | `ES384` | SHA-384 |
+| EdDSA Ed25519 | `OKP` / `Ed25519` | `EdDSA` | (built-in) |
 
 **Implementation requirements:**
 
-* All implementations **MUST** support verifying P-256 (`ES256`) signatures
-* Support for P-384 (`ES384`) is **OPTIONAL**
+* All implementations **MUST** support verifying `ES256` (ECDSA P-256)
+  signatures. ES256 is the UCP baseline; every conformant verifier and
+  signer interoperates on this algorithm.
+* Support for `ES384` (ECDSA P-384) is **OPTIONAL**.
+* Support for `EdDSA` (Ed25519) is **OPTIONAL** for general UCP
+  verifiers. Verifiers that explicitly support Web Bot Auth-compatible
+  signatures **MUST** support `EdDSA`.
 
 **Usage guidance:**
 
-* Signers **SHOULD** use P-256 for maximum compatibility
-* Signers **MAY** use P-384 when both parties support it
-* The algorithm is derived from the key's `crv` field in the JWK;
-  `alg` is **NOT** included in `Signature-Input` parameters
+* Signers **MAY** use any supported algorithm. A single party MAY publish
+  multiple keys of different algorithms in their `signing_keys[]` array
+  and select per-signature; verifiers select by `kid`.
+* `ES256` is **RECOMMENDED** for signers wanting maximum interoperability
+  with all UCP verifiers today.
+* `EdDSA` (Ed25519) is **RECOMMENDED** for signers opting into Web Bot
+  Auth interop. Signers using Ed25519 SHOULD coordinate with their
+  counterparties to ensure Ed25519 verifier support, or publish keys
+  of both algorithms and emit separate signatures per counterparty
+  expectation.
+* `ES256` is **RECOMMENDED** for AP2 mandate signing
+  (`ap2.merchant_authorization`), which currently requires a
+  non-deterministic signature scheme per
+  [AP2 v0.2 §Payment Mandate](https://ap2-protocol.org/ap2/specification/).
+  See [AP2 Mandates](ap2-mandates.md) for details.
+* The algorithm is derived from the key's `kty`/`crv` field in the JWK;
+  `alg` is **NOT** included in `Signature-Input` parameters.
+
+**Two-key vs. one-key configurations.** A merchant participating in both
+UCP HTTP transport (with WBA interop) and AP2 mandate signing today
+operates two keys: one Ed25519 for HTTP transport identity (WBA-
+compatible), one ECDSA P-256 for `merchant_authorization`. Both keys
+live in the same `signing_keys[]` array and are selected by `kid`. If
+AP2's algorithm constraint is relaxed in a future revision, the
+merchant MAY collapse to a single Ed25519 key serving both layers; the
+wire format does not change. UCP-only sites that do not interact with
+WBA or AP2 may operate a single ES256 key (the universal baseline).
+
+For on-the-wire signature encoding details, see
+[REST Request Signing — Signature Encoding](#rest-request-signing).
 
 ### Key Format (JWK)
 
 Public keys **MUST** be represented using **JSON Web Key (JWK)** format as
 defined in [RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517).
+UCP supports two JWK shapes: **EC** (per RFC 7518 §6.2) for ECDSA keys and
+**OKP** (per [RFC 8037](https://datatracker.ietf.org/doc/html/rfc8037)) for
+EdDSA keys.
 
-**EC Key Structure:**
+**EC Key Structure (ECDSA P-256, P-384):**
 
 | Field | Type   | Required | Description                              |
 | :---- | :----- | :------- | :--------------------------------------- |
 | `kid` | string | Yes      | Key ID (referenced in signatures)        |
-| `kty` | string | Yes      | Key type (`EC` for elliptic curve)       |
-| `crv` | string | Yes*     | Curve name (`P-256`, `P-384`)            |
-| `x`   | string | Yes*     | X coordinate (base64url encoded)         |
-| `y`   | string | Yes*     | Y coordinate (base64url encoded)         |
+| `kty` | string | Yes      | Key type (`EC`)                          |
+| `crv` | string | Yes      | Curve name (`P-256` or `P-384`)          |
+| `x`   | string | Yes      | X coordinate (base64url encoded)         |
+| `y`   | string | Yes      | Y coordinate (base64url encoded)         |
 | `use` | string | No       | Key usage (`sig` for signing)            |
 | `alg` | string | No       | Algorithm (`ES256`, `ES384`)             |
 
-\* Required for EC keys
+**OKP Key Structure (EdDSA Ed25519):**
 
-**Example:**
+| Field | Type   | Required | Description                                          |
+| :---- | :----- | :------- | :--------------------------------------------------- |
+| `kid` | string | Yes      | Key ID (referenced in signatures)                    |
+| `kty` | string | Yes      | Key type (`OKP`)                                     |
+| `crv` | string | Yes      | Curve name (`Ed25519`)                               |
+| `x`   | string | Yes      | Public key value (base64url encoded per RFC 8037 §2) |
+| `use` | string | No       | Key usage (`sig` for signing)                        |
+| `alg` | string | No       | Algorithm (`EdDSA`)                                  |
+
+**The optional `alg` member inside the JWK is informational.** It aids
+key-selection logic but is **not** propagated as an `alg` parameter on
+the wire in `Signature-Input`. Verifiers derive the signing algorithm
+from the matched JWK's `kty`/`crv`.
+
+**EC Example (ES256):**
 
 <!-- ucp:example schema=profile extract=$ target=$.signing_keys[0] -->
 ```json
@@ -130,6 +183,23 @@ defined in [RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517).
   "alg": "ES256"
 }
 ```
+
+**OKP Example (Ed25519 / EdDSA):**
+
+<!-- ucp:example schema=profile extract=$ target=$.signing_keys[0] -->
+```json
+{
+  "kid": "key-ed25519-2026-01",
+  "kty": "OKP",
+  "crv": "Ed25519",
+  "x": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo",
+  "use": "sig",
+  "alg": "EdDSA"
+}
+```
+
+For Web Bot Auth-compatible signatures, the JWK SHA-256 Thumbprint
+(RFC 7638) is **RECOMMENDED** as the `kid` value.
 
 ### Key Discovery
 
@@ -238,8 +308,8 @@ sign_rest_request(method, path, query, body_bytes, idempotency_key, private_key,
         keyid=kid
     )
 
-    // 4. Sign
-    signature = ecdsa_sign(signature_base, private_key)
+    // 4. Sign (algorithm derived from the JWK's kty/crv)
+    signature = sign(signature_base, private_key)  // ecdsa for EC, eddsa for OKP
 
     // 5. Return headers
     return {
@@ -250,12 +320,18 @@ sign_rest_request(method, path, query, body_bytes, idempotency_key, private_key,
     }
 ```
 
-**Signature Encoding:** ECDSA signatures **MUST** use fixed-width raw `r||s`
-encoding per RFC 9421, **not** ASN.1/DER. The signature value is the
-concatenation of `r` and `s` as fixed-length unsigned big-endian integers:
-64 bytes for P-256 (32 + 32), 96 bytes for P-384 (48 + 48). Many crypto
-libraries (OpenSSL, Java, .NET) default to DER encoding and require explicit
-conversion.
+**Signature Encoding:**
+
+* **ECDSA** signatures **MUST** use fixed-width raw `r||s` encoding per
+  RFC 9421 §3.3.1, **not** ASN.1/DER. The signature value is the
+  concatenation of `r` and `s` as fixed-length unsigned big-endian
+  integers: 64 bytes for P-256 (32 + 32), 96 bytes for P-384 (48 + 48).
+  Many crypto libraries (OpenSSL, Java, .NET) default to DER encoding and
+  require explicit conversion.
+* **EdDSA (Ed25519)** signatures **MUST** use the encoding defined by
+  RFC 8032 §5.1.6 — the 64-byte concatenation of the encoded `R` point
+  and the integer `S`. This is the standard output of Ed25519 signing
+  libraries; no DER conversion is involved.
 
 **Complete Request Example:**
 
@@ -327,8 +403,8 @@ sign_rest_response(status, body_bytes, private_key, kid):
         keyid=kid
     )
 
-    // 3. Sign
-    signature = ecdsa_sign(signature_base, private_key)
+    // 3. Sign (algorithm derived from the JWK's kty/crv)
+    signature = sign(signature_base, private_key)  // ecdsa for EC, eddsa for OKP
 
     // 4. Return headers
     return {
@@ -400,9 +476,9 @@ verify_rest_request(request):
         request.headers, keyid
     )
 
-    // 5. Verify signature
+    // 5. Verify signature (algorithm derived from the matched JWK's kty/crv)
     signature = parse_signature(request.headers["Signature"])
-    if not ecdsa_verify(signature_base, signature, public_key):
+    if not verify(signature_base, signature, public_key):
         return error("signature_invalid")
 
     return success()
@@ -440,9 +516,9 @@ verify_rest_response(response, signer_profile_url):
         response.headers, keyid
     )
 
-    // 5. Verify signature
+    // 5. Verify signature (algorithm derived from the matched JWK's kty/crv)
     signature = parse_signature(response.headers["Signature"])
-    if not ecdsa_verify(signature_base, signature, public_key):
+    if not verify(signature_base, signature, public_key):
         return error("signature_invalid")
 
     return success()
@@ -600,5 +676,8 @@ Content-Type: application/json
 ## References
 
 * [RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517) — JSON Web Key (JWK)
+* [RFC 7518](https://datatracker.ietf.org/doc/html/rfc7518) — JSON Web Algorithms (JWA), §6.2 (EC public keys)
+* [RFC 8032](https://datatracker.ietf.org/doc/html/rfc8032) — Edwards-Curve Digital Signature Algorithm (EdDSA)
+* [RFC 8037](https://datatracker.ietf.org/doc/html/rfc8037) — CFRG Elliptic Curve Diffie-Hellman (ECDH) and Signatures in JOSE
 * [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421) — HTTP Message Signatures
 * [RFC 9530](https://www.rfc-editor.org/rfc/rfc9530) — Digest Fields (Content-Digest)

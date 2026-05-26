@@ -121,3 +121,9 @@ Accor
 Kogan
 Petbarn
 VTEX
+Ed25519
+EdDSA
+eddsa
+OKP
+CFRG
+Diffie
