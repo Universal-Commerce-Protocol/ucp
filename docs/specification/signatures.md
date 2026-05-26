@@ -52,7 +52,8 @@ for all HTTP-based transports:
 |              required when supporting Web Bot Auth interop;     |
 |              ES384 optional                                     |
 |  Key Format: JWK (RFC 7517 + RFC 8037 for Ed25519)              |
-|  Key Discovery: signing_keys[] in /.well-known/ucp              |
+|  Key Discovery: signing_keys[] (canonical) or top-level keys[]  |
+|                 (RFC 7517 JWK Set mirror) in /.well-known/ucp   |
 |  Replay Protection: idempotency-key (business layer)            |
 +-----------------------------------------------------------------+
                               |
@@ -93,8 +94,7 @@ additive option that unlocks Web Bot Auth (WBA) interop.
 **Implementation requirements:**
 
 * All implementations **MUST** support verifying `ES256` (ECDSA P-256)
-  signatures. ES256 is the UCP baseline; every conformant verifier and
-  signer interoperates on this algorithm.
+  signatures. This is the universal UCP baseline.
 * Support for `ES384` (ECDSA P-384) is **OPTIONAL**.
 * Support for `EdDSA` (Ed25519) is **OPTIONAL** for general UCP
   verifiers. Verifiers that explicitly support Web Bot Auth-compatible
@@ -103,16 +103,16 @@ additive option that unlocks Web Bot Auth (WBA) interop.
 **Usage guidance:**
 
 * Signers **MAY** use any supported algorithm. A single party MAY publish
-  multiple keys of different algorithms in their `signing_keys[]` array
-  and select per-signature; verifiers select by `kid`.
+  multiple keys of different algorithms in their published key set
+  (`keys[]` or `signing_keys[]`, see
+  [Key Discovery](#key-discovery)) and select per-signature; verifiers
+  select by `kid`.
 * `ES256` is **RECOMMENDED** for signers wanting maximum interoperability
   with all UCP verifiers today.
 * `EdDSA` (Ed25519) is **RECOMMENDED** for signers opting into Web Bot
   Auth interop — see [WBA Interop](#wba-interop) for the recommended
-  signature shape. Signers using Ed25519 SHOULD coordinate with their
-  counterparties to ensure Ed25519 verifier support, or publish keys
-  of both algorithms and emit separate signatures per counterparty
-  expectation.
+  signature shape. Signers using Ed25519 SHOULD confirm Ed25519
+  verifier support with their counterparties.
 * `ES256` is **RECOMMENDED** for AP2 mandate signing
   (`ap2.merchant_authorization`), which currently requires a
   non-deterministic signature scheme per
@@ -121,15 +121,14 @@ additive option that unlocks Web Bot Auth (WBA) interop.
 * The algorithm is derived from the key's `kty`/`crv` field in the JWK;
   `alg` is **NOT** included in `Signature-Input` parameters.
 
-**Two-key vs. one-key configurations.** A merchant participating in both
-UCP HTTP transport (with WBA interop) and AP2 mandate signing today
-operates two keys: one Ed25519 for HTTP transport identity (WBA-
-compatible), one ECDSA P-256 for `merchant_authorization`. Both keys
-live in the same `signing_keys[]` array and are selected by `kid`. If
-AP2's algorithm constraint is relaxed in a future revision, the
-merchant MAY collapse to a single Ed25519 key serving both layers; the
-wire format does not change. UCP-only sites that do not interact with
-WBA or AP2 may operate a single ES256 key (the universal baseline).
+**Two-key vs. one-key configurations.** A merchant participating in
+both UCP HTTP transport (with WBA interop) and AP2 mandate signing
+today operates two keys — one Ed25519 for HTTP transport identity,
+one ECDSA P-256 for `merchant_authorization` — selected per signature
+by `kid`. UCP-only sites that do not interact with WBA or AP2 may
+operate a single ES256 key. See
+[Business Profile](overview.md#business-profile) for a two-key
+example.
 
 For on-the-wire signature encoding details, see
 [REST Request Signing — Signature Encoding](#rest-request-signing).
@@ -165,11 +164,6 @@ EdDSA keys.
 | `use` | string | No       | Key usage (`sig` for signing)                        |
 | `alg` | string | No       | Algorithm (`EdDSA`)                                  |
 
-**The optional `alg` member inside the JWK is informational.** It aids
-key-selection logic but is **not** propagated as an `alg` parameter on
-the wire in `Signature-Input`. Verifiers derive the signing algorithm
-from the matched JWK's `kty`/`crv`.
-
 **EC Example (ES256):**
 
 <!-- ucp:example schema=profile extract=$ target=$.signing_keys[0] -->
@@ -199,31 +193,38 @@ from the matched JWK's `kty`/`crv`.
 }
 ```
 
-For Web Bot Auth-compatible signatures, the JWK SHA-256 Thumbprint
-(RFC 7638) is **RECOMMENDED** as the `kid` value; see
-[WBA Interop](#wba-interop).
+For WBA-shape signatures, the JWK SHA-256 Thumbprint
+([RFC 7638](https://www.rfc-editor.org/rfc/rfc7638)) is
+**RECOMMENDED** as the `kid` value.
 
 ### Key Discovery
 
-Public keys are published in the `signing_keys` array of the party's UCP
-profile at `/.well-known/ucp`. For the complete key discovery protocol,
-profile trust model, and profile fetch requirements, see
-[Identity & Authentication — Key Discovery](overview.md#key-discovery).
+Public keys are published in the party's UCP profile (see
+[Profile Structure](overview.md#profile-structure) for the publishing
+contract). Verifiers read by signature regime:
+
+* **Default UCP signature** — read `signing_keys[]`.
+* **WBA-shape signature** (resolved via `Signature-Agent`) — read
+  top-level `keys[]`.
+
+For the full identity resolution algorithm and deployment patterns,
+see [Identity & Authentication](overview.md#identity-authentication).
 
 ### Key Rotation
 
 To rotate keys without service interruption:
 
-1. **Add new key** — Publish new key in `signing_keys[]` alongside existing keys
+1. **Add new key** — Publish new key in the profile's `signing_keys[]`
+   (and mirror in `keys[]` if the profile uses the JWKS-superset form)
+   alongside existing keys
 2. **Start signing** — Begin signing with the new key
 3. **Grace period** — Continue accepting signatures from old keys (minimum 7 days)
-4. **Remove old key** — Remove the old key from `signing_keys[]`
+4. **Remove old key** — Remove the old key from the profile
 
 **Recommendations:**
 
-* Rotate keys every 90 days
-* Support multiple active keys during transitions
-* Verifiers: accept any key in `signing_keys[]`
+* Operators SHOULD rotate keys every 90 days.
+* Profiles SHOULD support multiple active keys during transitions.
 
 **Key Compromise Response:**
 
@@ -239,59 +240,63 @@ and WBA verifiers with **one key and one signing operation**. This is the
 RECOMMENDED path for integrators wanting interop with WBA-conformant
 verifiers.
 
-To opt in, a signer adds the following to their primary UCP signature:
+To opt in, a signer makes the following changes to their primary UCP
+signature. Items marked **MUST** are required by
+[draft-meunier-web-bot-auth-architecture](https://datatracker.ietf.org/doc/draft-meunier-web-bot-auth-architecture/)
+§4.2; consult that draft for full details.
 
-1. **Use Ed25519** as the signing algorithm. Ed25519 is the convention
-   across deployed WBA verifiers (see [Signature Algorithms](#signature-algorithms)).
-2. **Send a `Signature-Agent` header** alongside the existing `UCP-Agent`
-   header. `Signature-Agent` is an RFC 8941 Dictionary Structured Header;
-   each member's value is an sf-string containing a URI pointing to a
-   key directory, or a `data:` URI carrying an inline JWKS. The
-   dictionary key matches the signature label in `Signature-Input`. See
-   [Identity & Authentication](overview.md#identity-authentication) for
-   the directory shape and deployment patterns.
-3. **Include `signature-agent` in the signed components list.** Sign the
-   header value as a whole (no `;key=` parameter). The `;key=` parameter
-   form defined in RFC 9421 §2.4 is **NOT RECOMMENDED**: deployed WBA
-   verifiers are known to reject component parameters on header fields
-   and will fail to verify signatures that use it.
-4. **Set `keyid` to the JWK SHA-256 Thumbprint** of the signing key per
-   [RFC 7638](https://www.rfc-editor.org/rfc/rfc7638) (RFC 8037 §3.2
-   defines the Thumbprint computation for OKP keys).
-5. **Include `created` and `expires` parameters** in the signature
-   input. WBA verifiers enforce signature freshness via these parameters;
-   recommended expiry window is at most 24 hours.
-6. **Include `tag="web-bot-auth"`** in the signature parameters. WBA-
-   shaped verifiers select signatures by this tag.
+1. **Algorithm SHOULD be Ed25519.** Ed25519 is the convention across
+   WBA-conformant verifiers; other algorithms work only if the
+   counterparty accepts them.
+2. **MUST send a `Signature-Agent` header** alongside `UCP-Agent`. An
+   RFC 8941 Dictionary Structured Field whose member's sf-string value
+   is the HTTPS directory URL; the member key matches the
+   `Signature-Input` signature label. (`data:` URI inline form is out
+   of scope; see
+   [Identity Resolution Algorithm](overview.md#identity-resolution-algorithm).)
+   See [Identity & Authentication](overview.md#identity-authentication)
+   for directory shape and deployment patterns.
+3. **MUST sign the `signature-agent` component with `;key="<label>"`**
+   matching the `Signature-Agent` dictionary member key (which equals
+   the `Signature-Input` signature label). Per WBA §4.2.1.
+4. **MUST set `keyid` to the JWK SHA-256 Thumbprint** of the signing
+   key per [RFC 7638](https://www.rfc-editor.org/rfc/rfc7638). For
+   Ed25519 (OKP) keys, the thumbprint members are `crv`, `kty`, `x`
+   per [RFC 8037](https://www.rfc-editor.org/rfc/rfc8037) §2;
+   Appendix A.3 has a worked example.
+5. **MUST include `created` and `expires` parameters.** The `expires`
+   interval SHOULD be at most 24 hours.
+6. **MUST include `tag="web-bot-auth"`.** WBA verifiers select
+   signatures by this tag.
 
 **Component requirements preserved.** UCP's existing signed components
 (`ucp-agent`, `idempotency-key`, `content-digest`, `content-type`)
-remain in the signed components list. WBA verifiers accept these as
-additional components per
+stay in the signed list. WBA accepts them as "additional components"
+per
 [draft-meunier-web-bot-auth-architecture](https://datatracker.ietf.org/doc/draft-meunier-web-bot-auth-architecture/)
-§4.2.3 (*"Agents MAY include additional components, such as specific
-HTTP headers, in the signature"*). UCP verifiers verify the signature
-as they always have; the new parameters (`tag`, `created`, `expires`)
-and the `signature-agent` component are opaque to UCP-only verifiers
-and add no UCP-side verification work.
+§4.2.3.
 
-**Identity resolution.** UCP and Web Bot Auth define parallel
-verification regimes; the signature's `tag` parameter determines which
-key directory applies. WBA-shape signatures (those carrying
-`tag="web-bot-auth"`) **MUST** resolve identity via the
-`Signature-Agent` header. UCP-classic signatures (without
-`tag="web-bot-auth"`) **MUST** resolve identity via `UCP-Agent` (the
-existing behavior). The two regimes are independent: a UCP-only site
-that does not opt into WBA shape continues to use only `UCP-Agent` and
-emits no `Signature-Agent` header. A site that opts into WBA shape
-emits both headers (UCP-Agent for capability discovery; Signature-
-Agent for key discovery on WBA-shape signatures).
+UCP verifiers see the same signature with three new things:
 
-**Verifier handling of unknown signature parameters.** Verifiers **MUST**
-ignore signature parameters they do not recognize. This codifies
-RFC 9421's permissive parameter handling and prevents strict-verifier
-rejection of WBA-shape signatures by UCP verifiers that have not
-adopted WBA-shape parsing.
+* The `tag` parameter is an RFC 9421 §2.3 signature parameter unknown
+  to UCP-only verifiers and ignored per RFC 9421's permissive
+  parameter handling.
+* The `signature-agent` component is processed normally as a covered
+  HTTP field; the `;key="<label>"` parameter selects a Dictionary
+  member per RFC 9421 §2.1.2. Verifying WBA-shape signatures requires
+  §2.1.2 support — UCP-default signatures don't use Dictionary-member
+  component selection, so verifiers built only for UCP-default may
+  need to add it.
+* The `created` and `expires` parameters are standard RFC 9421 §2.3
+  parameters, so RFC 9421-conformant UCP verifiers **will** enforce
+  the freshness window.
+
+**Identity resolution.** WBA opt-in does not change the default UCP
+regime: verifiers dispatch by `tag`. See
+[Identity Resolution Algorithm](overview.md#identity-resolution-algorithm).
+
+**Unknown signature parameters.** Verifiers **MUST** ignore signature
+parameters they do not recognize (RFC 9421 §2.3).
 
 **Complete WBA-shape Request Example:**
 
@@ -304,8 +309,8 @@ UCP-Agent: profile="https://platform.example/.well-known/ucp"
 Signature-Agent: sig1="https://platform.example/.well-known/ucp"
 Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000
 Content-Digest: sha-256=:X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=:
-Signature-Input: sig1=("@method" "@authority" "@path" "signature-agent" "ucp-agent" "idempotency-key" "content-digest" "content-type");keyid="NzbLsXh8uDCcd-6MNwXF4W_7noWXFZAfHkxZsRGC9Xs";created=1738617600;expires=1738621200;tag="web-bot-auth"
-Signature: sig1=:base64url_ed25519_signature_value:
+Signature-Input: sig1=("@method" "@authority" "@path" "signature-agent";key="sig1" "ucp-agent" "idempotency-key" "content-digest" "content-type");keyid="NzbLsXh8uDCcd-6MNwXF4W_7noWXFZAfHkxZsRGC9Xs";created=1738617600;expires=1738621200;tag="web-bot-auth"
+Signature: sig1=:base64_ed25519_signature_value:
 
 {
   "line_items": [
@@ -317,31 +322,29 @@ Signature: sig1=:base64url_ed25519_signature_value:
 }
 ```
 
-One signature on the wire. UCP-shaped verifiers find their expected
-components (`ucp-agent`, `idempotency-key`); WBA-shaped verifiers find
+One signature on the wire. UCP-shape verifiers find their expected
+components (`ucp-agent`, `idempotency-key`); WBA-shape verifiers find
 theirs (`@authority`, `signature-agent`, `tag`, `created`/`expires`).
-Both verify the same bytes against the same key.
+Both verify the same bytes against the same key. The two header URLs
+match here because the same well-known endpoint serves both regimes
+(see
+[Deployment Patterns](overview.md#deployment-patterns-for-wba-interop)).
 
-Note the **`Signature-Agent: sig1="..."`** dictionary syntax — the
-key `sig1` matches the signature label, and the value is the directory
-URI as an sf-string. This matches the current
-[`draft-meunier-web-bot-auth-architecture`](https://datatracker.ietf.org/doc/draft-meunier-web-bot-auth-architecture/)
-format (the legacy bare-sf-string form is deprecated).
+In the example, the three `sig1` labels are bound together — the
+`Signature-Agent` dictionary member key, the `;key="sig1"` parameter
+on the signed `signature-agent` component, and the `Signature-Input`
+signature label — per item 3 of the opt-in list above.
 
-**Tags.** RFC 9421 §2.3 defines `tag` as a single String value per
-signature label. **UCP does not define its own tag**; UCP verifiers
-identify their signatures via the `UCP-Agent` header presence, signed-
-components set, and URL routing (no tag needed). The `tag="web-bot-
-auth"` parameter is purely for WBA-verifier benefit and is opaque to
-UCP-only verifiers.
+**Tags.** UCP does not define its own `tag` (RFC 9421 §2.3). UCP
+verifiers identify their signatures via the `UCP-Agent` header,
+signed-components set, and URL routing.
 
 **Multiple signatures.** UCP requests **MAY** carry multiple signatures
 using the [RFC 9421 §4.3](https://www.rfc-editor.org/rfc/rfc9421#section-4.3)
 label mechanism. Use this pattern only when genuine separation is
 required (different keys per audience, multi-party countersigning,
-audience-specific component sets that conflict). For the common case
-of UCP + WBA interop with one key, a **single signature with WBA-
-compatible shape is the RECOMMENDED path**.
+audience-specific component sets that conflict). For UCP + WBA interop
+with one key, prefer the single-signature shape described above.
 
 ## REST Binding
 
@@ -360,7 +363,7 @@ For HTTP REST transport, UCP uses
 \* Required when request/response has a body
 
 \** Required when opting into Web Bot Auth-compatible signature shape;
-absent for UCP-classic signatures (verifiers fall back to `UCP-Agent`-
+absent for default UCP signatures (verifiers fall back to `UCP-Agent`-
 derived identity).
 
 `Content-Digest` follows [RFC 9530](https://www.rfc-editor.org/rfc/rfc9530) and
@@ -430,7 +433,7 @@ sign_rest_request(method, path, query, body_bytes, idempotency_key, private_key,
         keyid=kid
     )
 
-    // 4. Sign (algorithm derived from the JWK's kty/crv)
+    // 4. Sign
     signature = sign(signature_base, private_key)  // ecdsa for EC, eddsa for OKP
 
     // 5. Return headers
@@ -543,7 +546,7 @@ sign_rest_response(status, body_bytes, private_key, kid):
         keyid=kid
     )
 
-    // 3. Sign (algorithm derived from the JWK's kty/crv)
+    // 3. Sign
     signature = sign(signature_base, private_key)  // ecdsa for EC, eddsa for OKP
 
     // 4. Return headers
@@ -564,24 +567,22 @@ directory pointer.
 
 1. **WBA-shape signatures** (`tag="web-bot-auth"`) resolve the key
    directory via the **`Signature-Agent`** header — an RFC 8941
-   Dictionary Structured Header whose member's sf-string value
-   contains the directory URI (or `data:` URI for inline JWKS). The
-   dictionary key matches the signature label in `Signature-Input`.
-   See [WBA Interop](#wba-interop).
-2. **UCP-classic signatures** (without `tag="web-bot-auth"`) resolve
+   Dictionary Structured Field whose member's sf-string value is
+   the HTTPS directory URL. The dictionary key matches the signature
+   label in `Signature-Input`. See [WBA Interop](#wba-interop).
+2. **Default UCP signatures** (without `tag="web-bot-auth"`) resolve
    the key directory via the **`UCP-Agent`** header — the UCP profile
    URL in RFC 8941 Dictionary form.
 
-Sites supporting Web Bot Auth interop emit **both** headers: `UCP-Agent`
-for capability discovery and UCP-classic key lookup, and
-`Signature-Agent` for WBA-shape key lookup. The two are complementary,
-not redundant. UCP-only sites emit only `UCP-Agent`.
+Sites supporting WBA interop emit **both** headers: `UCP-Agent` for
+capability discovery and default UCP key lookup; `Signature-Agent`
+for WBA-shape key lookup.
 
 For the full identity resolution algorithm (including directory self-
 signature verification and inline-form handling), see
 [Identity Resolution Algorithm](overview.md#identity-resolution-algorithm).
 
-**`UCP-Agent` parsing rules** (UCP-classic regime):
+**`UCP-Agent` parsing rules** (default UCP regime):
 
 1. Parse as RFC 8941 Dictionary
 2. Extract the `profile` key (REQUIRED)
@@ -592,19 +593,20 @@ signature verification and inline-form handling), see
 
 **`Signature-Agent` parsing rules** (WBA-shape regime):
 
-1. Parse as RFC 8941 Dictionary
-2. Locate the dictionary member whose key matches the signature label
-   being verified (e.g., for `Signature-Input: sig1=...`, find member
-   `sig1`)
-3. Value MUST be an sf-string containing either:
-   * An HTTPS URL pointing to a JWK Set (per RFC 7517), which MAY also
-     be a UCP profile (JWKS-superset); or
-   * A `data:` URI with media type
-     `application/http-message-signatures-directory+json` carrying an
-     inline JWKS
-4. Reject any other scheme on the URL form
+1. Parse as RFC 8941 Dictionary.
+2. **MUST** locate the dictionary member whose key equals the
+   signature label being verified (for `Signature-Input: sig1=...`,
+   find member `sig1`). If no matching member exists, verification
+   of this signature **MUST** fail.
+3. The member's value **MUST** be an sf-string containing an HTTPS
+   URL pointing to a JWK Set per RFC 7517 (which **MAY** also be a
+   UCP profile in JWKS-superset form). `data:` URI inline form is
+   out of scope for UCP-WBA interop (see
+   [Identity Resolution](overview.md#identity-resolution-algorithm)).
+4. Verification of this signature **MUST** fail if the URL is
+   non-HTTPS.
 
-**Example (UCP-classic):**
+**Example (default UCP):**
 
 ```text
 // Header
@@ -640,8 +642,10 @@ verify_rest_request(request):
     // 2. Fetch signer's public key
     // See overview.md#identity-resolution-algorithm for the full algorithm.
     // The signature's tag selects the verification regime:
-    //   tag="web-bot-auth"  -> resolve via Signature-Agent (WBA-shape).
-    //   no/other tag        -> resolve via UCP-Agent (UCP-classic).
+    //   tag="web-bot-auth"  -> resolve via Signature-Agent (WBA-shape);
+    //                          read keys from top-level keys[] (RFC 7517).
+    //   no/other tag        -> resolve via UCP-Agent (default UCP);
+    //                          read keys from signing_keys[].
     directory = resolve_key_directory(request.headers, sig_input.tag)
     public_key = find_key_by_kid(directory, keyid)
     if not public_key:
@@ -659,14 +663,14 @@ verify_rest_request(request):
         request.headers, keyid
     )
 
-    // 5. Verify signature (algorithm derived from the matched JWK's kty/crv)
+    // 5. Verify signature
     signature = parse_signature(request.headers["Signature"])
     if not verify(signature_base, signature, public_key):
         return error("signature_invalid")
 
     return success()
 
-    // Note: Replay protection handled by idempotency keys in request payload
+    // Note: Replay protection handled by the signed idempotency-key header
 ```
 
 ### REST Response Verification
@@ -682,7 +686,7 @@ verify_rest_response(response, signer_profile_url):
     components = sig_input.components
 
     // 2. Fetch signer's public key (regime-aware: keys[] for WBA-shape,
-    // signing_keys[] for UCP-classic; see overview.md#identity-resolution-algorithm)
+    // signing_keys[] for default UCP; see overview.md#identity-resolution-algorithm)
     profile = fetch_profile(signer_profile_url)
     public_key = find_key_by_kid(profile, keyid)
     if not public_key:
@@ -700,7 +704,7 @@ verify_rest_response(response, signer_profile_url):
         response.headers, keyid
     )
 
-    // 5. Verify signature (algorithm derived from the matched JWK's kty/crv)
+    // 5. Verify signature
     signature = parse_signature(response.headers["Signature"])
     if not verify(signature_base, signature, public_key):
         return error("signature_invalid")
@@ -748,7 +752,8 @@ Signature: sig1=:MEUCIQD...:
 
 **Note:** The RFC 9421 `created` parameter is **OPTIONAL**. UCP handles replay
 protection at the business layer through idempotency keys, not signature timestamps.
-Key rotation (removing compromised keys from `signing_keys`) provides the mechanism
+Key rotation (removing compromised keys from the profile's published key
+set) provides the mechanism
 for invalidating old signatures.
 
 ### When Signatures Apply
@@ -811,7 +816,7 @@ the complete error code registry and transport bindings.
 | :---------------------- | :--- | :--------------------------------------------------- |
 | `signature_missing`     | 401  | Required signature header/field not present          |
 | `signature_invalid`     | 401  | Signature verification failed                        |
-| `key_not_found`         | 401  | Key ID not found in signer's `signing_keys`          |
+| `key_not_found`         | 401  | Key ID not found in signer's published key set       |
 | `digest_mismatch`       | 400  | Body digest doesn't match `Content-Digest` header    |
 | `algorithm_unsupported` | 400  | Signature algorithm not supported                    |
 

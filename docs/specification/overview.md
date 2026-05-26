@@ -363,10 +363,29 @@ registries **MUST** be present even when empty. `ucp.capabilities` is optional
 and **MAY** be omitted, though useful commerce profiles normally advertise at
 least one capability.
 
-Profiles **MAY** include `signing_keys`, an array of public EC JSON Web Keys
-used for HTTP Message Signatures and signed webhooks. See
-[Message Signatures](signatures.md) for key format, algorithms, lookup, and
-rotation.
+Profiles **MAY** include public JSON Web Keys used for HTTP Message
+Signatures and signed webhooks. When a profile publishes signing keys,
+they **MUST** appear in `signing_keys[]` — the canonical UCP profile
+field that every UCP verifier reads. This preserves backward
+compatibility with every existing UCP verifier.
+
+Profiles **MAY** additionally publish a top-level `keys[]` array per
+[RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517) (JWK Set
+Format) that **mirrors** `signing_keys[]`. RFC 7517 §5 permits
+additional members alongside `keys`, so the same document serves as
+both a UCP profile and a Web Bot Auth-compatible key directory. See
+[Deployment Patterns for WBA Interop](#deployment-patterns-for-wba-interop)
+below. When both arrays are present, they **MUST** list the same set
+of `kid` values, and entries sharing a `kid` **MUST** be semantically
+equivalent — i.e., have identical RFC 7638 SHA-256 thumbprints
+(serialization differences such as member order are not significant).
+Rotation updates apply to both arrays atomically. A future UCP version may
+promote `keys[]` to the canonical field; profiles publishing both
+arrays today are positioned for that transition.
+
+UCP supports two key types: **EC** (ECDSA P-256, P-384) and **OKP**
+(EdDSA Ed25519). See [Message Signatures](signatures.md) for key
+format, algorithms, lookup, and rotation.
 
 #### Business Profile
 
@@ -475,6 +494,33 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
   },
   "signing_keys": [
     {
+      "kid": "NzbLsXh8uDCcd-6MNwXF4W_7noWXFZAfHkxZsRGC9Xs",
+      "kty": "OKP",
+      "crv": "Ed25519",
+      "x": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo",
+      "use": "sig",
+      "alg": "EdDSA"
+    },
+    {
+      "kid": "business_2025",
+      "kty": "EC",
+      "crv": "P-256",
+      "x": "WbbXwVYGdJoP4Xm3qCkGvBRcRvKtEfXDbWvPzpPS8LA",
+      "y": "sP4jHHxYqC89HBo8TjrtVOAGHfJDflYxw7MFMxuFMPY",
+      "use": "sig",
+      "alg": "ES256"
+    }
+  ],
+  "keys": [
+    {
+      "kid": "NzbLsXh8uDCcd-6MNwXF4W_7noWXFZAfHkxZsRGC9Xs",
+      "kty": "OKP",
+      "crv": "Ed25519",
+      "x": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo",
+      "use": "sig",
+      "alg": "EdDSA"
+    },
+    {
       "kid": "business_2025",
       "kty": "EC",
       "crv": "P-256",
@@ -488,9 +534,29 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
 ```
 
 The business profile advertises the business's available transports,
-capabilities, payment handlers, and public verification keys. See
-[Key Discovery](#key-discovery) for key lookup and resolution, and
-[Message Signatures](signatures.md) for signing mechanics.
+capabilities, payment handlers, and public verification keys. This
+example publishes signing keys in **both** `signing_keys[]` (the
+canonical UCP profile field) and top-level `keys[]` (the RFC 7517
+JWK Set mirror) so the same document also serves as a Web Bot Auth-
+compatible key directory. The two arrays carry the same JWK content
+(semantically equivalent); UCP-only verifiers read `signing_keys[]`;
+WBA-shape verifiers read `keys[]`.
+
+The example carries two keys, demonstrating a merchant participating in
+both UCP HTTP transport (with WBA interop) and AP2 mandate signing:
+
+- An **Ed25519** key (OKP) for HTTP transport identity, WBA-compatible.
+  The `kid` is the JWK SHA-256 Thumbprint per RFC 7638.
+- An **ECDSA P-256** key (EC) for AP2 mandate signing
+  (`ap2.merchant_authorization`), required to be non-deterministic
+  per AP2 v0.2 §Payment Mandate.
+
+A business that does not interact with AP2 or WBA may publish a single
+ES256 key in `signing_keys[]` only (the universal baseline). See
+[Key Discovery](#key-discovery) for key lookup and resolution,
+[Deployment Patterns for WBA Interop](#deployment-patterns-for-wba-interop)
+for hosting choices, and [Message Signatures](signatures.md) for
+signing mechanics.
 
 Businesses that support older protocol versions **SHOULD** include a
 `supported_versions` object mapping each older version to a
@@ -733,7 +799,7 @@ the result in the UCP response:
 | ---------------------- | ------------------------------------------------------ | ---- | ------ |
 | `signature_missing`    | Required signature header/field not present            | 401  | -32000 |
 | `signature_invalid`    | Signature verification failed                          | 401  | -32000 |
-| `key_not_found`        | Key ID not found in signer's `signing_keys`            | 401  | -32000 |
+| `key_not_found`        | Key ID not found in signer's published key set         | 401  | -32000 |
 | `digest_mismatch`      | Body digest doesn't match `Content-Digest` header      | 400  | -32600 |
 | `algorithm_unsupported`| Signature algorithm not supported                      | 400  | -32600 |
 
@@ -1026,14 +1092,15 @@ negotiate capabilities and verify identity. This design enables
 **permissionless onboarding** — any platform with a discoverable profile
 can interact with any business without prior registration.
 
-**Web Bot Auth interop.** Platforms MAY additionally send a
-`Signature-Agent` header pointing to a key directory that conforms to
-the Web Bot Auth directory format. When present, verifiers SHOULD prefer
-`Signature-Agent` for identity / key-discovery resolution, falling back
-to `UCP-Agent`-derived identity when `Signature-Agent` is absent. See
+**Web Bot Auth interop.** Signers opting into WBA-shape signatures
+additionally emit a `Signature-Agent` header carrying a key directory
+URL. Verifiers dispatch by the signature's `tag` parameter:
+`tag="web-bot-auth"` resolves identity via `Signature-Agent`; absent
+or unknown tags resolve via `UCP-Agent`. See
+[Identity Resolution Algorithm](#identity-resolution-algorithm) for
+the full verifier algorithm and
 [Message Signatures — WBA Interop](signatures.md#wba-interop) for the
-signature shape and [Key Discovery](#key-discovery) for the resolution
-algorithm.
+signature shape.
 
 ### Authentication Mechanisms
 
@@ -1069,40 +1136,29 @@ authenticated identity is consistent with the `UCP-Agent` header:
 
 ### Key Discovery
 
-Both parties publish public keys in the `signing_keys` array of their
-UCP profile. Platforms fetch the business profile at `/.well-known/ucp`;
-businesses fetch the platform profile from the `UCP-Agent` header. The
-same profile that provides capabilities also provides verification
-keys — this is UCP's key resolution mechanism for
+Both parties publish public keys in their UCP profile. Platforms fetch
+the business profile at `/.well-known/ucp`; businesses fetch the
+platform profile from the `UCP-Agent` header (or `Signature-Agent`
+header when Web Bot Auth interop is in use). The same profile that
+provides capabilities also provides verification keys — this is UCP's
+key resolution mechanism for
 [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421) HTTP Message
 Signatures.
 
-**Key Lookup:**
+See [Profile Structure](#profile-structure) for the publishing
+contract (canonical `signing_keys[]`, optional `keys[]` mirror,
+cross-array equivalence rule). Verifiers read by signature shape:
 
-UCP and Web Bot Auth define parallel verification regimes; the
-signature's `tag` parameter determines which key directory applies.
+- **Default UCP signature** — read `signing_keys[]`.
+- **WBA-shape signature** (resolved via `Signature-Agent`) — read
+  top-level `keys[]`.
 
-1. **Determine the verification regime from the signature's `tag`.**
-    - `tag="web-bot-auth"` — Web Bot Auth-shape signature. Resolve
-      the key directory URL via the `Signature-Agent` header (a URL
-      pointing to a WBA-format JWK Set, or a `data:` URI carrying an
-      inline JWKS).
-    - Absent or any other tag — UCP-classic signature. Resolve the
-      key directory URL via the `UCP-Agent` header (the existing UCP
-      profile URL).
-2. Fetch the key directory at the resolved URL (or serve from cache).
-3. Extract `keyid` from `Signature-Input` and match to `kid` in the
-   key set published at that location.
-4. Verify the signature using the corresponding public key.
-
-A request MAY carry both `UCP-Agent` and `Signature-Agent` headers
-(common when a site supports both UCP-classic and WBA-shape signatures).
-Each header is consulted only for signatures in its own regime; the
-headers do not interfere with each other.
-
+For the full verifier algorithm — tag-driven regime selection,
+profile fetching, directory self-signature verification — see
+[Identity Resolution Algorithm](#identity-resolution-algorithm) below.
 For key format (JWK), supported algorithms, key rotation procedures,
-the Web Bot Auth interop signature shape, and complete signing/
-verification mechanics, see [Message Signatures](signatures.md).
+and the Web Bot Auth interop signature shape, see
+[Message Signatures](signatures.md).
 
 ### Profile Requirements
 
@@ -1172,6 +1228,140 @@ If a profile cannot be fetched (timeout, DNS failure, 5xx) or fails
 validation (invalid schema, signing keys, signature mismatch),
 businesses **MUST** reject the request with an appropriate error and
 status code (see [Error Handling](#error-handling)).
+
+### Deployment Patterns for WBA Interop
+
+A UCP profile served at a URL MAY also serve as a Web Bot Auth-
+compatible key directory at the same URL when the profile carries a
+top-level `keys[]` array (per RFC 7517 JWK Set Format). Two
+deployment patterns are recognized; integrators choose based on their
+hosting infrastructure.
+
+#### Pattern 1: Content negotiation (one URL, two media types)
+
+The server responds to the same profile URL with different
+`Content-Type` based on the request's `Accept` header:
+
+- `Accept: application/json` (or no `Accept` header) — returns the UCP
+  profile as `application/json` with no HTTP-layer response signature.
+- `Accept: application/http-message-signatures-directory+json` — returns
+  the **same body** served with the Web Bot Auth media type, plus
+  per-key response signatures (see
+  [WBA Response Signing](#wba-response-signing) below).
+
+The body bytes are identical between the two responses; only the
+`Content-Type` header and the presence of `Signature-Input` /
+`Signature` response headers differ.
+
+Best fit for: dynamic hosting infrastructure (edge runtimes, API
+gateways, application servers) where content negotiation is
+straightforward.
+
+#### Pattern 2: Two URLs (isolated signing complexity)
+
+The site hosts two endpoints with shared key material:
+
+- `/.well-known/ucp` — serves the UCP profile as `application/json`
+  with no HTTP-layer response signature. Static-flat-file hosting is
+  sufficient.
+- `/.well-known/http-message-signatures-directory` — serves a WBA
+  directory format with per-key response signatures. Requires signing-
+  capable hosting.
+
+Both endpoints publish the same key material. Key rotation updates
+both.
+
+Best fit for: deployments with simple static-file hosting for the UCP
+profile, isolating dynamic response-signing complexity to a separate
+dedicated endpoint.
+
+#### WBA Response Signing
+
+A profile URL serving as a WBA-compatible key directory SHOULD carry
+per-key self-signatures on the HTTP response, as defined by
+[draft-meunier-http-message-signatures-directory](https://datatracker.ietf.org/doc/draft-meunier-http-message-signatures-directory/)
+§5.2. Verifiers SHOULD discard keys without a valid self-signature.
+
+The signed response **MAY** be precomputed and cached. The signature
+base binds `@authority`, so any cache (CDN, reverse proxy, in-process)
+**MUST** include the request authority in its cache key. Otherwise a
+cached signature served for `Host: a.example` will fail verification
+under `Host: b.example` requests.
+
+Operators wanting to avoid in-band response signing on the UCP
+profile URL MAY use
+[Pattern 2](#pattern-2-two-urls-isolated-signing-complexity) to
+isolate signing to a separate endpoint.
+
+### Identity Resolution Algorithm
+
+UCP and Web Bot Auth define parallel verification regimes; the
+signature's `tag` parameter determines which key directory applies.
+
+A request MAY carry multiple signatures per
+[RFC 9421 §4.3](https://www.rfc-editor.org/rfc/rfc9421#section-4.3).
+Verifiers attempt each signature independently; the request is
+authenticated when at least one signature verifies. The algorithm
+below processes a single signature.
+
+1. **Determine the verification regime from the signature's `tag`.**
+    - `tag="web-bot-auth"` — WBA-shape. The signature **MUST** satisfy
+      the agent-signature requirements in
+      [draft-meunier-web-bot-auth-architecture](https://datatracker.ietf.org/doc/draft-meunier-web-bot-auth-architecture/)
+      §4.2 (signed `signature-agent;key=<sig-label>`, `keyid`,
+      `created`, `expires`); **skip** this signature otherwise.
+      Resolve via `Signature-Agent`, parsed per the
+      [Signature-Agent parsing rules](signatures.md#rest-request-verification)
+      in signatures.md. The value **MUST** be an HTTPS URL pointing to
+      a WBA-compatible directory (see
+      [Deployment Patterns](#deployment-patterns-for-wba-interop)).
+      `data:` URI inline form is out of scope for UCP-WBA interop. If
+      the `Signature-Agent` header is absent, no matching dictionary
+      member exists, or the URL is non-HTTPS, **skip** this signature.
+    - No `tag` parameter — default UCP. Resolve via `UCP-Agent` (the
+      UCP profile URL).
+    - Any other `tag` — extension this verifier does not understand.
+      **Skip** this signature.
+2. **Fetch the document** per [§Fetching](#fetching). If the fetch
+   fails (DNS error, network failure, non-2xx response, parse failure),
+   **skip** this signature.
+3. **Locate the key list** in the resolved document:
+    - **WBA-shape signature** — read top-level `keys[]` per RFC 7517.
+    - **Default UCP signature** — read `signing_keys[]`.
+4. **For WBA-shape signatures: verify the directory's per-key
+   self-signatures** per
+   [draft-meunier-http-message-signatures-directory](https://datatracker.ietf.org/doc/draft-meunier-http-message-signatures-directory/)
+   §5.2. Discard keys without a valid self-signature.
+5. **Match the signature's `keyid`** to a `kid` in the resolved key
+   list. **Skip** this signature if no match. For WBA-shape
+   signatures, the verifier **SHOULD** also confirm that `keyid`
+   equals the RFC 7638 SHA-256 thumbprint of the matched JWK. The
+   WBA architecture draft §4.2 requires `keyid` to be the thumbprint;
+   verifying the equality detects directory tampering and ensures
+   WBA-interop behavior. If the thumbprint check fails, skip this
+   signature.
+6. **Verify the signature** using the matched key. The signing
+   algorithm is derived from the JWK's `kty`/`crv`.
+
+The request **MUST** be rejected (`key_not_found` or related error)
+only when every signature has been skipped or fails verification.
+
+**Authenticated identity.** When a signature verifies, the
+authenticated signer is identified by the URL of the key directory
+that supplied the verifying key — the `Signature-Agent` URL for
+WBA-shape signatures, the `UCP-Agent` URL for default UCP signatures.
+Both URLs may be present in the same request; the identity attached
+to the request is determined by which signature verified, not by
+which headers were sent. When multiple signatures verify (e.g., a
+single signer emitting both a WBA-shape and a default UCP signature
+with matching identities), implementations **MAY** treat the request
+as authenticated by either; the URLs **SHOULD** resolve to the same
+party in this case.
+
+This rule governs **HTTP transport identity**. Payload-layer
+assertions (e.g., AP2 mandate JWTs carried in the request body) have
+their own identity binding and key-resolution rules; see
+[AP2 Mandates](ap2-mandates.md).
 
 ## Payment Architecture
 

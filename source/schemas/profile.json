@@ -33,9 +33,29 @@
             "alg": {
               "type": "string",
               "enum": ["ES256", "ES384"],
-              "description": "JWA algorithm associated with this public key. Optional; verifiers derive the algorithm from crv when alg is omitted."
+              "description": "JWA algorithm associated with this public key. Optional; verifiers derive the algorithm from crv when alg is omitted. When present, MUST match crv: ES256 with P-256, ES384 with P-384."
             }
-          }
+          },
+          "allOf": [
+            {
+              "if": {
+                "properties": { "crv": { "const": "P-256" } },
+                "required": ["crv"]
+              },
+              "then": {
+                "properties": { "alg": { "const": "ES256" } }
+              }
+            },
+            {
+              "if": {
+                "properties": { "crv": { "const": "P-384" } },
+                "required": ["crv"]
+              },
+              "then": {
+                "properties": { "alg": { "const": "ES384" } }
+              }
+            }
+          ]
         },
         {
           "title": "OKP Public Key (EdDSA)",
@@ -101,7 +121,12 @@
         },
         "signing_keys": {
           "type": "array",
-          "description": "Public keys used to verify signatures from this profile owner.",
+          "description": "Canonical UCP profile field for publishing signing keys. When a profile publishes signing keys, they MUST appear here; this is where every UCP verifier reads them. A future UCP version may promote keys[] to canonical; profiles wanting WBA interop today MAY publish both arrays as mirrors.",
+          "items": { "$ref": "#/$defs/jwk_public_key" }
+        },
+        "keys": {
+          "type": "array",
+          "description": "Optional top-level JWK Set per RFC 7517, mirroring signing_keys[]. When present, makes the UCP profile a valid JWK Set, enabling the same document to also serve as a Web Bot Auth-compatible key directory. WBA-shape verifiers reading the profile URL via Signature-Agent locate keys here; UCP-only verifiers continue to read from signing_keys[]. When both arrays are published, they MUST list the same set of kid values, and entries sharing a kid MUST be semantically equivalent JWKs (same members and values; serialization differences not significant). See the Deployment Patterns for WBA Interop section in the overview for hosting patterns.",
           "items": { "$ref": "#/$defs/jwk_public_key" }
         }
       },
