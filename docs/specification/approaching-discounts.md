@@ -96,7 +96,7 @@ i.e. Free shipping on orders >= \$100, upsell threshold \$25
 
 ### Re-evaluation
 
-As with discounts, approaching discounts are re-evaluated each time the cart accessed.  If the cart no longer meets the 
+As with discounts, approaching discounts are re-evaluated each time the cart is accessed.  If the cart no longer meets the 
 threshold for the approaching discount, qualifies for the promotion, or the promotion has expired, the approaching message
 is not returned.
 
@@ -148,7 +148,7 @@ replaced with the discount.
     Free shipping on orders >= $100, upsell threshold $25
     Cart contains 1, $75 item
 
-    Checkout / Cart response (relevant sections
+    Checkout / Cart response (relevant sections)
 
 Groups
 ```json
