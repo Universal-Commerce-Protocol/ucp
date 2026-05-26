@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/profile.json",
+  "title": "UCP Profile Document",
+  "description": "Variant-neutral wrapper schema for UCP profile documents. Use the business_schema definition to validate business profiles and the platform_schema definition to validate platform profiles.",
+  "allOf": [{ "$ref": "#/$defs/base" }],
+
+  "$defs": {
+    "jwk_public_key": {
+      "type": "object",
+      "description": "EC public JSON Web Key used for HTTP Message Signatures and signed webhook verification. UCP profiles publish public keys only; private key material MUST NOT appear in a profile. Additional public JWK members are permitted; consumers ignore unknown members.",
+      "required": ["kid", "kty", "crv", "x", "y"],
+      "properties": {
+        "kid": {
+          "type": "string",
+          "description": "Key identifier referenced by Signature-Input keyid."
+        },
+        "kty": {
+          "type": "string",
+          "const": "EC",
+          "description": "JWK key type. UCP profile signing keys use EC."
+        },
+        "crv": {
+          "type": "string",
+          "description": "Elliptic curve name, e.g. P-256 or P-384."
+        },
+        "x": {
+          "type": "string",
+          "description": "Public key x coordinate for EC keys."
+        },
+        "y": {
+          "type": "string",
+          "description": "Public key y coordinate for EC keys."
+        },
+        "use": {
+          "type": "string",
+          "description": "JWK public key use. UCP examples use sig for signatures."
+        },
+        "alg": {
+          "type": "string",
+          "description": "JWA algorithm associated with this public key."
+        }
+      },
+      "not": {
+        "anyOf": [
+          { "required": ["d"] },
+          { "required": ["p"] },
+          { "required": ["q"] },
+          { "required": ["dp"] },
+          { "required": ["dq"] },
+          { "required": ["qi"] },
+          { "required": ["oth"] },
+          { "required": ["k"] }
+        ]
+      },
+      "additionalProperties": true
+    },
+
+    "base": {
+      "type": "object",
+      "description": "Common wrapper for UCP profile documents.",
+      "required": ["ucp"],
+      "properties": {
+        "ucp": {
+          "$ref": "ucp.json#/$defs/base",
+          "description": "Protocol metadata, capabilities, services, and payment handlers advertised by this party."
+        },
+        "signing_keys": {
+          "type": "array",
+          "description": "Public keys used to verify signatures from this profile owner.",
+          "items": { "$ref": "#/$defs/jwk_public_key" }
+        }
+      },
+      "additionalProperties": true
+    },
+
+    "business_schema": {
+      "title": "UCP Business Profile Document",
+      "description": "Profile document hosted by a business at /.well-known/ucp.",
+      "allOf": [
+        { "$ref": "#/$defs/base" },
+        {
+          "type": "object",
+          "properties": {
+            "ucp": { "$ref": "ucp.json#/$defs/business_schema" }
+          }
+        }
+      ]
+    },
+
+    "platform_schema": {
+      "title": "UCP Platform Profile Document",
+      "description": "Profile document hosted by a platform and advertised to businesses via UCP-Agent.",
+      "allOf": [
+        { "$ref": "#/$defs/base" },
+        {
+          "type": "object",
+          "properties": {
+            "ucp": { "$ref": "ucp.json#/$defs/platform_schema" }
+          }
+        }
+      ]
+    }
+  }
+}

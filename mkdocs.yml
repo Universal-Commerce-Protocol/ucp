@@ -53,6 +53,7 @@ nav:
           - Discounts Extension: specification/discount.md
           - Fulfillment Extension: specification/fulfillment.md
           - Loyalty Extension: specification/loyalty.md
+          - Split Payments Extension: specification/split-payments.md
       - Cart Capability:
           - Overview: specification/cart.md
           - Transports:

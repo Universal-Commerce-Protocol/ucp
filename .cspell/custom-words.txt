@@ -75,7 +75,9 @@ linkignore
 llms
 llmstxt
 mastercard
+grepable
 midsole
+misparsed
 mkdocs
 mtok
 openapi
@@ -109,6 +111,7 @@ yml
 jwks
 keyid
 reauth
+redeemables
 reprepare
 sandboxing
 fbclid

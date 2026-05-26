@@ -120,6 +120,7 @@ image: assets/banner.png
               <img src="assets/partner/codeveloped/Walmart.svg" alt="Walmart" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
               <span>Walmart</span>
             </div>
+            <div class="flex-break"></div>
             <div class="partner-logo">
               <img src="assets/partner/codeveloped/Amazon.svg" alt="Amazon" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
               <span>Amazon</span>
