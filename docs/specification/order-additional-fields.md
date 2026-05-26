@@ -62,6 +62,10 @@ Businesses MAY advertise additional field support for checkout only, order only,
 or both. Platforms SHOULD check which resources are extended before expecting
 additional fields on order read responses.
 
+If `config.supported_types` narrows the active additional field input types,
+order additional fields follow the same active type set as checkout additional
+fields.
+
 ## Schema
 
 When this capability is active for order, order is extended with an

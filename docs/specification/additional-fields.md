@@ -27,6 +27,7 @@ submitted values are shared between the platform and the business.
 - Receive business-defined required and optional fields
 - Submit additional field values as `key` plus `value` entries
 - Apply standard input hints for `text`, `boolean`, `date`, and `choice`
+- Optionally narrow supported input types with capability config
 - Preserve extensibility through an open `input.type` vocabulary
 - Invalid values communicated via `messages[]` with detailed error codes
 
@@ -117,6 +118,31 @@ This version defines the following standard types:
 #### Choice Option
 
 {{ extension_schema_fields('additional_fields.json#/$defs/choice_option', 'additional-fields') }}
+
+## Optional Type Support Config
+
+By default, support for `dev.ucp.shopping.additional_fields` means support for
+all standard input types defined by this extension: `text`, `boolean`, `date`,
+and `choice`. Platforms and businesses MAY use `config.supported_types` to
+narrow that set.
+
+{{ extension_schema_fields('additional_fields.json#/$defs/additional_fields_config', 'additional-fields') }}
+
+When both parties declare `supported_types`, the active type set is the
+intersection of the platform and business declarations. When either party omits
+`supported_types`, that party is treated as supporting all standard types.
+
+```json
+{
+  "config": {
+    "supported_types": ["text", "boolean"]
+  }
+}
+```
+
+Businesses MUST only return fields whose `input.type` is in the active type
+set. If a required field cannot be represented using an active type, the
+business SHOULD use a supported fallback or require escalation.
 
 ## Extensibility
 
