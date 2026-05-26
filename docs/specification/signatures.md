@@ -108,7 +108,8 @@ additive option that unlocks Web Bot Auth (WBA) interop.
 * `ES256` is **RECOMMENDED** for signers wanting maximum interoperability
   with all UCP verifiers today.
 * `EdDSA` (Ed25519) is **RECOMMENDED** for signers opting into Web Bot
-  Auth interop. Signers using Ed25519 SHOULD coordinate with their
+  Auth interop — see [WBA Interop](#wba-interop) for the recommended
+  signature shape. Signers using Ed25519 SHOULD coordinate with their
   counterparties to ensure Ed25519 verifier support, or publish keys
   of both algorithms and emit separate signatures per counterparty
   expectation.
@@ -189,7 +190,7 @@ from the matched JWK's `kty`/`crv`.
 <!-- ucp:example schema=profile extract=$ target=$.signing_keys[0] -->
 ```json
 {
-  "kid": "key-ed25519-2026-01",
+  "kid": "NzbLsXh8uDCcd-6MNwXF4W_7noWXFZAfHkxZsRGC9Xs",
   "kty": "OKP",
   "crv": "Ed25519",
   "x": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo",
@@ -199,7 +200,8 @@ from the matched JWK's `kty`/`crv`.
 ```
 
 For Web Bot Auth-compatible signatures, the JWK SHA-256 Thumbprint
-(RFC 7638) is **RECOMMENDED** as the `kid` value.
+(RFC 7638) is **RECOMMENDED** as the `kid` value; see
+[WBA Interop](#wba-interop).
 
 ### Key Discovery
 
@@ -229,6 +231,118 @@ To rotate keys without service interruption:
 2. Add new key with different `kid`
 3. Reject all signatures made with compromised key
 
+### WBA Interop
+
+A UCP integrator MAY opt their primary signature into a Web Bot Auth-
+compatible shape, enabling the same signature to be verified by both UCP
+and WBA verifiers with **one key and one signing operation**. This is the
+RECOMMENDED path for integrators wanting interop with WBA-conformant
+verifiers.
+
+To opt in, a signer adds the following to their primary UCP signature:
+
+1. **Use Ed25519** as the signing algorithm. Ed25519 is the convention
+   across deployed WBA verifiers (see [Signature Algorithms](#signature-algorithms)).
+2. **Send a `Signature-Agent` header** alongside the existing `UCP-Agent`
+   header. `Signature-Agent` is an RFC 8941 Dictionary Structured Header;
+   each member's value is an sf-string containing a URI pointing to a
+   key directory, or a `data:` URI carrying an inline JWKS. The
+   dictionary key matches the signature label in `Signature-Input`. See
+   [Identity & Authentication](overview.md#identity-authentication) for
+   the directory shape and deployment patterns.
+3. **Include `signature-agent` in the signed components list.** Sign the
+   header value as a whole (no `;key=` parameter). The `;key=` parameter
+   form defined in RFC 9421 §2.4 is **NOT RECOMMENDED**: deployed WBA
+   verifiers are known to reject component parameters on header fields
+   and will fail to verify signatures that use it.
+4. **Set `keyid` to the JWK SHA-256 Thumbprint** of the signing key per
+   [RFC 7638](https://www.rfc-editor.org/rfc/rfc7638) (RFC 8037 §3.2
+   defines the Thumbprint computation for OKP keys).
+5. **Include `created` and `expires` parameters** in the signature
+   input. WBA verifiers enforce signature freshness via these parameters;
+   recommended expiry window is at most 24 hours.
+6. **Include `tag="web-bot-auth"`** in the signature parameters. WBA-
+   shaped verifiers select signatures by this tag.
+
+**Component requirements preserved.** UCP's existing signed components
+(`ucp-agent`, `idempotency-key`, `content-digest`, `content-type`)
+remain in the signed components list. WBA verifiers accept these as
+additional components per
+[draft-meunier-web-bot-auth-architecture](https://datatracker.ietf.org/doc/draft-meunier-web-bot-auth-architecture/)
+§4.2.3 (*"Agents MAY include additional components, such as specific
+HTTP headers, in the signature"*). UCP verifiers verify the signature
+as they always have; the new parameters (`tag`, `created`, `expires`)
+and the `signature-agent` component are opaque to UCP-only verifiers
+and add no UCP-side verification work.
+
+**Identity resolution.** UCP and Web Bot Auth define parallel
+verification regimes; the signature's `tag` parameter determines which
+key directory applies. WBA-shape signatures (those carrying
+`tag="web-bot-auth"`) **MUST** resolve identity via the
+`Signature-Agent` header. UCP-classic signatures (without
+`tag="web-bot-auth"`) **MUST** resolve identity via `UCP-Agent` (the
+existing behavior). The two regimes are independent: a UCP-only site
+that does not opt into WBA shape continues to use only `UCP-Agent` and
+emits no `Signature-Agent` header. A site that opts into WBA shape
+emits both headers (UCP-Agent for capability discovery; Signature-
+Agent for key discovery on WBA-shape signatures).
+
+**Verifier handling of unknown signature parameters.** Verifiers **MUST**
+ignore signature parameters they do not recognize. This codifies
+RFC 9421's permissive parameter handling and prevents strict-verifier
+rejection of WBA-shape signatures by UCP verifiers that have not
+adopted WBA-shape parsing.
+
+**Complete WBA-shape Request Example:**
+
+<!-- ucp:example schema=shopping/checkout op=create direction=request -->
+```json
+POST /checkout-sessions HTTP/1.1
+Host: merchant.example.com
+Content-Type: application/json
+UCP-Agent: profile="https://platform.example/.well-known/ucp"
+Signature-Agent: sig1="https://platform.example/.well-known/ucp"
+Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000
+Content-Digest: sha-256=:X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=:
+Signature-Input: sig1=("@method" "@authority" "@path" "signature-agent" "ucp-agent" "idempotency-key" "content-digest" "content-type");keyid="NzbLsXh8uDCcd-6MNwXF4W_7noWXFZAfHkxZsRGC9Xs";created=1738617600;expires=1738621200;tag="web-bot-auth"
+Signature: sig1=:base64url_ed25519_signature_value:
+
+{
+  "line_items": [
+    {
+      "item": {"id": "item_123"},
+      "quantity": 2
+    }
+  ]
+}
+```
+
+One signature on the wire. UCP-shaped verifiers find their expected
+components (`ucp-agent`, `idempotency-key`); WBA-shaped verifiers find
+theirs (`@authority`, `signature-agent`, `tag`, `created`/`expires`).
+Both verify the same bytes against the same key.
+
+Note the **`Signature-Agent: sig1="..."`** dictionary syntax — the
+key `sig1` matches the signature label, and the value is the directory
+URI as an sf-string. This matches the current
+[`draft-meunier-web-bot-auth-architecture`](https://datatracker.ietf.org/doc/draft-meunier-web-bot-auth-architecture/)
+format (the legacy bare-sf-string form is deprecated).
+
+**Tags.** RFC 9421 §2.3 defines `tag` as a single String value per
+signature label. **UCP does not define its own tag**; UCP verifiers
+identify their signatures via the `UCP-Agent` header presence, signed-
+components set, and URL routing (no tag needed). The `tag="web-bot-
+auth"` parameter is purely for WBA-verifier benefit and is opaque to
+UCP-only verifiers.
+
+**Multiple signatures.** UCP requests **MAY** carry multiple signatures
+using the [RFC 9421 §4.3](https://www.rfc-editor.org/rfc/rfc9421#section-4.3)
+label mechanism. Use this pattern only when genuine separation is
+required (different keys per audience, multi-party countersigning,
+audience-specific component sets that conflict). For the common case
+of UCP + WBA interop with one key, a **single signature with WBA-
+compatible shape is the RECOMMENDED path**.
+
 ## REST Binding
 
 For HTTP REST transport, UCP uses
@@ -236,13 +350,18 @@ For HTTP REST transport, UCP uses
 
 ### Headers
 
-| Header            | Direction        | Required | Description                           |
-| :---------------- | :--------------- | :------- | :------------------------------------ |
-| `Signature-Input` | Request/Response | Yes      | Describes signed components           |
-| `Signature`       | Request/Response | Yes      | Contains signature value              |
-| `Content-Digest`  | Request/Response | Cond.*   | SHA-256 hash of request/response body |
+| Header            | Direction        | Required | Description                                           |
+| :---------------- | :--------------- | :------- | :---------------------------------------------------- |
+| `Signature-Input` | Request/Response | Yes      | Describes signed components                           |
+| `Signature`       | Request/Response | Yes      | Contains signature value                              |
+| `Content-Digest`  | Request/Response | Cond.\*  | SHA-256 hash of request/response body                 |
+| `Signature-Agent` | Request          | Cond.\** | Key directory for [WBA Interop](#wba-interop)         |
 
 \* Required when request/response has a body
+
+\** Required when opting into Web Bot Auth-compatible signature shape;
+absent for UCP-classic signatures (verifiers fall back to `UCP-Agent`-
+derived identity).
 
 `Content-Digest` follows [RFC 9530](https://www.rfc-editor.org/rfc/rfc9530) and
 hashes the raw body bytes. This binds the message body to the signature without
@@ -259,22 +378,25 @@ verification.
 
 **Signed Components:**
 
-| Component         | Required  | Description                            |
-| :---------------- | :-------- | :------------------------------------- |
-| `@method`         | Yes       | HTTP method (GET, POST, etc.)          |
-| `@authority`      | Yes       | Target host (prevents cross-host relay)|
-| `@path`           | Yes       | Request path                           |
-| `@query`          | Cond.\*   | Query string (if present)              |
-| `ucp-agent`       | Cond.\**  | Profile URL (binds identity)           |
-| `idempotency-key` | Cond.\*** | Idempotency header (state-changing)    |
-| `content-digest`  | Cond.†    | Body digest (if body present)          |
-| `content-type`    | Cond.†    | Content-Type (if body present)         |
+| Component         | Required   | Description                                                           |
+| :---------------- | :--------- | :-------------------------------------------------------------------- |
+| `@method`         | Yes        | HTTP method (GET, POST, etc.)                                         |
+| `@authority`      | Yes        | Target host (prevents cross-host relay)                               |
+| `@path`           | Yes        | Request path                                                          |
+| `@query`          | Cond.\*    | Query string (if present)                                             |
+| `ucp-agent`       | Cond.\**   | Profile URL (binds identity)                                          |
+| `signature-agent` | Cond.\***  | WBA-style key directory (when [WBA Interop](#wba-interop) opted into) |
+| `idempotency-key` | Cond.\**** | Idempotency header (state-changing)                                   |
+| `content-digest`  | Cond.†     | Body digest (if body present)                                         |
+| `content-type`    | Cond.†     | Content-Type (if body present)                                        |
 
 \* Required if request has query parameters
 
 \** Required if `UCP-Agent` header is present
 
-\*** Required for POST, PUT, DELETE, PATCH
+\*** Required if `Signature-Agent` header is present (i.e., WBA-shape signature)
+
+\**** Required for POST, PUT, DELETE, PATCH
 
 † Required if request has a body
 
@@ -335,7 +457,8 @@ sign_rest_request(method, path, query, body_bytes, idempotency_key, private_key,
 
 **Complete Request Example:**
 
-```http
+<!-- ucp:example schema=shopping/checkout op=create direction=request -->
+```json
 POST /checkout-sessions HTTP/1.1
 Host: merchant.example.com
 Content-Type: application/json
@@ -345,7 +468,14 @@ Content-Digest: sha-256=:X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=:
 Signature-Input: sig1=("@method" "@authority" "@path" "ucp-agent" "idempotency-key" "content-digest" "content-type");keyid="platform-2026"
 Signature: sig1=:MEUCIQDTxNq8h7LGHpvVZQp1iHkFp9+3N8Mxk2zH1wK4YuVN8w...:
 
-{"checkout":{"line_items":[{"id":"prod_123","quantity":2}]}}
+{
+  "line_items": [
+    {
+      "item": {"id": "item_123"},
+      "quantity": 2
+    }
+  ]
+}
 ```
 
 **GET Request Example (no body, no idempotency):**
@@ -373,6 +503,12 @@ Response signatures use `@status` instead of `@method`:
 
 **Complete Response Example:**
 
+The response body below is abbreviated for clarity — only the key fields
+used in signing are shown. A full checkout response includes additional
+required fields (`ucp`, `currency`, `line_items`, `totals`, `links`); see
+[Create Checkout response](checkout-rest.md#create-checkout) for the
+complete shape.
+
 ```http
 HTTP/1.1 201 Created
 Content-Type: application/json
@@ -380,7 +516,11 @@ Content-Digest: sha-256=:Y5fK8nLmPqRsT3vWxYzAbCdEfGhIjKlMnO...:
 Signature-Input: sig1=("@status" "content-digest" "content-type");created=1738617601;keyid="merchant-2026"
 Signature: sig1=:MFQCIH7kL9nM2oP5qR8sT1uV4wX6yZaB3cD...:
 
-{"checkout":{"id":"chk_123","status":"ready_for_complete"}}
+{
+  "id": "chk_123",
+  "status": "ready_for_complete",
+  "...": "abbreviated; see linked spec for full shape"
+}
 ```
 
 **Response Signature Generation:**
@@ -416,16 +556,32 @@ sign_rest_response(status, body_bytes, private_key, kid):
 
 ### REST Request Verification
 
-**Determining Signer's Profile URL:**
+**Determining the Signer's Key Directory:**
 
-The signer's profile URL is obtained from the `UCP-Agent` header, which uses
-[RFC 8941 Dictionary](https://www.rfc-editor.org/rfc/rfc8941#section-3.2) syntax:
+UCP and Web Bot Auth define parallel verification regimes; the
+signature's `tag` parameter determines which header carries the key
+directory pointer.
 
-```text
-UCP-Agent: profile="https://platform.example/.well-known/ucp"
-```
+1. **WBA-shape signatures** (`tag="web-bot-auth"`) resolve the key
+   directory via the **`Signature-Agent`** header — an RFC 8941
+   Dictionary Structured Header whose member's sf-string value
+   contains the directory URI (or `data:` URI for inline JWKS). The
+   dictionary key matches the signature label in `Signature-Input`.
+   See [WBA Interop](#wba-interop).
+2. **UCP-classic signatures** (without `tag="web-bot-auth"`) resolve
+   the key directory via the **`UCP-Agent`** header — the UCP profile
+   URL in RFC 8941 Dictionary form.
 
-**Parsing Rules:**
+Sites supporting Web Bot Auth interop emit **both** headers: `UCP-Agent`
+for capability discovery and UCP-classic key lookup, and
+`Signature-Agent` for WBA-shape key lookup. The two are complementary,
+not redundant. UCP-only sites emit only `UCP-Agent`.
+
+For the full identity resolution algorithm (including directory self-
+signature verification and inline-form handling), see
+[Identity Resolution Algorithm](overview.md#identity-resolution-algorithm).
+
+**`UCP-Agent` parsing rules** (UCP-classic regime):
 
 1. Parse as RFC 8941 Dictionary
 2. Extract the `profile` key (REQUIRED)
@@ -434,7 +590,21 @@ UCP-Agent: profile="https://platform.example/.well-known/ucp"
    profile URLs are not path-constrained
 5. Reject non-HTTPS URLs
 
-**Example:**
+**`Signature-Agent` parsing rules** (WBA-shape regime):
+
+1. Parse as RFC 8941 Dictionary
+2. Locate the dictionary member whose key matches the signature label
+   being verified (e.g., for `Signature-Input: sig1=...`, find member
+   `sig1`)
+3. Value MUST be an sf-string containing either:
+   * An HTTPS URL pointing to a JWK Set (per RFC 7517), which MAY also
+     be a UCP profile (JWKS-superset); or
+   * A `data:` URI with media type
+     `application/http-message-signatures-directory+json` carrying an
+     inline JWKS
+4. Reject any other scheme on the URL form
+
+**Example (UCP-classic):**
 
 ```text
 // Header
@@ -442,6 +612,17 @@ UCP-Agent: profile="https://platform.example/.well-known/ucp"
 
 // Parsed
 profile_url = "https://platform.example/.well-known/ucp"
+```
+
+**Example (Signature-Agent, WBA-shape):**
+
+```text
+// Headers
+Signature-Agent: sig1="https://platform.example/.well-known/ucp"
+Signature-Input: sig1=("@method" "@authority" ...);...
+
+// Parsed (member key matches sig1)
+directory_url = "https://platform.example/.well-known/ucp"
 ```
 
 **Applicability:**
@@ -457,10 +638,12 @@ verify_rest_request(request):
     components = sig_input.components
 
     // 2. Fetch signer's public key
-    // See overview.md#profile-requirements for URL validation and fetch rules
-    profile_url = get_profile_url_from_ucp_agent(request.headers["UCP-Agent"])
-    profile = fetch_profile(profile_url)  // HTTPS-only, no redirects
-    public_key = find_key_by_kid(profile.signing_keys, keyid)
+    // See overview.md#identity-resolution-algorithm for the full algorithm.
+    // The signature's tag selects the verification regime:
+    //   tag="web-bot-auth"  -> resolve via Signature-Agent (WBA-shape).
+    //   no/other tag        -> resolve via UCP-Agent (UCP-classic).
+    directory = resolve_key_directory(request.headers, sig_input.tag)
+    public_key = find_key_by_kid(directory, keyid)
     if not public_key:
         return error("key_not_found")
 
@@ -498,9 +681,10 @@ verify_rest_response(response, signer_profile_url):
     keyid = sig_input.keyid
     components = sig_input.components
 
-    // 2. Fetch signer's public key
+    // 2. Fetch signer's public key (regime-aware: keys[] for WBA-shape,
+    // signing_keys[] for UCP-classic; see overview.md#identity-resolution-algorithm)
     profile = fetch_profile(signer_profile_url)
-    public_key = find_key_by_kid(profile.signing_keys, keyid)
+    public_key = find_key_by_kid(profile, keyid)
     if not public_key:
         return error("key_not_found")
 

@@ -1026,6 +1026,15 @@ negotiate capabilities and verify identity. This design enables
 **permissionless onboarding** — any platform with a discoverable profile
 can interact with any business without prior registration.
 
+**Web Bot Auth interop.** Platforms MAY additionally send a
+`Signature-Agent` header pointing to a key directory that conforms to
+the Web Bot Auth directory format. When present, verifiers SHOULD prefer
+`Signature-Agent` for identity / key-discovery resolution, falling back
+to `UCP-Agent`-derived identity when `Signature-Agent` is absent. See
+[Message Signatures — WBA Interop](signatures.md#wba-interop) for the
+signature shape and [Key Discovery](#key-discovery) for the resolution
+algorithm.
+
 ### Authentication Mechanisms
 
 Businesses **SHOULD** authenticate platforms to prevent impersonation and ensure
@@ -1070,15 +1079,30 @@ Signatures.
 
 **Key Lookup:**
 
-1. Obtain the signer's profile URL
-2. Fetch profile (or serve from cache)
-3. Extract `keyid` from `Signature-Input` and match to `kid` in
-   `signing_keys[]`
-4. Verify signature using the corresponding public key
+UCP and Web Bot Auth define parallel verification regimes; the
+signature's `tag` parameter determines which key directory applies.
 
-For key format (JWK), supported algorithms, key rotation procedures, and
-complete signing/verification mechanics, see
-[Message Signatures](signatures.md).
+1. **Determine the verification regime from the signature's `tag`.**
+    - `tag="web-bot-auth"` — Web Bot Auth-shape signature. Resolve
+      the key directory URL via the `Signature-Agent` header (a URL
+      pointing to a WBA-format JWK Set, or a `data:` URI carrying an
+      inline JWKS).
+    - Absent or any other tag — UCP-classic signature. Resolve the
+      key directory URL via the `UCP-Agent` header (the existing UCP
+      profile URL).
+2. Fetch the key directory at the resolved URL (or serve from cache).
+3. Extract `keyid` from `Signature-Input` and match to `kid` in the
+   key set published at that location.
+4. Verify the signature using the corresponding public key.
+
+A request MAY carry both `UCP-Agent` and `Signature-Agent` headers
+(common when a site supports both UCP-classic and WBA-shape signatures).
+Each header is consulted only for signatures in its own regime; the
+headers do not interfere with each other.
+
+For key format (JWK), supported algorithms, key rotation procedures,
+the Web Bot Auth interop signature shape, and complete signing/
+verification mechanics, see [Message Signatures](signatures.md).
 
 ### Profile Requirements
 

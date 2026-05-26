@@ -127,3 +127,4 @@ eddsa
 OKP
 CFRG
 Diffie
+meunier
