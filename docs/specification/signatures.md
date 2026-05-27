@@ -483,8 +483,21 @@ Signature: sig1=:MEUCIQD...:
 | **Entropy** | Minimum 128 bits (e.g., UUID v4, 22+ char alphanumeric) |
 | **Uniqueness** | Per-client, per-operation type |
 | **Server storage** | Minimum 24 hours, recommended 48 hours |
-| **On duplicate** | Return cached response, do not re-execute |
+| **On duplicate (matching payload)** | Return cached response, do not re-execute |
+| **On duplicate (mismatched payload)** | Reject with `409 Conflict` (REST) / `-32000` (MCP); do not execute |
 | **On storage failure** | Fail closed (reject request with 503) |
+
+**Payload Matching:** Businesses **MUST** detect whether the payload of a
+duplicate-key request matches the payload of the original. Because
+`Content-Digest` (RFC 9530) is a SHA-256 hash over the raw body bytes and
+is already required on any signed request with a body, businesses
+**SHOULD** persist the `Content-Digest` alongside the idempotency key and
+compare on duplicate-key requests. For unsigned requests, businesses
+**MUST** use an equivalent deterministic payload-comparison mechanism
+(e.g., hashing the raw body). Platforms therefore **MUST** generate a
+fresh idempotency key whenever they modify the request payload —
+including retries with modified payment instruments, updated shipping
+addresses, swapped line items, or any other change to the request body.
 
 **Note:** The RFC 9421 `created` parameter is **OPTIONAL**. UCP handles replay
 protection at the business layer through idempotency keys, not signature timestamps.
