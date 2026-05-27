@@ -54,6 +54,7 @@ nav:
           - Fulfillment Extension: specification/fulfillment.md
           - Loyalty Extension: specification/loyalty.md
           - Product Addons Extension: specification/product-addons.md
+          - Split Payments Extension: specification/split-payments.md
       - Cart Capability:
           - Overview: specification/cart.md
           - Transports:
