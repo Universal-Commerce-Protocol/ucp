@@ -10,20 +10,17 @@
       "type": "object",
       "description": "Capability configuration for additional field input type support.",
       "additionalProperties": false,
+      "required": [
+        "supported_types"
+      ],
       "properties": {
         "supported_types": {
           "type": "array",
-          "description": "Input type identifiers supported by this party. When omitted, all standard types defined by this extension are supported: text, boolean, date, and choice. The active type set is the intersection of platform and business supported types.",
+          "description": "Input type identifiers supported by this party. The active type set is the intersection of platform and business supported types.",
           "items": {
             "type": "string",
             "minLength": 1
           },
-          "default": [
-            "text",
-            "boolean",
-            "date",
-            "choice"
-          ],
           "uniqueItems": true,
           "minItems": 1,
           "examples": [
@@ -484,6 +481,9 @@
             "$ref": "../capability.json#/$defs/platform_schema"
           },
           {
+            "required": [
+              "config"
+            ],
             "properties": {
               "config": {
                 "$ref": "#/$defs/additional_fields_config",
@@ -501,6 +501,9 @@
             "$ref": "../capability.json#/$defs/business_schema"
           },
           {
+            "required": [
+              "config"
+            ],
             "properties": {
               "config": {
                 "$ref": "#/$defs/additional_fields_config",

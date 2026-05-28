@@ -50,7 +50,10 @@ responses, the capability extends order:
           "version": "{{ ucp_version }}",
           "extends": "dev.ucp.shopping.order",
           "spec": "https://ucp.dev/{{ ucp_version }}/specification/order-additional-fields",
-          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/additional_fields.json"
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/additional_fields.json",
+          "config": {
+            "supported_types": ["text", "boolean", "date", "choice"]
+          }
         }
       ]
     }
@@ -62,8 +65,7 @@ Businesses MAY advertise additional field support for checkout only, order only,
 or both. Platforms SHOULD check which resources are extended before expecting
 additional fields on order read responses.
 
-If `config.supported_types` narrows the active additional field input types,
-order additional fields follow the same active type set as checkout additional
+Order additional fields follow the same active type set as checkout additional
 fields.
 
 ## Schema

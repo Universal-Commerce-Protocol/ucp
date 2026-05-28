@@ -27,7 +27,7 @@ submitted values are shared between the platform and the business.
 - Receive business-defined required and optional fields
 - Submit additional field values as `key` plus `value` entries
 - Apply standard input hints for `text`, `boolean`, `date`, and `choice`
-- Optionally narrow supported input types with capability config
+- Declare supported input types with capability config
 - Preserve extensibility through an open `input.type` vocabulary
 - Invalid values communicated via `messages[]` with detailed error codes
 
@@ -50,7 +50,10 @@ extends checkout:
           "version": "{{ ucp_version }}",
           "extends": "dev.ucp.shopping.checkout",
           "spec": "https://ucp.dev/{{ ucp_version }}/specification/additional-fields",
-          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/additional_fields.json"
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/additional_fields.json",
+          "config": {
+            "supported_types": ["text", "boolean", "date", "choice"]
+          }
         }
       ]
     }
@@ -119,18 +122,16 @@ This version defines the following standard types:
 
 {{ extension_schema_fields('additional_fields.json#/$defs/choice_option', 'additional-fields') }}
 
-## Optional Type Support Config
+## Type Support Config
 
-By default, support for `dev.ucp.shopping.additional_fields` means support for
-all standard input types defined by this extension: `text`, `boolean`, `date`,
-and `choice`. Platforms and businesses MAY use `config.supported_types` to
-narrow that set.
+Platform and business profile declarations for
+`dev.ucp.shopping.additional_fields` MUST include `config.supported_types`.
+This keeps type support explicit as the extension evolves.
 
 {{ extension_schema_fields('additional_fields.json#/$defs/additional_fields_config', 'additional-fields') }}
 
-When both parties declare `supported_types`, the active type set is the
-intersection of the platform and business declarations. When either party omits
-`supported_types`, that party is treated as supporting all standard types.
+The active type set is the intersection of the platform and business
+declarations.
 
 ```json
 {
