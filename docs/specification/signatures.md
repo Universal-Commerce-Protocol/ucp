@@ -487,17 +487,18 @@ Signature: sig1=:MEUCIQD...:
 | **On duplicate (mismatched payload)** | Reject with `409 Conflict` (REST) / `-32000` (MCP); do not execute |
 | **On storage failure** | Fail closed (reject request with 503) |
 
-**Payload Matching:** Businesses **MUST** detect whether the payload of a
-duplicate-key request matches the payload of the original. Because
-`Content-Digest` (RFC 9530) is a SHA-256 hash over the raw body bytes and
-is already required on any signed request with a body, businesses
-**SHOULD** persist the `Content-Digest` alongside the idempotency key and
-compare on duplicate-key requests. For unsigned requests, businesses
-**MUST** use an equivalent deterministic payload-comparison mechanism
-(e.g., hashing the raw body). Platforms therefore **MUST** generate a
-fresh idempotency key whenever they modify the request payload —
-including retries with modified payment instruments, updated shipping
-addresses, swapped line items, or any other change to the request body.
+**Payload Matching:** Businesses **MUST** detect whether the payload of
+a duplicate-key request matches the payload of the original by
+comparing the SHA-256 hash of the raw body bytes — the same digest
+RFC 9530 mandates as `Content-Digest`. When signing is in use, this
+value is supplied in the `Content-Digest` header and the Intermediary
+Warning above guarantees byte fidelity end-to-end; businesses persist
+it alongside the idempotency key. For unsigned requests, businesses
+compute the same digest from the received body bytes. Platforms
+therefore **MUST** generate a fresh idempotency key whenever they
+modify the request payload — including retries with modified payment
+instruments, updated shipping addresses, swapped line items, or any
+other change to the request body.
 
 **Note:** The RFC 9421 `created` parameter is **OPTIONAL**. UCP handles replay
 protection at the business layer through idempotency keys, not signature timestamps.
