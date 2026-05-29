@@ -4,7 +4,7 @@
   "name": "dev.ucp.common.identity_linking",
   "title": "Identity Linking",
   "description": "Capability schema for identity linking. Businesses declare the user-authenticated scopes they offer in a flat 'scopes' map. Each key is the OAuth scope string as it appears on the wire ('{capability}:{scope}', e.g. 'dev.ucp.shopping.order:read'). Scope presence implies that the corresponding operations require user authentication. Operations not gated by any listed scope operate at whatever access level the business permits; UCP does not prescribe a default.",
-  "$comment": "Auth mechanism: OAuth 2.0 with RFC 8414 discovery. When 'config.providers' is present, platforms select a listed provider whose 'type' they support and chain identity via RFC 8693 token exchange + RFC 7523 JWT bearer; when absent, platforms run OAuth 2.0 on the business domain. The 'provider.type' discriminator defaults to 'oauth2' and reserves space for future non-OAuth mechanisms (e.g., wallet attestation). 'config' is open for non-breaking extension at the field level; platforms MUST ignore unrecognized sibling fields. If 'providers' is present but no listed entry is supported, platforms MUST abort — direct OAuth on the business domain requires the business to self-list.",
+  "$comment": "Auth mechanism: OAuth 2.0 with RFC 8414 discovery. When 'config.providers' is present, platforms select a listed provider whose 'type' they support and chain identity via RFC 8693 token exchange + RFC 7523 JWT bearer; when absent, platforms run OAuth 2.0 on the business domain. The 'provider.type' discriminator is a REQUIRED open string: 'oauth2' is the only type defined in this version, and future versions MAY define additional non-OAuth mechanisms (e.g., wallet attestation) as non-breaking extensions. Per-type fields are enforced via 'if/then' so unrecognized types stay valid and are filtered by platforms at runtime. 'config' is open for non-breaking extension at the field level; platforms MUST ignore unrecognized sibling fields. If 'providers' is present but no listed entry is supported, platforms MUST abort — direct OAuth on the business domain requires the business to self-list.",
 
   "$defs": {
     "scope_policy": {
@@ -29,20 +29,31 @@
     "provider": {
       "type": "object",
       "title": "Identity Provider",
-      "description": "A trusted identity provider for delegated authentication. The 'type' discriminator defaults to 'oauth2' when absent; future versions may define additional types (e.g., 'wallet') without breaking the shape.",
-      "required": ["auth_url"],
+      "description": "A trusted identity provider for delegated authentication, keyed by the 'type' discriminator. 'oauth2' denotes an OAuth 2.0 / OIDC authorization server. Future versions MAY define additional types (e.g. wallet attestation) as non-breaking extensions; platforms MUST treat entries whose 'type' they do not support as filtered out (see Provider Selection).",
+      "$comment": "Discriminator design: 'type' is a REQUIRED open string, and per-type constraints are applied via 'if/then' branches (not 'oneOf'). This is deliberate. A closed 'oneOf' over enumerated arms would reject any entry whose 'type' is unknown to the schema version doing the validation, which contradicts the forward-compatibility rule that platforms filter unsupported types at runtime rather than rejecting the business config. 'if/then' enforces the known type's fields and lets unrecognized types validate as bare objects, so a platform pinned to an older schema does not reject a newer mechanism. This also matches UCP's house composition pattern (allOf/conditional) rather than the structural, fixed-set 'oneOf' in fulfillment_destination.json.",
+      "required": ["type"],
       "properties": {
         "type": {
           "type": "string",
-          "default": "oauth2",
-          "description": "Provider type. Defaults to 'oauth2'. Reserved for future non-OAuth provider mechanisms."
-        },
-        "auth_url": {
-          "type": "string",
-          "format": "uri",
-          "description": "Base URL for authorization server metadata discovery. Platforms resolve metadata via RFC 8414 (/.well-known/oauth-authorization-server) with OIDC fallback (/.well-known/openid-configuration) on 404."
+          "description": "Provider mechanism discriminator. 'oauth2' for OAuth 2.0 / OIDC authorization servers. Additional values MAY be defined by future versions; the value is an open string, not a closed enum, so unrecognized types remain valid and are filtered at runtime."
         }
       },
+      "allOf": [
+        {
+          "$comment": "oauth2 providers discover their authorization server via 'auth_url'. Verification-only mechanisms (e.g. wallet attestation) discover by other means and are added as sibling conditional branches without touching this one.",
+          "if": { "properties": { "type": { "const": "oauth2" } } },
+          "then": {
+            "required": ["auth_url"],
+            "properties": {
+              "auth_url": {
+                "type": "string",
+                "format": "uri",
+                "description": "Base URL for authorization server metadata discovery. Platforms resolve metadata via RFC 8414 (/.well-known/oauth-authorization-server) with OIDC fallback (/.well-known/openid-configuration) on 404."
+              }
+            }
+          }
+        }
+      ],
       "additionalProperties": true
     },
 

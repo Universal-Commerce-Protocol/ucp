@@ -37,8 +37,9 @@ for authorization. Platforms run OAuth 2.0 directly against the business
 domain, or — when the business declares trusted identity providers in
 `config.providers` — chain identity from a provider via the
 [Accelerated IdP Flow](#accelerated-idp-flow). The `provider.type`
-discriminator (defaulting to `oauth2`) reserves space for future non-OAuth
-provider mechanisms; see [Future Extensibility](#future-extensibility).
+discriminator (a required open string; `oauth2` is the only type defined in
+this version) reserves space for future non-OAuth provider mechanisms; see
+[Future Extensibility](#future-extensibility).
 
 ### Participants
 
@@ -220,8 +221,9 @@ vocabulary); runtime messages carry per-request advisories.
 * **MAY** declare trusted identity providers in `config.providers`
     (see [Identity Providers](#identity-providers)). Businesses **MUST**
     only list providers they explicitly trust.
-* When the business lists external identity providers in `config.providers`,
-    the business **MUST** support the JWT bearer assertion grant type
+* When the business lists external identity providers of `type: oauth2` in
+    `config.providers`, the business **MUST** support the JWT bearer assertion
+    grant type
     ([RFC 7523](https://datatracker.ietf.org/doc/html/rfc7523){ target="_blank" })
     at its token endpoint to accept JWT authorization grants from those
     IdPs, and **MUST** include
@@ -351,22 +353,36 @@ fresh browser-based OAuth flow required.
 
 ### Provider Configuration
 
-Each provider entry specifies the discovery base URL:
+Each provider entry is keyed by a reverse-domain identifier and described by
+its `type`:
 
 | Field | Type | Required | Description |
 | :---- | :--- | :------- | :---------- |
-| `type` | string | No (default: `oauth2`) | Provider type discriminator. |
-| `auth_url` | string (URI) | Yes | Base URL for authorization server metadata discovery. |
+| `type` | string | Yes | Provider mechanism discriminator. `oauth2` is the only type defined in this version; future versions **MAY** define additional types as non-breaking extensions. |
+| `auth_url` | string (URI) | Yes, for `oauth2` | Base URL for authorization server metadata discovery. |
 
-Platforms **MUST** discover the provider's authorization server metadata from
-`auth_url` using the same two-tier hierarchy as [Discovery](#discovery)
-(RFC 8414 primary, OIDC fallback on 404 only).
+The `type` value is an open string, not a closed enumeration. Platforms
+**MUST** treat provider entries whose `type` they do not support as filtered
+out (see [Provider Selection](#provider-selection)) rather than rejecting the
+business's configuration.
+
+For `oauth2` providers, platforms **MUST** discover the authorization server
+metadata from `auth_url` using the same two-tier hierarchy as
+[Discovery](#discovery) (RFC 8414 primary, OIDC fallback on 404 only).
 
 ### Provider Selection
 
 Platforms read the business's `config.providers` map and select a provider
 they support — typically one they already hold a token for (enabling the
 Accelerated IdP Flow), or one the user can authenticate with.
+
+A provider's `type` determines whether it participates in the token and
+scope model. The `oauth2` type chains identity via token exchange and
+contributes to the scopes of the business-issued token. Other types **MAY**
+contribute no scopes — presence in `providers` does not imply participation
+in the scope or token-issuance model. Provider selection and the abort rule
+turn only on whether the platform *supports* a provider's `type`, independent
+of whether that type issues a token.
 
 Businesses **MAY** list themselves alongside external providers (own
 `auth_url` resolving to own authorization server) to give platforms a
@@ -387,9 +403,11 @@ A business that trusts an external IdP and also self-lists:
   "config": {
     "providers": {
       "app.example.login": {
+        "type": "oauth2",
         "auth_url": "https://accounts.example-login.app/"
       },
       "com.example.merchant": {
+        "type": "oauth2",
         "auth_url": "https://merchant.example.com/"
       }
     },
@@ -523,8 +541,12 @@ at *both* layers — the IdP's and the business's.
 
 ## IdP Requirements
 
-Identity providers listed in `config.providers` **MUST** publish authorization
-server metadata via
+The requirements in this section apply to identity providers of
+`type: oauth2`. Other provider types define their own discovery and
+proof-presentation requirements (see [Future Extensibility](#future-extensibility)).
+
+Identity providers of `type: oauth2` listed in `config.providers` **MUST**
+publish authorization server metadata via
 [RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414){ target="_blank" }
 or OpenID Connect Discovery. The metadata **MUST** include:
 
@@ -870,11 +892,12 @@ field conveys the business's value prompt to the platform (e.g.,
 ## Future Extensibility
 
 The schema is designed to accommodate non-OAuth provider mechanisms as
-non-breaking extensions. The `provider.type` discriminator defaults to
-`oauth2` and reserves space for future types — wallet attestation,
-verifiable credentials, or other proof-of-identity protocols. Future
-versions may define additional `type` values and the corresponding
-discovery and grant exchange mechanics.
+non-breaking extensions. The `provider.type` discriminator is a required,
+open string: `oauth2` is the only type defined in this version, and it
+reserves space for future types — wallet attestation, verifiable
+credentials, or other proof-of-identity protocols. Future versions may
+define additional `type` values and the corresponding discovery and
+proof-presentation mechanics.
 
 **Forward-compatibility rule for platforms:** When `config` contains fields
 not defined in this version of the spec, platforms **MUST** ignore
