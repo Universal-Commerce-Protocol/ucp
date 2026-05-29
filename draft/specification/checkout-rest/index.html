@@ -4096,8 +4096,10 @@ operations unless otherwise noted.</p>
 <li><strong>Idempotency-Key</strong>: Operations that modify state <strong>SHOULD</strong> support
     idempotency. When provided, the server <strong>MUST</strong>:<ol>
 <li>Store the key with the operation result for at least 24 hours.</li>
-<li>Return the cached result for duplicate keys.</li>
-<li>Return <code>409 Conflict</code> if the key is reused with different parameters.</li>
+<li>Return the cached result for duplicate keys whose request body matches the original.</li>
+<li>Return <code>409 Conflict</code> if the key is reused with a mismatched body.
+See <a href="../signatures/#replay-protection">Message Signatures — Idempotency Key Requirements</a>
+for the full payload-matching contract.</li>
 </ol>
 </li>
 </ul>

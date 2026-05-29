@@ -3175,8 +3175,12 @@ not at the signature layer. This provides separation of concerns:</p>
 <td style="text-align: left;">Minimum 24 hours, recommended 48 hours</td>
 </tr>
 <tr>
-<td style="text-align: left;"><strong>On duplicate</strong></td>
+<td style="text-align: left;"><strong>On duplicate (matching payload)</strong></td>
 <td style="text-align: left;">Return cached response, do not re-execute</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>On duplicate (mismatched payload)</strong></td>
+<td style="text-align: left;">Reject with <code>409 Conflict</code> (REST) / <code>-32000</code> (MCP); do not execute</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>On storage failure</strong></td>
@@ -3184,6 +3188,18 @@ not at the signature layer. This provides separation of concerns:</p>
 </tr>
 </tbody>
 </table>
+<p><strong>Payload Matching:</strong> Businesses <strong>MUST</strong> detect whether the payload of
+a duplicate-key request matches the payload of the original by
+comparing the SHA-256 hash of the raw body bytes — the same digest
+RFC 9530 mandates as <code>Content-Digest</code>. When signing is in use, this
+value is supplied in the <code>Content-Digest</code> header and the Intermediary
+Warning above guarantees byte fidelity end-to-end; businesses persist
+it alongside the idempotency key. For unsigned requests, businesses
+compute the same digest from the received body bytes. Platforms
+therefore <strong>MUST</strong> generate a fresh idempotency key whenever they
+modify the request payload — including retries with modified payment
+instruments, updated shipping addresses, swapped line items, or any
+other change to the request body.</p>
 <p><strong>Note:</strong> The RFC 9421 <code>created</code> parameter is <strong>OPTIONAL</strong>. UCP handles replay
 protection at the business layer through idempotency keys, not signature timestamps.
 Key rotation (removing compromised keys from <code>signing_keys</code>) provides the mechanism

@@ -513,8 +513,8 @@ The following headers are defined for the HTTP binding and apply to all operatio
 - **UCP-Agent**: All requests **MUST** include the `UCP-Agent` header containing the platform profile URI using Dictionary Structured Field syntax ([RFC 8941](https://datatracker.ietf.org/doc/html/rfc8941)). Format: `profile="https://platform.example/profile"`.
 - **Idempotency-Key**: Operations that modify state **SHOULD** support idempotency. When provided, the server **MUST**:
   1. Store the key with the operation result for at least 24 hours.
-  1. Return the cached result for duplicate keys.
-  1. Return `409 Conflict` if the key is reused with different parameters.
+  1. Return the cached result for duplicate keys whose request body matches the original.
+  1. Return `409 Conflict` if the key is reused with a mismatched body. See [Message Signatures — Idempotency Key Requirements](http://ucp.dev/draft/specification/signatures/#replay-protection) for the full payload-matching contract.
 
 ## Protocol Mechanics
 
