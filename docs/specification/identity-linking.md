@@ -33,13 +33,12 @@ it does not gate it.
 
 **This specification uses
 [OAuth 2.0](https://datatracker.ietf.org/doc/html/rfc6749){ target="_blank" }**
-for authorization. Platforms run OAuth 2.0 directly against the business
-domain, or — when the business declares trusted identity providers in
-`config.providers` — chain identity from a provider via the
-[Accelerated IdP Flow](#accelerated-idp-flow). The `provider.type`
-discriminator (a required open string; `oauth2` is the only type defined in
-this version) reserves space for future non-OAuth provider mechanisms; see
-[Future Extensibility](#future-extensibility).
+for authorization. Direct OAuth 2.0 against the business domain (via
+[Discovery](#discovery)) is always available. When the business declares
+trusted external identity providers in `config.providers`, platforms
+**MAY** instead chain identity from a provider via the
+[Accelerated IdP Flow](#accelerated-idp-flow), skipping the
+browser-based flow when they already hold a suitable upstream token.
 
 ### Participants
 
@@ -147,10 +146,12 @@ vocabulary); runtime messages carry per-request advisories.
 * **SHOULD** include a unique, unguessable `state` parameter in the
     authorization request to prevent CSRF
     ([RFC 6749 §10.12](https://datatracker.ietf.org/doc/html/rfc6749#section-10.12){ target="_blank" }).
-* When `config.providers` is present, the platform **MUST** select a
-    listed provider whose `type` it supports and **MUST NOT** fall back
-    to direct OAuth on the business domain; if none is supported, the
-    platform **MUST** abort (see [Identity Providers](#identity-providers)).
+* When `config.providers` is present, the platform **MAY** chain
+    identity from a listed provider via the
+    [Accelerated IdP Flow](#accelerated-idp-flow). If no listed provider
+    is supported or suitable, the platform **MUST** fall back to direct
+    OAuth on the business domain via [Discovery](#discovery) (see
+    [Identity Providers](#identity-providers)).
 * Before initiating identity chaining with a business, the platform
     **SHOULD** offer the user a choice of available identity providers and
     indicate which provider's identity will be shared with the business.
@@ -218,9 +219,10 @@ vocabulary); runtime messages carry per-request advisories.
     `access_token`s issued from it.
 * **MUST** support revocation requests authenticated with the same client
     credentials used at the token endpoint.
-* **MAY** declare trusted identity providers in `config.providers`
-    (see [Identity Providers](#identity-providers)). Businesses **MUST**
-    only list providers they explicitly trust.
+* **MAY** declare trusted external identity providers in
+    `config.providers` (see [Identity Providers](#identity-providers)).
+    Businesses **MUST** only list providers they explicitly trust and
+    **MUST NOT** list their own authorization server.
 * When the business lists external identity providers of `type: oauth2` in
     `config.providers`, the business **MUST** support the JWT bearer assertion
     grant type
@@ -331,25 +333,27 @@ where `code_verifier` is absent or does not verify against the stored
 
 ## Identity Providers
 
-The `config.providers` map declares the trusted identity providers a
-business accepts for authentication.
+The `config.providers` map declares external trusted identity providers
+from which the business will accept chained identity via JWT bearer
+assertions for the [Accelerated IdP Flow](#accelerated-idp-flow). It is
+additive metadata on top of the always-available direct OAuth path
+against the business domain (see [Discovery](#discovery)) — never a
+closed whitelist.
 
-* **When absent:** by advertising the `dev.ucp.common.identity_linking`
-    capability without a `providers` map, the business implicitly declares
-    itself as its own (and only) identity provider. Platforms run OAuth 2.0
-    directly against the business domain using the [Discovery](#discovery)
-    hierarchy.
-* **When present:** the map is a strict whitelist. Platforms **MUST**
-    select from the listed providers and **MUST NOT** fall back to direct
-    OAuth against the business domain. To accept direct OAuth alongside
-    external IdPs, a business **MUST** self-list (own `auth_url` resolving
-    to own authorization server); omitting self signals IdP-mediated
-    authentication only.
-
-When a platform already holds a token from a listed provider (e.g., from a
-prior account-linking flow with that IdP), it can chain the user's identity
-to the business via the [Accelerated IdP Flow](#accelerated-idp-flow) — no
-fresh browser-based OAuth flow required.
+* **When absent or empty:** platforms run direct OAuth against the
+    business domain via [Discovery](#discovery).
+* **When present:** platforms **MAY** select a listed provider whose
+    `type` they support and chain identity via the
+    [Accelerated IdP Flow](#accelerated-idp-flow) — typically one they
+    already hold a valid upstream token for. If no listed provider is
+    supported or suitable, platforms **MUST** fall back to direct OAuth
+    on the business domain.
+* **Self-listing forbidden.** Businesses **MUST NOT** list their own
+    authorization server in `config.providers`. Chaining-to-self is
+    degenerate (the same server would issue and validate the assertion),
+    and direct OAuth is already available via [Discovery](#discovery).
+    Platforms **MUST** ignore any entry whose `auth_url` matches the
+    business's own issuer URI.
 
 ### Provider Configuration
 
@@ -380,20 +384,15 @@ A provider's `type` determines whether it participates in the token and
 scope model. The `oauth2` type chains identity via token exchange and
 contributes to the scopes of the business-issued token. Other types **MAY**
 contribute no scopes — presence in `providers` does not imply participation
-in the scope or token-issuance model. Provider selection and the abort rule
-turn only on whether the platform *supports* a provider's `type`, independent
-of whether that type issues a token.
-
-Businesses **MAY** list themselves alongside external providers (own
-`auth_url` resolving to own authorization server) to give platforms a
-single map to consult. When the platform selects the self-listed entry,
-it runs the [Account Linking Flow](#account-linking-flow) against the
-business directly — chaining is unnecessary because the business is both
-the IdP and the relying party.
+in the scope or token-issuance model. Selection turns only on whether
+the platform *supports* a provider's `type` and holds (or can obtain) a
+suitable upstream identity, independent of whether that type issues a
+token.
 
 ### Profile Example
 
-A business that trusts an external IdP and also self-lists:
+A business that trusts an external IdP for chaining, while also accepting
+direct OAuth flows (always available via discovery):
 
 ```json
 "dev.ucp.common.identity_linking": [{
@@ -405,10 +404,6 @@ A business that trusts an external IdP and also self-lists:
       "app.example.login": {
         "type": "oauth2",
         "auth_url": "https://accounts.example-login.app/"
-      },
-      "com.example.merchant": {
-        "type": "oauth2",
-        "auth_url": "https://merchant.example.com/"
       }
     },
     "scopes": {
@@ -419,9 +414,10 @@ A business that trusts an external IdP and also self-lists:
 }]
 ```
 
-The platform can use the Accelerated IdP Flow with `app.example.login` if it
-holds a token there, or fall back to the standard Account Linking Flow
-against `com.example.merchant` (the business's own authorization server).
+The platform can use the Accelerated IdP Flow with `app.example.login` if
+it already holds a valid token there; otherwise it runs the standard
+[Account Linking Flow](#account-linking-flow) against the business domain
+via [Discovery](#discovery).
 
 ## Accelerated IdP Flow
 
@@ -900,13 +896,10 @@ define additional `type` values and the corresponding discovery and
 proof-presentation mechanics.
 
 **Forward-compatibility rule for platforms:** When `config` contains fields
-not defined in this version of the spec, platforms **MUST** ignore
-those fields. Platforms **MUST** treat provider entries with an
-unsupported `type` as filtered out, then apply the whitelist rule
-(see [Identity Providers](#identity-providers)) to what remains.
-If nothing remains, the platform **MUST** abort and **MUST NOT**
-fall back to direct OAuth on the business domain unless the
-business self-listed.
+not defined in this version of the spec, platforms **MUST** ignore those
+fields. Platforms **MUST** treat provider entries with an unsupported
+`type` as filtered out, then apply the rules in
+[Identity Providers](#identity-providers) to what remains.
 
 ## Examples
 
