@@ -429,9 +429,8 @@ its own access token under its own authority.
 
 This flow profiles the identity and authorization chaining pattern in
 [draft-ietf-oauth-identity-chaining](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-identity-chaining-08){ target="_blank" }.
-UCP tightens two aspects beyond what the base RFCs mandate: token exchange
-**MUST** use `resource` (not `audience`), and the JWT authorization grant
-**MUST** carry `aud` as a single-valued URI plus a unique `jti` (see
+UCP tightens the JWT authorization grant beyond what the base RFCs
+mandate: `aud` **MUST** be a single-valued URI plus a unique `jti` (see
 [JWT Authorization Grant](#jwt-authorization-grant)).
 
 ### Flow
@@ -444,10 +443,13 @@ UCP tightens two aspects beyond what the base RFCs mandate: token exchange
     * `grant_type`: `urn:ietf:params:oauth:grant-type:token-exchange`
     * `subject_token`: the platform's existing IdP access token
     * `subject_token_type`: `urn:ietf:params:oauth:token-type:access_token`
-    * `resource`: the business's authorization server issuer URI (the IdP
-      maps this value to the `aud` claim in the resulting grant). Platforms
-      **MUST** use `resource`, not `audience`, because the target is a
-      concrete URI.
+    * `resource` and/or `audience`: the business's authorization server
+      issuer URI. Platforms **MUST** include at least one.
+      [RFC 8693 §2.1](https://datatracker.ietf.org/doc/html/rfc8693#section-2.1){ target="_blank" }
+      permits URI values in either parameter; IdP implementations vary
+      in which they accept. The IdP maps the value to the `aud` claim
+      in the resulting grant; when both are sent they **MUST** carry
+      identical values.
     * `requested_token_type`: `urn:ietf:params:oauth:token-type:jwt`
 3. The IdP validates the subject token, verifies the platform is authorized
    to request a grant for the target business, and returns a short-lived
@@ -588,9 +590,10 @@ IdP **MUST**:
 * Authenticate the platform and verify it is authorized to present the
     subject token
     ([RFC 8693 §2.1](https://datatracker.ietf.org/doc/html/rfc8693#section-2.1){ target="_blank" }).
-* Verify the target business (identified by `resource`) is a known relying
-    party and the user has authorized identity sharing with it. The IdP
-    **MUST NOT** issue grants for businesses the user has not authorized.
+* Verify the target business (identified by `resource` or `audience`) is
+    a known relying party and the user has authorized identity sharing
+    with it. The IdP **MUST NOT** issue grants for businesses the user
+    has not authorized.
 * Issue a JWT authorization grant conforming to the
     [JWT Authorization Grant](#jwt-authorization-grant) requirements.
 * Return `issued_token_type` as `urn:ietf:params:oauth:token-type:jwt`.
