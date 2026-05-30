@@ -514,6 +514,19 @@ onboarding), the business **MUST** reject the grant with `invalid_grant`
 platforms recover by running the [Account Linking Flow](#account-linking-flow)
 against an interactive provider.
 
+**Claims for user resolution.** Beyond `sub`, businesses commonly need
+additional claims to provision a new account with a usable contact
+identifier or to surface UX hints when an existing account may match.
+The stable identity key per IdP is `(iss, sub)`. For `oauth2`
+providers, IdPs **SHOULD** include relevant
+[OIDC Core §5.1 standard claims](https://openid.net/specs/openid-connect-core-1_0-31.html#StandardClaims){ target="_blank" }
+— particularly `email` and `email_verified` — in the JWT authorization
+grant when available and the user has consented. Businesses
+**SHOULD NOT** auto-link accounts across IdPs by matching email or any
+other claim, and **SHOULD** require user-mediated linking (the user
+authenticating to the existing account) before merging identities. See
+[Security Considerations](#security-considerations).
+
 ### Chaining Errors at the Token Endpoint
 
 Validation failures use the standard OAuth 2.0 token-endpoint error format
@@ -570,6 +583,12 @@ IdP **MUST**:
 * Issue a JWT authorization grant conforming to the
     [JWT Authorization Grant](#jwt-authorization-grant) requirements.
 * Return `issued_token_type` as `urn:ietf:params:oauth:token-type:jwt`.
+
+IdPs **SHOULD** populate OIDC Core §5.1 standard claims in JWT
+authorization grants when the user has consented to share them — at
+minimum `email` and `email_verified` when applicable — to support
+account provisioning and UX hints at the business. Standard claims are
+advisory; stable per-IdP identification remains `(iss, sub)`.
 
 ## Scopes
 
@@ -896,6 +915,16 @@ field conveys the business's value prompt to the platform (e.g.,
 * **Grant relay.** Businesses **MUST NOT** store or forward JWT
   authorization grants received from platforms. Grants are bearer
   credentials scoped to a single audience (`aud`) and a single use.
+* **Cross-IdP account linking.** Federation collapses trust boundaries:
+  a business that auto-links accounts across listed providers based on
+  any IdP-asserted claim (email, phone, name) extends each provider's
+  verification process into account-takeover risk. A provider that
+  issues `email_verified=true` for an email the user does not control
+  can hijack any account at the business sharing that email. The stable
+  per-IdP identifier is `(iss, sub)`; other claims are advisory.
+  Businesses **SHOULD** require user-mediated linking — the user
+  demonstrating control of the existing account via current-session
+  authentication or equivalent — before merging accounts across IdPs.
 
 ## Future Extensibility
 
