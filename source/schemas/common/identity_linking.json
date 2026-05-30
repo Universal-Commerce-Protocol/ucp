@@ -4,7 +4,6 @@
   "name": "dev.ucp.common.identity_linking",
   "title": "Identity Linking",
   "description": "Capability schema for identity linking. Businesses declare the user-authenticated scopes they offer in a flat 'scopes' map. Each key is the OAuth scope string as it appears on the wire ('{capability}:{scope}', e.g. 'dev.ucp.shopping.order:read'). Scope presence implies that the corresponding operations require user authentication. Operations not gated by any listed scope operate at whatever access level the business permits; UCP does not prescribe a default.",
-  "$comment": "Auth mechanism: OAuth 2.0 with RFC 8414 discovery on the business domain is the always-available baseline. 'config.providers' is additive metadata declaring trusted external identity providers from whom platforms MAY chain identity via RFC 8693 token exchange + RFC 7523 JWT bearer, skipping a fresh browser-based OAuth flow. The 'provider.type' discriminator is a REQUIRED open string: 'oauth2' is the only type defined in this version, and future versions MAY define additional non-OAuth mechanisms (e.g., wallet attestation) as non-breaking extensions. Per-type fields are enforced via 'if/then' so unrecognized types stay valid and are filtered by platforms at runtime. 'config' is open for non-breaking extension at the field level; platforms MUST ignore unrecognized sibling fields. Businesses MUST NOT list their own authorization server in 'providers' (chaining-to-self is degenerate; direct OAuth is already available via discovery). When no listed provider is supported by the platform, the platform MUST fall back to direct OAuth on the business domain via discovery; it MUST NOT abort solely because 'providers' is non-empty.",
 
   "$defs": {
     "scope_policy": {
@@ -30,7 +29,6 @@
       "type": "object",
       "title": "Identity Provider",
       "description": "A trusted identity provider for delegated authentication, keyed by the 'type' discriminator. 'oauth2' denotes an OAuth 2.0 / OIDC authorization server. Future versions MAY define additional types (e.g. wallet attestation) as non-breaking extensions; platforms MUST treat entries whose 'type' they do not support as filtered out (see Provider Selection).",
-      "$comment": "Discriminator design: 'type' is a REQUIRED open string, and per-type constraints are applied via 'if/then' branches (not 'oneOf'). This is deliberate. A closed 'oneOf' over enumerated arms would reject any entry whose 'type' is unknown to the schema version doing the validation, which contradicts the forward-compatibility rule that platforms filter unsupported types at runtime rather than rejecting the business config. 'if/then' enforces the known type's fields and lets unrecognized types validate as bare objects, so a platform pinned to an older schema does not reject a newer mechanism. This also matches UCP's house composition pattern (allOf/conditional) rather than the structural, fixed-set 'oneOf' in fulfillment_destination.json.",
       "required": ["type"],
       "properties": {
         "type": {
@@ -40,7 +38,6 @@
       },
       "allOf": [
         {
-          "$comment": "oauth2 providers discover their authorization server via 'auth_url'. Verification-only mechanisms (e.g. wallet attestation) discover by other means and are added as sibling conditional branches without touching this one.",
           "if": { "properties": { "type": { "const": "oauth2" } } },
           "then": {
             "required": ["auth_url"],
@@ -81,7 +78,7 @@
                   "providers": {
                     "type": "object",
                     "description": "Map of trusted external identity providers keyed by reverse-domain identifier. Declares which upstream IdPs the business will accept JWT bearer assertions from for the Accelerated IdP Flow (chaining via RFC 8693 + RFC 7523). This field is additive: direct OAuth against the business domain via RFC 8414 discovery is always available regardless of 'providers' content. Businesses MUST NOT list their own authorization server here — chaining-to-self is degenerate, and direct OAuth covers that path. When absent, empty, or when no listed provider is supported by the platform, platforms run direct OAuth on the business domain.",
-                    "propertyNames": { "$ref": "../shopping/types/reverse_domain_name.json" },
+                    "propertyNames": { "$ref": "types/reverse_domain_name.json" },
                     "additionalProperties": { "$ref": "#/$defs/provider" }
                   },
                   "scopes": {

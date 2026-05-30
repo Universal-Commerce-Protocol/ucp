@@ -377,8 +377,8 @@ metadata from `auth_url` using the same two-tier hierarchy as
 ### Provider Selection
 
 Platforms read the business's `config.providers` map and select a provider
-they support — typically one they already hold a token for (enabling the
-Accelerated IdP Flow), or one the user can authenticate with.
+they support — typically one they already hold a token for, enabling the
+[Accelerated IdP Flow](#accelerated-idp-flow).
 
 A provider's `type` determines whether it participates in the token and
 scope model. The `oauth2` type chains identity via token exchange and
@@ -394,24 +394,34 @@ token.
 A business that trusts an external IdP for chaining, while also accepting
 direct OAuth flows (always available via discovery):
 
+<!-- ucp:example schema=profile def=business_schema -->
 ```json
-"dev.ucp.common.identity_linking": [{
-  "version": "Working Draft",
-  "spec": "https://ucp.dev/specification/identity-linking",
-  "schema": "https://ucp.dev/schemas/common/identity_linking.json",
-  "config": {
-    "providers": {
-      "app.example.login": {
-        "type": "oauth2",
-        "auth_url": "https://accounts.example-login.app/"
-      }
+{
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "services": {},
+    "capabilities": {
+      "dev.ucp.common.identity_linking": [{
+        "version": "{{ ucp_version }}",
+        "spec": "https://ucp.dev/specification/identity-linking",
+        "schema": "https://ucp.dev/schemas/common/identity_linking.json",
+        "config": {
+          "providers": {
+            "app.example.login": {
+              "type": "oauth2",
+              "auth_url": "https://accounts.example-login.app/"
+            }
+          },
+          "scopes": {
+            "dev.ucp.shopping.order:read":   {},
+            "dev.ucp.shopping.order:manage": {}
+          }
+        }
+      }]
     },
-    "scopes": {
-      "dev.ucp.shopping.order:read":   {},
-      "dev.ucp.shopping.order:manage": {}
-    }
+    "payment_handlers": {}
   }
-}]
+}
 ```
 
 The platform can use the Accelerated IdP Flow with `app.example.login` if
@@ -590,10 +600,11 @@ IdP **MUST**:
 * Authenticate the platform and verify it is authorized to present the
     subject token
     ([RFC 8693 §2.1](https://datatracker.ietf.org/doc/html/rfc8693#section-2.1){ target="_blank" }).
-* Verify the target business (identified by `resource` or `audience`) is
-    a known relying party and the user has authorized identity sharing
-    with it. The IdP **MUST NOT** issue grants for businesses the user
-    has not authorized.
+* Verify the target business (identified by `resource` and/or `audience`,
+    which **MUST** carry identical values when both are sent — see
+    [Flow](#flow)) is a known relying party and the user has authorized
+    identity sharing with it. The IdP **MUST NOT** issue grants for
+    businesses the user has not authorized.
 * Issue a JWT authorization grant conforming to the
     [JWT Authorization Grant](#jwt-authorization-grant) requirements.
 * Return `issued_token_type` as `urn:ietf:params:oauth:token-type:jwt`.
