@@ -501,9 +501,14 @@ with the following UCP-specific requirements:
 * The JWT signature **MUST** be verified against the IdP's `jwks_uri`; if
   JWKS cannot be retrieved, the business **MUST** fail closed.
 
-Once the assertion is validated, the business resolves the user from `sub`
-(auto-provisioning permitted) and issues an access token scoped to the
-requested UCP scopes. If user interaction is required (terms acceptance,
+Once the assertion is validated, the business resolves the user from
+`sub` (auto-provisioning permitted) and issues an access token scoped to
+the subset of requested scopes whose per-scope policy is satisfied by
+the grant's claims (`acr`, `auth_time`, `amr`, etc.). If no requested
+scope can be satisfied, the business **MUST** return `invalid_scope`
+per [RFC 6749 §5.2](https://datatracker.ietf.org/doc/html/rfc6749#section-5.2){ target="_blank" };
+platforms recover by requesting a step-up grant from the IdP or running
+direct OAuth. If user interaction is required (terms acceptance,
 onboarding), the business **MUST** reject the grant with `invalid_grant`
 (see [Chaining Errors at the Token Endpoint](#chaining-errors-at-the-token-endpoint));
 platforms recover by running the [Account Linking Flow](#account-linking-flow)
@@ -614,6 +619,13 @@ fields include authentication constraints (`min_acr`, `max_token_age`,
 `require_mfa`), declarative metadata (`claims` produced when granted),
 or other scope-specific configuration. Platforms **MUST** ignore
 unrecognized fields.
+
+Advertised scopes **MUST** apply uniformly across identity paths. The
+same `config.scopes` map governs scope availability whether the platform
+obtained user identity via direct OAuth or the
+[Accelerated IdP Flow](#accelerated-idp-flow). Per-scope policy gates
+which assertions satisfy a scope; businesses honoring `min_acr` (for
+example) **MUST** apply the same threshold regardless of path.
 
 #### `description`
 
