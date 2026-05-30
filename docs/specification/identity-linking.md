@@ -538,6 +538,17 @@ Businesses **MAY** include `error_description` and `error_uri` to aid
 diagnosis or to point to onboarding documentation; platforms **MUST NOT**
 treat `error_description` as machine-readable.
 
+**Missing or insufficient claims.** When the JWT authorization grant
+lacks a claim the business requires (e.g., `email` for account
+resolution), the business **MUST** reject with `invalid_grant`. The
+business **MAY** include `error_description` naming the missing claim
+for human diagnosis (e.g., `"missing required claim: email"`); platforms
+**MUST NOT** parse it for automated recovery and **SHOULD** fall back to
+direct OAuth, where the business can prompt the user for the missing
+information. Businesses with claim requirements beyond OIDC Core §5.1
+standard claims **SHOULD** document them in their developer-facing
+materials.
+
 ### Token Lifecycle
 
 JWT bearer assertion grants don't establish long-lived sessions:
