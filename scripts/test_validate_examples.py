@@ -27,6 +27,7 @@ are gated and skipped if the binary is missing.
 """
 
 import json
+import re
 import shutil
 import sys
 import tempfile
@@ -206,6 +207,44 @@ def test_string_ellipsis_in_array() -> None:
     "string_ellipsis_in_array_item",
     cleaned == [1, 3],
     f"got {cleaned!r}",
+  )
+
+
+# -----------------------------------------------------------
+# AP2 checkout_mandate pattern
+# -----------------------------------------------------------
+
+
+def test_ap2_checkout_mandate_kb_pattern() -> None:
+  """checkout_mandate pattern accepts an SD-JWT+kb credential.
+
+  An SD-JWT+kb serializes as <issuer-JWT>~<disclosure>...~<KB-JWT>; the
+  trailing key-binding JWT contains dots. The pattern must accept it, still
+  accept the unbound form, and reject non-credential input. Reads the live
+  pattern from the schema so a regression fails here.
+  """
+  schema_path = (
+    Path(__file__).parent.parent / "source/schemas/shopping/ap2_mandate.json"
+  )
+  pattern = json.loads(schema_path.read_text())["$defs"]["checkout_mandate"][
+    "pattern"
+  ]
+  jwt, disclosure, kb_jwt = "eyJh.eyJz.SIG", "WyJzYWx0Il0", "eyJ0.eyJu.SIG"
+
+  _check(
+    "checkout_mandate_accepts_key_binding",
+    re.search(pattern, f"{jwt}~{disclosure}~{kb_jwt}") is not None,
+    f"SD-JWT+kb should match {pattern!r}",
+  )
+  _check(
+    "checkout_mandate_accepts_unbound_sd_jwt",
+    re.search(pattern, f"{jwt}~{disclosure}") is not None,
+    "unbound SD-JWT should still match",
+  )
+  _check(
+    "checkout_mandate_rejects_non_credential",
+    re.search(pattern, "not a credential") is None,
+    "plain text should not match",
   )
 
 
@@ -516,6 +555,7 @@ def main() -> int:
   test_parse_example_keeps_sentinels()
   test_strip_ellipsis_records_paths()
   test_string_ellipsis_in_array()
+  test_ap2_checkout_mandate_kb_pattern()
   test_annotation_parsing()
   test_extract_blocks()
   test_process_block_integration()
