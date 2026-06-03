@@ -10,7 +10,7 @@
       "$ref": "shipping_destination.json"
     },
     {
-      "$ref": "retail_location.json"
+      "$ref": "../../common/types/location.json"
     }
   ]
 }
