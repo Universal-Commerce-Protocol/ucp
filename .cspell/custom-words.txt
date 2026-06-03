@@ -125,3 +125,17 @@ worktree
 yaml
 yml
 zapatillas
+jwks
+keyid
+reauth
+redeemables
+reprepare
+sandboxing
+fbclid
+gclid
+ttclid
+Accor
+Kogan
+Petbarn
+VTEX
+geofence
