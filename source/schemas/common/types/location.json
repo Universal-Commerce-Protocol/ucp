@@ -9,17 +9,29 @@
   "properties": {
     "id": {
       "type": "string",
-      "description": "Unique location identifier."
+      "description": "Unique location identifier.",
+      "ucp_request": {
+        "transition": {
+          "from": "omit",
+          "to": "optional",
+          "description": "Location ids MAY be specified by platforms in requests."
+        }
+      }
     },
     "name": {
       "type": "string",
       "description": "Location display name.",
-      "ucp_request": "omit"
+      "ucp_request": {
+        "transition": {
+          "from": "required",
+          "to": "omit",
+          "description": "Location names should not be specified by platforms."
+        }
+      }
     },
     "address": {
       "$ref": "postal_address.json",
-      "description": "Physical address of the location.",
-      "ucp_request": "omit"
+      "description": "Physical address of the location."
     },
     "geo": {
       "$ref": "geo.json",
