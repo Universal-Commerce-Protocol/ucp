@@ -1,5 +1,6 @@
 """Script to check for broken internal links and anchors in the built site."""
 
+import argparse
 import os
 import sys
 import re
@@ -9,7 +10,6 @@ from pathlib import Path
 from collections import defaultdict
 
 # Configuration
-ROOT_DIR = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("local_preview")
 SITE_URL = os.environ.get("SITE_URL", "https://ucp.dev/")
 
 # Ensure trailing slash for site url to match correctly
@@ -71,9 +71,22 @@ class LinkParser(HTMLParser):
 
 def check_links():
   """Scan the built documentation site for broken links and anchors."""
-  if not ROOT_DIR.exists():
+  parser = argparse.ArgumentParser(
+    description="Check for broken internal links and anchors in the built site."
+  )
+  parser.add_argument(
+    "root_dir",
+    nargs="?",
+    type=Path,
+    default=Path("local_preview"),
+    help="Directory containing the built site (default: local_preview)",
+  )
+  args = parser.parse_args()
+  root_dir = args.root_dir
+
+  if not root_dir.exists():
     print(
-      f"Error: {ROOT_DIR} does not exist. Run build_local.sh (local) "
+      f"Error: {root_dir} does not exist. Run build_local.sh (local) "
       "or mkdocs build (CI) first."
     )
     sys.exit(1)
@@ -93,9 +106,9 @@ def check_links():
   except Exception as e:
     print(f"Warning: Could not read .linkignore: {e}")
 
-  print(f"Scanning {ROOT_DIR} for broken links (Site URL: {SITE_URL})...")
+  print(f"Scanning {root_dir} for broken links (Site URL: {SITE_URL})...")
 
-  html_files = list(ROOT_DIR.rglob("*.html"))
+  html_files = list(root_dir.rglob("*.html"))
   file_cache = {}  # Cache parsed IDs for each file to avoid re-parsing
   # Structure: errors_by_version[version][file_path] = [list of error details]
   errors_by_version = defaultdict(lambda: defaultdict(list))
@@ -119,7 +132,7 @@ def check_links():
 
   for file_path in html_files:
     try:
-      rel_path = file_path.relative_to(ROOT_DIR)
+      rel_path = file_path.relative_to(root_dir)
       first_part = rel_path.parts[0]
 
       # Heuristic for version detection
@@ -196,11 +209,11 @@ def check_links():
             parts[0] in ["latest", "draft"]
             or re.match(r"^\d{4}-\d{2}-\d{2}$", parts[0])
           )
-          and not (ROOT_DIR / parts[0]).exists()
+          and not (root_dir / parts[0]).exists()
         ):
           rel_path = parts[1]
 
-        target_file = ROOT_DIR / rel_path
+        target_file = root_dir / rel_path
       else:
         # Relative path
         target_file = file_path.parent / path_part

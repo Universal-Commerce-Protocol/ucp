@@ -110,6 +110,12 @@ def main():
   try:
     result = subprocess.run(cmd, check=False)
     sys.exit(result.returncode)
+  except FileNotFoundError:
+    print(
+      f"\nError: Container runtime '{args.runtime}' not found. "
+      "Please ensure Docker or Podman is installed and in your PATH."
+    )
+    sys.exit(1)
   except KeyboardInterrupt:
     print("\nInterrupted by user")
     sys.exit(1)

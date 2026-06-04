@@ -61,6 +61,20 @@ class TestLinkParser(unittest.TestCase):
     self.assertNotIn("/path/...", parser.links)
     self.assertNotIn("/path/*", parser.links)
 
+  def test_ignore_non_anchor_tags(self):
+    """Test that href is only extracted from <a> tags, but IDs from any tag."""
+    parser = LinkParser()
+    parser.feed('<link href="/ignore-this-link"><div id="content-div"></div>')
+    self.assertNotIn("/ignore-this-link", parser.links)
+    self.assertIn("content-div", parser.ids)
+
+  def test_multiple_bare_urls_with_quotes(self):
+    """Test extraction of bare URLs surrounded by quotes or brackets."""
+    parser = LinkParser()
+    parser.feed('See "https://ucp.dev/a" or <https://ucp.dev/b>.')
+    self.assertIn("https://ucp.dev/a", parser.links)
+    self.assertIn("https://ucp.dev/b", parser.links)
+
 
 if __name__ == "__main__":
   unittest.main()
