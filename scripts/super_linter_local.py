@@ -55,7 +55,7 @@ def main():
     print(f"Error: {workflow_path} not found.")
     sys.exit(1)
 
-  with workflow_path.open() as f:
+  with workflow_path.open(encoding="utf-8") as f:
     workflow = yaml.safe_load(f)
 
   lint_step = None

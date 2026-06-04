@@ -190,7 +190,7 @@ def extract_blocks(filepath: Path) -> list[dict]:
   fence with no intervening fence — and emits an error block for the
   second one. Per contract, at most one annotation per block.
   """
-  lines = filepath.read_text().splitlines()
+  lines = filepath.read_text(encoding="utf-8").splitlines()
   blocks: list[dict] = []
   i = 0
   pending_annotation = None
@@ -682,7 +682,9 @@ def validate_payload(
 ) -> tuple[bool, list[dict]]:
   """Validate a payload via ucp-schema validate."""
   full_schema = schema_base / f"{schema_path}.json"
-  with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+  with tempfile.NamedTemporaryFile(
+    mode="w", suffix=".json", delete=False, encoding="utf-8"
+  ) as f:
     json.dump(payload, f)
     tmp_path = f.name
 
@@ -734,12 +736,12 @@ def validate_payload_with_schema(
   tmp_payload = None
   try:
     with tempfile.NamedTemporaryFile(
-      mode="w", suffix=".json", delete=False
+      mode="w", suffix=".json", delete=False, encoding="utf-8"
     ) as f:
       json.dump(schema_dict, f)
       tmp_schema = f.name
     with tempfile.NamedTemporaryFile(
-      mode="w", suffix=".json", delete=False
+      mode="w", suffix=".json", delete=False, encoding="utf-8"
     ) as f:
       json.dump(payload, f)
       tmp_payload = f.name
@@ -791,17 +793,17 @@ def load_scaffold(
   name = schema_path.replace("/", "_")
   specific = scaffolds_dir / f"{name}_{direction}_{op}.json"
   if specific.exists():
-    return json.loads(specific.read_text())
+    return json.loads(specific.read_text(encoding="utf-8"))
 
   # Try direction-only: checkout_response.json
   dir_only = scaffolds_dir / f"{name}_{direction}.json"
   if dir_only.exists():
-    return json.loads(dir_only.read_text())
+    return json.loads(dir_only.read_text(encoding="utf-8"))
 
   # Try generic: checkout.json
   generic = scaffolds_dir / f"{name}.json"
   if generic.exists():
-    return json.loads(generic.read_text())
+    return json.loads(generic.read_text(encoding="utf-8"))
 
   return None
 

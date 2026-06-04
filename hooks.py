@@ -354,7 +354,7 @@ def on_post_build(config):
         target = f"{base_path}{rel_path.as_posix()}"
 
         dest_file.parent.mkdir(parents=True, exist_ok=True)
-        with Path.open(dest_file, "w") as f:
+        with dest_file.open("w", encoding="utf-8") as f:
           f.write(
             "<!doctype html>"
             f'<meta http-equiv="refresh" content="0; url={target}">'
@@ -364,7 +364,7 @@ def on_post_build(config):
     index_file = site_dir / "index.html"
     index_target = "specification/overview/"
     index_file.parent.mkdir(parents=True, exist_ok=True)
-    with Path.open(index_file, "w") as f:
+    with index_file.open("w", encoding="utf-8") as f:
       f.write(
         "<!doctype html>"
         f'<meta http-equiv="refresh" content="0; url={index_target}">'

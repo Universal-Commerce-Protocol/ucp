@@ -79,18 +79,19 @@ def check_links():
     sys.exit(1)
 
   ignore_patterns = []
-  if Path(".linkignore").exists():
-    try:
-      with Path.open(".linkignore", "r", encoding="utf-8") as f:
-        for line in f:
-          line = line.strip()
-          if line and not line.startswith("#"):
-            try:
-              ignore_patterns.append(re.compile(line))
-            except re.error as e:
-              print(f"Warning: Invalid regex in .linkignore '{line}': {e}")
-    except Exception as e:
-      print(f"Warning: Could not read .linkignore: {e}")
+  try:
+    with Path(".linkignore").open("r", encoding="utf-8") as f:
+      for line in f:
+        line = line.strip()
+        if line and not line.startswith("#"):
+          try:
+            ignore_patterns.append(re.compile(line))
+          except re.error as e:
+            print(f"Warning: Invalid regex in .linkignore '{line}': {e}")
+  except FileNotFoundError:
+    pass  # .linkignore is optional and it is safe to skip
+  except Exception as e:
+    print(f"Warning: Could not read .linkignore: {e}")
 
   print(f"Scanning {ROOT_DIR} for broken links (Site URL: {SITE_URL})...")
 
@@ -129,7 +130,7 @@ def check_links():
         is_version = True
 
       version = first_part if is_version else "root"
-    except Exception:
+    except (ValueError, IndexError):
       version = "unknown"
 
     try:
