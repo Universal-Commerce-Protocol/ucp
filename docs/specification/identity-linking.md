@@ -941,7 +941,8 @@ field conveys the business's value prompt to the platform (e.g.,
 * **JWT grant lifetime.** JWT authorization grants **MUST** be short-lived;
   the `exp` claim **SHOULD** be no more than 60 seconds after `iat`. Short
   lifetimes limit the window for grant theft and replay.
-* **JWT grant single-use.** Businesses **SHOULD** enforce single-use JWT
+* **JWT grant single-use.** Businesses **MUST** enforce single-use JWT;
+  a short exp narrows the replay window, but only jti tracking closes it.
   authorization grants by tracking the `jti` claim within the grant's
   validity window.
 * **Grant relay.** Businesses **MUST NOT** store or forward JWT
