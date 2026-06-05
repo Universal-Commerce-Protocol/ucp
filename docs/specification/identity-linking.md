@@ -252,32 +252,45 @@ vocabulary); runtime messages carry per-request advisories.
 
 ## Discovery
 
-Platforms resolve business authorization server metadata using the following
-**strict two-tier hierarchy**. The issuer URI used as the discovery base is
-the business's domain as declared in its UCP profile.
+UCP discovery is a three-step pipeline.
+
+**Step 1 — Resolve the AS issuer.** Platforms fetch the business's
+protected-resource metadata per
+[RFC 9728](https://datatracker.ietf.org/doc/html/rfc9728){ target="_blank" }
+and use the selected entry from `authorization_servers` as the AS
+issuer. The AS issuer **MAY** be hosted on a different origin than the
+business domain. If the business publishes no protected-resource
+metadata, the AS issuer defaults to the business domain (single-host
+deployments).
+
+**Step 2 — Fetch AS metadata.** Using the issuer from Step 1, platforms
+resolve authorization-server metadata via a strict two-tier hierarchy.
+Well-known URLs are constructed per
+[RFC 8414 §3.1](https://datatracker.ietf.org/doc/html/rfc8414#section-3.1){ target="_blank" }
+(the well-known segment is inserted between the host and any issuer
+path, not appended).
 
 1. **RFC 8414 (Primary):** Fetch
-   `{business-domain}/.well-known/oauth-authorization-server`.
+   `https://{host}/.well-known/oauth-authorization-server{path}`.
     * `2xx` response: use this metadata. Discovery complete.
     * `404 Not Found`: proceed to step 2.
-    * Any other non-2xx response, network error, or timeout: **MUST** abort.
-      **MUST NOT** proceed to step 2.
+    * Any other non-2xx response, network error, or timeout: **MUST**
+      abort. **MUST NOT** proceed to step 2.
 
 2. **OIDC Discovery (Fallback):** Fetch
-   `{business-domain}/.well-known/openid-configuration`.
+   `{issuer}/.well-known/openid-configuration`.
     * `2xx` response: use this metadata. Discovery complete.
-    * Any non-2xx response, network error, or timeout: **MUST** abort the
-      identity linking process.
+    * Any non-2xx response, network error, or timeout: **MUST** abort.
 
-Platforms **MUST NOT** silently fall through on any error other than `404` in
-step 1. This prevents partial or undefined behavior when a server is
-misconfigured or temporarily unavailable.
+Platforms **MUST NOT** silently fall through on any error other than
+`404` in step 1.
 
-The `issuer` value in the discovered metadata **MUST** match the discovery
-base URI exactly (per
+**Step 3 — Validate the issuer.** The `issuer` value in the discovered
+metadata **MUST** byte-for-byte match the AS issuer selected in Step 1
+(per
 [RFC 8414 §3.3](https://datatracker.ietf.org/doc/html/rfc8414#section-3.3){ target="_blank" }).
 Platforms **MUST NOT** normalize (e.g., strip trailing slashes) before
-comparison — the value must be a byte-for-byte match.
+comparison.
 
 ## Account Linking Flow
 
