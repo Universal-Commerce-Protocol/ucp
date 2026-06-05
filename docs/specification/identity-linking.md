@@ -337,8 +337,10 @@ The `config.providers` map declares external trusted identity providers
 from which the business will accept chained identity via JWT bearer
 assertions for the [Accelerated IdP Flow](#accelerated-idp-flow). It is
 additive metadata on top of the always-available direct OAuth path
-against the business domain (see [Discovery](#discovery)) — never a
-closed whitelist.
+against the business domain (see [Discovery](#discovery)); for the chaining
+path, it is a closed allowlist — a business **MUST** reject a JWT
+authorization grant whose `iss` is not a listed provider (see
+[Business Token Issuance](#business-token-issuance)).
 
 * **When absent or empty:** platforms run direct OAuth against the
     business domain via [Discovery](#discovery).
