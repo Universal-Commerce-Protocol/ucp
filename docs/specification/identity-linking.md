@@ -244,7 +244,8 @@ vocabulary); runtime messages carry per-request advisories.
     `WWW-Authenticate` challenges. This lets platforms discover the
     authorization server protecting the resource without relying on
     domain conventions and prepares the deployment for future delegated
-    IdP scenarios where the AS may not live on the business domain.
+    domain conventions. The business **MUST** publish this metadata when
+    the authorization server does not live on the business domain.
 * **SHOULD** support
     [OpenID RISC Profile 1.0](https://openid.net/specs/openid-risc-1_0-final.html){ target="_blank" }
     to signal revocation and account state changes to platforms.
