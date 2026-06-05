@@ -158,10 +158,10 @@ The `source` field carries the authorship of the current `checked` value:
 - `source: "platform"` means the value reflects the buyer's stated
   preference, captured by the platform.
 
-The source signals how to treat the current value: `source: "business"`
-invites the platform to surface the choice for buyer engagement;
-`source: "platform"` indicates a recorded buyer preference the platform
-SHOULD respect unless the buyer initiates a change.
+The source signals how the platform should treat the current value:
+`source: "business"` invites the platform to present the choice for buyer
+engagement; `source: "platform"` indicates a recorded buyer preference,
+and platforms MAY suppress re-presentation.
 
 ### Advertise example
 
@@ -312,11 +312,16 @@ Handling](checkout.md#error-handling) flow.
 
 ## Normative requirements
 
-1. **Use the advertised settings.** Platforms MUST initialize and present
-   consent using the advertised `description`, `links`, provided `checked`
-   values, `source` attribution, and purpose/segment grouping. Identifiers are
-   opaque handles; platforms MUST NOT infer semantics from identifier paths
-   alone.
+1. **Use the advertised settings.** Businesses MUST advertise the complete
+   set of consent options they support. Platforms decide which choices to
+   present to the buyer and when; when presenting a choice, platforms MUST
+   use the advertised `description`, `links`, `checked` value, and
+   purpose/segment grouping. The `source` field informs platform decisions
+   (see [Advertise and confirm](#advertise-and-confirm)) and is not
+   user-facing content. Identifiers outside the `dev.ucp.consent.*` namespace
+   are opaque handles; platforms MUST NOT infer semantics from such paths
+   alone. UCP-defined identifiers carry the semantics established in this
+   specification.
 
 2. **Confirm semantics.** The `consent` field is optional on requests;
    omitting it provides no consent update and the business retains its prior
