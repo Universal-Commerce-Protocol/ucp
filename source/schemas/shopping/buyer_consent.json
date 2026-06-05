@@ -3,17 +3,22 @@
   "$id": "https://ucp.dev/schemas/shopping/buyer_consent.json",
   "name": "dev.ucp.shopping.buyer_consent",
   "title": "Buyer Consent Extension",
-  "description": "Extends the buyer object with per-purpose consent. Each purpose is keyed by a reverse-DNS identifier and carries an `allowed` state, a `description`, optional `links`, and optional `segments` for finer-grained channel, vendor, or program decisions scoped to that purpose.",
+  "description": "Extends the buyer object with per-purpose consent. Each purpose is keyed by a reverse-DNS identifier and carries the current `checked` state, the `source` of that state (business default or platform-captured buyer decision), a `description`, optional `links`, and optional `segments` for finer-grained channel, vendor, or program decisions scoped to that purpose.",
   "$defs": {
     "consent_purpose": {
       "type": "object",
-      "description": "A buyer's consent decision for a purpose (e.g., marketing, analytics). Carries the current consent state, human-readable context, and optional refinements scoping the decision to specific channels, vendors, or programs.",
-      "required": ["allowed", "description"],
+      "description": "A buyer's consent decision for a purpose (e.g., marketing, analytics). Carries the current binary state, its source (business default or platform-captured buyer decision), human-readable context, and optional refinements scoping the decision to specific channels, vendors, or programs.",
+      "required": ["checked", "source", "description"],
       "additionalProperties": false,
       "properties": {
-        "allowed": {
+        "checked": {
           "type": "boolean",
-          "description": "Current consent state for this decision."
+          "description": "Current binary state of this consent decision. The protocol carries only the binary state; the operational meaning of `true` vs `false` (e.g., consent granted or denied) is defined by the consent context, not by this field."
+        },
+        "source": {
+          "type": "string",
+          "enum": ["business", "platform"],
+          "description": "Identifies the party that asserted the current `checked` value. `business` means the value reflects the business's default policy; `platform` means the value reflects an explicit buyer decision captured by the platform."
         },
         "description": {
           "type": "string",
@@ -37,13 +42,18 @@
     },
     "consent_segment": {
       "type": "object",
-      "description": "A buyer's consent decision for a specific refinement of a parent purpose (e.g., email marketing under the marketing purpose). Overrides the parent's consent state for this scope. Segments do not nest further.",
-      "required": ["allowed", "description"],
+      "description": "A buyer's consent decision for a specific refinement of a parent purpose (e.g., email marketing under the marketing purpose). Overrides the parent's `checked` value for this scope. Segments do not nest further.",
+      "required": ["checked", "source", "description"],
       "additionalProperties": false,
       "properties": {
-        "allowed": {
+        "checked": {
           "type": "boolean",
-          "description": "Current consent state for this decision, overriding the parent purpose's value for this specific scope."
+          "description": "Current binary state for this segment, overriding the parent purpose's `checked` value for this specific scope."
+        },
+        "source": {
+          "type": "string",
+          "enum": ["business", "platform"],
+          "description": "Identifies the party that asserted the current `checked` value for this segment. `business` means the value reflects the business's default policy; `platform` means the value reflects an explicit buyer decision captured by the platform."
         },
         "description": {
           "type": "string",
