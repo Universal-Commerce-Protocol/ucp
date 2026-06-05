@@ -46,6 +46,12 @@
                 "type": "string",
                 "format": "uri",
                 "description": "Base URL for authorization server metadata discovery. Platforms resolve metadata via RFC 8414 (/.well-known/oauth-authorization-server) with OIDC fallback (/.well-known/openid-configuration) on 404."
+              },
+              "required_claims": {
+                "type": "array",
+                "items": { "type": "string" },
+                "uniqueItems": true,
+                "description": "OIDC Core §5.1 claim names the business requires in the JWT authorization grant from this provider (e.g. 'email'). Optional pre-filter hint: platforms SHOULD skip this provider during selection when their upstream identity lacks any of the listed claim names. Reactive enforcement at the token endpoint remains mandatory regardless; this field expresses claim presence only, not value constraints."
               }
             }
           }

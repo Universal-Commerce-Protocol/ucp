@@ -380,6 +380,7 @@ its `type`:
 | :---- | :--- | :------- | :---------- |
 | `type` | string | Yes | Provider mechanism discriminator. `oauth2` is the only type defined in this version; future versions **MAY** define additional types as non-breaking extensions. |
 | `auth_url` | string (URI) | Yes, for `oauth2` | Base URL for authorization server metadata discovery. |
+| `required_claims` | array of strings | No, for `oauth2` | OIDC Core §5.1 claim names the business requires in the JWT authorization grant (e.g. `email`). Optional pre-filter hint — see [Provider Selection](#provider-selection). |
 
 The `type` value is an open string, not a closed enumeration. Platforms
 **MUST** treat provider entries whose `type` they do not support as filtered
@@ -404,10 +405,21 @@ A provider's `type` determines whether it participates in the token and
 scope model. The `oauth2` type chains identity via token exchange and
 contributes to the scopes of the business-issued token. Other types **MAY**
 contribute no scopes — presence in `providers` does not imply participation
-in the scope or token-issuance model. Selection turns only on whether
-the platform *supports* a provider's `type` and holds (or can obtain) a
+in the scope or token-issuance model. Selection turns on whether the
+platform *supports* a provider's `type` and holds (or can obtain) a
 suitable upstream identity, independent of whether that type issues a
 token.
+
+When a provider entry declares `required_claims`, platforms **SHOULD**
+filter out that provider during selection if their upstream identity
+lacks any of the listed claim names (e.g., the upstream token does not
+carry `email`). This avoids a wasted chaining attempt that would be
+rejected at the token endpoint. Reactive enforcement remains mandatory
+(see
+[Chaining Errors at the Token Endpoint](#chaining-errors-at-the-token-endpoint))
+because not every business will declare `required_claims`, and the hint
+expresses claim presence only — value constraints (e.g., requiring
+`email_verified=true`) are enforced reactively.
 
 ### Profile Example
 
@@ -429,7 +441,8 @@ direct OAuth flows (always available via discovery):
           "providers": {
             "app.example.login": {
               "type": "oauth2",
-              "auth_url": "https://accounts.example-login.app/"
+              "auth_url": "https://accounts.example-login.app/",
+              "required_claims": ["email"]
             }
           },
           "scopes": {
@@ -577,9 +590,11 @@ business **MAY** include `error_description` naming the missing claim
 for human diagnosis (e.g., `"missing required claim: email"`); platforms
 **MUST NOT** parse it for automated recovery and **SHOULD** fall back to
 direct OAuth, where the business can prompt the user for the missing
-information. Businesses with claim requirements beyond OIDC Core §5.1
-standard claims **SHOULD** document them in their developer-facing
-materials.
+information. Businesses **SHOULD** advertise standard-claim requirements
+via `required_claims` (see
+[Provider Configuration](#provider-configuration)) so platforms can
+pre-filter; requirements beyond OIDC Core §5.1 **SHOULD** be documented
+in developer-facing materials.
 
 ### Token Lifecycle
 
