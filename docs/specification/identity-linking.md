@@ -374,8 +374,12 @@ out (see [Provider Selection](#provider-selection)) rather than rejecting the
 business's configuration.
 
 For `oauth2` providers, platforms **MUST** discover the authorization server
-metadata from `auth_url` using the same two-tier hierarchy as
-[Discovery](#discovery) (RFC 8414 primary, OIDC fallback on 404 only).
+metadata from `auth_url` using the same two-tier metadata hierarchy as
+[Discovery](#discovery) Step 2 (RFC 8414 primary with §3.1 path insertion,
+OIDC fallback on 404 only), treating `auth_url` as the issuer. The
+protected-resource step does not apply — `auth_url` is already the IdP
+issuer — and the business validates the JWT grant's `iss` against it per
+[Business Token Issuance](#business-token-issuance).
 
 ### Provider Selection
 
