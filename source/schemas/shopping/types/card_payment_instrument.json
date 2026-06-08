@@ -42,6 +42,7 @@
                       "type": "array",
                       "items": {
                         "oneOf": [
+                          { "$ref": "network_token_credential.json#/$defs/constraint" },
                           { "$ref": "token_credential.json#/$defs/constraint" }
                         ],
                         "uniqueItems": true
@@ -71,6 +72,7 @@
         },
         "credential": {
           "oneOf": [
+            { "$ref": "network_token_credential.json" },
             { "$ref": "token_credential.json" }
           ],
           "description": "Credential shapes that can convey this card instrument on the wire. Extended by payment handler schemas."
