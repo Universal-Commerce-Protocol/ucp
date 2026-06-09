@@ -231,7 +231,7 @@ Maps to the [Create Cart](cart.md#create-cart) operation.
       "id": 1,
       "result": {
         "structuredContent": {
-          "ucp": { "version": "2026-04-08", "status": "error" },
+          "ucp": { "version": "{{ ucp_version }}", "status": "error" },
           "messages": [
             {
               "type": "error",

@@ -184,7 +184,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
     Content-Type: application/json
 
     {
-      "ucp": { "version": "2026-04-08", "status": "error" },
+      "ucp": { "version": "{{ ucp_version }}", "status": "error" },
       "messages": [
         {
           "type": "error",
