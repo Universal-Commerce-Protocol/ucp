@@ -65,29 +65,35 @@ Businesses declare support by adding `dev.ucp.shopping.ap2_mandate` to their
 
 **Business Profile Example:**
 
+<!-- ucp:example schema=profile def=business_schema -->
 ```json
 {
-  "capabilities": {
-    "dev.ucp.shopping.checkout": [
-      {
-        "version": "{{ ucp_version }}",
-        "spec": "https://ucp.dev/{{ ucp_version }}/specification/checkout",
-        "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/checkout.json"
-      }
-    ],
-    "dev.ucp.shopping.ap2_mandate": [
-      {
-        "version": "{{ ucp_version }}",
-        "spec": "https://ucp.dev/{{ ucp_version }}/specification/ap2-mandates",
-        "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/ap2_mandate.json",
-        "extends": "dev.ucp.shopping.checkout",
-        "config": {
-          "vp_formats_supported": {
-            "dc+sd-jwt": { }
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "services": {},
+    "capabilities": {
+      "dev.ucp.shopping.checkout": [
+        {
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/checkout",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/checkout.json"
+        }
+      ],
+      "dev.ucp.shopping.ap2_mandate": [
+        {
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/ap2-mandates",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/ap2_mandate.json",
+          "extends": "dev.ucp.shopping.checkout",
+          "config": {
+            "vp_formats_supported": {
+              "dc+sd-jwt": { }
+            }
           }
         }
-      }
-    ]
+      ]
+    },
+    "payment_handlers": {}
   }
 }
 ```
@@ -143,13 +149,16 @@ Businesses **MUST** embed their signature in the checkout response body under
 
 **Checkout Response with Embedded Signature:**
 
+<!-- ucp:example schema=shopping/checkout op=read -->
 ```json
 {
+  "ucp": { ... },
   "id": "chk_abc123",
   "status": "ready_for_complete",
   "currency": "USD",
-  "line_items": [...],
-  "totals": [...],
+  "line_items": [ ... ],
+  "totals": [ ... ],
+  "links": [ ... ],
   "ap2": {
     "merchant_authorization": "eyJhbGciOiJFUzI1NiIsImtpZCI6Im1lcmNoYW50XzIwMjUifQ..<signature>"
   }
@@ -252,8 +261,10 @@ with `ap2.merchant_authorization` embedded in the response body.
 
 **Example Response:**
 
+<!-- ucp:example schema=shopping/checkout op=read -->
 ```json
 {
+  "ucp": { ... },
   "id": "chk_abc123",
   "status": "ready_for_complete",
   "currency": "USD",
@@ -273,6 +284,7 @@ with `ap2.merchant_authorization` embedded in the response body.
     {"type": "tax", "amount": 400},
     {"type": "total", "amount": 5400}
   ],
+  "links": [ ... ],
   "ap2": {
     "merchant_authorization": "eyJhbGciOiJFUzI1NiIsImtpZCI6Im1lcmNoYW50XzIwMjUifQ..<signature>"
   }
@@ -337,6 +349,7 @@ request:
 
 {{ extension_schema_fields('ap2_mandate.json#/$defs/ap2_with_checkout_mandate', 'ap2-mandates') }}
 
+<!-- ucp:example schema=shopping/checkout op=complete direction=request -->
 ```json
 {
   "payment": {
@@ -347,7 +360,7 @@ request:
         "type": "card",
         "selected": true,
         "display": {
-          "description": "Visa •••• 1234",
+          "description": "Visa •••• 1234"
         },
         "billing_address": {
           "street_address": "123 Main St",

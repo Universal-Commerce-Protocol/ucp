@@ -57,6 +57,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
 
 === "Request"
 
+    <!-- ucp:example schema=shopping/checkout op=create direction=request -->
     ```json
     POST /checkout-sessions HTTP/1.1
     UCP-Agent: profile="https://platform.example/profile"
@@ -76,6 +77,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/checkout op=read -->
     ```json
     HTTP/1.1 201 Created
     Content-Type: application/json
@@ -170,6 +172,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
 
     All items out of stock — no checkout resource is created:
 
+    <!-- ucp:example schema=common/types/error_response op=read -->
     ```json
     HTTP/1.1 200 OK
     Content-Type: application/json
@@ -198,6 +201,7 @@ so clients must include all previously set fields they wish to retain.
 
 === "Request"
 
+    <!-- ucp:example schema=shopping/checkout op=update direction=request -->
     ```json
     PUT /checkout-sessions/{id} HTTP/1.1
     UCP-Agent: profile="https://platform.example/profile"
@@ -224,6 +228,7 @@ so clients must include all previously set fields they wish to retain.
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/checkout op=read -->
     ```json
     HTTP/1.1 200 OK
     Content-Type: application/json
@@ -327,6 +332,7 @@ type & addresses.
 
 === "Request"
 
+    <!-- ucp:example schema=shopping/checkout op=update direction=request -->
     ```json
     PUT /checkout-sessions/{id} HTTP/1.1
     UCP-Agent: profile="https://platform.example/profile"
@@ -369,6 +375,7 @@ type & addresses.
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/checkout op=read -->
     ```json
     HTTP/1.1 200 OK
     Content-Type: application/json
@@ -527,6 +534,7 @@ Follow-up calls after initial `fulfillment` data to update selection.
 
 === "Request"
 
+    <!-- ucp:example schema=shopping/checkout op=update direction=request -->
     ```json
     PUT /checkout-sessions/{id} HTTP/1.1
     UCP-Agent: profile="https://platform.example/profile"
@@ -545,7 +553,7 @@ Follow-up calls after initial `fulfillment` data to update selection.
             "id": "item_123"
           },
           "id": "li_1",
-          "quantity": 2,
+          "quantity": 2
         }
       ],
       "fulfillment": {
@@ -579,6 +587,7 @@ Follow-up calls after initial `fulfillment` data to update selection.
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/checkout op=read -->
     ```json
     HTTP/1.1 200 OK
     Content-Type: application/json
@@ -724,6 +733,7 @@ place to set these expectations via `messages`.
 
 === "Request"
 
+    <!-- ucp:example schema=shopping/checkout op=complete direction=request -->
     ```json
     POST /checkout-sessions/{id}/complete
     UCP-Agent: profile="https://platform.example/profile"
@@ -766,6 +776,7 @@ place to set these expectations via `messages`.
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/checkout op=read -->
     ```json
     HTTP/1.1 200 OK
     Content-Type: application/json
@@ -917,6 +928,7 @@ place to set these expectations via `messages`.
 
 === "Request"
 
+    <!-- ucp:example schema=shopping/checkout op=read direction=request -->
     ```json
     GET /checkout-sessions/{id}
     UCP-Agent: profile="https://platform.example/profile"
@@ -927,6 +939,7 @@ place to set these expectations via `messages`.
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/checkout op=read -->
     ```json
     HTTP/1.1 200 OK
     Content-Type: application/json
@@ -1072,6 +1085,7 @@ place to set these expectations via `messages`.
 
 === "Request"
 
+    <!-- ucp:example schema=shopping/checkout op=cancel direction=request -->
     ```json
     POST /checkout-sessions/{id}/cancel
     UCP-Agent: profile="https://platform.example/profile"
@@ -1082,6 +1096,7 @@ place to set these expectations via `messages`.
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/checkout op=read -->
     ```json
     HTTP/1.1 200 OK
     Content-Type: application/json
@@ -1241,8 +1256,10 @@ operations unless otherwise noted.
 * **Idempotency-Key**: Operations that modify state **SHOULD** support
     idempotency. When provided, the server **MUST**:
     1. Store the key with the operation result for at least 24 hours.
-    2. Return the cached result for duplicate keys.
-    3. Return `409 Conflict` if the key is reused with different parameters.
+    2. Return the cached result for duplicate keys whose request body matches the original.
+    3. Return `409 Conflict` if the key is reused with a mismatched body.
+    See [Message Signatures — Idempotency Key Requirements](signatures.md#replay-protection)
+    for the full payload-matching contract.
 
 ## Protocol Mechanics
 
@@ -1279,16 +1296,20 @@ code registry and transport binding examples.
 Business outcomes (including errors like unavailable merchandise) are returned
 with HTTP 200 and the UCP envelope containing `messages`:
 
+<!-- ucp:example schema=shopping/checkout op=read -->
 ```json
 {
   "ucp": {
     "version": "{{ ucp_version }}",
+    "status": "success",
+    "payment_handlers": { ... },
     "capabilities": {
       "dev.ucp.shopping.checkout": [{"version": "{{ ucp_version }}"}]
     }
   },
   "id": "checkout_abc123",
   "status": "incomplete",
+  "currency": "USD",
   "line_items": [
     {
       "id": "li_1",
@@ -1302,6 +1323,7 @@ with HTTP 200 and the UCP envelope containing `messages`:
     }
   ],
   "totals": [...],
+  "links": [...],
   "messages": [
     {
       "type": "warning",
@@ -1317,6 +1339,7 @@ with HTTP 200 and the UCP envelope containing `messages`:
 For `create_checkout`, when all items unavailable and no checkout can be created, returns
 HTTP 200 and the UCP envelope containing `messages`
 
+<!-- ucp:example schema=common/types/error_response op=read -->
 ```json
 {
   "ucp": { "version": "2026-01-11", "status": "error" },
