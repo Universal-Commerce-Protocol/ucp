@@ -172,7 +172,7 @@
     "boolean_input": {
       "title": "Boolean Input",
       "type": "object",
-      "description": "Boolean field semantics. Values are still submitted as strings.",
+      "description": "Boolean field semantics. Non-null values MUST be the exact strings \"true\" or \"false\".",
       "required": [
         "type"
       ],
@@ -181,7 +181,7 @@
         "type": {
           "type": "string",
           "const": "boolean",
-          "description": "Use boolean for true/false fields. Submit checked as true and unchecked as false.",
+          "description": "Use boolean for true/false fields.",
           "examples": [
             "boolean"
           ]

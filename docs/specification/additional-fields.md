@@ -85,7 +85,8 @@ Platforms SHOULD respect the declared type. Platforms that do not recognize a
 type SHOULD NOT render it as a different supported type, coerce it to text, or
 collect a value unless a negotiated extension defines that type.
 
-All non-null values are submitted as strings regardless of input type.
+All non-null values are submitted as strings regardless of input type. `null`
+represents no submitted value or a cleared value.
 
 ### Additional Field Input
 
@@ -98,7 +99,7 @@ This version defines the following standard types:
 | Type      | What it adds                                                       | Example Value      |
 | :-------- | :----------------------------------------------------------------- | :----------------- |
 | `text`    | Text semantics and text validation hints; set `multiline: true` for multi-line text | `"PO-12345"` |
-| `boolean` | Boolean semantics represented as strings                          | `"true"`           |
+| `boolean` | Boolean semantics represented as `"true"` / `"false"` strings     | `"true"`           |
 | `date`    | Calendar date semantics and date bounds                           | `"2026-03-15"`     |
 | `choice`  | Select-from-list semantics and `options[]`                         | `"birthday"`       |
 
@@ -142,8 +143,11 @@ declarations.
 ```
 
 Businesses MUST only return fields whose `input.type` is in the active type
-set. If a required field cannot be represented using an active type, the
-business SHOULD use a supported fallback or require escalation.
+set. If the active type set is empty, or if a required field cannot be
+represented using an active type, the business MUST NOT return unsupported
+additional fields. When checkout cannot complete without that data, the
+business MUST return `status: "requires_escalation"` and provide
+`continue_url`, following the Checkout escalation flow.
 
 ## Extensibility
 
@@ -183,6 +187,8 @@ operations.
 
 - `additional_fields` contains all configured fields with current values merged
     into each entry
+- Platforms SHOULD render additional fields in the order returned by the
+    business
 - `value` is `null` for fields that have not been submitted or have been
     cleared by replacement
 - Invalid values communicated via `messages[]` (see below)

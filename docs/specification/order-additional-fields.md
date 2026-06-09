@@ -97,6 +97,8 @@ event payloads. They are read-only:
 - Checkout collection details such as `required` and validation hints are not
     included
 - Choice fields include `input.value_label` for the captured value label
+- Platforms SHOULD render order additional fields in the order returned by the
+    business
 
 ## Examples
 
