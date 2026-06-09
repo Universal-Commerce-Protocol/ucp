@@ -149,7 +149,7 @@ indicator:
 <!-- ucp:example schema=common/types/error_response op=read -->
 ```json
 {
-  "ucp": { "version": "2026-01-15", "status": "error" },
+  "ucp": { "version": "2026-04-08", "status": "error" },
   "messages": [
     {
       "type": "error",
