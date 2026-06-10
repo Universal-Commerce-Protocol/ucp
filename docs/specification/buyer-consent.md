@@ -160,8 +160,9 @@ The `source` field carries the authorship of the current `checked` value:
 
 The source signals how the platform should treat the current value:
 `source: "business"` invites the platform to present the choice for buyer
-engagement; `source: "platform"` indicates a recorded buyer preference,
-and platforms MAY suppress re-presentation.
+engagement; `source: "platform"` indicates a recorded buyer preference that
+MAY persist across subsequent transactions with the same business. Platforms
+MAY suppress re-presentation.
 
 ### Example: purposes and segments
 
@@ -401,3 +402,6 @@ Handling](checkout.md#error-handling) flow.
    request. Broader buyer preferences that are not tied to a specific business
    are independent of per-business decisions and may be applied to each
    business's advertised choices on their own basis.
+
+7. **Buyer review and revocation.** Platforms MUST provide a way for buyers
+   to audit and revoke or change prior consent decisions.

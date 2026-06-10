@@ -9,7 +9,6 @@
       "type": "object",
       "description": "A buyer's consent decision for a purpose (e.g., marketing, analytics). Carries the current binary state, its source (business default or platform-captured buyer decision), human-readable context, and optional refinements scoping the decision to specific channels, vendors, or programs.",
       "required": ["checked", "source", "description"],
-      "additionalProperties": false,
       "properties": {
         "checked": {
           "type": "boolean",
@@ -44,7 +43,6 @@
       "type": "object",
       "description": "A buyer's consent decision for a specific refinement of a parent purpose (e.g., email marketing under the marketing purpose). Overrides the parent's `checked` value for this scope. Segments do not nest further.",
       "required": ["checked", "source", "description"],
-      "additionalProperties": false,
       "properties": {
         "checked": {
           "type": "boolean",
