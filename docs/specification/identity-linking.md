@@ -116,8 +116,9 @@ vocabulary); runtime messages carry per-request advisories.
         as proof-of-possession of the authorization code. Public clients
         **MUST NOT** embed a `client_secret`.
 
-* Platforms **MUST** select the strongest method offered by the business
+    Platforms **MUST** select the strongest method offered by the business
     that is compatible with the platform's deployment model.
+
 * **MUST** include user identity tokens in the HTTP `Authorization` header
     using the Bearer scheme: `Authorization: Bearer <access_token>`
     ([RFC 6750 §2.1](https://datatracker.ietf.org/doc/html/rfc6750#section-2.1){ target="_blank" }).
