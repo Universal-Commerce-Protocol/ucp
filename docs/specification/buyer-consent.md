@@ -27,21 +27,16 @@ Consent is modeled as a two-level structure:
 
 - **Purpose** — what the consent is for. Keyed at the top level by a
     reverse-DNS identifier (e.g., `dev.ucp.consent.marketing`). Each purpose
-    carries a `checked` state, a `source` identifying who asserted that state,
+    carries a `granted` state, a `source` identifying who asserted that state,
     a human-readable `description`, and optional `links`.
 - **Segment** — an optional refinement scoping the parent purpose to a
     specific channel (e.g., email, SMS), vendor (e.g., a measurement provider),
-    or program. Each segment has the same shape (`checked`, `source`,
+    or program. Each segment has the same shape (`granted`, `source`,
     `description`, optional `links`) and overrides the parent purpose for its
     specific scope.
 
 The structure is bounded to one level of nesting: purposes have segments;
 segments do not nest further.
-
-The protocol carries only the binary state and its source attribution.
-The operational meaning of `checked: true` vs `false` (granted, denied,
-enabled, subscribed) is defined by the consent context — not by the field
-name or by the protocol.
 
 ## Scope
 
@@ -53,7 +48,7 @@ displaying current subscription state with an unsubscribe affordance) are
 governed by business policy and applicable regulation, not by this
 specification.
 
-Businesses are responsible for selecting the initial `checked` value according
+Businesses are responsible for selecting the initial `granted` value according
 to their applicable policy before advertising consent options. The advertised
 value with `source: "business"` is the business's authoritative default;
 buyers may override it through the platform. Policy reasoning remains the
@@ -143,15 +138,15 @@ The same map shape carries two complementary directions of information:
 
 | Direction                | Who populates | Fields populated                                                          |
 | ------------------------ | ------------- | ------------------------------------------------------------------------- |
-| **Advertise** (response) | Business      | `checked`, `source`, `description`; `links` and `segments` when present   |
-| **Confirm** (request)    | Platform      | `checked`, `source`; `segments` when present                              |
+| **Advertise** (response) | Business      | `granted`, `source`, `description`; `links` and `segments` when present   |
+| **Confirm** (request)    | Platform      | `granted`, `source`; `segments` when present                              |
 
 `description` and `links` are response-only; the platform does not echo them on
-confirm. `checked` and `source` are required in both directions: businesses
+confirm. `granted` and `source` are required in both directions: businesses
 send the current state and its source when advertising; platforms send the
 current state and its source when confirming.
 
-The `source` field carries the authorship of the current `checked` value:
+The `source` field carries the authorship of the current `granted` value:
 
 - `source: "business"` means the value reflects the business's default; no
   buyer preference applies.
@@ -169,8 +164,8 @@ MAY suppress re-presentation.
 The simplest case is purpose-level consent capture — `analytics` here shows
 the buyer's consent recorded at the parent. Purposes can also carry segments
 for finer-grained control: `marketing` is set to off, but the buyer has
-consented to SMS marketing. The segment's `checked: true`
-overrides the parent's `checked: false` for that scope (more-specific values
+consented to SMS marketing. The segment's `granted: true`
+overrides the parent's `granted: false` for that scope (more-specific values
 win).
 
 <!-- ucp:example schema=shopping/buyer_consent def=consent op=read extract=$.buyer.consent -->
@@ -184,22 +179,22 @@ win).
   "buyer": {
     "consent": {
       "dev.ucp.consent.analytics": {
-        "checked": true,
+        "granted": true,
         "source": "platform",
         "description": "Site analytics and performance measurement"
       },
       "dev.ucp.consent.marketing": {
-        "checked": false,
+        "granted": false,
         "source": "business",
         "description": "Promotional communications",
         "segments": {
           "dev.ucp.consent.marketing.email": {
-            "checked": false,
+            "granted": false,
             "source": "business",
             "description": "Promotional emails"
           },
           "dev.ucp.consent.marketing.sms": {
-            "checked": true,
+            "granted": true,
             "source": "platform",
             "description": "Marketing text messages"
           }
@@ -230,36 +225,36 @@ state (either the buyer's prior decision or the business default):
   "buyer": {
     "consent": {
       "dev.ucp.consent.marketing": {
-        "checked": false,
+        "granted": false,
         "source": "business",
         "description": "Promotional communications across all channels",
         "links": [{ "type": "privacy_policy", "url": "https://example.com/privacy" }],
         "segments": {
           "dev.ucp.consent.marketing.email": {
-            "checked": true,
+            "granted": true,
             "source": "platform",
             "description": "Promotional emails and exclusive offers"
           },
           "dev.ucp.consent.marketing.sms": {
-            "checked": false,
+            "granted": false,
             "source": "business",
             "description": "Marketing text messages",
             "links": [{ "type": "terms_of_service", "url": "https://example.com/sms-terms" }]
           },
           "com.example.channel.marketing": {
-            "checked": false,
+            "granted": false,
             "source": "business",
             "description": "Marketing messages via a third-party channel"
           }
         }
       },
       "dev.ucp.consent.analytics": {
-        "checked": true,
+        "granted": true,
         "source": "business",
         "description": "Site analytics and performance measurement",
         "segments": {
           "com.example.analytics": {
-            "checked": false,
+            "granted": false,
             "source": "business",
             "description": "Third-party analytics measurement",
             "links": [{ "type": "privacy_policy", "url": "https://example.com/analytics-privacy" }]
@@ -267,12 +262,12 @@ state (either the buyer's prior decision or the business default):
         }
       },
       "dev.ucp.consent.preferences": {
-        "checked": true,
+        "granted": true,
         "source": "business",
         "description": "Remember preferences and personalize the shopping experience"
       },
       "dev.ucp.consent.sale_or_sharing": {
-        "checked": false,
+        "granted": false,
         "source": "platform",
         "description": "Sale or sharing of personal data with third parties",
         "links": [{ "type": "privacy_policy", "url": "https://example.com/privacy" }]
@@ -292,9 +287,9 @@ to surface for explicit capture.
 
 Platforms submit the current state of every advertised purpose and segment in a
 subsequent `update_checkout` or `complete_checkout` request. For each choice,
-the platform echoes the advertised `checked` and `source` when no buyer
+the platform echoes the advertised `granted` and `source` when no buyer
 preference applies, or sets `source: "platform"` with the buyer's stated
-`checked` value when one does.
+`granted` value when one does.
 
 <!-- ucp:example schema=shopping/buyer_consent def=consent op=complete direction=request extract=$.buyer.consent -->
 
@@ -303,23 +298,23 @@ preference applies, or sets `source: "platform"` with the buyer's stated
   "buyer": {
     "consent": {
       "dev.ucp.consent.marketing": {
-        "checked": true,
+        "granted": true,
         "source": "platform",
         "segments": {
-          "dev.ucp.consent.marketing.email": { "checked": true,  "source": "platform" },
-          "dev.ucp.consent.marketing.sms":   { "checked": true,  "source": "platform" },
-          "com.example.channel.marketing":   { "checked": false, "source": "business" }
+          "dev.ucp.consent.marketing.email": { "granted": true,  "source": "platform" },
+          "dev.ucp.consent.marketing.sms":   { "granted": true,  "source": "platform" },
+          "com.example.channel.marketing":   { "granted": false, "source": "business" }
         }
       },
       "dev.ucp.consent.analytics": {
-        "checked": true,
+        "granted": true,
         "source": "business",
         "segments": {
-          "com.example.analytics": { "checked": false, "source": "business" }
+          "com.example.analytics": { "granted": false, "source": "business" }
         }
       },
-      "dev.ucp.consent.preferences":     { "checked": true,  "source": "business" },
-      "dev.ucp.consent.sale_or_sharing": { "checked": false, "source": "platform" }
+      "dev.ucp.consent.preferences":     { "granted": true,  "source": "business" },
+      "dev.ucp.consent.sale_or_sharing": { "granted": false, "source": "platform" }
     }
   }
 }
@@ -366,7 +361,7 @@ Handling](checkout.md#error-handling) flow.
 1. **Use the advertised settings.** Businesses MUST advertise the complete
    set of consent options they support. Platforms decide which choices to
    present to the buyer and when; when presenting a choice, platforms MUST
-   use the advertised `description`, `links`, `checked` value, and
+   use the advertised `description`, `links`, `granted` value, and
    purpose/segment grouping. The `source` field informs platform decisions
    (see [Advertise and confirm](#advertise-and-confirm)) and is not
    user-facing content. Identifiers outside the `dev.ucp.consent.*` namespace
@@ -377,7 +372,7 @@ Handling](checkout.md#error-handling) flow.
 2. **Confirm semantics.** The `consent` field is optional on requests;
    omitting it provides no consent update and the business retains its prior
    position. When submitting `consent`, platforms MUST include every advertised
-   purpose and segment key, carrying both `checked` and `source` for each.
+   purpose and segment key, carrying both `granted` and `source` for each.
    Omitting an advertised key within a submitted `consent` map MUST NOT be
    used to signal any value.
 
@@ -387,10 +382,10 @@ Handling](checkout.md#error-handling) flow.
    advertise.
 
 4. **More-specific values win.** For an advertised segment, the segment's
-   `checked` value overrides the parent purpose's `checked` for that segment.
+   `granted` value overrides the parent purpose's `granted` for that segment.
 
 5. **Source attribution requires a buyer-stated preference.** Platforms MUST
-   set `source: "platform"` only when the `checked` value reflects the buyer's
+   set `source: "platform"` only when the `granted` value reflects the buyer's
    stated preference. For choices to which no buyer preference applies,
    platforms MUST echo the advertised `source` unchanged. The protocol does
    not prescribe what counts as a buyer-stated preference; that determination

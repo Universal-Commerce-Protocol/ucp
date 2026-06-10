@@ -3,21 +3,21 @@
   "$id": "https://ucp.dev/schemas/shopping/buyer_consent.json",
   "name": "dev.ucp.shopping.buyer_consent",
   "title": "Buyer Consent Extension",
-  "description": "Extends the buyer object with per-purpose consent. Each purpose is keyed by a reverse-DNS identifier and carries the current `checked` state, the `source` of that state (business default or platform-captured buyer decision), a `description`, optional `links`, and optional `segments` for finer-grained channel, vendor, or program decisions scoped to that purpose.",
+  "description": "Extends the buyer object with per-purpose consent. Each purpose is keyed by a reverse-DNS identifier and carries the current `granted` state, the `source` of that state (business default or platform-captured buyer decision), a `description`, optional `links`, and optional `segments` for finer-grained channel, vendor, or program decisions scoped to that purpose.",
   "$defs": {
     "consent_purpose": {
       "type": "object",
       "description": "A buyer's consent decision for a purpose (e.g., marketing, analytics). Carries the current binary state, its source (business default or platform-captured buyer decision), human-readable context, and optional refinements scoping the decision to specific channels, vendors, or programs.",
-      "required": ["checked", "source", "description"],
+      "required": ["granted", "source", "description"],
       "properties": {
-        "checked": {
+        "granted": {
           "type": "boolean",
-          "description": "Current binary state of this consent decision. The protocol carries only the binary state; the operational meaning of `true` vs `false` (e.g., consent granted or denied) is defined by the consent context, not by this field."
+          "description": "Whether consent has been granted for this purpose. The `source` field identifies who asserted this state (business default or platform-captured buyer preference)."
         },
         "source": {
           "type": "string",
           "enum": ["business", "platform"],
-          "description": "Identifies the party that asserted the current `checked` value. `business` means the value reflects the business's default policy; `platform` means the value reflects an explicit buyer decision captured by the platform."
+          "description": "Identifies the party that asserted the current `granted` value. `business` means the value reflects the business's default policy; `platform` means the value reflects an explicit buyer decision captured by the platform."
         },
         "description": {
           "type": "string",
@@ -41,17 +41,17 @@
     },
     "consent_segment": {
       "type": "object",
-      "description": "A buyer's consent decision for a specific refinement of a parent purpose (e.g., email marketing under the marketing purpose). Overrides the parent's `checked` value for this scope. Segments do not nest further.",
-      "required": ["checked", "source", "description"],
+      "description": "A buyer's consent decision for a specific refinement of a parent purpose (e.g., email marketing under the marketing purpose). Overrides the parent's `granted` value for this scope. Segments do not nest further.",
+      "required": ["granted", "source", "description"],
       "properties": {
-        "checked": {
+        "granted": {
           "type": "boolean",
-          "description": "Current binary state for this segment, overriding the parent purpose's `checked` value for this specific scope."
+          "description": "Whether consent has been granted for this segment. Overrides the parent purpose's `granted` value for this specific scope."
         },
         "source": {
           "type": "string",
           "enum": ["business", "platform"],
-          "description": "Identifies the party that asserted the current `checked` value for this segment. `business` means the value reflects the business's default policy; `platform` means the value reflects an explicit buyer decision captured by the platform."
+          "description": "Identifies the party that asserted the current `granted` value for this segment. `business` means the value reflects the business's default policy; `platform` means the value reflects an explicit buyer decision captured by the platform."
         },
         "description": {
           "type": "string",
