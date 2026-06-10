@@ -163,6 +163,56 @@ The source signals how the platform should treat the current value:
 engagement; `source: "platform"` indicates a recorded buyer preference,
 and platforms MAY suppress re-presentation.
 
+### Example: purposes and segments
+
+The simplest case is purpose-level consent capture — `analytics` here shows
+the buyer's consent recorded at the parent. Purposes can also carry segments
+for finer-grained control: `marketing` is set to off, but the buyer has
+consented to SMS marketing. The segment's `checked: true`
+overrides the parent's `checked: false` for that scope (more-specific values
+win).
+
+<!-- ucp:example schema=shopping/buyer_consent def=consent op=read extract=$.buyer.consent -->
+
+```json
+{
+  "ucp": { ... },
+  "id": "checkout_456",
+  "status": "ready_for_complete",
+  "currency": "USD",
+  "buyer": {
+    "consent": {
+      "dev.ucp.consent.analytics": {
+        "checked": true,
+        "source": "platform",
+        "description": "Site analytics and performance measurement"
+      },
+      "dev.ucp.consent.marketing": {
+        "checked": false,
+        "source": "business",
+        "description": "Promotional communications",
+        "segments": {
+          "dev.ucp.consent.marketing.email": {
+            "checked": false,
+            "source": "business",
+            "description": "Promotional emails"
+          },
+          "dev.ucp.consent.marketing.sms": {
+            "checked": true,
+            "source": "platform",
+            "description": "Marketing text messages"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+The buyer has engaged with two specific choices (analytics broadly, SMS
+marketing specifically); both carry `source: "platform"`. The remaining
+values (parent `marketing`, `email` segment) carry `source: "business"`.
+
 ### Advertise example
 
 Businesses advertise available purposes and segments with the current consent
