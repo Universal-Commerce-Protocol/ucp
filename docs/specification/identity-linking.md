@@ -349,32 +349,36 @@ where `code_verifier` is absent or does not verify against the stored
 
 The `config.providers` map declares external trusted identity providers
 from which the business will accept chained identity via JWT bearer
-assertions for the [Accelerated IdP Flow](#accelerated-idp-flow). It is
-additive metadata on top of the always-available direct OAuth path
-against the business domain (see [Discovery](#discovery)); for the chaining
-path, it is a closed allowlist — a business **MUST** reject a JWT
-authorization grant whose `iss` is not a listed provider (see
+assertions for the [Accelerated IdP Flow](#accelerated-idp-flow). Each
+key identifies an IdP namespace and maps to an array of mechanism
+entries — an IdP **MAY** offer multiple token acquisition mechanisms
+under a single key. The map is additive metadata on top of the
+always-available direct OAuth path against the business domain (see
+[Discovery](#discovery)); for the chaining path, it is a closed
+allowlist — a business **MUST** reject a JWT authorization grant
+whose `iss` does not match a listed `oauth2` mechanism entry (see
 [Business Token Issuance](#business-token-issuance)).
 
 * **When absent or empty:** platforms run direct OAuth against the
     business domain via [Discovery](#discovery).
-* **When present:** platforms **MAY** select a listed provider whose
+* **When present:** platforms **MAY** select a mechanism entry whose
     `type` they support and chain identity via the
-    [Accelerated IdP Flow](#accelerated-idp-flow) — typically one they
-    already hold a valid upstream token for. If no listed provider is
-    supported or suitable, platforms **MUST** fall back to direct OAuth
-    on the business domain.
+    [Accelerated IdP Flow](#accelerated-idp-flow) — typically one
+    belonging to an IdP they already hold a valid upstream token for.
+    If no listed mechanism is supported or suitable, platforms **MUST**
+    fall back to direct OAuth on the business domain.
 * **Self-listing forbidden.** Businesses **MUST NOT** list their own
     authorization server in `config.providers`. Chaining-to-self is
     degenerate (the same server would issue and validate the assertion),
     and direct OAuth is already available via [Discovery](#discovery).
-    Platforms **MUST** ignore any entry whose `auth_url` matches the
-    business's own issuer URI.
+    Platforms **MUST** ignore any `oauth2` mechanism entry whose
+    `auth_url` matches the business's own issuer URI.
 
 ### Provider Configuration
 
-Each provider entry is keyed by a reverse-domain identifier and described by
-its `type`:
+Each key in `config.providers` is a reverse-domain identifier for an IdP
+namespace; its value is an array of mechanism entries. Each entry is
+described by its `type`:
 
 | Field | Type | Required | Description |
 | :---- | :--- | :------- | :---------- |
@@ -397,25 +401,27 @@ issuer — and the business validates the JWT grant's `iss` against it per
 
 ### Provider Selection
 
-Platforms read the business's `config.providers` map and select a provider
-they support — typically one they already hold a token for, enabling the
-[Accelerated IdP Flow](#accelerated-idp-flow).
+Platforms iterate over the `(provider key, mechanism entry)` pairs in
+the business's `config.providers` map and select an entry they support
+— typically one belonging to an IdP they already hold a valid upstream
+token for, enabling the [Accelerated IdP Flow](#accelerated-idp-flow).
+Mechanism entries under the same provider key are alternatives; a
+platform may match any one of them.
 
-A provider's `type` determines whether it participates in the token and
-scope model. The `oauth2` type chains identity via token exchange and
-contributes to the scopes of the business-issued token. Other types **MAY**
-contribute no scopes — presence in `providers` does not imply participation
-in the scope or token-issuance model. Selection turns on whether the
-platform *supports* a provider's `type` and holds (or can obtain) a
-suitable upstream identity, independent of whether that type issues a
-token.
+A mechanism's `type` determines whether it participates in the token
+and scope model. The `oauth2` type chains identity via token exchange
+and contributes to the scopes of the business-issued token. Other types
+**MAY** contribute no scopes — presence in `providers` does not imply
+participation in the scope or token-issuance model. Selection turns on
+whether the platform *supports* a mechanism's `type` and holds (or can
+obtain) a suitable upstream identity, independent of whether that type
+issues a token.
 
-When a provider entry declares `required_claims`, platforms **SHOULD**
-filter out that provider during selection if their upstream identity
-lacks any of the listed claim names (e.g., the upstream token does not
-carry `email`). This avoids a wasted chaining attempt that would be
-rejected at the token endpoint. Reactive enforcement remains mandatory
-(see
+When a mechanism entry declares `required_claims`, platforms **SHOULD**
+filter out that entry during selection if their upstream identity lacks
+any of the listed claim names (e.g., the upstream token does not carry
+`email`). This avoids a wasted chaining attempt that would be rejected
+at the token endpoint. Reactive enforcement remains mandatory (see
 [Chaining Errors at the Token Endpoint](#chaining-errors-at-the-token-endpoint))
 because not every business will declare `required_claims`, and the hint
 expresses claim presence only — value constraints (e.g., requiring
@@ -439,11 +445,13 @@ direct OAuth flows (always available via discovery):
         "schema": "https://ucp.dev/schemas/common/identity_linking.json",
         "config": {
           "providers": {
-            "app.example.login": {
-              "type": "oauth2",
-              "auth_url": "https://accounts.example-login.app/",
-              "required_claims": ["email"]
-            }
+            "app.example.login": [
+              {
+                "type": "oauth2",
+                "auth_url": "https://accounts.example-login.app/",
+                "required_claims": ["email"]
+              }
+            ]
           },
           "scopes": {
             "dev.ucp.shopping.order:read":   {},
@@ -541,7 +549,8 @@ business's authorization server **MUST** validate the assertion per
 [RFC 7523 §3](https://datatracker.ietf.org/doc/html/rfc7523#section-3){ target="_blank" },
 with the following UCP-specific requirements:
 
-* `iss` **MUST** identify a provider listed in `config.providers`.
+* `iss` **MUST** match the `auth_url` of an `oauth2` mechanism entry
+  listed in `config.providers`.
 * `aud` **MUST** match the business's own AS issuer URI exactly.
 * The JWT signature **MUST** be verified against the IdP's `jwks_uri`; if
   JWKS cannot be retrieved, the business **MUST** fail closed.

@@ -83,9 +83,12 @@
                 "properties": {
                   "providers": {
                     "type": "object",
-                    "description": "Map of trusted external identity providers keyed by reverse-domain identifier. Declares which upstream IdPs the business will accept JWT bearer assertions from for the Accelerated IdP Flow (chaining via RFC 8693 + RFC 7523). This field is additive: direct OAuth against the business domain via RFC 8414 discovery is always available regardless of 'providers' content. Businesses MUST NOT list their own authorization server here — chaining-to-self is degenerate, and direct OAuth covers that path. When absent, empty, or when no listed provider is supported by the platform, platforms run direct OAuth on the business domain.",
+                    "description": "Map of trusted external identity providers keyed by reverse-domain identifier. Each key maps to an array of mechanism entries — an IdP namespace MAY offer multiple token acquisition mechanisms. Declares which upstream IdPs the business will accept JWT bearer assertions from for the Accelerated IdP Flow (chaining via RFC 8693 + RFC 7523). This field is additive: direct OAuth against the business domain via RFC 8414 discovery is always available regardless of 'providers' content. Businesses MUST NOT list their own authorization server here — chaining-to-self is degenerate, and direct OAuth covers that path. When absent, empty, or when no listed mechanism is supported by the platform, platforms run direct OAuth on the business domain.",
                     "propertyNames": { "$ref": "types/reverse_domain_name.json" },
-                    "additionalProperties": { "$ref": "#/$defs/provider" }
+                    "additionalProperties": {
+                      "type": "array",
+                      "items": { "$ref": "#/$defs/provider" }
+                    }
                   },
                   "scopes": {
                     "type": "object",
