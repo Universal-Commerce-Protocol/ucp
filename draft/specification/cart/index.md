@@ -119,7 +119,7 @@ When **all** requested items are unavailable, the business MAY return an error r
 
 ```json
 {
-  "ucp": { "version": "2026-01-15", "status": "error" },
+  "ucp": { "version": "draft", "status": "error" },
   "messages": [
     {
       "type": "error",

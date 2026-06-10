@@ -174,7 +174,7 @@ HTTP/1.1 200 OK
 Content-Type: application/json
 
 {
-  "ucp": { "version": "2026-01-15", "status": "error" },
+  "ucp": { "version": "draft", "status": "error" },
   "messages": [
     {
       "type": "error",

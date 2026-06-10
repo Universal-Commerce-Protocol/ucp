@@ -216,7 +216,7 @@ All items out of stock — no cart resource is created:
   "id": 1,
   "result": {
     "structuredContent": {
-      "ucp": { "version": "2026-01-15", "status": "error" },
+      "ucp": { "version": "draft", "status": "error" },
       "messages": [
         {
           "type": "error",
