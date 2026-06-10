@@ -155,9 +155,7 @@ The `source` field carries the authorship of the current `granted` value:
 
 The source signals how the platform should treat the current value:
 `source: "business"` invites the platform to present the choice for buyer
-engagement; `source: "platform"` indicates a recorded buyer preference that
-MAY persist across subsequent transactions with the same business. Platforms
-MAY suppress re-presentation.
+engagement; `source: "platform"` indicates a recorded buyer preference.
 
 ### Example: purposes and segments
 
@@ -398,5 +396,8 @@ Handling](checkout.md#error-handling) flow.
    are independent of per-business decisions and may be applied to each
    business's advertised choices on their own basis.
 
-7. **Buyer review and revocation.** Platforms MUST provide a way for buyers
-   to audit and revoke or change prior consent decisions.
+7. **Persistence and reversibility.** Platforms MAY persist a buyer's prior
+   preferences (`source: "platform"`) across interactions with the same
+   business and MAY suppress re-presentation of unchanged values. Where
+   preferences are persisted, platforms SHOULD give the buyer the ability
+   to change them.
