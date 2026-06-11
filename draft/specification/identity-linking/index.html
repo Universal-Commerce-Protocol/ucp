@@ -3002,42 +3002,46 @@ vocabulary); runtime messages carry per-request advisories.</p>
     <strong>MUST NOT</strong> embed a <code>client_secret</code>.</li>
 </ul>
 <p>Platforms <strong>MUST</strong> select the strongest method offered by the business
-that is compatible with the platform's deployment model.
-* <strong>MUST</strong> include user identity tokens in the HTTP <code>Authorization</code> header
-using the Bearer scheme: <code>Authorization: Bearer &lt;access_token&gt;</code>
-(<a href="https://datatracker.ietf.org/doc/html/rfc6750#section-2.1" target="_blank">RFC 6750 §2.1</a>).
-* <strong>MUST</strong> process <code>WWW-Authenticate: Bearer</code> challenges per
-<a href="https://datatracker.ietf.org/doc/html/rfc6750#section-3" target="_blank">RFC 6750 §3</a>
-on <code>401</code> and <code>403</code> responses to user-authenticated operations.
-Platforms <strong>MUST</strong> extract the <code>scope</code> parameter (when present) to
-construct subsequent authorization requests, and <strong>SHOULD</strong> follow
-the <code>resource_metadata</code> pointer
-(<a href="https://datatracker.ietf.org/doc/html/rfc9728" target="_blank">RFC 9728</a>)
-when present to discover the protecting authorization server.
-* <strong>MUST</strong> implement the OAuth 2.0 Authorization Code flow
-(<a href="https://datatracker.ietf.org/doc/html/rfc6749#section-4.1" target="_blank">RFC 6749 §4.1</a>)
-as the account linking mechanism.
-* <strong>MUST</strong> use PKCE
-(<a href="https://datatracker.ietf.org/doc/html/rfc7636" target="_blank">RFC 7636</a>)
-with <code>code_challenge_method=S256</code> for all authorization code exchanges.
-* <strong>MUST</strong> validate the <code>iss</code> parameter in the authorization response
-(<a href="https://datatracker.ietf.org/doc/html/rfc9207" target="_blank">RFC 9207</a>)
-to prevent Mix-Up Attacks. The platform <strong>MUST</strong> verify that the <code>iss</code>
-value matches the authorization server's issuer URI (as declared in its
-<a href="https://datatracker.ietf.org/doc/html/rfc8414" target="_blank">RFC 8414</a>
-metadata). If the values do not match, the platform <strong>MUST</strong>
-abort and discard the authorization response.
-* <strong>SHOULD</strong> include a unique, unguessable <code>state</code> parameter in the
-authorization request to prevent CSRF
-(<a href="https://datatracker.ietf.org/doc/html/rfc6749#section-10.12" target="_blank">RFC 6749 §10.12</a>).
-* Revocation and security events:
-* <strong>MUST</strong> call the business's token revocation endpoint
+that is compatible with the platform's deployment model.</p>
+</li>
+<li>
+<p><strong>MUST</strong> include user identity tokens in the HTTP <code>Authorization</code> header
+    using the Bearer scheme: <code>Authorization: Bearer &lt;access_token&gt;</code>
+    (<a href="https://datatracker.ietf.org/doc/html/rfc6750#section-2.1" target="_blank">RFC 6750 §2.1</a>).</p>
+</li>
+<li><strong>MUST</strong> process <code>WWW-Authenticate: Bearer</code> challenges per
+    <a href="https://datatracker.ietf.org/doc/html/rfc6750#section-3" target="_blank">RFC 6750 §3</a>
+    on <code>401</code> and <code>403</code> responses to user-authenticated operations.
+    Platforms <strong>MUST</strong> extract the <code>scope</code> parameter (when present) to
+    construct subsequent authorization requests, and <strong>SHOULD</strong> follow
+    the <code>resource_metadata</code> pointer
+    (<a href="https://datatracker.ietf.org/doc/html/rfc9728" target="_blank">RFC 9728</a>)
+    when present to discover the protecting authorization server.</li>
+<li><strong>MUST</strong> implement the OAuth 2.0 Authorization Code flow
+    (<a href="https://datatracker.ietf.org/doc/html/rfc6749#section-4.1" target="_blank">RFC 6749 §4.1</a>)
+    as the account linking mechanism.</li>
+<li><strong>MUST</strong> use PKCE
+    (<a href="https://datatracker.ietf.org/doc/html/rfc7636" target="_blank">RFC 7636</a>)
+    with <code>code_challenge_method=S256</code> for all authorization code exchanges.</li>
+<li><strong>MUST</strong> validate the <code>iss</code> parameter in the authorization response
+    (<a href="https://datatracker.ietf.org/doc/html/rfc9207" target="_blank">RFC 9207</a>)
+    to prevent Mix-Up Attacks. The platform <strong>MUST</strong> verify that the <code>iss</code>
+    value matches the authorization server's issuer URI (as declared in its
+    <a href="https://datatracker.ietf.org/doc/html/rfc8414" target="_blank">RFC 8414</a>
+    metadata). If the values do not match, the platform <strong>MUST</strong>
+    abort and discard the authorization response.</li>
+<li><strong>SHOULD</strong> include a unique, unguessable <code>state</code> parameter in the
+    authorization request to prevent CSRF
+    (<a href="https://datatracker.ietf.org/doc/html/rfc6749#section-10.12" target="_blank">RFC 6749 §10.12</a>).</li>
+<li>Revocation and security events:<ul>
+<li><strong>MUST</strong> call the business's token revocation endpoint
     (<a href="https://datatracker.ietf.org/doc/html/rfc7009" target="_blank">RFC 7009</a>)
-    when a user initiates an unlink action on the platform side.
-* <strong>SHOULD</strong> support
+    when a user initiates an unlink action on the platform side.</li>
+<li><strong>SHOULD</strong> support
     <a href="https://openid.net/specs/openid-risc-1_0-final.html" target="_blank">OpenID RISC Profile 1.0</a>
     to handle asynchronous account updates and cross-account protection
-    events initiated by the business.</p>
+    events initiated by the business.</li>
+</ul>
 </li>
 </ul>
 <h3 id="for-businesses">For Businesses<a class="headerlink" href="#for-businesses" title="Permanent link">&para;</a></h3>
