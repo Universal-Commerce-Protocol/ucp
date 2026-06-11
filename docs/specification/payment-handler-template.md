@@ -311,6 +311,36 @@ Content-Type: application/json
 
 ---
 
+## Runtime Actions [CONDITIONAL]
+
+{Include this section if the handler may emit actions in checkout responses.}
+
+Actions emitted by this handler use the checkout action envelope:
+
+```json
+{
+  "code": "{handler_action_code}",
+  "severity": "optional | required | blocking",
+  "config": {
+    // Handler-defined runtime configuration
+  }
+}
+```
+
+| Code | Purpose | Severity | Config schema | Completion |
+| :--- | :------ | :------- | :------------ | :--------- |
+| `{handler_action_code}` | {what the platform must do} | {allowed severities} | {fields or schema reference} | {how checkout state or handler side channels reflect completion} |
+
+For each action, document:
+
+* When the action may be emitted.
+* What platform behavior is required.
+* Security requirements for interpreting `config`.
+* Fallback behavior when unsupported, abandoned, or failed.
+* How the business observes completion.
+
+---
+
 <!--
   ADDITIONAL PARTICIPANT SECTIONS
 

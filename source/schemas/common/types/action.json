@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/action.json",
+  "title": "Action",
+  "type": "object",
+  "description": "Runtime instruction emitted by a business during the lifecycle of a ucp entity. UCP defines only this generic envelope; the action code's owning capability, extension, or payment handler defines the config schema, platform behavior, security requirements, completion criteria, and resulting ucp entity updates.",
+  "required": ["code", "severity", "config"],
+  "properties": {
+    "code": {
+      "$ref": "reverse_domain_name.json",
+      "description": "Reverse-domain action code defined by an active capability, extension, or payment handler.",
+      "examples": [
+        "dev.ucp.payment.device_data_collection",
+        "dev.ucp.payment.three_ds_challenge"
+      ]
+    },
+    "severity": {
+      "type": "string",
+      "enum": ["optional", "required", "blocking"],
+      "description": "Consequence of not handling the action. 'optional': platform MAY ignore the action; the ucp entity can still be completed. 'required': platform MUST resolve the action before the ucp entity can complete successfully, but the entity remains otherwise usable. 'blocking': the action blocks the current attempted transition; the platform MUST resolve it, choose an allowed alternate path, or escalate before retrying that transition."
+    },
+    "config": {
+      "type": "object",
+      "description": "Action-specific runtime configuration. Its schema and semantics are defined by the active capability, extension, or payment handler that owns the action code. Fields such as URL, presentation, expiry, correlation, callback, or native request payloads belong here only when defined by that owning specification."
+    }
+  }
+}

@@ -205,6 +205,41 @@ Extensions can be:
 - **Official**: `dev.ucp.shopping.fulfillment` extends `dev.ucp.shopping.checkout`
 - **Vendor**: `com.example.installments` extends `dev.ucp.shopping.checkout`
 
+### Runtime Actions
+
+A **runtime action** is a scoped instruction emitted during the lifecycle of a
+UCP entity. Actions use a common envelope — `code`, `severity`, and `config` —
+but are not independently negotiated as top-level capabilities. Instead, action
+codes are part of the runtime surface of an active capability, extension, or
+payment handler.
+
+UCP defines only the generic envelope and severity model. The owning
+capability, extension, or payment handler defines:
+
+- What the action means and when it may be emitted
+- The `config` schema and security requirements
+- The platform behavior required to execute the action
+- Completion criteria and how completion is reflected in the UCP entity
+- Fallback behavior when the platform cannot execute the action
+
+To avoid ambiguity, custom action codes **SHOULD** be namespaced beneath the
+capability, extension, or payment handler that defines them.
+If no active entity resolves the action code, the business **MUST NOT** use that action.
+
+Action severity describes the consequence of not handling the action:
+
+| Severity | Meaning |
+| :------- | :------ |
+| `optional` | The platform may ignore the action; the entity can still reach a successful terminal state. |
+| `required` | The platform must resolve the action before the entity can reach a successful terminal state, but the entity remains otherwise usable. |
+| `blocking` | The action blocks the current attempted transition; resolve it, choose an allowed alternate path, or escalate before retrying that transition. |
+
+Entity specifications that expose actions **MUST** define how these generic
+severity values apply to their lifecycle. For example, checkout defines how
+actions interact with checkout status, `complete_checkout`, and `continue_url`.
+Cart or other entities can reuse the same action envelope while defining their
+own lifecycle-specific processing rules.
+
 ### Schema Composition
 
 Extensions can add new fields and modify shared structures (e.g., discounts

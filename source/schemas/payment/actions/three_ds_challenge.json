@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/payment/actions/three_ds_challenge.json",
+  "title": "Payment 3DS Challenge Action Config",
+  "description": "Config schema for the dev.ucp.payment.three_ds_challenge runtime action.",
+  "type": "object",
+  "required": ["url"],
+  "properties": {
+    "url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Absolute HTTPS URL for the buyer-facing 3DS challenge surface. The loaded surface owns any PSP, issuer, ACS, or 3DS-provider protocol details."
+    },
+    "timeout_seconds": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Number of seconds the platform should wait after loading the surface before treating the action as abandoned or failed. If absent, the platform may apply its own timeout."
+    }
+  }
+}

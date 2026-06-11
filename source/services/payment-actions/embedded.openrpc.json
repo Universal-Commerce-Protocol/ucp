@@ -1,0 +1,57 @@
+{
+  "openrpc": "1.3.2",
+  "info": {
+    "title": "UCP Payment Action Embedded Protocol",
+    "description": "Embedded transport messages for standard UCP payment action surfaces. A platform loads an action config URL in an isolated browser-capable surface. The surface sends JSON-RPC 2.0 notifications to the platform via postMessage (or the equivalent native bridge) to indicate completion or fatal surface failure."
+  },
+  "servers": [],
+  "methods": [
+    {
+      "name": "pa.done",
+      "summary": "Payment action surface completed",
+      "description": "The loaded payment action surface notifies the platform that the scoped interaction is done from the platform-facing surface's perspective. This does not assert payment success or authentication success; the business determines the outcome when the platform resubmits the UCP operation.",
+      "params": [
+        {
+          "name": "code",
+          "required": true,
+          "schema": {
+            "$ref": "../../schemas/common/types/reverse_domain_name.json",
+            "description": "Runtime action code for the completed action. Well-known values include dev.ucp.payment.device_data_collection and dev.ucp.payment.three_ds_challenge."
+          }
+        }
+      ]
+    },
+    {
+      "name": "pa.error",
+      "summary": "Payment action surface failed",
+      "description": "The loaded payment action surface notifies the platform that it cannot continue. The platform follows the fallback behavior defined by the owning payment handler and action spec.",
+      "params": [
+        {
+          "name": "error",
+          "required": true,
+          "schema": {
+            "$ref": "../../schemas/common/types/error_response.json",
+            "description": "Surface-level failure. This is not a payment authorization result; domain outcomes remain owned by the business/payment-provider integration."
+          }
+        },
+        {
+          "name": "code",
+          "schema": {
+            "$ref": "../../schemas/common/types/reverse_domain_name.json",
+            "description": "Runtime action code for the failed action."
+          }
+        }
+      ]
+    }
+  ],
+  "components": {
+    "schemas": {
+      "device_data_collection_config": {
+        "$ref": "../../schemas/payment/actions/device_data_collection.json"
+      },
+      "three_ds_challenge_config": {
+        "$ref": "../../schemas/payment/actions/three_ds_challenge.json"
+      }
+    }
+  }
+}
