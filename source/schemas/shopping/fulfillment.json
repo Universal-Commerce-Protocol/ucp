@@ -20,6 +20,135 @@
     "fulfillment": {
       "$ref": "types/fulfillment.json"
     },
+    "catalog_fulfillment_method": {
+      "title": "Catalog Fulfillment Method",
+      "description": "A fulfillment method on a catalog variant: how the variant can be received, and where.",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Fulfillment method type. Well-known values: `shipping`, `pickup`. Businesses MAY use additional values."
+        },
+        "description": {
+          "$ref": "../common/types/description.json",
+          "description": "Short buyer-facing summary (e.g. 'Ships in 2–4 business days')."
+        },
+        "destinations": {
+          "type": "array",
+          "description": "Buyer-visible destinations for this method, each with availability.",
+          "items": { "$ref": "types/catalog_destination.json" }
+        }
+      }
+    },
+    "catalog_fulfillment": {
+      "title": "Catalog Fulfillment",
+      "description": "How a catalog variant can be received. Mirrors checkout `fulfillment`.",
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "methods": {
+          "type": "array",
+          "description": "Fulfillment methods for this variant.",
+          "items": { "$ref": "#/$defs/catalog_fulfillment_method" }
+        }
+      }
+    },
+    "fulfillment_variant": {
+      "description": "A catalog variant with fulfillment.",
+      "allOf": [
+        { "$ref": "types/variant.json" },
+        {
+          "type": "object",
+          "properties": {
+            "fulfillment": { "$ref": "#/$defs/catalog_fulfillment" }
+          }
+        }
+      ]
+    },
+    "fulfillment_product": {
+      "description": "A catalog product whose variants are fulfillment-enriched.",
+      "allOf": [
+        { "$ref": "types/product.json" },
+        {
+          "type": "object",
+          "properties": {
+            "variants": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/fulfillment_variant" }
+            }
+          }
+        }
+      ]
+    },
+    "fulfillment_search_filters": {
+      "description": "Catalog filters extended with a fulfillment destination filter.",
+      "allOf": [
+        { "$ref": "types/search_filters.json" },
+        {
+          "type": "object",
+          "properties": {
+            "fulfills_to": {
+              "$ref": "../common/types/postal_address.json",
+              "description": "Where the buyer wants to receive the item, as a postal address (coarse country/region/postal is sufficient). Narrows results and seeds per-destination availability. Authoritative counterpart to `context` address hints (filter wins; falls back to `context` when absent)."
+            }
+          }
+        }
+      ]
+    },
+    "fulfillment_search_request": {
+      "allOf": [
+        { "$ref": "catalog_search.json#/$defs/search_request" },
+        { "type": "object", "properties": { "filters": { "$ref": "#/$defs/fulfillment_search_filters" } } }
+      ]
+    },
+    "fulfillment_search_response": {
+      "allOf": [
+        { "$ref": "catalog_search.json#/$defs/search_response" },
+        { "type": "object", "properties": { "products": { "type": "array", "items": { "$ref": "#/$defs/fulfillment_product" } } } }
+      ]
+    },
+    "fulfillment_lookup_request": {
+      "allOf": [
+        { "$ref": "catalog_lookup.json#/$defs/lookup_request" },
+        { "type": "object", "properties": { "filters": { "$ref": "#/$defs/fulfillment_search_filters" } } }
+      ]
+    },
+    "fulfillment_lookup_response": {
+      "allOf": [
+        { "$ref": "catalog_lookup.json#/$defs/lookup_response" },
+        { "type": "object", "properties": { "products": { "type": "array", "items": { "$ref": "#/$defs/fulfillment_product" } } } }
+      ]
+    },
+    "fulfillment_get_product_request": {
+      "allOf": [
+        { "$ref": "catalog_lookup.json#/$defs/get_product_request" },
+        { "type": "object", "properties": { "filters": { "$ref": "#/$defs/fulfillment_search_filters" } } }
+      ]
+    },
+    "fulfillment_get_product_response": {
+      "allOf": [
+        { "$ref": "catalog_lookup.json#/$defs/get_product_response" },
+        { "type": "object", "properties": { "product": { "$ref": "#/$defs/fulfillment_product" } } }
+      ]
+    },
+    "dev.ucp.shopping.catalog.search": {
+      "description": "Catalog search composition with fulfillment (extends dev.ucp.shopping.catalog.search).",
+      "$defs": {
+        "search_request": { "$ref": "#/$defs/fulfillment_search_request" },
+        "search_response": { "$ref": "#/$defs/fulfillment_search_response" }
+      }
+    },
+    "dev.ucp.shopping.catalog.lookup": {
+      "description": "Catalog lookup composition with fulfillment (extends dev.ucp.shopping.catalog.lookup).",
+      "$defs": {
+        "lookup_request": { "$ref": "#/$defs/fulfillment_lookup_request" },
+        "lookup_response": { "$ref": "#/$defs/fulfillment_lookup_response" },
+        "get_product_request": { "$ref": "#/$defs/fulfillment_get_product_request" },
+        "get_product_response": { "$ref": "#/$defs/fulfillment_get_product_response" }
+      }
+    },
     "dev.ucp.shopping.checkout": {
       "title": "Checkout with Fulfillment",
       "description": "Checkout extended with hierarchical fulfillment.",

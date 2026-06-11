@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/catalog_destination.json",
+  "title": "Catalog Destination",
+  "description": "A buyer-visible destination for a fulfillment method, with availability.",
+  "type": "object",
+  "required": ["id"],
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Destination identifier. `address` denotes the buyer's address; otherwise a location id."
+    },
+    "name": {
+      "type": "string",
+      "description": "Location name (e.g., store name)."
+    },
+    "address": {
+      "$ref": "../../common/types/postal_address.json",
+      "description": "Physical address of the location."
+    },
+    "availability": {
+      "$ref": "availability.json",
+      "description": "Availability of the variant via this method at this destination."
+    }
+  }
+}

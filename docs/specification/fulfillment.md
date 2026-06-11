@@ -21,7 +21,16 @@
 The fulfillment extension enables businesses to advertise support for physical
 goods fulfillment (shipping, pickup, etc).
 
-This extension adds a `fulfillment` field to Checkout containing:
+This extension adds a `fulfillment` field to Checkout and/or Catalog:
+
+* **Checkout** (`dev.ucp.shopping.checkout`) — selection and cost: which
+    items go where, by which method, at what price and ETA.
+* **Catalog** (`dev.ucp.shopping.catalog.search` and
+    `dev.ucp.shopping.catalog.lookup`) — discovery: a variant advertises the
+    fulfillment options available for it, based on the provided buyer
+    context. See [Catalog Discovery](#catalog-discovery).
+
+On Checkout, the `fulfillment` field contains:
 
 * `methods[]` — fulfillment methods applicable to cart items (shipping, pickup, etc.)
     * `line_item_ids` — which items this method fulfills
@@ -280,10 +289,152 @@ If the buyer chooses pickup but the platform doesn't support split
 fulfillment, the platform **SHOULD** use `continue_url` to hand off to the
 business's checkout.
 
+## Catalog Discovery
+
+When the fulfillment extension extends the Catalog capability, each variant
+in a catalog response carries a `fulfillment` object listing the fulfillment
+methods available for that variant and where each can be received — so a
+buyer browsing the catalog can see how an item can be received before
+reaching checkout.
+
+### Methods and destinations
+
+`fulfillment.methods[]` lists the methods available for a variant. Each
+method has:
+
+* `type` — the fulfillment method (e.g. `shipping`, `pickup`); see
+    [Method Types](#method-types).
+* `destinations[]` — where the item is received via this method, each with
+    its own `availability`.
+
+Each destination has:
+
+* `id` — the destination identifier. For `shipping` it is `address` (the
+    buyer's address, supplied on the request); otherwise it is the store or
+    location id.
+* `name` and `address` — the location's name and address, when it has one.
+* `availability` — whether the variant is available via this method at this
+    destination.
+
+A method's `type` tells you what kind of destination it carries. Catalog
+only advertises these options; the buyer commits at checkout. A destination
+`id` found here can be passed to cart or checkout as
+`selected_destination_id`, though checkout can also present its own
+destinations to choose from.
+
+### Shapes
+
+#### Catalog Fulfillment Method
+
+{{ extension_schema_fields('fulfillment.json#/$defs/catalog_fulfillment_method', 'fulfillment') }}
+
+#### Catalog Destination
+
+{{ schema_fields('types/catalog_destination', 'fulfillment') }}
+
+#### Availability
+
+{{ schema_fields('types/availability', 'fulfillment') }}
+
+### Location: `context` and `filters.fulfills_to`
+
+The buyer's location can reach a catalog request two ways. They are distinct
+use cases:
+
+* **`context`** (the buyer's coarse address — `address_country` /
+    `address_region` / `postal_code`) is a non-binding hint. The business
+    uses it to report `availability` on the methods it returns: *"given
+    roughly where I am, where is this available?"* It does not remove
+    results — you still see the variant, annotated with availability.
+* **`filters.fulfills_to`** (a postal address) is a filter. It *restricts*
+    results to variants the business can fulfill to that destination:
+    *"only show me what I can actually get here."* Like any filter, it
+    narrows the result set.
+
+When both are present, `fulfills_to` is authoritative and wins; `context`
+is the fallback.
+
+`fulfills_to` takes an address, not a store id; filtering by a specific
+store or locker is not part of this capability.
+
+### Example
+
+A variant exposes two fulfillment methods: shipping to the buyer's ship-to
+and pickup today at a named store. Each method carries its own destinations,
+each with its own availability.
+
+<!-- ucp:example schema=shopping/fulfillment def=fulfillment_search_response op=read -->
+```json
+{
+  "ucp": { "version": "{{ ucp_version }}" },
+  "products": [
+    {
+      "id": "prod_kettle",
+      "title": "Electric Kettle",
+      "description": { "plain": "1.7L electric kettle." },
+      "price_range": {
+        "min": { "amount": 4999, "currency": "USD" },
+        "max": { "amount": 4999, "currency": "USD" }
+      },
+      "variants": [
+        {
+          "id": "var_ss",
+          "title": "Stainless Steel",
+          "description": { "plain": "Stainless steel finish." },
+          "price": { "amount": 4999, "currency": "USD" },
+          "availability": { "available": true, "status": "in_stock" },
+          "fulfillment": {
+            "methods": [
+              {
+                "type": "shipping",
+                "description": { "plain": "Ships to your address" },
+                "destinations": [
+                  {
+                    "id": "address",
+                    "availability": { "available": true, "status": "in_stock" }
+                  }
+                ]
+              },
+              {
+                "type": "pickup",
+                "description": { "plain": "Pickup today at Downtown Store" },
+                "destinations": [
+                  {
+                    "id": "loc_downtown",
+                    "name": "Downtown Store",
+                    "address": {
+                      "address_locality": "Toronto",
+                      "address_region": "ON",
+                      "address_country": "CA",
+                      "postal_code": "M5B 2H1"
+                    },
+                    "availability": { "available": true, "status": "in_stock" }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
+```
+
+Each method gives the buyer a way to receive the item, with its own
+`availability`. Each method's `description` is directly renderable, so a
+platform can present it without recognizing the `type` (see
+[Rendering](#rendering)).
+
 ## Configuration
 
 Businesses and platforms declare fulfillment constraints in their profiles.
 Businesses fetch platform profiles to adapt responses accordingly.
+
+The `extends` array lists the capabilities this extension adds fulfillment
+to. Checkout is the authoritative, transactional surface; catalog is for
+discovery. A business lists the catalog capabilities in `extends` to expose
+fulfillment on catalog, or omits them to scope itself to checkout only.
 
 ### Platform Profile
 
@@ -296,7 +447,8 @@ single-group responses. The response shape is always
 `methods[].groups[]`—the difference is whether `groups.length` can exceed 1
 within each method.
 
-Default declaration (single group per method):
+Default declaration (single group per method; fulfillment surfaced on
+checkout and on catalog discovery):
 
 <!-- ucp:example schema=profile def=platform_schema target=$.ucp.capabilities -->
 ```json
@@ -306,11 +458,18 @@ Default declaration (single group per method):
       "version": "{{ ucp_version }}",
       "spec": "https://ucp.dev/{{ ucp_version }}/specification/fulfillment",
       "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json",
-      "extends": "dev.ucp.shopping.checkout"
+      "extends": [
+        "dev.ucp.shopping.checkout",
+        "dev.ucp.shopping.catalog.search",
+        "dev.ucp.shopping.catalog.lookup"
+      ]
     }
   ]
 }
 ```
+
+A party that does not expose catalog discovery MAY narrow `extends` to
+`"dev.ucp.shopping.checkout"` (string form) or to a single-element array.
 
 Opt-in declaration (business MAY return multiple groups per method):
 
@@ -322,7 +481,11 @@ Opt-in declaration (business MAY return multiple groups per method):
       "version": "{{ ucp_version }}",
       "spec": "https://ucp.dev/{{ ucp_version }}/specification/fulfillment",
       "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json",
-      "extends": "dev.ucp.shopping.checkout",
+      "extends": [
+        "dev.ucp.shopping.checkout",
+        "dev.ucp.shopping.catalog.search",
+        "dev.ucp.shopping.catalog.lookup"
+      ],
       "config": { "supports_multi_group": true }
     }
   ]
@@ -344,7 +507,11 @@ Businesses declare what fulfillment configurations they support using
       "version": "{{ ucp_version }}",
       "spec": "https://ucp.dev/{{ ucp_version }}/specification/fulfillment",
       "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json",
-      "extends": "dev.ucp.shopping.checkout",
+      "extends": [
+        "dev.ucp.shopping.checkout",
+        "dev.ucp.shopping.catalog.search",
+        "dev.ucp.shopping.catalog.lookup"
+      ],
       "config": {
         "allows_multi_destination": {
           "shipping": true
@@ -375,18 +542,23 @@ shipping+pickup.
 * Platform is responsible for rendering group selection UI (e.g., choose
     shipping speed per package)
 
-### Adding New Methods
+### Method Types
 
-Extensions that extend fulfillment with new method types (e.g.,
-`local_delivery`) **MUST** add an extension schema that:
+`fulfillment_method.type` (checkout) and `catalog_fulfillment_method.type`
+(catalog) share one vocabulary of fulfillment method types. The field is an
+open string: consumers ignore values they do not recognize.
 
-1. Adds the method to the `type` enum in `fulfillment_method`
-2. Adds corresponding business config options:
-    * `allows_multi_destination.local_delivery: boolean`
-    * `allows_method_combinations` items enum (includes `"local_delivery"`)
+**Well-known values:**
 
-Note: Platform's `supports_multi_group` is method-agnostic (single boolean),
-so no extension needed.
+| Value | Meaning |
+| --- | --- |
+| `shipping` | Carrier ships to the buyer's address. |
+| `pickup` | Buyer picks up at a named location. |
+
+**Adding method types.** `type` is an open string: businesses MAY use
+additional values, and consumers ignore values they do not recognize. New
+well-known values are added via a UCP RFC and a `dev.ucp.shopping.fulfillment`
+version bump.
 
 ## Examples
 
