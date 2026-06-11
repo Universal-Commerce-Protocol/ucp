@@ -89,6 +89,15 @@ and abuse prevention. Signal values MUST NOT be buyer-asserted claims. See
 
 {{ schema_fields('types/signals', 'catalog') }}
 
+### Attribution
+
+Platform-provided referral and conversion-event context — campaign IDs,
+click identifiers, and source/medium markers communicated by the platform.
+See [Attribution](../overview.md#attribution) for details and consent
+requirements.
+
+{{ schema_fields('types/attribution', 'catalog') }}
+
 ### Product
 
 A catalog item representing a sellable item with one or more purchasable variants.
@@ -181,6 +190,7 @@ rendering contract.
 
 When search finds no matches, return an empty array without messages.
 
+<!-- ucp:example schema=shopping/catalog_search def=search_response op=read -->
 ```json
 {
   "ucp": {...},
@@ -195,6 +205,7 @@ This is not an error - the query was valid but returned no results.
 When a product is available but has delayed fulfillment, return the product with
 a warning message. Use the `path` field to target specific variants.
 
+<!-- ucp:example schema=shopping/catalog_search def=search_response op=read -->
 ```json
 {
   "ucp": {...},
@@ -238,6 +249,7 @@ When requested identifiers don't exist, return success with the found products
 (if any). The response MAY include informational messages indicating which
 identifiers were not found.
 
+<!-- ucp:example schema=shopping/catalog_lookup def=lookup_response op=read -->
 ```json
 {
   "ucp": {...},
@@ -262,6 +274,7 @@ return it as a warning with `presentation: "disclosure"`. The `path` field targe
 relevant component in the response — when it targets a product, the
 disclosure applies to all of its variants.
 
+<!-- ucp:example schema=shopping/catalog_search def=search_response op=read -->
 ```json
 {
   "ucp": {...},
@@ -269,16 +282,23 @@ disclosure applies to all of its variants.
     {
       "id": "prod_nut_butter",
       "title": "Artisan Nut Butter Collection",
+      "description": { "plain": "Assorted artisan nut butters." },
+      "price_range": {
+        "min": { "amount": 1299, "currency": "USD" },
+        "max": { "amount": 1499, "currency": "USD" }
+      },
       "variants": [
         {
           "id": "var_almond",
           "title": "Almond Butter",
+          "description": { "plain": "Smooth almond butter." },
           "price": { "amount": 1299, "currency": "USD" },
           "availability": { "available": true }
         },
         {
           "id": "var_cashew",
           "title": "Cashew Butter",
+          "description": { "plain": "Creamy cashew butter." },
           "price": { "amount": 1499, "currency": "USD" },
           "availability": { "available": true }
         }
@@ -302,6 +322,19 @@ disclosure applies to all of its variants.
 
 See [Warning Presentation](../checkout.md#warning-presentation) for the
 full rendering contract.
+
+## Scopes
+
+The Catalog Search and Catalog Lookup capabilities define the following
+well-known scopes for user-authenticated access:
+
+| Scope | Description |
+| :--- | :--- |
+| `dev.ucp.shopping.catalog.search:read` | Search on behalf of the authenticated user — personalized results, member pricing, gated inventory. |
+| `dev.ucp.shopping.catalog.lookup:read` | Lookup on behalf of the authenticated user — personalized pricing or availability for specific products. |
+
+Scope declaration, derivation, and rules for extending this set with
+custom scopes are defined in [Identity Linking — Scopes](../identity-linking.md#scopes).
 
 ## Transport Bindings
 

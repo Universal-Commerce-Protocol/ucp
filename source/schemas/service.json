@@ -29,7 +29,7 @@
 
     "platform_schema": {
       "title": "Service (Platform Schema)",
-      "description": "Full service declaration for platform-level discovery. All transports require `version`, `spec`, and `transport`. REST and MCP additionally require `schema` and `endpoint`; A2A requires `endpoint`; embedded requires `schema`.",
+      "description": "Full service declaration for platform-level discovery. All transports require `version`, `spec`, and `transport`. REST, MCP, and embedded additionally require `schema`.",
       "allOf": [
         { "$ref": "#/$defs/base" },
         { "required": ["spec"] },
@@ -37,15 +37,14 @@
           "anyOf": [
             {
               "properties": { "transport": { "const": "rest" } },
-              "required": ["schema", "endpoint"]
+              "required": ["schema"]
             },
             {
               "properties": { "transport": { "const": "mcp" } },
-              "required": ["schema", "endpoint"]
+              "required": ["schema"]
             },
             {
-              "properties": { "transport": { "const": "a2a" } },
-              "required": ["endpoint"]
+              "properties": { "transport": { "const": "a2a" } }
             },
             {
               "properties": { "transport": { "const": "embedded" } },

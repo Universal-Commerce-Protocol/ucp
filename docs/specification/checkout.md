@@ -146,6 +146,7 @@ response body. When no resource exists to act on, messages SHOULD use
 For example, a business may reject a create checkout request where all
 items are unavailable:
 
+<!-- ucp:example schema=common/types/error_response op=read -->
 ```json
 {
   "ucp": { "version": "2026-01-11", "status": "error" },
@@ -174,30 +175,28 @@ The latter two require handoff and serve as explicit signals to the platform.
 Businesses **SHOULD** surface such messages as early as possible, and platforms
 **SHOULD** prioritize resolving recoverable errors before initiating handoff.
 
+<!-- ucp:example schema=shopping/checkout target=$.messages op=read -->
 ```json
-{
-  "status": "requires_escalation",
-  "messages": [
-    {
-      "type": "error",
-      "code": "invalid_phone",
-      "severity": "recoverable",
-      "content": "Phone number format is invalid"
-    },
-    {
-      "type": "error",
-      "code": "schedule_delivery",
-      "severity": "requires_buyer_input",
-      "content": "Select delivery window for your purchase"
-    },
-    {
-      "type": "error",
-      "code": "high_value_order",
-      "severity": "requires_buyer_review",
-      "content": "Orders over $500 require additional verification"
-    }
-  ]
-}
+[
+  {
+    "type": "error",
+    "code": "invalid_phone",
+    "severity": "recoverable",
+    "content": "Phone number format is invalid"
+  },
+  {
+    "type": "error",
+    "code": "schedule_delivery",
+    "severity": "requires_buyer_input",
+    "content": "Select delivery window for your purchase"
+  },
+  {
+    "type": "error",
+    "code": "high_value_order",
+    "severity": "requires_buyer_review",
+    "content": "Orders over $500 require additional verification"
+  }
+]
 ```
 
 Example error processing algorithm:
@@ -302,13 +301,16 @@ For example, the Platform claims a store card benefit via
 `context.eligibility`. The Business applies member pricing during the session.
 At completion, the payment credential does not match the claimed instrument:
 
+<!-- ucp:example schema=shopping/checkout op=read -->
 ```json
 {
-  "ucp": { "version": "2026-01-11", "status": "success" },
+  "ucp": { "version": "2026-01-11", "status": "success", "payment_handlers": { ... } },
   "id": "checkout_abc",
   "status": "ready_for_complete",
-  "line_items": [ "..." ],
-  "totals": [ "..." ],
+  "currency": "...",
+  "line_items": [ ... ],
+  "totals": [ ... ],
+  "links": [ ... ],
   "messages": [
     {
       "type": "error",
@@ -409,21 +411,28 @@ what they receive from the business.
 A checkout response containing both a recoverable error and a disclosure
 warning on a line item:
 
+<!-- ucp:example schema=shopping/checkout op=read -->
 ```json
 {
-  "ucp": { "version": "{{ ucp_version }}", "status": "success" },
+  "ucp": { "version": "{{ ucp_version }}", "status": "success", "payment_handlers": { ... } },
   "id": "chk_abc123",
   "status": "incomplete",
   "currency": "USD",
   "line_items": [
     {
       "id": "li_1",
-      "item": { "id": "item_456", "title": "Artisan Nut Butter Collection", "image_url": "https://merchant.com/nut-butter.jpg" },
+      "item": { "id": "item_456", "title": "Artisan Nut Butter Collection", "price": 1299, "image_url": "https://merchant.com/nut-butter.jpg" },
       "quantity": 1,
-      "totals": [{ "type": "subtotal", "amount": 1299 }]
+      "totals": [
+        { "type": "subtotal", "amount": 1299 },
+        { "type": "total", "amount": 1299 }
+      ]
     }
   ],
-  "totals": [{ "type": "total", "amount": 1299 }],
+  "totals": [
+    { "type": "subtotal", "amount": 1299 },
+    { "type": "total", "amount": 1299 }
+  ],
   "messages": [
     {
       "type": "error",
@@ -492,6 +501,18 @@ platform can prefill checkout state when initiating a buy-now flow.
 > **Note:** Checkout permalinks are a REST-specific construct that extends the
 > [REST transport binding](checkout-rest.md). Accessing a permalink returns a
 > redirect to the checkout UI or renders the checkout page directly.
+
+## Scopes
+
+The Checkout capability defines the following well-known scopes for
+user-authenticated access:
+
+| Scope | Description |
+| :--- | :--- |
+| `dev.ucp.shopping.checkout:manage` | All checkout operations on behalf of the authenticated user — create, update, complete, and cancel checkout sessions. |
+
+Scope declaration, derivation, and rules for extending this set with
+custom scopes are defined in [Identity Linking — Scopes](identity-linking.md#scopes).
 
 ## Guidelines
 
@@ -641,6 +662,15 @@ independently verifiable third-party attestations. See
 requirements.
 
 {{ schema_fields('types/signals', 'checkout') }}
+
+### Attribution
+
+Platform-provided referral and conversion-event context — campaign IDs,
+click identifiers, and source/medium markers communicated by the platform.
+See [Attribution](overview.md#attribution) for details and consent
+requirements.
+
+{{ schema_fields('types/attribution', 'checkout') }}
 
 ### Fulfillment Option
 
@@ -834,8 +864,9 @@ when provided.
 
 **Split tax, itemized at top-level:**
 
+<!-- ucp:example schema=shopping/checkout target=$.totals op=read -->
 ```json
-"totals": [
+[
   { "type": "subtotal",    "display_text": "Subtotal",    "amount": 5750 },
   { "type": "fulfillment", "display_text": "Shipping",    "amount": 899 },
   { "type": "tax",         "display_text": "Federal Tax", "amount": 332 },
@@ -846,8 +877,9 @@ when provided.
 
 **Collapsed fees with optional breakdown:**
 
+<!-- ucp:example schema=shopping/checkout target=$.totals op=read -->
 ```json
-"totals": [
+[
   { "type": "subtotal", "display_text": "Subtotal", "amount": 4999 },
   {
     "type": "fee", "display_text": "Fees", "amount": 549,
@@ -863,8 +895,9 @@ when provided.
 
 **Discount and account credit — negative amounts:**
 
+<!-- ucp:example schema=shopping/checkout target=$.totals op=read -->
 ```json
-"totals": [
+[
   { "type": "subtotal",       "display_text": "Subtotal",       "amount": 10000 },
   { "type": "discount",       "display_text": "Summer Sale",    "amount": -1500 },
   { "type": "tax",            "display_text": "Tax",            "amount": 680 },

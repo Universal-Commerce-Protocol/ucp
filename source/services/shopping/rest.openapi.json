@@ -974,7 +974,7 @@
       "checkout_response": {
         "oneOf": [
           { "$ref": "../../schemas/shopping/checkout.json" },
-          { "$ref": "../../schemas/shopping/types/error_response.json" }
+          { "$ref": "../../schemas/common/types/error_response.json" }
         ]
       },
       "cart": {
@@ -983,7 +983,7 @@
       "cart_response": {
         "oneOf": [
           { "$ref": "../../schemas/shopping/cart.json" },
-          { "$ref": "../../schemas/shopping/types/error_response.json" }
+          { "$ref": "../../schemas/common/types/error_response.json" }
         ]
       },
       "order": {
@@ -992,7 +992,7 @@
       "order_response": {
         "oneOf": [
           { "$ref": "../../schemas/shopping/order.json" },
-          { "$ref": "../../schemas/shopping/types/error_response.json" }
+          { "$ref": "../../schemas/common/types/error_response.json" }
         ]
       },
       "payment": {
@@ -1019,7 +1019,7 @@
       "catalog_get_product_response": {
         "oneOf": [
           { "$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/get_product_response" },
-          { "$ref": "../../schemas/shopping/types/error_response.json" }
+          { "$ref": "../../schemas/common/types/error_response.json" }
         ]
       }
     }

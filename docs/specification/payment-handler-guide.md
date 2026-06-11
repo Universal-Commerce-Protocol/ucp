@@ -168,26 +168,21 @@ schema. The specification **SHOULD** define the available config and instrument
 schemas, and how to construct each based on the business's prerequisites output
 and desired configuration.
 
+<!-- ucp:example schema=profile def=business_schema target=$.ucp.payment_handlers -->
 ```json
 {
-  "ucp": {
-    "payment_handlers": {
-      "com.example.handler": [
-        {
-          "id": "processor_tokenizer_1234",
-          "version": "{{ ucp_version }}",
-          "spec": "https://example.com/ucp/handler",
-          "schema": "https://example.com/ucp/handler/schema.json",
-          "available_instruments": [
-            // Instrument types this handler supports
-          ],
-          "config": {
-            // Handler-specific configuration (see Config Shapes)
-          }
-        }
-      ]
+  "com.example.handler": [
+    {
+      "id": "processor_tokenizer_1234",
+      "version": "{{ ucp_version }}",
+      "spec": "https://example.com/ucp/handler",
+      "schema": "https://example.com/ucp/handler/schema.json",
+      "available_instruments": [ ... ],
+      "config": {
+        // Handler-specific configuration (see Config Shapes)
+      }
     }
-  }
+  ]
 }
 ```
 
@@ -213,6 +208,7 @@ and typically includes different configuration:
 
 **Business Schema Example** (business declares handler configuration):
 
+<!-- ucp:example schema=payment_handler def=business_schema -->
 ```json
 {
   "id": "processor_tokenizer_1234",
@@ -236,6 +232,7 @@ and typically includes different configuration:
 
 **Platform Schema Example** (platform declares handler support):
 
+<!-- ucp:example schema=payment_handler def=platform_schema -->
 ```json
 {
   "id": "platform_tokenizer_2345", // note: ids are for disambiguation, they may differ between business and platform
@@ -259,6 +256,7 @@ and typically includes different configuration:
 
 **Response Schema Example** (runtime context for checkout):
 
+<!-- ucp:example schema=payment_handler def=response_schema -->
 ```json
 {
   "id": "processor_tokenizer_1234",
@@ -327,6 +325,7 @@ Authors typically define each shape in its own file and reference them:
 
 **Example Handler Schema:**
 
+<!-- ucp:example skip reason="handler schema definition" -->
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -416,6 +415,7 @@ Each variant has its own config schema tailored to its context:
 
 **Example `types/business_config.json`:**
 
+<!-- ucp:example skip reason="handler schema definition" -->
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -438,6 +438,7 @@ Each variant has its own config schema tailored to its context:
 
 **Example `types/platform_config.json`:**
 
+<!-- ucp:example skip reason="handler schema definition" -->
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -460,6 +461,7 @@ Each variant has its own config schema tailored to its context:
 
 **Example `types/response_config.json`:**
 
+<!-- ucp:example skip reason="handler schema definition" -->
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -522,6 +524,7 @@ constraints are meaningful (e.g., `brands` for cards), and **platforms/businesse
 
 **Example `types/tokenizer_instrument.json`**:
 
+<!-- ucp:example skip reason="handler schema definition" -->
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -578,6 +581,7 @@ constraints are meaningful (e.g., `brands` for cards), and **platforms/businesse
 
 **Example `types/tokenizer_alt_instrument.json`:**
 
+<!-- ucp:example skip reason="handler schema definition" -->
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -629,6 +633,7 @@ refresh credentials.
 
 **Example `types/tokenizer_token.json`** (expiring token):
 
+<!-- ucp:example skip reason="handler schema definition" -->
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -656,6 +661,7 @@ refresh credentials.
 
 **Example `types/tokenizer_alt_token.json`** (alt token):
 
+<!-- ucp:example skip reason="handler schema definition" -->
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
