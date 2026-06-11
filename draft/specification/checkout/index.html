@@ -1082,17 +1082,6 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#fulfillment-option" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Fulfillment Option
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#item" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3393,17 +3382,6 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#fulfillment-option" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Fulfillment Option
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#item" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4897,62 +4875,6 @@ click identifiers, and source/medium markers communicated by the platform.
 See <a href="../overview/#attribution">Attribution</a> for details and consent
 requirements.</p>
 <p>Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.</p>
-<h3 id="fulfillment-option">Fulfillment Option<a class="headerlink" href="#fulfillment-option" title="Permanent link">&para;</a></h3>
-<p>A fulfillment option within a group (e.g., Standard Shipping $5, Express $15).</p>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Name</th>
-<th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
-<th style="text-align: left;">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;">id</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Unique fulfillment option identifier.</td>
-</tr>
-<tr>
-<td style="text-align: left;">title</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Short label (e.g., 'Express Shipping', 'Curbside Pickup').</td>
-</tr>
-<tr>
-<td style="text-align: left;">description</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Complete context for buyer decision (e.g., 'Arrives Dec 12-15 via FedEx').</td>
-</tr>
-<tr>
-<td style="text-align: left;">carrier</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Carrier name (for shipping).</td>
-</tr>
-<tr>
-<td style="text-align: left;">earliest_fulfillment_time</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Earliest fulfillment date.</td>
-</tr>
-<tr>
-<td style="text-align: left;">latest_fulfillment_time</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Latest fulfillment date.</td>
-</tr>
-<tr>
-<td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[object]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Fulfillment option totals breakdown.</td>
-</tr>
-</tbody>
-</table>
 <h3 id="item">Item<a class="headerlink" href="#item" title="Permanent link">&para;</a></h3>
 <h4 id="item-create-request">Item Create Request<a class="headerlink" href="#item-create-request" title="Permanent link">&para;</a></h4>
 <table>

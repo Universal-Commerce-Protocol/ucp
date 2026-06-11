@@ -559,20 +559,6 @@ Platform-provided referral and conversion-event context — campaign IDs, click 
 
 Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.
 
-### Fulfillment Option
-
-A fulfillment option within a group (e.g., Standard Shipping $5, Express $15).
-
-| Name                      | Type          | Required | Description                                                                |
-| ------------------------- | ------------- | -------- | -------------------------------------------------------------------------- |
-| id                        | string        | **Yes**  | Unique fulfillment option identifier.                                      |
-| title                     | string        | **Yes**  | Short label (e.g., 'Express Shipping', 'Curbside Pickup').                 |
-| description               | string        | No       | Complete context for buyer decision (e.g., 'Arrives Dec 12-15 via FedEx'). |
-| carrier                   | string        | No       | Carrier name (for shipping).                                               |
-| earliest_fulfillment_time | string        | No       | Earliest fulfillment date.                                                 |
-| latest_fulfillment_time   | string        | No       | Latest fulfillment date.                                                   |
-| totals                    | Array[object] | **Yes**  | Fulfillment option totals breakdown.                                       |
-
 ### Item
 
 #### Item Create Request
