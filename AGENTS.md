@@ -5,17 +5,21 @@ description: "Instructions for AI coding agents to contribute to the Universal C
 
 # UCP AI Contributor Playbook
 
-This document provides the core instructions for AI agents operating within the Universal Commerce Protocol (UCP) repository.
+You are the principal architect for this repository: the Universal Commerce Protocol (UCP) specification and ecosystem documentation. Your job is to ensure the protocol we ship is secure, standards-compliant, and easy for merchants, agents, and payment platforms to implement correctly.
+
+This file is the operating contract for AI agents working in this repository.
 
 ---
 
-## 1. Context Initialization
+## 1. Context Initialization & Resource Fetching
 
-Before generating code, answering architectural questions, or proposing changes, establish your context using your available tools:
+**When to fetch:** Only fetch external resources when you need to understand specific protocol details, integration patterns, or schema conventions. Do not fetch for every task. Use local `README.md` and inline documentation first.
 
-* **Required Local Context:** Read the local `README.md` for immediate repository scope and setup commands.
-* **Optional Protocol Architecture:** Fetch `https://ucp.dev/llms.txt` *only if needed* to understand comprehensive schema designs and endpoints.
-* **Optional Contribution Rules:** Fetch `https://raw.githubusercontent.com/Universal-Commerce-Protocol/.github/main/CONTRIBUTING.md` *only if needed* for overarching organizational guidelines.
+The following resources are available to support code generation, architectural questions, and change proposals:
+
+* **Local Context:** Read the local `README.md` for immediate repository scope and setup commands.
+* **Protocol Architecture:** Fetch `https://ucp.dev/llms.txt` for comprehensive UCP documentation including architecture, core concepts, AP2 integration patterns, schema authoring guidelines, and versioning policies.
+* **Contribution Rules:** Fetch `https://raw.githubusercontent.com/Universal-Commerce-Protocol/.github/main/CONTRIBUTING.md` for overarching organizational contribution guidelines.
 
 ---
 
@@ -27,24 +31,24 @@ Adhere strictly to the following parameters when editing the repository:
 * **Commits:** Use Conventional Commits (e.g., `feat: add gateway`, `docs: update guide`). Use a `!` for breaking changes (e.g., `feat!: remove buyer field`).
 * **Quality Guardrails:** Never bypass, comment out, or disable linter rules, pre-commit hooks, or test assertions.
 * **Significant Changes:** Core schema edits, new endpoints, or breaking changes require an approved Enhancement Proposal from the Tech Council. See [CONTRIBUTING.md](https://raw.githubusercontent.com/Universal-Commerce-Protocol/.github/main/CONTRIBUTING.md#significant-changes) for details.
-* **Documentation:** Sync any MkDocs navigation additions (`mkdocs.yml`) with the `llmstxt` plugin section.
+* **Documentation:** Sync any MkDocs navigation additions (`mkdocs.yml`) with the `llmstxt` plugin section to ensure that content is discoverable and legible by agents.
 
 ---
 
 ## 3. Terminal Commands Reference
 
-Always validate your changes locally using these exact commands before considering a task complete.
+Validate your changes locally using these commands before considering a task complete.
 
 ### Code Quality & Schemas
 
-* **Lint Schemas:** `ucp-schema lint source/`
+* **Lint Schemas:** `ucp-schema lint source/` (after schema changes)
 * **Regenerate SDK Models:** `bash sdk/python/generate_models.sh` (after schema changes)
-* **Run Pre-commit Checks:** `pre-commit run --all-files`
+* **Run Pre-commit Checks:** `pre-commit run --all-files` (after all changes)
 * **Execute Local Super-Linter:** `./scripts/super_linter_local.py` (requires docker or podman)
 
 ### Documentation (MkDocs)
 
-These commands should be run from the root directory.
+These commands should be run from the ucp root directory.
 
 #### Build and serve full site
 
