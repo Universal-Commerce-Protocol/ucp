@@ -223,6 +223,14 @@ Content-Type: application/json
 | `Accept-Language` | No       | Localization. Tells the receiver the user's preferred natural languages, often with "weights" or priorities.                                                                                                                                                  |
 | `Accept-Encoding` | No       | Compression. The client tells the server which content-codings it supports, usually for compression.                                                                                                                                                          |
 
+**Response Headers**
+
+| Header            | Required | Description                                                                                                           |
+| ----------------- | -------- | --------------------------------------------------------------------------------------------------------------------- |
+| `Signature`       | No       | RFC 9421 HTTP Message Signature for response. Contains the signature value in the format `sig1=:<base64-signature>:`. |
+| `Signature-Input` | No       | RFC 9421 Signature-Input header for response. Describes signed components, timestamp, and key ID.                     |
+| `Content-Digest`  | No       | JCS-canonicalized body digest per RFC 8785. Format: `sha-256=:<base64-digest>:`.                                      |
+
 ### Specific Header Requirements
 
 **UCP-Agent** (required on all requests):
