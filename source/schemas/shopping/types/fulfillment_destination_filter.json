@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/fulfillment_destination_filter.json",
+  "title": "Fulfillment Destination Filter",
+  "description": "A specific destination to check fulfillment against: a location id, or a coarse locality. Used as a request filter; a full street address is not required.",
+  "type": "object",
+  "additionalProperties": true,
+  "allOf": [
+    {
+      "$ref": "../../common/types/locality.json"
+    },
+    {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "location": {
+          "type": "string",
+          "description": "A specific location id (e.g. a store) to check."
+        }
+      }
+    }
+  ]
+}

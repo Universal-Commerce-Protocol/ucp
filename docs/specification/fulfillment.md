@@ -293,75 +293,72 @@ business's checkout.
 
 When the fulfillment extension extends the Catalog capability, each variant
 in a catalog response carries a `fulfillment` object listing the fulfillment
-methods available for that variant and where each can be received — so a
-buyer browsing the catalog can see how an item can be received before
-reaching checkout.
+methods available for that variant and their availability — so a buyer
+browsing the catalog can see how an item can be fulfilled.
 
-### Methods and destinations
+### Methods
 
 `fulfillment.methods[]` lists the methods available for a variant. Each
 method has:
 
 * `type` — the fulfillment method (e.g. `shipping`, `pickup`); see
     [Method Types](#method-types).
-* `destinations[]` — where the item is received via this method, each with
-    its own `availability`.
+* `description` — short, buyer-facing summary of how the variant is
+    fulfilled via this method (e.g. "Ships in 2–4 business days"). Directly
+    renderable; see [Rendering](#rendering).
+* `availability` — whether the variant is available via this method at the
+    specified or inferred location.
+* `location` — for place-based methods (e.g. `pickup`), the resolved
+    location id, and the business's stable identifier for that location. A
+    business that advertises pickup at a `location` MUST accept the same id
+    as `selected_destination_id` for that method, so a discovered location
+    can be used in cart and checkout.
 
-Each destination has:
-
-* `id` — the destination identifier. For `shipping` it is `address` (the
-    buyer's address, supplied on the request); otherwise it is the store or
-    location id.
-* `name` and `address` — the location's name and address, when it has one.
-* `availability` — whether the variant is available via this method at this
-    destination.
-
-A method's `type` tells you what kind of destination it carries. Catalog
-only advertises these options; the buyer commits at checkout. A destination
-`id` found here can be passed to cart or checkout as
-`selected_destination_id`, though checkout can also present its own
-destinations to choose from.
+Catalog reports availability for a single location per method — the one
+specified via `fulfills_to` or inferred from `context`; discovering and
+comparing other locations is handled separately.
 
 ### Shapes
+
+#### Catalog Fulfillment
+
+{{ extension_schema_fields('fulfillment.json#/$defs/catalog_fulfillment', 'fulfillment') }}
 
 #### Catalog Fulfillment Method
 
 {{ extension_schema_fields('fulfillment.json#/$defs/catalog_fulfillment_method', 'fulfillment') }}
 
-#### Catalog Destination
-
-{{ schema_fields('types/catalog_destination', 'fulfillment') }}
-
 #### Availability
 
 {{ schema_fields('types/availability', 'fulfillment') }}
 
-### Location: `context` and `filters.fulfills_to`
+#### Fulfillment Destination Filter
 
-The buyer's location can reach a catalog request two ways. They are distinct
-use cases:
+{{ schema_fields('types/fulfillment_destination_filter', 'fulfillment') }}
 
-* **`context`** (the buyer's coarse address — `address_country` /
-    `address_region` / `postal_code`) is a non-binding hint. The business
-    uses it to report `availability` on the methods it returns: *"given
-    roughly where I am, where is this available?"* It does not remove
-    results — you still see the variant, annotated with availability.
-* **`filters.fulfills_to`** (a postal address) is a filter. It *restricts*
-    results to variants the business can fulfill to that destination:
-    *"only show me what I can actually get here."* Like any filter, it
-    narrows the result set.
+### Location and method: `context` and `filters`
 
-When both are present, `fulfills_to` is authoritative and wins; `context`
-is the fallback.
+* **`context`** (`address_country` / `address_region` / `postal_code`) is
+    where the *buyer* is — a non-binding hint the business uses to report
+    `availability`. On a market-scoped catalog it MAY narrow results;
+    otherwise it annotates rather than removes them.
+* **`filters.fulfills_to`** is where the order is *fulfilled to* — a
+    `location` id, or a coarse address (`address_country` / `address_region`
+    / `postal_code`). It restricts results to what can be fulfilled there
+    and seeds method `availability`. It may differ from `context` (e.g. a
+    gift).
+* **`filters.method`** restricts results to specific method types (e.g.
+    `["pickup"]`).
 
-`fulfills_to` takes an address, not a store id; filtering by a specific
-store or locker is not part of this capability.
+Provide location once: `context` for where the buyer is, `fulfills_to` for
+an explicit destination. When both are present, `fulfills_to` supersedes
+`context`.
 
 ### Example
 
 A variant exposes two fulfillment methods: shipping to the buyer's ship-to
-and pickup today at a named store. Each method carries its own destinations,
-each with its own availability.
+and pickup today at a named store. Each method carries its own availability,
+and `pickup` references the resolved location by id.
 
 <!-- ucp:example schema=shopping/fulfillment def=fulfillment_search_response op=read -->
 ```json
@@ -388,29 +385,13 @@ each with its own availability.
               {
                 "type": "shipping",
                 "description": { "plain": "Ships to your address" },
-                "destinations": [
-                  {
-                    "id": "address",
-                    "availability": { "available": true, "status": "in_stock" }
-                  }
-                ]
+                "availability": { "available": true, "status": "in_stock" }
               },
               {
                 "type": "pickup",
                 "description": { "plain": "Pickup today at Downtown Store" },
-                "destinations": [
-                  {
-                    "id": "loc_downtown",
-                    "name": "Downtown Store",
-                    "address": {
-                      "address_locality": "Toronto",
-                      "address_region": "ON",
-                      "address_country": "CA",
-                      "postal_code": "M5B 2H1"
-                    },
-                    "availability": { "available": true, "status": "in_stock" }
-                  }
-                ]
+                "location": "loc_downtown",
+                "availability": { "available": true, "status": "in_stock" }
               }
             ]
           }
@@ -421,7 +402,7 @@ each with its own availability.
 }
 ```
 
-Each method gives the buyer a way to receive the item, with its own
+Each method is a way the variant can be fulfilled, with its own
 `availability`. Each method's `description` is directly renderable, so a
 platform can present it without recognizing the `type` (see
 [Rendering](#rendering)).

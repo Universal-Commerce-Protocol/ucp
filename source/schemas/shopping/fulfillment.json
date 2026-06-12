@@ -22,7 +22,7 @@
     },
     "catalog_fulfillment_method": {
       "title": "Catalog Fulfillment Method",
-      "description": "A fulfillment method on a catalog variant: how the variant can be received, and where.",
+      "description": "A fulfillment method on a catalog variant: how the variant can be fulfilled, and its availability.",
       "type": "object",
       "additionalProperties": true,
       "required": ["type"],
@@ -35,16 +35,19 @@
           "$ref": "../common/types/description.json",
           "description": "Short buyer-facing summary (e.g. 'Ships in 2–4 business days')."
         },
-        "destinations": {
-          "type": "array",
-          "description": "Buyer-visible destinations for this method, each with availability.",
-          "items": { "$ref": "types/catalog_destination.json" }
+        "availability": {
+          "$ref": "types/availability.json",
+          "description": "Availability of this variant via this method at the specified or inferred location."
+        },
+        "location": {
+          "type": "string",
+          "description": "The location resolved for this method, where appropriate (e.g. the pickup store or location), as a location id."
         }
       }
     },
     "catalog_fulfillment": {
       "title": "Catalog Fulfillment",
-      "description": "How a catalog variant can be received. Mirrors checkout `fulfillment`.",
+      "description": "How a catalog variant can be fulfilled. Mirrors checkout `fulfillment`.",
       "type": "object",
       "additionalProperties": true,
       "properties": {
@@ -68,7 +71,7 @@
       ]
     },
     "fulfillment_product": {
-      "description": "A catalog product whose variants are fulfillment-enriched.",
+      "description": "A catalog product whose variants are fulfillment-enriched. Used by search.",
       "allOf": [
         { "$ref": "types/product.json" },
         {
@@ -82,16 +85,63 @@
         }
       ]
     },
+    "fulfillment_lookup_variant": {
+      "description": "A lookup variant (carrying input correlation) enriched with fulfillment.",
+      "allOf": [
+        { "$ref": "catalog_lookup.json#/$defs/lookup_variant" },
+        {
+          "type": "object",
+          "properties": {
+            "fulfillment": { "$ref": "#/$defs/catalog_fulfillment" }
+          }
+        }
+      ]
+    },
+    "fulfillment_lookup_product": {
+      "description": "A lookup product whose variants are fulfillment-enriched, preserving input correlation. Used by lookup.",
+      "allOf": [
+        { "$ref": "types/product.json" },
+        {
+          "type": "object",
+          "properties": {
+            "variants": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/fulfillment_lookup_variant" }
+            }
+          }
+        }
+      ]
+    },
+    "fulfillment_detail_product": {
+      "description": "A get_product detail product (carrying selected/options availability signals) whose variants are fulfillment-enriched. Used by get_product.",
+      "allOf": [
+        { "$ref": "catalog_lookup.json#/$defs/detail_product" },
+        {
+          "type": "object",
+          "properties": {
+            "variants": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/fulfillment_variant" }
+            }
+          }
+        }
+      ]
+    },
     "fulfillment_search_filters": {
-      "description": "Catalog filters extended with a fulfillment destination filter.",
+      "description": "Catalog filters extended with a fulfillment destination filter and a method-type filter.",
       "allOf": [
         { "$ref": "types/search_filters.json" },
         {
           "type": "object",
           "properties": {
             "fulfills_to": {
-              "$ref": "../common/types/postal_address.json",
-              "description": "Where the buyer wants to receive the item, as a postal address (coarse country/region/postal is sufficient). Narrows results and seeds per-destination availability. Authoritative counterpart to `context` address hints (filter wins; falls back to `context` when absent)."
+              "$ref": "types/fulfillment_destination_filter.json",
+              "description": "Where the order is fulfilled to — may differ from the buyer's `context` location (e.g. a gift). A `location` id, or a coarse address (`address_country`/`address_region`/`postal_code`). Restricts results to what can be fulfilled there and seeds method `availability`. Supersedes `context`."
+            },
+            "method": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Restrict results to these fulfillment method types (e.g. [\"pickup\"]). Well-known values: `shipping`, `pickup`."
             }
           }
         }
@@ -118,7 +168,7 @@
     "fulfillment_lookup_response": {
       "allOf": [
         { "$ref": "catalog_lookup.json#/$defs/lookup_response" },
-        { "type": "object", "properties": { "products": { "type": "array", "items": { "$ref": "#/$defs/fulfillment_product" } } } }
+        { "type": "object", "properties": { "products": { "type": "array", "items": { "$ref": "#/$defs/fulfillment_lookup_product" } } } }
       ]
     },
     "fulfillment_get_product_request": {
@@ -130,7 +180,7 @@
     "fulfillment_get_product_response": {
       "allOf": [
         { "$ref": "catalog_lookup.json#/$defs/get_product_response" },
-        { "type": "object", "properties": { "product": { "$ref": "#/$defs/fulfillment_product" } } }
+        { "type": "object", "properties": { "product": { "$ref": "#/$defs/fulfillment_detail_product" } } }
       ]
     },
     "dev.ucp.shopping.catalog.search": {
