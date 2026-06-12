@@ -877,32 +877,71 @@ ______________________________________________________________________
 
 ### Buyer Consent Extension
 
+#### Consent Purpose
+
+A buyer's consent decision for a purpose (e.g., marketing, analytics). Carries the current binary state, its source (business default or platform-captured buyer decision), human-readable context, and optional refinements scoping the decision to specific channels, vendors, or programs.
+
+| Name        | Type          | Required | Description                                                                                                                                                                                                                                                                                                                                               |
+| ----------- | ------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| granted     | boolean       | **Yes**  | Whether consent has been granted for this purpose. The `source` field identifies who asserted this state (business default or platform-captured buyer preference).                                                                                                                                                                                        |
+| source      | string        | **Yes**  | Identifies the party that asserted the current `granted` value. `business` means the value reflects the business's default policy; `platform` means the value reflects an explicit buyer decision captured by the platform. **Enum:** `business`, `platform`                                                                                              |
+| description | string        | **Yes**  | Human-readable description of what the buyer is consenting to (e.g., 'Promotional communications across all channels').                                                                                                                                                                                                                                   |
+| links       | Array[object] | No       | Optional links providing context (e.g., privacy policy, terms).                                                                                                                                                                                                                                                                                           |
+| segments    | object        | No       | Optional refinements scoping this purpose to specific channels, vendors, or programs. Keys are reverse-DNS identifiers. UCP currently defines two well-known segment identifiers under `dev.ucp.consent.marketing`: `dev.ucp.consent.marketing.email`, `dev.ucp.consent.marketing.sms`. Other segments follow vendor or merchant reverse-DNS conventions. |
+
+#### Consent Segment
+
+A buyer's consent decision for a specific refinement of a parent purpose (e.g., email marketing under the marketing purpose). Overrides the parent's `granted` value for this scope. Segments do not nest further.
+
+| Name        | Type          | Required | Description                                                                                                                                                                                                                                                                   |
+| ----------- | ------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| granted     | boolean       | **Yes**  | Whether consent has been granted for this segment. Overrides the parent purpose's `granted` value for this specific scope.                                                                                                                                                    |
+| source      | string        | **Yes**  | Identifies the party that asserted the current `granted` value for this segment. `business` means the value reflects the business's default policy; `platform` means the value reflects an explicit buyer decision captured by the platform. **Enum:** `business`, `platform` |
+| description | string        | **Yes**  | Human-readable description of what the buyer is consenting to within this segment (e.g., 'Promotional emails and exclusive offers').                                                                                                                                          |
+| links       | Array[object] | No       | Optional segment-specific links (e.g., channel terms or privacy disclosures).                                                                                                                                                                                                 |
+
 #### Consent
 
-User consent states for data processing
+Per-purpose consent. Keys are reverse-DNS purpose identifiers. UCP defines four well-known purposes: `dev.ucp.consent.marketing`, `dev.ucp.consent.analytics`, `dev.ucp.consent.preferences`, `dev.ucp.consent.sale_or_sharing`. Vendors and merchants may define additional purposes under their own reverse-DNS namespace.
 
-| Name         | Type    | Required | Description                                       |
-| ------------ | ------- | -------- | ------------------------------------------------- |
-| analytics    | boolean | No       | Consent for analytics and performance tracking.   |
-| preferences  | boolean | No       | Consent for storing user preferences.             |
-| marketing    | boolean | No       | Consent for marketing communications.             |
-| sale_of_data | boolean | No       | Consent for selling data to third parties (CCPA). |
+Per-purpose consent. Keys are reverse-DNS purpose identifiers. UCP defines four well-known purposes: `dev.ucp.consent.marketing`, `dev.ucp.consent.analytics`, `dev.ucp.consent.preferences`, `dev.ucp.consent.sale_or_sharing`. Vendors and merchants may define additional purposes under their own reverse-DNS namespace.
 
 #### Buyer with Consent
 
-Buyer object extended with consent tracking.
+Buyer object extended with per-purpose consent.
 
-| Name         | Type   | Required | Description              |
-| ------------ | ------ | -------- | ------------------------ |
-| first_name   | string | No       | First name of the buyer. |
-| last_name    | string | No       | Last name of the buyer.  |
-| email        | string | No       | Email of the buyer.      |
-| phone_number | string | No       | E.164 standard.          |
-| consent      | object | No       | Consent tracking fields. |
+| Name         | Type   | Required | Description                                                            |
+| ------------ | ------ | -------- | ---------------------------------------------------------------------- |
+| first_name   | string | No       | First name of the buyer.                                               |
+| last_name    | string | No       | Last name of the buyer.                                                |
+| email        | string | No       | Email of the buyer.                                                    |
+| phone_number | string | No       | E.164 standard.                                                        |
+| consent      | object | No       | Per-purpose consent decisions and business-advertised consent options. |
+
+#### Cart with Buyer Consent
+
+Cart extended with buyer consent.
+
+| Name         | Type          | Required | Description                                                                                                                                                                                                                                                                                                                                                                                             |
+| ------------ | ------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ucp          | any           | **Yes**  | UCP metadata for cart responses. No payment handlers needed pre-checkout.                                                                                                                                                                                                                                                                                                                               |
+| id           | string        | **Yes**  | Unique cart identifier.                                                                                                                                                                                                                                                                                                                                                                                 |
+| line_items   | Array[object] | **Yes**  | Cart line items. Same structure as checkout. Full replacement on update.                                                                                                                                                                                                                                                                                                                                |
+| context      | object        | No       | Buyer signals for localization (country, region, postal_code). Merchant uses for pricing, availability, currency. Falls back to geo-IP if omitted.                                                                                                                                                                                                                                                      |
+| signals      | object        | No       | Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace. |
+| attribution  | object        | No       | Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.                                                                                                                                                                                        |
+| buyer        | object        | No       | Optional buyer information for personalized estimates.                                                                                                                                                                                                                                                                                                                                                  |
+| currency     | string        | **Yes**  | ISO 4217 currency code. Determined by merchant based on context or geo-IP.                                                                                                                                                                                                                                                                                                                              |
+| totals       | Array[any]    | **Yes**  | Estimated cost breakdown. May be partial if shipping/tax not yet calculable.                                                                                                                                                                                                                                                                                                                            |
+| messages     | Array[object] | No       | Validation messages, warnings, or informational notices.                                                                                                                                                                                                                                                                                                                                                |
+| links        | Array[object] | No       | Optional merchant links (policies, FAQs).                                                                                                                                                                                                                                                                                                                                                               |
+| continue_url | string        | No       | URL for cart handoff and session recovery. Enables sharing and human-in-the-loop flows.                                                                                                                                                                                                                                                                                                                 |
+| expires_at   | string        | No       | Cart expiry timestamp (RFC 3339). Optional.                                                                                                                                                                                                                                                                                                                                                             |
+| buyer        | any           | No       | Buyer with consent tracking.                                                                                                                                                                                                                                                                                                                                                                            |
 
 #### Checkout with Buyer Consent
 
-Checkout extended with consent tracking via buyer object.
+Checkout extended with buyer consent.
 
 | Name         | Type          | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | ------------ | ------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

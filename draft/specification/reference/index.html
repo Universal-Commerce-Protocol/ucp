@@ -2994,6 +2994,28 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#consent-purpose" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consent Purpose
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consent-segment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consent Segment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#consent" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3009,6 +3031,17 @@
     <span class="md-ellipsis">
       
         Buyer with Consent
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cart-with-buyer-consent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cart with Buyer Consent
       
     </span>
   </a>
@@ -4422,6 +4455,28 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#consent-purpose" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consent Purpose
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consent-segment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consent Segment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#consent" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4437,6 +4492,17 @@
     <span class="md-ellipsis">
       
         Buyer with Consent
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cart-with-buyer-consent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cart with Buyer Consent
       
     </span>
   </a>
@@ -7623,8 +7689,8 @@ within the UCP.</p>
 <p><strong>Enum:</strong> <code>mandate_required</code>, <code>agent_missing_key</code>, <code>mandate_invalid_signature</code>, <code>mandate_expired</code>, <code>mandate_scope_mismatch</code>, <code>merchant_authorization_invalid</code>, <code>merchant_authorization_missing</code></p>
 <hr />
 <h3 id="buyer-consent-extension">Buyer Consent Extension<a class="headerlink" href="#buyer-consent-extension" title="Permanent link">&para;</a></h3>
-<h4 id="consent">Consent<a class="headerlink" href="#consent" title="Permanent link">&para;</a></h4>
-<p>User consent states for data processing</p>
+<h4 id="consent-purpose">Consent Purpose<a class="headerlink" href="#consent-purpose" title="Permanent link">&para;</a></h4>
+<p>A buyer's consent decision for a purpose (e.g., marketing, analytics). Carries the current binary state, its source (business default or platform-captured buyer decision), human-readable context, and optional refinements scoping the decision to specific channels, vendors, or programs.</p>
 <table>
 <thead>
 <tr>
@@ -7636,33 +7702,80 @@ within the UCP.</p>
 </thead>
 <tbody>
 <tr>
-<td style="text-align: left;">analytics</td>
+<td style="text-align: left;">granted</td>
 <td style="text-align: left;">boolean</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Consent for analytics and performance tracking.</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Whether consent has been granted for this purpose. The <code>source</code> field identifies who asserted this state (business default or platform-captured buyer preference).</td>
 </tr>
 <tr>
-<td style="text-align: left;">preferences</td>
-<td style="text-align: left;">boolean</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Consent for storing user preferences.</td>
+<td style="text-align: left;">source</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Identifies the party that asserted the current <code>granted</code> value. <code>business</code> means the value reflects the business's default policy; <code>platform</code> means the value reflects an explicit buyer decision captured by the platform.<br><strong>Enum:</strong> <code>business</code>, <code>platform</code></td>
 </tr>
 <tr>
-<td style="text-align: left;">marketing</td>
-<td style="text-align: left;">boolean</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Consent for marketing communications.</td>
+<td style="text-align: left;">description</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Human-readable description of what the buyer is consenting to (e.g., 'Promotional communications across all channels').</td>
 </tr>
 <tr>
-<td style="text-align: left;">sale_of_data</td>
-<td style="text-align: left;">boolean</td>
+<td style="text-align: left;">links</td>
+<td style="text-align: left;">Array[object]</td>
 <td style="text-align: left;">No</td>
-<td style="text-align: left;">Consent for selling data to third parties (CCPA).</td>
+<td style="text-align: left;">Optional links providing context (e.g., privacy policy, terms).</td>
+</tr>
+<tr>
+<td style="text-align: left;">segments</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional refinements scoping this purpose to specific channels, vendors, or programs. Keys are reverse-DNS identifiers. UCP currently defines two well-known segment identifiers under <code>dev.ucp.consent.marketing</code>: <code>dev.ucp.consent.marketing.email</code>, <code>dev.ucp.consent.marketing.sms</code>. Other segments follow vendor or merchant reverse-DNS conventions.</td>
 </tr>
 </tbody>
 </table>
+<h4 id="consent-segment">Consent Segment<a class="headerlink" href="#consent-segment" title="Permanent link">&para;</a></h4>
+<p>A buyer's consent decision for a specific refinement of a parent purpose (e.g., email marketing under the marketing purpose). Overrides the parent's <code>granted</code> value for this scope. Segments do not nest further.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">granted</td>
+<td style="text-align: left;">boolean</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Whether consent has been granted for this segment. Overrides the parent purpose's <code>granted</code> value for this specific scope.</td>
+</tr>
+<tr>
+<td style="text-align: left;">source</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Identifies the party that asserted the current <code>granted</code> value for this segment. <code>business</code> means the value reflects the business's default policy; <code>platform</code> means the value reflects an explicit buyer decision captured by the platform.<br><strong>Enum:</strong> <code>business</code>, <code>platform</code></td>
+</tr>
+<tr>
+<td style="text-align: left;">description</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Human-readable description of what the buyer is consenting to within this segment (e.g., 'Promotional emails and exclusive offers').</td>
+</tr>
+<tr>
+<td style="text-align: left;">links</td>
+<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional segment-specific links (e.g., channel terms or privacy disclosures).</td>
+</tr>
+</tbody>
+</table>
+<h4 id="consent">Consent<a class="headerlink" href="#consent" title="Permanent link">&para;</a></h4>
+<p>Per-purpose consent. Keys are reverse-DNS purpose identifiers. UCP defines four well-known purposes: <code>dev.ucp.consent.marketing</code>, <code>dev.ucp.consent.analytics</code>, <code>dev.ucp.consent.preferences</code>, <code>dev.ucp.consent.sale_or_sharing</code>. Vendors and merchants may define additional purposes under their own reverse-DNS namespace.</p>
+<p>Per-purpose consent. Keys are reverse-DNS purpose identifiers. UCP defines four well-known purposes: <code>dev.ucp.consent.marketing</code>, <code>dev.ucp.consent.analytics</code>, <code>dev.ucp.consent.preferences</code>, <code>dev.ucp.consent.sale_or_sharing</code>. Vendors and merchants may define additional purposes under their own reverse-DNS namespace.</p>
 <h4 id="buyer-with-consent">Buyer with Consent<a class="headerlink" href="#buyer-with-consent" title="Permanent link">&para;</a></h4>
-<p>Buyer object extended with consent tracking.</p>
+<p>Buyer object extended with per-purpose consent.</p>
 <table>
 <thead>
 <tr>
@@ -7701,12 +7814,110 @@ within the UCP.</p>
 <td style="text-align: left;">consent</td>
 <td style="text-align: left;">object</td>
 <td style="text-align: left;">No</td>
-<td style="text-align: left;">Consent tracking fields.</td>
+<td style="text-align: left;">Per-purpose consent decisions and business-advertised consent options.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="cart-with-buyer-consent">Cart with Buyer Consent<a class="headerlink" href="#cart-with-buyer-consent" title="Permanent link">&para;</a></h4>
+<p>Cart extended with buyer consent.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">ucp</td>
+<td style="text-align: left;">any</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">UCP metadata for cart responses. No payment handlers needed pre-checkout.</td>
+</tr>
+<tr>
+<td style="text-align: left;">id</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Unique cart identifier.</td>
+</tr>
+<tr>
+<td style="text-align: left;">line_items</td>
+<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Cart line items. Same structure as checkout. Full replacement on update.</td>
+</tr>
+<tr>
+<td style="text-align: left;">context</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Buyer signals for localization (country, region, postal_code). Merchant uses for pricing, availability, currency. Falls back to geo-IP if omitted.</td>
+</tr>
+<tr>
+<td style="text-align: left;">signals</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
+</tr>
+<tr>
+<td style="text-align: left;">attribution</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.</td>
+</tr>
+<tr>
+<td style="text-align: left;">buyer</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional buyer information for personalized estimates.</td>
+</tr>
+<tr>
+<td style="text-align: left;">currency</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">ISO 4217 currency code. Determined by merchant based on context or geo-IP.</td>
+</tr>
+<tr>
+<td style="text-align: left;">totals</td>
+<td style="text-align: left;">Array[any]</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Estimated cost breakdown. May be partial if shipping/tax not yet calculable.</td>
+</tr>
+<tr>
+<td style="text-align: left;">messages</td>
+<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Validation messages, warnings, or informational notices.</td>
+</tr>
+<tr>
+<td style="text-align: left;">links</td>
+<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional merchant links (policies, FAQs).</td>
+</tr>
+<tr>
+<td style="text-align: left;">continue_url</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">URL for cart handoff and session recovery. Enables sharing and human-in-the-loop flows.</td>
+</tr>
+<tr>
+<td style="text-align: left;">expires_at</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Cart expiry timestamp (RFC 3339). Optional.</td>
+</tr>
+<tr>
+<td style="text-align: left;">buyer</td>
+<td style="text-align: left;">any</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Buyer with consent tracking.</td>
 </tr>
 </tbody>
 </table>
 <h4 id="checkout-with-buyer-consent">Checkout with Buyer Consent<a class="headerlink" href="#checkout-with-buyer-consent" title="Permanent link">&para;</a></h4>
-<p>Checkout extended with consent tracking via buyer object.</p>
+<p>Checkout extended with buyer consent.</p>
 <table>
 <thead>
 <tr>
