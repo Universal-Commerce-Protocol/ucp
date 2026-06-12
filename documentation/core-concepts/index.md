@@ -102,7 +102,7 @@ The following are examples of extensions defined in UCP — see the [Specificati
 | `dev.ucp.shopping.discount`      | checkout, cart | Discount codes and promotions                        |
 | `dev.ucp.shopping.fulfillment`   | checkout       | Shipping and delivery options                        |
 | `dev.ucp.shopping.ap2_mandate`   | checkout       | Non-repudiable authorization for autonomous commerce |
-| `dev.ucp.shopping.buyer_consent` | checkout       | Explicit consent capture                             |
+| `dev.ucp.shopping.buyer_consent` | checkout, cart | Explicit consent capture                             |
 
 ### Services
 
