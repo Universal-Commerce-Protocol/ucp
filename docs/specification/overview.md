@@ -494,7 +494,7 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
   },
   "signing_keys": [
     {
-      "kid": "NzbLsXh8uDCcd-6MNwXF4W_7noWXFZAfHkxZsRGC9Xs",
+      "kid": "kPrK_qmxVWaYVA9wwBF6Iuo3vVzz7TxHCTwXBygrS4k",
       "kty": "OKP",
       "crv": "Ed25519",
       "x": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo",
@@ -513,7 +513,7 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
   ],
   "keys": [
     {
-      "kid": "NzbLsXh8uDCcd-6MNwXF4W_7noWXFZAfHkxZsRGC9Xs",
+      "kid": "kPrK_qmxVWaYVA9wwBF6Iuo3vVzz7TxHCTwXBygrS4k",
       "kty": "OKP",
       "crv": "Ed25519",
       "x": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo",

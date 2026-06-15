@@ -184,7 +184,7 @@ EdDSA keys.
 <!-- ucp:example schema=profile extract=$ target=$.signing_keys[0] -->
 ```json
 {
-  "kid": "NzbLsXh8uDCcd-6MNwXF4W_7noWXFZAfHkxZsRGC9Xs",
+  "kid": "kPrK_qmxVWaYVA9wwBF6Iuo3vVzz7TxHCTwXBygrS4k",
   "kty": "OKP",
   "crv": "Ed25519",
   "x": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo",
@@ -309,7 +309,7 @@ UCP-Agent: profile="https://platform.example/.well-known/ucp"
 Signature-Agent: sig1="https://platform.example/.well-known/ucp"
 Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000
 Content-Digest: sha-256=:X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=:
-Signature-Input: sig1=("@method" "@authority" "@path" "signature-agent";key="sig1" "ucp-agent" "idempotency-key" "content-digest" "content-type");keyid="NzbLsXh8uDCcd-6MNwXF4W_7noWXFZAfHkxZsRGC9Xs";created=1738617600;expires=1738621200;tag="web-bot-auth"
+Signature-Input: sig1=("@method" "@authority" "@path" "signature-agent";key="sig1" "ucp-agent" "idempotency-key" "content-digest" "content-type");keyid="kPrK_qmxVWaYVA9wwBF6Iuo3vVzz7TxHCTwXBygrS4k";created=1738617600;expires=1738621200;tag="web-bot-auth"
 Signature: sig1=:base64_ed25519_signature_value:
 
 {
