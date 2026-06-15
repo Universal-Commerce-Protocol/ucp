@@ -131,6 +131,10 @@ requirements of a purchase before completion.
 
 ### Business Responsibilities
 
+**For Policy References:**
+
+- **MUST** ensure every `return_policy_id` on a line item resolves to a key present in the top-level `return_policies` registry.
+
 **For Policy Locking:**
 
 - **MUST** honor the return policy that was in effect at the time of order placement; that policy MUST be sourced from the Order resource (when available) rather than recomputed from current merchant rules. The return policy returned at checkout response time is the policy in effect for the buyer at that moment.
@@ -169,6 +173,7 @@ assurance:
 **For Absent Policy Data:**
 
 - **MUST NOT** infer items are non-returnable if the Return capability is advertised in discovery but `return_policies` is absent or empty in a checkout response. Platforms SHOULD fall back to general merchant return info (e.g., via the merchant's profile URL).
+- **MUST** treat unresolved policy references (`return_policy_id` without a matching key in `return_policies`) as having no stated return policy (per the Absent Policy Data rule) and **MUST NOT** infer the item is non-returnable.
 
 **Interpretation of Policy States:**
 

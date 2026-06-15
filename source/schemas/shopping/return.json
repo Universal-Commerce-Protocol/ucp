@@ -12,7 +12,8 @@
       "properties": {
         "return_period_in_days": {
           "type": "integer",
-          "description": "Length of the merchant's return window in days, measured from the date of delivery. This is a policy statement — it communicates the window duration, not a pre-computed deadline."
+          "minimum": 0,
+          "description": "Length of the merchant's return window in days, measured from the date of delivery. This is a policy statement — it communicates the window duration, not a pre-computed deadline. A value of 0 explicitly indicates the items are non-returnable (final sale)."
         },
         "supported_resolutions": {
           "type": "array",
@@ -108,7 +109,8 @@
                     "properties": {
                       "return_policy_id": {
                         "type": "string",
-                        "description": "ID of the return policy that applies to this line item. Must reference a key in the top-level return_policies map."
+                        "description": "ID of the return policy that applies to this line item. Must reference a key in the top-level return_policies map.",
+                        "ucp_request": "omit"
                       }
                     }
                   }
