@@ -7,7 +7,7 @@
   "properties": {
     "allows_multi_destination": {
       "type": "object",
-      "description": "Permits multiple destinations per method type.",
+      "description": "Permits multiple destinations per method type. Keyed by fulfillment method `type`; `shipping` and `pickup` are well-known, and businesses MAY include additional method types.",
       "properties": {
         "shipping": {
           "type": "boolean",
@@ -18,7 +18,7 @@
           "description": "Multiple pickup locations allowed."
         }
       },
-      "additionalProperties": false
+      "additionalProperties": true
     },
     "allows_method_combinations": {
       "type": "array",
@@ -27,7 +27,7 @@
         "type": "array",
         "items": {
           "type": "string",
-          "enum": ["shipping", "pickup"]
+          "description": "Fulfillment method `type`. Well-known values: `shipping`, `pickup`."
         }
       }
     }

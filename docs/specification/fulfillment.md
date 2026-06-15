@@ -541,6 +541,24 @@ additional values, and consumers ignore values they do not recognize. New
 well-known values are added via a UCP RFC and a `dev.ucp.shopping.fulfillment`
 version bump.
 
+**Example — adding `curbside`.** No schema change or registration is needed.
+Emit the value directly as the `type` on catalog and checkout, and filter with
+`filters.method: ["curbside"]`. For cart and checkout negotiation, declare its
+behavior in the business profile `config` — set `allows_multi_destination.curbside`
+and include `["shipping", "curbside"]` in `allows_method_combinations` (see
+[Business Profile](#business-profile)). On a catalog variant's method:
+
+<!-- ucp:example schema=shopping/fulfillment def=catalog_fulfillment_method op=read -->
+```json
+{
+  "type": "curbside",
+  "location": "loc_downtown",
+  "availability": {
+    "available": true
+  }
+}
+```
+
 ## Examples
 
 ### Basic
