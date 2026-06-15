@@ -310,7 +310,10 @@ p.hero-description {
   max-height: 45px;
 }
 
-.partner-logo img[src*="Amadeus"],
+.partner-logo img[src*="Amadeus"] {
+  max-height: 62px;
+}
+
 .partner-logo img[src*="Block"],
 .partner-logo img[src*="Booking"],
 .partner-logo img[src*="Choice"],
@@ -358,6 +361,12 @@ p.hero-description {
   padding: 0;
 }
 
+.lodging-logos .partner-logo img[src*="Amadeus"] {
+  height: 60px;
+  width: 170px;
+  max-width: 170px;
+}
+
 .tab-action-container {
   text-align: center;
   margin-top: 24px;
@@ -395,9 +404,11 @@ p.hero-description {
     height: 30px;
   }
 
-  /* Specific override for Amadeus to make it smaller */
+  /* Make Amadeus more prominent in Lodging */
   .lodging-logos .partner-logo img[src*="Amadeus"] {
-    height: 25px;
+    height: 60px;
+    width: 170px;
+    max-width: 170px;
   }
 
   /* Increase Google slightly in Lodging */

@@ -117,6 +117,7 @@ sandboxing
 fbclid
 gclid
 ttclid
+ietf
 Accor
 Kogan
 Petbarn
