@@ -526,8 +526,11 @@ shipping+pickup.
 ### Method Types
 
 `fulfillment_method.type` (checkout) and `catalog_fulfillment_method.type`
-(catalog) share one vocabulary of fulfillment method types. The field is an
-open string: consumers ignore values they do not recognize.
+(catalog) share one open-string vocabulary. Presentation is method-agnostic:
+platforms **SHOULD** present every method, rendering `description` and
+`availability` regardless of its `type` (see [Rendering](#rendering)), and
+**SHOULD NOT** omit a method solely because they do not recognize its `type`.
+Recognizing a `type` only enables optional type-specific UX.
 
 **Well-known values:**
 
@@ -536,10 +539,10 @@ open string: consumers ignore values they do not recognize.
 | `shipping` | Carrier ships to the buyer's address. |
 | `pickup` | Buyer picks up at a named location. |
 
-**Adding method types.** `type` is an open string: businesses MAY use
-additional values, and consumers ignore values they do not recognize. New
-well-known values are added via a UCP RFC and a `dev.ucp.shopping.fulfillment`
-version bump.
+**Adding method types.** Because `type` is an open string, a business MAY
+introduce a new value at any time with no consumer change: it advertises the
+value (and filters on it via `filters.methods`), and consumers present it
+like any other method.
 
 **Example — adding `curbside`.** No schema change or registration is needed.
 Emit the value directly as the `type` on catalog and checkout, and filter with
