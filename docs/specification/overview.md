@@ -387,9 +387,11 @@ is not effectively revoked until it is absent from **both** arrays. A
 future UCP version may promote `keys[]` to the canonical field; profiles
 publishing both arrays today are positioned for that transition.
 
-UCP supports two key types: **EC** (ECDSA P-256, P-384) and **OKP**
-(EdDSA Ed25519). See [Message Signatures](signatures.md) for key
-format, algorithms, lookup, and rotation.
+UCP defines two well-known key types: **EC** (ECDSA P-256, P-384) and
+**OKP** (EdDSA Ed25519); the key-type, curve, and algorithm
+vocabularies are open and verifiers skip keys they do not recognize.
+See [Message Signatures](signatures.md) for key format, algorithms,
+lookup, and rotation.
 
 #### Business Profile
 
@@ -1345,10 +1347,14 @@ below processes a single signature.
    WBA-interop behavior. If the thumbprint check fails, skip this
    signature.
 6. **Verify the signature** using the matched key. The signing
-   algorithm is derived from the JWK's `kty`/`crv`.
+   algorithm is derived from the JWK's `kty`/`crv`. If the verifier
+   does not support the matched key's `kty`, `crv`, or `alg`, **skip**
+   this signature; it yields `algorithm_unsupported` if no other
+   signature authenticates the request.
 
-The request **MUST** be rejected (`key_not_found` or related error)
-only when every signature has been skipped or fails verification.
+The request **MUST** be rejected (`key_not_found`,
+`algorithm_unsupported`, or related error) only when every signature
+has been skipped or fails verification.
 
 **Authenticated identity.** When a signature verifies, the
 authenticated signer is identified by the URL of the key directory

@@ -99,6 +99,13 @@ additive option that unlocks Web Bot Auth (WBA) interop.
 * Support for `EdDSA` (Ed25519) is **OPTIONAL** for general UCP
   verifiers. Verifiers that explicitly support Web Bot Auth-compatible
   signatures **MUST** support `EdDSA`.
+* The `kty`/`crv`/`alg` vocabularies are **open**. A verifier that
+  encounters a key whose type, curve, or algorithm it does not support
+  **MUST NOT** reject the published key set; the unsupported key simply
+  remains unusable to that verifier. A signature that references such a
+  key fails with `algorithm_unsupported` (and, in a multi-signature
+  request, is skipped per the [Identity Resolution
+  Algorithm](overview.md#identity-resolution-algorithm)).
 
 **Usage guidance:**
 
@@ -137,9 +144,11 @@ For on-the-wire signature encoding details, see
 
 Public keys **MUST** be represented using **JSON Web Key (JWK)** format as
 defined in [RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517).
-UCP supports two JWK shapes: **EC** (per RFC 7518 §6.2) for ECDSA keys and
-**OKP** (per [RFC 8037](https://datatracker.ietf.org/doc/html/rfc8037)) for
-EdDSA keys.
+UCP defines two well-known JWK shapes: **EC** (per RFC 7518 §6.2) for ECDSA
+keys and **OKP** (per [RFC 8037](https://datatracker.ietf.org/doc/html/rfc8037))
+for EdDSA keys. The JWK vocabulary is open (see [Signature
+Algorithms](#signature-algorithms)): profiles MAY publish keys of other
+types, and verifiers skip those they cannot use.
 
 **EC Key Structure (ECDSA P-256, P-384):**
 
@@ -655,6 +664,12 @@ verify_rest_request(request):
     if not public_key:
         return error("key_not_found")
 
+    // 2a. Skip keys whose algorithm this verifier does not support.
+    // The kty/crv/alg vocabularies are open (see Signature Algorithms);
+    // an unsupported key never invalidates the whole key set.
+    if not algorithm_supported(public_key):
+        return error("algorithm_unsupported")
+
     // 3. Verify body digest (if body present)
     if "content-digest" in components:
         expected = "sha-256=:" + base64(sha256(request.body_bytes)) + ":"
@@ -695,6 +710,12 @@ verify_rest_response(response, signer_profile_url):
     public_key = find_key_by_kid(profile, keyid)
     if not public_key:
         return error("key_not_found")
+
+    // 2a. Skip keys whose algorithm this verifier does not support.
+    // The kty/crv/alg vocabularies are open (see Signature Algorithms);
+    // an unsupported key never invalidates the whole key set.
+    if not algorithm_supported(public_key):
+        return error("algorithm_unsupported")
 
     // 3. Verify body digest (if body present)
     if "content-digest" in components:
