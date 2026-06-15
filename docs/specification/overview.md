@@ -379,9 +379,13 @@ below. When both arrays are present, they **MUST** list the same set
 of `kid` values, and entries sharing a `kid` **MUST** be semantically
 equivalent — i.e., have identical RFC 7638 SHA-256 thumbprints
 (serialization differences such as member order are not significant).
-Rotation updates apply to both arrays atomically. A future UCP version may
-promote `keys[]` to the canonical field; profiles publishing both
-arrays today are positioned for that transition.
+Adding, rotating, or removing a key **MUST** update both arrays
+atomically. Removal is the security-critical case: a verifier reads only
+one array, so a key dropped from `signing_keys[]` but still listed in
+`keys[]` (or vice versa) keeps verifying — a revoked or compromised key
+is not effectively revoked until it is absent from **both** arrays. A
+future UCP version may promote `keys[]` to the canonical field; profiles
+publishing both arrays today are positioned for that transition.
 
 UCP supports two key types: **EC** (ECDSA P-256, P-384) and **OKP**
 (EdDSA Ed25519). See [Message Signatures](signatures.md) for key

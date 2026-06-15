@@ -219,7 +219,9 @@ To rotate keys without service interruption:
    alongside existing keys
 2. **Start signing** — Begin signing with the new key
 3. **Grace period** — Continue accepting signatures from old keys (minimum 7 days)
-4. **Remove old key** — Remove the old key from the profile
+4. **Remove old key** — Remove the old key from `signing_keys[]` (and
+   from `keys[]` if published). A key still listed in either array
+   continues to verify.
 
 **Recommendations:**
 
@@ -228,7 +230,9 @@ To rotate keys without service interruption:
 
 **Key Compromise Response:**
 
-1. Immediately remove compromised key from profile
+1. Immediately remove the compromised key from `signing_keys[]` and
+   `keys[]` (if published); it continues to verify until absent from
+   both arrays
 2. Add new key with different `kid`
 3. Reject all signatures made with compromised key
 
