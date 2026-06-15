@@ -138,7 +138,7 @@
               "$ref": "types/fulfillment_destination_filter.json",
               "description": "Where the order is fulfilled to — may differ from the buyer's `context` location (e.g. a gift). A `location` id, or a coarse address (`address_country`/`address_region`/`postal_code`). Restricts results to what can be fulfilled there and seeds method `availability`. Supersedes `context`."
             },
-            "method": {
+            "methods": {
               "type": "array",
               "items": { "type": "string" },
               "description": "Restrict results to these fulfillment method types (e.g. [\"pickup\"]). Well-known values: `shipping`, `pickup`."

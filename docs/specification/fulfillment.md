@@ -347,7 +347,7 @@ comparing other locations is handled separately.
     / `postal_code`). It restricts results to what can be fulfilled there
     and seeds method `availability`. It may differ from `context` (e.g. a
     gift).
-* **`filters.method`** restricts results to specific method types (e.g.
+* **`filters.methods`** restricts results to specific method types (e.g.
     `["pickup"]`).
 
 Provide location once: `context` for where the buyer is, `fulfills_to` for
@@ -543,7 +543,7 @@ version bump.
 
 **Example — adding `curbside`.** No schema change or registration is needed.
 Emit the value directly as the `type` on catalog and checkout, and filter with
-`filters.method: ["curbside"]`. For cart and checkout negotiation, declare its
+`filters.methods: ["curbside"]`. For cart and checkout negotiation, declare its
 behavior in the business profile `config` — set `allows_multi_destination.curbside`
 and include `["shipping", "curbside"]` in `allows_method_combinations` (see
 [Business Profile](#business-profile)). On a catalog variant's method:
