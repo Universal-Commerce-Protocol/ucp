@@ -342,11 +342,14 @@ comparing other locations is handled separately.
     where the *buyer* is — a non-binding hint the business uses to report
     `availability`. On a market-scoped catalog it MAY narrow results;
     otherwise it annotates rather than removes them.
-* **`filters.fulfills_to`** is where the order is *fulfilled to* — a
-    `location` id, or a coarse address (`address_country` / `address_region`
-    / `postal_code`). It restricts results to what can be fulfilled there
-    and seeds method `availability`. It may differ from `context` (e.g. a
-    gift).
+* **`filters.fulfills_to`** is where the order is *fulfilled to* — a single
+    destination, named by value (a coarse address: `address_country` /
+    `address_region` / `postal_code`) or by reference (a `location` id — a
+    store, pickup point, or saved address). Platforms **SHOULD** provide one
+    or the other, not both; if both are present, a business **SHOULD** use
+    the more specific — typically `location`. It restricts results to what
+    can be fulfilled there and seeds method `availability`, and may differ
+    from `context` (e.g. a gift).
 * **`filters.methods`** restricts results to specific method types (e.g.
     `["pickup"]`).
 
