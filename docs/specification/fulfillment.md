@@ -538,24 +538,26 @@ Recognizing a `type` only enables optional type-specific UX.
 | --- | --- |
 | `shipping` | Carrier ships to the buyer's address. |
 | `pickup` | Buyer picks up at a named location. |
+| `curbside` | Buyer picks up at a location without leaving their vehicle (drive-up). |
 
 **Adding method types.** Because `type` is an open string, a business MAY
 introduce a new value at any time with no consumer change: it advertises the
 value (and filters on it via `filters.methods`), and consumers present it
 like any other method.
 
-**Example — adding `curbside`.** No schema change or registration is needed.
-Emit the value directly as the `type` on catalog and checkout, and filter with
-`filters.methods: ["curbside"]`. For cart and checkout negotiation, declare its
-behavior in the business profile `config` — set `allows_multi_destination.curbside`
-and include `["shipping", "curbside"]` in `allows_method_combinations` (see
+**Example — adding `locker_pickup`.** No schema change or registration is
+needed. Emit the value directly as the `type` on catalog and checkout, and
+filter with `filters.methods: ["locker_pickup"]`. For cart and checkout
+negotiation, declare its behavior in the business profile `config` — set
+`allows_multi_destination.locker_pickup` and include
+`["shipping", "locker_pickup"]` in `allows_method_combinations` (see
 [Business Profile](#business-profile)). On a catalog variant's method:
 
 <!-- ucp:example schema=shopping/fulfillment def=catalog_fulfillment_method op=read -->
 ```json
 {
-  "type": "curbside",
-  "location": "loc_downtown",
+  "type": "locker_pickup",
+  "location": "loc_locker_5th",
   "availability": {
     "available": true
   }
