@@ -41,6 +41,13 @@ Validate your changes locally using these commands before considering a task com
 
 ### Code Quality & Schemas
 
+**Installing ucp-schema:** If `ucp-schema` is not available in your environment, install it using Cargo:
+
+* From crates.io: `cargo install ucp-schema`
+* From git: `cargo install --git https://github.com/universal-commerce-protocol/ucp-schema`
+
+Then validate your changes with:
+
 * **Lint Schemas:** `ucp-schema lint source/` (after schema changes)
 * **Regenerate SDK Models:** `bash sdk/python/generate_models.sh` (after schema changes)
 * **Run Pre-commit Checks:** `pre-commit run --all-files` (after all changes)
