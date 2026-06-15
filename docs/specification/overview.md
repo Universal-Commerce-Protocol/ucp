@@ -437,6 +437,11 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
           "spec": "https://ucp.dev/{{ ucp_version }}/specification/identity-linking",
           "schema": "https://ucp.dev/{{ ucp_version }}/schemas/common/identity_linking.json",
           "config": {
+            "providers": {
+              "com.example.idp": [
+                { "type": "oauth2", "auth_url": "https://accounts.example.com/" }
+              ]
+            },
             "scopes": {
               "dev.ucp.shopping.order:read":   {},
               "dev.ucp.shopping.order:manage": {}
