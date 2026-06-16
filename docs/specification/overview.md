@@ -1242,56 +1242,52 @@ status code (see [Error Handling](#error-handling)).
 
 ### Deployment Patterns for WBA Interop
 
-A UCP profile served at a URL MAY also serve as a Web Bot Auth-
-compatible key directory at the same URL when the profile carries a
-top-level `keys[]` array (per RFC 7517 JWK Set Format). Two
-deployment patterns are recognized; integrators choose based on their
-hosting infrastructure.
+A UCP profile that carries a top-level `keys[]` array (RFC 7517 JWK Set
+Format) is already a valid JWK Set, so it can serve as a Web Bot Auth
+key source directly. Two deployment patterns are recognized.
 
-#### Pattern 1: Content negotiation (one URL, two media types)
+#### Pattern 1: Profile as JWK Set (recommended)
 
-The server responds to the same profile URL with different
-`Content-Type` based on the request's `Accept` header:
+The signer points `Signature-Agent` at the UCP profile URL with
+`type=jwks_uri`:
 
-- `Accept: application/json` (or no `Accept` header) — returns the UCP
-  profile as `application/json` with no HTTP-layer response signature.
-- `Accept: application/http-message-signatures-directory+json` — returns
-  the **same body** served with the Web Bot Auth media type, plus
-  per-key response signatures (see
-  [WBA Response Signing](#wba-response-signing) below).
+```text
+Signature-Agent: sig1="https://platform.example/.well-known/ucp";type=jwks_uri
+```
 
-The body bytes are identical between the two responses; only the
-`Content-Type` header and the presence of `Signature-Input` /
-`Signature` response headers differ.
+A WBA verifier fetches that URL directly and reads its `keys[]` array as
+the JWK Set, selecting the key by `keyid`. One URL, one key set, one
+document that is simultaneously the UCP profile and the WBA key source.
+The profile is served as `application/json`; static-flat-file hosting is
+sufficient and no separate directory document is required. Integrity
+derives from TLS to the profile URL.
 
-Best fit for: dynamic hosting infrastructure (edge runtimes, API
-gateways, application servers) where content negotiation is
-straightforward.
+#### Pattern 2: Well-known directory (fallback)
 
-#### Pattern 2: Two URLs (isolated signing complexity)
+Verifiers using the default `type=directory` resolve the directory from
+the well-known path at the URL's origin, not the member value verbatim.
+To interoperate with these, the site hosts two endpoints with shared key
+material:
 
-The site hosts two endpoints with shared key material:
+- `/.well-known/ucp` — the UCP profile as `application/json`.
+- `/.well-known/http-message-signatures-directory` — a WBA directory
+  (`application/http-message-signatures-directory+json`, RFC 7517 JWK
+  Set form) carrying per-key response signatures (see WBA Response
+  Signing below).
 
-- `/.well-known/ucp` — serves the UCP profile as `application/json`
-  with no HTTP-layer response signature. Static-flat-file hosting is
-  sufficient.
-- `/.well-known/http-message-signatures-directory` — serves a WBA
-  directory format with per-key response signatures. Requires signing-
-  capable hosting.
-
-Both endpoints publish the same key material. Key rotation updates
-both.
-
-Best fit for: deployments with simple static-file hosting for the UCP
-profile, isolating dynamic response-signing complexity to a separate
-dedicated endpoint.
+Both endpoints publish the same keys; rotation and revocation update
+both. Best fit for interop with verifiers that require the registered
+well-known directory path.
 
 #### WBA Response Signing
 
-A profile URL serving as a WBA-compatible key directory SHOULD carry
-per-key self-signatures on the HTTP response, as defined by
+A WBA directory (Pattern 2's
+`/.well-known/http-message-signatures-directory`) SHOULD carry per-key
+self-signatures on the HTTP response, as defined by
 [draft-meunier-http-message-signatures-directory](https://datatracker.ietf.org/doc/draft-meunier-http-message-signatures-directory/)
-§5.2. Verifiers SHOULD discard keys without a valid self-signature.
+§5.2; verifiers SHOULD discard keys without a valid self-signature. A
+Pattern 1 `jwks_uri` profile is fetched directly over HTTPS and is not a
+signed directory; its integrity derives from TLS.
 
 The signed response **MAY** be precomputed and cached. The signature
 base binds `@authority`, so any cache (CDN, reverse proxy, in-process)
@@ -1299,10 +1295,10 @@ base binds `@authority`, so any cache (CDN, reverse proxy, in-process)
 cached signature served for `Host: a.example` will fail verification
 under `Host: b.example` requests.
 
-Operators wanting to avoid in-band response signing on the UCP
-profile URL MAY use
-[Pattern 2](#pattern-2-two-urls-isolated-signing-complexity) to
-isolate signing to a separate endpoint.
+Operators preferring to avoid in-band response signing entirely can use
+[Pattern 1](#pattern-1-profile-as-jwk-set-recommended), which serves the
+profile as a plain JWK Set over HTTPS with no per-key response
+signature.
 
 ### Identity Resolution Algorithm
 
@@ -1323,8 +1319,11 @@ below processes a single signature.
       `created`, `expires`); **skip** this signature otherwise.
       Resolve via `Signature-Agent`, parsed per the
       [Signature-Agent parsing rules](signatures.md#rest-request-verification)
-      in signatures.md. The value **MUST** be an HTTPS URL pointing to
-      a WBA-compatible directory (see
+      in signatures.md. The member value **MUST** be an HTTPS URL; its
+      `type` parameter selects resolution — `jwks_uri` reads the URL
+      directly as a JWK Set (a UCP profile in JWKS-superset form),
+      `directory` (default) resolves the well-known directory at the
+      URL's origin (see
       [Deployment Patterns](#deployment-patterns-for-wba-interop)).
       `data:` URI inline form is out of scope for UCP-WBA interop. If
       the `Signature-Agent` header is absent, no matching dictionary
@@ -1339,10 +1338,12 @@ below processes a single signature.
 3. **Locate the key list** in the resolved document:
     - **WBA-shape signature** — read top-level `keys[]` per RFC 7517.
     - **Default UCP signature** — read `signing_keys[]`.
-4. **For WBA-shape signatures: verify the directory's per-key
+4. **For `type=directory` resolution: verify the directory's per-key
    self-signatures** per
    [draft-meunier-http-message-signatures-directory](https://datatracker.ietf.org/doc/draft-meunier-http-message-signatures-directory/)
-   §5.2. Discard keys without a valid self-signature.
+   §5.2; discard keys without a valid self-signature. For `jwks_uri`
+   resolution the key set is fetched directly over HTTPS; integrity
+   derives from TLS to that URL.
 5. **Match the signature's `keyid`** to a `kid` in the resolved key
    list. **Skip** this signature if no match. For WBA-shape
    signatures, the verifier **SHOULD** also confirm that `keyid`

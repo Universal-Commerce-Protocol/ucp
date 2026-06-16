@@ -263,12 +263,15 @@ signature. Items marked **MUST** are required by
    counterparty accepts them.
 2. **MUST send a `Signature-Agent` header** alongside `UCP-Agent`. An
    RFC 8941 Dictionary Structured Field whose member's sf-string value
-   is the HTTPS directory URL; the member key matches the
-   `Signature-Input` signature label. (`data:` URI inline form is out
-   of scope; see
+   is an HTTPS URL and whose `type` parameter selects the discovery
+   mechanism; the member key matches the `Signature-Input` signature
+   label. UCP RECOMMENDS `type=jwks_uri` pointing at the UCP profile
+   URL, so WBA verifiers read the profile's `keys[]` array directly as
+   the JWK Set; sites needing interop with default `type=directory`
+   verifiers also publish a well-known directory. See
+   [Deployment Patterns](overview.md#deployment-patterns-for-wba-interop).
+   (`data:` URI inline form is out of scope; see
    [Identity Resolution Algorithm](overview.md#identity-resolution-algorithm).)
-   See [Identity & Authentication](overview.md#identity-authentication)
-   for directory shape and deployment patterns.
 3. **MUST sign the `signature-agent` component with `;key="<label>"`**
    matching the `Signature-Agent` dictionary member key (which equals
    the `Signature-Input` signature label). Per WBA §4.2.1.
@@ -319,7 +322,7 @@ POST /checkout-sessions HTTP/1.1
 Host: merchant.example.com
 Content-Type: application/json
 UCP-Agent: profile="https://platform.example/.well-known/ucp"
-Signature-Agent: sig1="https://platform.example/.well-known/ucp"
+Signature-Agent: sig1="https://platform.example/.well-known/ucp";type=jwks_uri
 Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000
 Content-Digest: sha-256=:X48E9q...:
 Signature-Input: sig1=("@method" "@authority" "@path" "signature-agent";key="sig1" "ucp-agent" "idempotency-key" "content-digest" "content-type");keyid="kPrK_qmxVWaYVA9wwBF6Iuo3vVzz7TxHCTwXBygrS4k";created=1738617600;expires=1738621200;tag="web-bot-auth"
@@ -338,9 +341,10 @@ Signature: sig1=:base64_ed25519_signature_value:
 One signature on the wire. UCP-shape verifiers find their expected
 components (`ucp-agent`, `idempotency-key`); WBA-shape verifiers find
 theirs (`@authority`, `signature-agent`, `tag`, `created`/`expires`).
-Both verify the same bytes against the same key. The two header URLs
-match here because the same well-known endpoint serves both regimes
-(see
+Both verify the same bytes against the same key. Both headers point at
+the same `/.well-known/ucp` URL — `UCP-Agent` for UCP discovery,
+`Signature-Agent` with `type=jwks_uri` so WBA verifiers read the
+profile's `keys[]` as the JWK Set (see
 [Deployment Patterns](overview.md#deployment-patterns-for-wba-interop)).
 
 In the example, the three `sig1` labels are bound together — the
@@ -612,9 +616,12 @@ signature verification and inline-form handling), see
    find member `sig1`). If no matching member exists, verification
    of this signature **MUST** fail.
 3. The member's value **MUST** be an sf-string containing an HTTPS
-   URL pointing to a JWK Set per RFC 7517 (which **MAY** also be a
-   UCP profile in JWKS-superset form). `data:` URI inline form is
-   out of scope for UCP-WBA interop (see
+   URL. The `type` parameter selects resolution: `jwks_uri` fetches
+   the URL directly as a JWK Set per RFC 7517 (a UCP profile qualifies
+   in JWKS-superset form); `directory` (the default) resolves the
+   well-known directory at the URL's origin. UCP RECOMMENDS
+   `type=jwks_uri` at the profile URL. `data:` URI inline form is out
+   of scope for UCP-WBA interop (see
    [Identity Resolution](overview.md#identity-resolution-algorithm)).
 4. Verification of this signature **MUST** fail if the URL is
    non-HTTPS.
@@ -633,11 +640,12 @@ profile_url = "https://platform.example/.well-known/ucp"
 
 ```text
 // Headers
-Signature-Agent: sig1="https://platform.example/.well-known/ucp"
+Signature-Agent: sig1="https://platform.example/.well-known/ucp";type=jwks_uri
 Signature-Input: sig1=("@method" "@authority" ...);...
 
 // Parsed (member key matches sig1)
-directory_url = "https://platform.example/.well-known/ucp"
+type = jwks_uri
+jwks_uri = "https://platform.example/.well-known/ucp"
 ```
 
 **Applicability:**
