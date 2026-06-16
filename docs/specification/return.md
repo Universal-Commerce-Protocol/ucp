@@ -22,8 +22,8 @@ The Return Extension allows businesses to communicate the conditions, methods,
 timelines, and costs associated with returning physical items directly to the
 platform and the buyer, mirroring real-world commerce requirements.
 
-By exposing the return policy natively in the UCP schema, AI agents and
-platforms can intelligently answer user queries like _"Can I return this
+By exposing the return policy natively in the UCP schema, platforms can
+intelligently answer user queries like _"Can I return this
 in-store?"_ or _"How many days do I have to return this?"_ without forcing the
 user to leave the platform to hunt for a policy on the merchant's website.
 
