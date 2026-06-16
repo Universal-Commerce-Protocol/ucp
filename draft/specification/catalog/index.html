@@ -3451,7 +3451,12 @@ to provide context about errors, warnings, or informational notices.</p>
 declarations, safety warnings) that platforms must not hide or dismiss. See
 <a href="../checkout/#warning-presentation">Warning Presentation</a> for the full
 rendering contract.</p>
-<p><strong>Note</strong>: All catalog errors use <code>severity: "recoverable"</code> - agents handle them programmatically (retry, inform user, show alternatives).</p>
+<p><strong>Note</strong>: Most catalog errors use <code>severity: "recoverable"</code> - agents
+handle them programmatically (retry, inform user, show alternatives).
+<code>get_product</code> returns <code>severity: "unrecoverable"</code> when an identifier
+doesn't resolve; agents MUST NOT retry the same <code>id</code> (see the
+<a href="rest/#product-not-found">REST</a> and <a href="mcp/#product-not-found">MCP</a>
+examples).</p>
 <h4 id="message-error">Message (Error)<a class="headerlink" href="#message-error" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
