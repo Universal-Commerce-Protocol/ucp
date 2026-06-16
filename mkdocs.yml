@@ -53,6 +53,7 @@ nav:
           - Discounts Extension: specification/discount.md
           - Fulfillment Extension: specification/fulfillment.md
           - Loyalty Extension: specification/loyalty.md
+          - Saved Payment Instruments Extension: specification/saved-instruments.md
           - Split Payments Extension: specification/split-payments.md
       - Cart Capability:
           - Overview: specification/cart.md
@@ -323,6 +324,11 @@ plugins:
               memberships, tiers, benefits, and reward earning forecasts while
               managing provisional eligibility claims and enforcing
               data-minimization privacy rules.
+          - specification/saved-instruments.md: >-
+              Saved Payment Instruments Extension, surfacing the authenticated
+              user's previously-saved payment instruments on cart and checkout
+              responses as display-only metadata gated by the
+              `dev.ucp.shopping.saved_instruments:read` identity-linking scope.
         Cart Capability:
           - specification/cart.md: >-
               Pre-purchase Cart Capability, detailing item collection, state
