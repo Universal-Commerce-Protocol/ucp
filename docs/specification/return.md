@@ -150,8 +150,7 @@ requirements of a purchase before completion.
 
 **For `supported_resolutions`:**
 
-- **MUST** list all resolutions supported by the merchant (e.g. if exchange is
-  supported it must be explicitly listed).
+- **MUST** list all resolutions applicable to the `line_items` in the checkout session governed by that policy (e.g., if exchange is supported for those items, it must be explicitly listed).
 
 **For `return_method.fee`:**
 
