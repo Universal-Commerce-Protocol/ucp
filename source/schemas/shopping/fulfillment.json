@@ -42,6 +42,11 @@
         "location": {
           "type": "string",
           "description": "The location resolved for this method, where appropriate (e.g. the pickup store or location), as a location id."
+        },
+        "options": {
+          "type": "array",
+          "description": "Fulfillment options for this method (e.g. Standard, Express) to describe per-choice details such as cost, time estimates, etc. Optional and selective: without a destination or full cart, a business SHOULD preview meaningful boundary options (e.g. cheapest, fastest); the full, high-resolution set is negotiated in cart and checkout.",
+          "items": { "$ref": "types/fulfillment_option_base.json" }
         }
       }
     },

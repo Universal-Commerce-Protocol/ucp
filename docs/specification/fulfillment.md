@@ -143,7 +143,7 @@ method.
               {
                 "id": "standard",
                 "title": "Standard Shipping",
-                "description": "Arrives Dec 12-15 via USPS",
+                "description": { "plain": "Arrives Dec 12-15 via USPS" },
                 "totals": [
                   {
                     "type": "total",
@@ -154,7 +154,7 @@ method.
               {
                 "id": "express",
                 "title": "Express Shipping",
-                "description": "Arrives Dec 10-11 via FedEx",
+                "description": { "plain": "Arrives Dec 10-11 via FedEx" },
                 "totals": [
                   {
                     "type": "total",
@@ -313,10 +313,33 @@ method has:
     business that advertises pickup at a `location` MUST accept the same id
     as `selected_destination_id` for that method, so a discovered location
     can be used in cart and checkout.
+* `options` — concrete fulfillment choices within this method (e.g.
+    Standard, Express); see [Options](#options). Optional.
 
 Catalog reports availability for a single location per method — the one
 specified via `fulfills_to` or inferred from `context`; discovering and
 comparing other locations is handled separately.
+
+### Options
+
+A method MAY carry `options[]`, a representative subset of its fulfillment
+options — not an exhaustive list. Without a destination or full cart,
+catalog SHOULD preview meaningful boundary options for the buyer (e.g.
+cheapest, fastest); the full, high-resolution set is negotiated in cart and
+checkout once those are known.
+
+Each option carries an `id` and a `title` (a short label distinguishing it
+from siblings), plus an optional renderable `description` for context. These
+are a shared base: at checkout the same option is composed with cost and
+timing (`totals`, carrier, fulfillment times). The option is open, so a
+business MAY annotate it with additional fields. A method MAY also carry
+none, surfacing only `type`, `description`, and `availability`; options are
+nested directly under the method, with no group layer (unlike checkout
+`methods[].groups[].options[]`).
+
+A discovered option `id` is the unit checkout selects: a business that
+advertises an option `id` MUST accept the same id as `selected_option_id`
+at checkout, so a discovered option carries through to cart and checkout.
 
 ### Shapes
 
@@ -327,6 +350,10 @@ comparing other locations is handled separately.
 #### Catalog Fulfillment Method
 
 {{ extension_schema_fields('fulfillment.json#/$defs/catalog_fulfillment_method', 'fulfillment') }}
+
+#### Fulfillment Option Base
+
+{{ schema_fields('types/fulfillment_option_base', 'fulfillment') }}
 
 #### Availability
 
@@ -387,8 +414,20 @@ and `pickup` references the resolved location by id.
             "methods": [
               {
                 "type": "shipping",
-                "description": { "plain": "Ships to your address" },
-                "availability": { "available": true, "status": "in_stock" }
+                "description": { "plain": "Ships to your address in 1–4 business days" },
+                "availability": { "available": true, "status": "in_stock" },
+                "options": [
+                  {
+                    "id": "std",
+                    "title": "Standard",
+                    "description": { "plain": "Arrives in 4 business days" }
+                  },
+                  {
+                    "id": "exp",
+                    "title": "Express",
+                    "description": { "plain": "Next business day" }
+                  }
+                ]
               },
               {
                 "type": "pickup",
@@ -408,7 +447,9 @@ and `pickup` references the resolved location by id.
 Each method is a way the variant can be fulfilled, with its own
 `availability`. Each method's `description` is directly renderable, so a
 platform can present it without recognizing the `type` (see
-[Rendering](#rendering)).
+[Rendering](#rendering)). The shipping method's `description` previews the
+delivery range, and its `options[]` refine it (Standard, Express); pickup
+carries none — `options` is optional.
 
 ## Configuration
 
@@ -609,7 +650,7 @@ negotiation, declare its behavior in the business profile `config` — set
               {
                 "id": "standard",
                 "title": "Standard Shipping",
-                "description": "Arrives Dec 12-15 via USPS",
+                "description": { "plain": "Arrives Dec 12-15 via USPS" },
                 "totals": [
                   {
                     "type": "total",
@@ -620,7 +661,7 @@ negotiation, declare its behavior in the business profile `config` — set
               {
                 "id": "express",
                 "title": "Express Shipping",
-                "description": "Arrives Dec 10-11 via FedEx",
+                "description": { "plain": "Arrives Dec 10-11 via FedEx" },
                 "totals": [
                   {
                     "type": "total",
