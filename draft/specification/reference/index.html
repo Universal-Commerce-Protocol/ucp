@@ -3353,6 +3353,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#ucp-response-catalog-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Catalog Response Metadata
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#ucp-response-order-schema" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4807,6 +4818,17 @@
     <span class="md-ellipsis">
       
         Cart Response Metadata
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ucp-response-catalog-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Catalog Response Metadata
       
     </span>
   </a>
@@ -9106,6 +9128,57 @@ and responses.</p>
 <h3 id="ucp-response-cart-schema">Cart Response Metadata<a class="headerlink" href="#ucp-response-cart-schema" title="Permanent link">&para;</a></h3>
 <p>The <code>ucp</code> object included in cart responses.</p>
 <p>UCP metadata for cart responses. No payment handlers needed pre-checkout.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">version</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">UCP version in YYYY-MM-DD format.</td>
+</tr>
+<tr>
+<td style="text-align: left;">status</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Application-level status of the UCP operation.<br><strong>Enum:</strong> <code>success</code>, <code>error</code></td>
+</tr>
+<tr>
+<td style="text-align: left;">services</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Service registry keyed by reverse-domain name.</td>
+</tr>
+<tr>
+<td style="text-align: left;">capabilities</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Capability registry keyed by reverse-domain name.</td>
+</tr>
+<tr>
+<td style="text-align: left;">payment_handlers</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Payment handler registry keyed by reverse-domain name.</td>
+</tr>
+<tr>
+<td style="text-align: left;">capabilities</td>
+<td style="text-align: left;">any</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;"></td>
+</tr>
+</tbody>
+</table>
+<h3 id="ucp-response-catalog-schema">Catalog Response Metadata<a class="headerlink" href="#ucp-response-catalog-schema" title="Permanent link">&para;</a></h3>
+<p>The <code>ucp</code> object included in catalog responses.</p>
+<p>UCP metadata for catalog responses.</p>
 <table>
 <thead>
 <tr>
