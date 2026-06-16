@@ -33,11 +33,12 @@ it does not gate it.
 
 **This specification uses
 [OAuth 2.0](https://datatracker.ietf.org/doc/html/rfc6749){ target="_blank" }**
-as the v1 auth mechanism. The schema is designed for incremental extension:
-future versions will add delegated identity provider support and non-OAuth
-authentication mechanisms — both via a single `config.providers` extension
-point — without breaking changes to this version (see
-[Future Extensibility](#future-extensibility)).
+for authorization. Direct OAuth 2.0 against the business domain (via
+[Discovery](#discovery)) is always available. When the business declares
+trusted external identity providers in `config.providers`, platforms
+**MAY** instead chain identity from a provider via the
+[Accelerated IdP Flow](#accelerated-idp-flow), skipping the
+browser-based flow when they already hold a suitable upstream token.
 
 ### Participants
 
@@ -118,6 +119,7 @@ vocabulary); runtime messages carry per-request advisories.
 
     Platforms **MUST** select the strongest method offered by the business
     that is compatible with the platform's deployment model.
+
 * **MUST** include user identity tokens in the HTTP `Authorization` header
     using the Bearer scheme: `Authorization: Bearer <access_token>`
     ([RFC 6750 §2.1](https://datatracker.ietf.org/doc/html/rfc6750#section-2.1){ target="_blank" }).
@@ -145,6 +147,15 @@ vocabulary); runtime messages carry per-request advisories.
 * **SHOULD** include a unique, unguessable `state` parameter in the
     authorization request to prevent CSRF
     ([RFC 6749 §10.12](https://datatracker.ietf.org/doc/html/rfc6749#section-10.12){ target="_blank" }).
+* When `config.providers` is present, the platform **MAY** chain
+    identity from a listed provider via the
+    [Accelerated IdP Flow](#accelerated-idp-flow). If no listed provider
+    is supported or suitable, the platform **MUST** fall back to direct
+    OAuth on the business domain via [Discovery](#discovery) (see
+    [Identity Providers](#identity-providers)).
+* Before initiating identity chaining with a business, the platform
+    **SHOULD** offer the user a choice of available identity providers and
+    indicate which provider's identity will be shared with the business.
 * Revocation and security events:
     * **MUST** call the business's token revocation endpoint
         ([RFC 7009](https://datatracker.ietf.org/doc/html/rfc7009){ target="_blank" })
@@ -209,6 +220,18 @@ vocabulary); runtime messages carry per-request advisories.
     `access_token`s issued from it.
 * **MUST** support revocation requests authenticated with the same client
     credentials used at the token endpoint.
+* **MAY** declare trusted external identity providers in
+    `config.providers` (see [Identity Providers](#identity-providers)).
+    Businesses **MUST** only list providers they explicitly trust and
+    **MUST NOT** list their own authorization server.
+* When the business lists external identity providers of `type: oauth2` in
+    `config.providers`, the business **MUST** support the JWT bearer assertion
+    grant type
+    ([RFC 7523](https://datatracker.ietf.org/doc/html/rfc7523){ target="_blank" })
+    at its token endpoint to accept JWT authorization grants from those
+    IdPs, and **MUST** include
+    `urn:ietf:params:oauth:grant-type:jwt-bearer` in `grant_types_supported`
+    in its RFC 8414 metadata.
 * **SHOULD** provide an account creation flow if the user does not already have
     an account, or return a `continue_url` in an `identity_required` error
     response (see [Error Handling](#error-handling)) pointing to an onboarding
@@ -222,39 +245,53 @@ vocabulary); runtime messages carry per-request advisories.
     `WWW-Authenticate` challenges. This lets platforms discover the
     authorization server protecting the resource without relying on
     domain conventions and prepares the deployment for future delegated
-    IdP scenarios where the AS may not live on the business domain.
+    domain conventions. The business **MUST** publish this metadata when
+    the authorization server does not live on the business domain.
 * **SHOULD** support
     [OpenID RISC Profile 1.0](https://openid.net/specs/openid-risc-1_0-final.html){ target="_blank" }
     to signal revocation and account state changes to platforms.
 
 ## Discovery
 
-Platforms resolve business authorization server metadata using the following
-**strict two-tier hierarchy**. The issuer URI used as the discovery base is
-the business's domain as declared in its UCP profile.
+UCP discovery is a three-step pipeline.
+
+**Step 1 — Resolve the AS issuer.** Platforms fetch the business's
+protected-resource metadata per
+[RFC 9728](https://datatracker.ietf.org/doc/html/rfc9728){ target="_blank" }
+and use the selected entry from `authorization_servers` as the AS
+issuer. The AS issuer **MAY** be hosted on a different origin than the
+business domain. If the business publishes no protected-resource
+metadata, the AS issuer defaults to the business domain (single-host
+deployments).
+
+**Step 2 — Fetch AS metadata.** Using the issuer from Step 1, platforms
+resolve authorization-server metadata via a strict two-tier hierarchy.
+Well-known URLs are constructed per
+[RFC 8414 §3.1](https://datatracker.ietf.org/doc/html/rfc8414#section-3.1){ target="_blank" }
+(the well-known segment is inserted between the host and any issuer
+path, not appended).
 
 1. **RFC 8414 (Primary):** Fetch
-   `{business-domain}/.well-known/oauth-authorization-server`.
+   `https://{host}/.well-known/oauth-authorization-server{path}`.
     * `2xx` response: use this metadata. Discovery complete.
     * `404 Not Found`: proceed to step 2.
-    * Any other non-2xx response, network error, or timeout: **MUST** abort.
-      **MUST NOT** proceed to step 2.
+    * Any other non-2xx response, network error, or timeout: **MUST**
+      abort. **MUST NOT** proceed to step 2.
 
 2. **OIDC Discovery (Fallback):** Fetch
-   `{business-domain}/.well-known/openid-configuration`.
+   `{issuer}/.well-known/openid-configuration`.
     * `2xx` response: use this metadata. Discovery complete.
-    * Any non-2xx response, network error, or timeout: **MUST** abort the
-      identity linking process.
+    * Any non-2xx response, network error, or timeout: **MUST** abort.
 
-Platforms **MUST NOT** silently fall through on any error other than `404` in
-step 1. This prevents partial or undefined behavior when a server is
-misconfigured or temporarily unavailable.
+Platforms **MUST NOT** silently fall through on any error other than
+`404` in step 1.
 
-The `issuer` value in the discovered metadata **MUST** match the discovery
-base URI exactly (per
+**Step 3 — Validate the issuer.** The `issuer` value in the discovered
+metadata **MUST** byte-for-byte match the AS issuer selected in Step 1
+(per
 [RFC 8414 §3.3](https://datatracker.ietf.org/doc/html/rfc8414#section-3.3){ target="_blank" }).
 Platforms **MUST NOT** normalize (e.g., strip trailing slashes) before
-comparison — the value must be a byte-for-byte match.
+comparison.
 
 ## Account Linking Flow
 
@@ -309,6 +346,320 @@ response.
 where `code_verifier` is absent or does not verify against the stored
 `code_challenge`.
 
+## Identity Providers
+
+The `config.providers` map declares external trusted identity providers
+from which the business will accept chained identity via JWT bearer
+assertions for the [Accelerated IdP Flow](#accelerated-idp-flow). Each
+key identifies an IdP namespace and maps to an array of mechanism
+entries — an IdP **MAY** offer multiple token acquisition mechanisms
+under a single key. The map is additive metadata on top of the
+always-available direct OAuth path against the business domain (see
+[Discovery](#discovery)); for the chaining path, it is a closed
+allowlist — a business **MUST** reject a JWT authorization grant
+whose `iss` does not match a listed `oauth2` mechanism entry (see
+[Business Token Issuance](#business-token-issuance)).
+
+* **When absent or empty:** platforms run direct OAuth against the
+    business domain via [Discovery](#discovery).
+* **When present:** platforms **MAY** select a mechanism entry whose
+    `type` they support and chain identity via the
+    [Accelerated IdP Flow](#accelerated-idp-flow) — typically one
+    belonging to an IdP they already hold a valid upstream token for.
+    If no listed mechanism is supported or suitable, platforms **MUST**
+    fall back to direct OAuth on the business domain.
+* **Self-listing forbidden.** Businesses **MUST NOT** list their own
+    authorization server in `config.providers`. Chaining-to-self is
+    degenerate (the same server would issue and validate the assertion),
+    and direct OAuth is already available via [Discovery](#discovery).
+    Platforms **MUST** ignore any `oauth2` mechanism entry whose
+    `auth_url` matches the business's own issuer URI.
+
+### Provider Configuration
+
+Each key in `config.providers` is a reverse-domain identifier for an IdP
+namespace; its value is an array of mechanism entries. Each entry is
+described by its `type`:
+
+| Field | Type | Required | Description |
+| :---- | :--- | :------- | :---------- |
+| `type` | string | Yes | Provider mechanism discriminator. `oauth2` is the only type defined in this version; future versions **MAY** define additional types as non-breaking extensions. |
+| `auth_url` | string (URI) | Yes, for `oauth2` | Base URL for authorization server metadata discovery. |
+| `required_claims` | array of strings | No, for `oauth2` | OIDC Core §5.1 claim names the business requires in the JWT authorization grant (e.g. `email`). Optional pre-filter hint — see [Provider Selection](#provider-selection). |
+
+The `type` value is an open string, not a closed enumeration. Platforms
+**MUST** treat provider entries whose `type` they do not support as filtered
+out (see [Provider Selection](#provider-selection)) rather than rejecting the
+business's configuration.
+
+For `oauth2` providers, platforms **MUST** discover the authorization server
+metadata from `auth_url` using the same two-tier metadata hierarchy as
+[Discovery](#discovery) Step 2 (RFC 8414 primary with §3.1 path insertion,
+OIDC fallback on 404 only), treating `auth_url` as the issuer. The
+protected-resource step does not apply — `auth_url` is already the IdP
+issuer — and the business validates the JWT grant's `iss` against it per
+[Business Token Issuance](#business-token-issuance).
+
+### Provider Selection
+
+Platforms iterate over the `(provider key, mechanism entry)` pairs in
+the business's `config.providers` map and select an entry they support
+— typically one belonging to an IdP they already hold a valid upstream
+token for, enabling the [Accelerated IdP Flow](#accelerated-idp-flow).
+Mechanism entries under the same provider key are alternatives; a
+platform may match any one of them.
+
+A mechanism's `type` determines whether it participates in the token
+and scope model. The `oauth2` type chains identity via token exchange
+and contributes to the scopes of the business-issued token. Other types
+**MAY** contribute no scopes — presence in `providers` does not imply
+participation in the scope or token-issuance model. Selection turns on
+whether the platform *supports* a mechanism's `type` and holds (or can
+obtain) a suitable upstream identity, independent of whether that type
+issues a token.
+
+When a mechanism entry declares `required_claims`, platforms **SHOULD**
+filter out that entry during selection if their upstream identity lacks
+any of the listed claim names (e.g., the upstream token does not carry
+`email`). This avoids a wasted chaining attempt that would be rejected
+at the token endpoint. Reactive enforcement remains mandatory (see
+[Chaining Errors at the Token Endpoint](#chaining-errors-at-the-token-endpoint))
+because not every business will declare `required_claims`, and the hint
+expresses claim presence only — value constraints (e.g., requiring
+`email_verified=true`) are enforced reactively.
+
+### Profile Example
+
+A business that trusts an external IdP for chaining, while also accepting
+direct OAuth flows (always available via discovery):
+
+<!-- ucp:example schema=profile def=business_schema -->
+```json
+{
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "services": {},
+    "capabilities": {
+      "dev.ucp.common.identity_linking": [{
+        "version": "{{ ucp_version }}",
+        "spec": "https://ucp.dev/specification/identity-linking",
+        "schema": "https://ucp.dev/schemas/common/identity_linking.json",
+        "config": {
+          "providers": {
+            "app.example.login": [
+              {
+                "type": "oauth2",
+                "auth_url": "https://accounts.example-login.app/",
+                "required_claims": ["email"]
+              }
+            ]
+          },
+          "scopes": {
+            "dev.ucp.shopping.order:read":   {},
+            "dev.ucp.shopping.order:manage": {}
+          }
+        }
+      }]
+    },
+    "payment_handlers": {}
+  }
+}
+```
+
+The platform can use the Accelerated IdP Flow with `app.example.login` if
+it already holds a valid token there; otherwise it runs the standard
+[Account Linking Flow](#account-linking-flow) against the business domain
+via [Discovery](#discovery).
+
+## Accelerated IdP Flow
+
+After a platform has linked the user's identity with a trusted IdP, it can
+chain that identity to new businesses without a browser redirect: the
+platform obtains a **JWT authorization grant** from the IdP and presents it
+to the business's token endpoint. The business validates the grant and issues
+its own access token under its own authority.
+
+This flow profiles the identity and authorization chaining pattern in
+[draft-ietf-oauth-identity-chaining](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-identity-chaining-08){ target="_blank" }.
+UCP tightens the JWT authorization grant beyond what the base RFCs
+mandate: `aud` **MUST** be a single-valued URI plus a unique `jti` (see
+[JWT Authorization Grant](#jwt-authorization-grant)).
+
+### Flow
+
+1. Platform discovers `config.providers` in the business's identity linking
+   capability and selects a provider it already holds a valid token for.
+2. Platform requests a JWT authorization grant from the IdP via token
+   exchange ([RFC 8693](https://datatracker.ietf.org/doc/html/rfc8693){ target="_blank" })
+   at the IdP's token endpoint:
+    * `grant_type`: `urn:ietf:params:oauth:grant-type:token-exchange`
+    * `subject_token`: the platform's existing IdP access token
+    * `subject_token_type`: `urn:ietf:params:oauth:token-type:access_token`
+    * `resource` and/or `audience`: the business's authorization server
+      issuer URI. Platforms **MUST** include at least one.
+      [RFC 8693 §2.1](https://datatracker.ietf.org/doc/html/rfc8693#section-2.1){ target="_blank" }
+      permits URI values in either parameter; IdP implementations vary
+      in which they accept. The IdP maps the value to the `aud` claim
+      in the resulting grant; when both are sent they **MUST** carry
+      identical values.
+    * `requested_token_type`: `urn:ietf:params:oauth:token-type:jwt`
+3. The IdP validates the subject token, verifies the platform is authorized
+   to request a grant for the target business, and returns a short-lived
+   JWT authorization grant with `issued_token_type` set to
+   `urn:ietf:params:oauth:token-type:jwt`.
+4. Platform presents the grant to the business's token endpoint via the JWT
+   bearer assertion grant
+   ([RFC 7523](https://datatracker.ietf.org/doc/html/rfc7523){ target="_blank" }):
+    * `grant_type`: `urn:ietf:params:oauth:grant-type:jwt-bearer`
+    * `assertion`: the JWT authorization grant
+    * `scope`: the derived scope set (see [Scope Derivation](#scope-derivation))
+5. The business validates the grant, resolves the user identity, and issues
+   an access token under its own authority.
+6. Platform uses the business-issued token via `Authorization: Bearer <access_token>`
+   on subsequent requests.
+
+The platform **MUST NOT** present a raw IdP token directly to a business.
+Identity chaining ensures each business issues tokens under its own authority
+with the correct audience binding and scope policy.
+
+### JWT Authorization Grant
+
+The JWT authorization grant is a signed JWT
+([RFC 7519](https://datatracker.ietf.org/doc/html/rfc7519){ target="_blank" })
+issued by the IdP that asserts the user's identity for use with a specific
+business. It is **not** an access token — it is a short-lived credential the
+platform presents to the business's authorization server to obtain one.
+
+The grant **MUST** conform to
+[RFC 7523 §3](https://datatracker.ietf.org/doc/html/rfc7523#section-3){ target="_blank" },
+with two UCP-specific constraints:
+
+* `aud` **MUST** be a single value (the business's AS issuer URI), not an
+  array — chaining targets one business per grant.
+* `jti` **MUST** be present (RFC 7523 says MAY) so businesses can enforce
+  single-use replay protection (see [Security Considerations](#security-considerations)).
+
+`exp` **SHOULD** be no more than 60 seconds after `iat`. The IdP **MAY**
+include additional claims to convey authorization context (consent records,
+user attributes, etc.).
+
+### Business Token Issuance
+
+Upon receiving a JWT authorization grant at its token endpoint, the
+business's authorization server **MUST** validate the assertion per
+[RFC 7523 §3](https://datatracker.ietf.org/doc/html/rfc7523#section-3){ target="_blank" },
+with the following UCP-specific requirements:
+
+* `iss` **MUST** match the `auth_url` of an `oauth2` mechanism entry
+  listed in `config.providers`.
+* `aud` **MUST** match the business's own AS issuer URI exactly.
+* The JWT signature **MUST** be verified against the IdP's `jwks_uri`; if
+  JWKS cannot be retrieved, the business **MUST** fail closed.
+
+Once the assertion is validated, the business resolves the user from
+`sub` (auto-provisioning permitted) and issues an access token scoped to
+the subset of requested scopes whose per-scope policy is satisfied by
+the grant's claims (`acr`, `auth_time`, `amr`, etc.). If no requested
+scope can be satisfied, the business **MUST** return `invalid_scope`
+per [RFC 6749 §5.2](https://datatracker.ietf.org/doc/html/rfc6749#section-5.2){ target="_blank" };
+platforms recover by requesting a step-up grant from the IdP or running
+direct OAuth. If user interaction is required (terms acceptance,
+onboarding), the business **MUST** reject the grant with `invalid_grant`
+(see [Chaining Errors at the Token Endpoint](#chaining-errors-at-the-token-endpoint));
+platforms recover by running the [Account Linking Flow](#account-linking-flow)
+against an interactive provider.
+
+**Claims for user resolution.** Beyond `sub`, businesses commonly need
+additional claims to provision a new account with a usable contact
+identifier or to surface UX hints when an existing account may match.
+The stable identity key per IdP is `(iss, sub)`. For `oauth2`
+providers, IdPs **SHOULD** include relevant
+[OIDC Core §5.1 standard claims](https://openid.net/specs/openid-connect-core-1_0-31.html#StandardClaims){ target="_blank" }
+— particularly `email` and `email_verified` — in the JWT authorization
+grant when available and the user has consented. Businesses
+**SHOULD NOT** auto-link accounts across IdPs by matching email or any
+other claim, and **SHOULD** require user-mediated linking (the user
+authenticating to the existing account) before merging identities. See
+[Security Considerations](#security-considerations).
+
+### Chaining Errors at the Token Endpoint
+
+Validation failures use the standard OAuth 2.0 token-endpoint error format
+([RFC 6749 §5.2](https://datatracker.ietf.org/doc/html/rfc6749#section-5.2){ target="_blank" }).
+JWT-grant-specific failures (signature, `iss`, `aud`, `exp`, `jti` replay,
+unrecognized provider, user-interaction required) map to `invalid_grant`
+per [RFC 7523 §3.1](https://datatracker.ietf.org/doc/html/rfc7523#section-3.1){ target="_blank" }.
+Businesses **MAY** include `error_description` and `error_uri` to aid
+diagnosis or to point to onboarding documentation; platforms **MUST NOT**
+treat `error_description` as machine-readable.
+
+**Missing or insufficient claims.** When the JWT authorization grant
+lacks a claim the business requires (e.g., `email` for account
+resolution), the business **MUST** reject with `invalid_grant`. The
+business **MAY** include `error_description` naming the missing claim
+for human diagnosis (e.g., `"missing required claim: email"`); platforms
+**MUST NOT** parse it for automated recovery and **SHOULD** fall back to
+direct OAuth, where the business can prompt the user for the missing
+information. Businesses **SHOULD** advertise standard-claim requirements
+via `required_claims` (see
+[Provider Configuration](#provider-configuration)) so platforms can
+pre-filter; requirements beyond OIDC Core §5.1 **SHOULD** be documented
+in developer-facing materials.
+
+### Token Lifecycle
+
+JWT bearer assertion grants don't establish long-lived sessions:
+businesses **SHOULD NOT** issue refresh tokens in response, since they
+would outlive the IdP session and grant continued access after the user
+revokes the IdP relationship
+([draft-ietf-oauth-identity-chaining §5.4](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-identity-chaining-08#section-5.4){ target="_blank" }).
+When a business-issued token expires, the platform obtains a new JWT
+grant from the IdP and re-presents it.
+
+Revocation does not propagate across the chain. On unlink, platforms
+**SHOULD** call the revocation endpoint
+([RFC 7009](https://datatracker.ietf.org/doc/html/rfc7009){ target="_blank" })
+at *both* layers — the IdP's and the business's.
+
+## IdP Requirements
+
+The requirements in this section apply to identity providers of
+`type: oauth2`. Other provider types define their own discovery and
+proof-presentation requirements (see [Future Extensibility](#future-extensibility)).
+
+Identity providers of `type: oauth2` listed in `config.providers` **MUST**
+publish authorization server metadata via
+[RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414){ target="_blank" }
+or OpenID Connect Discovery. The metadata **MUST** include:
+
+* `revocation_endpoint` — to support token revocation per the
+    [Token Lifecycle](#token-lifecycle) section.
+* `jwks_uri` — so businesses can verify the signature on JWT authorization
+    grants issued by the IdP.
+* `urn:ietf:params:oauth:grant-type:token-exchange` in `grant_types_supported`
+    — to enable the Accelerated IdP Flow.
+
+When processing token exchange requests for JWT authorization grants, the
+IdP **MUST**:
+
+* Authenticate the platform and verify it is authorized to present the
+    subject token
+    ([RFC 8693 §2.1](https://datatracker.ietf.org/doc/html/rfc8693#section-2.1){ target="_blank" }).
+* Verify the target business (identified by `resource` and/or `audience`,
+    which **MUST** carry identical values when both are sent — see
+    [Flow](#flow)) is a known relying party and the user has authorized
+    identity sharing with it. The IdP **MUST NOT** issue grants for
+    businesses the user has not authorized.
+* Issue a JWT authorization grant conforming to the
+    [JWT Authorization Grant](#jwt-authorization-grant) requirements.
+* Return `issued_token_type` as `urn:ietf:params:oauth:token-type:jwt`.
+
+IdPs **SHOULD** populate OIDC Core §5.1 standard claims in JWT
+authorization grants when the user has consented to share them — at
+minimum `email` and `email_verified` when applicable — to support
+account provisioning and UX hints at the business. Standard claims are
+advisory; stable per-IdP identification remains `(iss, sub)`.
+
 ## Scopes
 
 Scopes define the user-authenticated permissions a business grants to a
@@ -357,6 +708,13 @@ fields include authentication constraints (`min_acr`, `max_token_age`,
 `require_mfa`), declarative metadata (`claims` produced when granted),
 or other scope-specific configuration. Platforms **MUST** ignore
 unrecognized fields.
+
+Advertised scopes **MUST** apply uniformly across identity paths. The
+same `config.scopes` map governs scope availability whether the platform
+obtained user identity via direct OAuth or the
+[Accelerated IdP Flow](#accelerated-idp-flow). Per-scope policy gates
+which assertions satisfy a scope; businesses honoring `min_acr` (for
+example) **MUST** apply the same threshold regardless of path.
 
 #### `description`
 
@@ -618,42 +976,42 @@ field conveys the business's value prompt to the platform (e.g.,
 * **Token revocation.** Platforms **MUST** revoke user identity tokens at the
   business's revocation endpoint (RFC 7009) when a user unlinks their account.
   Businesses **MUST** reject subsequent requests that present revoked tokens.
+* **JWT grant lifetime.** JWT authorization grants **MUST** be short-lived;
+  the `exp` claim **SHOULD** be no more than 60 seconds after `iat`. Short
+  lifetimes limit the window for grant theft and replay.
+* **JWT grant single-use.** Businesses **MUST** enforce single-use JWT;
+  a short exp narrows the replay window, but only jti tracking closes it.
+  authorization grants by tracking the `jti` claim within the grant's
+  validity window.
+* **Grant relay.** Businesses **MUST NOT** store or forward JWT
+  authorization grants received from platforms. Grants are bearer
+  credentials scoped to a single audience (`aud`) and a single use.
+* **Cross-IdP account linking.** Federation collapses trust boundaries:
+  a business that auto-links accounts across listed providers based on
+  any IdP-asserted claim (email, phone, name) extends each provider's
+  verification process into account-takeover risk. A provider that
+  issues `email_verified=true` for an email the user does not control
+  can hijack any account at the business sharing that email. The stable
+  per-IdP identifier is `(iss, sub)`; other claims are advisory.
+  Businesses **SHOULD** require user-mediated linking — the user
+  demonstrating control of the existing account via current-session
+  authentication or equivalent — before merging accounts across IdPs.
 
 ## Future Extensibility
 
-This specification intentionally scopes v1 to business-hosted OAuth 2.0.
-The schema and protocol are designed to accommodate additional auth patterns
-as non-breaking extensions in future versions:
-
-### Delegated Identity Providers and Mechanism Extensibility (`config.providers`)
-
-A future version will allow businesses to declare trusted identity providers in
-a `config.providers` map, keyed by reverse-domain identifier. Each entry carries
-a `type` discriminator that defaults to `oauth2`, making this a single extension
-point for both delegated OAuth IdPs and future non-OAuth mechanisms such as
-wallet attestation or verifiable credentials.
-
-For delegated OAuth IdPs (e.g., `com.google`, `com.shopify`): platforms that
-have already established an OAuth session with a trusted provider can present a
-JWT-based authorization grant to the business's token endpoint instead of
-initiating a new browser-based OAuth flow — useful for multi-merchant agentic
-commerce where N merchants should not require N separate consent screens.
-
-For non-OAuth mechanisms: entries with a non-`oauth2` `type` value enable
-wallet attestation and similar schemes. Platforms select the first entry whose
-`type` they support, using business-preference ordering — analogous to TLS
-cipher suite negotiation.
-
-When `config.providers` is present, the platform uses the provider selection
-and identity chaining flows defined in that version. When `config.providers` is
-absent (as in v1), platforms **MUST** fall back to direct OAuth 2.0 against the
-business domain via RFC 8414 discovery.
+The schema is designed to accommodate non-OAuth provider mechanisms as
+non-breaking extensions. The `provider.type` discriminator is a required,
+open string: `oauth2` is the only type defined in this version, and it
+reserves space for future types — wallet attestation, verifiable
+credentials, or other proof-of-identity protocols. Future versions may
+define additional `type` values and the corresponding discovery and
+proof-presentation mechanics.
 
 **Forward-compatibility rule for platforms:** When `config` contains fields
-not defined in this version of the spec (`providers` or any other future field),
-platforms **MUST** ignore those fields and proceed using OAuth 2.0 with RFC 8414
-discovery on the business domain, as defined here. This ensures v1 platform
-implementations remain valid as the spec evolves.
+not defined in this version of the spec, platforms **MUST** ignore those
+fields. Platforms **MUST** treat provider entries with an unsupported
+`type` as filtered out, then apply the rules in
+[Identity Providers](#identity-providers) to what remains.
 
 ## Examples
 
@@ -675,7 +1033,11 @@ Example metadata hosted at `/.well-known/oauth-authorization-server` per
     "dev.ucp.shopping.order:manage"
   ],
   "response_types_supported": ["code"],
-  "grant_types_supported": ["authorization_code", "refresh_token"],
+  "grant_types_supported": [
+    "authorization_code",
+    "refresh_token",
+    "urn:ietf:params:oauth:grant-type:jwt-bearer"
+  ],
   "code_challenge_methods_supported": ["S256"],
   "token_endpoint_auth_methods_supported": [
     "private_key_jwt",
@@ -690,7 +1052,10 @@ Example metadata hosted at `/.well-known/oauth-authorization-server` per
 
 Note: `authorization_response_iss_parameter_supported: true` advertises
 [RFC 9207](https://datatracker.ietf.org/doc/html/rfc9207){ target="_blank" } support. `code_challenge_methods_supported: ["S256"]` signals PKCE.
-Both **MUST** be present in UCP-compliant metadata.
+Both **MUST** be present in UCP-compliant metadata. The
+`urn:ietf:params:oauth:grant-type:jwt-bearer` grant type indicates the
+business accepts JWT authorization grants from trusted IdPs via the
+[Accelerated IdP Flow](#accelerated-idp-flow).
 
 `token_endpoint_auth_methods_supported` lists every method the business
 accepts. The example advertises asymmetric methods (`private_key_jwt`,

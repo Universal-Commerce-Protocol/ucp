@@ -529,7 +529,7 @@ const UcpData = {
     ],
     "dev.ucp.shopping.buyer_consent": [
       {
-        extends: "dev.ucp.shopping.checkout",
+        extends: ["dev.ucp.shopping.cart", "dev.ucp.shopping.checkout"],
         version: "{{ ucp_version }}",
         spec: "https://ucp.dev/{{ ucp_version }}/specification/buyer-consent",
         schema: "https://ucp.dev/{{ ucp_version }}/schemas/shopping/buyer_consent.json"
