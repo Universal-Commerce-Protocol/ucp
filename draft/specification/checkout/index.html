@@ -4510,6 +4510,10 @@ custom scopes are defined in <a href="../identity-linking/#scopes">Identity Link
 <p><strong>Recommendation</strong>: To minimize discrepancies and a streamlined user experience,
 product data (price/title etc.) provided by the business through the feeds
 <strong>SHOULD</strong> match the actual attributes returned in the response.</p>
+<p>When the <a href="../cart/">Cart</a> capability is negotiated, the request payload
+should accept an additional <code>cart_id</code> field for cart-to-checkout conversion. See
+<a href="../cart/#cart-to-checkout-conversion">Cart → Cart-to-Checkout Conversion</a> for
+the field contract.</p>
 <p><strong>Inputs</strong></p>
 <table>
 <thead>

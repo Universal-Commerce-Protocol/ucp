@@ -426,6 +426,8 @@ To be invoked by the platform when the user has expressed purchase intent (e.g.,
 
 **Recommendation**: To minimize discrepancies and a streamlined user experience, product data (price/title etc.) provided by the business through the feeds **SHOULD** match the actual attributes returned in the response.
 
+When the [Cart](http://ucp.dev/draft/specification/cart/index.md) capability is negotiated, the request payload should accept an additional `cart_id` field for cart-to-checkout conversion. See [Cart → Cart-to-Checkout Conversion](http://ucp.dev/draft/specification/cart/#cart-to-checkout-conversion) for the field contract.
+
 **Inputs**
 
 | Name        | Type                                                            | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
