@@ -135,6 +135,10 @@ requirements of a purchase before completion.
 
 - **MUST** ensure every `return_policy_id` on a line item resolves to a key present in the top-level `return_policies` registry.
 
+**For Contextual Accuracy:**
+
+- **SHOULD** use contextual information available in the customer's checkout session (e.g., provisional buyer location signals such as shipping destination) to provide the most accurate policy information possible rather than relying on static defaults.
+
 **For Policy Locking:**
 
 - **MUST** honor the return policy that was in effect at the time of order placement; that policy MUST be sourced from the Order resource (when available) rather than recomputed from current merchant rules. The return policy returned at checkout response time is the policy in effect for the buyer at that moment.
