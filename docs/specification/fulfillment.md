@@ -221,6 +221,7 @@ Platforms **SHOULD** treat fulfillment as a generic, renderable structure:
 * Render each option as a card using `title`, `description`, and `total`
 * Present options in the order provided by the business
 * Present all methods returned—method selection is a buyer decision
+* Render methods in the order provided; do not merge or de-duplicate them
 * Use `available_methods[].description` to surface alternatives to the buyer
 
 Platforms **MAY** provide enhanced UX for recognized method types (store
@@ -575,6 +576,14 @@ platforms **SHOULD** present every method, rendering `description` and
 `availability` regardless of its `type` (see [Rendering](#rendering)), and
 **SHOULD NOT** omit a method solely because they do not recognize its `type`.
 Recognizing a `type` only enables optional type-specific UX.
+
+A method is identified by its `type` and its fulfillment scope (what it
+fulfills and where). A business **SHOULD** model same-scope variation (e.g.
+Standard vs Express) as `options`, and **SHOULD NOT** emit multiple methods
+that differ only in option-level detail. Same-`type` methods are valid when
+their scope differs — e.g. checkout may carry two `shipping` methods to
+different destinations. In catalog a method covers a single variant at one
+resolved location, so this collapses to at most one method per `type`.
 
 **Well-known values:**
 
