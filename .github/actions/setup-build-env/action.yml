@@ -8,7 +8,7 @@ runs:
       run: sudo apt-get update && sudo apt-get install -y libcairo2-dev libfreetype6-dev libffi-dev libjpeg-dev libpng-dev libz-dev
     
     - name: Install uv
-      uses: astral-sh/setup-uv@v7
+      uses: astral-sh/setup-uv@v8.2.0
       with:
         enable-cache: true
     
@@ -25,7 +25,7 @@ runs:
 
     - name: Cache ucp-schema binary
       id: cache-ucp-schema
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ~/.cargo/bin/ucp-schema
         key: ${{ runner.os }}-ucp-schema-${{ steps.get-version.outputs.version }}
