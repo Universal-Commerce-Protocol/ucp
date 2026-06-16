@@ -37,6 +37,14 @@
       "items": {
         "$ref": "../../common/types/reverse_domain_name.json"
       }
+    },
+    "payment_handlers": {
+      "type": "array",
+      "description": "Buyer-preferred payment handlers in priority order (most preferred first). Each provided value SHOULD map to a handler advertised in the Business profile's `ucp.payment_handlers`. The Business SHOULD use it to preselect or prioritize that handler and MAY ignore unavailable or ineligible values; unrecognized values MUST be ignored without error.",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "../../common/types/reverse_domain_name.json"
+      }
     }
   }
 }

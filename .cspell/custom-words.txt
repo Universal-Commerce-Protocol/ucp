@@ -122,3 +122,6 @@ Accor
 Kogan
 Petbarn
 VTEX
+userinfo
+prefetchers
+unparseable
