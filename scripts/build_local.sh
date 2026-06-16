@@ -132,3 +132,8 @@ echo "Extracting: $EXTRACT_LIST"
 git archive "$GH_PAGES_BRANCH" $EXTRACT_LIST | tar -x -C "$OUTPUT_DIR"
 
 echo "=== Build Complete! ==="
+echo "To serve the fully built site (with versioning):"
+echo "  python3 -m http.server 8000 -d $OUTPUT_DIR"
+echo ""
+echo "Alternative (faster for live editing current version):"
+echo "  uv run mkdocs serve"

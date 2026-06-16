@@ -664,9 +664,12 @@ def define_env(env):
     required_list = schema_data.get("required", [])
 
     if parent_required_list:
-      # Used for embedded schemas, we will only enforce the uppermost level
-      # required list.
-      required_list = parent_required_list
+      # Preserve required fields from both the embedded child schema and the
+      # parent wrapper that referenced it.
+      required_list = list(required_list)
+      for req in parent_required_list:
+        if req not in required_list:
+          required_list.append(req)
 
     if (
       not properties
