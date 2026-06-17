@@ -598,19 +598,19 @@ introduce a new value at any time with no consumer change: it advertises the
 value (and filters on it via `filters.methods`), and consumers present it
 like any other method.
 
-**Example — adding `locker_pickup`.** No schema change or registration is
+**Example — adding `home_installation`.** No schema change or registration is
 needed. Emit the value directly as the `type` on catalog and checkout, and
-filter with `filters.methods: ["locker_pickup"]`. For cart and checkout
-negotiation, declare its behavior in the business profile `config` — set
-`allows_multi_destination.locker_pickup` and include
-`["shipping", "locker_pickup"]` in `allows_method_combinations` (see
+filter with `filters.methods: ["home_installation"]`. For cart and checkout
+negotiation, declare its behavior in the business profile `config` — e.g.
+include `["shipping", "home_installation"]` in `allows_method_combinations`
+so a cart can mix shipped and installed items (see
 [Business Profile](#business-profile)). On a catalog variant's method:
 
 <!-- ucp:example schema=shopping/fulfillment def=catalog_fulfillment_method op=read -->
 ```json
 {
-  "type": "locker_pickup",
-  "location": "loc_locker_5th",
+  "type": "home_installation",
+  "description": { "plain": "Delivered and installed in your home" },
   "availability": {
     "available": true
   }
