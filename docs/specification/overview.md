@@ -377,15 +377,23 @@ both a UCP profile and a Web Bot Auth-compatible key directory. See
 [Deployment Patterns for WBA Interop](#deployment-patterns-for-wba-interop)
 below. When both arrays are present, they **MUST** list the same set
 of `kid` values, and entries sharing a `kid` **MUST** be semantically
-equivalent — i.e., have identical RFC 7638 SHA-256 thumbprints
-(serialization differences such as member order are not significant).
+equivalent — i.e., have identical base64url JWK SHA-256 Thumbprints, as
+defined in
+[Section 3.2 of RFC 7638](https://rfc-editor.org/rfc/rfc7638#section-3.2)
+for RSA and EC, and in
+[Appendix A.3 of RFC 8037](https://rfc-editor.org/rfc/rfc8037#appendix-A.3)
+for Ed25519. Serialization differences such as member order are not
+significant.
+
 Adding, rotating, or removing a key **MUST** update both arrays
 atomically. Removal is the security-critical case: a verifier reads only
 one array, so a key dropped from `signing_keys[]` but still listed in
 `keys[]` (or vice versa) keeps verifying — a revoked or compromised key
-is not effectively revoked until it is absent from **both** arrays. A
-future UCP version may promote `keys[]` to the canonical field; profiles
-publishing both arrays today are positioned for that transition.
+is not effectively revoked until it is absent from **both** arrays.
+
+A future UCP version may promote `keys[]` to the canonical field;
+profiles publishing both arrays today are positioned for that
+transition.
 
 UCP defines two well-known key types: **EC** (ECDSA P-256, P-384) and
 **OKP** (EdDSA Ed25519); the key-type, curve, and algorithm
@@ -505,10 +513,10 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
   },
   "signing_keys": [
     {
-      "kid": "kPrK_qmxVWaYVA9wwBF6Iuo3vVzz7TxHCTwXBygrS4k",
+      "kid": "poqkLGiymh_W0uP6PZFw-dvez3QJT5SolqXBCW38r0U",
       "kty": "OKP",
       "crv": "Ed25519",
-      "x": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo",
+      "x": "JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs",
       "use": "sig",
       "alg": "EdDSA"
     },
@@ -524,10 +532,10 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
   ],
   "keys": [
     {
-      "kid": "kPrK_qmxVWaYVA9wwBF6Iuo3vVzz7TxHCTwXBygrS4k",
+      "kid": "poqkLGiymh_W0uP6PZFw-dvez3QJT5SolqXBCW38r0U",
       "kty": "OKP",
       "crv": "Ed25519",
-      "x": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo",
+      "x": "JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs",
       "use": "sig",
       "alg": "EdDSA"
     },
@@ -1284,7 +1292,7 @@ well-known directory path.
 A WBA directory (Pattern 2's
 `/.well-known/http-message-signatures-directory`) SHOULD carry per-key
 self-signatures on the HTTP response, as defined by
-[draft-meunier-http-message-signatures-directory](https://datatracker.ietf.org/doc/draft-meunier-http-message-signatures-directory/)
+[draft-meunier-http-message-signatures-directory-05](https://datatracker.ietf.org/doc/draft-meunier-http-message-signatures-directory/05/)
 §5.2; verifiers SHOULD discard keys without a valid self-signature. A
 Pattern 1 `jwks_uri` profile is fetched directly over HTTPS and is not a
 signed directory; its integrity derives from TLS.
@@ -1314,7 +1322,7 @@ below processes a single signature.
 1. **Determine the verification regime from the signature's `tag`.**
     - `tag="web-bot-auth"` — WBA-shape. The signature **MUST** satisfy
       the agent-signature requirements in
-      [draft-meunier-web-bot-auth-architecture](https://datatracker.ietf.org/doc/draft-meunier-web-bot-auth-architecture/)
+      [draft-meunier-web-bot-auth-architecture-05](https://datatracker.ietf.org/doc/draft-meunier-web-bot-auth-architecture/05/)
       §4.2 (signed `signature-agent;key=<sig-label>`, `keyid`,
       `created`, `expires`); **skip** this signature otherwise.
       Resolve via `Signature-Agent`, parsed per the
@@ -1340,7 +1348,7 @@ below processes a single signature.
     - **Default UCP signature** — read `signing_keys[]`.
 4. **For `type=directory` resolution: verify the directory's per-key
    self-signatures** per
-   [draft-meunier-http-message-signatures-directory](https://datatracker.ietf.org/doc/draft-meunier-http-message-signatures-directory/)
+   [draft-meunier-http-message-signatures-directory-05](https://datatracker.ietf.org/doc/draft-meunier-http-message-signatures-directory/05/)
    §5.2; discard keys without a valid self-signature. For `jwks_uri`
    resolution the key set is fetched directly over HTTPS; integrity
    derives from TLS to that URL.
