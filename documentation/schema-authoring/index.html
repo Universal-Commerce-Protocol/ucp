@@ -2538,10 +2538,17 @@ target path; the rest uses the scaffold's defaults.</p>
 shows an envelope but only a subtree is the UCP payload under validation.</p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>&lt;!-- ucp:example schema=shopping/checkout op=create direction=request extract=$.params.arguments.checkout --&gt;
 </span></code></pre></div>
-<p><strong>Schema with <code>$defs</code>.</strong> Some schemas (e.g. catalog) define request/response
-inside <code>$defs</code>. Use <code>def=</code> to extract and validate against the named
-definition.</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>&lt;!-- ucp:example schema=shopping/catalog_search def=request_schema direction=request --&gt;
+<p><strong>Schema with <code>$defs</code>.</strong> Some schemas hold several message shapes under
+<code>$defs</code>. When a capability's request and response are different objects (e.g.
+catalog: a search request is a query, a search response is a list of products),
+just name the operation and direction — the validator selects
+<code>$defs/{op}_{direction}</code> automatically:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>&lt;!-- ucp:example schema=shopping/catalog_search op=search direction=response extract=$.result.structuredContent --&gt;
+</span></code></pre></div>
+<p>For a shape that isn't an operation+direction — a transport's <code>error_response</code>,
+a profile's <code>business_schema</code>, or a named sub-type — select it explicitly with
+<code>def=</code>:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>&lt;!-- ucp:example schema=transports/jsonrpc def=error_response op=read --&gt;
 </span></code></pre></div>
 <p><strong>Empty body.</strong> A <code>{}</code> payload (e.g. cancel, GET) validates trivially against
 the matching op + direction. No special syntax needed.</p>
@@ -2583,18 +2590,18 @@ file path isn't part of it.</p>
 <p>The validator is pure stdlib Python and shells out to the
 <a href="https://github.com/universal-commerce-protocol/ucp-schema"><code>ucp-schema</code></a>
 binary for schema resolution and payload validation. First-time setup:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>uv<span class="w"> </span>sync<span class="w">                                   </span><span class="c1"># Python deps</span>
-</span><span id="__span-22-2"><a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>cargo<span class="w"> </span>install<span class="w"> </span>ucp-schema<span class="w">                  </span><span class="c1"># validator backend</span>
-</span><span id="__span-22-3"><a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a>uv<span class="w"> </span>tool<span class="w"> </span>install<span class="w"> </span>pre-commit<span class="w">                </span><span class="c1"># if not already installed</span>
-</span><span id="__span-22-4"><a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a>pre-commit<span class="w"> </span>install<span class="w"> </span>--hook-type<span class="w"> </span>pre-commit<span class="w"> </span>--hook-type<span class="w"> </span>pre-push
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>uv<span class="w"> </span>sync<span class="w">                                   </span><span class="c1"># Python deps</span>
+</span><span id="__span-23-2"><a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>cargo<span class="w"> </span>install<span class="w"> </span>ucp-schema<span class="w">                  </span><span class="c1"># validator backend</span>
+</span><span id="__span-23-3"><a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a>uv<span class="w"> </span>tool<span class="w"> </span>install<span class="w"> </span>pre-commit<span class="w">                </span><span class="c1"># if not already installed</span>
+</span><span id="__span-23-4"><a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a>pre-commit<span class="w"> </span>install<span class="w"> </span>--hook-type<span class="w"> </span>pre-commit<span class="w"> </span>--hook-type<span class="w"> </span>pre-push
 </span></code></pre></div>
 <p>The <code>--hook-type pre-push</code> flag is important: pre-commit only installs the
 <code>pre-commit</code> stage hook by default, but this repo also uses <code>pre-push</code>
 hooks as a safety net. Pass both to opt into the full enforcement story.</p>
 <p>Manual invocation:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>python3<span class="w"> </span>scripts/validate_examples.py<span class="w"> </span>--schema-base<span class="w"> </span>source/schemas/
-</span><span id="__span-23-2"><a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>python3<span class="w"> </span>scripts/validate_examples.py<span class="w"> </span>--schema-base<span class="w"> </span>source/schemas/<span class="w"> </span>--file<span class="w"> </span>docs/specification/checkout-rest.md<span class="w"> </span>docs/specification/cart.md
-</span><span id="__span-23-3"><a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a>python3<span class="w"> </span>scripts/validate_examples.py<span class="w"> </span>--schema-base<span class="w"> </span>source/schemas/<span class="w"> </span>--audit
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>python3<span class="w"> </span>scripts/validate_examples.py<span class="w"> </span>--schema-base<span class="w"> </span>source/schemas/
+</span><span id="__span-24-2"><a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>python3<span class="w"> </span>scripts/validate_examples.py<span class="w"> </span>--schema-base<span class="w"> </span>source/schemas/<span class="w"> </span>--file<span class="w"> </span>docs/specification/checkout-rest.md<span class="w"> </span>docs/specification/cart.md
+</span><span id="__span-24-3"><a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a>python3<span class="w"> </span>scripts/validate_examples.py<span class="w"> </span>--schema-base<span class="w"> </span>source/schemas/<span class="w"> </span>--audit
 </span></code></pre></div>
 <p>The <code>--audit</code> mode lists blocks without validating them — useful for counting
 skips and identifying unannotated blocks. <code>--file</code> accepts one or more paths
