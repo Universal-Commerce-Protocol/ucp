@@ -3613,7 +3613,7 @@ examples).</p>
 <h3 id="common-scenarios">Common Scenarios<a class="headerlink" href="#common-scenarios" title="Permanent link">&para;</a></h3>
 <h4 id="empty-search">Empty Search<a class="headerlink" href="#empty-search" title="Permanent link">&para;</a></h4>
 <p>When search finds no matches, return an empty array without messages.</p>
-<!-- ucp:example schema=shopping/catalog_search def=search_response op=read -->
+<!-- ucp:example schema=shopping/catalog_search op=search -->
 <div class="language-json highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="p">{</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="nt">&quot;ucp&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="err">...</span><span class="p">},</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span><span class="nt">&quot;products&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
@@ -3623,7 +3623,7 @@ examples).</p>
 <h4 id="backorder-warning">Backorder Warning<a class="headerlink" href="#backorder-warning" title="Permanent link">&para;</a></h4>
 <p>When a product is available but has delayed fulfillment, return the product with
 a warning message. Use the <code>path</code> field to target specific variants.</p>
-<!-- ucp:example schema=shopping/catalog_search def=search_response op=read -->
+<!-- ucp:example schema=shopping/catalog_search op=search -->
 <div class="language-json highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="p">{</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="nt">&quot;ucp&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="err">...</span><span class="p">},</span>
 </span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span><span class="nt">&quot;products&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
@@ -3662,7 +3662,7 @@ field uses RFC 9535 JSONPath to target specific components.</p>
 <p>When requested identifiers don't exist, return success with the found products
 (if any). The response MAY include informational messages indicating which
 identifiers were not found.</p>
-<!-- ucp:example schema=shopping/catalog_lookup def=lookup_response op=read -->
+<!-- ucp:example schema=shopping/catalog_lookup op=lookup -->
 <div class="language-json highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="p">{</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="nt">&quot;ucp&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="err">...</span><span class="p">},</span>
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span><span class="nt">&quot;products&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
@@ -3682,7 +3682,7 @@ identifiers were not found.</p>
 return it as a warning with <code>presentation: "disclosure"</code>. The <code>path</code> field targets the
 relevant component in the response — when it targets a product, the
 disclosure applies to all of its variants.</p>
-<!-- ucp:example schema=shopping/catalog_search def=search_response op=read -->
+<!-- ucp:example schema=shopping/catalog_search op=search -->
 <div class="language-json highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="p">{</span>
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="nt">&quot;ucp&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="err">...</span><span class="p">},</span>
 </span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span><span class="nt">&quot;products&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
