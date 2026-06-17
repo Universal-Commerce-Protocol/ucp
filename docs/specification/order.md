@@ -87,6 +87,13 @@ Expectations can be split, merged, or adjusted post-order. For example:
   (common examples: `processing`, `shipped`, `in_transit`, `delivered`,
   `failed_attempt`, `canceled`, `undeliverable`, `returned_to_sender`)
 
+### Attribution
+
+Businesses MAY surface a snapshot of the originating checkout's
+`attribution` on the order. Read-only on the order — agents do not write
+`order.attribution`. See [Attribution](overview.md#attribution) for the
+underlying contract.
+
 ### Adjustments
 
 **Adjustments** are post-order events that exist independently of
@@ -116,6 +123,7 @@ Line items reflect what was purchased at checkout and their current state.
 
 **Quantity Structure:**
 
+<!-- ucp:example schema=shopping/types/order_line_item target=$.quantity -->
 ```json
 {
   "original": 3,   // Quantity from the original checkout
@@ -165,6 +173,7 @@ Examples: `refund`, `return`, `credit`, `price_adjustment`, `dispute`,
 
 ## Example
 
+<!-- ucp:example schema=shopping/order op=read -->
 ```json
 {
   "ucp": {
@@ -264,6 +273,19 @@ Examples: `refund`, `return`, `credit`, `price_adjustment`, `dispute`,
 }
 ```
 
+## Scopes
+
+The Order capability defines the following well-known scopes for
+user-authenticated access:
+
+| Scope | Description |
+| :--- | :--- |
+| `dev.ucp.shopping.order:read` | Read access to the user's orders — Get Order on resources owned by the authenticated user. |
+| `dev.ucp.shopping.order:manage` | Post-purchase operations on the user's orders — cancellation, returns, and other modifications. |
+
+Scope declaration, derivation, and rules for extending this set with
+custom scopes are defined in [Identity Linking — Scopes](identity-linking.md#scopes).
+
 ## Operations
 
 The order entity is a **current-state snapshot**: the authoritative latest
@@ -294,12 +316,13 @@ The business **MUST** authenticate requests to order data before returning a
 response, using any supported UCP mechanism - API keys, OAuth 2.0, mutual
 TLS, or HTTP Message Signatures (see
 [Identity and Authentication](checkout-rest.md#authentication)). The
-authentication method determines the scope of accessible orders:
+authentication method determines which orders are accessible to the
+caller:
 
-| Authentication | Recommended Access Scope |
+| Authentication | Accessible Orders |
 | :------------- | :----------------------- |
 | Platform credentials | Orders originated by the platform |
-| Buyer authorization | Orders originated by the buyer, subject to granted scope |
+| Buyer authorization | Orders owned by the buyer, subject to the granted OAuth scopes |
 
 **Platform credentials** (API key, signatures, OAuth client credentials) -
 businesses **MAY** allow access for orders the platform originated. The
@@ -325,6 +348,7 @@ that includes a `messages` array describing the outcome:
 
 **Order not found:**
 
+<!-- ucp:example schema=common/types/error_response op=read -->
 ```json
 {
   "ucp": {
@@ -347,6 +371,7 @@ that includes a `messages` array describing the outcome:
 
 **Not authorized:**
 
+<!-- ucp:example schema=common/types/error_response op=read -->
 ```json
 {
   "ucp": {
@@ -420,11 +445,14 @@ platform's profile and uses it to send order lifecycle events.
 
 **Example:**
 
+<!-- ucp:example schema=profile def=platform_schema target=$.ucp.capabilities -->
 ```json
 {
   "dev.ucp.shopping.order": [
     {
       "version": "{{ ucp_version }}",
+      "spec": "https://ucp.dev/{{ ucp_version }}/specification/order",
+      "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/order.json",
       "config": {
         "webhook_url": "https://platform.example.com/webhooks/ucp/orders"
       }

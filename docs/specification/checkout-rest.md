@@ -21,6 +21,41 @@ This document specifies the REST binding for the
 
 ## Protocol Fundamentals
 
+### Discovery
+
+Businesses advertise REST transport availability through their UCP profile at
+`/.well-known/ucp`.
+
+<!-- ucp:example schema=profile def=business_schema -->
+```json
+{
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "services": {
+      "dev.ucp.shopping": [
+        {
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview",
+          "transport": "rest",
+          "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/rest.openapi.json",
+          "endpoint": "https://business.example.com/ucp/v1"
+        }
+      ]
+    },
+    "capabilities": {
+      "dev.ucp.shopping.checkout": [
+        {
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/checkout",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/checkout.json"
+        }
+      ]
+    },
+    "payment_handlers": {}
+  }
+}
+```
+
 ### Base URL
 
 All UCP REST endpoints are relative to the business's base URL, which is
@@ -57,6 +92,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
 
 === "Request"
 
+    <!-- ucp:example schema=shopping/checkout op=create direction=request -->
     ```json
     POST /checkout-sessions HTTP/1.1
     UCP-Agent: profile="https://platform.example/profile"
@@ -76,6 +112,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/checkout op=read -->
     ```json
     HTTP/1.1 201 Created
     Content-Type: application/json
@@ -170,6 +207,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
 
     All items out of stock — no checkout resource is created:
 
+    <!-- ucp:example schema=common/types/error_response op=read -->
     ```json
     HTTP/1.1 200 OK
     Content-Type: application/json
@@ -198,6 +236,7 @@ so clients must include all previously set fields they wish to retain.
 
 === "Request"
 
+    <!-- ucp:example schema=shopping/checkout op=update direction=request -->
     ```json
     PUT /checkout-sessions/{id} HTTP/1.1
     UCP-Agent: profile="https://platform.example/profile"
@@ -224,6 +263,7 @@ so clients must include all previously set fields they wish to retain.
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/checkout op=read -->
     ```json
     HTTP/1.1 200 OK
     Content-Type: application/json
@@ -257,7 +297,7 @@ so clients must include all previously set fields they wish to retain.
         {
           "type": "error",
           "code": "missing",
-          "path": "$.fulfillment.method[0].selected_destination_id",
+          "path": "$.fulfillment.methods[0].selected_destination_id",
           "content": "Fulfillment address is required",
           "severity": "recoverable"
         }
@@ -327,6 +367,7 @@ type & addresses.
 
 === "Request"
 
+    <!-- ucp:example schema=shopping/checkout op=update direction=request -->
     ```json
     PUT /checkout-sessions/{id} HTTP/1.1
     UCP-Agent: profile="https://platform.example/profile"
@@ -369,6 +410,7 @@ type & addresses.
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/checkout op=read -->
     ```json
     HTTP/1.1 200 OK
     Content-Type: application/json
@@ -527,6 +569,7 @@ Follow-up calls after initial `fulfillment` data to update selection.
 
 === "Request"
 
+    <!-- ucp:example schema=shopping/checkout op=update direction=request -->
     ```json
     PUT /checkout-sessions/{id} HTTP/1.1
     UCP-Agent: profile="https://platform.example/profile"
@@ -545,7 +588,7 @@ Follow-up calls after initial `fulfillment` data to update selection.
             "id": "item_123"
           },
           "id": "li_1",
-          "quantity": 2,
+          "quantity": 2
         }
       ],
       "fulfillment": {
@@ -579,6 +622,7 @@ Follow-up calls after initial `fulfillment` data to update selection.
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/checkout op=read -->
     ```json
     HTTP/1.1 200 OK
     Content-Type: application/json
@@ -724,6 +768,7 @@ place to set these expectations via `messages`.
 
 === "Request"
 
+    <!-- ucp:example schema=shopping/checkout op=complete direction=request -->
     ```json
     POST /checkout-sessions/{id}/complete
     UCP-Agent: profile="https://platform.example/profile"
@@ -766,6 +811,7 @@ place to set these expectations via `messages`.
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/checkout op=read -->
     ```json
     HTTP/1.1 200 OK
     Content-Type: application/json
@@ -917,6 +963,7 @@ place to set these expectations via `messages`.
 
 === "Request"
 
+    <!-- ucp:example schema=shopping/checkout op=read direction=request -->
     ```json
     GET /checkout-sessions/{id}
     UCP-Agent: profile="https://platform.example/profile"
@@ -927,6 +974,7 @@ place to set these expectations via `messages`.
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/checkout op=read -->
     ```json
     HTTP/1.1 200 OK
     Content-Type: application/json
@@ -1072,6 +1120,7 @@ place to set these expectations via `messages`.
 
 === "Request"
 
+    <!-- ucp:example schema=shopping/checkout op=cancel direction=request -->
     ```json
     POST /checkout-sessions/{id}/cancel
     UCP-Agent: profile="https://platform.example/profile"
@@ -1082,6 +1131,7 @@ place to set these expectations via `messages`.
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/checkout op=read -->
     ```json
     HTTP/1.1 200 OK
     Content-Type: application/json
@@ -1241,8 +1291,10 @@ operations unless otherwise noted.
 * **Idempotency-Key**: Operations that modify state **SHOULD** support
     idempotency. When provided, the server **MUST**:
     1. Store the key with the operation result for at least 24 hours.
-    2. Return the cached result for duplicate keys.
-    3. Return `409 Conflict` if the key is reused with different parameters.
+    2. Return the cached result for duplicate keys whose request body matches the original.
+    3. Return `409 Conflict` if the key is reused with a mismatched body.
+    See [Message Signatures — Idempotency Key Requirements](signatures.md#replay-protection)
+    for the full payload-matching contract.
 
 ## Protocol Mechanics
 
@@ -1279,23 +1331,34 @@ code registry and transport binding examples.
 Business outcomes (including errors like unavailable merchandise) are returned
 with HTTP 200 and the UCP envelope containing `messages`:
 
+<!-- ucp:example schema=shopping/checkout op=read -->
 ```json
 {
   "ucp": {
     "version": "{{ ucp_version }}",
+    "status": "success",
+    "payment_handlers": { ... },
     "capabilities": {
       "dev.ucp.shopping.checkout": [{"version": "{{ ucp_version }}"}]
     }
   },
   "id": "checkout_abc123",
   "status": "incomplete",
+  "currency": "USD",
   "line_items": [
     {
-      "id": "item_456",
-      "quantity": 100,
-      "available_quantity": 12
+      "id": "li_1",
+        "item": {
+          "id": "item_123",
+          "title": "Blue Jeans",
+          "price": 5000
+        },
+      "quantity": 12,
+      "totals": [...]
     }
   ],
+  "totals": [...],
+  "links": [...],
   "messages": [
     {
       "type": "warning",
@@ -1311,6 +1374,7 @@ with HTTP 200 and the UCP envelope containing `messages`:
 For `create_checkout`, when all items unavailable and no checkout can be created, returns
 HTTP 200 and the UCP envelope containing `messages`
 
+<!-- ucp:example schema=common/types/error_response op=read -->
 ```json
 {
   "ucp": { "version": "2026-01-11", "status": "error" },
@@ -1399,8 +1463,9 @@ authentication is required, the REST transport **MAY** use:
 
 1. **Open API**: No authentication required for public operations.
 2. **API Keys**: Via `X-API-Key` header.
-3. **OAuth 2.0**: Via `Authorization: Bearer {token}` header, following
-    [RFC 6749](https://tools.ietf.org/html/rfc6749){ target="_blank" }.
+3. **OAuth 2.0**: Via `Authorization: Bearer {token}` header. Identifies the
+   platform for agent-authenticated access, or both platform and user for
+   user-authenticated access (see [Identity Linking](identity-linking.md)).
 4. **Mutual TLS**: For high-security environments.
 5. **HTTP Message Signatures**: Per [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421)
     (see [Message Signing](#message-signing) above).

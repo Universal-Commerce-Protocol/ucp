@@ -30,6 +30,7 @@ Paymentech
 Paypal
 Preorders
 Queensway
+Quicktype
 Sephora
 Shopify
 Shopee
@@ -74,7 +75,9 @@ linkignore
 llms
 llmstxt
 mastercard
+grepable
 midsole
+misparsed
 mkdocs
 mtok
 openapi
@@ -108,5 +111,14 @@ yml
 jwks
 keyid
 reauth
+redeemables
 reprepare
 sandboxing
+fbclid
+gclid
+ttclid
+ietf
+Accor
+Kogan
+Petbarn
+VTEX
