@@ -338,9 +338,11 @@ none, surfacing only `type`, `description`, and `availability`; options are
 nested directly under the method, with no group layer (unlike checkout
 `methods[].groups[].options[]`).
 
-A discovered option `id` is the unit checkout selects: a business that
-advertises an option `id` MUST accept the same id as `selected_option_id`
-at checkout, so a discovered option carries through to cart and checkout.
+A discovered option `id` lets a buyer's choice carry forward: a business
+SHOULD accept the same id as `selected_option_id` in cart and checkout.
+The id is a best-effort handle, not a guaranteed match — an option
+discovered for a single product may differ in a cart, where other
+products, quantities, and combined fulfillment modify the options.
 
 ### Shapes
 
