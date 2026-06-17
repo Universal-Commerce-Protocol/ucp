@@ -79,13 +79,13 @@ Public keys **MUST** be represented using **JSON Web Key (JWK)** format as defin
 | ----- | ------ | -------- | ---------------------------------- |
 | `kid` | string | Yes      | Key ID (referenced in signatures)  |
 | `kty` | string | Yes      | Key type (`EC` for elliptic curve) |
-| `crv` | string | Yes\*    | Curve name (`P-256`, `P-384`)      |
-| `x`   | string | Yes\*    | X coordinate (base64url encoded)   |
-| `y`   | string | Yes\*    | Y coordinate (base64url encoded)   |
+| `crv` | string | Yes `*`  | Curve name (`P-256`, `P-384`)      |
+| `x`   | string | Yes `*`  | X coordinate (base64url encoded)   |
+| `y`   | string | Yes `*`  | Y coordinate (base64url encoded)   |
 | `use` | string | No       | Key usage (`sig` for signing)      |
 | `alg` | string | No       | Algorithm (`ES256`, `ES384`)       |
 
-\* Required for EC keys
+- `*` Required for EC keys
 
 **Example:**
 
@@ -132,13 +132,13 @@ For HTTP REST transport, UCP uses [RFC 9421 (HTTP Message Signatures)](https://w
 
 ### Headers
 
-| Header            | Direction        | Required | Description                           |
-| ----------------- | ---------------- | -------- | ------------------------------------- |
-| `Signature-Input` | Request/Response | Yes      | Describes signed components           |
-| `Signature`       | Request/Response | Yes      | Contains signature value              |
-| `Content-Digest`  | Request/Response | Cond.\*  | SHA-256 hash of request/response body |
+| Header            | Direction        | Required  | Description                           |
+| ----------------- | ---------------- | --------- | ------------------------------------- |
+| `Signature-Input` | Request/Response | Yes       | Describes signed components           |
+| `Signature`       | Request/Response | Yes       | Contains signature value              |
+| `Content-Digest`  | Request/Response | Cond. `*` | SHA-256 hash of request/response body |
 
-\* Required when request/response has a body
+- `*` Required when request/response has a body
 
 `Content-Digest` follows [RFC 9530](https://www.rfc-editor.org/rfc/rfc9530) and hashes the raw body bytes. This binds the message body to the signature without requiring JSON canonicalization. Implementations **MUST** use `sha-256`. For durable artifacts requiring canonicalization, see [AP2 Mandates - Canonicalization](http://ucp.dev/draft/specification/ap2-mandates/#canonicalization).
 
@@ -153,19 +153,16 @@ For HTTP REST transport, UCP uses [RFC 9421 (HTTP Message Signatures)](https://w
 | `@method`         | Yes         | HTTP method (GET, POST, etc.)           |
 | `@authority`      | Yes         | Target host (prevents cross-host relay) |
 | `@path`           | Yes         | Request path                            |
-| `@query`          | Cond.\*     | Query string (if present)               |
-| `ucp-agent`       | Cond.\*\*   | Profile URL (binds identity)            |
-| `idempotency-key` | Cond.\*\*\* | Idempotency header (state-changing)     |
-| `content-digest`  | Cond.†      | Body digest (if body present)           |
-| `content-type`    | Cond.†      | Content-Type (if body present)          |
+| `@query`          | Cond. `*`   | Query string (if present)               |
+| `ucp-agent`       | Cond. `**`  | Profile URL (binds identity)            |
+| `idempotency-key` | Cond. `***` | Idempotency header (state-changing)     |
+| `content-digest`  | Cond. `†`   | Body digest (if body present)           |
+| `content-type`    | Cond. `†`   | Content-Type (if body present)          |
 
-\* Required if request has query parameters
-
-\*\* Required if `UCP-Agent` header is present
-
-\*\*\* Required for POST, PUT, DELETE, PATCH
-
-† Required if request has a body
+- `*` Required if request has query parameters
+- `**` Required if `UCP-Agent` header is present
+- `***` Required for POST, PUT, DELETE, PATCH
+- `†` Required if request has a body
 
 **Signature Generation:**
 
@@ -241,13 +238,13 @@ Response signatures use `@status` instead of `@method`:
 
 **Signed Components:**
 
-| Component        | Required | Description                       |
-| ---------------- | -------- | --------------------------------- |
-| `@status`        | Yes      | HTTP status code (200, 201, etc.) |
-| `content-digest` | Cond.\*  | Body digest (if body present)     |
-| `content-type`   | Cond.\*  | Content-Type (if body present)    |
+| Component        | Required  | Description                       |
+| ---------------- | --------- | --------------------------------- |
+| `@status`        | Yes       | HTTP status code (200, 201, etc.) |
+| `content-digest` | Cond. `*` | Body digest (if body present)     |
+| `content-type`   | Cond. `*` | Content-Type (if body present)    |
 
-\* Required if response has a body
+- `*` Required if response has a body
 
 **Complete Response Example:**
 

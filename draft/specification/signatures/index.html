@@ -2725,19 +2725,19 @@ defined in <a href="https://datatracker.ietf.org/doc/html/rfc7517">RFC 7517</a>.
 <tr>
 <td style="text-align: left;"><code>crv</code></td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">Yes*</td>
+<td style="text-align: left;">Yes <code>*</code></td>
 <td style="text-align: left;">Curve name (<code>P-256</code>, <code>P-384</code>)</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>x</code></td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">Yes*</td>
+<td style="text-align: left;">Yes <code>*</code></td>
 <td style="text-align: left;">X coordinate (base64url encoded)</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>y</code></td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">Yes*</td>
+<td style="text-align: left;">Yes <code>*</code></td>
 <td style="text-align: left;">Y coordinate (base64url encoded)</td>
 </tr>
 <tr>
@@ -2754,7 +2754,9 @@ defined in <a href="https://datatracker.ietf.org/doc/html/rfc7517">RFC 7517</a>.
 </tr>
 </tbody>
 </table>
-<p>* Required for EC keys</p>
+<ul>
+<li><code>*</code> Required for EC keys</li>
+</ul>
 <p><strong>Example:</strong></p>
 <!-- ucp:example schema=profile extract=$ target=$.signing_keys[0] -->
 <div class="language-json highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="p">{</span>
@@ -2821,12 +2823,14 @@ profile trust model, and profile fetch requirements, see
 <tr>
 <td style="text-align: left;"><code>Content-Digest</code></td>
 <td style="text-align: left;">Request/Response</td>
-<td style="text-align: left;">Cond.*</td>
+<td style="text-align: left;">Cond. <code>*</code></td>
 <td style="text-align: left;">SHA-256 hash of request/response body</td>
 </tr>
 </tbody>
 </table>
-<p>* Required when request/response has a body</p>
+<ul>
+<li><code>*</code> Required when request/response has a body</li>
+</ul>
 <p><code>Content-Digest</code> follows <a href="https://www.rfc-editor.org/rfc/rfc9530">RFC 9530</a> and
 hashes the raw body bytes. This binds the message body to the signature without
 requiring JSON canonicalization. Implementations <strong>MUST</strong> use <code>sha-256</code>. For
@@ -2864,35 +2868,37 @@ verification.</p>
 </tr>
 <tr>
 <td style="text-align: left;"><code>@query</code></td>
-<td style="text-align: left;">Cond.*</td>
+<td style="text-align: left;">Cond. <code>*</code></td>
 <td style="text-align: left;">Query string (if present)</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>ucp-agent</code></td>
-<td style="text-align: left;">Cond.**</td>
+<td style="text-align: left;">Cond. <code>**</code></td>
 <td style="text-align: left;">Profile URL (binds identity)</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>idempotency-key</code></td>
-<td style="text-align: left;">Cond.***</td>
+<td style="text-align: left;">Cond. <code>***</code></td>
 <td style="text-align: left;">Idempotency header (state-changing)</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>content-digest</code></td>
-<td style="text-align: left;">Cond.†</td>
+<td style="text-align: left;">Cond. <code>†</code></td>
 <td style="text-align: left;">Body digest (if body present)</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>content-type</code></td>
-<td style="text-align: left;">Cond.†</td>
+<td style="text-align: left;">Cond. <code>†</code></td>
 <td style="text-align: left;">Content-Type (if body present)</td>
 </tr>
 </tbody>
 </table>
-<p>* Required if request has query parameters</p>
-<p>** Required if <code>UCP-Agent</code> header is present</p>
-<p>*** Required for POST, PUT, DELETE, PATCH</p>
-<p>† Required if request has a body</p>
+<ul>
+<li><code>*</code>   Required if request has query parameters</li>
+<li><code>**</code>  Required if <code>UCP-Agent</code> header is present</li>
+<li><code>***</code> Required for POST, PUT, DELETE, PATCH</li>
+<li><code>†</code>   Required if request has a body</li>
+</ul>
 <p><strong>Signature Generation:</strong></p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>sign_rest_request(method, path, query, body_bytes, idempotency_key, private_key, kid):
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    // 1. Compute body digest (if body present)
@@ -2975,17 +2981,19 @@ conversion.</p>
 </tr>
 <tr>
 <td style="text-align: left;"><code>content-digest</code></td>
-<td style="text-align: left;">Cond.*</td>
+<td style="text-align: left;">Cond. <code>*</code></td>
 <td style="text-align: left;">Body digest (if body present)</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>content-type</code></td>
-<td style="text-align: left;">Cond.*</td>
+<td style="text-align: left;">Cond. <code>*</code></td>
 <td style="text-align: left;">Content-Type (if body present)</td>
 </tr>
 </tbody>
 </table>
-<p>* Required if response has a body</p>
+<ul>
+<li><code>*</code> Required if response has a body</li>
+</ul>
 <p><strong>Complete Response Example:</strong></p>
 <div class="language-http highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">201</span> <span class="ne">Created</span>
 </span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
