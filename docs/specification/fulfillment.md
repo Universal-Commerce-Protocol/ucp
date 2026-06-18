@@ -549,10 +549,10 @@ Businesses declare what fulfillment configurations they support using
         "dev.ucp.shopping.catalog.lookup"
       ],
       "config": {
-        "allows_multi_destination": {
-          "shipping": true
+        "multi_destination": {
+          "shipping": { "allowed": true }
         },
-        "allows_method_combinations": [["shipping", "pickup"]]
+        "method_combinations": [["shipping", "pickup"]]
       }
     }
   ]
@@ -612,7 +612,7 @@ like any other method.
 needed. Emit the value directly as the `type` on catalog and checkout, and
 filter with `filters.methods: ["home_installation"]`. For cart and checkout
 negotiation, declare its behavior in the business profile `config` — e.g.
-include `["shipping", "home_installation"]` in `allows_method_combinations`
+include `["shipping", "home_installation"]` in `method_combinations`
 so a cart can mix shipped and installed items (see
 [Business Profile](#business-profile)). On a catalog variant's method:
 
@@ -776,7 +776,7 @@ package.
 ### Split Destinations
 
 **Config:** Business profile requires
-`config.allows_multi_destination.shipping: true`
+`config.multi_destination.shipping.allowed: true`
 
 Shirt ships to mom (US), pants ship to grandma (Hong Kong). Two methods of the
 same type, each with its own destination.

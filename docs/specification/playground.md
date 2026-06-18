@@ -508,11 +508,11 @@ const UcpData = {
         spec: "https://ucp.dev/{{ ucp_version }}/specification/fulfillment",
         schema: "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json",
         config: {
-          allows_multi_destination: {
-            shipping: false,
-            pickup: false
+          multi_destination: {
+            shipping: { allowed: false },
+            pickup: { allowed: false }
           },
-          allows_method_combinations: [
+          method_combinations: [
             ["shipping"],
             ["pickup"]
           ]

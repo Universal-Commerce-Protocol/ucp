@@ -5,24 +5,24 @@
   "description": "Merchant's fulfillment configuration.",
   "type": "object",
   "properties": {
-    "allows_multi_destination": {
+    "multi_destination": {
       "type": "object",
-      "description": "Permits multiple destinations per method type. Keyed by fulfillment method `type`; `shipping` and `pickup` are well-known, and businesses MAY include additional method types.",
-      "properties": {
-        "shipping": {
-          "type": "boolean",
-          "description": "Multiple shipping destinations allowed."
+      "description": "Per-method-type multi-destination config, keyed by fulfillment method `type`. Open — businesses MAY add any method type; well-known keys are `shipping` and `pickup`. A type that is absent is not permitted.",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["allowed"],
+        "properties": {
+          "allowed": {
+            "type": "boolean",
+            "description": "Whether multiple destinations are allowed for this method type."
+          }
         },
-        "pickup": {
-          "type": "boolean",
-          "description": "Multiple pickup locations allowed."
-        }
-      },
-      "additionalProperties": true
+        "additionalProperties": true
+      }
     },
-    "allows_method_combinations": {
+    "method_combinations": {
       "type": "array",
-      "description": "Allowed method type combinations.",
+      "description": "Method-type combinations the business permits within one cart. Each inner array is a permitted set of method `type` values (e.g. shipping + pickup).",
       "items": {
         "type": "array",
         "items": {
