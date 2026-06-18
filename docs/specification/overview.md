@@ -1166,13 +1166,15 @@ Signatures.
 
 See [Profile Structure](#profile-structure) for the publishing
 contract (canonical `signing_keys[]`, optional `keys[]` mirror,
-cross-array equivalence rule). Verifiers read by signature shape:
+cross-array equivalence rule). Verifiers read the key list that matches
+how they resolved the key:
 
-- **Default UCP signature** — read `signing_keys[]`.
-- **WBA-shape signature** (resolved via `Signature-Agent`) — read
+- **Resolved via `UCP-Agent`** (default UCP key lookup) — read
+  `signing_keys[]`.
+- **Resolved via `Signature-Agent`** (Web Bot Auth, optional) — read
   top-level `keys[]`.
 
-For the full verifier algorithm — tag-driven regime selection,
+For the full verifier algorithm — capability-based key resolution,
 profile fetching, directory self-signature verification — see
 [Identity Resolution Algorithm](#identity-resolution-algorithm) below.
 For key format (JWK), supported algorithms, key rotation procedures,
@@ -1310,8 +1312,12 @@ signature.
 
 ### Identity Resolution Algorithm
 
-UCP and Web Bot Auth define parallel verification regimes; the
-signature's `tag` parameter determines which key directory applies.
+UCP and Web Bot Auth define two key-resolution mechanisms. Which one a
+verifier uses is chosen by **verifier capability and the headers
+present**, not by the signature's `tag` — the `tag` is a hint, not a
+gate. Default UCP key lookup (`UCP-Agent`) is supported by every UCP
+verifier and works for any UCP signature; Web Bot Auth key lookup
+(`Signature-Agent`) is an optional, additive layer.
 
 A request MAY carry multiple signatures per
 [RFC 9421 §4.3](https://www.rfc-editor.org/rfc/rfc9421#section-4.3).
@@ -1319,33 +1325,44 @@ Verifiers attempt each signature independently; the request is
 authenticated when at least one signature verifies. The algorithm
 below processes a single signature.
 
-1. **Determine the verification regime from the signature's `tag`.**
-    - `tag="web-bot-auth"` — WBA-shape. The signature **MUST** satisfy
-      the agent-signature requirements in
+1. **Resolve the signing key — by verifier capability, not by `tag`.**
+   The `tag` is a hint, not a gate; a verifier uses a resolution
+   mechanism it supports whose header is present:
+    - **`UCP-Agent` — default UCP key lookup, supported by every UCP
+      verifier.** Resolve the `UCP-Agent` profile URL and read
+      `signing_keys[]`. This path applies to UCP signatures that are
+      untagged (default UCP) or carry `tag="web-bot-auth"` (the
+      dual-audience shape); the verifier resolves them via `UCP-Agent`,
+      treats `signature-agent` as an ordinary covered component, and
+      need not implement Web Bot Auth. Signatures whose `tag` denotes
+      another application's purpose are skipped (see below) — UCP does
+      not claim signatures scoped to other applications.
+    - **`Signature-Agent` — Web Bot Auth key lookup, OPTIONAL
+      (WBA-aware verifiers).** For a signature carrying
+      `tag="web-bot-auth"`, a WBA-aware verifier **MAY** instead resolve
+      via the `Signature-Agent` member, parsed per the
+      [Signature-Agent parsing rules](signatures.md#rest-request-verification).
+      Such a signature **MUST** satisfy the WBA agent-signature
+      requirements in
       [draft-meunier-web-bot-auth-architecture-05](https://datatracker.ietf.org/doc/draft-meunier-web-bot-auth-architecture/05/)
       §4.2 (signed `signature-agent;key=<sig-label>`, `keyid`,
-      `created`, `expires`); **skip** this signature otherwise.
-      Resolve via `Signature-Agent`, parsed per the
-      [Signature-Agent parsing rules](signatures.md#rest-request-verification)
-      in signatures.md. The member value **MUST** be an HTTPS URL; its
-      `type` parameter selects resolution — `jwks_uri` reads the URL
+      `created`, `expires`). The member value **MUST** be an HTTPS URL;
+      its `type` parameter selects resolution — `jwks_uri` reads the URL
       directly as a JWK Set (a UCP profile in JWKS-superset form),
       `directory` (default) resolves the well-known directory at the
       URL's origin (see
       [Deployment Patterns](#deployment-patterns-for-wba-interop)).
-      `data:` URI inline form is out of scope for UCP-WBA interop. If
-      the `Signature-Agent` header is absent, no matching dictionary
-      member exists, or the URL is non-HTTPS, **skip** this signature.
-    - No `tag` parameter — default UCP. Resolve via `UCP-Agent` (the
-      UCP profile URL).
-    - Any other `tag` — extension this verifier does not understand.
-      **Skip** this signature.
+      `data:` URI inline form is out of scope for UCP-WBA interop.
+   **Skip** this signature if no mechanism the verifier supports can
+   resolve its key — the required header is absent, no `Signature-Agent`
+   member matches the signature label, the URL is non-HTTPS, or the
+   `tag` is scoped to a purpose this verifier does not handle.
 2. **Fetch the document** per [§Fetching](#fetching). If the fetch
    fails (DNS error, network failure, non-2xx response, parse failure),
    **skip** this signature.
-3. **Locate the key list** in the resolved document:
-    - **WBA-shape signature** — read top-level `keys[]` per RFC 7517.
-    - **Default UCP signature** — read `signing_keys[]`.
+3. **Locate the key list** in the resolved document — `signing_keys[]`
+   when resolved via `UCP-Agent`, the top-level `keys[]` (RFC 7517 JWK
+   Set) when resolved via `Signature-Agent`.
 4. **For `type=directory` resolution: verify the directory's per-key
    self-signatures** per
    [draft-meunier-http-message-signatures-directory-05](https://datatracker.ietf.org/doc/draft-meunier-http-message-signatures-directory/05/)
@@ -1360,7 +1377,20 @@ below processes a single signature.
    verifying the equality detects directory tampering and ensures
    WBA-interop behavior. If the thumbprint check fails, skip this
    signature.
-6. **Verify the signature** using the matched key. The signing
+6. **Enforce covered-component requirements, in every regime.**
+   Independent of `tag` and transport, the signature **MUST** cover the
+   request target (`@method`, `@authority`, `@path`; `@query` when a
+   query string is present), the body when present (`content-digest`,
+   `content-type`), and every integrity-relevant header the request
+   carries (`ucp-agent`, `signature-agent`, `idempotency-key`). If any
+   such component is absent from the signature's covered set, **skip**
+   this signature — a target, body, or header the signature does not
+   cover is treated as unsigned. This prevents a signature satisfying only
+   Web Bot Auth's minimal covered set (`@authority`, `signature-agent`)
+   from authenticating a UCP request whose body, method, or path is
+   unbound. (Whether a request must carry `Idempotency-Key` at all is a
+   binding-level rule, separate from this coverage check.)
+7. **Verify the signature** using the matched key. The signing
    algorithm is derived from the JWK's `kty`/`crv`. If the verifier
    does not support the matched key's `kty`, `crv`, or `alg`, **skip**
    this signature; it yields `algorithm_unsupported` if no other

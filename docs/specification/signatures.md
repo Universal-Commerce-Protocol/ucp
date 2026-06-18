@@ -210,10 +210,12 @@ For WBA-shape signatures, the JWK SHA-256 Thumbprint
 
 Public keys are published in the party's UCP profile (see
 [Profile Structure](overview.md#profile-structure) for the publishing
-contract). Verifiers read by signature regime:
+contract). Verifiers read the key list that matches how they resolved
+the key:
 
-* **Default UCP signature** — read `signing_keys[]`.
-* **WBA-shape signature** (resolved via `Signature-Agent`) — read
+* **Resolved via `UCP-Agent`** (default UCP key lookup) — read
+  `signing_keys[]`.
+* **Resolved via `Signature-Agent`** (Web Bot Auth, optional) — read
   top-level `keys[]`.
 
 For the full identity resolution algorithm and deployment patterns,
@@ -285,12 +287,19 @@ signature. Items marked **MUST** are required by
 6. **MUST include `tag="web-bot-auth"`.** WBA verifiers select
    signatures by this tag.
 
-**Component requirements preserved.** UCP's existing signed components
-(`ucp-agent`, `idempotency-key`, `content-digest`, `content-type`)
-stay in the signed list. WBA accepts them as "additional components"
-per
+**Component requirements preserved — and enforced.** A WBA-shape
+signature **MUST** still cover the same components a default UCP
+signature does (the Required set in the
+[Signed Components](#rest-request-signing) table); WBA accepts them as
+"additional components" per
 [draft-meunier-web-bot-auth-architecture-05](https://datatracker.ietf.org/doc/draft-meunier-web-bot-auth-architecture/05/)
-§4.2.3.
+§4.2.3. This is enforced at the verifier, not left to signer
+discipline: per the [Identity Resolution
+Algorithm](overview.md#identity-resolution-algorithm), a UCP verifier
+**MUST** skip any signature — WBA-shape or default — that omits a
+component required for the request, even when it verifies
+cryptographically. Opting into Web Bot Auth therefore never widens
+what UCP authenticates.
 
 UCP verifiers see the same signature with three new things:
 
@@ -307,8 +316,10 @@ UCP verifiers see the same signature with three new things:
   parameters, so RFC 9421-conformant UCP verifiers **will** enforce
   the freshness window.
 
-**Identity resolution.** WBA opt-in does not change the default UCP
-regime: verifiers dispatch by `tag`. See
+**Identity resolution.** WBA opt-in does not change default UCP
+verification: a UCP verifier resolves the key via `UCP-Agent`
+regardless of `tag`; WBA-aware verifiers **MAY** additionally resolve
+via `Signature-Agent`. See
 [Identity Resolution Algorithm](overview.md#identity-resolution-algorithm).
 
 **Unknown signature parameters.** Verifiers **MUST** ignore signature
@@ -578,22 +589,27 @@ sign_rest_response(status, body_bytes, private_key, kid):
 
 **Determining the Signer's Key Directory:**
 
-UCP and Web Bot Auth define parallel verification regimes; the
-signature's `tag` parameter determines which header carries the key
-directory pointer.
+Key resolution is chosen by the verifier's capability and the headers
+present — not dictated by the signature's `tag`, which is a hint, not
+a gate.
 
-1. **WBA-shape signatures** (`tag="web-bot-auth"`) resolve the key
-   directory via the **`Signature-Agent`** header — an RFC 8941
-   Dictionary Structured Field whose member's sf-string value is
-   the HTTPS directory URL. The dictionary key matches the signature
+1. **`UCP-Agent` — default UCP key lookup (every UCP verifier).**
+   Resolve the key directory via the **`UCP-Agent`** header — the UCP
+   profile URL in RFC 8941 Dictionary form → `signing_keys[]`. This
+   path applies to any UCP signature regardless of `tag`; a UCP
+   verifier need not implement Web Bot Auth.
+2. **`Signature-Agent` — Web Bot Auth key lookup (OPTIONAL).** A
+   WBA-aware verifier **MAY**, for a signature carrying
+   `tag="web-bot-auth"`, resolve via the **`Signature-Agent`** header —
+   an RFC 8941 Dictionary Structured Field whose member's sf-string
+   value is an HTTPS URL; the dictionary key matches the signature
    label in `Signature-Input`. See [WBA Interop](#wba-interop).
-2. **Default UCP signatures** (without `tag="web-bot-auth"`) resolve
-   the key directory via the **`UCP-Agent`** header — the UCP profile
-   URL in RFC 8941 Dictionary form.
 
-Sites supporting WBA interop emit **both** headers: `UCP-Agent` for
-capability discovery and default UCP key lookup; `Signature-Agent`
-for WBA-shape key lookup.
+A WBA-interop signer emits **both** headers so either kind of verifier
+resolves the same key: `UCP-Agent` (also capability discovery) and
+`Signature-Agent`. Because the key is published in both `signing_keys[]`
+and `keys[]`, a UCP-only verifier resolves it via `UCP-Agent` without
+implementing Web Bot Auth.
 
 For the full identity resolution algorithm (including directory self-
 signature verification and inline-form handling), see
@@ -660,13 +676,12 @@ verify_rest_request(request):
     keyid = sig_input.keyid
     components = sig_input.components
 
-    // 2. Fetch signer's public key
-    // See overview.md#identity-resolution-algorithm for the full algorithm.
-    // The signature's tag selects the verification regime:
-    //   tag="web-bot-auth"  -> resolve via Signature-Agent (WBA-shape);
-    //                          read keys from top-level keys[] (RFC 7517).
-    //   no/other tag        -> resolve via UCP-Agent (default UCP);
-    //                          read keys from signing_keys[].
+    // 2. Resolve signer's public key — by verifier capability, not tag.
+    // Default UCP lookup (every verifier): UCP-Agent -> signing_keys[];
+    // works for any UCP signature regardless of tag. A WBA-aware verifier
+    // MAY instead resolve a tag="web-bot-auth" signature via
+    // Signature-Agent -> keys[]/jwks_uri (optional layer). tag is a hint,
+    // not a gate. See overview.md#identity-resolution-algorithm.
     directory = resolve_key_directory(request.headers, sig_input.tag)
     public_key = find_key_by_kid(directory, keyid)
     if not public_key:
@@ -677,6 +692,25 @@ verify_rest_request(request):
     // an unsupported key never invalidates the whole key set.
     if not algorithm_supported(public_key):
         return error("algorithm_unsupported")
+
+    // 2b. Enforce covered-component requirements (all regimes/transports).
+    // Bind the target, the body when present, and every integrity-relevant
+    // header the request carries. A signature covering only WBA's minimum
+    // (@authority, signature-agent) does not authenticate a request whose
+    // body/method/path is unbound.
+    // (Which requests must CARRY Idempotency-Key is a binding rule,
+    // separate from this coverage check.)
+    required = ["@method", "@authority", "@path"]
+    if request.query:                        required += ["@query"]
+    if request.has_body:                     required += ["content-digest", "content-type"]
+    if "Idempotency-Key" in request.headers: required += ["idempotency-key"]
+    if "UCP-Agent" in request.headers:       required += ["ucp-agent"]
+    if "Signature-Agent" in request.headers: required += ["signature-agent"]
+    for component in required:
+        if component not in components:
+            // coverage failure, not a crypto failure; under multi-signature
+            // handling this is skip-and-try-next (see IRA step 6)
+            return error("signature_invalid")
 
     // 3. Verify body digest (if body present)
     if "content-digest" in components:
@@ -712,8 +746,10 @@ verify_rest_response(response, signer_profile_url):
     keyid = sig_input.keyid
     components = sig_input.components
 
-    // 2. Fetch signer's public key (regime-aware: keys[] for WBA-shape,
-    // signing_keys[] for default UCP; see overview.md#identity-resolution-algorithm)
+    // 2. Resolve signer's public key — by verifier capability, not tag:
+    // signing_keys[] via the profile (default UCP, every verifier); a
+    // WBA-aware verifier MAY use keys[]/jwks_uri for a tag="web-bot-auth"
+    // response. See overview.md#identity-resolution-algorithm.
     profile = fetch_profile(signer_profile_url)
     public_key = find_key_by_kid(profile, keyid)
     if not public_key:
@@ -724,6 +760,14 @@ verify_rest_response(response, signer_profile_url):
     // an unsupported key never invalidates the whole key set.
     if not algorithm_supported(public_key):
         return error("algorithm_unsupported")
+
+    // 2b. Enforce covered-component requirements for responses (all regimes).
+    // No method/idempotency to bind, but the body still MUST be covered.
+    required = ["@status"]
+    if response.has_body: required += ["content-digest", "content-type"]
+    for component in required:
+        if component not in components:
+            return error("signature_invalid")
 
     // 3. Verify body digest (if body present)
     if "content-digest" in components:
@@ -831,7 +875,10 @@ RFC 9421 signature mechanism applies:
 
 * The `Content-Digest` header covers the JSON-RPC message body
 * The `Signature-Input` and `Signature` headers provide authentication
-* The `UCP-Agent` and `Idempotency-Key` headers work identically to REST
+* The `UCP-Agent` header works identically to REST; `Idempotency-Key` is
+  signed when present, but since every MCP request is a POST, whether one
+  is required follows the JSON-RPC operation (state-changing), not the
+  HTTP method
 
 **Example MCP Request with Signature:**
 
