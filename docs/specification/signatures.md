@@ -284,7 +284,14 @@ signature. Items marked **MUST** are required by
    Appendix A.3 has a worked example.
 5. **MUST include `created` and `expires` parameters.** The `expires`
    interval SHOULD be at most 24 hours.
-6. **MUST include `tag="web-bot-auth"`.** WBA verifiers select
+6. **SHOULD include a `nonce`** for anti-replay — a base64url-encoded
+   random value (RECOMMENDED 64 bytes), unique within the
+   `created`/`expires` window (WBA §4.2.2). UCP's `Idempotency-Key` is
+   business-layer payload deduplication, not a transport-bound nonce,
+   and does not substitute. A verifying origin **MAY** require a `nonce` and
+   re-challenge (HTTP 429) a signature that lacks or replays one
+   (WBA §4.3–4.4).
+7. **MUST include `tag="web-bot-auth"`.** WBA verifiers select
    signatures by this tag.
 
 **Component requirements preserved — and enforced.** A WBA-shape
@@ -312,9 +319,12 @@ UCP verifiers see the same signature with three new things:
   §2.1.2 support — UCP-default signatures don't use Dictionary-member
   component selection, so verifiers built only for UCP-default may
   need to add it.
-* The `created` and `expires` parameters are standard RFC 9421 §2.3
-  parameters, so RFC 9421-conformant UCP verifiers **will** enforce
-  the freshness window.
+* `created` and `expires` are required in WBA-shape signatures
+  (item 5, per WBA §4.2). Enforcing them is **application-defined**
+  (RFC 9421 §3.2.1) — not an automatic consequence of RFC 9421
+  conformance, and not separately mandated by UCP, whose own replay
+  protection is the business-layer `Idempotency-Key`. A WBA-aware
+  verifier enforcing freshness rejects out-of-window signatures.
 
 **Identity resolution.** WBA opt-in does not change default UCP
 verification: a UCP verifier resolves the key via `UCP-Agent`
@@ -841,8 +851,13 @@ modify the request payload — including retries with modified payment
 instruments, updated shipping addresses, swapped line items, or any
 other change to the request body.
 
-**Note:** The RFC 9421 `created` parameter is **OPTIONAL**. UCP handles replay
-protection at the business layer through idempotency keys, not signature timestamps.
+**Note:** For **default UCP** signatures, the RFC 9421 `created`
+parameter is **OPTIONAL** and replay protection is handled at the
+business layer through idempotency keys, not signature timestamps.
+**WBA-shape** signatures additionally carry `created`/`expires` (and
+SHOULD carry a `nonce`) for WBA verifiers; enforcing that freshness
+window is application-defined (RFC 9421 §3.2.1). See
+[WBA Interop](#wba-interop).
 Key rotation (removing compromised keys from the profile's published key
 set) provides the mechanism
 for invalidating old signatures.
