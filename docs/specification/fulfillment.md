@@ -212,16 +212,18 @@ human-readable fields that platforms render directly.
 
 * Businesses **SHOULD** return `options[]` in a meaningful order (e.g., cheapest
     first, fastest first)
-* Platforms **SHOULD** render options in the provided order
+* Platforms **SHOULD** preserve that order, but **MAY** re-order it
+    (e.g. to match known buyer preferences or surface-specific ranking);
+    they **MUST** preserve the method/option grouping
 
 ### Platform Responsibilities
 
 Platforms **SHOULD** treat fulfillment as a generic, renderable structure:
 
 * Render each option as a card using `title`, `description`, and `total`
-* Present options in the order provided by the business
 * Present all methods returned—method selection is a buyer decision
-* Render methods in the order provided; do not merge or de-duplicate them
+* Preserve the method and option structure—do not merge or de-duplicate;
+    the platform chooses ordering
 * Use `available_methods[].description` to surface alternatives to the buyer
 
 Platforms **MAY** provide enhanced UX for recognized method types (store
@@ -320,6 +322,12 @@ method has:
 Catalog reports availability for a single location per method — the one
 specified via `fulfills_to` or inferred from `context`; discovering and
 comparing other locations is handled separately.
+
+The variant-level `availability` indicates whether the variant is
+obtainable via *any* method; a method's own `availability` is authoritative
+for that method. Where a method states `availability`, consumers MUST use
+it for that method and MUST NOT infer per-method availability from the
+variant-level value.
 
 ### Options
 
