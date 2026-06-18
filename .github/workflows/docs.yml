@@ -58,7 +58,7 @@ jobs:
 
       - name: Check for changed files in source
         id: source_files_changed
-        uses: tj-actions/changed-files@v46
+        uses: tj-actions/changed-files@v47
         with:
           files: source/**
 

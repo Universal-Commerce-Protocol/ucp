@@ -86,6 +86,12 @@ The `ucp` object included in cart responses.
 
 {{ extension_schema_fields('ucp.json#/$defs/response_cart_schema', 'reference') }}
 
+### Catalog Response Metadata {: #ucp-response-catalog-schema }
+
+The `ucp` object included in catalog responses.
+
+{{ extension_schema_fields('ucp.json#/$defs/response_catalog_schema', 'reference') }}
+
 ### Order Response Metadata {: #ucp-response-order-schema }
 
 The `ucp` object included in order responses or events.

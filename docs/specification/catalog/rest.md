@@ -77,7 +77,7 @@ Maps to the [Catalog Search](search.md) capability.
 
 === "Request"
 
-    <!-- ucp:example schema=shopping/catalog_search def=search_request op=create direction=request -->
+    <!-- ucp:example schema=shopping/catalog_search op=search direction=request -->
     ```json
     {
       "query": "blue running shoes",
@@ -100,7 +100,7 @@ Maps to the [Catalog Search](search.md) capability.
 
 === "Response"
 
-    <!-- ucp:example schema=shopping/catalog_search def=search_response op=read -->
+    <!-- ucp:example schema=shopping/catalog_search op=search -->
     ```json
     {
       "ucp": {
@@ -207,7 +207,7 @@ applies to all lookups in the batch.
 
 === "Request"
 
-    <!-- ucp:example schema=shopping/catalog_lookup def=lookup_request op=create direction=request -->
+    <!-- ucp:example schema=shopping/catalog_lookup op=lookup direction=request -->
     ```json
     POST /catalog/lookup HTTP/1.1
     Host: business.example.com
@@ -224,7 +224,7 @@ applies to all lookups in the batch.
 
 === "Response"
 
-    <!-- ucp:example schema=shopping/catalog_lookup def=lookup_response op=read -->
+    <!-- ucp:example schema=shopping/catalog_lookup op=lookup -->
     ```json
     {
       "ucp": {
@@ -296,7 +296,7 @@ messages indicating which identifiers were not found.
 
 === "Request"
 
-    <!-- ucp:example schema=shopping/catalog_lookup def=lookup_request op=create direction=request -->
+    <!-- ucp:example schema=shopping/catalog_lookup op=lookup direction=request -->
     ```json
     {
       "ids": ["prod_abc123", "prod_invalid", "prod_def456"]
@@ -305,7 +305,7 @@ messages indicating which identifiers were not found.
 
 === "Response"
 
-    <!-- ucp:example schema=shopping/catalog_lookup def=lookup_response op=read -->
+    <!-- ucp:example schema=shopping/catalog_lookup op=lookup -->
     ```json
     {
       "ucp": {
@@ -362,7 +362,7 @@ on option values and returns variants matching the selection.
 
 === "Request"
 
-    <!-- ucp:example schema=shopping/catalog_lookup def=get_product_request op=create direction=request -->
+    <!-- ucp:example schema=shopping/catalog_lookup op=get_product direction=request -->
     ```json
     POST /catalog/product HTTP/1.1
     Host: business.example.com
@@ -382,7 +382,7 @@ on option values and returns variants matching the selection.
 
 === "Response"
 
-    <!-- ucp:example schema=shopping/catalog_lookup def=get_product_response op=read -->
+    <!-- ucp:example schema=shopping/catalog_lookup op=get_product -->
     ```json
     {
       "ucp": {
@@ -535,7 +535,7 @@ for message semantics and common scenarios.
 When all requested identifiers fail lookup, the `products` array is empty. The response
 MAY include informational messages indicating which identifiers were not found.
 
-<!-- ucp:example schema=shopping/catalog_lookup def=lookup_response op=read -->
+<!-- ucp:example schema=shopping/catalog_lookup op=lookup -->
 ```json
 {
   "ucp": {
