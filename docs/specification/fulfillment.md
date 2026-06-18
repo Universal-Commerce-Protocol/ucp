@@ -549,9 +549,9 @@ Businesses declare what fulfillment configurations they support using
         "dev.ucp.shopping.catalog.lookup"
       ],
       "config": {
-        "multi_destination": {
-          "shipping": { "allowed": true }
-        },
+        "multi_destination": [
+          { "method": "shipping" }
+        ],
         "method_combinations": [["shipping", "pickup"]]
       }
     }
@@ -775,8 +775,7 @@ package.
 
 ### Split Destinations
 
-**Config:** Business profile requires
-`config.multi_destination.shipping.allowed: true`
+**Config:** Business profile lists `shipping` in `config.multi_destination`
 
 Shirt ships to mom (US), pants ship to grandma (Hong Kong). Two methods of the
 same type, each with its own destination.

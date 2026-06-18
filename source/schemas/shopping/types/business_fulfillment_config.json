@@ -6,18 +6,18 @@
   "type": "object",
   "properties": {
     "multi_destination": {
-      "type": "object",
-      "description": "Per-method-type multi-destination config, keyed by fulfillment method `type`. Open — businesses MAY add any method type; well-known keys are `shipping` and `pickup`. A type that is absent is not permitted.",
-      "additionalProperties": {
+      "type": "array",
+      "description": "Method types that permit multiple destinations within one cart (e.g. split shipping across addresses). Listing a method permits it; an omitted method does not. Open — businesses MAY list any method type.",
+      "items": {
         "type": "object",
-        "required": ["allowed"],
+        "required": ["method"],
+        "additionalProperties": true,
         "properties": {
-          "allowed": {
-            "type": "boolean",
-            "description": "Whether multiple destinations are allowed for this method type."
+          "method": {
+            "type": "string",
+            "description": "Fulfillment method type (e.g. `shipping`, `pickup`). Optional per-method constraints MAY be added alongside."
           }
-        },
-        "additionalProperties": true
+        }
       }
     },
     "method_combinations": {

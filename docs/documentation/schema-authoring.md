@@ -224,7 +224,7 @@ Each entity type defines **three variants** for different contexts:
   "dev.ucp.shopping.fulfillment": [{
     "version": "{{ ucp_version }}",
     "config": {
-      "multi_destination": {"shipping": {"allowed": true}}
+      "multi_destination": [{"method": "shipping"}]
     }
   }]
 }
