@@ -651,12 +651,22 @@ shows an envelope but only a subtree is the UCP payload under validation.
 <!-- ucp:example schema=shopping/checkout op=create direction=request extract=$.params.arguments.checkout -->
 ```
 
-**Schema with `$defs`.** Some schemas (e.g. catalog) define request/response
-inside `$defs`. Use `def=` to extract and validate against the named
-definition.
+**Schema with `$defs`.** Some schemas hold several message shapes under
+`$defs`. When a capability's request and response are different objects (e.g.
+catalog: a search request is a query, a search response is a list of products),
+just name the operation and direction — the validator selects
+`$defs/{op}_{direction}` automatically:
 
 ```text
-<!-- ucp:example schema=shopping/catalog_search def=request_schema direction=request -->
+<!-- ucp:example schema=shopping/catalog_search op=search direction=response extract=$.result.structuredContent -->
+```
+
+For a shape that isn't an operation+direction — a transport's `error_response`,
+a profile's `business_schema`, or a named sub-type — select it explicitly with
+`def=`:
+
+```text
+<!-- ucp:example schema=transports/jsonrpc def=error_response op=read -->
 ```
 
 **Empty body.** A `{}` payload (e.g. cancel, GET) validates trivially against
