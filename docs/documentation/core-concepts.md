@@ -317,9 +317,15 @@ registry — domain owners control their own namespace.
 | `dev.shopify.catalog` | shopify.dev | Shopify |
 | `com.example.payments.installments` | example.com | example.com |
 
-The `spec` and `schema` URLs declared in a capability must originate from the
-namespace authority domain. Platforms **MUST** validate this binding to prevent
-spoofed capabilities.
+A capability's `schema` URL must originate from its namespace authority domain.
+This guarantees **provenance** — that the reverse-domain name is controlled by
+the domain owner — not that the capability is trustworthy; whether to trust or
+support it remains the client's decision. Platforms **MUST** validate this
+binding for the `schema` URL and **MUST** reject capabilities that fail it. The
+`spec` (documentation) URL is not authority-bound and may be served from any
+`https` origin. See
+[Authority Binding](../specification/overview.md#authority-binding) for the
+normative algorithm.
 
 The `dev.ucp.*` namespace is reserved exclusively for capabilities governed by
 the UCP Tech Council. Any vendor can define and publish capabilities under their

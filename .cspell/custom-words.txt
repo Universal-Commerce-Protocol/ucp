@@ -122,3 +122,7 @@ Accor
 Kogan
 Petbarn
 VTEX
+WHATWG
+punycode
+userinfo
+examplecorp

@@ -13,16 +13,10 @@
           "properties": {
             "extends": {
               "oneOf": [
-                {
-                  "type": "string",
-                  "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9_]*)+$"
-                },
+                { "$ref": "common/types/reverse_domain_name.json" },
                 {
                   "type": "array",
-                  "items": {
-                    "type": "string",
-                    "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9_]*)+$"
-                  },
+                  "items": { "$ref": "common/types/reverse_domain_name.json" },
                   "minItems": 1
                 }
               ],
