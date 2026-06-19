@@ -564,14 +564,15 @@ as a Web Bot Auth key source. The two arrays carry the same JWK content
 (semantically equivalent); UCP-only verifiers read `signing_keys[]`;
 WBA-shape verifiers read `keys[]`.
 
-The example carries two keys, demonstrating a merchant participating in
-both UCP HTTP transport (with WBA interop) and AP2 mandate signing:
+This example uses two keys. Whether a deployment needs one or two depends
+on the algorithms its counterparties accept — many need only one; see
+[Signature Algorithms](signatures.md#signature-algorithms). The two keys
+here:
 
 - An **Ed25519** key (OKP) for HTTP transport identity, WBA-compatible.
   The `kid` is the JWK SHA-256 Thumbprint per RFC 7638.
 - An **ECDSA P-256** key (EC) for AP2 mandate signing
-  (`ap2.merchant_authorization`), required to be non-deterministic
-  per AP2 v0.2 §Payment Mandate.
+  (`ap2.merchant_authorization`).
 
 A business that does not interact with AP2 or WBA may publish a single
 ES256 key in `signing_keys[]` only (the universal baseline). See
@@ -1333,7 +1334,7 @@ below processes a single signature.
       treats `signature-agent` as an ordinary covered component, and
       need not implement Web Bot Auth key discovery. (Verifying a
       dual-audience signature does still require supporting the key's
-      algorithm — Ed25519, per
+      algorithm — whichever the signer used, per
       [Signature Algorithms](signatures.md#signature-algorithms) — and
       RFC 9421 §2.1.2 Dictionary-member component selection to cover
       `signature-agent;key="<label>"`.) Signatures whose `tag` denotes

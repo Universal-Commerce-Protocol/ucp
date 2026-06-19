@@ -48,9 +48,9 @@ for all HTTP-based transports:
 +-----------------------------------------------------------------+
 |  Signature Format: RFC 9421 (HTTP Message Signatures)           |
 |  Body Digest: RFC 9530 (Content-Digest, raw bytes)              |
-|  Algorithms: ES256 (required); EdDSA (Ed25519) optional,        |
-|              required when supporting Web Bot Auth interop;     |
-|              ES384 optional                                     |
+|  Algorithms: must verify ES256 (baseline); other algorithms     |
+|              optional — open vocabulary, counterparty-driven    |
+|              (see Signature Algorithms)                         |
 |  Key Format: JWK (RFC 7517 + RFC 8037 for Ed25519)              |
 |  Key Discovery: signing_keys[] (canonical) or top-level keys[]  |
 |                 (RFC 7517 JWK Set mirror) in /.well-known/ucp   |
@@ -96,9 +96,10 @@ additive option that unlocks Web Bot Auth (WBA) interop.
 * All implementations **MUST** support verifying `ES256` (ECDSA P-256)
   signatures. This is the universal UCP baseline.
 * Support for `ES384` (ECDSA P-384) is **OPTIONAL**.
-* Support for `EdDSA` (Ed25519) is **OPTIONAL** for general UCP
-  verifiers. Verifiers that explicitly support Web Bot Auth-compatible
-  signatures **MUST** support `EdDSA`.
+* Support for `EdDSA` (Ed25519) is **OPTIONAL**. A WBA-aware verifier
+  **SHOULD** support the algorithms its signers actually use (Ed25519 is
+  the most common among WBA signers today); UCP imposes no algorithm
+  requirement beyond the universal `ES256` baseline.
 * The `kty`/`crv`/`alg` vocabularies are **open**. A verifier that
   encounters a key whose type, curve, or algorithm it does not support
   **MUST NOT** reject the published key set; the unsupported key simply
@@ -109,33 +110,30 @@ additive option that unlocks Web Bot Auth (WBA) interop.
 
 **Usage guidance:**
 
-* Signers **MAY** use any supported algorithm. A single party MAY publish
-  multiple keys of different algorithms in their published key set
-  (`keys[]` or `signing_keys[]`, see
-  [Key Discovery](#key-discovery)) and select per-signature; verifiers
-  select by `kid`.
-* `ES256` is **RECOMMENDED** for signers wanting maximum interoperability
-  with all UCP verifiers today.
-* `EdDSA` (Ed25519) is **RECOMMENDED** for signers opting into Web Bot
-  Auth interop — see [WBA Interop](#wba-interop) for the recommended
-  signature shape. Signers using Ed25519 SHOULD confirm Ed25519
-  verifier support with their counterparties.
-* `ES256` is **RECOMMENDED** for AP2 mandate signing
-  (`ap2.merchant_authorization`), which currently requires a
-  non-deterministic signature scheme per
-  [AP2 v0.2 §Payment Mandate](https://ap2-protocol.org/ap2/specification/).
-  See [AP2 Mandates](ap2-mandates.md) for details.
+* **Algorithm choice is counterparty-driven.** A signer **SHOULD** use an
+  algorithm accepted by every verifier the same signature must satisfy —
+  the receiving UCP verifier, plus any WBA verifier or AP2 layer it opts
+  that signature into. One key suffices when a single algorithm satisfies
+  all of them; publish multiple keys of different algorithms (selected
+  per-signature by `kid`) only when no single algorithm does.
+* **Default to `ES256`** absent a specific counterparty constraint — it is
+  the universal UCP baseline and also a valid Web Bot Auth algorithm.
+  (WBA's algorithm rules and the current deployment landscape are in
+  [WBA Interop](#wba-interop).)
+* **AP2 mandate signing follows AP2's own algorithm rule** — see
+  [AP2 Mandates](ap2-mandates.md).
 * The algorithm is derived from the key's `kty`/`crv` field in the JWK;
   `alg` is **NOT** included in `Signature-Input` parameters.
 
-**Two-key vs. one-key configurations.** A merchant participating in
-both UCP HTTP transport (with WBA interop) and AP2 mandate signing
-today operates two keys — one Ed25519 for HTTP transport identity,
-one ECDSA P-256 for `merchant_authorization` — selected per signature
-by `kid`. UCP-only sites that do not interact with WBA or AP2 may
-operate a single ES256 key. See
-[Business Profile](overview.md#business-profile) for a two-key
-example.
+**Number of signing keys.** How many keys a party publishes follows from
+algorithm compatibility, not a UCP rule. One key suffices when a single
+algorithm is accepted by every audience it signs for; separate keys
+(selected by `kid`) are needed only when audiences impose incompatible
+algorithm constraints — for example, a WBA verifier that accepts only
+Ed25519 together with an AP2 mandate algorithm requirement that excludes
+it (see [AP2 Mandates](ap2-mandates.md)). When one algorithm satisfies
+every audience, a single key serves all of them. See
+[Business Profile](overview.md#business-profile) for a two-key example.
 
 For on-the-wire signature encoding details, see
 [REST Request Signing — Signature Encoding](#rest-request-signing).
@@ -307,9 +305,12 @@ signature. Items marked **MUST** are required by
 [draft-meunier-web-bot-auth-architecture-05](https://datatracker.ietf.org/doc/draft-meunier-web-bot-auth-architecture/05/)
 §4.2; consult that draft for full details.
 
-1. **Algorithm SHOULD be Ed25519.** Ed25519 is the convention across
-   WBA-conformant verifiers; other algorithms work only if the
-   counterparty accepts them.
+1. **Use an algorithm the WBA verifier accepts.** WBA permits any
+   algorithm in the RFC 9421 HTTP Message Signatures Algorithm registry
+   (e.g. `ed25519`, `ecdsa-p256-sha256` = `ES256`, `ecdsa-p384-sha384`,
+   `rsa-pss-sha512`). Confirm
+   acceptance with your target verifiers. (Non-normative: Ed25519 is the
+   most widely deployed today.)
 2. **MUST send a `Signature-Agent` header** alongside `UCP-Agent`. An
    RFC 8941 Dictionary Structured Field whose member's sf-string value
    is an HTTPS URL and whose `type` parameter selects the discovery
