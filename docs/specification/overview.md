@@ -372,8 +372,9 @@ compatibility with every existing UCP verifier.
 Profiles **MAY** additionally publish a top-level `keys[]` array per
 [RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517) (JWK Set
 Format) that **mirrors** `signing_keys[]`. RFC 7517 §5 permits
-additional members alongside `keys`, so the same document serves as
-both a UCP profile and a Web Bot Auth-compatible key directory. See
+additional members alongside `keys`, so the same document is
+simultaneously a UCP profile and a valid JWK Set — which a signer can
+reuse as its Web Bot Auth key source. See
 [Deployment Patterns for WBA Interop](#deployment-patterns-for-wba-interop)
 below. When both arrays are present, they **MUST** list the same set
 of `kid` values, and entries sharing a `kid` **MUST** be semantically
@@ -391,9 +392,11 @@ one array, so a key dropped from `signing_keys[]` but still listed in
 `keys[]` (or vice versa) keeps verifying — a revoked or compromised key
 is not effectively revoked until it is absent from **both** arrays.
 
-A future UCP version may promote `keys[]` to the canonical field;
-profiles publishing both arrays today are positioned for that
-transition.
+Publishing the top-level `keys[]` is what makes the profile a valid
+JWK Set. A future UCP version **will** promote `keys[]` to the canonical
+field and deprecate `signing_keys[]`, so the profile is a JWK Set
+without dual publication; profiles publishing both arrays today are
+positioned for that transition.
 
 UCP defines two well-known key types: **EC** (ECDSA P-256, P-384) and
 **OKP** (EdDSA Ed25519); the key-type, curve, and algorithm
@@ -556,8 +559,8 @@ The business profile advertises the business's available transports,
 capabilities, payment handlers, and public verification keys. This
 example publishes signing keys in **both** `signing_keys[]` (the
 canonical UCP profile field) and top-level `keys[]` (the RFC 7517
-JWK Set mirror) so the same document also serves as a Web Bot Auth-
-compatible key directory. The two arrays carry the same JWK content
+JWK Set mirror) so the same document is also a valid JWK Set — reusable
+as a Web Bot Auth key source. The two arrays carry the same JWK content
 (semantically equivalent); UCP-only verifiers read `signing_keys[]`;
 WBA-shape verifiers read `keys[]`.
 
@@ -1267,11 +1270,11 @@ status code (see [Error Handling](#error-handling)).
 A UCP profile carrying a top-level `keys[]` array is a valid RFC 7517
 JWK Set, which a signer can optionally reuse as its Web Bot Auth key
 source. The `Signature-Agent` header's `type` parameter
-([draft-meunier-http-message-signatures-directory-05](https://datatracker.ietf.org/doc/draft-meunier-http-message-signatures-directory/05/)
-§4) selects how a verifier resolves the advertised keys. (The `type`
-parameter is being standardized via
-[directory-draft PR #98](https://github.com/thibmeu/http-message-signatures-directory/pull/98),
-not yet merged; its name and accepted values may still change.) Each
+([draft-meunier-http-message-signatures-directory](https://datatracker.ietf.org/doc/draft-meunier-http-message-signatures-directory/))
+selects how a verifier resolves the advertised keys. (The `type`
+parameter and its `jwks_uri`/`cimd`/`directory` values were added via
+[directory-draft PR #98](https://github.com/thibmeu/http-message-signatures-directory/pull/98);
+they are in the editor's copy, pending publication as -06.) Each
 variant can stand alone or point back at the UCP profile:
 
 - **`type=jwks_uri`** — the member value is a JWK Set URL, fetched
@@ -1320,9 +1323,8 @@ Verifiers attempt each signature independently; the request is
 authenticated when at least one signature verifies. The algorithm
 below processes a single signature.
 
-1. **Resolve the signing key — by verifier capability, not by `tag`.**
-   The `tag` is a hint, not a gate; a verifier uses a resolution
-   mechanism it supports whose header is present:
+1. **Resolve the signing key.** A verifier uses a resolution mechanism
+   it supports whose header is present:
     - **`UCP-Agent` — default UCP key lookup, supported by every UCP
       verifier.** Resolve the `UCP-Agent` profile URL and read
       `signing_keys[]`. This path applies to UCP signatures that are
@@ -1397,9 +1399,9 @@ The request **MUST** be rejected (`key_not_found`,
 has been skipped or fails verification.
 
 **Authenticated identity.** When a signature verifies, the
-authenticated signer is identified by the URL of the key directory
-that supplied the verifying key — the `Signature-Agent` URL for
-WBA-shape signatures, the `UCP-Agent` URL for default UCP signatures.
+authenticated signer is identified by the URL that supplied the
+verifying key — the `Signature-Agent` URL for WBA-shape signatures,
+the `UCP-Agent` URL for default UCP signatures.
 Both URLs may be present in the same request; the identity attached
 to the request is determined by which signature verified, not by
 which headers were sent. When multiple signatures verify, each
