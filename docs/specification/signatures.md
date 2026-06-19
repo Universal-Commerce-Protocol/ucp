@@ -202,24 +202,22 @@ types, and verifiers skip those they cannot use.
 }
 ```
 
-For WBA-shape signatures, the JWK SHA-256 Thumbprint
-([RFC 7638](https://www.rfc-editor.org/rfc/rfc7638)) is
-**RECOMMENDED** as the `kid` value.
+A key used for **dual-audience** signatures (those carrying
+`tag="web-bot-auth"`) **MUST** publish its `kid` as the key's JWK SHA-256
+Thumbprint ([RFC 7638](https://www.rfc-editor.org/rfc/rfc7638)) in every
+array that lists it. The WBA-shape signature's `keyid` is that thumbprint,
+and a UCP verifier resolves the key by matching `keyid` to a published
+`kid`; setting both to the thumbprint lets the `UCP-Agent` and
+`Signature-Agent` lookups find the same key. For other keys `kid` is an
+opaque identifier (RFC 7517) and MAY be any stable value.
 
 ### Key Discovery
 
-Public keys are published in the party's UCP profile (see
+Public keys are published in the signer's UCP profile. See
 [Profile Structure](overview.md#profile-structure) for the publishing
-contract). Verifiers read the key list that matches how they resolved
-the key:
-
-* **Resolved via `UCP-Agent`** (default UCP key lookup) — read
-  `signing_keys[]`.
-* **Resolved via `Signature-Agent`** (Web Bot Auth, optional) — read
-  top-level `keys[]`.
-
-For the full identity resolution algorithm and deployment patterns,
-see [Identity & Authentication](overview.md#identity-authentication).
+contract and [Key Discovery](overview.md#key-discovery) for the
+verifier lookup rule (which key list to read for each resolution
+mechanism).
 
 ### Key Rotation
 
@@ -250,10 +248,14 @@ To rotate keys without service interruption:
 ### WBA Interop
 
 A UCP integrator MAY opt their primary signature into a Web Bot Auth-
-compatible shape, enabling the same signature to be verified by both UCP
-and WBA verifiers with **one key and one signing operation**. This is the
-RECOMMENDED path for integrators wanting interop with WBA-conformant
-verifiers.
+compatible shape: a single **dual-audience** signature — one key, one
+signing operation, one signature on the wire — that both a UCP verifier
+(resolving via `UCP-Agent`) and a WBA verifier (resolving via
+`Signature-Agent`) accept. This is the RECOMMENDED path for integrators
+wanting interop with WBA-conformant verifiers; the requirements below
+apply to any signature carrying `tag="web-bot-auth"`. WBA interop is
+request-scoped: responses are signed with standard UCP signatures
+(covering `@status`) and do not carry `tag="web-bot-auth"`.
 
 To opt in, a signer makes the following changes to their primary UCP
 signature. Items marked **MUST** are required by
@@ -267,21 +269,21 @@ signature. Items marked **MUST** are required by
    RFC 8941 Dictionary Structured Field whose member's sf-string value
    is an HTTPS URL and whose `type` parameter selects the discovery
    mechanism; the member key matches the `Signature-Input` signature
-   label. UCP RECOMMENDS `type=jwks_uri` pointing at the UCP profile
-   URL, so WBA verifiers read the profile's `keys[]` array directly as
-   the JWK Set; sites needing interop with default `type=directory`
-   verifiers also publish a well-known directory. See
-   [Deployment Patterns](overview.md#deployment-patterns-for-wba-interop).
-   (`data:` URI inline form is out of scope; see
-   [Identity Resolution Algorithm](overview.md#identity-resolution-algorithm).)
+   label. See
+   [Deployment Patterns](overview.md#deployment-patterns-for-wba-interop)
+   for the `jwks_uri`/`cimd`/`directory` variants and how each can reuse
+   the UCP profile. (`data:` URI inline form is out of scope.)
 3. **MUST sign the `signature-agent` component with `;key="<label>"`**
    matching the `Signature-Agent` dictionary member key (which equals
    the `Signature-Input` signature label). Per WBA §4.2.1.
 4. **MUST set `keyid` to the JWK SHA-256 Thumbprint** of the signing
-   key per [RFC 7638](https://www.rfc-editor.org/rfc/rfc7638). For
-   Ed25519 (OKP) keys, the thumbprint members are `crv`, `kty`, `x`
-   per [RFC 8037](https://www.rfc-editor.org/rfc/rfc8037) §2;
-   Appendix A.3 has a worked example.
+   key per [RFC 7638](https://www.rfc-editor.org/rfc/rfc7638), and
+   publish that key with `kid` set to the same thumbprint (see
+   [Key Format](#key-format-jwk)) so the `UCP-Agent` and `Signature-Agent`
+   lookups resolve it identically. For Ed25519 (OKP) keys, the thumbprint
+   members are `crv`, `kty`, `x` per
+   [RFC 8037](https://www.rfc-editor.org/rfc/rfc8037) §2; Appendix A.3 has
+   a worked example.
 5. **MUST include `created` and `expires` parameters.** The `expires`
    interval SHOULD be at most 24 hours.
 6. **SHOULD include a `nonce`** for anti-replay — a base64url-encoded
@@ -300,13 +302,9 @@ signature does (the Required set in the
 [Signed Components](#rest-request-signing) table); WBA accepts them as
 "additional components" per
 [draft-meunier-web-bot-auth-architecture-05](https://datatracker.ietf.org/doc/draft-meunier-web-bot-auth-architecture/05/)
-§4.2.3. This is enforced at the verifier, not left to signer
-discipline: per the [Identity Resolution
-Algorithm](overview.md#identity-resolution-algorithm), a UCP verifier
-**MUST** skip any signature — WBA-shape or default — that omits a
-component required for the request, even when it verifies
-cryptographically. Opting into Web Bot Auth therefore never widens
-what UCP authenticates.
+§4.2.3. The verifier enforces this regardless of `tag` per the
+[Identity Resolution Algorithm](overview.md#identity-resolution-algorithm),
+so opting into Web Bot Auth never widens what UCP authenticates.
 
 UCP verifiers see the same signature with three new things:
 
@@ -327,13 +325,8 @@ UCP verifiers see the same signature with three new things:
   verifier enforcing freshness rejects out-of-window signatures.
 
 **Identity resolution.** WBA opt-in does not change default UCP
-verification: a UCP verifier resolves the key via `UCP-Agent`
-regardless of `tag`; WBA-aware verifiers **MAY** additionally resolve
-via `Signature-Agent`. See
+verification; see
 [Identity Resolution Algorithm](overview.md#identity-resolution-algorithm).
-
-**Unknown signature parameters.** Verifiers **MUST** ignore signature
-parameters they do not recognize (RFC 9421 §2.3).
 
 **Complete WBA-shape Request Example:**
 
@@ -599,31 +592,12 @@ sign_rest_response(status, body_bytes, private_key, kid):
 
 **Determining the Signer's Key Directory:**
 
-Key resolution is chosen by the verifier's capability and the headers
-present — not dictated by the signature's `tag`, which is a hint, not
-a gate.
-
-1. **`UCP-Agent` — default UCP key lookup (every UCP verifier).**
-   Resolve the key directory via the **`UCP-Agent`** header — the UCP
-   profile URL in RFC 8941 Dictionary form → `signing_keys[]`. This
-   path applies to any UCP signature regardless of `tag`; a UCP
-   verifier need not implement Web Bot Auth.
-2. **`Signature-Agent` — Web Bot Auth key lookup (OPTIONAL).** A
-   WBA-aware verifier **MAY**, for a signature carrying
-   `tag="web-bot-auth"`, resolve via the **`Signature-Agent`** header —
-   an RFC 8941 Dictionary Structured Field whose member's sf-string
-   value is an HTTPS URL; the dictionary key matches the signature
-   label in `Signature-Input`. See [WBA Interop](#wba-interop).
-
-A WBA-interop signer emits **both** headers so either kind of verifier
-resolves the same key: `UCP-Agent` (also capability discovery) and
-`Signature-Agent`. Because the key is published in both `signing_keys[]`
-and `keys[]`, a UCP-only verifier resolves it via `UCP-Agent` without
-implementing Web Bot Auth.
-
-For the full identity resolution algorithm (including directory self-
-signature verification and inline-form handling), see
-[Identity Resolution Algorithm](overview.md#identity-resolution-algorithm).
+See
+[Identity Resolution Algorithm](overview.md#identity-resolution-algorithm)
+for the dispatch rule (resolution is chosen by verifier capability and
+the headers present, not by the signature's `tag`). This section
+specifies header parsing only — `UCP-Agent` for the default UCP regime,
+`Signature-Agent` for the WBA-shape regime.
 
 **`UCP-Agent` parsing rules** (default UCP regime):
 
@@ -642,13 +616,12 @@ signature verification and inline-form handling), see
    find member `sig1`). If no matching member exists, verification
    of this signature **MUST** fail.
 3. The member's value **MUST** be an sf-string containing an HTTPS
-   URL. The `type` parameter selects resolution: `jwks_uri` fetches
-   the URL directly as a JWK Set per RFC 7517 (a UCP profile qualifies
-   in JWKS-superset form); `directory` (the default) resolves the
-   well-known directory at the URL's origin. UCP RECOMMENDS
-   `type=jwks_uri` at the profile URL. `data:` URI inline form is out
-   of scope for UCP-WBA interop (see
-   [Identity Resolution](overview.md#identity-resolution-algorithm)).
+   URL. Its `type` parameter selects resolution — `jwks_uri` (a JWK
+   Set URL, e.g. the UCP profile), `cimd` (a Client ID Metadata
+   Document), or `directory` (an origin hosting a well-known
+   directory); see
+   [Deployment Patterns](overview.md#deployment-patterns-for-wba-interop).
+   `data:` URI inline form is out of scope for UCP-WBA interop.
 4. Verification of this signature **MUST** fail if the URL is
    non-HTTPS.
 
@@ -686,12 +659,8 @@ verify_rest_request(request):
     keyid = sig_input.keyid
     components = sig_input.components
 
-    // 2. Resolve signer's public key — by verifier capability, not tag.
-    // Default UCP lookup (every verifier): UCP-Agent -> signing_keys[];
-    // works for any UCP signature regardless of tag. A WBA-aware verifier
-    // MAY instead resolve a tag="web-bot-auth" signature via
-    // Signature-Agent -> keys[]/jwks_uri (optional layer). tag is a hint,
-    // not a gate. See overview.md#identity-resolution-algorithm.
+    // 2. Resolve signer's public key. See the dispatch rule in
+    // overview.md#identity-resolution-algorithm.
     directory = resolve_key_directory(request.headers, sig_input.tag)
     public_key = find_key_by_kid(directory, keyid)
     if not public_key:
@@ -719,7 +688,7 @@ verify_rest_request(request):
     for component in required:
         if component not in components:
             // coverage failure, not a crypto failure; under multi-signature
-            // handling this is skip-and-try-next (see IRA step 6)
+            // handling this is skip-and-try-next (see IRA step 5)
             return error("signature_invalid")
 
     // 3. Verify body digest (if body present)
@@ -756,10 +725,8 @@ verify_rest_response(response, signer_profile_url):
     keyid = sig_input.keyid
     components = sig_input.components
 
-    // 2. Resolve signer's public key — by verifier capability, not tag:
-    // signing_keys[] via the profile (default UCP, every verifier); a
-    // WBA-aware verifier MAY use keys[]/jwks_uri for a tag="web-bot-auth"
-    // response. See overview.md#identity-resolution-algorithm.
+    // 2. Resolve signer's public key. See the dispatch rule in
+    // overview.md#identity-resolution-algorithm.
     profile = fetch_profile(signer_profile_url)
     public_key = find_key_by_kid(profile, keyid)
     if not public_key:

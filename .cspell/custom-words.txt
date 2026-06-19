@@ -129,3 +129,6 @@ OKP
 CFRG
 Diffie
 meunier
+thibmeu
+CIMD
+cimd

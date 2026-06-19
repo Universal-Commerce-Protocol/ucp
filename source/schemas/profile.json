@@ -13,7 +13,7 @@
       "properties": {
         "kid": {
           "type": "string",
-          "description": "Key identifier referenced by Signature-Input keyid. Profiles MAY use any string. For Web Bot Auth-compatible signatures, the JWK SHA-256 Thumbprint (RFC 7638) is RECOMMENDED."
+          "description": "Key identifier referenced by Signature-Input keyid. For keys used in dual-audience (Web Bot Auth) signatures, the kid MUST be the key's JWK SHA-256 Thumbprint (RFC 7638) so UCP-Agent and Signature-Agent lookups resolve the same key; otherwise the kid MAY be any stable string."
         },
         "kty": {
           "type": "string",

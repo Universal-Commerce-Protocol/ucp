@@ -1112,12 +1112,9 @@ negotiate capabilities and verify identity. This design enables
 can interact with any business without prior registration.
 
 **Web Bot Auth interop.** Signers opting into WBA-shape signatures
-additionally emit a `Signature-Agent` header carrying a key directory
-URL. Verifiers dispatch by the signature's `tag` parameter:
-`tag="web-bot-auth"` resolves identity via `Signature-Agent`; absent
-or unknown tags resolve via `UCP-Agent`. See
-[Identity Resolution Algorithm](#identity-resolution-algorithm) for
-the full verifier algorithm and
+additionally emit a `Signature-Agent` header advertising their keys. See
+[Identity Resolution Algorithm](#identity-resolution-algorithm) for how
+verifiers resolve identity and
 [Message Signatures — WBA Interop](signatures.md#wba-interop) for the
 signature shape.
 
@@ -1175,7 +1172,7 @@ how they resolved the key:
   top-level `keys[]`.
 
 For the full verifier algorithm — capability-based key resolution,
-profile fetching, directory self-signature verification — see
+profile fetching, and covered-component enforcement — see
 [Identity Resolution Algorithm](#identity-resolution-algorithm) below.
 For key format (JWK), supported algorithms, key rotation procedures,
 and the Web Bot Auth interop signature shape, see
@@ -1231,19 +1228,34 @@ request access. Strategies include:
   profile in the background; when the platform retries, the validated
   profile is cached and capability negotiation proceeds synchronously
 
-When fetching profiles, the following apply:
+These rules apply to any URL dereferenced during identity resolution —
+the profile, and any `jwks_uri` or CIMD document a verifier follows:
 
-1. Implementations **MUST** reject profile URLs not served over HTTPS.
-2. Implementations **MUST NOT** follow redirects (3xx) on profile fetches.
-3. Implementations **SHOULD** enforce connect and response timeouts on
-   profile fetches.
+1. Implementations **MUST** reject URLs not served over HTTPS.
+2. Implementations **MUST NOT** follow redirects (3xx).
+3. Implementations **SHOULD** enforce connect and response timeouts.
 4. Implementations **SHOULD** cache profiles with a minimum TTL floor
    of 60 seconds, regardless of the origin's `Cache-Control` headers.
 5. Implementations **MAY** refresh profiles asynchronously using
    stale-while-revalidate semantics.
 6. On signature verification failure with an unknown `kid`,
-   implementations **MAY** force-refresh the cached profile — but
-   **MUST NOT** do so more than once per TTL floor per origin.
+   implementations **SHOULD** force-refresh the cached profile once —
+   but **MUST NOT** do so more than once per TTL floor per origin.
+7. Implementations **MUST** reject URLs that resolve to special-use IP
+   addresses ([RFC 6890](https://www.rfc-editor.org/rfc/rfc6890) —
+   loopback, link-local including the cloud-metadata address
+   `169.254.169.254`, private, and other reserved ranges), except a
+   loopback target when the verifier itself runs on the same loopback
+   interface (local development). Verifiers **SHOULD** validate the
+   resolved address, not just the hostname (to resist DNS rebinding),
+   and **SHOULD NOT** dereference a URL contained within a fetched
+   document (e.g. a CIMD `jwks_uri`) that resolves to such an address.
+8. Implementations **SHOULD** bound the response body size to prevent
+   unbounded-response resource exhaustion. A UCP profile is an
+   identity/capability manifest, not a data payload (documented profiles
+   are under 5 KiB); since the schema sets no size limit, this bound is a
+   deployment guard, and verifiers **SHOULD** set it no lower than
+   128 KiB so it does not reject conformant profiles.
 
 If a profile cannot be fetched (timeout, DNS failure, 5xx) or fails
 validation (invalid schema, signing keys, signature mismatch),
@@ -1252,63 +1264,46 @@ status code (see [Error Handling](#error-handling)).
 
 ### Deployment Patterns for WBA Interop
 
-A UCP profile that carries a top-level `keys[]` array (RFC 7517 JWK Set
-Format) is already a valid JWK Set, so it can serve as a Web Bot Auth
-key source directly. Two deployment patterns are recognized.
+A UCP profile carrying a top-level `keys[]` array is a valid RFC 7517
+JWK Set, which a signer can optionally reuse as its Web Bot Auth key
+source. The `Signature-Agent` header's `type` parameter
+([draft-meunier-http-message-signatures-directory-05](https://datatracker.ietf.org/doc/draft-meunier-http-message-signatures-directory/05/)
+§4) selects how a verifier resolves the advertised keys. (The `type`
+parameter is being standardized via
+[directory-draft PR #98](https://github.com/thibmeu/http-message-signatures-directory/pull/98),
+not yet merged; its name and accepted values may still change.) Each
+variant can stand alone or point back at the UCP profile:
 
-#### Pattern 1: Profile as JWK Set (recommended)
+- **`type=jwks_uri`** — the member value is a JWK Set URL, fetched
+  directly. Point it at the UCP profile URL and the profile's `keys[]`
+  serves as the JWK Set: one document is both profile and key source.
+  Integrity derives from TLS to the profile origin, with no per-key
+  self-signature.
 
-The signer points `Signature-Agent` at the UCP profile URL with
-`type=jwks_uri`:
+  ```text
+  Signature-Agent: sig1="https://platform.example/.well-known/ucp";type=jwks_uri
+  ```
 
-```text
-Signature-Agent: sig1="https://platform.example/.well-known/ucp";type=jwks_uri
-```
+- **`type=cimd`** — the member value is a Client ID Metadata Document
+  ([draft-ietf-oauth-client-id-metadata-document](https://datatracker.ietf.org/doc/draft-ietf-oauth-client-id-metadata-document/))
+  whose `jwks_uri` **MAY** point back at the UCP profile. Use when a
+  counterparty consumes CIMD-shaped agent identity.
 
-A WBA verifier fetches that URL directly and reads its `keys[]` array as
-the JWK Set, selecting the key by `keyid`. One URL, one key set, one
-document that is simultaneously the UCP profile and the WBA key source.
-The profile is served as `application/json`; static-flat-file hosting is
-sufficient and no separate directory document is required. Integrity
-derives from TLS to the profile URL.
+  ```text
+  Signature-Agent: sig1="https://platform.example/agent";type=cimd
+  ```
 
-#### Pattern 2: Well-known directory (fallback)
+- **`type=directory`** *(default)* — when `type` is omitted or set to
+  `directory`, the member value is an **origin** (not a full URL): the
+  verifier appends the registered well-known path
+  (`/.well-known/http-message-signatures-directory`) to that origin and
+  fetches a signed directory there. Its format, per-key self-signatures,
+  and media type are defined by the directory draft §5.2.
 
-Verifiers using the default `type=directory` resolve the directory from
-the well-known path at the URL's origin, not the member value verbatim.
-To interoperate with these, the site hosts two endpoints with shared key
-material:
-
-- `/.well-known/ucp` — the UCP profile as `application/json`.
-- `/.well-known/http-message-signatures-directory` — a WBA directory
-  (`application/http-message-signatures-directory+json`, RFC 7517 JWK
-  Set form) carrying per-key response signatures (see WBA Response
-  Signing below).
-
-Both endpoints publish the same keys; rotation and revocation update
-both. Best fit for interop with verifiers that require the registered
-well-known directory path.
-
-#### WBA Response Signing
-
-A WBA directory (Pattern 2's
-`/.well-known/http-message-signatures-directory`) SHOULD carry per-key
-self-signatures on the HTTP response, as defined by
-[draft-meunier-http-message-signatures-directory-05](https://datatracker.ietf.org/doc/draft-meunier-http-message-signatures-directory/05/)
-§5.2; verifiers SHOULD discard keys without a valid self-signature. A
-Pattern 1 `jwks_uri` profile is fetched directly over HTTPS and is not a
-signed directory; its integrity derives from TLS.
-
-The signed response **MAY** be precomputed and cached. The signature
-base binds `@authority`, so any cache (CDN, reverse proxy, in-process)
-**MUST** include the request authority in its cache key. Otherwise a
-cached signature served for `Host: a.example` will fail verification
-under `Host: b.example` requests.
-
-Operators preferring to avoid in-band response signing entirely can use
-[Pattern 1](#pattern-1-profile-as-jwk-set-recommended), which serves the
-profile as a plain JWK Set over HTTPS with no per-key response
-signature.
+  ```text
+  Signature-Agent: sig1="https://platform.example"  # type omitted -> directory
+  Signature-Agent: sig1="https://platform.example";type=directory  # explicit
+  ```
 
 ### Identity Resolution Algorithm
 
@@ -1334,7 +1329,12 @@ below processes a single signature.
       untagged (default UCP) or carry `tag="web-bot-auth"` (the
       dual-audience shape); the verifier resolves them via `UCP-Agent`,
       treats `signature-agent` as an ordinary covered component, and
-      need not implement Web Bot Auth. Signatures whose `tag` denotes
+      need not implement Web Bot Auth key discovery. (Verifying a
+      dual-audience signature does still require supporting the key's
+      algorithm — Ed25519, per
+      [Signature Algorithms](signatures.md#signature-algorithms) — and
+      RFC 9421 §2.1.2 Dictionary-member component selection to cover
+      `signature-agent;key="<label>"`.) Signatures whose `tag` denotes
       another application's purpose are skipped (see below) — UCP does
       not claim signatures scoped to other applications.
     - **`Signature-Agent` — Web Bot Auth key lookup, OPTIONAL
@@ -1345,13 +1345,12 @@ below processes a single signature.
       Such a signature **MUST** satisfy the WBA agent-signature
       requirements in
       [draft-meunier-web-bot-auth-architecture-05](https://datatracker.ietf.org/doc/draft-meunier-web-bot-auth-architecture/05/)
-      §4.2 (signed `signature-agent;key=<sig-label>`, `keyid`,
-      `created`, `expires`). The member value **MUST** be an HTTPS URL;
-      its `type` parameter selects resolution — `jwks_uri` reads the URL
-      directly as a JWK Set (a UCP profile in JWKS-superset form),
-      `directory` (default) resolves the well-known directory at the
-      URL's origin (see
-      [Deployment Patterns](#deployment-patterns-for-wba-interop)).
+      §4.2 (see [WBA Interop](signatures.md#wba-interop) for the
+      signer-side shape). The member value **MUST** be an HTTPS URL.
+      Its `type` selects resolution: `jwks_uri` and `cimd` reach the
+      keys through the signer's profile and are resolved by the steps
+      below; the `directory` mechanism is defined by the directory draft
+      (see [Deployment Patterns](#deployment-patterns-for-wba-interop)).
       `data:` URI inline form is out of scope for UCP-WBA interop.
    **Skip** this signature if no mechanism the verifier supports can
    resolve its key — the required header is absent, no `Signature-Agent`
@@ -1360,29 +1359,26 @@ below processes a single signature.
 2. **Fetch the document** per [§Fetching](#fetching). If the fetch
    fails (DNS error, network failure, non-2xx response, parse failure),
    **skip** this signature.
-3. **Locate the key list** in the resolved document — `signing_keys[]`
-   when resolved via `UCP-Agent`, the top-level `keys[]` (RFC 7517 JWK
-   Set) when resolved via `Signature-Agent`.
-4. **For `type=directory` resolution: verify the directory's per-key
-   self-signatures** per
-   [draft-meunier-http-message-signatures-directory-05](https://datatracker.ietf.org/doc/draft-meunier-http-message-signatures-directory/05/)
-   §5.2; discard keys without a valid self-signature. For `jwks_uri`
-   resolution the key set is fetched directly over HTTPS; integrity
-   derives from TLS to that URL.
-5. **Match the signature's `keyid`** to a `kid` in the resolved key
-   list. **Skip** this signature if no match. For WBA-shape
-   signatures, the verifier **SHOULD** also confirm that `keyid`
-   equals the RFC 7638 SHA-256 thumbprint of the matched JWK. The
-   WBA architecture draft §4.2 requires `keyid` to be the thumbprint;
-   verifying the equality detects directory tampering and ensures
-   WBA-interop behavior. If the thumbprint check fails, skip this
-   signature.
-6. **Enforce covered-component requirements, in every regime.**
+3. **Locate the key list.** `signing_keys[]` when resolved via
+   `UCP-Agent`; the top-level `keys[]` (RFC 7517 JWK Set) when resolved
+   via `Signature-Agent` `type=jwks_uri`; for `type=cimd`, dereference
+   the document's `jwks_uri` to obtain the JWK Set. Integrity derives
+   from TLS to the resolved origin.
+4. **Match the signature's `keyid`** to a `kid` in the resolved key
+   list. **Skip** this signature if no match. For WBA-shape signatures
+   (`tag="web-bot-auth"`), the verifier **MUST** also confirm `keyid`
+   equals the [RFC 7638](https://www.rfc-editor.org/rfc/rfc7638) SHA-256
+   thumbprint of the matched JWK — the WBA architecture draft §4.2
+   requires this, binding the advertised key identity to its bytes. If
+   it fails, skip this signature.
+5. **Enforce covered-component requirements, in every regime.**
    Independent of `tag` and transport, the signature **MUST** cover the
    request target (`@method`, `@authority`, `@path`; `@query` when a
    query string is present), the body when present (`content-digest`,
-   `content-type`), and every integrity-relevant header the request
-   carries (`ucp-agent`, `signature-agent`, `idempotency-key`). If any
+   `content-type`), and each of these request headers when present:
+   `ucp-agent`, `signature-agent`, `idempotency-key` (a closed set — a
+   header added to UCP later is gate-required only if its defining
+   section says so). If any
    such component is absent from the signature's covered set, **skip**
    this signature — a target, body, or header the signature does not
    cover is treated as unsigned. This prevents a signature satisfying only
@@ -1390,7 +1386,7 @@ below processes a single signature.
    from authenticating a UCP request whose body, method, or path is
    unbound. (Whether a request must carry `Idempotency-Key` at all is a
    binding-level rule, separate from this coverage check.)
-7. **Verify the signature** using the matched key. The signing
+6. **Verify the signature** using the matched key. The signing
    algorithm is derived from the JWK's `kty`/`crv`. If the verifier
    does not support the matched key's `kty`, `crv`, or `alg`, **skip**
    this signature; it yields `algorithm_unsupported` if no other
@@ -1406,11 +1402,14 @@ that supplied the verifying key — the `Signature-Agent` URL for
 WBA-shape signatures, the `UCP-Agent` URL for default UCP signatures.
 Both URLs may be present in the same request; the identity attached
 to the request is determined by which signature verified, not by
-which headers were sent. When multiple signatures verify (e.g., a
-single signer emitting both a WBA-shape and a default UCP signature
-with matching identities), implementations **MAY** treat the request
-as authenticated by either; the URLs **SHOULD** resolve to the same
-party in this case.
+which headers were sent. When multiple signatures verify, each
+identifies the signer only as the URL that supplied its key — a key
+resolved via `Signature-Agent` proves control of that key source, not
+of the `UCP-Agent` profile (whose URL is merely a signed header value).
+Implementations **MUST** treat the request as a single authenticated
+identity only when those URLs are the same after normalization;
+otherwise they are distinct identities and policy decides whether
+either suffices.
 
 This rule governs **HTTP transport identity**. Payload-layer
 assertions (e.g., AP2 mandate JWTs carried in the request body) have
