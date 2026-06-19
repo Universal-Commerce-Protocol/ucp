@@ -527,8 +527,8 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
       "kid": "business_2025",
       "kty": "EC",
       "crv": "P-256",
-      "x": "WbbXwVYGdJoP4Xm3qCkGvBRcRvKtEfXDbWvPzpPS8LA",
-      "y": "sP4jHHxYqC89HBo8TjrtVOAGHfJDflYxw7MFMxuFMPY",
+      "x": "qIVYZVLCrPZHGHjP17CTW0_-D9Lfw0EkjqF7xB4FivA",
+      "y": "Mc4nN9LTDOBhfoUeg8Ye9WedFRhnZXZJA12Qp0zZ6F0",
       "use": "sig",
       "alg": "ES256"
     }
@@ -546,8 +546,8 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
       "kid": "business_2025",
       "kty": "EC",
       "crv": "P-256",
-      "x": "WbbXwVYGdJoP4Xm3qCkGvBRcRvKtEfXDbWvPzpPS8LA",
-      "y": "sP4jHHxYqC89HBo8TjrtVOAGHfJDflYxw7MFMxuFMPY",
+      "x": "qIVYZVLCrPZHGHjP17CTW0_-D9Lfw0EkjqF7xB4FivA",
+      "y": "Mc4nN9LTDOBhfoUeg8Ye9WedFRhnZXZJA12Qp0zZ6F0",
       "use": "sig",
       "alg": "ES256"
     }
