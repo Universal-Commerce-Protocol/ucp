@@ -50,6 +50,11 @@ Business declarations MUST include `config.endpoint`. The endpoint is an
 absolute HTTPS browser endpoint with a non-empty authority and without userinfo,
 query, fragment, whitespace, backslashes, or trailing slash.
 
+Permalinks can also open native apps. A native app can register as a link
+handler for the endpoint's `https` URLs — Universal Links on iOS, App Links on
+Android. When the app is installed it intercepts the permalink and handles it
+in native UI; when it is not, the navigation is handled by the web browser.
+
 <!-- ucp:example schema=profile def=business_schema extract=$.ucp.capabilities target=$.ucp.capabilities -->
 ```json
 {
