@@ -563,7 +563,7 @@ image: assets/banner.png
   const tabs = ['tab-shopping', 'tab-lodging', 'tab-food'];
   const tabButtons = document.querySelectorAll('#industry-tabs .tab-btn');
   let autoplayTimeout;
-  
+
   function autoplay() {
     currentTabIdx = (currentTabIdx + 1) % tabs.length;
     const nextBtn = tabButtons[currentTabIdx];
@@ -572,18 +572,18 @@ image: assets/banner.png
     }
     autoplayTimeout = setTimeout(autoplay, 3000);
   }
-  
+
   function startAutoplay() {
     clearTimeout(autoplayTimeout);
     autoplayTimeout = setTimeout(autoplay, 3000);
   }
-  
+
   function stopAutoplay() {
     clearTimeout(autoplayTimeout);
   }
-  
+
   startAutoplay();
-  
+
   const industryTabsContainer = document.getElementById('industry-tabs');
   if (industryTabsContainer) {
     industryTabsContainer.addEventListener('mouseenter', stopAutoplay);

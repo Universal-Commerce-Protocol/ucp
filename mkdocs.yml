@@ -30,6 +30,7 @@ edit_uri: edit/main/docs/
 nav:
   - Overview:
       - Home: index.md
+      - Announcements: documentation/announcements.md
       - Core Concepts: documentation/core-concepts.md
       - Specification: !ENV [
           SPEC_URL,
@@ -53,6 +54,7 @@ nav:
           - Discounts Extension: specification/discount.md
           - Fulfillment Extension: specification/fulfillment.md
           - Loyalty Extension: specification/loyalty.md
+          - Split Payments Extension: specification/split-payments.md
       - Cart Capability:
           - Overview: specification/cart.md
           - Transports:
@@ -249,6 +251,9 @@ plugins:
               Fundamental UCP abstractions, including the decoupled separation
               of capabilities, extensions, services, and the decentralized
               protocol negotiation model.
+          - documentation/announcements.md: >-
+              General announcements, release notes, and community updates for
+              the Universal Commerce Protocol.
           - documentation/ucp-and-ap2.md: >-
               Integration patterns with the Agent Payments Protocol (AP2) to
               facilitate secure, agent-mediated checkout commitments and
