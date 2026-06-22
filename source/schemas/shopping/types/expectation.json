@@ -40,7 +40,7 @@
       "description": "Delivery method type (shipping, pickup, digital)."
     },
     "destination": {
-      "$ref": "postal_address.json",
+      "$ref": "../../common/types/postal_address.json",
       "description": "Delivery destination address."
     },
     "description": {

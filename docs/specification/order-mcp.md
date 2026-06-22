@@ -26,6 +26,7 @@ This document specifies the Model Context Protocol (MCP) binding for the
 Businesses advertise MCP transport availability through their UCP profile at
 `/.well-known/ucp`.
 
+<!-- ucp:example schema=profile def=business_schema -->
 ```json
 {
   "ucp": {
@@ -49,7 +50,8 @@ Businesses advertise MCP transport availability through their UCP profile at
           "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/order.json"
         }
       ]
-    }
+    },
+    "payment_handlers": {}
   }
 }
 ```
@@ -59,6 +61,7 @@ Businesses advertise MCP transport availability through their UCP profile at
 MCP clients **MUST** include a `meta` object in every request containing
 protocol metadata:
 
+<!-- ucp:example schema=transports/mcp_tool_call def=request direction=request -->
 ```json
 {
   "jsonrpc": "2.0",
@@ -108,6 +111,7 @@ current-state snapshot of an order.
 
 === "Request"
 
+    <!-- ucp:example schema=transports/mcp_tool_call def=request direction=request -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -129,76 +133,75 @@ current-state snapshot of an order.
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/order op=read direction=response extract=$.result.structuredContent -->
     ```json
     {
       "jsonrpc": "2.0",
       "id": 1,
       "result": {
         "structuredContent": {
-          "order": {
-            "ucp": {
-              "version": "{{ ucp_version }}",
-              "capabilities": {
-                "dev.ucp.shopping.order": [{"version": "{{ ucp_version }}"}]
-              }
-            },
-            "id": "order_abc123",
-            "checkout_id": "checkout_xyz789",
-            "permalink_url": "https://business.example.com/orders/abc123",
-            "currency": "USD",
-            "line_items": [
+          "ucp": {
+            "version": "{{ ucp_version }}",
+            "capabilities": {
+              "dev.ucp.shopping.order": [{"version": "{{ ucp_version }}"}]
+            }
+          },
+          "id": "order_abc123",
+          "checkout_id": "checkout_xyz789",
+          "permalink_url": "https://business.example.com/orders/abc123",
+          "currency": "USD",
+          "line_items": [
+            {
+              "id": "li_shoes",
+              "item": { "id": "prod_shoes", "title": "Running Shoes", "price": 3000 },
+              "quantity": { "total": 1, "fulfilled": 1 },
+              "totals": [
+                {"type": "subtotal", "amount": 3000},
+                {"type": "total", "amount": 3000}
+              ],
+              "status": "fulfilled"
+            }
+          ],
+          "fulfillment": {
+            "expectations": [
               {
-                "id": "li_shoes",
-                "item": { "id": "prod_shoes", "title": "Running Shoes", "price": 3000 },
-                "quantity": { "total": 1, "fulfilled": 1 },
-                "totals": [
-                  {"type": "subtotal", "amount": 3000},
-                  {"type": "total", "amount": 3000}
-                ],
-                "status": "fulfilled"
+                "id": "exp_1",
+                "line_items": [{ "id": "li_shoes", "quantity": 1 }],
+                "method_type": "shipping",
+                "destination": {
+                  "street_address": "123 Main St",
+                  "address_locality": "Austin",
+                  "address_region": "TX",
+                  "address_country": "US",
+                  "postal_code": "78701"
+                },
+                "description": "Delivered"
               }
             ],
-            "fulfillment": {
-              "expectations": [
-                {
-                  "id": "exp_1",
-                  "line_items": [{ "id": "li_shoes", "quantity": 1 }],
-                  "method_type": "shipping",
-                  "destination": {
-                    "street_address": "123 Main St",
-                    "address_locality": "Austin",
-                    "address_region": "TX",
-                    "address_country": "US",
-                    "postal_code": "78701"
-                  },
-                  "description": "Delivered"
-                }
-              ],
-              "events": [
-                {
-                  "id": "evt_1",
-                  "occurred_at": "2026-01-08T10:30:00Z",
-                  "type": "delivered",
-                  "line_items": [{ "id": "li_shoes", "quantity": 1 }],
-                  "tracking_number": "1Z999AA10123456784",
-                  "tracking_url": "https://ups.com/track/1Z999AA10123456784",
-                  "description": "Delivered to front door"
-                }
-              ]
-            },
-            "adjustments": [],
-            "totals": [
-              { "type": "subtotal", "amount": 3000 },
-              { "type": "fulfillment", "amount": 800 },
-              { "type": "tax", "amount": 304 },
-              { "type": "total", "amount": 4104 }
+            "events": [
+              {
+                "id": "evt_1",
+                "occurred_at": "2026-01-08T10:30:00Z",
+                "type": "delivered",
+                "line_items": [{ "id": "li_shoes", "quantity": 1 }],
+                "tracking_number": "1Z999AA10123456784",
+                "tracking_url": "https://ups.com/track/1Z999AA10123456784",
+                "description": "Delivered to front door"
+              }
             ]
-          }
+          },
+          "adjustments": [],
+          "totals": [
+            { "type": "subtotal", "amount": 3000 },
+            { "type": "fulfillment", "amount": 800 },
+            { "type": "tax", "amount": 304 },
+            { "type": "total", "amount": 4104 }
+          ]
         },
         "content": [
           {
             "type": "text",
-            "text": "{\"order\":{\"ucp\":{...},\"id\":\"order_abc123\",...}}"
+            "text": "{\"ucp\":{…},…}"
           }
         ]
       }
@@ -207,29 +210,28 @@ current-state snapshot of an order.
 
 === "Not Found"
 
+    <!-- ucp:example schema=common/types/error_response op=read direction=response extract=$.result.structuredContent -->
     ```json
     {
       "jsonrpc": "2.0",
       "id": 1,
       "result": {
         "structuredContent": {
-          "order": {
-            "ucp": {
-              "version": "{{ ucp_version }}",
-              "status": "error",
-              "capabilities": {
-                "dev.ucp.shopping.order": [{"version": "{{ ucp_version }}"}]
-              }
-            },
-            "messages": [
-              {
-                "type": "error",
-                "code": "not_found",
-                "severity": "unrecoverable",
-                "content": "Order not found."
-              }
-            ]
-          }
+          "ucp": {
+            "version": "{{ ucp_version }}",
+            "status": "error",
+            "capabilities": {
+              "dev.ucp.shopping.order": [{"version": "{{ ucp_version }}"}]
+            }
+          },
+          "messages": [
+            {
+              "type": "error",
+              "code": "not_found",
+              "severity": "unrecoverable",
+              "content": "Order not found."
+            }
+          ]
         },
         "content": [
           {
@@ -243,29 +245,28 @@ current-state snapshot of an order.
 
 === "Not Authorized"
 
+    <!-- ucp:example schema=common/types/error_response op=read direction=response extract=$.result.structuredContent -->
     ```json
     {
       "jsonrpc": "2.0",
       "id": 1,
       "result": {
         "structuredContent": {
-          "order": {
-            "ucp": {
-              "version": "{{ ucp_version }}",
-              "status": "error",
-              "capabilities": {
-                "dev.ucp.shopping.order": [{"version": "{{ ucp_version }}"}]
-              }
-            },
-            "messages": [
-              {
-                "type": "error",
-                "code": "unauthorized",
-                "severity": "unrecoverable",
-                "content": "Not authorized to access this order."
-              }
-            ]
-          }
+          "ucp": {
+            "version": "{{ ucp_version }}",
+            "status": "error",
+            "capabilities": {
+              "dev.ucp.shopping.order": [{"version": "{{ ucp_version }}"}]
+            }
+          },
+          "messages": [
+            {
+              "type": "error",
+              "code": "unauthorized",
+              "severity": "unrecoverable",
+              "content": "Not authorized to access this order."
+            }
+          ]
         },
         "content": [
           {

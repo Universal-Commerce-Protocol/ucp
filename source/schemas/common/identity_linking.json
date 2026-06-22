@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/identity_linking.json",
+  "name": "dev.ucp.common.identity_linking",
+  "title": "Identity Linking",
+  "description": "Capability schema for identity linking. Businesses declare the user-authenticated scopes they offer in a flat 'scopes' map. Each key is the OAuth scope string as it appears on the wire ('{capability}:{scope}', e.g. 'dev.ucp.shopping.order:read'). Scope presence implies that the corresponding operations require user authentication. Operations not gated by any listed scope operate at whatever access level the business permits; UCP does not prescribe a default.",
+
+  "$defs": {
+    "scope_policy": {
+      "type": "object",
+      "title": "Scope Policy",
+      "description": "Per-scope policy and metadata — auth constraints (e.g. min_acr, max_token_age), declarative metadata (e.g. claims produced, consent descriptions), or any other scope-specific configuration. An empty object means user authentication is required with no additional policy. Open for non-breaking extension.",
+      "properties": {
+        "description": {
+          "$ref": "types/description.json",
+          "description": "Optional human-readable description of the scope that platforms can use to present and explain context (requirement and value) to the user."
+        }
+      },
+      "additionalProperties": true
+    },
+
+    "scope_token": {
+      "type": "string",
+      "description": "OAuth scope string formed by joining a capability name and a scope name with a colon: '{capability}:{scope}', e.g. 'dev.ucp.shopping.order:read'. Capability names use reverse-DNS naming; scope names denote the permission granted, defined by each capability's spec (e.g. 'read', 'manage', 'create'). Platforms request these strings verbatim in OAuth 'scope' parameters; issued tokens carry them in the 'scope' claim.",
+      "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9_]*)+:[a-z][a-z0-9_]*$"
+    },
+
+    "provider": {
+      "type": "object",
+      "title": "Identity Provider",
+      "description": "A trusted identity provider for delegated authentication, keyed by the 'type' discriminator. 'oauth2' denotes an OAuth 2.0 / OIDC authorization server. Future versions MAY define additional types (e.g. wallet attestation) as non-breaking extensions; platforms MUST treat entries whose 'type' they do not support as filtered out (see Provider Selection).",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Provider mechanism discriminator. 'oauth2' for OAuth 2.0 / OIDC authorization servers. Additional values MAY be defined by future versions; the value is an open string, not a closed enum, so unrecognized types remain valid and are filtered at runtime."
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "type": { "const": "oauth2" } } },
+          "then": {
+            "required": ["auth_url"],
+            "properties": {
+              "auth_url": {
+                "type": "string",
+                "format": "uri",
+                "description": "Base URL for authorization server metadata discovery. Platforms resolve metadata via RFC 8414 (/.well-known/oauth-authorization-server) with OIDC fallback (/.well-known/openid-configuration) on 404."
+              },
+              "required_claims": {
+                "type": "array",
+                "items": { "type": "string" },
+                "uniqueItems": true,
+                "description": "OIDC Core §5.1 claim names the business requires in the JWT authorization grant from this provider (e.g. 'email'). Optional pre-filter hint: platforms SHOULD skip this provider during selection when their upstream identity lacks any of the listed claim names. Reactive enforcement at the token endpoint remains mandatory regardless; this field expresses claim presence only, not value constraints."
+              }
+            }
+          }
+        }
+      ],
+      "additionalProperties": true
+    },
+
+    "dev.ucp.common.identity_linking": {
+      "platform_schema": {
+        "title": "Identity Linking (Platform)",
+        "description": "Platform-level identity linking capability declaration. Platforms advertise support for identity linking; no auth-specific config is required.",
+        "allOf": [
+          { "$ref": "../capability.json#/$defs/platform_schema" }
+        ]
+      },
+      "business_schema": {
+        "title": "Identity Linking (Business)",
+        "description": "Business-level identity linking configuration. Businesses declare the user-authenticated scopes they offer in 'config.scopes'.",
+        "allOf": [
+          { "$ref": "../capability.json#/$defs/business_schema" },
+          {
+            "type": "object",
+            "required": ["config"],
+            "properties": {
+              "config": {
+                "type": "object",
+                "required": ["scopes"],
+                "properties": {
+                  "providers": {
+                    "type": "object",
+                    "description": "Map of trusted external identity providers keyed by reverse-domain identifier. Each key maps to an array of mechanism entries — an IdP namespace MAY offer multiple token acquisition mechanisms. Declares which upstream IdPs the business will accept JWT bearer assertions from for the Accelerated IdP Flow (chaining via RFC 8693 + RFC 7523). This field is additive: direct OAuth against the business domain via RFC 8414 discovery is always available regardless of 'providers' content. Businesses MUST NOT list their own authorization server here — chaining-to-self is degenerate, and direct OAuth covers that path. When absent, empty, or when no listed mechanism is supported by the platform, platforms run direct OAuth on the business domain.",
+                    "propertyNames": { "$ref": "types/reverse_domain_name.json" },
+                    "additionalProperties": {
+                      "type": "array",
+                      "items": { "$ref": "#/$defs/provider" }
+                    }
+                  },
+                  "scopes": {
+                    "type": "object",
+                    "description": "Map of user-authenticated scopes offered by this business. Each key is an OAuth scope string formed as '{capability}:{scope}' (e.g. 'dev.ucp.shopping.order:read'). Scope presence in this map declares that the corresponding operations require a user identity token. Operations not gated by any listed scope operate at whatever access level the business permits; UCP does not prescribe a default. Each value is a per-scope policy object (empty object means user auth required with no additional policy).",
+                    "propertyNames": { "$ref": "#/$defs/scope_token" },
+                    "additionalProperties": { "$ref": "#/$defs/scope_policy" }
+                  }
+                },
+                "additionalProperties": true
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

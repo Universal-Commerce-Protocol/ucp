@@ -25,6 +25,7 @@ Businesses that support A2A transport must specify the agent card endpoint as
 part of `services` in UCP Profile at `/.well-known/ucp`. This allows capable
 platforms to interact with the business services over A2A Protocol.
 
+<!-- ucp:example schema=profile def=business_schema extract=$.ucp.services target=$.ucp.services -->
 ```json
 {
   "ucp": {
@@ -48,7 +49,7 @@ platforms to interact with the business services over A2A Protocol.
 Shopping platforms interacting with the business agent must send their profile
 URI as `UCP-Agent` request headers with every request.
 
-```json
+```http
 UCP-Agent: profile="https://agent.example/profiles/v2025-11/shopping-agent.json"
 Content-Type: application/json
 ```
@@ -80,6 +81,7 @@ extension.
 
 An example:
 
+<!-- ucp:example schema=transports/a2a_message def=agent_card -->
 ```json
 {
   "extensions": [
@@ -154,42 +156,54 @@ Examples:
 
 - Natural language input
 
+<!-- ucp:example schema=transports/a2a_message def=message_request direction=request -->
 ```json
 {
-  "message": {
-    "role": "user",
-    "parts": [
-      {
-        "type": "text",
-        "text": "add Pixel 10 Pro to my checkout"
-      }
-    ],
-    "messageId": "69da8f87-991b-479e-80dc-ed92fcb57cbe",
-    "kind": "message",
-    "contextId": "aad14abc-4082-4748-84ca-4afff85aedfa"
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "message/send",
+  "params": {
+    "message": {
+      "role": "user",
+      "parts": [
+        {
+          "type": "text",
+          "text": "add Pixel 10 Pro to my checkout"
+        }
+      ],
+      "messageId": "69da8f87-991b-479e-80dc-ed92fcb57cbe",
+      "kind": "message",
+      "contextId": "aad14abc-4082-4748-84ca-4afff85aedfa"
+    }
   }
 }
 ```
 
 - Structured inputs on user actions
 
+<!-- ucp:example schema=transports/a2a_message def=message_request direction=request -->
 ```json
 {
-  "message": {
-    "role": "user",
-    "parts": [
-      {
-        "type": "data",
-        "data": {
-          "action": "add_to_checkout",
-          "product_id": "PIXEL-10-PRO",
-          "quantity": 1
+  "jsonrpc": "2.0",
+  "id": 2,
+  "method": "message/send",
+  "params": {
+    "message": {
+      "role": "user",
+      "parts": [
+        {
+          "type": "data",
+          "data": {
+            "action": "add_to_checkout",
+            "product_id": "PIXEL-10-PRO",
+            "quantity": 1
+          }
         }
-      }
-    ],
-    "messageId": "e94a8c10-69f4-4c4c-b988-21a298302da6",
-    "kind": "message",
-    "contextId": "aad14abc-4082-4748-84ca-4afff85aedfa"
+      ],
+      "messageId": "e94a8c10-69f4-4c4c-b988-21a298302da6",
+      "kind": "message",
+      "contextId": "aad14abc-4082-4748-84ca-4afff85aedfa"
+    }
   }
 }
 ```
@@ -197,6 +211,7 @@ Examples:
 **Response format:** Following is an example response from a business agent
 implementing Checkout functionality:
 
+<!-- ucp:example schema=transports/a2a_message def=message_response -->
 ```json
 {
   "id": 33,
@@ -208,7 +223,7 @@ implementing Checkout functionality:
     "parts": [
       {
         "data": {
-          "a2a.ucp.checkout": {...checkoutObject}
+          "a2a.ucp.checkout": { ... }
         },
         "kind": "data"
       }
@@ -232,31 +247,35 @@ checkout object containing an `order` attribute with `id` and `permalink_url`.
 
 ### Request format
 
+<!-- ucp:example schema=transports/a2a_message def=message_request direction=request -->
 ```json
 {
-  "message": {
-    "role": "user",
-    "parts": [
-      {
-        "type": "data",
-        "data": {"action":"complete_checkout"}
-      },
-      {
-        "kind": "data",
-        "data": {
-          "a2a.ucp.checkout.payment": {
-            ...paymentObject
-          },
-          "a2a.ucp.checkout.signals": {
-            "dev.ucp.buyer_ip": "203.0.113.42",
-            "dev.ucp.user_agent": "Mozilla/5.0 ..."
+  "jsonrpc": "2.0",
+  "id": 3,
+  "method": "message/send",
+  "params": {
+    "message": {
+      "role": "user",
+      "parts": [
+        {
+          "type": "data",
+          "data": {"action":"complete_checkout"}
+        },
+        {
+          "kind": "data",
+          "data": {
+            "a2a.ucp.checkout.payment": { ... },
+            "a2a.ucp.checkout.signals": {
+              "dev.ucp.buyer_ip": "203.0.113.42",
+              "dev.ucp.user_agent": "Mozilla/5.0 ..."
+            }
           }
         }
-      }
-    ],
-    "messageId": "e94a8c10-69f4-4c4c-b988-21a298302da6",
-    "kind": "message",
-    "contextId": "aad14abc-4082-4748-84ca-4afff85aedfa"
+      ],
+      "messageId": "e94a8c10-69f4-4c4c-b988-21a298302da6",
+      "kind": "message",
+      "contextId": "aad14abc-4082-4748-84ca-4afff85aedfa"
+    }
   }
 }
 
@@ -265,6 +284,7 @@ checkout object containing an `order` attribute with `id` and `permalink_url`.
 **Response format:** Following is an example response from a business agent
 implementing Checkout functionality:
 
+<!-- ucp:example schema=transports/a2a_message def=message_response -->
 ```json
 {
   "id": 33,
@@ -276,7 +296,7 @@ implementing Checkout functionality:
     "parts": [
       {
         "data": {
-          "a2a.ucp.checkout": { ...checkoutObject }
+          "a2a.ucp.checkout": { ... }
         },
         "kind": "data"
       }
@@ -302,6 +322,7 @@ part of the `DataPart` as `ap2.merchant_authorization`. This will allow the
 platform to cryptographically verify the checkout payload against the business's
 public keys.
 
+<!-- ucp:example schema=transports/a2a_message def=message_response -->
 ```json
 {
   "id": 33,
@@ -314,7 +335,6 @@ public keys.
       {
         "data": {
           "a2a.ucp.checkout": {
-            ...checkoutObject,
             "ap2": {
               "merchant_authorization": "<detached jws signature>"
             }
@@ -340,46 +360,52 @@ verification and processing of the mandates to complete the checkout.
 
 ### Request format
 
+<!-- ucp:example schema=transports/a2a_message def=message_request direction=request -->
 ```json
 {
-  "message": {
-    "role": "user",
-    "parts": [
-      {
-        "type": "data",
-        "data": {
-          "action": "complete_checkout"
-        }
-      },
-      {
-        "kind": "data",
-        "data": {
-          "a2a.ucp.checkout.payment": {
-            "id": "instr_1",
-            "handler_id": "gpay",
-            "type": "card",
-            "description": "Visa •••• 1234",
-            "billing_address": {
-              "street_address": "123 Main St",
-              "address_locality": "Anytown",
-              "address_region": "CA",
-              "address_country": "US",
-              "postal_code": "12345"
+  "jsonrpc": "2.0",
+  "id": 4,
+  "method": "message/send",
+  "params": {
+    "message": {
+      "role": "user",
+      "parts": [
+        {
+          "type": "data",
+          "data": {
+            "action": "complete_checkout"
+          }
+        },
+        {
+          "kind": "data",
+          "data": {
+            "a2a.ucp.checkout.payment": {
+              "id": "instr_1",
+              "handler_id": "gpay",
+              "type": "card",
+              "description": "Visa •••• 1234",
+              "billing_address": {
+                "street_address": "123 Main St",
+                "address_locality": "Anytown",
+                "address_region": "CA",
+                "address_country": "US",
+                "postal_code": "12345"
+              },
+              "credential": {
+                "type": "PAYMENT_GATEWAY",
+                "token": "examplePaymentMethodToken"
+              }
             },
-            "credential": {
-              "type": "PAYMENT_GATEWAY",
-              "token": "examplePaymentMethodToken"
+            "ap2": {
+              "checkout_mandate": "eyJhbGciOiJFUz..."
             }
-          },
-          "ap2": {
-            "checkout_mandate": "eyJhbGciOiJFUz..."
           }
         }
-      }
-    ],
-    "messageId": "e94a8c10-69f4-4c4c-b988-21a298302da6",
-    "kind": "message",
-    "contextId": "aad14abc-4082-4748-84ca-4afff85aedfa"
+      ],
+      "messageId": "e94a8c10-69f4-4c4c-b988-21a298302da6",
+      "kind": "message",
+      "contextId": "aad14abc-4082-4748-84ca-4afff85aedfa"
+    }
   }
 }
 ```

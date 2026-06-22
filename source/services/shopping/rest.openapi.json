@@ -409,6 +409,7 @@
           { "$ref": "#/components/parameters/idempotency_key" },
           { "$ref": "#/components/parameters/request_id" },
           { "$ref": "#/components/parameters/user_agent" },
+          { "$ref": "#/components/parameters/ucp_agent" },
           { "$ref": "#/components/parameters/content_type" },
           { "$ref": "#/components/parameters/accept" },
           { "$ref": "#/components/parameters/accept_language" },
@@ -672,6 +673,11 @@
         "responses": {
           "200": {
             "description": "Order retrieved or business outcome message",
+            "headers": {
+              "Signature": { "$ref": "#/components/headers/signature" },
+              "Signature-Input": { "$ref": "#/components/headers/signature_input" },
+              "Content-Digest": { "$ref": "#/components/headers/content_digest" }
+            },
             "content": {
               "application/json": {
                 "schema": { "$ref": "#/components/schemas/order_response" }
@@ -968,7 +974,7 @@
       "checkout_response": {
         "oneOf": [
           { "$ref": "../../schemas/shopping/checkout.json" },
-          { "$ref": "../../schemas/shopping/types/error_response.json" }
+          { "$ref": "../../schemas/common/types/error_response.json" }
         ]
       },
       "cart": {
@@ -977,7 +983,7 @@
       "cart_response": {
         "oneOf": [
           { "$ref": "../../schemas/shopping/cart.json" },
-          { "$ref": "../../schemas/shopping/types/error_response.json" }
+          { "$ref": "../../schemas/common/types/error_response.json" }
         ]
       },
       "order": {
@@ -986,7 +992,7 @@
       "order_response": {
         "oneOf": [
           { "$ref": "../../schemas/shopping/order.json" },
-          { "$ref": "../../schemas/shopping/types/error_response.json" }
+          { "$ref": "../../schemas/common/types/error_response.json" }
         ]
       },
       "payment": {
@@ -1013,7 +1019,7 @@
       "catalog_get_product_response": {
         "oneOf": [
           { "$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/get_product_response" },
-          { "$ref": "../../schemas/shopping/types/error_response.json" }
+          { "$ref": "../../schemas/common/types/error_response.json" }
         ]
       }
     }

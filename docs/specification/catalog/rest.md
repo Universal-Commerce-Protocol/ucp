@@ -26,6 +26,7 @@ This document specifies the HTTP/REST binding for the
 Businesses advertise REST transport availability through their UCP profile at
 `/.well-known/ucp`.
 
+<!-- ucp:example schema=profile def=business_schema -->
 ```json
 {
   "ucp": {
@@ -52,7 +53,8 @@ Businesses advertise REST transport availability through their UCP profile at
         "spec": "https://ucp.dev/{{ ucp_version }}/specification/catalog/lookup",
         "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/catalog_lookup.json"
       }]
-    }
+    },
+    "payment_handlers": {}
   }
 }
 ```
@@ -75,6 +77,7 @@ Maps to the [Catalog Search](search.md) capability.
 
 === "Request"
 
+    <!-- ucp:example schema=shopping/catalog_search op=search direction=request -->
     ```json
     {
       "query": "blue running shoes",
@@ -97,6 +100,7 @@ Maps to the [Catalog Search](search.md) capability.
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/catalog_search op=search -->
     ```json
     {
       "ucp": {
@@ -203,6 +207,7 @@ applies to all lookups in the batch.
 
 === "Request"
 
+    <!-- ucp:example schema=shopping/catalog_lookup op=lookup direction=request -->
     ```json
     POST /catalog/lookup HTTP/1.1
     Host: business.example.com
@@ -219,6 +224,7 @@ applies to all lookups in the batch.
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/catalog_lookup op=lookup -->
     ```json
     {
       "ucp": {
@@ -269,6 +275,7 @@ applies to all lookups in the batch.
               "id": "prod_def456_size10",
               "sku": "TBX-GRN-10",
               "title": "Talla 10",
+              "description": { "plain": "Variante talla 10" },
               "price": { "amount": 15000, "currency": "USD" },
               "availability": { "available": true },
               "inputs": [
@@ -289,6 +296,7 @@ messages indicating which identifiers were not found.
 
 === "Request"
 
+    <!-- ucp:example schema=shopping/catalog_lookup op=lookup direction=request -->
     ```json
     {
       "ids": ["prod_abc123", "prod_invalid", "prod_def456"]
@@ -297,6 +305,7 @@ messages indicating which identifiers were not found.
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/catalog_lookup op=lookup -->
     ```json
     {
       "ucp": {
@@ -311,6 +320,8 @@ messages indicating which identifiers were not found.
         {
           "id": "prod_abc123",
           "title": "Blue Runner Pro",
+          "description": { "plain": "Lightweight running shoes." },
+          "variants": [ ... ],
           "price_range": {
             "min": { "amount": 12000, "currency": "USD" },
             "max": { "amount": 12000, "currency": "USD" }
@@ -319,6 +330,8 @@ messages indicating which identifiers were not found.
         {
           "id": "prod_def456",
           "title": "Trail Blazer X",
+          "description": { "plain": "Trail shoes with superior traction." },
+          "variants": [ ... ],
           "price_range": {
             "min": { "amount": 15000, "currency": "USD" },
             "max": { "amount": 15000, "currency": "USD" }
@@ -349,6 +362,7 @@ on option values and returns variants matching the selection.
 
 === "Request"
 
+    <!-- ucp:example schema=shopping/catalog_lookup op=get_product direction=request -->
     ```json
     POST /catalog/product HTTP/1.1
     Host: business.example.com
@@ -368,6 +382,7 @@ on option values and returns variants matching the selection.
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/catalog_lookup op=get_product -->
     ```json
     {
       "ucp": {
@@ -466,6 +481,7 @@ with `ucp.status: "error"` and a descriptive message. This is an application
 outcome, not a transport error — the handler executed and reports its result
 via the UCP envelope.
 
+<!-- ucp:example schema=common/types/error_response op=read -->
 ```json
 {
   "ucp": {
@@ -519,6 +535,7 @@ for message semantics and common scenarios.
 When all requested identifiers fail lookup, the `products` array is empty. The response
 MAY include informational messages indicating which identifiers were not found.
 
+<!-- ucp:example schema=shopping/catalog_lookup op=lookup -->
 ```json
 {
   "ucp": {
