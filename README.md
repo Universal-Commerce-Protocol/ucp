@@ -182,11 +182,6 @@ The local version of the documentation website will then be available at
 ## What's Next
 
 Take a look at [our roadmap on ucp.dev](https://ucp.dev/documentation/roadmap/).
-Future enhancements include:
-
-- **New Verticals:** Applications beyond Shopping (e.g., Travel, Services).
-- **Loyalty:** Standardized management of loyalty programs and rewards.
-- **Personalization:** Enhanced signals for personalized product discovery.
 
 ## About
 
