@@ -119,7 +119,7 @@ platform receives messages indicating what's needed to progress.
 The `messages` array contains errors, warnings, and informational messages
 about the checkout state. `ucp.status` is the shape discriminator —
 `"success"` means the response carries the expected payload, `"error"`
-means it carries error information instead. Each message carries a `type`,
+means it carries error information instead. Each error message carries a `type`,
 `code`, `severity`, `content`, and an optional `path` that identifies the
 specific field or line item the message refers to (see [The `path` Field](#the-path-field) below).
 The `severity` field prescribes the recommended platform action:
@@ -296,13 +296,6 @@ are unambiguous within the response.
 `$.line_items[0].quantity`) takes precedence over a path to its parent
 (e.g., `$.line_items[0]`). When multiple errors apply to the same field,
 each message **SHOULD** carry the most specific path applicable.
-
-**Create vs. Update keying:** On `create_checkout`, line item filter
-expressions key on `item.id` (the catalog item identifier). On
-`update_checkout`, they key on the line item's own `id` (the
-session-scoped line item identifier assigned in the create response).
-
-When `path` is omitted, the message applies to the response as a whole.
 
 #### Eligibility Verification at Completion
 
