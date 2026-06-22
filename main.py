@@ -608,6 +608,55 @@ def define_env(env):
 
     return "\n".join(md)
 
+  def _field_visibility(field_name, ucp_request, required_list):
+    """Render the Visibility cell for a schema field.
+
+    The base ``required`` array defines *response* visibility (responses never
+    omit a defined field, so a field is either ``required`` or ``optional`` in
+    responses). The ``ucp_request`` annotation overrides *request* visibility —
+    either a single value applied to every request operation, or a per-operation
+    map over ``create``/``update``/``complete``. Request operations left
+    unannotated inherit the response visibility.
+
+    Returns a Markdown string such as ``**Required**`` (same everywhere) or
+    ``**Required** in responses; omitted on create, optional on update``.
+    """
+    word = {"required": "required", "optional": "optional", "omit": "omitted"}
+    response = "required" if field_name in required_list else "optional"
+    base_disp = "**Required**" if response == "required" else "Optional"
+
+    if ucp_request is None:
+      return base_disp
+
+    if isinstance(ucp_request, str):
+      if ucp_request == response:
+        return base_disp
+      return (
+        f"{base_disp} in responses; "
+        f"{word.get(ucp_request, ucp_request)} in requests"
+      )
+
+    if isinstance(ucp_request, dict):
+      # Group adjacent request operations that share a visibility value so the
+      # cell stays compact (e.g. "required on create & update").
+      groups = []  # list of (value, [ops]) preserving operation order
+      for op in ("create", "update", "complete"):
+        if op not in ucp_request:
+          continue
+        val = ucp_request[op]
+        if groups and groups[-1][0] == val:
+          groups[-1][1].append(op)
+        else:
+          groups.append((val, [op]))
+      clauses = [
+        f"{word.get(val, val)} on {' & '.join(ops)}" for val, ops in groups
+      ]
+      if not clauses:
+        return base_disp
+      return f"{base_disp} in responses; {', '.join(clauses)}"
+
+    return base_disp
+
   def _render_table_from_schema(
     schema_data,
     spec_file_name,
@@ -695,7 +744,7 @@ def define_env(env):
 
     md = []
     if need_header:
-      md = ["| Name | Type | Required | Description |"]
+      md = ["| Name | Type | Visibility | Description |"]
       md.append("| :--- | :--- | :--- | :--- |")
 
     if "allOf" in properties:
@@ -731,6 +780,12 @@ def define_env(env):
             )
           )
           continue
+
+        # Capture the request-visibility annotation before `details` may be
+        # reassigned during $ref resolution below.
+        ucp_annotation = (
+          details.get("ucp_request") if isinstance(details, dict) else None
+        )
 
         f_type = details.get("type", "any")
         ref = details.get("$ref")
@@ -830,10 +885,12 @@ def define_env(env):
             desc += "<br>"
           desc += f"**Enum:** {formatted_enums}"
 
-        # --- Handle Required ---
-        req_display = "**Yes**" if field_name in required_list else "No"
+        # --- Handle Visibility (required/optional/omit per request op + response) ---
+        visibility = _field_visibility(
+          field_name, ucp_annotation, required_list
+        )
 
-        md.append(f"| {field_name} | {f_type} | {req_display} | {desc} |")
+        md.append(f"| {field_name} | {f_type} | {visibility} | {desc} |")
 
     return "\n".join(md)
 
