@@ -87,15 +87,6 @@
                 }
               }
             }
-          },
-          "400": {
-            "$ref": "#/components/responses/bad_request"
-          },
-          "401": {
-            "$ref": "#/components/responses/unauthorized"
-          },
-          "500": {
-            "$ref": "#/components/responses/internal_server_error"
           }
         }
       }
@@ -158,18 +149,6 @@
                 }
               }
             }
-          },
-          "400": {
-            "$ref": "#/components/responses/bad_request"
-          },
-          "401": {
-            "$ref": "#/components/responses/unauthorized"
-          },
-          "404": {
-            "$ref": "#/components/responses/not_found"
-          },
-          "500": {
-            "$ref": "#/components/responses/internal_server_error"
           }
         }
       },
@@ -213,18 +192,6 @@
                 }
               }
             }
-          },
-          "400": {
-            "$ref": "#/components/responses/bad_request"
-          },
-          "401": {
-            "$ref": "#/components/responses/unauthorized"
-          },
-          "404": {
-            "$ref": "#/components/responses/not_found"
-          },
-          "500": {
-            "$ref": "#/components/responses/internal_server_error"
           }
         }
       }
@@ -317,18 +284,6 @@
                 }
               }
             }
-          },
-          "400": {
-            "$ref": "#/components/responses/bad_request"
-          },
-          "401": {
-            "$ref": "#/components/responses/unauthorized"
-          },
-          "404": {
-            "$ref": "#/components/responses/not_found"
-          },
-          "500": {
-            "$ref": "#/components/responses/internal_server_error"
           }
         }
       }
@@ -396,18 +351,6 @@
                 }
               }
             }
-          },
-          "400": {
-            "$ref": "#/components/responses/bad_request"
-          },
-          "401": {
-            "$ref": "#/components/responses/unauthorized"
-          },
-          "404": {
-            "$ref": "#/components/responses/not_found"
-          },
-          "500": {
-            "$ref": "#/components/responses/internal_server_error"
           }
         }
       }
@@ -476,15 +419,6 @@
                 }
               }
             }
-          },
-          "400": {
-            "$ref": "#/components/responses/bad_request"
-          },
-          "401": {
-            "$ref": "#/components/responses/unauthorized"
-          },
-          "500": {
-            "$ref": "#/components/responses/internal_server_error"
           }
         }
       }
@@ -541,18 +475,6 @@
                 }
               }
             }
-          },
-          "400": {
-            "$ref": "#/components/responses/bad_request"
-          },
-          "401": {
-            "$ref": "#/components/responses/unauthorized"
-          },
-          "404": {
-            "$ref": "#/components/responses/not_found"
-          },
-          "500": {
-            "$ref": "#/components/responses/internal_server_error"
           }
         }
       },
@@ -590,18 +512,6 @@
                 }
               }
             }
-          },
-          "400": {
-            "$ref": "#/components/responses/bad_request"
-          },
-          "401": {
-            "$ref": "#/components/responses/unauthorized"
-          },
-          "404": {
-            "$ref": "#/components/responses/not_found"
-          },
-          "500": {
-            "$ref": "#/components/responses/internal_server_error"
           }
         }
       }
@@ -663,18 +573,6 @@
                 }
               }
             }
-          },
-          "400": {
-            "$ref": "#/components/responses/bad_request"
-          },
-          "401": {
-            "$ref": "#/components/responses/unauthorized"
-          },
-          "404": {
-            "$ref": "#/components/responses/not_found"
-          },
-          "500": {
-            "$ref": "#/components/responses/internal_server_error"
           }
         }
       }
@@ -926,56 +824,18 @@
         "description": "Optional detached JWT signature for the response body. Verifies the response came from the server."
       }
     },
-    "responses": {
-      "bad_request": {
-        "description": "Bad Request - The request was malformed or contained invalid data.",
-        "content": {
-          "application/json": {
-            "schema": {
-              "$ref": "#/components/schemas/error_response"
-            }
-          }
-        }
-      },
-      "unauthorized": {
-        "description": "Unauthorized - Authentication credentials were missing or invalid.",
-        "content": {
-          "application/json": {
-            "schema": {
-              "$ref": "#/components/schemas/error_response"
-            }
-          }
-        }
-      },
-      "not_found": {
-        "description": "Not Found - The requested resource does not exist or has expired.",
-        "content": {
-          "application/json": {
-            "schema": {
-              "$ref": "#/components/schemas/error_response"
-            }
-          }
-        }
-      },
-      "internal_server_error": {
-        "description": "Internal Server Error - An unexpected error occurred on the server.",
-        "content": {
-          "application/json": {
-            "schema": {
-              "$ref": "#/components/schemas/error_response"
-            }
-          }
-        }
-      }
-    },
     "schemas": {
       "checkout": {
         "$ref": "../../schemas/shopping/checkout.json"
       },
       "checkout_response": {
         "oneOf": [
-          { "$ref": "../../schemas/shopping/checkout.json" },
-          { "$ref": "../../schemas/common/types/error_response.json" }
+          {
+            "$ref": "../../schemas/shopping/checkout.json"
+          },
+          {
+            "$ref": "../../schemas/common/types/error_response.json"
+          }
         ]
       },
       "cart": {
@@ -983,8 +843,12 @@
       },
       "cart_response": {
         "oneOf": [
-          { "$ref": "../../schemas/shopping/cart.json" },
-          { "$ref": "../../schemas/common/types/error_response.json" }
+          {
+            "$ref": "../../schemas/shopping/cart.json"
+          },
+          {
+            "$ref": "../../schemas/common/types/error_response.json"
+          }
         ]
       },
       "order": {
@@ -992,8 +856,12 @@
       },
       "order_response": {
         "oneOf": [
-          { "$ref": "../../schemas/shopping/order.json" },
-          { "$ref": "../../schemas/common/types/error_response.json" }
+          {
+            "$ref": "../../schemas/shopping/order.json"
+          },
+          {
+            "$ref": "../../schemas/common/types/error_response.json"
+          }
         ]
       },
       "payment": {
@@ -1001,22 +869,6 @@
       },
       "ucp": {
         "$ref": "../../schemas/ucp.json"
-      },
-      "error_response": {
-        "type": "object",
-        "description": "Standard error response wrapper containing one or more error messages.",
-        "required": [
-          "messages"
-        ],
-        "properties": {
-          "messages": {
-            "type": "array",
-            "description": "List of error messages describing what went wrong.",
-            "items": {
-              "$ref": "../../schemas/shopping/types/message_error.json"
-            }
-          }
-        }
       }
     }
   }
