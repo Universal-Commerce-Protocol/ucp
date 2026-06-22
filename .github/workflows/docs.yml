@@ -34,6 +34,7 @@ on:
       - "hooks.py"
       - "docs/**"
       - "source/**"
+      - "scripts/**"
 
 jobs:
   lint:
@@ -57,13 +58,23 @@ jobs:
 
       - name: Check for changed files in source
         id: source_files_changed
-        uses: tj-actions/changed-files@v46
+        uses: tj-actions/changed-files@v47
         with:
           files: source/**
 
       - name: Lint source schemas
         if: steps.source_files_changed.outputs.any_changed == 'true' || github.event_name == 'workflow_dispatch'
         run: ucp-schema lint source/
+
+      # Enforce the schema-authoring contract end-to-end: every ```json block
+      # in the spec docs either validates against its declared schema, or is
+      # explicitly skipped with a precise reason. The validator is pure stdlib
+      # Python and shells out to the already-installed ucp-schema binary.
+      - name: Validate documentation examples
+        run: uv run python scripts/validate_examples.py --schema-base source/schemas/
+
+      - name: Run validator unit tests
+        run: uv run python scripts/test_validate_examples.py
 
   build_and_verify_main:
     needs: lint
