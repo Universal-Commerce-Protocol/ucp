@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/ask.json",
+  "name": "dev.ucp.shopping.ask",
+  "title": "Ask",
+  "description": "Natural-language Q&A with a business. A platform, on behalf of the buyer, asks a free-form question — about the business's products, policies, and services — and receives a text answer with optional related links. `ask` is the open-question complement to UCP's structured shopping capabilities: a question that maps to a dedicated operation is owned by that capability, while `ask` covers open questions and business-specific facts and knowledge not exposed by other capabilities. Optionally pass item IDs to ground the answer in specific products.",
+  "type": "object",
+  "$defs": {
+    "ask_request": {
+      "type": "object",
+      "required": ["query"],
+      "properties": {
+        "query": {
+          "type": "string",
+          "description": "Natural-language question."
+        },
+        "conversation": {
+          "type": "string",
+          "description": "Optional conversation GID. Provide it on a follow-up query to continue that conversation; omit to start a new one."
+        },
+        "ids": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Optional identifiers for the resources the question is about. A business SHOULD accept identifiers that ground the question, with product and variant IDs as the recommended minimum, and MAY also accept secondary identifiers (SKU, handle, URL) and other resources it holds a GID for, such as a cart or checkout."
+        },
+        "context": {
+          "$ref": "types/context.json"
+        },
+        "signals": {
+          "$ref": "types/signals.json"
+        },
+        "attribution": {
+          "$ref": "types/attribution.json"
+        }
+      }
+    },
+    "ask_response": {
+      "type": "object",
+      "required": ["ucp", "answer"],
+      "properties": {
+        "ucp": {
+          "$ref": "../ucp.json#/$defs/response_ask_schema"
+        },
+        "answer": {
+          "$ref": "../common/types/description.json",
+          "description": "Answer provided by the business, as free-form content in one or more formats (plain text, HTML, or Markdown)."
+        },
+        "conversation": {
+          "type": "string",
+          "description": "Optional, business-issued conversation GID. A business that supports multi-turn conversations MAY return one; when it does, it SHOULD retain the conversation history it represents (the retention policy is set by the business) so a follow-up `ask` operation with the same GID builds on prior conversation context. If a provided GID cannot be resolved, the business SHOULD start a new conversation and add an informational message to `messages` noting that the provided conversation GID was not found."
+        },
+        "links": {
+          "type": "array",
+          "items": { "$ref": "../common/types/link.json" },
+          "description": "Optional additional links and references related to the answer, where relevant."
+        },
+        "messages": {
+          "type": "array",
+          "items": { "$ref": "../common/types/message.json" },
+          "description": "Errors, warnings, or informational messages about the answer or its grounding."
+        }
+      }
+    }
+  }
+}
