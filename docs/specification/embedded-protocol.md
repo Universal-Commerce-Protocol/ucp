@@ -336,12 +336,12 @@ continuing. Each capability defines its own session error notification method
 **Notification Payload:**
 
 - `error` (object, **REQUIRED**): Session-level error response.
-- `error.ucp` (object, **REQUIRED**): UCP protocol metadata. `status`
-    **MUST** be `"error"`.
-- `error.messages` (array, **REQUIRED**): One or more messages describing the
-    failure.
-- `error.continue_url` (string, **OPTIONAL**): URL for buyer handoff or session
-    recovery.
+    - `ucp` (object, **REQUIRED**): UCP protocol metadata. `status`
+        **MUST** be `"error"`.
+    - `messages` (array, **REQUIRED**): One or more messages describing the
+        failure.
+    - `continue_url` (string, **OPTIONAL**): URL for buyer handoff or session
+        recovery.
 
 **Example:**
 
