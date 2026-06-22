@@ -903,6 +903,44 @@ def define_env(env):
       f" directory{get_error_context()}."
     )
 
+  def _resolves_to_shared_type(base_name):
+    """Return the resolved path if base_name lives in a `types/` directory.
+
+    A "shared type" is any schema under `source/schemas/common/types/` or
+    `source/schemas/<vertical>/types/`. These are canonically rendered in
+    `reference.md` per the convention established in PR #226. Callers from
+    other pages should link out rather than re-render the table.
+
+    Returns the resolved Path on match, or None otherwise.
+    """
+    # Strip leading 'types/' if present so we can match the basename
+    # against the types directories directly.
+    name = base_name.split("/")[-1]
+    for types_dir in (COMMON_TYPES_DIR, *VERTICAL_TYPES_DIRS):
+      candidate = types_dir / (name + ".json")
+      if candidate.exists():
+        return candidate
+    return None
+
+  def _render_shared_type_link(entity_name, spec_file_name):
+    """Emit a Markdown link to `reference.md` for a shared type.
+
+    Used in place of inline-rendering a `types/...` table on capability
+    pages (#412). `create_link` already routes the anchor to
+    `reference.md`, so we reuse it for consistency.
+    """
+    # create_link expects a ref-style path; normalize entity_name so the
+    # anchor logic in create_link matches the rendered heading in
+    # reference.md (which is auto-generated from the schema filename).
+    ref = entity_name if entity_name.startswith("types/") else f"types/{entity_name}"
+    if not ref.endswith(".json"):
+      ref = ref + ".json"
+    link = create_link(ref, spec_file_name)
+    return (
+      f"See {link} in the [Schema Reference](reference.md) "
+      f"for the canonical field definition."
+    )
+
   # --- MACRO 1: For Standalone JSON Schemas ---
   @env.macro
   def schema_fields(entity_name, spec_file_name):
@@ -914,6 +952,11 @@ def define_env(env):
     - 'cart_resp' -> resolves cart.json as response schema
     - 'cart_create_req' -> resolves cart.json as request schema (op=create)
     - 'buyer' -> resolves buyer.json as response schema (default)
+
+    For shared types (any schema under a `types/` directory), callers from
+    pages other than `reference.md` receive a Markdown link to the
+    canonical entry in `reference.md` instead of an inline table. This
+    finishes the centralization started in #226 (see #412).
 
     Args:
     ----
@@ -943,6 +986,16 @@ def define_env(env):
       else:
         base_name = entity_name[:-4]
         direction = "request"
+
+    # Shared-type redirect: when a capability page asks for a `types/...`
+    # schema, render a link to reference.md instead of duplicating the
+    # field table. reference.md itself still renders the full tables via
+    # auto_generate_schema_reference. See #412.
+    if (
+      spec_file_name != "reference"
+      and _resolves_to_shared_type(base_name) is not None
+    ):
+      return _render_shared_type_link(entity_name, spec_file_name)
 
     # Build context for downstream link generation
     context = {"io_type": direction, "operation_id": operation}
@@ -977,6 +1030,11 @@ def define_env(env):
 
     Usage: {{ extension_schema_fields('fulfillment_option') }}
 
+    For shared types referenced from a capability page (e.g.
+    `types/pagination.json#/$defs/response`), this macro emits a link to
+    the canonical entry in `reference.md` instead of rendering the table
+    inline. See #412.
+
     Args:
     ----
       entity_name: The name of the schema entity embedded in the extension
@@ -985,6 +1043,14 @@ def define_env(env):
         should be rendered (e.g., "checkout", "fulfillment").
 
     """
+    # Shared-type redirect for capability-page callers. The entity_name
+    # has the form '<file>.json#/$defs/<def>'; route to reference.md if
+    # <file>.json lives under a `types/` directory.
+    if spec_file_name != "reference" and ".json#" in entity_name:
+      file_part = entity_name.split(".json#", 1)[0]
+      file_basename = Path(file_part).stem
+      if _resolves_to_shared_type(file_basename) is not None:
+        return create_link(entity_name, spec_file_name)
     return _read_schema_from_defs(entity_name, spec_file_name)
 
   @env.macro
