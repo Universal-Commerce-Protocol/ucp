@@ -218,16 +218,18 @@ If the error is transient (indicated by `recoverable` severity), the embedded co
     "jsonrpc": "2.0",
     "method": "ec.error",
     "params": {
-        "ucp": { "version": "draft", "status": "error" },
-        "messages": [
-            {
-                "type": "error",
-                "code": "not_supported_error",
-                "content": "Requested auth credential type is not supported",
-                "severity": "unrecoverable"
-            }
-        ],
-        "continue_url": "https://merchant.example.com"
+        "error": {
+            "ucp": { "version": "draft", "status": "error" },
+            "messages": [
+                {
+                    "type": "error",
+                    "code": "not_supported_error",
+                    "content": "Requested auth credential type is not supported",
+                    "severity": "unrecoverable"
+                }
+            ],
+            "continue_url": "https://merchant.example.com"
+        }
     }
 }
 ```
@@ -240,9 +242,10 @@ A session error signals a fatal condition unrelated to the capability's resource
 
 **Notification Payload:**
 
-- `ucp` (object, **REQUIRED**): UCP protocol metadata. `status` **MUST** be `"error"`.
-- `messages` (array, **REQUIRED**): One or more messages describing the failure.
-- `continue_url` (string, **OPTIONAL**): URL for buyer handoff or session recovery.
+- `error` (object, **REQUIRED**): Session-level error response.
+  - `ucp` (object, **REQUIRED**): UCP protocol metadata. `status` **MUST** be `"error"`.
+  - `messages` (array, **REQUIRED**): One or more messages describing the failure.
+  - `continue_url` (string, **OPTIONAL**): URL for buyer handoff or session recovery.
 
 **Example:**
 
@@ -251,16 +254,18 @@ A session error signals a fatal condition unrelated to the capability's resource
     "jsonrpc": "2.0",
     "method": "ec.error",
     "params": {
-        "ucp": { "version": "draft", "status": "error" },
-        "messages": [
-            {
-                "type": "error",
-                "code": "not_supported_error",
-                "content": "Requested auth credential type is not supported.",
-                "severity": "unrecoverable"
-            }
-        ],
-        "continue_url": "https://merchant.example.com/checkout/abc123"
+        "error": {
+            "ucp": { "version": "draft", "status": "error" },
+            "messages": [
+                {
+                    "type": "error",
+                    "code": "not_supported_error",
+                    "content": "Requested auth credential type is not supported.",
+                    "severity": "unrecoverable"
+                }
+            ],
+            "continue_url": "https://merchant.example.com/checkout/abc123"
+        }
     }
 }
 ```
