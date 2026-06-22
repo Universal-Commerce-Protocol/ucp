@@ -28,6 +28,7 @@ specifications:
 
 - [Home](http://ucp.dev/index.md): High-level architecture, core value propositions, and structural capabilities of the Universal Commerce Protocol (UCP) as a common language for commerce agents.
 - [Core Concepts](http://ucp.dev/documentation/core-concepts/index.md): Fundamental UCP abstractions, including the decoupled separation of capabilities, extensions, services, and the decentralized protocol negotiation model.
+- [Announcements](http://ucp.dev/documentation/announcements/index.md): General announcements, release notes, and community updates for the Universal Commerce Protocol.
 - [UCP and AP2](http://ucp.dev/documentation/ucp-and-ap2/index.md): Integration patterns with the Agent Payments Protocol (AP2) to facilitate secure, agent-mediated checkout commitments and cryptographically signed mandates.
 - [Roadmap](http://ucp.dev/documentation/roadmap/index.md): Future development and planned capabilities of UCP.
 - [Schema Authoring](http://ucp.dev/documentation/schema-authoring/index.md): Comprehensive guidelines and JSON Schema design conventions when authoring or extending UCP schemas, including strict versioning and registry patterns.
