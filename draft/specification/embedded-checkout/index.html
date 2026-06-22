@@ -5321,72 +5321,7 @@ rather than attempting to merge the new data with existing state.</p>
 <p>The address object uses the UCP
 <a href="/draft/specification/checkout/#postal-address">PostalAddress</a> format:</p>
 <h3 id="postal-address">Postal Address<a class="headerlink" href="#postal-address" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Name</th>
-<th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
-<th style="text-align: left;">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;">extended_address</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">An address extension such as an apartment number, C/O or alternative name.</td>
-</tr>
-<tr>
-<td style="text-align: left;">street_address</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">The street address.</td>
-</tr>
-<tr>
-<td style="text-align: left;">address_locality</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">The locality in which the street address is, and which is in the region. For example, Mountain View.</td>
-</tr>
-<tr>
-<td style="text-align: left;">address_region</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">The region in which the locality is, and which is in the country. Required for applicable countries (i.e. state in US, province in CA). For example, California or another appropriate first-level Administrative division.</td>
-</tr>
-<tr>
-<td style="text-align: left;">address_country</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">The country. Recommended to be in 2-letter ISO 3166-1 alpha-2 format, for example "US". For backward compatibility, a 3-letter ISO 3166-1 alpha-3 country code such as "SGP" or a full country name such as "Singapore" can also be used.</td>
-</tr>
-<tr>
-<td style="text-align: left;">postal_code</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">The postal code. For example, 94043.</td>
-</tr>
-<tr>
-<td style="text-align: left;">first_name</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Optional. First name of the contact associated with the address.</td>
-</tr>
-<tr>
-<td style="text-align: left;">last_name</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Optional. Last name of the contact associated with the address.</td>
-</tr>
-<tr>
-<td style="text-align: left;">phone_number</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Optional. Phone number of the contact associated with the address.</td>
-</tr>
-</tbody>
-</table>
+<p>See <a href="/draft/specification/reference/#postal-address">Postal Address</a> in the <a href="/draft/specification/reference/">Schema Reference</a> for the canonical field definition.</p>
 <h2 id="window-extension">Window Extension<a class="headerlink" href="#window-extension" title="Permanent link">&para;</a></h2>
 <p>The window extension defines how the Embedded Checkout notifies the host when
 the buyer activates a link presented by the business. When a checkout URL

@@ -3559,36 +3559,7 @@ MAY include informational messages indicating which identifiers were not found.<
 </tbody>
 </table>
 <h3 id="error-response">Error Response<a class="headerlink" href="#error-response" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Name</th>
-<th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
-<th style="text-align: left;">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;">ucp</td>
-<td style="text-align: left;">any</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">UCP protocol metadata. Status MUST be 'error' for error response.</td>
-</tr>
-<tr>
-<td style="text-align: left;">messages</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/reference/#message">Message</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Array of messages describing why the operation failed.</td>
-</tr>
-<tr>
-<td style="text-align: left;">continue_url</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">URL for buyer handoff or session recovery.</td>
-</tr>
-</tbody>
-</table>
+<p>See <a href="/draft/specification/reference/#error-response">Error Response</a> in the <a href="/draft/specification/reference/">Schema Reference</a> for the canonical field definition.</p>
 <h2 id="conformance">Conformance<a class="headerlink" href="#conformance" title="Permanent link">&para;</a></h2>
 <p>A conforming REST transport implementation <strong>MUST</strong>:</p>
 <ol>

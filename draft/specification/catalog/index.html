@@ -3206,30 +3206,7 @@ as the first element. Platforms SHOULD treat the first element as featured.</p>
 </tbody>
 </table>
 <h3 id="price">Price<a class="headerlink" href="#price" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Name</th>
-<th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
-<th style="text-align: left;">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;">amount</td>
-<td style="text-align: left;"><a href="/draft/specification/reference/#amount">Amount</a></td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Amount in ISO 4217 minor units. Use 0 for free items.</td>
-</tr>
-<tr>
-<td style="text-align: left;">currency</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">ISO 4217 currency code (e.g., 'USD', 'EUR', 'GBP').</td>
-</tr>
-</tbody>
-</table>
+<p>See <a href="/draft/specification/reference/#price">Price</a> in the <a href="/draft/specification/reference/">Schema Reference</a> for the canonical field definition.</p>
 <h3 id="price-range">Price Range<a class="headerlink" href="#price-range" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -3256,48 +3233,7 @@ as the first element. Platforms SHOULD treat the first element as featured.</p>
 </tbody>
 </table>
 <h3 id="media">Media<a class="headerlink" href="#media" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Name</th>
-<th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
-<th style="text-align: left;">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;">type</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Media type. Well-known values: <code>image</code>, <code>video</code>, <code>model_3d</code>.</td>
-</tr>
-<tr>
-<td style="text-align: left;">url</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">URL to the media resource.</td>
-</tr>
-<tr>
-<td style="text-align: left;">alt_text</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Accessibility text describing the media.</td>
-</tr>
-<tr>
-<td style="text-align: left;">width</td>
-<td style="text-align: left;">integer</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Width in pixels (for images/video).</td>
-</tr>
-<tr>
-<td style="text-align: left;">height</td>
-<td style="text-align: left;">integer</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Height in pixels (for images/video).</td>
-</tr>
-</tbody>
-</table>
+<p>See <a href="/draft/specification/reference/#media">Media</a> in the <a href="/draft/specification/reference/">Schema Reference</a> for the canonical field definition.</p>
 <h3 id="product-option">Product Option<a class="headerlink" href="#product-option" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -3458,158 +3394,11 @@ doesn't resolve; agents MUST NOT retry the same <code>id</code> (see the
 <a href="rest/#product-not-found">REST</a> and <a href="mcp/#product-not-found">MCP</a>
 examples).</p>
 <h4 id="message-error">Message (Error)<a class="headerlink" href="#message-error" title="Permanent link">&para;</a></h4>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Name</th>
-<th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
-<th style="text-align: left;">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;">type</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;"><strong>Constant = error</strong>. Message type discriminator.</td>
-</tr>
-<tr>
-<td style="text-align: left;">code</td>
-<td style="text-align: left;"><a href="/draft/specification/reference/#error-code">Error Code</a></td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Error code identifying the type of error. Standard errors are defined in capability specifications (see examples) and have standardized semantics; freeform codes are permitted.</td>
-</tr>
-<tr>
-<td style="text-align: left;">path</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">RFC 9535 JSONPath to the component the message refers to (e.g., $.line_items[0]).</td>
-</tr>
-<tr>
-<td style="text-align: left;">content_type</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Content format, default = plain.<br><strong>Enum:</strong> <code>plain</code>, <code>markdown</code></td>
-</tr>
-<tr>
-<td style="text-align: left;">content</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Human-readable message.</td>
-</tr>
-<tr>
-<td style="text-align: left;">severity</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Reflects the resource state and recommended action. 'recoverable': platform can resolve by modifying inputs and retrying via API. 'requires_buyer_input': merchant requires information their API doesn't support collecting programmatically (checkout incomplete). 'requires_buyer_review': buyer must authorize before order placement due to policy, regulatory, or entitlement rules. 'unrecoverable': no valid resource exists to act on, retry with new resource or inputs. Errors with 'requires_<em>' severity contribute to 'status: requires_escalation'.<br></em><em>Enum:</em>* <code>recoverable</code>, <code>requires_buyer_input</code>, <code>requires_buyer_review</code>, <code>unrecoverable</code></td>
-</tr>
-</tbody>
-</table>
+<p>See <a href="/draft/specification/reference/#message-error">Message Error</a> in the <a href="/draft/specification/reference/">Schema Reference</a> for the canonical field definition.</p>
 <h4 id="message-warning">Message (Warning)<a class="headerlink" href="#message-warning" title="Permanent link">&para;</a></h4>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Name</th>
-<th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
-<th style="text-align: left;">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;">type</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;"><strong>Constant = warning</strong>. Message type discriminator.</td>
-</tr>
-<tr>
-<td style="text-align: left;">path</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">RFC 9535 JSONPath to the component the message refers to (e.g., $.line_items[0]).</td>
-</tr>
-<tr>
-<td style="text-align: left;">code</td>
-<td style="text-align: left;"><a href="/draft/specification/reference/#warning-code">Warning Code</a></td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Warning code identifying the type of warning. Standard codes are defined in capability specifications (see examples) and have standardized semantics; freeform codes are permitted.</td>
-</tr>
-<tr>
-<td style="text-align: left;">content</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Human-readable warning message that MUST be displayed.</td>
-</tr>
-<tr>
-<td style="text-align: left;">content_type</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Content format, default = plain.<br><strong>Enum:</strong> <code>plain</code>, <code>markdown</code></td>
-</tr>
-<tr>
-<td style="text-align: left;">presentation</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Rendering contract for this warning. 'notice' (default): platform MUST display, MAY dismiss. 'disclosure': platform MUST display in proximity to the path-referenced component, MUST NOT hide or auto-dismiss. See specification for full contract.</td>
-</tr>
-<tr>
-<td style="text-align: left;">image_url</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">URL to a required visual element (e.g., warning symbol, energy class label).</td>
-</tr>
-<tr>
-<td style="text-align: left;">url</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Reference URL for more information (e.g., regulatory site, registry entry, policy page).</td>
-</tr>
-</tbody>
-</table>
+<p>See <a href="/draft/specification/reference/#message-warning">Message Warning</a> in the <a href="/draft/specification/reference/">Schema Reference</a> for the canonical field definition.</p>
 <h4 id="message-info">Message (Info)<a class="headerlink" href="#message-info" title="Permanent link">&para;</a></h4>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Name</th>
-<th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
-<th style="text-align: left;">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;">type</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;"><strong>Constant = info</strong>. Message type discriminator.</td>
-</tr>
-<tr>
-<td style="text-align: left;">path</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">RFC 9535 JSONPath to the component the message refers to (e.g., $.line_items[0]).</td>
-</tr>
-<tr>
-<td style="text-align: left;">code</td>
-<td style="text-align: left;"><a href="/draft/specification/reference/#info-code">Info Code</a></td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Info code identifying the type of informational message. Standard codes are defined in capability specifications (see examples) and have standardized semantics; freeform codes are permitted.</td>
-</tr>
-<tr>
-<td style="text-align: left;">content_type</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
-<td style="text-align: left;">Content format, default = plain.<br><strong>Enum:</strong> <code>plain</code>, <code>markdown</code></td>
-</tr>
-<tr>
-<td style="text-align: left;">content</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
-<td style="text-align: left;">Human-readable message.</td>
-</tr>
-</tbody>
-</table>
+<p>See <a href="/draft/specification/reference/#message-info">Message Info</a> in the <a href="/draft/specification/reference/">Schema Reference</a> for the canonical field definition.</p>
 <h3 id="common-scenarios">Common Scenarios<a class="headerlink" href="#common-scenarios" title="Permanent link">&para;</a></h3>
 <h4 id="empty-search">Empty Search<a class="headerlink" href="#empty-search" title="Permanent link">&para;</a></h4>
 <p>When search finds no matches, return an empty array without messages.</p>

@@ -614,11 +614,7 @@ Platform-emitted referral and conversion-event context — campaign identifiers,
 
 ### Link
 
-| Name  | Type   | Required | Description                                                                                                                                                                                                                          |
-| ----- | ------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| type  | string | **Yes**  | Type of link. Well-known values: `privacy_policy`, `terms_of_service`, `refund_policy`, `shipping_policy`, `faq`. Consumers SHOULD handle unknown values gracefully by displaying them using the `title` field or omitting the link. |
-| url   | string | **Yes**  | The actual URL pointing to the content to be displayed.                                                                                                                                                                              |
-| title | string | No       | Optional display text for the link. When provided, use this instead of generating from type.                                                                                                                                         |
+See [Link](/draft/specification/reference/#link) in the [Schema Reference](/draft/specification/reference/) for the canonical field definition.
 
 #### Well-Known Link Types
 
@@ -636,45 +632,23 @@ Businesses **MAY** define custom types for domain-specific needs. Platforms **SH
 
 ### Message
 
-This object MUST be one of the following types: [Message Error](/draft/specification/reference/#message-error), [Message Warning](/draft/specification/reference/#message-warning), [Message Info](/draft/specification/reference/#message-info).
+See [Message](/draft/specification/reference/#message) in the [Schema Reference](/draft/specification/reference/) for the canonical field definition.
 
 ### Message Error
 
-| Name         | Type                                                     | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| ------------ | -------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| type         | string                                                   | **Yes**  | **Constant = error**. Message type discriminator.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| code         | [Error Code](/draft/specification/reference/#error-code) | **Yes**  | Error code identifying the type of error. Standard errors are defined in capability specifications (see examples) and have standardized semantics; freeform codes are permitted.                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| path         | string                                                   | No       | RFC 9535 JSONPath to the component the message refers to (e.g., $.line_items[0]).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| content_type | string                                                   | No       | Content format, default = plain. **Enum:** `plain`, `markdown`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| content      | string                                                   | **Yes**  | Human-readable message.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| severity     | string                                                   | **Yes**  | Reflects the resource state and recommended action. 'recoverable': platform can resolve by modifying inputs and retrying via API. 'requires_buyer_input': merchant requires information their API doesn't support collecting programmatically (checkout incomplete). 'requires_buyer_review': buyer must authorize before order placement due to policy, regulatory, or entitlement rules. 'unrecoverable': no valid resource exists to act on, retry with new resource or inputs. Errors with 'requires\_*' severity contribute to 'status: requires_escalation'.* *Enum:*\* `recoverable`, `requires_buyer_input`, `requires_buyer_review`, `unrecoverable` |
+See [Message Error](/draft/specification/reference/#message-error) in the [Schema Reference](/draft/specification/reference/) for the canonical field definition.
 
 #### Error Code
 
-Error code identifying the type of error. Standard errors are defined in capability specifications (see examples) and have standardized semantics; freeform codes are permitted.
+See [Error Code](/draft/specification/reference/#error-code) in the [Schema Reference](/draft/specification/reference/) for the canonical field definition.
 
 ### Message Info
 
-| Name         | Type                                                   | Required | Description                                                                                                                                                                                    |
-| ------------ | ------------------------------------------------------ | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| type         | string                                                 | **Yes**  | **Constant = info**. Message type discriminator.                                                                                                                                               |
-| path         | string                                                 | No       | RFC 9535 JSONPath to the component the message refers to (e.g., $.line_items[0]).                                                                                                              |
-| code         | [Info Code](/draft/specification/reference/#info-code) | No       | Info code identifying the type of informational message. Standard codes are defined in capability specifications (see examples) and have standardized semantics; freeform codes are permitted. |
-| content_type | string                                                 | No       | Content format, default = plain. **Enum:** `plain`, `markdown`                                                                                                                                 |
-| content      | string                                                 | **Yes**  | Human-readable message.                                                                                                                                                                        |
+See [Message Info](/draft/specification/reference/#message-info) in the [Schema Reference](/draft/specification/reference/) for the canonical field definition.
 
 ### Message Warning
 
-| Name         | Type                                                         | Required | Description                                                                                                                                                                                                                                         |
-| ------------ | ------------------------------------------------------------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| type         | string                                                       | **Yes**  | **Constant = warning**. Message type discriminator.                                                                                                                                                                                                 |
-| path         | string                                                       | No       | RFC 9535 JSONPath to the component the message refers to (e.g., $.line_items[0]).                                                                                                                                                                   |
-| code         | [Warning Code](/draft/specification/reference/#warning-code) | **Yes**  | Warning code identifying the type of warning. Standard codes are defined in capability specifications (see examples) and have standardized semantics; freeform codes are permitted.                                                                 |
-| content      | string                                                       | **Yes**  | Human-readable warning message that MUST be displayed.                                                                                                                                                                                              |
-| content_type | string                                                       | No       | Content format, default = plain. **Enum:** `plain`, `markdown`                                                                                                                                                                                      |
-| presentation | string                                                       | No       | Rendering contract for this warning. 'notice' (default): platform MUST display, MAY dismiss. 'disclosure': platform MUST display in proximity to the path-referenced component, MUST NOT hide or auto-dismiss. See specification for full contract. |
-| image_url    | string                                                       | No       | URL to a required visual element (e.g., warning symbol, energy class label).                                                                                                                                                                        |
-| url          | string                                                       | No       | Reference URL for more information (e.g., regulatory site, registry entry, policy page).                                                                                                                                                            |
+See [Message Warning](/draft/specification/reference/#message-warning) in the [Schema Reference](/draft/specification/reference/) for the canonical field definition.
 
 ### Payment
 
@@ -704,17 +678,7 @@ A payment instrument with selection state.
 
 ### Postal Address
 
-| Name             | Type   | Required | Description                                                                                                                                                                                                                               |
-| ---------------- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| extended_address | string | No       | An address extension such as an apartment number, C/O or alternative name.                                                                                                                                                                |
-| street_address   | string | No       | The street address.                                                                                                                                                                                                                       |
-| address_locality | string | No       | The locality in which the street address is, and which is in the region. For example, Mountain View.                                                                                                                                      |
-| address_region   | string | No       | The region in which the locality is, and which is in the country. Required for applicable countries (i.e. state in US, province in CA). For example, California or another appropriate first-level Administrative division.               |
-| address_country  | string | No       | The country. Recommended to be in 2-letter ISO 3166-1 alpha-2 format, for example "US". For backward compatibility, a 3-letter ISO 3166-1 alpha-3 country code such as "SGP" or a full country name such as "Singapore" can also be used. |
-| postal_code      | string | No       | The postal code. For example, 94043.                                                                                                                                                                                                      |
-| first_name       | string | No       | Optional. First name of the contact associated with the address.                                                                                                                                                                          |
-| last_name        | string | No       | Optional. Last name of the contact associated with the address.                                                                                                                                                                           |
-| phone_number     | string | No       | Optional. Phone number of the contact associated with the address.                                                                                                                                                                        |
+See [Postal Address](/draft/specification/reference/#postal-address) in the [Schema Reference](/draft/specification/reference/) for the canonical field definition.
 
 ### Response
 
@@ -873,8 +837,4 @@ UCP metadata for checkout responses.
 
 ### Error Response
 
-| Name         | Type                                                        | Required | Description                                                       |
-| ------------ | ----------------------------------------------------------- | -------- | ----------------------------------------------------------------- |
-| ucp          | any                                                         | **Yes**  | UCP protocol metadata. Status MUST be 'error' for error response. |
-| messages     | Array\[[Message](/draft/specification/reference/#message)\] | **Yes**  | Array of messages describing why the operation failed.            |
-| continue_url | string                                                      | No       | URL for buyer handoff or session recovery.                        |
+See [Error Response](/draft/specification/reference/#error-response) in the [Schema Reference](/draft/specification/reference/) for the canonical field definition.
