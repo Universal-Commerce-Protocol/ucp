@@ -6,6 +6,21 @@
   "description": "Natural-language Q&A with a business. A platform, on behalf of the buyer, asks a free-form question — about the business's products, policies, and services — and receives a text answer with optional related links. `ask` is the open-question complement to UCP's structured shopping capabilities: a question that maps to a dedicated operation is owned by that capability, while `ask` covers open questions and business-specific facts and knowledge not exposed by other capabilities. Optionally pass item IDs to ground the answer in specific products.",
   "type": "object",
   "$defs": {
+    "conversation": {
+      "type": "object",
+      "required": ["id"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Opaque, business-issued conversation identifier."
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "RFC 3339 timestamp after which the conversation context may be discarded. Optional."
+        }
+      }
+    },
     "ask_request": {
       "type": "object",
       "required": ["query"],
@@ -15,8 +30,8 @@
           "description": "Natural-language question."
         },
         "conversation": {
-          "type": "string",
-          "description": "Optional conversation GID. Provide it on a follow-up query to continue that conversation; omit to start a new one."
+          "$ref": "#/$defs/conversation",
+          "description": "Provide a conversation to continue it on a follow-up; omit to start a new one."
         },
         "ids": {
           "type": "array",
@@ -46,8 +61,8 @@
           "description": "Answer provided by the business, as free-form content in one or more formats (plain text, HTML, or Markdown)."
         },
         "conversation": {
-          "type": "string",
-          "description": "Optional, business-issued conversation GID. A business that supports multi-turn conversations MAY return one; when it does, it SHOULD retain the conversation history it represents (the retention policy is set by the business) so a follow-up `ask` operation with the same GID builds on prior conversation context. If a provided GID cannot be resolved, the business SHOULD start a new conversation and add an informational message to `messages` noting that the provided conversation GID was not found."
+          "$ref": "#/$defs/conversation",
+          "description": "Business-issued conversation for multi-turn continuation. When returned, the business SHOULD retain its history until `expires_at` (or per its own policy) so a follow-up with the same `id` builds on it. An unresolved `id` starts a new conversation and is noted in `messages`."
         },
         "links": {
           "type": "array",

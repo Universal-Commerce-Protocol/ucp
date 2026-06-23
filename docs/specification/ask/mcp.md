@@ -226,7 +226,7 @@ Turn 1, response — the business issues a `conversation` GID:
       "answer": {
         "plain": "Yes — it's insulated for sub-zero conditions and rated for harsh winter use."
       },
-      "conversation": "conv_9a3f2e7b"
+      "conversation": { "id": "conv_9a3f2e7b", "expires_at": "2026-06-22T18:30:00Z" }
     }
   }
 }
@@ -250,7 +250,7 @@ Turn 2, request — replay the GID to continue:
       },
       "ask": {
         "query": "And is it waterproof?",
-        "conversation": "conv_9a3f2e7b"
+        "conversation": { "id": "conv_9a3f2e7b" }
       }
     }
   }
@@ -277,7 +277,7 @@ Turn 2, response:
       "answer": {
         "plain": "It's water-resistant with a durable water-repellent finish — good for snow and light rain, though not fully waterproof."
       },
-      "conversation": "conv_9a3f2e7b"
+      "conversation": { "id": "conv_9a3f2e7b", "expires_at": "2026-06-22T18:30:00Z" }
     }
   }
 }
