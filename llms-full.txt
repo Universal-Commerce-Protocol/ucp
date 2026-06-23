@@ -846,56 +846,6 @@ Capability schemas carry their version inline, which enables independent version
 
 See [Versioning](http://ucp.dev/versioning/index.md) for the release branch process and the full breaking-change procedure.
 
-# Announcements
-
-Welcome to the Universal Commerce Protocol (UCP) announcements page. Here we post updates about the protocol, new releases, and governance updates.
-
-______________________________________________________________________
-
-## April 28, 2026: Stripe Joins the Governing Council
-
-Stripe has joined the UCP Governing Council as a new member, joining existing permanent members Google and Shopify. Additionally, the Governing Council structure is being updated to add two more elected open seats for future nominations.
-
-For more details, read the full announcement in the [GitHub Discussion #396](https://github.com/Universal-Commerce-Protocol/ucp/discussions/396).
-
-______________________________________________________________________
-
-## April 24, 2026: Technical Committee Expansion
-
-The Tech Council has expanded its seats to 16, welcoming five new members:
-
-- Greg Smith (Amazon)
-- James Andersen (Meta)
-- Patrick Jordan (Microsoft)
-- Prasad Wangikar (Stripe)
-- Scot DeDeo (Salesforce)
-
-Read the details in the [GitHub Discussion #379](https://github.com/Universal-Commerce-Protocol/ucp/discussions/379).
-
-______________________________________________________________________
-
-## April 8, 2026: Protocol Release v2026-04-08
-
-We have released version v2026-04-08 of the protocol.
-
-See the [v2026-04-08 Release Notes](https://github.com/Universal-Commerce-Protocol/ucp/releases/tag/v2026-04-08) for details on the changes.
-
-______________________________________________________________________
-
-## January 23, 2026: Protocol Release v2026-01-23
-
-We have released version v2026-01-23 of the protocol.
-
-See the [v2026-01-23 Release Notes](https://github.com/Universal-Commerce-Protocol/ucp/releases/tag/v2026-01-23) for details on the changes.
-
-______________________________________________________________________
-
-## January 11, 2026: Protocol Release v2026-01-11
-
-We have released version v2026-01-11 of the protocol.
-
-See the [v2026-01-11 Release Notes](https://github.com/Universal-Commerce-Protocol/ucp/releases/tag/v2026-01-11) for details on the changes.
-
 # UCP and AP2
 
 UCP is fully compatible with [Agent Payments Protocol (AP2)](https://ap2-protocol.org/). AP2 serves as the trust layer for agent-led transactions completed on behalf of a user, mandating a secure, verifiable exchange of intents and authorizations between Platforms and businesses. By using Verifiable Digital Credentials (VDCs), AP2 eliminates the need for middleman "trust referees." It allows businesses to receive signed checkout commitments—ensuring the price and terms don't change mid-flow—and allows Platforms to provide cryptographically signed payment authorizations that are mathematically tied to the specific state of the cart.
@@ -1582,3 +1532,53 @@ New development occurs on the `main` branch. We will maintain long-lived branche
 
 - Breaking changes should include `!` in the PR title
 - Timing: We will announce the breaking change in Discussions 2 weeks before the change is merged.
+
+# Announcements
+
+Welcome to the Universal Commerce Protocol (UCP) announcements page. Here we post updates about the protocol, new releases, and governance updates.
+
+______________________________________________________________________
+
+## April 28, 2026: Stripe Joins the Governing Council
+
+Stripe has joined the UCP Governing Council as a new member, joining existing permanent members Google and Shopify. Additionally, the Governing Council structure is being updated to add two more elected open seats for future nominations.
+
+For more details, read the full announcement in the [GitHub Discussion #396](https://github.com/Universal-Commerce-Protocol/ucp/discussions/396).
+
+______________________________________________________________________
+
+## April 24, 2026: Technical Committee Expansion
+
+The Tech Council has expanded its seats to 16, welcoming five new members:
+
+- Greg Smith (Amazon)
+- James Andersen (Meta)
+- Patrick Jordan (Microsoft)
+- Prasad Wangikar (Stripe)
+- Scot DeDeo (Salesforce)
+
+Read the details in the [GitHub Discussion #379](https://github.com/Universal-Commerce-Protocol/ucp/discussions/379).
+
+______________________________________________________________________
+
+## April 8, 2026: Protocol Release v2026-04-08
+
+We have released version v2026-04-08 of the protocol.
+
+See the [v2026-04-08 Release Notes](https://github.com/Universal-Commerce-Protocol/ucp/releases/tag/v2026-04-08) for details on the changes.
+
+______________________________________________________________________
+
+## January 23, 2026: Protocol Release v2026-01-23
+
+We have released version v2026-01-23 of the protocol.
+
+See the [v2026-01-23 Release Notes](https://github.com/Universal-Commerce-Protocol/ucp/releases/tag/v2026-01-23) for details on the changes.
+
+______________________________________________________________________
+
+## January 11, 2026: Protocol Release v2026-01-11
+
+We have released version v2026-01-11 of the protocol.
+
+See the [v2026-01-11 Release Notes](https://github.com/Universal-Commerce-Protocol/ucp/releases/tag/v2026-01-11) for details on the changes.
