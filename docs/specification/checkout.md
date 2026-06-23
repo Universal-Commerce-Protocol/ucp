@@ -271,18 +271,21 @@ When `path` is omitted, the message applies to the response as a whole.
 
 **Simple field reference:**
 
+<!-- ucp:example skip reason="path schema example" -->
 ```json
 { "path": "$.buyer.email" }
 ```
 
 **Indexed array element:**
 
+<!-- ucp:example skip reason="path schema example" -->
 ```json
 { "path": "$.line_items[0].quantity" }
 ```
 
 **Filter expression (optional, when referencing a specific item by ID):**
 
+<!-- ucp:example skip reason="path schema example" -->
 ```json
 { "path": "$.line_items[?(@.id=='line-item-uuid')].quantity" }
 ```
