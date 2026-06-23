@@ -149,15 +149,29 @@ identifiers, and source/medium markers communicated by the platform. See
 
 ## Links
 
-`links` is an optional array of [`link.json`](../reference.md) entries pointing
-to public resources related to the answer — for example, the policy page it
-summarizes, an FAQ that elaborates, or product documentation the platform can
-direct the buyer to. Well-known `type` values include `refund_policy`,
-`shipping_policy`, `privacy_policy`, `terms_of_service`, and `faq`. Businesses
-**MAY** also supply other `type` values and a `title`.
+`links` are an array of addressable references to the resources the answer
+names. The array is optional in the schema, but a business **SHOULD** return a
+link for each resource the answer references, so the platform can act on the
+response provided to the buyer.
 
-Businesses **SHOULD** include `links` to relevant public resources where such
-resources exist.
+A link carries:
+
+* `title` — display text that **SHOULD** capture the resource the link points to
+  as it appears in the `answer` (the product, policy, or page the buyer just
+  heard about), so the platform can tie the link back to the text it rendered.
+* `url` — the page the platform can direct the buyer to. Required on every link.
+* `id` — when the link points to an addressable UCP resource (a product or
+  variant the answer recommends, say), the business **SHOULD** include the
+  resource's `id` (a GID) alongside the `url`. The `url` is for display; the `id`
+  lets the platform act on the resource through the capability that owns it —
+  resolve it in `catalog`, add it to a `cart` — without re-deriving it from the
+  answer text. Omit `id` for resources without a UCP identifier, such as a
+  policy page.
+
+Each link also carries a `type` classifier. Well-known values are
+`refund_policy`, `shipping_policy`, `privacy_policy`, `terms_of_service`, and
+`faq`; a business **MAY** supply other `type` values (a product, a size guide, a
+store-locator page).
 
 {{ schema_fields('types/link', 'ask') }}
 
