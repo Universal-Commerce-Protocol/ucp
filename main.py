@@ -664,9 +664,12 @@ def define_env(env):
     required_list = schema_data.get("required", [])
 
     if parent_required_list:
-      # Used for embedded schemas, we will only enforce the uppermost level
-      # required list.
-      required_list = parent_required_list
+      # Preserve required fields from both the embedded child schema and the
+      # parent wrapper that referenced it.
+      required_list = list(required_list)
+      for req in parent_required_list:
+        if req not in required_list:
+          required_list.append(req)
 
     if (
       not properties
@@ -900,6 +903,78 @@ def define_env(env):
       f" directory{get_error_context()}."
     )
 
+  def _resolves_to_shared_type(ref_path):
+    """Return path if ref_path identifies a `common/types/` primitive.
+
+    Scope is intentionally narrow: only schemas under
+    `source/schemas/common/types/` get redirected to `reference.md`.
+    These are cross-vertical primitives -- types reused as
+    interchangeable building blocks across capabilities -- where an
+    integrator reading a capability page does not need their fields
+    enumerated inline, and a link to the canonical entry preserves
+    enough context.
+
+    Vertical-namespaced types under `<vertical>/types/` intentionally
+    retain inline rendering on capability pages. They carry
+    vertical-specific semantics that integrators expect to read in
+    situ, including operation-filtered variants (per-operation
+    request shapes and the response shape) that `reference.md` cannot
+    express because it renders a single canonical heading per schema
+    file. The resulting render duplication across capability pages is
+    acceptable because every render is generated from the same JSON
+    source, so drift between them is structurally impossible.
+
+    Cross-references emitted inside any rendered table continue to
+    route to `reference.md` via `create_link` (the redirect rule
+    introduced in #226 is unchanged), so anchor consistency holds
+    end-to-end regardless of which pages render a given type inline.
+
+    This lookup assumes that filenames at `common/` root remain
+    disjoint from `common/types/`. If a future schema introduces a
+    basename collision, the rule here will need explicit
+    disambiguation.
+    """
+    name = ref_path.split("/")[-1]
+    candidate = COMMON_TYPES_DIR / (name + ".json")
+    return candidate if candidate.exists() else None
+
+  def _render_shared_type_link(canonical_name, spec_file_name):
+    """Emit a Markdown link to the `reference.md` entry for a shared type.
+
+    Used in place of inline-rendering a `common/types/` table on a
+    capability page (#412). `create_link` already routes `types/...`
+    anchors to `reference.md`, so we reuse it to keep the anchor scheme
+    consistent with cross-references emitted from inside other tables.
+
+    `canonical_name` must be the suffix-stripped base name (with or
+    without a leading `types/`), never the raw macro argument.
+    `reference.md` emits exactly one anchor per schema file -- one
+    heading per file, one anchor per heading -- and does not emit
+    per-variant anchors. A raw argument still carrying an operation suffix would
+    cause `create_link` to bake the variant into the anchor and target
+    a heading that does not exist on `reference.md`.
+    """
+    # Normalize canonical_name into a ref-style path so create_link's
+    # anchor logic matches the heading produced by
+    # auto_generate_schema_reference on reference.md.
+    ref = (
+      canonical_name
+      if canonical_name.startswith("types/")
+      else f"types/{canonical_name}"
+    )
+    if not ref.endswith(".json"):
+      ref = ref + ".json"
+    link = create_link(ref, spec_file_name)
+    # The trailing reference must use the `site:` absolute scheme
+    # (handled by the site-urls plugin), not a relative `reference.md`
+    # link. A relative link resolves from the source file's directory,
+    # so callers from any subdirectory page would otherwise target a
+    # non-existent `<subdir>/reference.md`.
+    return (
+      f"See {link} in the [Schema Reference](site:specification/reference/) "
+      f"for the canonical field definition."
+    )
+
   # --- MACRO 1: For Standalone JSON Schemas ---
   @env.macro
   def schema_fields(entity_name, spec_file_name):
@@ -911,6 +986,12 @@ def define_env(env):
     - 'cart_resp' -> resolves cart.json as response schema
     - 'cart_create_req' -> resolves cart.json as request schema (op=create)
     - 'buyer' -> resolves buyer.json as response schema (default)
+
+    For schemas under `common/types/` (cross-vertical primitives),
+    callers from pages other than `reference.md` receive a Markdown
+    link to the canonical entry on `reference.md` instead of an
+    inline table. See `_resolves_to_shared_type` for the scope
+    rationale and #412 for the motivating discussion.
 
     Args:
     ----
@@ -940,6 +1021,18 @@ def define_env(env):
       else:
         base_name = entity_name[:-4]
         direction = "request"
+
+    # Redirect capability-page callers to reference.md for primitives
+    # under `common/types/` only. Vertical-namespaced types continue to
+    # render inline; see _resolves_to_shared_type for the scope
+    # rationale. reference.md itself always renders full tables via
+    # auto_generate_schema_reference. base_name is passed (suffix
+    # stripped) so the link anchor targets the canonical heading.
+    if (
+      spec_file_name != "reference"
+      and _resolves_to_shared_type(base_name) is not None
+    ):
+      return _render_shared_type_link(base_name, spec_file_name)
 
     # Build context for downstream link generation
     context = {"io_type": direction, "operation_id": operation}
@@ -974,6 +1067,12 @@ def define_env(env):
 
     Usage: {{ extension_schema_fields('fulfillment_option') }}
 
+    When the embedded schema lives under `common/types/`, the macro
+    emits a link to the canonical entry on `reference.md` instead of
+    rendering the table inline. Vertical-namespaced extensions render
+    inline as before. See `_resolves_to_shared_type` for scope and
+    #412 for motivation.
+
     Args:
     ----
       entity_name: The name of the schema entity embedded in the extension
@@ -982,6 +1081,17 @@ def define_env(env):
         should be rendered (e.g., "checkout", "fulfillment").
 
     """
+    # entity_name has the form `<file>.json#/$defs/<def>`. Redirect to
+    # reference.md only when `<file>.json` resolves to a
+    # `common/types/` schema; vertical-namespaced extensions keep
+    # their inline render so same-page `$defs` anchors continue to
+    # resolve. file_part preserves any `types/` prefix from the
+    # caller so the lookup is unambiguous against the basename
+    # namespace.
+    if spec_file_name != "reference" and ".json#" in entity_name:
+      file_part = entity_name.split(".json#", 1)[0]
+      if _resolves_to_shared_type(file_part) is not None:
+        return create_link(entity_name, spec_file_name)
     return _read_schema_from_defs(entity_name, spec_file_name)
 
   @env.macro

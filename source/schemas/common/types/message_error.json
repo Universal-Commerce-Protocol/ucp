@@ -20,7 +20,7 @@
     },
     "path": {
       "type": "string",
-      "description": "RFC 9535 JSONPath to the component the message refers to (e.g., $.items[1])."
+      "description": "RFC 9535 JSONPath to the component the message refers to (e.g., $.line_items[0])."
     },
     "content_type": {
       "type": "string",

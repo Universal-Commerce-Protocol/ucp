@@ -437,6 +437,11 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
           "spec": "https://ucp.dev/{{ ucp_version }}/specification/identity-linking",
           "schema": "https://ucp.dev/{{ ucp_version }}/schemas/common/identity_linking.json",
           "config": {
+            "providers": {
+              "com.example.idp": [
+                { "type": "oauth2", "auth_url": "https://accounts.example.com/" }
+              ]
+            },
             "scopes": {
               "dev.ucp.shopping.order:read":   {},
               "dev.ucp.shopping.order:manage": {}
@@ -1241,6 +1246,13 @@ and cart context, then returns the resolved result. Platforms **MUST** treat the
 `available_instruments` in the response as authoritative for that checkout. See
 the [Payment Handler Guide](payment-handler-guide.md#resolving-available_instruments)
 for the full resolution semantics.
+
+**Instrument Cardinality:** A checkout submission **MUST** contain exactly one
+payment instrument unless the `dev.ucp.shopping.split_payments` capability is
+active. Businesses **MUST** reject submissions that violate this constraint with
+a `payment_failed` error in `messages[]`. See
+[Split Payments](split-payments.md) for the extension that relaxes this
+constraint.
 
 ### Implementation Scenarios
 
