@@ -30,10 +30,8 @@ dedicated operation is owned by that capability; `ask` covers open questions and
 business-specific facts and knowledge that may not be directly available through
 the structured resources exposed by other capabilities.
 
-`ask` draws on public store information and on resources the caller can address
+`ask` draws on public business information and on resources the caller can address
 by a GID it holds — products and variants, and optionally a cart or checkout.
-Questions that require a buyer's private account data, such as order history,
-are out of scope for this version.
 
 Typical use cases:
 
@@ -66,26 +64,50 @@ to the storefront broadly ("what is your return policy?").
 `ids` is **optional**. A business **SHOULD** accept the identifiers that ground a
 question, with product and variant IDs as the recommended minimum; it **MAY**
 also accept secondary identifiers (SKU, handle, URL) and other resources it holds
-a GID for, such as a cart or checkout. For resources like a cart or checkout, a
-business **MAY** accept the held GID as a bearer reference — possessing it is
-sufficient to ask about that resource, with no separate authentication. Access is
-otherwise the business's to govern: it **MAY** require authentication to reach a
-given resource (a gated catalog, for example).
+a GID for, such as a cart or checkout. How a business authorizes access to those
+resources is described under [Access](#access).
+
+**Future direction.** A later version may add an `attachments` array — for
+example, an image — for multimodal grounding, such as asking about a product
+from a photo.
+
+## Access
+
+What a business may reveal through `ask` depends on the credential the caller
+presents:
+
+* **Public** — with no credential, `ask` answers from public business information
+  and public catalog items (product and variant IDs).
+* **Resource reference** — a GID the caller holds for a specific resource, such
+  as a cart or checkout, is itself a bearer reference: where a business honors
+  it, possessing the GID is sufficient to ask about that resource, with no
+  separate authentication.
+* **Business posture** — a business **MAY** require a stronger credential than a
+  bare GID to reach a given resource (a gated catalog, for example). The required
+  posture is the business's to set.
+* **Authenticated user** — when the caller presents a bearer token the business
+  recognizes for user authentication (see [Scopes](#scopes) and
+  [Identity Linking](../identity-linking.md)), the business **MAY** return
+  personalized results — member pricing, entitlements, or gated availability.
+  This tier is the `dev.ucp.shopping.ask:read` scope.
 
 ## Conversation
 
 A business **MAY** support multi-turn conversations by returning a `conversation`
-GID in its response. When a platform replays that GID on a follow-up `ask`, the
-business continues that conversation, and follow-up questions build on the prior
-turns. Omitting `conversation` starts a new one. The `conversation` GID is
-opaque: platforms **MUST NOT** parse or construct it, and **MUST** replay only a
-value the business returned.
+in its response — an object with an opaque `id` and an optional `expires_at`.
+When a platform replays that `conversation` on a follow-up `ask`, the business
+continues it, and follow-up questions build on the prior turns. Omitting
+`conversation` starts a new one. The `id` is opaque: platforms **MUST NOT** parse
+or construct it, and **MUST** replay only a value the business returned.
 
-A business that returns a `conversation` GID **SHOULD** retain the conversation
-history it represents so a follow-up `ask` with the same GID builds on it; the
-retention policy is set by the business. If a provided GID cannot be resolved,
-the business **SHOULD** start a new conversation and add an informational
-message to `messages` noting that the provided `conversation` GID was not found.
+A business that returns a `conversation` **SHOULD** retain the history it
+represents until `expires_at` — or per its own policy when `expires_at` is
+omitted — so a follow-up with the same `id` builds on it. If a provided `id`
+cannot be resolved, the business **SHOULD** start a new conversation and add an
+informational message to `messages` noting that the provided `conversation` was
+not found.
+
+{{ extension_schema_fields('ask.json#/$defs/conversation', 'ask') }}
 
 ## Answer
 
