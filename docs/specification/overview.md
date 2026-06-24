@@ -1270,13 +1270,11 @@ status code (see [Error Handling](#error-handling)).
 
 A UCP profile carrying a top-level `keys[]` array is a valid RFC 7517
 JWK Set, which a signer can optionally reuse as its Web Bot Auth key
-source. The `Signature-Agent` header's `type` parameter
-([draft-meunier-http-message-signatures-directory](https://datatracker.ietf.org/doc/draft-meunier-http-message-signatures-directory/))
-selects how a verifier resolves the advertised keys. (The `type`
-parameter and its `jwks_uri`/`cimd`/`directory` values were added via
-[directory-draft PR #98](https://github.com/thibmeu/http-message-signatures-directory/pull/98);
-they are in the editor's copy, pending publication as -06.) Each
-variant can stand alone or point back at the UCP profile:
+source. The `Signature-Agent` header's `type` parameter selects
+how a verifier resolves the advertised keys. The parameter and
+its `jwks_uri`/`cimd`/`directory` values are defined in §4.1 of
+[draft-meunier-http-message-signatures-directory](https://datatracker.ietf.org/doc/html/draft-meunier-http-message-signatures-directory).
+Each variant can stand alone or point back at the UCP profile:
 
 - **`type=jwks_uri`** — the member value is a JWK Set URL, fetched
   directly. Point it at the UCP profile URL and the profile's `keys[]`
@@ -1337,7 +1335,9 @@ below processes a single signature.
       algorithm — whichever the signer used, per
       [Signature Algorithms](signatures.md#signature-algorithms) — and
       RFC 9421 §2.1.2 Dictionary-member component selection to cover
-      `signature-agent;key="<label>"`.) Signatures with tags other than `web-bot-auth` are skipped unless UCP defines or explicitly accepts that tag.
+      `signature-agent;key="<label>"`.) Signatures with tags
+      other than `web-bot-auth` are skipped unless UCP defines
+      or explicitly accepts that tag.
     - **`Signature-Agent` — Web Bot Auth key lookup, OPTIONAL
       (WBA-aware verifiers).** For a signature carrying
       `tag="web-bot-auth"`, a WBA-aware verifier **MAY** instead resolve
