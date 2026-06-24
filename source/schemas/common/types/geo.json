@@ -20,7 +20,7 @@
     },
     "geofence_radius": {
       "type": "number",
-      "description": "Geofence radius in meters. Used for proximity detection."
+      "description": "Geofence radius in RFC 7035 distance unit (meters). Used for proximity detection."
     }
   }
 }

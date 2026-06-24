@@ -169,3 +169,6 @@ Kogan
 Petbarn
 VTEX
 geofence
+geofencing
+wifi
+optionalities
