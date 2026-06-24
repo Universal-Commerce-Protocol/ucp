@@ -206,7 +206,7 @@ communicate this via the `messages[]` array:
       "type": "error",
       "severity": "recoverable",
       "code": "additional_field_invalid_value",
-      "path": "$.additional_fields[?@.key=='po_number']",
+      "path": "$.additional_fields[0].value",
       "content": "Purchase Order Number is required"
     }
   ]
@@ -470,7 +470,7 @@ When an additional field cannot be accepted, the field still appears in
           "type": "error",
           "severity": "recoverable",
           "code": "additional_field_invalid_value",
-          "path": "$.additional_fields[?@.key=='po_number']",
+          "path": "$.additional_fields[0].value",
           "content": "Purchase Order Number is required"
         }
       ]
