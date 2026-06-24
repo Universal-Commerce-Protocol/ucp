@@ -100,8 +100,8 @@ jobs:
 
       - name: Build and Verify Documentation Site (Main/PR)
         run: |
-          bash scripts/build_local.sh --draft-only
-          uv run python scripts/check_links.py local_preview
+          uv run mkdocs build --strict
+          uv run python scripts/check_links.py site --check-external
 
   build_and_verify_release:
     needs: lint
@@ -131,7 +131,7 @@ jobs:
         run: |
           export DOCS_MODE=spec
           uv run mkdocs build --strict
-          uv run python scripts/check_links.py site
+          uv run python scripts/check_links.py site --check-external
 
   deploy_main:
     needs: build_and_verify_main
