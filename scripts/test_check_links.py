@@ -75,6 +75,13 @@ class TestLinkParser(unittest.TestCase):
     self.assertIn("https://ucp.dev/a", parser.links)
     self.assertIn("https://ucp.dev/b", parser.links)
 
+  def test_bare_url_in_anchor_text(self):
+    """Test extraction of bare URLs from within an anchor tag's text."""
+    parser = LinkParser()
+    parser.feed('<a href="/some-link">See this spec: https://ucp.dev/spec</a>')
+    self.assertIn("/some-link", parser.links)
+    self.assertIn("https://ucp.dev/spec", parser.links)
+
 
 if __name__ == "__main__":
   unittest.main()

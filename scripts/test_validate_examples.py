@@ -55,7 +55,8 @@ def _report() -> int:
   for name, ok, detail in _RESULTS:
     status = "PASS" if ok else "FAIL"
     suffix = f" \u2014 {detail}" if detail and not ok else ""
-    print(f"  {status}  {name}{suffix}")
+    # cspell:disable-next-line
+    print(f"  {status}  {name}{suffix}")  # noqa: T201
   print(f"\n{passed} passed, {len(failed)} failed")
   return 0 if not failed else 1
 
@@ -382,17 +383,17 @@ def test_process_block_integration() -> None:
     )
     return
 
-  # Trailing comma is now rejected (was tolerated before). Assert on the
-  # validator's "invalid JSON:" prefix; Python's JSONDecodeError text isn't
-  # stable across versions.
+  # Trailing comma is now natively removed and accepted.
   md = (
-    "<!-- ucp:example schema=shopping/checkout op=read -->\n"
-    '```json\n{ "a": 1, }\n```\n'
+    "<!-- ucp:example schema=profile def=business_schema "
+    "extract=$.ucp.payment_handlers target=$.ucp.payment_handlers -->\n"
+    '```json\n{ "ucp": { "payment_handlers": { "com.example.handler": '
+    '[{ "id": "h1", "version": "{{ ucp_version }}", }] } } }\n```\n'
   )
   result = _process(md)
   _check(
-    "process_trailing_comma_rejected",
-    result.status == "fail" and result.message.startswith("invalid JSON:"),
+    "process_trailing_comma_accepted",
+    result.status == "ok",
     f"got {result.status}: {result.message}",
   )
 
@@ -499,6 +500,18 @@ def test_process_block_integration() -> None:
   result = _process(md)
   _check(
     "process_empty_body_ok",
+    result.status == "ok",
+    f"got {result.status}: {result.message}",
+  )
+
+  # Trailing comma is now natively removed and accepted.
+  md = (
+    "<!-- ucp:example schema=shopping/cart op=create direction=request -->\n"
+    '```json\n{ "line_items": [], }\n```\n'
+  )
+  result = _process(md)
+  _check(
+    "process_trailing_comma_in_object_accepted",
     result.status == "ok",
     f"got {result.status}: {result.message}",
   )

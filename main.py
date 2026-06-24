@@ -186,12 +186,19 @@ def _resolve_schema(
   if bundle:
     cmd.append("--bundle")
 
-  result = subprocess.run(
-    cmd,
-    capture_output=True,
-    text=True,
-    check=False,
-  )
+  try:
+    result = subprocess.run(
+      cmd,
+      capture_output=True,
+      text=True,
+      check=False,
+    )
+  except FileNotFoundError:
+    raise RuntimeError(
+      "ucp-schema not found. Please install it using "
+      "`cargo install ucp-schema`."
+    ) from None
+
   if result.returncode == 0:
     data = json.loads(result.stdout)
     _resolved_schema_cache[cache_key] = data

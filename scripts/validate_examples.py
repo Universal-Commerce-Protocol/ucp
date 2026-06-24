@@ -109,6 +109,7 @@ Exit codes: 0 if all pass or skip; 1 if any block fails or errors.
 """
 
 import argparse
+import concurrent.futures
 import json
 import re
 import subprocess
@@ -357,10 +358,34 @@ def lower_ellipsis_to_sentinels(content: str) -> str:
   return content
 
 
+def remove_trailing_commas(content: str) -> str:
+  """Stage 5. Remove trailing commas from arrays and objects."""
+  result = []
+  in_string = False
+  i = 0
+  while i < len(content):
+    ch = content[i]
+    if ch == '"' and (i == 0 or content[i - 1] != "\\"):
+      in_string = not in_string
+      result.append(ch)
+    elif ch == "," and not in_string:
+      j = i + 1
+      while j < len(content) and content[j].isspace():
+        j += 1
+      if j < len(content) and content[j] in "]}":
+        pass  # skip comma
+      else:
+        result.append(ch)
+    else:
+      result.append(ch)
+    i += 1
+  return "".join(result)
+
+
 def reduce_to_canonical_json(raw: str) -> str:
   """Layer 1 → Layer 2. Pure text transformation, no JSON parse.
 
-  Applies the four authoring conveniences in order. Output is
+  Applies the authoring conveniences in order. Output is
   parsable by json.loads. String-sentinel "..." survives into
   Layer 3 and is interpreted there as an elision marker.
   """
@@ -368,6 +393,7 @@ def reduce_to_canonical_json(raw: str) -> str:
   raw = expand_templates(raw)
   raw = strip_line_comments(raw)
   raw = lower_ellipsis_to_sentinels(raw)
+  raw = remove_trailing_commas(raw)
   return raw
 
 
@@ -1104,6 +1130,12 @@ def main() -> int:
     action="store_true",
     help="Just list blocks without validating",
   )
+  parser.add_argument(
+    "--format",
+    choices=["text", "json"],
+    default="text",
+    help="Output format (default: text)",
+  )
   args = parser.parse_args()
 
   # Resolve paths relative to script location
@@ -1145,9 +1177,13 @@ def main() -> int:
 
   # Validate
   results: list[Result] = []
-  for block in all_blocks:
-    result = process_block(block, schema_base, scaffolds_dir)
-    results.append(result)
+  with concurrent.futures.ThreadPoolExecutor() as executor:
+    future_to_block = {
+      executor.submit(process_block, block, schema_base, scaffolds_dir): block
+      for block in all_blocks
+    }
+    for future in concurrent.futures.as_completed(future_to_block):
+      results.append(future.result())
 
   # Report
   passed = sum(1 for r in results if r.status == "ok")
@@ -1155,13 +1191,30 @@ def main() -> int:
   errors = sum(1 for r in results if r.status == "error")
   skipped = sum(1 for r in results if r.status == "skip")
 
+  if args.format == "json":
+    json_output = []
+    for r in results:
+      if r.status in ("fail", "error"):
+        json_output.append(
+          {
+            "file": r.file,
+            "line": r.line,
+            "status": r.status,
+            "message": r.message,
+          }
+        )
+    print(json.dumps(json_output, indent=2))
+    return 0 if (failed == 0 and errors == 0) else 1
+
   # Print failures and errors first
   for r in results:
     if r.status in ("fail", "error"):
-      print(r)
+      # cspell:disable-next-line
+      print(r)  # noqa: T201
   for r in results:
     if r.status == "skip":
-      print(r)
+      # cspell:disable-next-line
+      print(r)  # noqa: T201
 
   print(
     f"\n{passed} passed, {failed} failed, {errors} errors, {skipped} skipped"
