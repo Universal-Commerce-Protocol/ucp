@@ -1337,9 +1337,7 @@ below processes a single signature.
       algorithm — whichever the signer used, per
       [Signature Algorithms](signatures.md#signature-algorithms) — and
       RFC 9421 §2.1.2 Dictionary-member component selection to cover
-      `signature-agent;key="<label>"`.) Signatures whose `tag` denotes
-      another application's purpose are skipped (see below) — UCP does
-      not claim signatures scoped to other applications.
+      `signature-agent;key="<label>"`.) Signatures with tags other than `web-bot-auth` are skipped unless UCP defines or explicitly accepts that tag.
     - **`Signature-Agent` — Web Bot Auth key lookup, OPTIONAL
       (WBA-aware verifiers).** For a signature carrying
       `tag="web-bot-auth"`, a WBA-aware verifier **MAY** instead resolve
