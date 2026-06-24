@@ -39,10 +39,10 @@
           "description": "Filter criteria to narrow returned products and variants. All specified filters combine with AND logic."
         },
         "context": {
-          "$ref": "types/context.json"
+          "$ref": "../common/types/context.json"
         },
         "signals": {
-          "$ref": "types/signals.json"
+          "$ref": "../common/types/signals.json"
         },
         "attribution": {
           "$ref": "types/attribution.json"
@@ -112,10 +112,10 @@
           "description": "Filter criteria to narrow returned variants. All specified filters combine with AND logic."
         },
         "context": {
-          "$ref": "types/context.json"
+          "$ref": "../common/types/context.json"
         },
         "signals": {
-          "$ref": "types/signals.json"
+          "$ref": "../common/types/signals.json"
         },
         "attribution": {
           "$ref": "types/attribution.json"

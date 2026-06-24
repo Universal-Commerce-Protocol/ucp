@@ -74,6 +74,13 @@ nav:
               - REST: specification/order-rest.md
               - MCP: specification/order-mcp.md
       - Identity Linking Capability: specification/identity-linking.md
+      - Location Capability:
+          - Overview: specification/location/index.md
+          - Search: specification/location/search.md
+          - Lookup: specification/location/lookup.md
+          - Transports:
+              - REST: specification/location/rest.md
+              - MCP: specification/location/mcp.md
       - Payment Handlers:
           - Guide: specification/payment-handler-guide.md
           - Template: specification/payment-handler-template.md
@@ -368,6 +375,24 @@ plugins:
               endpoints with JSON payload examples.
           - specification/catalog/mcp.md: >-
               Model Context Protocol (MCP) transport binding for the Catalog
+              Capability, mapping discovery operations to JSON-RPC tools with
+              metadata validation rules.
+        Location Capability:
+          - specification/location/index.md: >-
+              Core Location Capability, detailing high-level product discovery
+              models, variant structures, merchant attribution, and real-time
+              pricing context.
+          - specification/location/search.md: >-
+              Product discovery via the Search Location capability, specifying
+              text queries and filters such as operating hours and offerings.
+          - specification/location/lookup.md: >-
+              Direct location retrieval via the Lookup Location capability,
+              specifying identifiers and additional filter option.
+          - specification/location/rest.md: >-
+              HTTP REST transport binding for the Location Capability,
+              detailing search and lookup endpoints with JSON payload examples.
+          - specification/location/mcp.md: >-
+              Model Context Protocol (MCP) transport binding for the Location
               Capability, mapping discovery operations to JSON-RPC tools with
               metadata validation rules.
         Other Capabilities:
