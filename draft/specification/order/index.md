@@ -137,7 +137,7 @@ Expectations are buyer-facing groupings representing when/how items will be deli
 | -------------- | ---------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------- |
 | id             | string                                                           | **Yes**  | Expectation identifier.                                                                                     |
 | line_items     | Array[object]                                                    | **Yes**  | Which line items and quantities are in this expectation.                                                    |
-| method_type    | string                                                           | **Yes**  | Delivery method type (shipping, pickup, digital). **Enum:** `shipping`, `pickup`, `digital`                 |
+| method_type    | string                                                           | **Yes**  | Delivery method type. Well-known values: `shipping`, `pickup`, `digital`; additional values MAY be used.    |
 | destination    | [Postal Address](/draft/specification/reference/#postal-address) | **Yes**  | Delivery destination address.                                                                               |
 | description    | string                                                           | No       | Human-readable delivery description (e.g., 'Arrives in 5-8 business days').                                 |
 | fulfillable_on | string                                                           | No       | When this expectation can be fulfilled: 'now' or ISO 8601 timestamp for future date (backorder, pre-order). |

@@ -136,6 +136,16 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
+### Locality
+
+| Name            | Type   | Required | Description                                                                                                                    |
+| --------------- | ------ | -------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| address_country | string | No       | The country, as a 2-letter ISO 3166-1 alpha-2 code (e.g. "US"). A 3-letter alpha-3 code or full country name MAY also be used. |
+| address_region  | string | No       | The first-level administrative region within the country (e.g. a state or province such as California).                        |
+| postal_code     | string | No       | The postal code (e.g. "94043").                                                                                                |
+
+______________________________________________________________________
+
 ### Media
 
 | Name     | Type    | Required | Description                                                  |
@@ -273,6 +283,15 @@ Platform-emitted referral and conversion-event context — campaign identifiers,
 
 ______________________________________________________________________
 
+### Availability
+
+| Name      | Type    | Required | Description                                                                                                                         |
+| --------- | ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| available | boolean | No       | Whether this can be obtained. See status for fulfillment details.                                                                   |
+| status    | string  | No       | Qualifies available with fulfillment state. Well-known values: `in_stock`, `backorder`, `preorder`, `out_of_stock`, `discontinued`. |
+
+______________________________________________________________________
+
 ### Available Payment Instrument
 
 | Name        | Type   | Required | Description                                                                                                  |
@@ -293,10 +312,10 @@ ______________________________________________________________________
 
 ### Business Fulfillment Config
 
-| Name                       | Type         | Required | Description                                    |
-| -------------------------- | ------------ | -------- | ---------------------------------------------- |
-| allows_multi_destination   | object       | No       | Permits multiple destinations per method type. |
-| allows_method_combinations | Array[array] | No       | Allowed method type combinations.              |
+| Name                | Type          | Required | Description                                                                                                                                                                                                 |
+| ------------------- | ------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| multi_destination   | Array[object] | No       | Method types that permit multiple destinations within one cart (e.g. split shipping across addresses). Listing a method permits it; an omitted method does not. Open — businesses MAY list any method type. |
+| method_combinations | Array[array]  | No       | Method-type combinations the business permits within one cart. Each inner array is a permitted set of method `type` values (e.g. shipping + pickup).                                                        |
 
 ______________________________________________________________________
 
@@ -364,9 +383,9 @@ ______________________________________________________________________
 
 | Name            | Type                                                                                | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | --------------- | ----------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| address_country | string                                                                              | No       | The country. Recommended to be in 2-letter ISO 3166-1 alpha-2 format, for example "US". For backward compatibility, a 3-letter ISO 3166-1 alpha-3 country code such as "SGP" or a full country name such as "Singapore" can also be used. Optional hint for market context (currency, availability, pricing)—higher-resolution data (e.g., shipping address) supersedes this value.                                                                                |
-| address_region  | string                                                                              | No       | The region in which the locality is, and which is in the country. For example, California or another appropriate first-level Administrative division. Optional hint for progressive localization—higher-resolution data (e.g., shipping address) supersedes this value.                                                                                                                                                                                            |
-| postal_code     | string                                                                              | No       | The postal code. For example, 94043. Optional hint for regional refinement—higher-resolution data (e.g., shipping address) supersedes this value.                                                                                                                                                                                                                                                                                                                  |
+| address_country | string                                                                              | No       | The country, as a 2-letter ISO 3166-1 alpha-2 code (e.g. "US"). A 3-letter alpha-3 code or full country name MAY also be used.                                                                                                                                                                                                                                                                                                                                     |
+| address_region  | string                                                                              | No       | The first-level administrative region within the country (e.g. a state or province such as California).                                                                                                                                                                                                                                                                                                                                                            |
+| postal_code     | string                                                                              | No       | The postal code (e.g. "94043").                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | intent          | string                                                                              | No       | Background context describing buyer's intent (e.g., 'looking for a gift under $50', 'need something durable for outdoor use'). Informs relevance, recommendations, and personalization.                                                                                                                                                                                                                                                                            |
 | language        | string                                                                              | No       | Preferred language for content. Use IETF BCP 47 language tags (e.g., 'en', 'fr-CA', 'zh-Hans'). For REST, equivalent to Accept-Language header—platforms SHOULD fall back to Accept-Language when this field is absent; when provided, overrides Accept-Language. Businesses MAY return content in a different language if unavailable.                                                                                                                            |
 | currency        | string                                                                              | No       | Preferred currency (ISO 4217, e.g., 'EUR', 'USD'). Businesses determine presentment currency from context and authoritative signals; this hint MAY inform selection in multi-currency markets. Also serves as the denomination for price filter values — platforms SHOULD include this field when sending price filters. Response prices include explicit currency confirming the resolution.                                                                      |
@@ -389,7 +408,7 @@ ______________________________________________________________________
 | -------------- | ---------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------- |
 | id             | string                                                           | **Yes**  | Expectation identifier.                                                                                     |
 | line_items     | Array[object]                                                    | **Yes**  | Which line items and quantities are in this expectation.                                                    |
-| method_type    | string                                                           | **Yes**  | Delivery method type (shipping, pickup, digital). **Enum:** `shipping`, `pickup`, `digital`                 |
+| method_type    | string                                                           | **Yes**  | Delivery method type. Well-known values: `shipping`, `pickup`, `digital`; additional values MAY be used.    |
 | destination    | [Postal Address](/draft/specification/reference/#postal-address) | **Yes**  | Delivery destination address.                                                                               |
 | description    | string                                                           | No       | Human-readable delivery description (e.g., 'Arrives in 5-8 business days').                                 |
 | fulfillable_on | string                                                           | No       | When this expectation can be fulfilled: 'now' or ISO 8601 timestamp for future date (backorder, pre-order). |
@@ -407,18 +426,29 @@ ______________________________________________________________________
 
 ### Fulfillment Available Method
 
-| Name           | Type               | Required | Description                                                                              |
-| -------------- | ------------------ | -------- | ---------------------------------------------------------------------------------------- |
-| type           | string             | **Yes**  | Fulfillment method type this availability applies to. **Enum:** `shipping`, `pickup`     |
-| line_item_ids  | Array[string]      | **Yes**  | Line items available for this fulfillment method.                                        |
-| fulfillable_on | ['string', 'null'] | No       | 'now' for immediate availability, or ISO 8601 date for future (preorders, transfers).    |
-| description    | string             | No       | Human-readable availability info (e.g., 'Available for pickup at Downtown Store today'). |
+| Name           | Type               | Required | Description                                                                                                                          |
+| -------------- | ------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| type           | string             | **Yes**  | Fulfillment method type this availability applies to. Well-known values: `shipping`, `pickup`; businesses MAY use additional values. |
+| line_item_ids  | Array[string]      | **Yes**  | Line items available for this fulfillment method.                                                                                    |
+| fulfillable_on | ['string', 'null'] | No       | 'now' for immediate availability, or ISO 8601 date for future (preorders, transfers).                                                |
+| description    | string             | No       | Human-readable availability info (e.g., 'Available for pickup at Downtown Store today').                                             |
 
 ______________________________________________________________________
 
 ### Fulfillment Destination
 
 This object MUST be one of the following types: [Shipping Destination](/draft/specification/reference/#shipping-destination), [Retail Location](/draft/specification/reference/#retail-location).
+
+______________________________________________________________________
+
+### Fulfillment Destination Filter
+
+| Name            | Type   | Required | Description                                                                                                                    |
+| --------------- | ------ | -------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| address_country | string | No       | The country, as a 2-letter ISO 3166-1 alpha-2 code (e.g. "US"). A 3-letter alpha-3 code or full country name MAY also be used. |
+| address_region  | string | No       | The first-level administrative region within the country (e.g. a state or province such as California).                        |
+| postal_code     | string | No       | The postal code (e.g. "94043").                                                                                                |
+| location        | string | No       | A reference to the destination (e.g. store, pickup location, saved address).                                                   |
 
 ______________________________________________________________________
 
@@ -453,7 +483,7 @@ ______________________________________________________________________
 | Name                    | Type                                                                                        | Required | Description                                                                                                  |
 | ----------------------- | ------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------ |
 | id                      | string                                                                                      | **Yes**  | Unique fulfillment method identifier.                                                                        |
-| type                    | string                                                                                      | **Yes**  | Fulfillment method type. **Enum:** `shipping`, `pickup`                                                      |
+| type                    | string                                                                                      | **Yes**  | Fulfillment method type. Well-known values: `shipping`, `pickup`. Businesses MAY use additional values.      |
 | line_item_ids           | Array[string]                                                                               | **Yes**  | Line item IDs fulfilled via this method.                                                                     |
 | destinations            | Array\[[Fulfillment Destination](/draft/specification/reference/#fulfillment-destination)\] | No       | Available destinations. For shipping: addresses. For pickup: retail locations.                               |
 | selected_destination_id | ['string', 'null']                                                                          | No       | ID of the selected destination.                                                                              |
@@ -463,15 +493,25 @@ ______________________________________________________________________
 
 ### Fulfillment Option
 
-| Name                      | Type                                                    | Required | Description                                                                |
-| ------------------------- | ------------------------------------------------------- | -------- | -------------------------------------------------------------------------- |
-| id                        | string                                                  | **Yes**  | Unique fulfillment option identifier.                                      |
-| title                     | string                                                  | **Yes**  | Short label (e.g., 'Express Shipping', 'Curbside Pickup').                 |
-| description               | string                                                  | No       | Complete context for buyer decision (e.g., 'Arrives Dec 12-15 via FedEx'). |
-| carrier                   | string                                                  | No       | Carrier name (for shipping).                                               |
-| earliest_fulfillment_time | string                                                  | No       | Earliest fulfillment date.                                                 |
-| latest_fulfillment_time   | string                                                  | No       | Latest fulfillment date.                                                   |
-| totals                    | Array\[[Total](/draft/specification/reference/#total)\] | **Yes**  | Fulfillment option totals breakdown.                                       |
+| Name                      | Type                                                       | Required | Description                                                                                                                                             |
+| ------------------------- | ---------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| id                        | string                                                     | **Yes**  | Unique identifier for this fulfillment option.                                                                                                          |
+| title                     | string                                                     | **Yes**  | Short label that distinguishes this option from its siblings (e.g. 'Standard', 'Express Shipping', 'Curbside Pickup').                                  |
+| description               | [Description](/draft/specification/reference/#description) | No       | Supplementary context for the title (e.g. 'Arrives in 4 business days', 'Arrives Dec 12-15 via FedEx'). Directly renderable; MUST NOT repeat the title. |
+| carrier                   | string                                                     | No       | Carrier name (for shipping).                                                                                                                            |
+| earliest_fulfillment_time | string                                                     | No       | Earliest fulfillment date.                                                                                                                              |
+| latest_fulfillment_time   | string                                                     | No       | Latest fulfillment date.                                                                                                                                |
+| totals                    | Array\[[Total](/draft/specification/reference/#total)\]    | **Yes**  | Fulfillment option totals breakdown.                                                                                                                    |
+
+______________________________________________________________________
+
+### Fulfillment Option Base
+
+| Name        | Type                                                       | Required | Description                                                                                                                                             |
+| ----------- | ---------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| id          | string                                                     | **Yes**  | Unique identifier for this fulfillment option.                                                                                                          |
+| title       | string                                                     | **Yes**  | Short label that distinguishes this option from its siblings (e.g. 'Standard', 'Express Shipping', 'Curbside Pickup').                                  |
+| description | [Description](/draft/specification/reference/#description) | No       | Supplementary context for the title (e.g. 'Arrives in 4 business days', 'Arrives Dec 12-15 via FedEx'). Directly renderable; MUST NOT repeat the title. |
 
 ______________________________________________________________________
 
@@ -519,10 +559,10 @@ ______________________________________________________________________
 
 ### Merchant Fulfillment Config
 
-| Name                       | Type         | Required | Description                                    |
-| -------------------------- | ------------ | -------- | ---------------------------------------------- |
-| allows_multi_destination   | object       | No       | Permits multiple destinations per method type. |
-| allows_method_combinations | Array[array] | No       | Allowed method type combinations.              |
+| Name                | Type          | Required | Description                                                                                                                                                                                                 |
+| ------------------- | ------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| multi_destination   | Array[object] | No       | Method types that permit multiple destinations within one cart (e.g. split shipping across addresses). Listing a method permits it; an omitted method does not. Open — businesses MAY list any method type. |
+| method_combinations | Array[array]  | No       | Method-type combinations the business permits within one cart. Each inner array is a permitted set of method `type` values (e.g. shipping + pickup).                                                        |
 
 ______________________________________________________________________
 
@@ -750,7 +790,7 @@ ______________________________________________________________________
 | price        | [Price](/draft/specification/reference/#price)                              | **Yes**  | Current selling price.                                                                    |
 | list_price   | [Price](/draft/specification/reference/#price)                              | No       | List price before discounts (for strikethrough display).                                  |
 | unit_price   | object                                                                      | No       | Price per standard unit of measurement. MAY be omitted when unit pricing does not apply.  |
-| availability | object                                                                      | No       | Variant availability for purchase.                                                        |
+| availability | [Availability](/draft/specification/reference/#availability)                | No       | Variant availability for purchase.                                                        |
 | options      | Array\[[Selected Option](/draft/specification/reference/#selected-option)\] | No       | Option values that define this variant (e.g., Color: Blue, Size: Large).                  |
 | media        | Array\[[Media](/draft/specification/reference/#media)\]                     | No       | Variant media (images, videos, 3D models). First item is the featured media for listings. |
 | rating       | [Rating](/draft/specification/reference/#rating)                            | No       | Variant rating.                                                                           |
@@ -1052,17 +1092,17 @@ ______________________________________________________________________
 
 #### Fulfillment Option
 
-A fulfillment option within a group (e.g., Standard Shipping $5, Express $15).
+A fulfillment option within a group (e.g., Standard Shipping $5, Express $15). Extends the fulfillment option base with cost and timing.
 
-| Name                      | Type          | Required | Description                                                                |
-| ------------------------- | ------------- | -------- | -------------------------------------------------------------------------- |
-| id                        | string        | **Yes**  | Unique fulfillment option identifier.                                      |
-| title                     | string        | **Yes**  | Short label (e.g., 'Express Shipping', 'Curbside Pickup').                 |
-| description               | string        | No       | Complete context for buyer decision (e.g., 'Arrives Dec 12-15 via FedEx'). |
-| carrier                   | string        | No       | Carrier name (for shipping).                                               |
-| earliest_fulfillment_time | string        | No       | Earliest fulfillment date.                                                 |
-| latest_fulfillment_time   | string        | No       | Latest fulfillment date.                                                   |
-| totals                    | Array[object] | **Yes**  | Fulfillment option totals breakdown.                                       |
+| Name                      | Type          | Required | Description                                                                                                                                             |
+| ------------------------- | ------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| id                        | string        | **Yes**  | Unique identifier for this fulfillment option.                                                                                                          |
+| title                     | string        | **Yes**  | Short label that distinguishes this option from its siblings (e.g. 'Standard', 'Express Shipping', 'Curbside Pickup').                                  |
+| description               | object        | No       | Supplementary context for the title (e.g. 'Arrives in 4 business days', 'Arrives Dec 12-15 via FedEx'). Directly renderable; MUST NOT repeat the title. |
+| carrier                   | string        | No       | Carrier name (for shipping).                                                                                                                            |
+| earliest_fulfillment_time | string        | No       | Earliest fulfillment date.                                                                                                                              |
+| latest_fulfillment_time   | string        | No       | Latest fulfillment date.                                                                                                                                |
+| totals                    | Array[object] | **Yes**  | Fulfillment option totals breakdown.                                                                                                                    |
 
 #### Fulfillment Group
 
@@ -1077,12 +1117,12 @@ A merchant-generated package/group of line items with fulfillment options.
 
 #### Fulfillment Method
 
-A fulfillment method (shipping or pickup) with destinations and groups.
+A fulfillment method with destinations and groups.
 
 | Name                    | Type               | Required | Description                                                                                                  |
 | ----------------------- | ------------------ | -------- | ------------------------------------------------------------------------------------------------------------ |
 | id                      | string             | **Yes**  | Unique fulfillment method identifier.                                                                        |
-| type                    | string             | **Yes**  | Fulfillment method type. **Enum:** `shipping`, `pickup`                                                      |
+| type                    | string             | **Yes**  | Fulfillment method type. Well-known values: `shipping`, `pickup`. Businesses MAY use additional values.      |
 | line_item_ids           | Array[string]      | **Yes**  | Line item IDs fulfilled via this method.                                                                     |
 | destinations            | Array[object]      | No       | Available destinations. For shipping: addresses. For pickup: retail locations.                               |
 | selected_destination_id | ['string', 'null'] | No       | ID of the selected destination.                                                                              |
@@ -1092,12 +1132,12 @@ A fulfillment method (shipping or pickup) with destinations and groups.
 
 Inventory availability hint for a fulfillment method type.
 
-| Name           | Type               | Required | Description                                                                              |
-| -------------- | ------------------ | -------- | ---------------------------------------------------------------------------------------- |
-| type           | string             | **Yes**  | Fulfillment method type this availability applies to. **Enum:** `shipping`, `pickup`     |
-| line_item_ids  | Array[string]      | **Yes**  | Line items available for this fulfillment method.                                        |
-| fulfillable_on | ['string', 'null'] | No       | 'now' for immediate availability, or ISO 8601 date for future (preorders, transfers).    |
-| description    | string             | No       | Human-readable availability info (e.g., 'Available for pickup at Downtown Store today'). |
+| Name           | Type               | Required | Description                                                                                                                          |
+| -------------- | ------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| type           | string             | **Yes**  | Fulfillment method type this availability applies to. Well-known values: `shipping`, `pickup`; businesses MAY use additional values. |
+| line_item_ids  | Array[string]      | **Yes**  | Line items available for this fulfillment method.                                                                                    |
+| fulfillable_on | ['string', 'null'] | No       | 'now' for immediate availability, or ISO 8601 date for future (preorders, transfers).                                                |
+| description    | string             | No       | Human-readable availability info (e.g., 'Available for pickup at Downtown Store today').                                             |
 
 #### Fulfillment
 
@@ -1107,6 +1147,220 @@ Container for fulfillment methods and availability.
 | ----------------- | ------------- | -------- | ----------------------------------- |
 | methods           | Array[object] | No       | Fulfillment methods for cart items. |
 | available_methods | Array[object] | No       | Inventory availability hints.       |
+
+#### Catalog Fulfillment Method
+
+A fulfillment method on a catalog variant: how the variant can be fulfilled, and its availability.
+
+| Name         | Type          | Required | Description                                                                                                                                                                                                                                                                                                                                  |
+| ------------ | ------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type         | string        | **Yes**  | Fulfillment method type. Well-known values: `shipping`, `pickup`. Businesses MAY use additional values.                                                                                                                                                                                                                                      |
+| description  | object        | No       | Short buyer-facing summary (e.g. 'Ships in 2–4 business days').                                                                                                                                                                                                                                                                              |
+| availability | object        | No       | Availability of this variant via this method at the specified or inferred location.                                                                                                                                                                                                                                                          |
+| location     | string        | No       | The location resolved for this method, where appropriate (e.g. the pickup store or location), as a location id.                                                                                                                                                                                                                              |
+| options      | Array[object] | No       | Fulfillment options for this method (e.g. Standard, Express) to describe per-choice details such as cost, time estimates, etc. Optional and selective: without a destination or full cart, a business SHOULD preview meaningful boundary options (e.g. cheapest, fastest); the full, high-resolution set is negotiated in cart and checkout. |
+
+#### Catalog Fulfillment
+
+How a catalog variant can be fulfilled. Mirrors checkout `fulfillment`.
+
+| Name    | Type          | Required | Description                           |
+| ------- | ------------- | -------- | ------------------------------------- |
+| methods | Array[object] | No       | Fulfillment methods for this variant. |
+
+#### Fulfillment Variant
+
+A catalog variant with fulfillment.
+
+| Name         | Type          | Required | Description                                                                               |
+| ------------ | ------------- | -------- | ----------------------------------------------------------------------------------------- |
+| id           | string        | **Yes**  | Global ID (GID) uniquely identifying this variant. Used as item.id in checkout.           |
+| sku          | string        | No       | Business-assigned identifier for inventory and fulfillment.                               |
+| barcodes     | Array[object] | No       | Industry-standard product identifiers for cross-reference and correlation.                |
+| handle       | string        | No       | URL-safe variant handle/slug.                                                             |
+| title        | string        | **Yes**  | Variant display title (e.g., 'Blue / Large').                                             |
+| description  | object        | **Yes**  | Variant description in one or more formats.                                               |
+| url          | string        | No       | Canonical variant page URL.                                                               |
+| categories   | Array[object] | No       | Variant categories with optional taxonomy identifiers.                                    |
+| price        | object        | **Yes**  | Current selling price.                                                                    |
+| list_price   | object        | No       | List price before discounts (for strikethrough display).                                  |
+| unit_price   | object        | No       | Price per standard unit of measurement. MAY be omitted when unit pricing does not apply.  |
+| availability | object        | No       | Variant availability for purchase.                                                        |
+| options      | Array[object] | No       | Option values that define this variant (e.g., Color: Blue, Size: Large).                  |
+| media        | Array[object] | No       | Variant media (images, videos, 3D models). First item is the featured media for listings. |
+| rating       | object        | No       | Variant rating.                                                                           |
+| tags         | Array[string] | No       | Variant tags for categorization and search.                                               |
+| metadata     | object        | No       | Business-defined custom data extending the standard variant model.                        |
+| seller       | object        | No       | Optional seller context for this variant.                                                 |
+| fulfillment  | object        | No       | How a catalog variant can be fulfilled. Mirrors checkout `fulfillment`.                   |
+
+#### Fulfillment Product
+
+A catalog product whose variants are fulfillment-enriched. Used by search.
+
+| Name             | Type          | Required | Description                                                                                      |
+| ---------------- | ------------- | -------- | ------------------------------------------------------------------------------------------------ |
+| id               | string        | **Yes**  | Global ID (GID) uniquely identifying this product.                                               |
+| handle           | string        | No       | URL-safe slug for SEO-friendly URLs (e.g., 'blue-runner-pro'). Use id for stable API references. |
+| title            | string        | **Yes**  | Product title.                                                                                   |
+| description      | object        | **Yes**  | Product description in one or more formats.                                                      |
+| url              | string        | No       | Canonical product page URL.                                                                      |
+| categories       | Array[object] | No       | Product categories with optional taxonomy identifiers.                                           |
+| price_range      | object        | **Yes**  | Price range across all variants.                                                                 |
+| list_price_range | object        | No       | List price range before discounts (for strikethrough display).                                   |
+| media            | Array[object] | No       | Product media (images, videos, 3D models). First item is the featured media for listings.        |
+| options          | Array[object] | No       | Product options (Size, Color, etc.).                                                             |
+| variants         | Array[object] | **Yes**  | Purchasable variants of this product. First item is the featured variant for listings.           |
+| rating           | object        | No       | Aggregate product rating.                                                                        |
+| tags             | Array[string] | No       | Product tags for categorization and search.                                                      |
+| metadata         | object        | No       | Business-defined custom data extending the standard product model.                               |
+| variants         | Array[any]    | **Yes**  |                                                                                                  |
+
+#### Fulfillment Lookup Variant
+
+A lookup variant (carrying input correlation) enriched with fulfillment.
+
+| Name         | Type          | Required | Description                                                                                                  |
+| ------------ | ------------- | -------- | ------------------------------------------------------------------------------------------------------------ |
+| id           | string        | **Yes**  | Global ID (GID) uniquely identifying this variant. Used as item.id in checkout.                              |
+| sku          | string        | No       | Business-assigned identifier for inventory and fulfillment.                                                  |
+| barcodes     | Array[object] | No       | Industry-standard product identifiers for cross-reference and correlation.                                   |
+| handle       | string        | No       | URL-safe variant handle/slug.                                                                                |
+| title        | string        | **Yes**  | Variant display title (e.g., 'Blue / Large').                                                                |
+| description  | object        | **Yes**  | Variant description in one or more formats.                                                                  |
+| url          | string        | No       | Canonical variant page URL.                                                                                  |
+| categories   | Array[object] | No       | Variant categories with optional taxonomy identifiers.                                                       |
+| price        | object        | **Yes**  | Current selling price.                                                                                       |
+| list_price   | object        | No       | List price before discounts (for strikethrough display).                                                     |
+| unit_price   | object        | No       | Price per standard unit of measurement. MAY be omitted when unit pricing does not apply.                     |
+| availability | object        | No       | Variant availability for purchase.                                                                           |
+| options      | Array[object] | No       | Option values that define this variant (e.g., Color: Blue, Size: Large).                                     |
+| media        | Array[object] | No       | Variant media (images, videos, 3D models). First item is the featured media for listings.                    |
+| rating       | object        | No       | Variant rating.                                                                                              |
+| tags         | Array[string] | No       | Variant tags for categorization and search.                                                                  |
+| metadata     | object        | No       | Business-defined custom data extending the standard variant model.                                           |
+| seller       | object        | No       | Optional seller context for this variant.                                                                    |
+| inputs       | Array[object] | **Yes**  | Which request identifiers resolved to this variant, and how. Each entry maps a request ID to its match type. |
+| fulfillment  | object        | No       | How a catalog variant can be fulfilled. Mirrors checkout `fulfillment`.                                      |
+
+#### Fulfillment Lookup Product
+
+A lookup product whose variants are fulfillment-enriched, preserving input correlation. Used by lookup.
+
+| Name             | Type          | Required | Description                                                                                      |
+| ---------------- | ------------- | -------- | ------------------------------------------------------------------------------------------------ |
+| id               | string        | **Yes**  | Global ID (GID) uniquely identifying this product.                                               |
+| handle           | string        | No       | URL-safe slug for SEO-friendly URLs (e.g., 'blue-runner-pro'). Use id for stable API references. |
+| title            | string        | **Yes**  | Product title.                                                                                   |
+| description      | object        | **Yes**  | Product description in one or more formats.                                                      |
+| url              | string        | No       | Canonical product page URL.                                                                      |
+| categories       | Array[object] | No       | Product categories with optional taxonomy identifiers.                                           |
+| price_range      | object        | **Yes**  | Price range across all variants.                                                                 |
+| list_price_range | object        | No       | List price range before discounts (for strikethrough display).                                   |
+| media            | Array[object] | No       | Product media (images, videos, 3D models). First item is the featured media for listings.        |
+| options          | Array[object] | No       | Product options (Size, Color, etc.).                                                             |
+| variants         | Array[object] | **Yes**  | Purchasable variants of this product. First item is the featured variant for listings.           |
+| rating           | object        | No       | Aggregate product rating.                                                                        |
+| tags             | Array[string] | No       | Product tags for categorization and search.                                                      |
+| metadata         | object        | No       | Business-defined custom data extending the standard product model.                               |
+| variants         | Array[any]    | **Yes**  |                                                                                                  |
+
+#### Fulfillment Detail Product
+
+A get_product detail product (carrying selected/options availability signals) whose variants are fulfillment-enriched. Used by get_product.
+
+| Name     | Type          | Required | Description                                                                                                                                                                                          |
+| -------- | ------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| selected | Array[object] | No       | Effective option selections that anchor the featured variant and availability signals. Required when the product has configurable options; may be empty or omitted for products with no option axes. |
+| options  | Array[object] | No       | Product options with availability signals relative to the effective selections.                                                                                                                      |
+| variants | Array[any]    | No       |                                                                                                                                                                                                      |
+
+#### Fulfillment Search Filters
+
+Catalog filters extended with a fulfillment destination filter and a method-type filter.
+
+| Name        | Type          | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| ----------- | ------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| categories  | Array[string] | No       | Filter by product categories (OR logic — matches products in any listed categories). Values match against the value field in product category entries. Valid values can be discovered from the categories field in search results, merchant documentation, or standard taxonomies that businesses may align with.                                                                                                                                                |
+| price       | object        | No       | Price range filter denominated in context.currency. When context.currency matches the presentment currency, businesses apply the filter directly. When it differs, businesses SHOULD convert filter values to the presentment currency before applying; if conversion is not supported, businesses MAY ignore the filter and SHOULD indicate this via a message. When context.currency is absent, filter denomination is ambiguous and businesses MAY ignore it. |
+| fulfills_to | object        | No       | Where the order is fulfilled to — may differ from the buyer's `context` location (e.g. a gift). A `location` id, or a coarse address (`address_country`/`address_region`/`postal_code`). Restricts results to what can be fulfilled there and seeds method `availability`. Supersedes `context`.                                                                                                                                                                 |
+| methods     | Array[string] | No       | Restrict results to these fulfillment method types (e.g. ["pickup"]). Well-known values: `shipping`, `pickup`.                                                                                                                                                                                                                                                                                                                                                   |
+
+#### Fulfillment Search Request
+
+| Name        | Type   | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| ----------- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| query       | string | No       | Free-text search query.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| context     | object | No       | Provisional buyer signals for relevance and localization—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data. Context SHOULD be non-identifying and can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. |
+| signals     | object | No       | Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.                                                                                                                                                                                                                                                                 |
+| attribution | object | No       | Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| filters     | object | No       | Filter criteria to narrow search results. All specified filters combine with AND logic.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| pagination  | object | No       | Pagination parameters for requests.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| filters     | any    | No       | Catalog filters extended with a fulfillment destination filter and a method-type filter.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+
+#### Fulfillment Search Response
+
+| Name       | Type          | Required | Description                                                           |
+| ---------- | ------------- | -------- | --------------------------------------------------------------------- |
+| ucp        | any           | **Yes**  | UCP metadata for catalog responses.                                   |
+| products   | Array[object] | **Yes**  | Products matching the search criteria.                                |
+| pagination | object        | No       | Pagination information in responses.                                  |
+| messages   | Array[object] | No       | Errors, warnings, or informational messages about the search results. |
+| products   | Array[any]    | **Yes**  |                                                                       |
+
+#### Fulfillment Lookup Request
+
+| Name        | Type          | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| ----------- | ------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ids         | Array[string] | **Yes**  | Identifiers to lookup. Implementations MUST support product ID and variant ID; MAY support secondary identifiers (SKU, handle, etc.).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| filters     | object        | No       | Filter criteria to narrow returned products and variants. All specified filters combine with AND logic.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| context     | object        | No       | Provisional buyer signals for relevance and localization—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data. Context SHOULD be non-identifying and can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. |
+| signals     | object        | No       | Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.                                                                                                                                                                                                                                                                 |
+| attribution | object        | No       | Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| filters     | any           | No       | Catalog filters extended with a fulfillment destination filter and a method-type filter.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+
+#### Fulfillment Lookup Response
+
+| Name     | Type          | Required | Description                                                                                                                                         |
+| -------- | ------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ucp      | any           | **Yes**  | UCP metadata for catalog responses.                                                                                                                 |
+| products | Array[any]    | **Yes**  | Products matching the requested identifiers. May contain fewer items if some identifiers not found, or more if identifiers match multiple products. |
+| messages | Array[object] | No       | Errors, warnings, or informational messages about the requested items.                                                                              |
+| products | Array[any]    | **Yes**  |                                                                                                                                                     |
+
+#### Fulfillment Get Product Request
+
+| Name        | Type          | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| ----------- | ------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| id          | string        | **Yes**  | Product or variant identifier. Implementations MUST support product ID and variant ID.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| selected    | Array[object] | No       | Partial or full option selections for interactive variant narrowing. When provided, response option values include availability signals (available, exists) relative to these selections.                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| preferences | Array[string] | No       | Option names in relaxation priority order. When no exact variant matches all selections, the server drops options from the end of this list first. E.g., ['Color', 'Size'] keeps Color and relaxes Size.                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| filters     | object        | No       | Filter criteria to narrow returned variants. All specified filters combine with AND logic.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| context     | object        | No       | Provisional buyer signals for relevance and localization—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data. Context SHOULD be non-identifying and can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. |
+| signals     | object        | No       | Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.                                                                                                                                                                                                                                                                 |
+| attribution | object        | No       | Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| filters     | any           | No       | Catalog filters extended with a fulfillment destination filter and a method-type filter.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+
+#### Fulfillment Get Product Response
+
+| Name     | Type          | Required | Description                                                                                                                                 |
+| -------- | ------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| ucp      | any           | **Yes**  | UCP metadata for catalog responses.                                                                                                         |
+| product  | object        | **Yes**  | The requested product with full detail. Singular — this is a single-resource operation.                                                     |
+| messages | Array[object] | No       | Warnings or informational messages about the product (e.g., price recently changed, limited availability).                                  |
+| product  | any           | **Yes**  | A get_product detail product (carrying selected/options availability signals) whose variants are fulfillment-enriched. Used by get_product. |
+
+#### Dev.Ucp.Shopping.Catalog.Search
+
+Catalog search composition with fulfillment (extends dev.ucp.shopping.catalog.search).
+
+*No properties defined.*
+
+#### Dev.Ucp.Shopping.Catalog.Lookup
+
+Catalog lookup composition with fulfillment (extends dev.ucp.shopping.catalog.lookup).
+
+*No properties defined.*
 
 #### Checkout with Fulfillment
 

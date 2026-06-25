@@ -39,12 +39,7 @@
     },
     "method_type": {
       "type": "string",
-      "enum": [
-        "shipping",
-        "pickup",
-        "digital"
-      ],
-      "description": "Delivery method type (shipping, pickup, digital)."
+      "description": "Delivery method type. Well-known values: `shipping`, `pickup`, `digital`; additional values MAY be used."
     },
     "destination": {
       "$ref": "https://ucp.dev/draft/schemas/common/types/postal_address.json",

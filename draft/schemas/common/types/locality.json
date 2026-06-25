@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/draft/schemas/common/types/locality.json",
+  "title": "Locality",
+  "description": "A coarse geographic location — country, region, and postal code. A lightweight alternative to a full postal address.",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "address_country": {
+      "type": "string",
+      "description": "The country, as a 2-letter ISO 3166-1 alpha-2 code (e.g. \"US\"). A 3-letter alpha-3 code or full country name MAY also be used."
+    },
+    "address_region": {
+      "type": "string",
+      "description": "The first-level administrative region within the country (e.g. a state or province such as California)."
+    },
+    "postal_code": {
+      "type": "string",
+      "description": "The postal code (e.g. \"94043\")."
+    }
+  }
+}

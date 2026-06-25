@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/draft/schemas/shopping/types/fulfillment_option_base.json",
+  "title": "Fulfillment Option Base",
+  "description": "Common base for a fulfillment option: an addressable, renderable choice (e.g. Standard, Express). Catalog uses this base directly; checkout composes it with cost and timing.",
+  "type": "object",
+  "ucp_shared_request": true,
+  "required": [
+    "id",
+    "title"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for this fulfillment option.",
+      "ucp_request": "omit"
+    },
+    "title": {
+      "type": "string",
+      "description": "Short label that distinguishes this option from its siblings (e.g. 'Standard', 'Express Shipping', 'Curbside Pickup').",
+      "ucp_request": "omit"
+    },
+    "description": {
+      "$ref": "https://ucp.dev/draft/schemas/common/types/description.json",
+      "description": "Supplementary context for the title (e.g. 'Arrives in 4 business days', 'Arrives Dec 12-15 via FedEx'). Directly renderable; MUST NOT repeat the title.",
+      "ucp_request": "omit"
+    }
+  }
+}
