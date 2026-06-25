@@ -179,7 +179,7 @@ Each entity type defines **three variants** for different contexts:
   "dev.ucp.shopping.fulfillment": [{
     "version": "draft",
     "config": {
-      "allows_multi_destination": {"shipping": true}
+      "multi_destination": [{"method": "shipping"}]
     }
   }]
 }
@@ -260,6 +260,8 @@ When designing schemas, you must account for how older clients will validate new
 
 Because modern code generators (e.g. [Quicktype](https://quicktype.io/)) translate JSON Schemas into strictly typed classes (e.g., Go structs or Java Enums), certain schema constraints will cause deserialization errors on older clients as the protocol evolves. Avoiding such changes helps minimize the need to up-version the protocol.
 
+A second failure mode comes from composition itself: extensions extend a base with `allOf`, which can only *add* constraints. An `allOf` of two enums (or two `oneOf`s) *intersects* their members — it never unions in a new value or branch — so a closed `enum`, `oneOf`, or `additionalProperties: false` is a one-way door an extension cannot widen.
+
 ### Open Enumerations
 
 If a field's list of values might expand in the future (e.g., adding a `"refunded"` status or a new payment method), **do not use `enum`**.
@@ -283,6 +285,40 @@ Use strict `enum` or `const` only for permanently fixed domains or when unknown 
   "type": "string",
   "enum": ["open", "completed", "expired"],
   "description": "Lifecycle state. This domain is strictly bounded; unknown states represent a breakdown in the state machine and MUST be rejected."
+}
+```
+
+### Variants (`oneOf`)
+
+`oneOf` models a sum type — a field that is *one of several shapes* — but it is **closed**, with the same one-way-door problem as `enum`: an extension cannot add a branch (an `allOf` of two `oneOf`s intersects their branches, it does not union them), and under open objects (`additionalProperties: true`) a payload matching two branches fails `oneOf` validation.
+
+For a variant set that may grow, model it as open in one of two ways:
+
+- an **open discriminator** — an open `type`/`kind` string that names the active form, with tolerant readers, exactly like an open enumeration; or
+- a single **open object with documented precedence** — when the active form is implied by which field is present rather than a tag, a stated rule decides which one wins if more than one appears.
+
+Reserve `oneOf` for permanently fixed variant sets — the same bar as a closed `enum`.
+
+```json
+// PREFER: an open `kind` discriminator — a new variant is a new value; readers tolerate unknowns
+"target": {
+  "type": "object",
+  "required": ["kind"],
+  "properties": {
+    "kind": {
+      "type": "string",
+      "description": "Delivery target. Well-known: `email`, `sms`. Unknown values MUST be tolerated.",
+      "examples": ["email", "sms"]
+    }
+  }
+}
+
+// AVOID: oneOf — adding a `push` variant means adding a branch, which an extension cannot do
+"target": {
+  "oneOf": [
+    { "required": ["email_address"], "properties": { "email_address": { "type": "string" } } },
+    { "required": ["phone_number"],  "properties": { "phone_number":  { "type": "string" } } }
+  ]
 }
 ```
 
