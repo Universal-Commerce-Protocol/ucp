@@ -145,14 +145,17 @@ schema on a name-aligned origin.
 
 ##### Enforcement
 
-Binding is enforced symmetrically: **any party that consumes a profile MUST**
-validate the `schema` binding for every capability (and service and payment
-handler) it declares. Platforms validate the business profile, and businesses
-validate the platform profile
-(see [Negotiation Protocol](#negotiation-protocol)). A declaration whose binding
-does not hold **MUST** be rejected (treated as not present / refused for
-negotiation) and **MUST NOT** be activated. The `spec` URL **MUST** be rejected
-if it is not a valid `https` URL.
+A platform **MUST** validate each business-declared `schema` URL before fetching
+it. If the URL's origin does not match the capability's namespace authority (per
+[Derivation algorithm](#derivation-algorithm)), the platform **MUST NOT** fetch
+it and **MUST** reject the capability — treated as not present and never
+activated. A `spec` URL **MUST** be a valid `https` URL.
+
+The platform fetches and composes business-declared schemas to validate every
+request and response, so validating the binding ensures each composed schema is
+sourced from the party that owns the capability's namespace. A business
+**SHOULD** apply the same check to the platform profile and exclude any
+capability whose binding fails.
 
 Binding validates the declared hostname for provenance; it is **not** a
 fetch-safety control and does not authorize dereferencing. Fetching the `schema`
@@ -729,8 +732,8 @@ metadata:
 2. **Discovery**: Platforms **MAY** fetch the business profile from
     `/.well-known/ucp` before initiating requests. If fetched, platforms
     **SHOULD** cache the profile according to HTTP cache-control directives.
-3. **Namespace Validation**: Platforms **MUST** validate that each capability's
-    `schema` URL origin matches its namespace authority (see
+3. **Namespace Validation**: Before fetching, platforms **MUST** validate that
+    each capability's `schema` URL origin matches its namespace authority (see
     [Authority Binding](#authority-binding)) and **MUST** reject capabilities
     that fail this binding.
 4. **Schema Resolution**: Platforms **MUST** fetch and compose schemas for
@@ -740,10 +743,10 @@ metadata:
 
 1. **Profile Resolution**: Upon receiving a request with a platform profile
     URI, businesses **MUST** fetch and validate the platform profile unless
-    already cached. Validation includes namespace binding: businesses **MUST**
-    verify that each declared capability's `schema` URL origin matches its
-    namespace authority (see [Authority Binding](#authority-binding)) and
-    **MUST** reject declarations that fail this binding.
+    already cached. Because businesses negotiate by capability name and serve
+    their own schemas, they do not normally dereference platform-declared
+    `schema` URLs; they **SHOULD** nonetheless verify the namespace binding (see
+    [Authority Binding](#authority-binding)) as defense in depth.
 2. **Capability Intersection**: Businesses **MUST** compute the intersection of
     platform and business capabilities.
 3. **Extension Validation**: Extensions without their parent capability in the

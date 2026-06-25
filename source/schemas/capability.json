@@ -35,8 +35,8 @@
 
     "business_schema": {
       "title": "Capability (Business Schema)",
-      "description": "Capability configuration for business/merchant level. May include business-specific config overrides.",
-      "allOf": [{ "$ref": "#/$defs/base" }]
+      "description": "Capability declaration for business/merchant discovery. Requires the `schema` URL so platforms can fetch and compose it during negotiation; may also include business-specific config overrides.",
+      "allOf": [{ "$ref": "#/$defs/base" }, { "required": ["schema"] }]
     },
 
     "response_schema": {
