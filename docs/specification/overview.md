@@ -1905,10 +1905,14 @@ Both businesses and platforms declare a single version in their profiles:
 
 ![High-level resolution flow sequence diagram](site:specification/images/ucp-discovery-negotiation.png)
 
-Version compatibility operates at two levels: the **protocol version**
-and **capability versions**. The protocol version (`ucp.version`)
-governs core protocol mechanisms — discovery, negotiation flow,
-transport bindings, and signature requirements. Capability versions
+Version compatibility operates at three layers — **transport bindings**,
+the **core protocol**, and **capability versions** — each evolving on its
+own cadence (see [Versioning](../versioning.md#layered-versioning) for the
+layer model). The protocol version (`ucp.version`) governs the
+cross-cutting mechanisms shared by every transport binding: discovery,
+negotiation flow, signature requirements, profile structure, and the
+error envelope. Each service entry declares its own `version` and **MAY**
+evolve independently of the core protocol cadence. Capability versions
 govern the semantics of each feature independently, as defined in
 [Independent Component Versioning](#independent-component-versioning).
 
@@ -2038,7 +2042,10 @@ by both parties.
 
 > [!IMPORTANT]
 > **Protocol Compatibility Constraint:**
-> Businesses **MUST** include only capabilities compatible with the negotiated protocol version in their response. A capability that depends on features introduced in a newer protocol version **MUST NOT** be included when processing at an older protocol version.
+> Businesses **MUST** include only capabilities compatible with the
+> negotiated protocol version in their response. A capability that
+> depends on features introduced in a newer protocol version
+> **MUST NOT** be included when processing at an older protocol version.
 
 ### Backwards Compatibility
 
@@ -2072,7 +2079,9 @@ The following changes **MUST NOT** be introduced without a new version:
 - Each capability versions independently from other capabilities.
 - Capabilities **MUST** follow the same backwards compatibility rules as the
     protocol.
-- Businesses **MUST** validate capability version compatibility using the same negotiation logic described in [Protocol Version](#protocol-version) and [Version Negotiation](#version-negotiation).
+- Businesses **MUST** validate capability version compatibility using the same
+    negotiation logic described in [Protocol Version](#protocol-version) and
+    [Version Negotiation](#version-negotiation).
 - Transports **MAY** define their own version handling mechanisms.
 
 #### UCP Capabilities (`dev.ucp.*`)

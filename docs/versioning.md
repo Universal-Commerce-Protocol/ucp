@@ -1,15 +1,34 @@
 # Versioning
 
-UCP uses date-based version identifiers following the format `YYYY-MM-DD` to indicate the last date backwards-incompatible changes were made.
+UCP uses date-based version identifiers following the format `YYYY-MM-DD` to
+indicate the last date backwards-incompatible changes were made to a given
+component.
 
-## Two-Tiered Versioning
+## Layered Versioning
 
-To balance ecosystem stability with flexibility, versioning in UCP operates at two distinct levels:
+UCP versions three layers independently. Each layer evolves on its own
+cadence and is negotiated by its own mechanism:
 
-1. **Protocol Version (`ucp.version`)**: Governs core protocol mechanisms (discovery, negotiation, transport, signatures) and uses the date-based `YYYY-MM-DD` format.
-2. **Capability Versions**: Govern individual features (e.g., Cart, Checkout, Order) which version independently to allow rapid iteration. Standard UCP capabilities also use the date-based `YYYY-MM-DD` format.
+1. **Transport bindings.** Each service entry — REST, MCP, A2A, or
+    embedded — declares its own `version`. The wire contract for each
+    transport lives in the OpenAPI / OpenRPC / Agent Card document referenced
+    from the service entry's `schema` field. Transports **MAY** evolve their
+    version handling independently from the core protocol release.
+2. **Core protocol** (`ucp.version`). Governs the cross-cutting mechanisms
+    every transport binding inherits: discovery, negotiation flow, signature
+    requirements, profile structure, and the error envelope. Validated as a
+    pre-negotiation gate; mismatch returns `version_unsupported`.
+3. **Capabilities and extensions.** Each capability entry declares its own
+    `version`, and each extension that augments a capability versions
+    independently. Capability versions are intersected at negotiation; the
+    highest mutual version wins, and extensions **MAY** declare
+    `requires.protocol` and `requires.capabilities` constraints that further
+    filter the active set.
 
-For details on negotiation, interaction, and lifecycles of these versions, see [Capability Versions](specification/overview.md#capability-versions) and [Independent Component Versioning](specification/overview.md#independent-component-versioning) in the Architecture Overview.
+For the negotiation algorithm and version-compatibility rules, see
+[Version Negotiation](specification/overview.md#version-negotiation) and
+[Independent Component Versioning](specification/overview.md#independent-component-versioning)
+in the Architecture Overview.
 
 ## Release Process
 
