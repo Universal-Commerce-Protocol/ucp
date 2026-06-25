@@ -309,10 +309,6 @@ All application-level outcomes return a successful JSON-RPC result with the UCP 
 
 {{ schema_fields('types/location_offering_filter', 'location/mcp') }}
 
-### Location Get Result {: #location-get-result-schema }
-
-{{ schema_fields('services/common/mcp.openrpc.json#/components/schemas/location_get_result', 'location/mcp') }}
-
 ### Error Response {: #error-response }
 
 {{ schema_fields('types/error_response', 'location/mcp') }}
