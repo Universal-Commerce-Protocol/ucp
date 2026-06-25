@@ -72,6 +72,16 @@ All response bodies **MUST** be valid JSON as specified in
 
 All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
+### Response Timing
+
+Business responses **MAY** include the
+[`Server-Timing`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Server-Timing){ target="_blank" }
+header to report business-side processing duration. When present, UCP responses
+**SHOULD** use the `ucp` metric with `dur` in milliseconds, for example
+`Server-Timing: ucp;dur=42.3`. This value excludes network time and is
+informational; platforms **SHOULD** measure client-observed latency
+independently.
+
 ## Operations
 
 | Operation | Method | Endpoint | Description |
@@ -111,6 +121,7 @@ Returns the current-state snapshot of an order.
     ```json
     HTTP/1.1 200 OK
     Content-Type: application/json
+    Server-Timing: ucp;dur=42.3
 
     {
       "ucp": {
@@ -240,6 +251,18 @@ syntax:
 ```http
 UCP-Agent: profile="https://platform.example/.well-known/ucp"
 ```
+
+**Server-Timing** (optional on responses):
+
+Business-side processing duration using the `ucp` metric and millisecond
+`dur` value:
+
+```http
+Server-Timing: ucp;dur=42.3
+```
+
+Platforms **SHOULD** treat this value as informational and measure
+client-observed latency independently.
 
 ## Message Signing
 

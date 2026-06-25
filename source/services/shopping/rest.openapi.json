@@ -83,6 +83,9 @@
               },
               "Content-Digest": {
                 "$ref": "#/components/headers/content_digest"
+              },
+              "Server-Timing": {
+                "$ref": "#/components/headers/server_timing"
               }
             },
             "content": {
@@ -151,6 +154,9 @@
               },
               "Content-Digest": {
                 "$ref": "#/components/headers/content_digest"
+              },
+              "Server-Timing": {
+                "$ref": "#/components/headers/server_timing"
               }
             },
             "content": {
@@ -228,6 +234,9 @@
               },
               "Content-Digest": {
                 "$ref": "#/components/headers/content_digest"
+              },
+              "Server-Timing": {
+                "$ref": "#/components/headers/server_timing"
               }
             },
             "content": {
@@ -310,6 +319,9 @@
               },
               "Content-Digest": {
                 "$ref": "#/components/headers/content_digest"
+              },
+              "Server-Timing": {
+                "$ref": "#/components/headers/server_timing"
               }
             },
             "content": {
@@ -382,6 +394,9 @@
               },
               "Content-Digest": {
                 "$ref": "#/components/headers/content_digest"
+              },
+              "Server-Timing": {
+                "$ref": "#/components/headers/server_timing"
               }
             },
             "content": {
@@ -429,7 +444,8 @@
             "headers": {
               "Signature": { "$ref": "#/components/headers/signature" },
               "Signature-Input": { "$ref": "#/components/headers/signature_input" },
-              "Content-Digest": { "$ref": "#/components/headers/content_digest" }
+              "Content-Digest": { "$ref": "#/components/headers/content_digest" },
+              "Server-Timing": { "$ref": "#/components/headers/server_timing" }
             },
             "content": {
               "application/json": {
@@ -467,7 +483,8 @@
             "headers": {
               "Signature": { "$ref": "#/components/headers/signature" },
               "Signature-Input": { "$ref": "#/components/headers/signature_input" },
-              "Content-Digest": { "$ref": "#/components/headers/content_digest" }
+              "Content-Digest": { "$ref": "#/components/headers/content_digest" },
+              "Server-Timing": { "$ref": "#/components/headers/server_timing" }
             },
             "content": {
               "application/json": {
@@ -510,7 +527,8 @@
             "headers": {
               "Signature": { "$ref": "#/components/headers/signature" },
               "Signature-Input": { "$ref": "#/components/headers/signature_input" },
-              "Content-Digest": { "$ref": "#/components/headers/content_digest" }
+              "Content-Digest": { "$ref": "#/components/headers/content_digest" },
+              "Server-Timing": { "$ref": "#/components/headers/server_timing" }
             },
             "content": {
               "application/json": {
@@ -550,7 +568,8 @@
             "headers": {
               "Signature": { "$ref": "#/components/headers/signature" },
               "Signature-Input": { "$ref": "#/components/headers/signature_input" },
-              "Content-Digest": { "$ref": "#/components/headers/content_digest" }
+              "Content-Digest": { "$ref": "#/components/headers/content_digest" },
+              "Server-Timing": { "$ref": "#/components/headers/server_timing" }
             },
             "content": {
               "application/json": {
@@ -594,7 +613,8 @@
             "headers": {
               "Signature": { "$ref": "#/components/headers/signature" },
               "Signature-Input": { "$ref": "#/components/headers/signature_input" },
-              "Content-Digest": { "$ref": "#/components/headers/content_digest" }
+              "Content-Digest": { "$ref": "#/components/headers/content_digest" },
+              "Server-Timing": { "$ref": "#/components/headers/server_timing" }
             },
             "content": {
               "application/json": {
@@ -638,7 +658,8 @@
             "headers": {
               "Signature": { "$ref": "#/components/headers/signature" },
               "Signature-Input": { "$ref": "#/components/headers/signature_input" },
-              "Content-Digest": { "$ref": "#/components/headers/content_digest" }
+              "Content-Digest": { "$ref": "#/components/headers/content_digest" },
+              "Server-Timing": { "$ref": "#/components/headers/server_timing" }
             },
             "content": {
               "application/json": {
@@ -676,7 +697,8 @@
             "headers": {
               "Signature": { "$ref": "#/components/headers/signature" },
               "Signature-Input": { "$ref": "#/components/headers/signature_input" },
-              "Content-Digest": { "$ref": "#/components/headers/content_digest" }
+              "Content-Digest": { "$ref": "#/components/headers/content_digest" },
+              "Server-Timing": { "$ref": "#/components/headers/server_timing" }
             },
             "content": {
               "application/json": {
@@ -720,7 +742,8 @@
             "headers": {
               "Signature": { "$ref": "#/components/headers/signature" },
               "Signature-Input": { "$ref": "#/components/headers/signature_input" },
-              "Content-Digest": { "$ref": "#/components/headers/content_digest" }
+              "Content-Digest": { "$ref": "#/components/headers/content_digest" },
+              "Server-Timing": { "$ref": "#/components/headers/server_timing" }
             },
             "content": {
               "application/json": {
@@ -965,6 +988,13 @@
           "type": "string"
         },
         "description": "JCS-canonicalized body digest per RFC 8785. Format: `sha-256=:<base64-digest>:`."
+      },
+      "server_timing": {
+        "required": false,
+        "schema": {
+          "type": "string"
+        },
+        "description": "Optional merchant-reported server processing duration using the W3C Server-Timing header. See https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Server-Timing. UCP responses SHOULD use the `ucp` metric with `dur` in milliseconds, for example `ucp;dur=42.3`. This excludes network time and is informational; platforms SHOULD measure client-observed latency independently."
       }
     },
     "schemas": {

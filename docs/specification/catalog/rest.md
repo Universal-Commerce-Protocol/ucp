@@ -59,6 +59,16 @@ Businesses advertise REST transport availability through their UCP profile at
 }
 ```
 
+### Response Timing
+
+Business responses **MAY** include the
+[`Server-Timing`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Server-Timing){ target="_blank" }
+header to report business-side processing duration. When present, UCP responses
+**SHOULD** use the `ucp` metric with `dur` in milliseconds, for example
+`Server-Timing: ucp;dur=42.3`. This value excludes network time and is
+informational; platforms **SHOULD** measure client-observed latency
+independently.
+
 ## Endpoints
 
 | Endpoint | Method | Capability | Description |
