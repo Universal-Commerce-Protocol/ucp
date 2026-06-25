@@ -63,9 +63,10 @@ other capabilities (like Catalog, Cart, and Checkout in Shopping):
     to locate nearby stores that have a specific item available, bridging the gap between online catalog
     browsing and physical store visits.
 3. **Provisional vs. Authoritative Boundaries**:
-    * *Discovery Phase (Provisional)*: Location responses based on operating hours, amenity support,
-        real-time product stock, property-level amenities represent the business's *current terms* at the
-        time of query. They are **provisional signals** and are not binding commitments.
+    * *Discovery Phase (Provisional)*: Location responses based on operating hours, real-time inventory
+        availability, and amenities offerings represent the business's *current terms* at the
+        time of query. They are **provisional signals** (despite most, like hours & amenities, remain stable
+        overtime) and are not binding commitments.
     * *Checkout Phase (Authoritative)*: Final transaction terms that depend on a location (e.g., pickup)
         **MUST** be negotiated and finalized authoritatively. Discovery signals **SHOULD NOT** be cached
         or reused across sessions without re-validation.

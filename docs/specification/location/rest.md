@@ -69,7 +69,7 @@ Location capabilities through their UCP profile at `/.well-known/ucp`.
 
 Maps to the [Location Search](search.md) capability.
 
-{{ method_fields('search_locations', 'rest.openapi.json', 'location/rest') }}
+{{ method_fields('search_locations', 'common/rest.openapi.json', 'location/rest') }}
 
 #### Example: Search for Grocery Stores with Local Delivery Coverage (Geofencing)
 
@@ -146,7 +146,7 @@ Maps to the [Location Search](search.md) capability.
     }
     ```
 
-#### Example: Search for Electronics Stores with iPhone in stock (Store Finder)
+#### Example: Search for Electronics Stores with Phone In-stock (Store Finder)
 
 === "Request"
 
@@ -169,7 +169,7 @@ Maps to the [Location Search](search.md) capability.
         "offerings": {
           "inventory": [
             {
-              "id": "item_id_iphone_15_pro",
+              "id": "item_id_phone_15_pro",
               "type": "product",
               "quantity": 1
             }
@@ -230,7 +230,7 @@ Maps to the [Location Search](search.md) capability.
 
 Maps to the [Location Lookup](lookup.md) capability.
 
-{{ method_fields('lookup_locations', 'rest.openapi.json', 'location/rest') }}
+{{ method_fields('lookup_locations', 'common/rest.openapi.json', 'location/rest') }}
 
 #### Example: Simple Lookup
 

@@ -27,7 +27,7 @@ from typing import Any
 
 # --- CONFIGURATION ---
 # Base directories for schema resolution
-OPENAPI_DIR = Path("source/services/shopping")
+OPENAPI_DIR = Path("source/services")
 SCHEMAS_DIR = Path("source/schemas")
 HANDLERS_GOOGLE_PAY_DIR = Path("source/handlers/google_pay")
 COMMON_SCHEMAS_DIR = SCHEMAS_DIR / "common"

@@ -72,7 +72,7 @@ Filters locations based on their operating hours:
 Separates static location characteristics from dynamic availability:
 
 * **`amenities`** (Array of Strings): Static features or services of the
-    location (e.g., `free_wifi`, `parking`, `outdoor_seating`, `curbside_pickup`).
+    location (e.g., `free_wifi`, `parking`, `outdoor_seating`, `curbside_pickup`, `vegetarian`).
     All specified amenities **MUST** be supported by the location (AND semantic).
 * **`inventory`** (Array of Objects): Real-time availability of items/goods at
     the location. Some industry specific use cases include:
