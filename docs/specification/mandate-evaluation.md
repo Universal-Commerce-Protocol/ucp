@@ -73,8 +73,8 @@ The terminal receipt's `iat` retains its existing meaning — the time the recei
 | Field | Description |
 | --- | --- |
 | `evaluated_at` | The issuer's signed attestation of when mandate liveness was checked (the admission decision anchor). |
-| `reference` | The AP2 hash of the closed mandate. |
-| `checkout_id` | The UCP checkout session binding. |
+| `reference` | The AP2 mandate reference: the hash of the **closed mandate credential**, per AP2's existing definition. It **MUST NOT** be the `checkout_hash` (which hashes the inner `checkout_jwt`, equal to the Payment Mandate `transaction_id`). |
+| `checkout_id` | The UCP checkout/session identifier (the flow binding). Distinct from `reference` and never conflated with it. |
 | `mandate_exp` | The mandate's `exp`. Lets a verifier that cannot independently resolve the mandate still confirm `evaluated_at` falls inside the window for that specific mandate. |
 | `result` | `valid` \| `expired`. |
 
@@ -85,6 +85,8 @@ A separately addressable admission attestation is **OPTIONAL** and earns its pla
 ### 5.3 Binding — by content, not by a forward identifier
 
 The admission decision is bound by **content**: the tuple `reference` + `checkout_id` + `evaluated_at`. The terminal receipt carries that same tuple, so a verifier reconstructs the link by **recomputation** and never needs a `receipt_id` that does not exist at admission time.
+
+`reference` and `checkout_id` are two **independent** identifiers and **MUST NOT** be conflated: `reference` identifies the authorization grant being evaluated (the closed mandate, never the `checkout_hash`), while `checkout_id` scopes the decision to the flow and is what enforces per-checkout exclusivity. A verifier resolves "which grant" from `reference` and "which flow" from `checkout_id`; collapsing them would break both the grant binding and the exclusivity check.
 
 A jwt-hash handle (digest of the canonical signed representation) **MAY** be used for *addressing* a receipt artifact (§6); it is the content tuple that makes the binding **verifiable** rather than only addressable. This extension does **not** add a required receipt `id`.
 
