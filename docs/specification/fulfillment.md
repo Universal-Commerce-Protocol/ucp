@@ -81,9 +81,9 @@ method.
 
 {{ schema_fields('types/shipping_destination_resp', 'fulfillment') }}
 
-#### Retail Location
+#### Location
 
-{{ schema_fields('types/retail_location_resp', 'fulfillment') }}
+{{ schema_fields('types/location_resp', 'fulfillment') }}
 
 #### Fulfillment Group
 
