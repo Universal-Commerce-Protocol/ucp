@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/order_line_item_quantity.json",
+  "title": "Order Line Item Quantity",
+  "description": "Quantity tracking for the line item.",
+  "type": "object",
+  "properties": {
+    "original": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Quantity from the original checkout."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Current total active quantity. May differ from original due to post-order modifications (e.g., returns or cancellations)."
+    },
+    "fulfilled": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Quantity fulfilled so far."
+    }
+  }
+}

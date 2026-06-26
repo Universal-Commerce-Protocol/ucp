@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/multi_destination_config.json",
+  "title": "Multi-Destination Config",
+  "description": "Fulfillment configuration for a specific method type in multi-destination carts.",
+  "type": "object",
+  "required": ["method"],
+  "properties": {
+    "method": {
+      "type": "string",
+      "description": "Fulfillment method type (e.g. `shipping`, `pickup`). Optional per-method constraints MAY be added alongside."
+    }
+  },
+  "additionalProperties": true
+}

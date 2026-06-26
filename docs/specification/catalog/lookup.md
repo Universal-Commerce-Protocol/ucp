@@ -63,7 +63,7 @@ resolve to the same product, it MUST be returned once.
 The response does not guarantee order. Each variant carries an `inputs`
 array identifying which request identifiers resolved to it, and how.
 
-{{ schema_fields('types/input_correlation', 'catalog') }}
+{{ schema_fields('types/input_correlation', 'catalog/lookup') }}
 
 Multiple request identifiers may resolve to the same variant (e.g., a
 product ID and one of its variant IDs). When this occurs, the variant's
@@ -101,11 +101,11 @@ from the response.
 
 ### Request
 
-{{ extension_schema_fields('catalog_lookup.json#/$defs/lookup_request', 'catalog') }}
+{{ extension_schema_fields('catalog_lookup.json#/$defs/lookup_request', 'catalog/lookup') }}
 
 ### Response
 
-{{ extension_schema_fields('catalog_lookup.json#/$defs/lookup_response', 'catalog') }}
+{{ extension_schema_fields('catalog_lookup.json#/$defs/lookup_response', 'catalog/lookup') }}
 
 ---
 
@@ -193,11 +193,15 @@ selection changes the availability map.
 
 ### Request
 
-{{ extension_schema_fields('catalog_lookup.json#/$defs/get_product_request', 'catalog') }}
+{{ extension_schema_fields('catalog_lookup.json#/$defs/get_product_request', 'catalog/lookup') }}
 
 ### Response
 
-{{ extension_schema_fields('catalog_lookup.json#/$defs/get_product_response', 'catalog') }}
+{{ extension_schema_fields('catalog_lookup.json#/$defs/get_product_response', 'catalog/lookup') }}
+
+### Detail Product
+
+{{ extension_schema_fields('catalog_lookup.json#/$defs/detail_product', 'catalog/lookup') }}
 
 ---
 

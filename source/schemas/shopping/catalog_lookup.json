@@ -135,16 +135,7 @@
         "options": {
           "type": "array",
           "items": {
-            "type": "object",
-            "required": ["name", "values"],
-            "properties": {
-              "name": { "type": "string" },
-              "values": {
-                "type": "array",
-                "items": { "$ref": "types/detail_option_value.json" },
-                "minItems": 1
-              }
-            }
+            "$ref": "types/detail_option.json"
           },
           "description": "Product options with availability signals relative to the effective selections."
         }

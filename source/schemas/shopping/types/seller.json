@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/seller.json",
+  "title": "Seller",
+  "description": "Optional seller context for a variant.",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Seller display name."
+    },
+    "links": {
+      "type": "array",
+      "items": {
+        "$ref": "../../common/types/link.json"
+      },
+      "description": "Seller policy and information links."
+    }
+  }
+}

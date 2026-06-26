@@ -20,25 +20,7 @@
       "description": "Product data (id, title, price, image_url)."
     },
     "quantity": {
-      "type": "object",
-      "required": ["total", "fulfilled"],
-      "properties": {
-        "original": {
-          "type": "integer",
-          "minimum": 0,
-          "description": "Quantity from the original checkout."
-        },
-        "total": {
-          "type": "integer",
-          "minimum": 0,
-          "description": "Current total active quantity. May differ from original due to post-order modifications (e.g., returns or cancellations)."
-        },
-        "fulfilled": {
-          "type": "integer",
-          "minimum": 0,
-          "description": "Quantity fulfilled so far."
-        }
-      },
+      "$ref": "order_line_item_quantity.json",
       "description": "Quantity tracking for the line item."
     },
     "totals": {

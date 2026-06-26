@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/detail_option.json",
+  "title": "Detail Option",
+  "description": "Product options with availability signals relative to the effective selections.",
+  "type": "object",
+  "required": ["name", "values"],
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "values": {
+      "type": "array",
+      "items": {
+        "$ref": "detail_option_value.json"
+      },
+      "minItems": 1
+    }
+  }
+}

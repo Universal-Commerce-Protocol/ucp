@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/barcode.json",
+  "title": "Barcode",
+  "description": "Industry-standard product identifier for cross-reference and correlation.",
+  "type": "object",
+  "required": ["type", "value"],
+  "properties": {
+    "type": {
+      "type": "string",
+      "description": "Barcode standard. Well-known values: UPC, EAN, ISBN, GTIN, JAN."
+    },
+    "value": {
+      "type": "string",
+      "description": "Barcode value."
+    }
+  }
+}

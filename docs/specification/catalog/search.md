@@ -29,11 +29,11 @@ queries, filtering by category and price, and pagination.
 
 ### Request
 
-{{ extension_schema_fields('catalog_search.json#/$defs/search_request', 'catalog') }}
+{{ extension_schema_fields('catalog_search.json#/$defs/search_request', 'catalog/search') }}
 
 ### Response
 
-{{ extension_schema_fields('catalog_search.json#/$defs/search_response', 'catalog') }}
+{{ extension_schema_fields('catalog_search.json#/$defs/search_response', 'catalog/search') }}
 
 ## Search Inputs
 
@@ -55,11 +55,11 @@ empty `query` strings, or accepting filter-only requests for category browsing.
 Filter criteria for narrowing search results. Standard filters are defined below;
 merchants MAY support additional custom filters via `additionalProperties`.
 
-{{ schema_fields('types/search_filters', 'catalog') }}
+{{ schema_fields('types/search_filters', 'catalog/search') }}
 
 ### Price Filter
 
-{{ schema_fields('types/price_filter', 'catalog') }}
+{{ schema_fields('types/price_filter', 'catalog/search') }}
 
 ## Pagination
 
@@ -76,11 +76,11 @@ error. Clients MUST NOT assume the response size equals the requested limit.
 
 ### Pagination Request
 
-{{ extension_schema_fields('types/pagination.json#/$defs/request', 'catalog') }}
+{{ extension_schema_fields('types/pagination.json#/$defs/request', 'catalog/search') }}
 
 ### Pagination Response
 
-{{ extension_schema_fields('types/pagination.json#/$defs/response', 'catalog') }}
+{{ extension_schema_fields('types/pagination.json#/$defs/response', 'catalog/search') }}
 
 ## Transport Bindings
 

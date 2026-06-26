@@ -9,15 +9,7 @@
       "type": "array",
       "description": "Method types that permit multiple destinations within one cart (e.g. split shipping across addresses). Listing a method permits it; an omitted method does not. Open — businesses MAY list any method type.",
       "items": {
-        "type": "object",
-        "required": ["method"],
-        "additionalProperties": true,
-        "properties": {
-          "method": {
-            "type": "string",
-            "description": "Fulfillment method type (e.g. `shipping`, `pickup`). Optional per-method constraints MAY be added alongside."
-          }
-        }
+        "$ref": "multi_destination_config.json"
       }
     },
     "method_combinations": {

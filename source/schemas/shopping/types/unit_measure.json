@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/unit_measure.json",
+  "title": "Unit Measure",
+  "description": "Product quantity in packaging (e.g., 750ml bottle).",
+  "type": "object",
+  "required": ["value", "unit"],
+  "properties": {
+    "value": {
+      "type": "number",
+      "description": "Package quantity."
+    },
+    "unit": {
+      "type": "string",
+      "description": "Unit of measurement."
+    }
+  }
+}
