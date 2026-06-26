@@ -134,7 +134,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
                 {"type": "shop_pay"}
               ],
               "config": {
-                "merchant_id": "shop_merchant_123"
+                "key_id": "rzp_live_ABCD"
               }
             }
           ]
@@ -285,7 +285,7 @@ so clients must include all previously set fields they wish to retain.
                 {"type": "shop_pay"}
               ],
               "config": {
-                "merchant_id": "shop_merchant_123"
+                "key_id": "rzp_live_ABCD"
               }
             }
           ]
@@ -644,7 +644,7 @@ Follow-up calls after initial `fulfillment` data to update selection.
                 {"type": "shop_pay"}
               ],
               "config": {
-                "merchant_id": "shop_merchant_123"
+                "key_id": "rzp_live_ABCD"
               }
             }
           ]
@@ -996,7 +996,7 @@ place to set these expectations via `messages`.
                 {"type": "shop_pay"}
               ],
               "config": {
-                "merchant_id": "shop_merchant_123"
+                "key_id": "rzp_live_ABCD"
               }
             }
           ]

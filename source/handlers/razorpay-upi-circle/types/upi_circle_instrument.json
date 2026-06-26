@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://razorpay.com/ucp/handlers/upi-circle/types/upi_circle_instrument.json",
+  "title": "Razorpay UPI Circle Instrument",
+  "description": "Handler-level wrapper for the upi_circle instrument type used with com.razorpay.upi_circle. Extends the base UPI Circle instrument schema and defines the available_upi_circle_instrument declaration for use in handler available_instruments.",
+
+  "$defs": {
+    "available_upi_circle_instrument": {
+      "title": "Available UPI Circle Instrument",
+      "description": "Declares support for the UPI Circle flow in handler available_instruments. The buyer must have an active delegation mandate (delegate_id with status linked) obtained via Razorpay delegation setup.",
+      "allOf": [
+        { "$ref": "https://ucp.dev/schemas/shopping/types/available_payment_instrument.json" }
+      ],
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "upi_circle"
+        }
+      }
+    }
+  },
+
+  "allOf": [
+    { "$ref": "https://ucp.dev/schemas/shopping/types/upi_circle_instrument.json" }
+  ]
+}
