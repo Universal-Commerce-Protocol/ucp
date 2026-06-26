@@ -138,17 +138,11 @@ Maps to the [Create Checkout](checkout.md#create-checkout) operation.
 
 #### Input Schema
 
-* `checkout` ([Checkout](checkout.md#create-checkout)): **Required**. Contains
-    the initial checkout session data and optional extensions.
-    * Extensions (Optional):
-        * `dev.ucp.shopping.buyer_consent`: [Buyer Consent](buyer-consent.md)
-        * `dev.ucp.shopping.fulfillment`: [Fulfillment](fulfillment.md)
-        * `dev.ucp.shopping.discount`: [Discount](discount.md)
-        * `dev.ucp.shopping.ap2_mandate`: [AP2 Mandates](ap2-mandates.md)
+{{ schema_fields('checkout_create_req', 'checkout') }}
 
 #### Output Schema
 
-* [Checkout](checkout.md#create-checkout) object.
+{{ schema_fields('checkout_resp', 'checkout') }}
 
 #### Example
 
@@ -378,11 +372,11 @@ Maps to the [Get Checkout](checkout.md#get-checkout) operation.
 
 #### Input Schema
 
-* `id` (String): **Required**. The ID of the checkout session.
+* `id` (String, required): The ID of the checkout session.
 
 #### Output Schema
 
-* [Checkout](checkout.md#get-checkout) object.
+{{ schema_fields('checkout_resp', 'checkout') }}
 
 ### `update_checkout`
 
@@ -390,18 +384,13 @@ Maps to the [Update Checkout](checkout.md#update-checkout) operation.
 
 #### Input Schema
 
-* `id` (String): **Required**. The ID of the checkout session to update.
-* `checkout` ([Checkout](checkout.md#update-checkout)): **Required**.
-    Contains the updated checkout session data.
-    * Extensions (Optional):
-        * `dev.ucp.shopping.buyer_consent`: [Buyer Consent](buyer-consent.md)
-        * `dev.ucp.shopping.fulfillment`: [Fulfillment](fulfillment.md)
-        * `dev.ucp.shopping.discount`: [Discount](discount.md)
-        * `dev.ucp.shopping.ap2_mandate`: [AP2 Mandates](ap2-mandates.md)
+* `id` (String, required): The ID of the checkout session to update.
+
+{{ schema_fields('checkout_update_req', 'checkout') }}
 
 #### Output Schema
 
-* [Checkout](checkout.md#update-checkout) object.
+{{ schema_fields('checkout_resp', 'checkout') }}
 
 #### Example
 
@@ -601,32 +590,29 @@ Maps to the [Complete Checkout](checkout.md#complete-checkout) operation.
 
 #### Input Schema
 
-* `meta` (Object): **Required**. Request metadata containing:
-    * `ucp-agent` (Object): **Required**. Platform agent identification.
-    * `idempotency-key` (String, UUID): **Required**. Unique key for retry safety.
-* `id` (String): **Required**. The ID of the checkout session.
-* `checkout` ([Checkout](checkout.md#complete-checkout)): **Required**.
-    Contains payment credentials and other finalization data to execute the transaction.
+* `id` (String, required): The ID of the checkout session.
+
+{{ schema_fields('checkout_complete_req', 'checkout') }}
 
 #### Output Schema
 
-* [Checkout](checkout.md#complete-checkout) object, containing a partial
-   `order` that holds only `id` and `permalink_url`.
+{{ schema_fields('checkout_resp', 'checkout') }}
+
+The response includes a partial `order` with only `id` and `permalink_url`.
+See [Complete Checkout](checkout.md#complete-checkout) for details.
 
 ### `cancel_checkout`
 
-Maps to the [Cancel Checkout](checkout.md#cancel-checkout) operation.
+Maps to the [Cancel Checkout](checkout.md#cancel-checkout) operation. The
+returned checkout has `status: canceled`.
 
 #### Input Schema
 
-* `meta` (Object): **Required**. Request metadata containing:
-    * `ucp-agent` (Object): **Required**. Platform agent identification.
-    * `idempotency-key` (String, UUID): **Required**. Unique key for retry safety.
-* `id` (String): **Required**. The ID of the checkout session.
+* `id` (String, required): The ID of the checkout session.
 
 #### Output Schema
 
-* [Checkout](checkout.md#cancel-checkout) object with `status: canceled`.
+{{ schema_fields('checkout_resp', 'checkout') }}
 
 ## Error Handling
 
