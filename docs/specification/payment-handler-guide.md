@@ -723,6 +723,42 @@ instrument acquisition. Instead, the specification **SHOULD** clearly document:
   business for usage, which is critical for security, based on the available
   `config` and `checkout`.
 
+### Actions
+
+**Definition:** Runtime instructions that a handler may emit during checkout to
+complete or improve processing of an instrument produced by the handler. Actions
+are carried in the checkout response's top-level `actions` array and use the
+common [Actions](actions.md) envelope: `id`, `code`, `severity`, and
+`config`.
+
+Payment handler action codes are part of the handler's runtime contract. They
+are not negotiated as independent UCP capabilities. Platforms resolve each
+action through the active payment handler's advertised `spec`, `schema`, and
+`config`, mirroring how payment instruments use `handler_id` to resolve their
+handler contract.
+
+Handler specifications that emit actions **MUST** define for each action code:
+
+- The action's purpose and when it may be emitted.
+- The valid `severity` values and fallback behavior when unsupported,
+  abandoned, expired, or failed.
+- The `config` schema and any security requirements for interpreting it.
+- The platform execution requirements, including any UI, native API, redirect,
+  background execution, or out-of-band behavior.
+- The completion criteria and how completion is reflected in ordinary checkout
+  state or handler-owned side channels.
+- Any handler-scoped negotiation needed before the action can be emitted.
+
+If an action asks the platform to load an external surface, the handler
+specification **MUST** define the trust policy for that surface. The trusted
+surface can be business-operated or provider-operated, but platforms must be able
+to validate it independently according to the handler's rules rather than
+blindly trusting arbitrary URLs in `config`.
+
+A platform that initiates checkout with an instrument produced by a handler is
+committing to the handler's required runtime action surface for that instrument,
+unless the handler explicitly defines partial support or fallback behavior.
+
 ### Processing
 
 **Definition:** The steps a participant (typically business or PSP) takes to
@@ -807,6 +843,14 @@ Before publishing a payment handler specification, verify:
 - [ ] Binding requirements are specified
 - [ ] Checkout Payment Instrument creation and shape is well-defined
 
+### Actions
+
+- [ ] Runtime action codes are documented, if the handler may emit actions
+- [ ] Each action defines its `config` schema, security requirements, platform
+      behavior, completion criteria, fallback behavior, and idempotency rules
+- [ ] Required action support and any handler-scoped negotiation are clear for
+      every instrument type the handler produces
+
 ### Processing
 
 - [ ] Processing steps are enumerated and clear
@@ -871,6 +915,8 @@ specifications:
 
 ## See Also
 
+- **[Actions](actions.md)** — Common action envelope, ownership,
+  severity, idempotency, and security rules
 - **[Tokenization Guide](tokenization-guide.md)** — Guide for building
   tokenization payment handlers
 - **[Google Pay Handler](https://developers.google.com/merchant/ucp/guides/google-pay-payment-handler){ target="_blank" }**

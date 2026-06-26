@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/action.json",
+  "title": "Action",
+  "type": "object",
+  "description": "Scoped runtime instruction emitted during the lifecycle of a UCP entity. UCP defines the common envelope; the active entity that owns or adopts the action code defines the config schema, platform behavior, security requirements, completion criteria, fallback behavior, and resulting UCP entity updates.",
+  "required": [
+    "id",
+    "code",
+    "severity",
+    "config"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Opaque identifier for this action occurrence. The identifier is unique among outstanding actions for the containing UCP entity and stable for the same unresolved occurrence across retries, polls, and repeated responses. A new occurrence of the same action code MUST use a new id."
+    },
+    "code": {
+      "$ref": "reverse_domain_name.json",
+      "description": "Reverse-domain action code defined or adopted by an active capability, extension, or payment handler. The code identifies the specification that defines config semantics and platform behavior.",
+      "examples": [
+        "com.example.identity.verify_student_status",
+        "com.example.account.verify_login"
+      ]
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "optional",
+        "required",
+        "blocking"
+      ],
+      "description": "Consequence of not handling the action. 'optional': the platform MAY ignore the action and the UCP entity can still reach a successful terminal state. 'required': the platform MUST resolve the action before the UCP entity can reach a successful terminal state, but the entity remains otherwise usable. 'blocking': the action blocks the current attempted transition; the platform MUST resolve it, choose an allowed alternate path, or escalate before resubmitting the same operation with the same parameters."
+    },
+    "config": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Action-specific runtime configuration. Its schema and semantics are defined by the active entity that owns the action code."
+    }
+  }
+}

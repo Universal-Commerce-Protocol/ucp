@@ -298,6 +298,18 @@ Extensions can be:
 - **Official**: `dev.ucp.shopping.fulfillment` extends `dev.ucp.shopping.checkout`
 - **Vendor**: `com.example.installments` extends `dev.ucp.shopping.checkout`
 
+### Actions
+
+A **runtime action** is a scoped instruction emitted during the lifecycle of a
+UCP entity. Actions use a common envelope (`id`, `code`, `severity`, and
+`config`) but are not independently negotiated as top-level capabilities. They
+are part of the runtime contract of an active capability, extension, or payment
+handler.
+
+The base action model, ownership rules, severity semantics, security
+requirements, and idempotency guidance are defined in
+[Actions](actions.md).
+
 ### Schema Composition
 
 Extensions can add new fields and modify shared structures (e.g., discounts
