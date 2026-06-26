@@ -773,16 +773,19 @@ def define_env(env):
 
         # --- Logic to determine Display Type ---
         if "oneOf" in details:
-          # List of values embedded within an oneOf
-          f_type = "OneOf["
-          for idx, one_of_type in enumerate(details.get("oneOf", [])):
+          # Render each branch: a $ref becomes a type link, an inline
+          # branch shows its JSON type (matching the prose oneOf renderer
+          # above). Without the inline case, a oneOf of scalars such as
+          # capability `extends` (string | array) rendered as "OneOf[]".
+          parts = []
+          for one_of_type in details.get("oneOf", []):
             if "$ref" in one_of_type:
-              f_type += create_link(
-                one_of_type["$ref"], spec_file_name, context
+              parts.append(
+                create_link(one_of_type["$ref"], spec_file_name, context)
               )
-              if idx < len(details.get("oneOf", [])) - 1:
-                f_type += ", "
-          f_type += "]"
+            elif one_of_type.get("type"):
+              parts.append(f"`{one_of_type['type']}`")
+          f_type = f"OneOf[{', '.join(parts)}]"
         elif ref:
           if version_data:
             f_type = version_data.get("type", "any")
