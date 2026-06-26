@@ -123,14 +123,14 @@ A **capability** is a feature within a service. It declares what functionality i
 
 Full capability declaration for platform-level discovery. Includes spec/schema URLs for agent fetching.
 
-| Name    | Type    | Required | Description                                                                                                                     |
-| ------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| version | string  | **Yes**  | Entity version in YYYY-MM-DD format.                                                                                            |
-| spec    | string  | **Yes**  | URL to human-readable specification document.                                                                                   |
-| schema  | string  | **Yes**  | URL to JSON Schema defining this entity's structure and payloads.                                                               |
-| id      | string  | No       | Unique identifier for this entity instance. Used to disambiguate when multiple instances exist.                                 |
-| config  | object  | No       | Entity-specific configuration. Structure defined by each entity's schema.                                                       |
-| extends | OneOf[] | No       | Parent capability(s) this extends. Present for extensions, absent for root capabilities. Use array for multi-parent extensions. |
+| Name    | Type                       | Required | Description                                                                                                                     |
+| ------- | -------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| version | string                     | **Yes**  | Entity version in YYYY-MM-DD format.                                                                                            |
+| spec    | string                     | **Yes**  | URL to human-readable specification document.                                                                                   |
+| schema  | string                     | **Yes**  | URL to JSON Schema defining this entity's structure and payloads.                                                               |
+| id      | string                     | No       | Unique identifier for this entity instance. Used to disambiguate when multiple instances exist.                                 |
+| config  | object                     | No       | Entity-specific configuration. Structure defined by each entity's schema.                                                       |
+| extends | OneOf\[`string`, `array`\] | No       | Parent capability(s) this extends. Present for extensions, absent for root capabilities. Use array for multi-parent extensions. |
 
 #### Extensions
 
