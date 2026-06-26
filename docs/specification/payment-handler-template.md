@@ -315,6 +315,45 @@ Content-Type: application/json
 
 ---
 
+## Actions [CONDITIONAL]
+
+{Include this section if the handler may emit actions in checkout responses. If
+not applicable, state that the handler does not emit actions.}
+
+Actions emitted by this handler use the common
+[Actions](actions.md) envelope:
+
+<!-- ucp:example skip reason="handler action template" -->
+```json
+{
+  "id": "{action_occurrence_id}",
+  "code": "{handler_action_code}",
+  "severity": "optional | required | blocking",
+  "config": {
+    // Handler-defined runtime configuration
+  }
+}
+```
+
+| Code | Purpose | Severity | Config schema | Completion |
+| :--- | :------ | :------- | :------------ | :--------- |
+| `{handler_action_code}` | {what the platform must do} | {allowed severities} | {fields or schema reference} | {how checkout state or handler side channels reflect completion} |
+
+For each action, document:
+
+* When the action may be emitted.
+* What platform behavior is required.
+* Security and trust requirements for interpreting `config`, including origin
+  validation for any external surface.
+* Fallback behavior when unsupported, abandoned, expired, or failed.
+* How action completion is correlated by `id` and how duplicate retries are
+  handled.
+* How the business observes completion and returns the next checkout state.
+* Any handler-scoped negotiation or configuration required before the action can
+  be emitted.
+
+---
+
 <!--
   ADDITIONAL PARTICIPANT SECTIONS
 

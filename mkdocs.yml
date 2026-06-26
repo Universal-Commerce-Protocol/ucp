@@ -42,6 +42,7 @@ nav:
       - Announcements: documentation/announcements.md
   - Specification:
       - Overview: specification/overview.md
+      - Actions: specification/actions.md
       - Checkout Capability:
           - Overview: specification/checkout.md
           - Transports:
@@ -272,6 +273,10 @@ plugins:
           - specification/overview.md: >-
               Master technical specification of UCP, discovery mechanisms,
               secure transports, and error taxonomies.
+          - specification/actions.md: >-
+              Common Actions primitive, covering action ownership,
+              severity, idempotency, completion, fallback, and security rules
+              for in-band runtime steps emitted by active UCP surfaces.
         Message Signatures:
           - specification/signatures.md: >-
               Implementation details for RFC 9421 HTTP Message Signatures and
