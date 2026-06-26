@@ -54,6 +54,7 @@ nav:
           - Discounts Extension: specification/discount.md
           - Fulfillment Extension: specification/fulfillment.md
           - Loyalty Extension: specification/loyalty.md
+          - Product Addons Extension: specification/product-addons.md
           - Split Payments Extension: specification/split-payments.md
       - Cart Capability:
           - Overview: specification/cart.md
@@ -327,6 +328,10 @@ plugins:
               memberships, tiers, benefits, and reward earning forecasts while
               managing provisional eligibility claims and enforcing
               data-minimization privacy rules.
+          - specification/product-addons.md: >-
+              Product Addons Extension, defining addon
+              discovery, choice selection patterns, pricing resolution,
+              and mid-checkout addon changes.
         Cart Capability:
           - specification/cart.md: >-
               Pre-purchase Cart Capability, detailing item collection, state
