@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/attestation.json",
+  "name": "dev.ucp.shopping.attestation",
+  "title": "Attestation Extension",
+  "description": "Extends Cart and Checkout with cryptographic attestation for eligibility claims. Enables offline verification of non-instrument claims via signed proofs. Implementation note: payload MUST be treated as opaque and passed through without JSON re-serialization or key reordering — any transformation will break signature verification.",
+
+  "$defs": {
+    "attestation_object": {
+      "type": "object",
+      "title": "Attestation",
+      "description": "A signed proof accompanying an eligibility claim. The Business verifies by fetching the JWKS from provider_jwks, selecting the key matching kid, and verifying sig over the canonical JSON serialization of payload.",
+      "properties": {
+        "provider_jwks": {
+          "type": "string",
+          "format": "uri",
+          "description": "URI of the JSON Web Key Set containing the verification key."
+        },
+        "kid": {
+          "type": "string",
+          "description": "Key identifier for the signing key. Resolves via the JWKS endpoint."
+        },
+        "payload": {
+          "type": "object",
+          "description": "The exact signed attestation data, passed through from the provider without transformation. Contents are provider-specific. Platforms MUST preserve the provider's original serialization to ensure signature verification succeeds.",
+          "required": ["pass"],
+          "properties": {
+            "pass": {
+              "type": "boolean",
+              "description": "Whether the attested condition was met."
+            }
+          },
+          "additionalProperties": true
+        },
+        "sig": {
+          "type": "string",
+          "description": "Base64-encoded signature over the canonical JSON serialization of payload. Algorithm is declared in the JWKS key."
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "RFC 3339 timestamp after which the attestation is no longer valid. Lives outside payload because it is not covered by the signature — the Business checks this independently."
+        }
+      },
+      "required": ["provider_jwks", "kid", "payload", "sig", "expires_at"]
+    },
+
+    "attestations_map": {
+      "type": "object",
+      "description": "Map of eligibility claim to its attestation proof. Keys correspond to values in context.eligibility.",
+      "propertyNames": {
+        "$ref": "types/reverse_domain_name.json"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/attestation_object"
+      }
+    },
+
+    "dev.ucp.shopping.cart": {
+      "title": "Cart with Attestation",
+      "description": "Cart extended with attestation capability.",
+      "allOf": [
+        { "$ref": "cart.json" },
+        {
+          "type": "object",
+          "properties": {
+            "attestations": {
+              "$ref": "#/$defs/attestations_map",
+              "ucp_request": {
+                "create": "optional",
+                "update": "optional"
+              }
+            }
+          }
+        }
+      ]
+    },
+
+    "dev.ucp.shopping.checkout": {
+      "title": "Checkout with Attestation",
+      "description": "Checkout extended with attestation capability.",
+      "allOf": [
+        { "$ref": "checkout.json" },
+        {
+          "type": "object",
+          "properties": {
+            "attestations": {
+              "$ref": "#/$defs/attestations_map",
+              "ucp_request": {
+                "create": "optional",
+                "update": "optional",
+                "complete": "optional"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
