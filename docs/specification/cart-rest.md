@@ -25,34 +25,39 @@ This document specifies the REST binding for the [Cart Capability](cart.md).
 Businesses advertise REST transport availability through their UCP profile at
 `/.well-known/ucp`.
 
+<!-- ucp:example schema=profile def=business_schema -->
 ```json
 {
   "ucp": {
     "version": "{{ ucp_version }}",
     "services": {
-      "dev.ucp.shopping": {
-        "version": "{{ ucp_version }}",
-        "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview",
-        "rest": {
+      "dev.ucp.shopping": [
+        {
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview",
+          "transport": "rest",
           "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/rest.openapi.json",
           "endpoint": "https://business.example.com/ucp/v1"
         }
-      }
+      ]
     },
-    "capabilities": [
-      {
-        "name": "dev.ucp.shopping.checkout",
-        "version": "{{ ucp_version }}",
-        "spec": "https://ucp.dev/{{ ucp_version }}/specification/checkout",
-        "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/checkout.json"
-      },
-      {
-        "name": "dev.ucp.shopping.cart",
-        "version": "{{ ucp_version }}",
-        "spec": "https://ucp.dev/{{ ucp_version }}/specification/cart",
-        "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/cart.json"
-      }
-    ]
+    "capabilities": {
+      "dev.ucp.shopping.checkout": [
+        {
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/checkout",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/checkout.json"
+        }
+      ],
+      "dev.ucp.shopping.cart": [
+        {
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/cart",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/cart.json"
+        }
+      ]
+    },
+    "payment_handlers": {}
   }
 }
 ```
@@ -98,6 +103,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
 === "Request"
 
+    <!-- ucp:example schema=shopping/cart op=create direction=request -->
     ```json
     POST /carts HTTP/1.1
     UCP-Agent: profile="https://platform.example/profile"
@@ -122,6 +128,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/cart op=read -->
     ```json
     HTTP/1.1 201 Created
     Content-Type: application/json
@@ -129,16 +136,10 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
     {
       "ucp": {
         "version": "{{ ucp_version }}",
-        "capabilities": [
-          {
-            "name": "dev.ucp.shopping.checkout",
-            "version": "{{ ucp_version }}"
-          },
-          {
-            "name": "dev.ucp.shopping.cart",
-            "version": "{{ ucp_version }}"
-          }
-        ]
+        "capabilities": {
+          "dev.ucp.shopping.checkout": [{"version": "{{ ucp_version }}"}],
+          "dev.ucp.shopping.cart": [{"version": "{{ ucp_version }}"}]
+        }
       },
       "id": "cart_abc123",
       "line_items": [
@@ -177,12 +178,13 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
     All items out of stock — no cart resource is created:
 
+    <!-- ucp:example schema=common/types/error_response op=read -->
     ```json
     HTTP/1.1 200 OK
     Content-Type: application/json
 
     {
-      "ucp": { "version": "2026-01-15", "status": "error" },
+      "ucp": { "version": "{{ ucp_version }}", "status": "error" },
       "messages": [
         {
           "type": "error",
@@ -209,13 +211,14 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
 === "Request"
 
-    ```json
+    ```http
     GET /carts/{id} HTTP/1.1
     UCP-Agent: profile="https://platform.example/profile"
     ```
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/cart op=read -->
     ```json
     HTTP/1.1 200 OK
     Content-Type: application/json
@@ -223,16 +226,10 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
     {
       "ucp": {
         "version": "{{ ucp_version }}",
-        "capabilities": [
-          {
-            "name": "dev.ucp.shopping.checkout",
-            "version": "{{ ucp_version }}"
-          },
-          {
-            "name": "dev.ucp.shopping.cart",
-            "version": "{{ ucp_version }}"
-          }
-        ]
+        "capabilities": {
+          "dev.ucp.shopping.checkout": [{"version": "{{ ucp_version }}"}],
+          "dev.ucp.shopping.cart": [{"version": "{{ ucp_version }}"}]
+        }
       },
       "id": "cart_abc123",
       "line_items": [
@@ -268,6 +265,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
 === "Not Found"
 
+    <!-- ucp:example schema=common/types/error_response op=read -->
     ```json
     HTTP/1.1 200 OK
     Content-Type: application/json
@@ -276,12 +274,9 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
       "ucp": {
         "version": "{{ ucp_version }}",
         "status": "error",
-        "capabilities": [
-          {
-            "name": "dev.ucp.shopping.cart",
-            "version": "{{ ucp_version }}"
-          }
-        ]
+        "capabilities": {
+          "dev.ucp.shopping.cart": [{"version": "{{ ucp_version }}"}]
+        }
       },
       "messages": [
         {
@@ -311,6 +306,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
 === "Request"
 
+    <!-- ucp:example schema=shopping/cart op=update direction=request -->
     ```json
     PUT /carts/{id} HTTP/1.1
     UCP-Agent: profile="https://platform.example/profile"
@@ -344,6 +340,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/cart op=read -->
     ```json
     HTTP/1.1 200 OK
     Content-Type: application/json
@@ -351,16 +348,10 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
     {
       "ucp": {
         "version": "{{ ucp_version }}",
-        "capabilities": [
-          {
-            "name": "dev.ucp.shopping.checkout",
-            "version": "{{ ucp_version }}"
-          },
-          {
-            "name": "dev.ucp.shopping.cart",
-            "version": "{{ ucp_version }}"
-          }
-        ]
+        "capabilities": {
+          "dev.ucp.shopping.checkout": [{"version": "{{ ucp_version }}"}],
+          "dev.ucp.shopping.cart": [{"version": "{{ ucp_version }}"}]
+        }
       },
       "id": "cart_abc123",
       "line_items": [
@@ -421,6 +412,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
 === "Request"
 
+    <!-- ucp:example schema=shopping/cart op=cancel direction=request -->
     ```json
     POST /carts/{id}/cancel HTTP/1.1
     UCP-Agent: profile="https://platform.example/profile"
@@ -431,6 +423,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/cart op=read -->
     ```json
     HTTP/1.1 200 OK
     Content-Type: application/json
@@ -438,16 +431,10 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
     {
       "ucp": {
         "version": "{{ ucp_version }}",
-        "capabilities": [
-          {
-            "name": "dev.ucp.shopping.checkout",
-            "version": "{{ ucp_version }}"
-          },
-          {
-            "name": "dev.ucp.shopping.cart",
-            "version": "{{ ucp_version }}"
-          }
-        ]
+        "capabilities": {
+          "dev.ucp.shopping.checkout": [{"version": "{{ ucp_version }}"}],
+          "dev.ucp.shopping.cart": [{"version": "{{ ucp_version }}"}]
+        }
       },
       "id": "cart_abc123",
       "line_items": [
@@ -496,8 +483,10 @@ operations unless otherwise noted.
 * **Idempotency-Key**: Operations that modify state **SHOULD** support
     idempotency. When provided, the server **MUST**:
     1. Store the key with the operation result for at least 24 hours.
-    2. Return the cached result for duplicate keys.
-    3. Return `409 Conflict` if the key is reused with different parameters.
+    2. Return the cached result for duplicate keys whose request body matches the original.
+    3. Return `409 Conflict` if the key is reused with a mismatched body.
+    See [Message Signatures — Idempotency Key Requirements](signatures.md#replay-protection)
+    for the full payload-matching contract.
 
 ## Protocol Mechanics
 
@@ -531,6 +520,7 @@ code registry and transport binding examples.
 Business outcomes (including not found and validation errors) are returned with
 HTTP 200 and the UCP envelope containing `messages`:
 
+<!-- ucp:example schema=common/types/error_response op=read -->
 ```json
 {
   "ucp": {
@@ -561,8 +551,9 @@ authentication is required, the REST transport **MAY** use:
 
 1. **Open API**: No authentication required for public operations.
 2. **API Keys**: Via `X-API-Key` header.
-3. **OAuth 2.0**: Via `Authorization: Bearer {token}` header, following
-    [RFC 6749](https://tools.ietf.org/html/rfc6749){ target="_blank" }.
+3. **OAuth 2.0**: Via `Authorization: Bearer {token}` header. Identifies the
+   platform for agent-authenticated access, or both platform and user for
+   user-authenticated access (see [Identity Linking](identity-linking.md)).
 4. **Mutual TLS**: For high-security environments.
 
 Businesses **MAY** require authentication for some operations while leaving

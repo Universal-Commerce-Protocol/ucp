@@ -26,6 +26,7 @@ This document specifies the Model Context Protocol (MCP) binding for the
 Businesses advertise MCP transport availability through their UCP profile at
 `/.well-known/ucp`.
 
+<!-- ucp:example schema=profile def=business_schema op=read direction=response -->
 ```json
 {
   "ucp": {
@@ -81,6 +82,7 @@ Businesses advertise MCP transport availability through their UCP profile at
 MCP clients **MUST** include a `meta` object in every request containing
 protocol metadata:
 
+<!-- ucp:example schema=shopping/checkout op=create direction=request extract=$.params.arguments.checkout -->
 ```json
 {
   "jsonrpc": "2.0",
@@ -95,7 +97,7 @@ protocol metadata:
         },
         "idempotency-key": "550e8400-e29b-41d4-a716-446655440000"
       },
-      "checkout": { ... }
+      "checkout": { "line_items": [ ... ] }
     }
   }
 }
@@ -152,6 +154,7 @@ Maps to the [Create Checkout](checkout.md#create-checkout) operation.
 
 === "Request"
 
+    <!-- ucp:example schema=shopping/checkout op=create direction=request extract=$.params.arguments.checkout -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -173,6 +176,7 @@ Maps to the [Create Checkout](checkout.md#create-checkout) operation.
             },
             "line_items": [
               {
+                "id": "li_1",
                 "item": {
                   "id": "item_123"
                 },
@@ -204,136 +208,135 @@ Maps to the [Create Checkout](checkout.md#create-checkout) operation.
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/checkout op=read direction=response extract=$.result.structuredContent -->
     ```json
     {
       "jsonrpc": "2.0",
       "id": 1,
       "result": {
         "structuredContent": {
-          "checkout": {
-            "ucp": {
-              "version": "{{ ucp_version }}",
-              "capabilities": {
-                "dev.ucp.shopping.checkout": [
-                  {"version": "{{ ucp_version }}"}
-                ],
-                "dev.ucp.shopping.fulfillment": [
-                  {"version": "{{ ucp_version }}"}
-                ]
-              },
-              "payment_handlers": {
-                "com.example.vendor.delegate_payment": [
-                  {"id": "handler_1", "version": "{{ ucp_version }}", "available_instruments": [{"type": "card"}], "config": {}}
-                ]
-              }
-            },
-            "id": "checkout_abc123",
-            "status": "incomplete",
-            "buyer": {
-              "email": "jane.doe@example.com",
-              "first_name": "Jane",
-              "last_name": "Doe"
-            },
-            "line_items": [
-              {
-                "id": "item_123",
-                "item": {
-                  "id": "item_123",
-                  "title": "Blue Jeans",
-                  "price": 5000
-                },
-                "quantity": 1,
-                "totals": [
-                  {"type": "subtotal", "amount": 5000},
-                  {"type": "total", "amount": 5000}
-                ]
-              }
-            ],
-            "currency": "USD",
-            "totals": [
-              {
-                "type": "subtotal",
-                "amount": 5000
-              },
-              {
-                "type": "fulfillment",
-                "display_text": "Shipping",
-                "amount": 500
-              },
-              {
-                "type": "total",
-                "amount": 5500
-              }
-            ],
-            "fulfillment": {
-              "methods": [
-                {
-                  "id": "shipping_1",
-                  "type": "shipping",
-                  "line_item_ids": ["item_123"],
-                  "selected_destination_id": "dest_home",
-                  "destinations": [
-                    {
-                      "id": "dest_home",
-                      "street_address": "123 Main St",
-                      "address_locality": "Springfield",
-                      "address_region": "IL",
-                      "postal_code": "62701",
-                      "address_country": "US"
-                    }
-                  ],
-                  "groups": [
-                    {
-                      "id": "package_1",
-                      "line_item_ids": ["item_123"],
-                      "selected_option_id": "standard",
-                      "options": [
-                        {
-                          "id": "standard",
-                          "title": "Standard Shipping",
-                          "description": "Arrives in 5-7 business days",
-                          "totals": [
-                            {
-                              "type": "total",
-                              "amount": 500
-                            }
-                          ]
-                        },
-                        {
-                          "id": "express",
-                          "title": "Express Shipping",
-                          "description": "Arrives in 2-3 business days",
-                          "totals": [
-                            {
-                              "type": "total",
-                              "amount": 1000
-                            }
-                          ]
-                        }
-                      ]
-                    }
-                  ]
-                }
+          "ucp": {
+            "version": "{{ ucp_version }}",
+            "capabilities": {
+              "dev.ucp.shopping.checkout": [
+                {"version": "{{ ucp_version }}"}
+              ],
+              "dev.ucp.shopping.fulfillment": [
+                {"version": "{{ ucp_version }}"}
               ]
             },
-            "links": [
-              {
-                "type": "privacy_policy",
-                "url": "https://business.example.com/privacy"
+            "payment_handlers": {
+              "com.example.vendor.delegate_payment": [
+                {"id": "handler_1", "version": "{{ ucp_version }}", "available_instruments": [{"type": "card"}], "config": {}}
+              ]
+            }
+          },
+          "id": "checkout_abc123",
+          "status": "incomplete",
+          "buyer": {
+            "email": "jane.doe@example.com",
+            "first_name": "Jane",
+            "last_name": "Doe"
+          },
+          "line_items": [
+            {
+              "id": "li_1",
+              "item": {
+                "id": "item_123",
+                "title": "Blue Jeans",
+                "price": 5000
               },
+              "quantity": 1,
+              "totals": [
+                {"type": "subtotal", "amount": 5000},
+                {"type": "total", "amount": 5000}
+              ]
+            }
+          ],
+          "currency": "USD",
+          "totals": [
+            {
+              "type": "subtotal",
+              "amount": 5000
+            },
+            {
+              "type": "fulfillment",
+              "display_text": "Shipping",
+              "amount": 500
+            },
+            {
+              "type": "total",
+              "amount": 5500
+            }
+          ],
+          "fulfillment": {
+            "methods": [
               {
-                "type": "terms_of_service",
-                "url": "https://business.example.com/terms"
+                "id": "shipping_1",
+                "type": "shipping",
+                "line_item_ids": ["li_1"],
+                "selected_destination_id": "dest_home",
+                "destinations": [
+                  {
+                    "id": "dest_home",
+                    "street_address": "123 Main St",
+                    "address_locality": "Springfield",
+                    "address_region": "IL",
+                    "postal_code": "62701",
+                    "address_country": "US"
+                  }
+                ],
+                "groups": [
+                  {
+                    "id": "package_1",
+                    "line_item_ids": ["li_1"],
+                    "selected_option_id": "standard",
+                    "options": [
+                      {
+                        "id": "standard",
+                        "title": "Standard Shipping",
+                        "description": "Arrives in 5-7 business days",
+                        "totals": [
+                          {
+                            "type": "total",
+                            "amount": 500
+                          }
+                        ]
+                      },
+                      {
+                        "id": "express",
+                        "title": "Express Shipping",
+                        "description": "Arrives in 2-3 business days",
+                        "totals": [
+                          {
+                            "type": "total",
+                            "amount": 1000
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
               }
-            ],
-            "continue_url": "https://business.example.com/checkout-sessions/checkout_abc123",
-            "expires_at": "2026-01-11T18:30:00Z"
-          }
+            ]
+          },
+          "links": [
+            {
+              "type": "privacy_policy",
+              "url": "https://business.example.com/privacy"
+            },
+            {
+              "type": "terms_of_service",
+              "url": "https://business.example.com/terms"
+            }
+          ],
+          "continue_url": "https://business.example.com/checkout-sessions/checkout_abc123",
+          "expires_at": "2026-01-11T18:30:00Z"
         },
         "content": [
           {
             "type": "text",
-            "text": "{\"checkout\":{\"ucp\":{...},\"id\":\"checkout_abc123\",...}}"
+            "text": "{\"ucp\":{…},…}"
           }
         ]
       }
@@ -344,6 +347,7 @@ Maps to the [Create Checkout](checkout.md#create-checkout) operation.
 
     All items out of stock — no checkout resource is created:
 
+    <!-- ucp:example schema=common/types/error_response op=read direction=response extract=$.result.structuredContent -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -362,7 +366,7 @@ Maps to the [Create Checkout](checkout.md#create-checkout) operation.
           "continue_url": "https://merchant.com/"
         },
         "content": [
-          {"type": "text", "text": "{\"ucp\":{...},\"messages\":[...]}"}
+          {"type": "text", "text": "{\"ucp\":{…},…}"}
         ]
       }
     }
@@ -403,6 +407,7 @@ Maps to the [Update Checkout](checkout.md#update-checkout) operation.
 
 === "Request"
 
+    <!-- ucp:example schema=shopping/checkout op=update direction=request extract=$.params.arguments.checkout -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -428,6 +433,7 @@ Maps to the [Update Checkout](checkout.md#update-checkout) operation.
                 "item": {
                   "id": "item_123"
                 },
+                "id": "li_1",
                 "quantity": 1
               }
             ],
@@ -436,7 +442,7 @@ Maps to the [Update Checkout](checkout.md#update-checkout) operation.
               "methods": [
                 {
                   "id": "shipping_1",
-                  "line_item_ids": ["item_123"],
+                  "line_item_ids": ["li_1"],
                   "groups": [
                     {
                       "id": "package_1",
@@ -454,136 +460,135 @@ Maps to the [Update Checkout](checkout.md#update-checkout) operation.
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/checkout op=read direction=response extract=$.result.structuredContent -->
     ```json
     {
       "jsonrpc": "2.0",
       "id": 2,
       "result": {
         "structuredContent": {
-          "checkout": {
-            "ucp": {
-              "version": "{{ ucp_version }}",
-              "capabilities": {
-                "dev.ucp.shopping.checkout": [
-                  {"version": "{{ ucp_version }}"}
-                ],
-                "dev.ucp.shopping.fulfillment": [
-                  {"version": "{{ ucp_version }}"}
-                ]
-              },
-              "payment_handlers": {
-                "com.example.vendor.delegate_payment": [
-                  {"id": "handler_1", "version": "{{ ucp_version }}", "available_instruments": [{"type": "card"}], "config": {}}
-                ]
-              }
-            },
-            "id": "checkout_abc123",
-            "status": "incomplete",
-            "buyer": {
-              "email": "jane.doe@example.com",
-              "first_name": "Jane",
-              "last_name": "Doe"
-            },
-            "line_items": [
-              {
-                "id": "item_123",
-                "item": {
-                  "id": "item_123",
-                  "title": "Blue Jeans",
-                  "price": 5000
-                },
-                "quantity": 1,
-                "totals": [
-                  {"type": "subtotal", "amount": 5000},
-                  {"type": "total", "amount": 5000}
-                ]
-              }
-            ],
-            "currency": "USD",
-            "totals": [
-              {
-                "type": "subtotal",
-                "amount": 5000
-              },
-              {
-                "type": "fulfillment",
-                "display_text": "Shipping",
-                "amount": 1000
-              },
-              {
-                "type": "total",
-                "amount": 6000
-              }
-            ],
-            "fulfillment": {
-              "methods": [
-                {
-                  "id": "shipping_1",
-                  "type": "shipping",
-                  "line_item_ids": ["item_123"],
-                  "selected_destination_id": "dest_home",
-                  "destinations": [
-                    {
-                      "id": "dest_home",
-                      "street_address": "123 Main St",
-                      "address_locality": "Springfield",
-                      "address_region": "IL",
-                      "postal_code": "62701",
-                      "address_country": "US"
-                    }
-                  ],
-                  "groups": [
-                    {
-                      "id": "package_1",
-                      "line_item_ids": ["item_123"],
-                      "selected_option_id": "express",
-                      "options": [
-                        {
-                          "id": "standard",
-                          "title": "Standard Shipping",
-                          "description": "Arrives in 5-7 business days",
-                          "totals": [
-                            {
-                              "type": "total",
-                              "amount": 500
-                            }
-                          ]
-                        },
-                        {
-                          "id": "express",
-                          "title": "Express Shipping",
-                          "description": "Arrives in 2-3 business days",
-                          "totals": [
-                            {
-                              "type": "total",
-                              "amount": 1000
-                            }
-                          ]
-                        }
-                      ]
-                    }
-                  ]
-                }
+          "ucp": {
+            "version": "{{ ucp_version }}",
+            "capabilities": {
+              "dev.ucp.shopping.checkout": [
+                {"version": "{{ ucp_version }}"}
+              ],
+              "dev.ucp.shopping.fulfillment": [
+                {"version": "{{ ucp_version }}"}
               ]
             },
-            "links": [
-              {
-                "type": "privacy_policy",
-                "url": "https://business.example.com/privacy"
+            "payment_handlers": {
+              "com.example.vendor.delegate_payment": [
+                {"id": "handler_1", "version": "{{ ucp_version }}", "available_instruments": [{"type": "card"}], "config": {}}
+              ]
+            }
+          },
+          "id": "checkout_abc123",
+          "status": "incomplete",
+          "buyer": {
+            "email": "jane.doe@example.com",
+            "first_name": "Jane",
+            "last_name": "Doe"
+          },
+          "line_items": [
+            {
+              "id": "li_1",
+              "item": {
+                "id": "item_123",
+                "title": "Blue Jeans",
+                "price": 5000
               },
+              "quantity": 1,
+              "totals": [
+                {"type": "subtotal", "amount": 5000},
+                {"type": "total", "amount": 5000}
+              ]
+            }
+          ],
+          "currency": "USD",
+          "totals": [
+            {
+              "type": "subtotal",
+              "amount": 5000
+            },
+            {
+              "type": "fulfillment",
+              "display_text": "Shipping",
+              "amount": 1000
+            },
+            {
+              "type": "total",
+              "amount": 6000
+            }
+          ],
+          "fulfillment": {
+            "methods": [
               {
-                "type": "terms_of_service",
-                "url": "https://business.example.com/terms"
+                "id": "shipping_1",
+                "type": "shipping",
+                "line_item_ids": ["li_1"],
+                "selected_destination_id": "dest_home",
+                "destinations": [
+                  {
+                    "id": "dest_home",
+                    "street_address": "123 Main St",
+                    "address_locality": "Springfield",
+                    "address_region": "IL",
+                    "postal_code": "62701",
+                    "address_country": "US"
+                  }
+                ],
+                "groups": [
+                  {
+                    "id": "package_1",
+                    "line_item_ids": ["li_1"],
+                    "selected_option_id": "express",
+                    "options": [
+                      {
+                        "id": "standard",
+                        "title": "Standard Shipping",
+                        "description": "Arrives in 5-7 business days",
+                        "totals": [
+                          {
+                            "type": "total",
+                            "amount": 500
+                          }
+                        ]
+                      },
+                      {
+                        "id": "express",
+                        "title": "Express Shipping",
+                        "description": "Arrives in 2-3 business days",
+                        "totals": [
+                          {
+                            "type": "total",
+                            "amount": 1000
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
               }
-            ],
-            "continue_url": "https://business.example.com/checkout-sessions/checkout_abc123",
-            "expires_at": "2026-01-11T18:30:00Z"
-          }
+            ]
+          },
+          "links": [
+            {
+              "type": "privacy_policy",
+              "url": "https://business.example.com/privacy"
+            },
+            {
+              "type": "terms_of_service",
+              "url": "https://business.example.com/terms"
+            }
+          ],
+          "continue_url": "https://business.example.com/checkout-sessions/checkout_abc123",
+          "expires_at": "2026-01-11T18:30:00Z"
         },
         "content": [
           {
             "type": "text",
-            "text": "{\"checkout\":{\"ucp\":{...},\"id\":\"checkout_abc123\",...}}"
+            "text": "{\"ucp\":{…},…}"
           }
         ]
       }
@@ -641,41 +646,49 @@ Business outcomes (including errors like unavailable merchandise) are returned
 as JSON-RPC `result` with `structuredContent` containing the UCP envelope and
 `messages`:
 
+<!-- ucp:example schema=shopping/checkout op=read direction=response extract=$.result.structuredContent -->
 ```json
 {
   "jsonrpc": "2.0",
   "id": 1,
   "result": {
     "structuredContent": {
-      "checkout": {
-        "ucp": {
-          "version": "{{ ucp_version }}",
-          "capabilities": {
-            "dev.ucp.shopping.checkout": [{"version": "{{ ucp_version }}"}]
-          }
-        },
-        "id": "checkout_abc123",
-        "status": "incomplete",
-        "line_items": [
-          {
-            "id": "item_456",
-            "quantity": 100,
-            "available_quantity": 12
-          }
-        ],
-        "messages": [
-          {
-            "type": "warning",
-            "code": "quantity_adjusted",
-            "content": "Quantity adjusted, requested 100 units but only 12 available",
-            "path": "$.line_items[0].quantity"
-          }
-        ],
-        "continue_url": "https://merchant.com/checkout/checkout_abc123"
-      }
+      "ucp": {
+        "version": "{{ ucp_version }}",
+        "payment_handlers": {},
+        "capabilities": {
+          "dev.ucp.shopping.checkout": [{"version": "{{ ucp_version }}"}]
+        }
+      },
+      "id": "checkout_abc123",
+      "status": "incomplete",
+      "line_items": [
+        {
+          "id": "li_1",
+           "item": {
+              "id": "item_123",
+              "title": "Blue Jeans",
+              "price": 5000
+            },
+          "quantity": 12,
+          "totals": [...]
+        }
+      ],
+      "totals": [...],
+      "currency": "USD",
+      "links": [],
+      "messages": [
+        {
+          "type": "warning",
+          "code": "quantity_adjusted",
+          "content": "Quantity adjusted, requested 100 units but only 12 available",
+          "path": "$.line_items[0].quantity"
+        }
+      ],
+      "continue_url": "https://merchant.com/checkout/checkout_abc123"
     },
     "content": [
-      {"type": "text", "text": "{\"checkout\":{\"ucp\":{...},\"id\":\"checkout_abc123\",...}}"}
+      {"type": "text", "text": "{\"ucp\":{…},…}"}
     ]
   }
 }
@@ -684,6 +697,7 @@ as JSON-RPC `result` with `structuredContent` containing the UCP envelope and
 For `create_checkout`, when all items unavailable and no checkout can be created,
 JSON-RPC `result` with `structuredContent` containing the UCP envelope and `messages`:
 
+<!-- ucp:example schema=common/types/error_response op=read direction=response extract=$.result.structuredContent -->
 ```json
 {
   "jsonrpc": "2.0",
@@ -703,7 +717,7 @@ JSON-RPC `result` with `structuredContent` containing the UCP envelope and `mess
       "continue_url": "https://merchant.com/"
     },
     "content": [
-      {"type": "text", "text": "{\"ucp\":{...},\"messages\":[...]}"}
+      {"type": "text", "text": "{\"ucp\":{…},…}"}
     ]
   }
 }
@@ -770,7 +784,7 @@ Content-Digest: sha-256=:Y5fK8nLmPqRsT3vWxYzAbCdEfGhIjKlMnO...:
 Signature-Input: sig1=("@status" "content-digest" "content-type");keyid="merchant-2026"
 Signature: sig1=:MFQCIH7kL9nM2oP5qR8sT1uV4wX6yZaB3cD...:
 
-{"jsonrpc":"2.0","id":1,"result":{"content":[{"type":"text","text":"..."}],"structuredContent":{"checkout":{"id":"checkout_abc123","status":"completed"}}}}
+{"jsonrpc":"2.0","id":1,"result":{"content":[{"type":"text","text":"..."}],"structuredContent":{"id":"checkout_abc123","status":"completed"}}}
 ```
 
 See [Message Signatures - REST Response Signing](signatures.md#rest-response-signing)
@@ -815,6 +829,7 @@ transformation:
 
 **Example:** Given the `complete_checkout` operation defined in OpenRPC:
 
+<!-- ucp:example schema=shopping/checkout op=complete direction=request extract=$.params.checkout -->
 ```json
 {
   "method": "complete_checkout",
@@ -831,6 +846,7 @@ transformation:
 
 Implementers **MUST** expose this as an MCP `tools/call` endpoint:
 
+<!-- ucp:example schema=shopping/checkout op=complete direction=request extract=$.params.arguments.checkout -->
 ```json
 {
   "jsonrpc": "2.0",

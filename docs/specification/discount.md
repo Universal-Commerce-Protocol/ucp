@@ -38,6 +38,7 @@ to be shared between the platform and the business.
 Businesses advertise discount support in their profile. The capability can
 extend cart, checkout, or both:
 
+<!-- ucp:example schema=profile def=business_schema extract=$.ucp.capabilities target=$.ucp.capabilities -->
 ```json
 {
   "ucp": {
@@ -138,7 +139,7 @@ operations. The same semantics apply to both resources.
 
 - `discounts.applied` contains all active discounts (code-based + automatic)
 - Rejected codes communicated via `messages[]` (see below)
-- Discount amounts reflected in `totals[]` and `line_items[].discount`
+- Discount amounts reflected in `totals[]` and `line_items[].totals[]`
 
 **Cart-to-checkout continuity:** When a cart is converted to a checkout via the
 cart capability's `cart_id` field, businesses MUST carry forward any discount
@@ -151,17 +152,16 @@ standard rejection codes.
 When a submitted discount code cannot be applied, businesses communicate this
 via the `messages[]` array:
 
+<!-- ucp:example schema=shopping/cart target=$.messages -->
 ```json
-{
-  "messages": [
-    {
-      "type": "warning",
-      "code": "discount_code_expired",
-      "path": "$.discounts.codes[0]",
-      "content": "Code 'SUMMER20' expired on December 1st"
-    }
-  ]
-}
+[
+  {
+    "type": "warning",
+    "code": "discount_code_expired",
+    "path": "$.discounts.codes[0]",
+    "content": "Code 'SUMMER20' expired on December 1st"
+  }
+]
 ```
 
 > **Implementation guidance:** Operations that affect order totals, or the
@@ -238,6 +238,7 @@ stacking and allocation details:
 
 === "Request"
 
+    <!-- ucp:example schema=shopping/cart op=create direction=request -->
     ```json
     {
       "context": {
@@ -246,10 +247,9 @@ stacking and allocation details:
       "line_items": [
         {
           "item": {
-            "id": "prod_shirt",
-            "quantity": 2,
-            "price": 2500
-          }
+            "id": "prod_shirt"
+          },
+          "quantity": 2
         }
       ]
     }
@@ -257,8 +257,13 @@ stacking and allocation details:
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/cart op=read -->
     ```json
     {
+      "ucp": { ... },
+      "id": "...",
+      "currency": "...",
+      "line_items": [ ... ],
       "discounts": {
         "applied": [
           {
@@ -302,18 +307,18 @@ with allocations to shipping/fees, contribute to `discount`.
 
 | Discount Type        | Where Reflected                            |
 | -------------------- | ------------------------------------------ |
-| Line-item discount   | `line_items[].discount` + `items_discount` |
-| Order-level discount | `totals[]` with `type: "discount"`         |
+| Line-item discount   | `line_items[].totals[type=items_discount]` |
+| Order-level discount | `totals[type=discount]`                    |
 
 **Invariant:** `totals[type=items_discount].amount` equals
-`sum(line_items[].discount)`.
+`sum(line_items[].totals[type=items_discount].amount)`.
 
 The `discounts.applied` array shows **what** was applied. The `totals[]` and
-`line_items[].discount` show **where** and **how much**.
+`line_items[].totals[]` show **where** and **how much**.
 
-**Amount convention:** All discount amounts are positive integers in minor
-currency units. When presenting totals to users, display discount types as
-subtractive (e.g., "-$13.99").
+**Amount convention:** Discount amounts in `discounts.applied` are positive
+integers (the value of the discount). Discount entries in `totals[]` are
+negative (the effect on the receipt) — the sign is schema-enforced.
 
 ## Examples
 
@@ -325,16 +330,15 @@ proceeding to checkout.
 
 === "Request"
 
+    <!-- ucp:example schema=shopping/cart op=create direction=request -->
     ```json
     {
       "line_items": [
         {
           "item": {
-            "id": "prod_1",
-            "quantity": 2,
-            "title": "T-Shirt",
-            "price": 2000
-          }
+            "id": "prod_1"
+          },
+          "quantity": 2
         }
       ],
       "discounts": {
@@ -345,18 +349,21 @@ proceeding to checkout.
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/cart op=read -->
     ```json
     {
+      "ucp": { ... },
       "id": "cart_abc123",
+      "currency": "USD",
       "line_items": [
         {
           "id": "li_1",
           "item": {
             "id": "prod_1",
-            "quantity": 2,
             "title": "T-Shirt",
             "price": 2000
           },
+          "quantity": 2,
           "totals": [
             {"type": "subtotal", "amount": 4000},
             {"type": "items_discount", "amount": -800},
@@ -378,7 +385,6 @@ proceeding to checkout.
           }
         ]
       },
-      "currency": "USD",
       "totals": [
         {"type": "subtotal", "display_text": "Subtotal", "amount": 4000},
         {"type": "items_discount", "display_text": "Item Discounts", "amount": -800},
@@ -394,8 +400,11 @@ to the order as a whole and uses `type: "discount"` in totals.
 
 === "Request"
 
+    <!-- ucp:example schema=shopping/cart op=update direction=request -->
     ```json
     {
+      "id": "...",
+      "line_items": [ ... ],
       "discounts": {
         "codes": ["SAVE10"]
       }
@@ -404,8 +413,13 @@ to the order as a whole and uses `type: "discount"` in totals.
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/cart op=read -->
     ```json
     {
+      "ucp": { ... },
+      "id": "...",
+      "currency": "...",
+      "line_items": [ ... ],
       "discounts": {
         "codes": ["SAVE10"],
         "applied": [
@@ -431,8 +445,11 @@ to line items, and an automatic shipping discount at the order level.
 
 === "Request"
 
+    <!-- ucp:example schema=shopping/cart op=update direction=request -->
     ```json
     {
+      "id": "...",
+      "line_items": [ ... ],
       "discounts": {
         "codes": ["SUMMER20"]
       }
@@ -441,17 +458,21 @@ to line items, and an automatic shipping discount at the order level.
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/cart op=read -->
     ```json
     {
+      "ucp": { ... },
+      "id": "...",
+      "currency": "...",
       "line_items": [
         {
           "id": "li_1",
           "item": {
             "id": "prod_1",
-            "quantity": 2,
             "title": "T-Shirt",
             "price": 2000
           },
+          "quantity": 2,
           "totals": [
             {"type": "subtotal", "amount": 4000},
             {"type": "items_discount", "amount": -800},
@@ -495,8 +516,11 @@ but not in `discounts.applied`.
 
 === "Request"
 
+    <!-- ucp:example schema=shopping/cart op=update direction=request -->
     ```json
     {
+      "id": "...",
+      "line_items": [ ... ],
       "discounts": {
         "codes": ["SAVE10", "EXPIRED50"]
       }
@@ -505,8 +529,13 @@ but not in `discounts.applied`.
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/cart op=read -->
     ```json
     {
+      "ucp": { ... },
+      "id": "...",
+      "currency": "...",
+      "line_items": [ ... ],
       "discounts": {
         "codes": ["SAVE10", "EXPIRED50"],
         "applied": [
@@ -539,15 +568,21 @@ Multiple discounts applied with full allocation breakdown:
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/cart op=read -->
     ```json
     {
+      "ucp": { ... },
+      "id": "...",
+      "currency": "...",
       "line_items": [
         {
           "id": "li_1",
           "item": {
+            "id": "prod_1",
             "title": "T-Shirt",
             "price": 6000
           },
+          "quantity": 1,
           "totals": [
             {"type": "subtotal", "amount": 6000},
             {"type": "items_discount", "amount": -1500},
@@ -557,9 +592,11 @@ Multiple discounts applied with full allocation breakdown:
         {
           "id": "li_2",
           "item": {
+            "id": "prod_2",
             "title": "Socks",
             "price": 4000
           },
+          "quantity": 1,
           "totals": [
             {"type": "subtotal", "amount": 4000},
             {"type": "items_discount", "amount": -1000},
@@ -604,3 +641,4 @@ Multiple discounts applied with full allocation breakdown:
 
 With this data, an agent can explain:
 > "Your T-Shirt ($60) got $12 off from the 20% summer sale, plus $3 from your
+> loyalty reward (split proportionally). Total savings on this item: $15.

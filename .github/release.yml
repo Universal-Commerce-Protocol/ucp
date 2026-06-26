@@ -1,0 +1,14 @@
+changelog:
+  exclude:
+    labels:
+      - dependencies
+  categories:
+    - title: ✨ New Features
+      labels:
+        - enhancement
+    - title: 📝 Documentation Updates
+      labels:
+        - documentation
+    - title: 🛠 Other Changes
+      labels:
+        - "*"

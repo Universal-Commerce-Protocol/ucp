@@ -36,11 +36,10 @@
     },
     "method_type": {
       "type": "string",
-      "enum": ["shipping", "pickup", "digital"],
-      "description": "Delivery method type (shipping, pickup, digital)."
+      "description": "Delivery method type. Well-known values: `shipping`, `pickup`, `digital`; additional values MAY be used."
     },
     "destination": {
-      "$ref": "postal_address.json",
+      "$ref": "../../common/types/postal_address.json",
       "description": "Delivery destination address."
     },
     "description": {

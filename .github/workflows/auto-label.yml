@@ -1,0 +1,61 @@
+name: Auto Label Merged PRs
+
+on:
+  push:
+    branches:
+      - main
+      - "release/**"
+
+jobs:
+  label_prs:
+    runs-on: ubuntu-latest
+
+    permissions:
+      pull-requests: write
+
+    steps:
+      - name: Apply labels based on Conventional Commits
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const commit_sha = context.sha;
+
+            // Find the PR associated with this push (merge commit or squash merge)
+            const { data: prs } = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+              owner,
+              repo,
+              commit_sha
+            });
+
+            if (prs.length === 0) {
+              console.log('No PR found for this commit. Skipping.');
+              return;
+            }
+
+            const pr = prs[0];
+            const title = pr.title.toLowerCase();
+            const prNumber = pr.number;
+
+            let labelsToAdd = [];
+
+            // The Regex checks: Starts with type (^type), optional scope (\([^)]+\))?, optional bang (!?), and a colon (:)
+            if (/^feat(\([^)]+\))?!?:/.test(title)) {
+              labelsToAdd.push('enhancement');
+            } else if (/^docs(\([^)]+\))?!?:/.test(title)) {
+              labelsToAdd.push('documentation');
+            }
+
+            if (labelsToAdd.length > 0) {
+              console.log(`Adding labels: ${labelsToAdd} to merged PR #${prNumber}`);
+              
+              await github.rest.issues.addLabels({
+                owner: owner,
+                repo: repo,
+                issue_number: prNumber,
+                labels: labelsToAdd
+              });
+            } else {
+              console.log('No matching Conventional Commit prefix found. No labels added.');
+            }

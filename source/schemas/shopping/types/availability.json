@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/availability.json",
+  "title": "Availability",
+  "description": "Availability of an item: whether it can be obtained, and a qualifying status.",
+  "type": "object",
+  "properties": {
+    "available": {
+      "type": "boolean",
+      "description": "Whether this can be obtained. See status for fulfillment details."
+    },
+    "status": {
+      "type": "string",
+      "description": "Qualifies available with fulfillment state. Well-known values: `in_stock`, `backorder`, `preorder`, `out_of_stock`, `discontinued`."
+    }
+  }
+}

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/shopping/types/adjustment.json",
   "title": "Adjustment",
-  "description": "Append-only event that exists independently of fulfillment. Typically represents money movements but can be any post-order change. Polymorphic type that can optionally reference line items.",
+  "description": "Post-order event that exists independently of fulfillment. Typically represents money movements but can be any post-order change. Polymorphic type that can optionally reference line items.",
   "type": "object",
   "required": [
     "id",
@@ -45,16 +45,18 @@
           },
           "quantity": {
             "type": "integer",
-            "minimum": 1,
-            "description": "Quantity affected by this adjustment."
+            "description": "Signed quantity affected by this adjustment. Negative values represent reductions (e.g. returns); positive values represent additions (e.g. exchanges)."
           }
         }
       },
       "description": "Which line items and quantities are affected (optional)."
     },
-    "amount": {
-      "$ref": "amount.json",
-      "description": "Amount in ISO 4217 minor units for refunds, credits, or price adjustments."
+    "totals": {
+      "type": "array",
+      "items": {
+        "$ref": "total.json"
+      },
+      "description": "Adjustment totals breakdown. Signed values - negative for money returned to buyer (refunds, credits), positive for additional charges (exchanges)."
     },
     "description": {
       "type": "string",

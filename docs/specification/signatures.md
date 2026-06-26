@@ -43,29 +43,29 @@ UCP uses HTTP Message Signatures ([RFC 9421](https://www.rfc-editor.org/rfc/rfc9
 for all HTTP-based transports:
 
 ```text
-┌─────────────────────────────────────────────────────────────────┐
-│                     SHARED FOUNDATION                           │
-├─────────────────────────────────────────────────────────────────┤
-│  Signature Format: RFC 9421 (HTTP Message Signatures)           │
-│  Body Digest: RFC 9530 (Content-Digest, raw bytes)              │
-│  Algorithms: ES256 (required), ES384 (optional)                 │
-│  Key Format: JWK (RFC 7517)                                     │
-│  Key Discovery: signing_keys[] in /.well-known/ucp              │
-│  Replay Protection: idempotency-key (business layer)            │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                     HTTP TRANSPORTS                             │
-├─────────────────────────────────────────────────────────────────┤
-│  REST API: Standard HTTP requests                               │
-│  MCP: Streamable HTTP transport (JSON-RPC over HTTP)            │
-├─────────────────────────────────────────────────────────────────┤
-│  Headers:                                                       │
-│    Signature-Input    (describes signed components)             │
-│    Signature          (contains signature value)                │
-│    Content-Digest     (body hash, raw bytes)                    │
-└─────────────────────────────────────────────────────────────────┘
++-----------------------------------------------------------------+
+|                     SHARED FOUNDATION                           |
++-----------------------------------------------------------------+
+|  Signature Format: RFC 9421 (HTTP Message Signatures)           |
+|  Body Digest: RFC 9530 (Content-Digest, raw bytes)              |
+|  Algorithms: ES256 (required), ES384 (optional)                 |
+|  Key Format: JWK (RFC 7517)                                     |
+|  Key Discovery: signing_keys[] in /.well-known/ucp              |
+|  Replay Protection: idempotency-key (business layer)            |
++-----------------------------------------------------------------+
+                              |
+                              v
++-----------------------------------------------------------------+
+|                     HTTP TRANSPORTS                             |
++-----------------------------------------------------------------+
+|  REST API: Standard HTTP requests                               |
+|  MCP: Streamable HTTP transport (JSON-RPC over HTTP)            |
++-----------------------------------------------------------------+
+|  Headers:                                                       |
+|    Signature-Input    (describes signed components)             |
+|    Signature          (contains signature value)                |
+|    Content-Digest     (body hash, raw bytes)                    |
++-----------------------------------------------------------------+
 ```
 
 **Note:** UCP specifies streamable HTTP for MCP transport, replacing SSE-based
@@ -104,20 +104,21 @@ defined in [RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517).
 
 **EC Key Structure:**
 
-| Field | Type   | Required | Description                              |
-| :---- | :----- | :------- | :--------------------------------------- |
-| `kid` | string | Yes      | Key ID (referenced in signatures)        |
-| `kty` | string | Yes      | Key type (`EC` for elliptic curve)       |
-| `crv` | string | Yes*     | Curve name (`P-256`, `P-384`)            |
-| `x`   | string | Yes*     | X coordinate (base64url encoded)         |
-| `y`   | string | Yes*     | Y coordinate (base64url encoded)         |
-| `use` | string | No       | Key usage (`sig` for signing)            |
-| `alg` | string | No       | Algorithm (`ES256`, `ES384`)             |
+| Field | Type   | Required      | Description                              |
+| :---- | :----- | :------------ | :--------------------------------------- |
+| `kid` | string | Yes           | Key ID (referenced in signatures)        |
+| `kty` | string | Yes           | Key type (`EC` for elliptic curve)       |
+| `crv` | string | Yes `*`       | Curve name (`P-256`, `P-384`)            |
+| `x`   | string | Yes `*`       | X coordinate (base64url encoded)         |
+| `y`   | string | Yes `*`       | Y coordinate (base64url encoded)         |
+| `use` | string | No            | Key usage (`sig` for signing)            |
+| `alg` | string | No            | Algorithm (`ES256`, `ES384`)             |
 
-\* Required for EC keys
+* `*` Required for EC keys
 
 **Example:**
 
+<!-- ucp:example schema=profile extract=$ target=$.signing_keys[0] -->
 ```json
 {
   "kid": "key-2024-01-15",
@@ -165,13 +166,13 @@ For HTTP REST transport, UCP uses
 
 ### Headers
 
-| Header            | Direction        | Required | Description                           |
-| :---------------- | :--------------- | :------- | :------------------------------------ |
-| `Signature-Input` | Request/Response | Yes      | Describes signed components           |
-| `Signature`       | Request/Response | Yes      | Contains signature value              |
-| `Content-Digest`  | Request/Response | Cond.*   | SHA-256 hash of request/response body |
+| Header            | Direction        | Required  | Description                           |
+| :---------------- | :--------------- | :-------- | :------------------------------------ |
+| `Signature-Input` | Request/Response | Yes       | Describes signed components           |
+| `Signature`       | Request/Response | Yes       | Contains signature value              |
+| `Content-Digest`  | Request/Response | Cond. `*` | SHA-256 hash of request/response body |
 
-\* Required when request/response has a body
+* `*` Required when request/response has a body
 
 `Content-Digest` follows [RFC 9530](https://www.rfc-editor.org/rfc/rfc9530) and
 hashes the raw body bytes. This binds the message body to the signature without
@@ -188,21 +189,21 @@ verification.
 
 **Signed Components:**
 
-| Component         | Required  | Description                            |
-| :---------------- | :-------- | :------------------------------------- |
-| `@method`         | Yes       | HTTP method (GET, POST, etc.)          |
-| `@authority`      | Yes       | Target host (prevents cross-host relay)|
-| `@path`           | Yes       | Request path                           |
-| `@query`          | Cond.\*   | Query string (if present)              |
-| `ucp-agent`       | Cond.\**  | Profile URL (binds identity)           |
-| `idempotency-key` | Cond.\*** | Idempotency header (state-changing)    |
-| `content-digest`  | Cond.†    | Body digest (if body present)          |
-| `content-type`    | Cond.†    | Content-Type (if body present)         |
+| Component         | Required                          | Description                            |
+| :---------------- | :-------------------------------- | :------------------------------------- |
+| `@method`         | Yes                               | HTTP method (GET, POST, etc.)          |
+| `@authority`      | Yes                               | Target host (prevents cross-host relay)|
+| `@path`           | Yes                               | Request path                           |
+| `@query`          | Cond. `*`                         | Query string (if present)              |
+| `ucp-agent`       | Cond. `**`                        | Profile URL (binds identity)           |
+| `idempotency-key` | Cond. `***`                       | Idempotency header (state-changing)    |
+| `content-digest`  | Cond. `†`                         | Body digest (if body present)          |
+| `content-type`    | Cond. `†`                         | Content-Type (if body present)         |
 
-\* Required if request has query parameters
-\** Required if `UCP-Agent` header is present
-\*** Required for POST, PUT, DELETE, PATCH
-† Required if request has a body
+* `*`   Required if request has query parameters
+* `**`  Required if `UCP-Agent` header is present
+* `***` Required for POST, PUT, DELETE, PATCH
+* `†`   Required if request has a body
 
 **Signature Generation:**
 
@@ -283,13 +284,13 @@ Response signatures use `@status` instead of `@method`:
 
 **Signed Components:**
 
-| Component        | Required | Description                       |
-| :--------------- | :------- | :-------------------------------- |
-| `@status`        | Yes      | HTTP status code (200, 201, etc.) |
-| `content-digest` | Cond.*   | Body digest (if body present)     |
-| `content-type`   | Cond.*   | Content-Type (if body present)    |
+| Component        | Required   | Description                       |
+| :--------------- | :--------- | :-------------------------------- |
+| `@status`        | Yes        | HTTP status code (200, 201, etc.) |
+| `content-digest` | Cond. `*`  | Body digest (if body present)     |
+| `content-type`   | Cond. `*`  | Content-Type (if body present)    |
 
-\* Required if response has a body
+* `*` Required if response has a body
 
 **Complete Response Example:**
 
@@ -479,8 +480,22 @@ Signature: sig1=:MEUCIQD...:
 | **Entropy** | Minimum 128 bits (e.g., UUID v4, 22+ char alphanumeric) |
 | **Uniqueness** | Per-client, per-operation type |
 | **Server storage** | Minimum 24 hours, recommended 48 hours |
-| **On duplicate** | Return cached response, do not re-execute |
+| **On duplicate (matching payload)** | Return cached response, do not re-execute |
+| **On duplicate (mismatched payload)** | Reject with `409 Conflict` (REST) / `-32000` (MCP); do not execute |
 | **On storage failure** | Fail closed (reject request with 503) |
+
+**Payload Matching:** Businesses **MUST** detect whether the payload of
+a duplicate-key request matches the payload of the original by
+comparing the SHA-256 hash of the raw body bytes — the same digest
+RFC 9530 mandates as `Content-Digest`. When signing is in use, this
+value is supplied in the `Content-Digest` header and the Intermediary
+Warning above guarantees byte fidelity end-to-end; businesses persist
+it alongside the idempotency key. For unsigned requests, businesses
+compute the same digest from the received body bytes. Platforms
+therefore **MUST** generate a fresh idempotency key whenever they
+modify the request payload — including retries with modified payment
+instruments, updated shipping addresses, swapped line items, or any
+other change to the request body.
 
 **Note:** The RFC 9421 `created` parameter is **OPTIONAL**. UCP handles replay
 protection at the business layer through idempotency keys, not signature timestamps.
@@ -577,6 +592,7 @@ Content-Type: application/json
 
 ### MCP Error Response
 
+<!-- ucp:example schema=transports/jsonrpc def=error_response -->
 ```json
 {
   "jsonrpc": "2.0",

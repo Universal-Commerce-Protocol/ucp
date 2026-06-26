@@ -28,14 +28,79 @@ from typing import Any
 # --- CONFIGURATION ---
 # Base directories for schema resolution
 OPENAPI_DIR = Path("source/services/shopping")
-SHOPPING_SCHEMAS_DIR = Path("source/schemas/shopping")
-UCP_SCHEMA_PATH = Path("source/schemas/ucp.json")
-SCHEMAS_DIRS = [
-  Path("source/handlers/google_pay"),
-  Path("source/schemas"),
-  SHOPPING_SCHEMAS_DIR,
-  SHOPPING_SCHEMAS_DIR / "types",
+SCHEMAS_DIR = Path("source/schemas")
+HANDLERS_GOOGLE_PAY_DIR = Path("source/handlers/google_pay")
+COMMON_SCHEMAS_DIR = SCHEMAS_DIR / "common"
+COMMON_TYPES_DIR = COMMON_SCHEMAS_DIR / "types"
+UCP_SCHEMA_PATH = SCHEMAS_DIR / "ucp.json"
+
+
+# common/ is the protocol namespace; every other immediate subdir of
+# source/schemas/ is a vertical. Discovered at module load so adding a
+# vertical requires zero config changes here.
+def _discover_vertical_dirs() -> list[Path]:
+  if not SCHEMAS_DIR.exists():
+    return []
+  return sorted(
+    p for p in SCHEMAS_DIR.iterdir() if p.is_dir() and p.name != "common"
+  )
+
+
+VERTICAL_DIRS = _discover_vertical_dirs()
+VERTICAL_TYPES_DIRS = [
+  v / "types" for v in VERTICAL_DIRS if (v / "types").exists()
 ]
+# Retained for call sites that reference shopping specifically (e.g.
+# auto_generate_schema_reference default, create_link redirect logic).
+SHOPPING_SCHEMAS_DIR = SCHEMAS_DIR / "shopping"
+SHOPPING_TYPES_DIR = SHOPPING_SCHEMAS_DIR / "types"
+SCHEMAS_DIRS = [
+  HANDLERS_GOOGLE_PAY_DIR,
+  SCHEMAS_DIR,
+  COMMON_SCHEMAS_DIR,
+  COMMON_TYPES_DIR,
+  *VERTICAL_DIRS,
+  *VERTICAL_TYPES_DIRS,
+]
+
+
+def _validate_common_namespace_exclusivity() -> None:
+  """Fail fast if any vertical schema shadows a common-namespace filename.
+
+  The docs macro system resolves schemas by basename across SCHEMAS_DIRS
+  (first match wins), while JSON Schema's $ref resolves by full path.
+  Once a basename is claimed by common/ (top-level or types/), it is the
+  protocol's canonical definition; a vertical file with the same basename
+  would silently resolve to the wrong file in rendered docs. Verticals
+  are autonomous siblings and may freely share filenames with each
+  other — this guard only protects the common namespace.
+  """
+  common_names: dict[str, Path] = {}
+  for d in (COMMON_SCHEMAS_DIR, COMMON_TYPES_DIR):
+    if not d.exists():
+      continue
+    for p in d.glob("*.json"):
+      common_names[p.name] = p
+
+  for v in VERTICAL_DIRS:
+    for sub in (v, v / "types"):
+      if not sub.exists():
+        continue
+      for p in sub.glob("*.json"):
+        if p.name in common_names:
+          raise RuntimeError(
+            f"Schema filename '{p.name}' is claimed by common "
+            f"({common_names[p.name]}) and shadowed by {p}. Once a "
+            f"basename exists in common/ (top-level or types/), no "
+            f"vertical may reuse it — doc resolution is basename-based "
+            f"and would silently bind to the wrong file. Rename or "
+            f"remove the vertical file. Verticals may share filenames "
+            f"with each other; this rule only protects common."
+          )
+
+
+_validate_common_namespace_exclusivity()
+
 
 # Cache for resolved schemas to avoid repeated subprocess calls
 _resolved_schema_cache: dict[str, dict] = {}
@@ -312,12 +377,17 @@ def define_env(env):
     if ref_string.startswith("types/"):
       spec_file_name = "reference"
 
-    # Redirect sibling refs that are types (e.g. "item.json" in
-    # types/order_line_item.json)
-    elif "/" not in ref_string and ref_string.endswith(".json"):
-      type_path = Path("source/schemas/shopping/types") / ref_string
-      shopping_path = Path("source/schemas/shopping") / ref_string
-      if type_path.exists() and not shopping_path.exists():
+    # Redirect refs to common/types/ or shopping/types/ schemas to reference.
+    # Uses ref_path (fragment stripped) so refs like
+    # "../common/types/pagination.json#/$defs/request" are handled correctly.
+    elif ref_path.endswith(".json"):
+      filename_only = Path(ref_path).name
+      common_type_path = COMMON_TYPES_DIR / filename_only
+      shopping_type_path = SHOPPING_TYPES_DIR / filename_only
+      shopping_path = SHOPPING_SCHEMAS_DIR / filename_only
+      if common_type_path.exists() or (
+        shopping_type_path.exists() and not shopping_path.exists()
+      ):
         spec_file_name = "reference"
 
     filename = Path(ref_path).name
@@ -503,17 +573,36 @@ def define_env(env):
           context,
         )
 
+    # Merge required arrays from all allOf siblings so that
+    # requirements declared at any level surface correctly.
+    merged_required = list(required_list) if required_list else []
+    for item in properties_list:
+      for req in item.get("required", []):
+        if req not in merged_required:
+          merged_required.append(req)
+
     md = []
     for properties in properties_list:
       if len(properties) == 1 and "$ref" in properties:
         embedded_data = _render_table_from_ref(
-          properties["$ref"], required_list, spec_file_name, context
+          properties["$ref"], merged_required, spec_file_name, context
         )
         md.append(embedded_data)
         continue
+
+      # Skip allOf siblings that only carry constraints (required,
+      # anyOf with const-only properties) but define no new fields.
+      has_renderable = (
+        properties.get("properties")
+        or properties.get("$ref")
+        or properties.get("allOf")
+      )
+      if not has_renderable:
+        continue
+
       md.append(
         _render_table_from_schema(
-          properties, spec_file_name, False, required_list, context
+          properties, spec_file_name, False, merged_required, context
         )
       )
 
@@ -575,15 +664,18 @@ def define_env(env):
     required_list = schema_data.get("required", [])
 
     if parent_required_list:
-      # Used for embedded schemas, we will only enforce the uppermost level
-      # required list.
-      required_list = parent_required_list
+      # Preserve required fields from both the embedded child schema and the
+      # parent wrapper that referenced it.
+      required_list = list(required_list)
+      for req in parent_required_list:
+        if req not in required_list:
+          required_list.append(req)
 
     if (
       not properties
-      and "allOf" not in schema_data
       and "oneOf" not in schema_data
       and "$ref" not in schema_data
+      and ("allOf" not in schema_data or schema_data.get("type") == "array")
     ):
       # Fallback for scalar schemas (Enums, Strings with patterns, etc.)
       s_type = schema_data.get("type")
@@ -615,7 +707,7 @@ def define_env(env):
           context,
         )
       )
-    elif "allOf" in schema_data:
+    elif "allOf" in schema_data and not properties:
       md.append(
         _render_embedded_table(
           schema_data.get("allOf", []),
@@ -643,6 +735,28 @@ def define_env(env):
         f_type = details.get("type", "any")
         ref = details.get("$ref")
 
+        # Resolve UCP $defs references inline so properties render as
+        # expanded tables (with anchors) instead of opaque links.
+        # e.g., "$ref": "../../ucp.json#/$defs/error" -> inline the allOf
+        if ref and "ucp.json#/$defs/" in ref and "$defs" in ref:
+          def_name = ref.split("/")[-1]
+          try:
+            with UCP_SCHEMA_PATH.open(encoding="utf-8") as f:
+              ucp_data = json.load(f)
+              resolved_def = ucp_data.get("$defs", {}).get(def_name)
+              if resolved_def:
+                # Merge resolved def into details, preserving embedder's
+                # description. The resolved def (e.g. allOf with base +
+                # status const) replaces the bare $ref.
+                embedder_desc = details.get("description")
+                details = dict(resolved_def)
+                if embedder_desc:
+                  details["description"] = embedder_desc
+                ref = None
+                f_type = details.get("type", "any")
+          except (json.JSONDecodeError, OSError):
+            pass
+
         # Check for Array specific logic
         items = details.get("items", {})
         items_ref = items.get("$ref")
@@ -659,16 +773,19 @@ def define_env(env):
 
         # --- Logic to determine Display Type ---
         if "oneOf" in details:
-          # List of values embedded within an oneOf
-          f_type = "OneOf["
-          for idx, one_of_type in enumerate(details.get("oneOf", [])):
+          # Render each branch: a $ref becomes a type link, an inline
+          # branch shows its JSON type (matching the prose oneOf renderer
+          # above). Without the inline case, a oneOf of scalars such as
+          # capability `extends` (string | array) rendered as "OneOf[]".
+          parts = []
+          for one_of_type in details.get("oneOf", []):
             if "$ref" in one_of_type:
-              f_type += create_link(
-                one_of_type["$ref"], spec_file_name, context
+              parts.append(
+                create_link(one_of_type["$ref"], spec_file_name, context)
               )
-              if idx < len(details.get("oneOf", [])) - 1:
-                f_type += ", "
-          f_type += "]"
+            elif one_of_type.get("type"):
+              parts.append(f"`{one_of_type['type']}`")
+          f_type = f"OneOf[{', '.join(parts)}]"
         elif ref:
           if version_data:
             f_type = version_data.get("type", "any")
@@ -767,12 +884,16 @@ def define_env(env):
             embedded_schema_data = embedded_schema_data.copy()
             embedded_schema_data["allOf"] = new_all_of
 
-          return _render_table_from_schema(
+          table = _render_table_from_schema(
             embedded_schema_data,
             spec_file_name,
             need_header,
             parent_required_list,
           )
+          desc = embedded_schema_data.get("description", "")
+          if desc and need_header:
+            return f"{desc}\n\n{table}"
+          return table
         else:
           raise RuntimeError(
             f"Definition '{def_path}' not found in '{full_path}'"
@@ -783,6 +904,78 @@ def define_env(env):
     raise FileNotFoundError(
       f"Schema file '{core_entity_name}' not found in any schema"
       f" directory{get_error_context()}."
+    )
+
+  def _resolves_to_shared_type(ref_path):
+    """Return path if ref_path identifies a `common/types/` primitive.
+
+    Scope is intentionally narrow: only schemas under
+    `source/schemas/common/types/` get redirected to `reference.md`.
+    These are cross-vertical primitives -- types reused as
+    interchangeable building blocks across capabilities -- where an
+    integrator reading a capability page does not need their fields
+    enumerated inline, and a link to the canonical entry preserves
+    enough context.
+
+    Vertical-namespaced types under `<vertical>/types/` intentionally
+    retain inline rendering on capability pages. They carry
+    vertical-specific semantics that integrators expect to read in
+    situ, including operation-filtered variants (per-operation
+    request shapes and the response shape) that `reference.md` cannot
+    express because it renders a single canonical heading per schema
+    file. The resulting render duplication across capability pages is
+    acceptable because every render is generated from the same JSON
+    source, so drift between them is structurally impossible.
+
+    Cross-references emitted inside any rendered table continue to
+    route to `reference.md` via `create_link` (the redirect rule
+    introduced in #226 is unchanged), so anchor consistency holds
+    end-to-end regardless of which pages render a given type inline.
+
+    This lookup assumes that filenames at `common/` root remain
+    disjoint from `common/types/`. If a future schema introduces a
+    basename collision, the rule here will need explicit
+    disambiguation.
+    """
+    name = ref_path.split("/")[-1]
+    candidate = COMMON_TYPES_DIR / (name + ".json")
+    return candidate if candidate.exists() else None
+
+  def _render_shared_type_link(canonical_name, spec_file_name):
+    """Emit a Markdown link to the `reference.md` entry for a shared type.
+
+    Used in place of inline-rendering a `common/types/` table on a
+    capability page (#412). `create_link` already routes `types/...`
+    anchors to `reference.md`, so we reuse it to keep the anchor scheme
+    consistent with cross-references emitted from inside other tables.
+
+    `canonical_name` must be the suffix-stripped base name (with or
+    without a leading `types/`), never the raw macro argument.
+    `reference.md` emits exactly one anchor per schema file -- one
+    heading per file, one anchor per heading -- and does not emit
+    per-variant anchors. A raw argument still carrying an operation suffix would
+    cause `create_link` to bake the variant into the anchor and target
+    a heading that does not exist on `reference.md`.
+    """
+    # Normalize canonical_name into a ref-style path so create_link's
+    # anchor logic matches the heading produced by
+    # auto_generate_schema_reference on reference.md.
+    ref = (
+      canonical_name
+      if canonical_name.startswith("types/")
+      else f"types/{canonical_name}"
+    )
+    if not ref.endswith(".json"):
+      ref = ref + ".json"
+    link = create_link(ref, spec_file_name)
+    # The trailing reference must use the `site:` absolute scheme
+    # (handled by the site-urls plugin), not a relative `reference.md`
+    # link. A relative link resolves from the source file's directory,
+    # so callers from any subdirectory page would otherwise target a
+    # non-existent `<subdir>/reference.md`.
+    return (
+      f"See {link} in the [Schema Reference](site:specification/reference/) "
+      f"for the canonical field definition."
     )
 
   # --- MACRO 1: For Standalone JSON Schemas ---
@@ -796,6 +989,12 @@ def define_env(env):
     - 'cart_resp' -> resolves cart.json as response schema
     - 'cart_create_req' -> resolves cart.json as request schema (op=create)
     - 'buyer' -> resolves buyer.json as response schema (default)
+
+    For schemas under `common/types/` (cross-vertical primitives),
+    callers from pages other than `reference.md` receive a Markdown
+    link to the canonical entry on `reference.md` instead of an
+    inline table. See `_resolves_to_shared_type` for the scope
+    rationale and #412 for the motivating discussion.
 
     Args:
     ----
@@ -825,6 +1024,18 @@ def define_env(env):
       else:
         base_name = entity_name[:-4]
         direction = "request"
+
+    # Redirect capability-page callers to reference.md for primitives
+    # under `common/types/` only. Vertical-namespaced types continue to
+    # render inline; see _resolves_to_shared_type for the scope
+    # rationale. reference.md itself always renders full tables via
+    # auto_generate_schema_reference. base_name is passed (suffix
+    # stripped) so the link anchor targets the canonical heading.
+    if (
+      spec_file_name != "reference"
+      and _resolves_to_shared_type(base_name) is not None
+    ):
+      return _render_shared_type_link(base_name, spec_file_name)
 
     # Build context for downstream link generation
     context = {"io_type": direction, "operation_id": operation}
@@ -859,6 +1070,12 @@ def define_env(env):
 
     Usage: {{ extension_schema_fields('fulfillment_option') }}
 
+    When the embedded schema lives under `common/types/`, the macro
+    emits a link to the canonical entry on `reference.md` instead of
+    rendering the table inline. Vertical-namespaced extensions render
+    inline as before. See `_resolves_to_shared_type` for scope and
+    #412 for motivation.
+
     Args:
     ----
       entity_name: The name of the schema entity embedded in the extension
@@ -867,6 +1084,17 @@ def define_env(env):
         should be rendered (e.g., "checkout", "fulfillment").
 
     """
+    # entity_name has the form `<file>.json#/$defs/<def>`. Redirect to
+    # reference.md only when `<file>.json` resolves to a
+    # `common/types/` schema; vertical-namespaced extensions keep
+    # their inline render so same-page `$defs` anchors continue to
+    # resolve. file_part preserves any `types/` prefix from the
+    # caller so the lookup is unambiguous against the basename
+    # namespace.
+    if spec_file_name != "reference" and ".json#" in entity_name:
+      file_part = entity_name.split(".json#", 1)[0]
+      if _resolves_to_shared_type(file_part) is not None:
+        return create_link(entity_name, spec_file_name)
     return _read_schema_from_defs(entity_name, spec_file_name)
 
   @env.macro
@@ -875,22 +1103,24 @@ def define_env(env):
     spec_file_name="reference",
     include_extensions=True,
     include_capability=True,
+    base_dir=None,
   ):
     """Scan a dir for JSON schemas and generate documentation.
 
-    Scan a subdirectory within source/schemas/shopping/ for .json files
-    and generate documentation for each schema found.
+    Scan a subdirectory for .json files and generate documentation for each
+    schema found. Defaults to scanning source/schemas/shopping/.
 
     Args:
     ----
-      sub_dir: The subdirectory to scan, relative to source/schemas/shopping/.
+      sub_dir: The subdirectory to scan, relative to base_dir.
       spec_file_name: The name of the spec file for link generation.
       include_extensions: If true, includes schemas with 'Extension' in title.
       include_capability: If true, includes schemas without 'Extension' in
         title.
+      base_dir: Override the base directory to scan (default: shopping schemas).
 
     """
-    schema_base_path = SHOPPING_SCHEMAS_DIR
+    schema_base_path = Path(base_dir) if base_dir else SHOPPING_SCHEMAS_DIR
     scan_path = (
       schema_base_path / sub_dir if sub_dir != "." else schema_base_path
     )

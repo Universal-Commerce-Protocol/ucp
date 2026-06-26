@@ -3,43 +3,107 @@
   "$id": "https://ucp.dev/schemas/shopping/buyer_consent.json",
   "name": "dev.ucp.shopping.buyer_consent",
   "title": "Buyer Consent Extension",
-  "description": "Extends Checkout with buyer consent tracking for privacy compliance via the buyer object.",
+  "description": "Extends the buyer object with per-purpose consent. Each purpose is keyed by a reverse-DNS identifier and carries the current `granted` state, the `source` of that state (business default or platform-captured buyer decision), a `description`, optional `links`, and optional `segments` for finer-grained channel, vendor, or program decisions scoped to that purpose.",
   "$defs": {
-    "consent": {
+    "consent_purpose": {
       "type": "object",
-      "description": "User consent states for data processing",
+      "description": "A buyer's consent decision for a purpose (e.g., marketing, analytics). Carries the current binary state, its source (business default or platform-captured buyer decision), human-readable context, and optional refinements scoping the decision to specific channels, vendors, or programs.",
+      "required": ["granted", "source", "description"],
       "properties": {
-        "analytics": {
+        "granted": {
           "type": "boolean",
-          "description": "Consent for analytics and performance tracking."
+          "description": "Whether consent has been granted for this purpose. The `source` field identifies who asserted this state (business default or platform-captured buyer preference)."
         },
-        "preferences": {
-          "type": "boolean",
-          "description": "Consent for storing user preferences."
+        "source": {
+          "type": "string",
+          "enum": ["business", "platform"],
+          "description": "Identifies the party that asserted the current `granted` value. `business` means the value reflects the business's default policy; `platform` means the value reflects an explicit buyer decision captured by the platform."
         },
-        "marketing": {
-          "type": "boolean",
-          "description": "Consent for marketing communications."
+        "description": {
+          "type": "string",
+          "description": "Human-readable description of what the buyer is consenting to (e.g., 'Promotional communications across all channels').",
+          "ucp_request": "omit",
+          "ucp_response": "required"
         },
-        "sale_of_data": {
-          "type": "boolean",
-          "description": "Consent for selling data to third parties (CCPA)."
+        "links": {
+          "type": "array",
+          "items": { "$ref": "../common/types/link.json" },
+          "description": "Optional links providing context (e.g., privacy policy, terms).",
+          "ucp_request": "omit"
+        },
+        "segments": {
+          "type": "object",
+          "description": "Optional refinements scoping this purpose to specific channels, vendors, or programs. Keys are reverse-DNS identifiers. UCP currently defines two well-known segment identifiers under `dev.ucp.consent.marketing`: `dev.ucp.consent.marketing.email`, `dev.ucp.consent.marketing.sms`. Other segments follow vendor or merchant reverse-DNS conventions.",
+          "propertyNames": { "$ref": "../common/types/reverse_domain_name.json" },
+          "additionalProperties": { "$ref": "#/$defs/consent_segment" }
         }
       }
     },
+    "consent_segment": {
+      "type": "object",
+      "description": "A buyer's consent decision for a specific refinement of a parent purpose (e.g., email marketing under the marketing purpose). Overrides the parent's `granted` value for this scope. Segments do not nest further.",
+      "required": ["granted", "source", "description"],
+      "properties": {
+        "granted": {
+          "type": "boolean",
+          "description": "Whether consent has been granted for this segment. Overrides the parent purpose's `granted` value for this specific scope."
+        },
+        "source": {
+          "type": "string",
+          "enum": ["business", "platform"],
+          "description": "Identifies the party that asserted the current `granted` value for this segment. `business` means the value reflects the business's default policy; `platform` means the value reflects an explicit buyer decision captured by the platform."
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable description of what the buyer is consenting to within this segment (e.g., 'Promotional emails and exclusive offers').",
+          "ucp_request": "omit",
+          "ucp_response": "required"
+        },
+        "links": {
+          "type": "array",
+          "items": { "$ref": "../common/types/link.json" },
+          "description": "Optional segment-specific links (e.g., channel terms or privacy disclosures).",
+          "ucp_request": "omit"
+        }
+      }
+    },
+    "consent": {
+      "type": "object",
+      "description": "Per-purpose consent. Keys are reverse-DNS purpose identifiers. UCP defines four well-known purposes: `dev.ucp.consent.marketing`, `dev.ucp.consent.analytics`, `dev.ucp.consent.preferences`, `dev.ucp.consent.sale_or_sharing`. Vendors and merchants may define additional purposes under their own reverse-DNS namespace.",
+      "propertyNames": { "$ref": "../common/types/reverse_domain_name.json" },
+      "additionalProperties": { "$ref": "#/$defs/consent_purpose" }
+    },
     "buyer": {
       "title": "Buyer with Consent",
-      "description": "Buyer object extended with consent tracking.",
+      "description": "Buyer object extended with per-purpose consent.",
       "allOf": [
-        {
-          "$ref": "types/buyer.json"
-        },
+        { "$ref": "types/buyer.json" },
         {
           "type": "object",
           "properties": {
             "consent": {
               "$ref": "#/$defs/consent",
-              "description": "Consent tracking fields."
+              "description": "Per-purpose consent decisions and business-advertised consent options."
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.cart": {
+      "title": "Cart with Buyer Consent",
+      "description": "Cart extended with buyer consent.",
+      "allOf": [
+        { "$ref": "cart.json" },
+        {
+          "type": "object",
+          "properties": {
+            "buyer": {
+              "$ref": "#/$defs/buyer",
+              "description": "Buyer with consent tracking.",
+              "ucp_request": {
+                "create": "optional",
+                "update": "optional"
+              }
             }
           }
         }
@@ -47,11 +111,9 @@
     },
     "dev.ucp.shopping.checkout": {
       "title": "Checkout with Buyer Consent",
-      "description": "Checkout extended with consent tracking via buyer object.",
+      "description": "Checkout extended with buyer consent.",
       "allOf": [
-        {
-          "$ref": "checkout.json"
-        },
+        { "$ref": "checkout.json" },
         {
           "type": "object",
           "properties": {
@@ -61,7 +123,7 @@
               "ucp_request": {
                 "create": "optional",
                 "update": "optional",
-                "complete": "omit"
+                "complete": "optional"
               }
             }
           }

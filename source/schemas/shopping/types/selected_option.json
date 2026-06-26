@@ -13,6 +13,10 @@
       "type": "string",
       "description": "Option name (e.g., 'Size')."
     },
+    "id": {
+      "type": "string",
+      "description": "Optional option value identifier from option_value.id. When present, the server SHOULD use it for matching; name and label remain required for display."
+    },
     "label": {
       "type": "string",
       "description": "Selected option label (e.g., 'Large')."
