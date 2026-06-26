@@ -1,0 +1,167 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/additional_fields_date.json",
+  "name": "dev.ucp.shopping.additional_fields_date",
+  "title": "Date Additional Fields Extension",
+  "description": "Extends Additional Fields with date input semantics and date range hints for checkout, and date input type identifiers for read-only order additional fields.",
+  "$defs": {
+    "date_input": {
+      "title": "Date Input",
+      "type": "object",
+      "description": "Date field semantics with optional date range hints.",
+      "required": [
+        "type"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "date",
+          "description": "Use date for calendar-date fields.",
+          "examples": [
+            "date"
+          ]
+        },
+        "min": {
+          "type": "string",
+          "format": "date",
+          "description": "Earliest accepted date in YYYY-MM-DD format."
+        },
+        "max": {
+          "type": "string",
+          "format": "date",
+          "description": "Latest accepted date in YYYY-MM-DD format."
+        }
+      }
+    },
+    "dev.ucp.shopping.additional_fields": {
+      "title": "Additional Fields with Date Type",
+      "description": "Additional Fields extended with date input semantics.",
+      "type": "object",
+      "properties": {
+        "additional_fields": {
+          "type": "array",
+          "description": "Merchant-defined additional checkout fields with date input semantics.",
+          "items": {
+            "allOf": [
+              {
+                "$ref": "additional_fields.json#/$defs/additional_field"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "input": {
+                    "description": "Input control configuration.",
+                    "ucp_request": "omit",
+                    "allOf": [
+                      {
+                        "$ref": "additional_fields.json#/$defs/additional_field_input"
+                      },
+                      {
+                        "type": "object",
+                        "additionalProperties": true,
+                        "allOf": [
+                          {
+                            "if": {
+                              "properties": {
+                                "type": {
+                                  "const": "date"
+                                }
+                              },
+                              "required": [
+                                "type"
+                              ]
+                            },
+                            "then": {
+                              "$ref": "#/$defs/date_input"
+                            }
+                          }
+                        ],
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "description": "Field type identifier. This extension defines date in addition to the base text type."
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          "ucp_request": {
+            "create": "optional",
+            "update": "optional",
+            "complete": "omit"
+          }
+        }
+      }
+    },
+    "dev.ucp.shopping.checkout": {
+      "title": "Checkout with Date Additional Fields",
+      "description": "Checkout additional fields extended with date input semantics.",
+      "type": "object",
+      "properties": {
+        "additional_fields": {
+          "type": "array",
+          "description": "Merchant-defined additional checkout fields with date input semantics.",
+          "items": {
+            "$ref": "#/$defs/dev.ucp.shopping.additional_fields/properties/additional_fields/items"
+          },
+          "ucp_request": {
+            "create": "optional",
+            "update": "optional",
+            "complete": "omit"
+          }
+        }
+      }
+    },
+    "dev.ucp.shopping.order": {
+      "title": "Order with Date Additional Fields",
+      "description": "Order additional fields extended with date input type identifiers.",
+      "type": "object",
+      "properties": {
+        "additional_fields": {
+          "type": "array",
+          "description": "Read-only additional field values captured during checkout, with date input type identifiers.",
+          "items": {
+            "allOf": [
+              {
+                "$ref": "additional_fields.json#/$defs/order_additional_field"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "input": {
+                    "description": "Input metadata for the captured field.",
+                    "allOf": [
+                      {
+                        "$ref": "additional_fields.json#/$defs/order_additional_field_input"
+                      },
+                      {
+                        "type": "object",
+                        "additionalProperties": true,
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "description": "Field type identifier. This extension defines date in addition to the base text type.",
+                            "examples": [
+                              "text",
+                              "date"
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          "ucp_request": "omit"
+        }
+      }
+    }
+  }
+}

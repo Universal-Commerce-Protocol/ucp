@@ -524,6 +524,46 @@ const UcpData = {
         schema: "https://ucp.dev/{{ ucp_version }}/schemas/shopping/discount.json"
       }
     ],
+    "dev.ucp.shopping.additional_fields": [
+      {
+        extends: ["dev.ucp.shopping.checkout", "dev.ucp.shopping.order"],
+        version: "{{ ucp_version }}",
+        spec: "https://ucp.dev/{{ ucp_version }}/specification/additional-fields",
+        schema: "https://ucp.dev/{{ ucp_version }}/schemas/shopping/additional_fields.json"
+      }
+    ],
+    "dev.ucp.shopping.additional_fields_text_validation": [
+      {
+        extends: "dev.ucp.shopping.additional_fields",
+        version: "{{ ucp_version }}",
+        spec: "https://ucp.dev/{{ ucp_version }}/specification/additional-fields-text-validation",
+        schema: "https://ucp.dev/{{ ucp_version }}/schemas/shopping/additional_fields_text_validation.json"
+      }
+    ],
+    "dev.ucp.shopping.additional_fields_boolean": [
+      {
+        extends: "dev.ucp.shopping.additional_fields",
+        version: "{{ ucp_version }}",
+        spec: "https://ucp.dev/{{ ucp_version }}/specification/additional-fields-boolean",
+        schema: "https://ucp.dev/{{ ucp_version }}/schemas/shopping/additional_fields_boolean.json"
+      }
+    ],
+    "dev.ucp.shopping.additional_fields_date": [
+      {
+        extends: "dev.ucp.shopping.additional_fields",
+        version: "{{ ucp_version }}",
+        spec: "https://ucp.dev/{{ ucp_version }}/specification/additional-fields-date",
+        schema: "https://ucp.dev/{{ ucp_version }}/schemas/shopping/additional_fields_date.json"
+      }
+    ],
+    "dev.ucp.shopping.additional_fields_choice": [
+      {
+        extends: "dev.ucp.shopping.additional_fields",
+        version: "{{ ucp_version }}",
+        spec: "https://ucp.dev/{{ ucp_version }}/specification/additional-fields-choice",
+        schema: "https://ucp.dev/{{ ucp_version }}/schemas/shopping/additional_fields_choice.json"
+      }
+    ],
     "dev.ucp.shopping.buyer_consent": [
       {
         extends: ["dev.ucp.shopping.cart", "dev.ucp.shopping.checkout"],
@@ -550,8 +590,8 @@ const UcpData = {
     },
     full: {
       label: "Full",
-      description: "Supports core + Fulfillment and Discount extensions.",
-      caps: ["dev.ucp.shopping.checkout", "dev.ucp.shopping.order", "dev.ucp.shopping.fulfillment", "dev.ucp.shopping.discount", "dev.ucp.shopping.buyer_consent", "dev.ucp.shopping.ap2_mandates"]
+      description: "Supports core checkout extensions.",
+      caps: ["dev.ucp.shopping.checkout", "dev.ucp.shopping.order", "dev.ucp.shopping.fulfillment", "dev.ucp.shopping.discount", "dev.ucp.shopping.additional_fields", "dev.ucp.shopping.additional_fields_text_validation", "dev.ucp.shopping.additional_fields_boolean", "dev.ucp.shopping.additional_fields_date", "dev.ucp.shopping.additional_fields_choice", "dev.ucp.shopping.buyer_consent", "dev.ucp.shopping.ap2_mandates"]
     }
   },
 
@@ -744,6 +784,14 @@ class UcpBackend {
         };
     }
 
+    const additionalFields = (this.session.additional_fields || []).map(field => ({
+      key: field.key,
+      label: field.label,
+      description: field.description,
+      type: field.input?.type || field.type || "text",
+      value: field.value ?? null
+    }));
+
     const order = {
       ucp: {
           version: UcpData.version,
@@ -757,6 +805,10 @@ class UcpBackend {
       adjustments: [],
       totals: this.session.totals
     };
+
+    if (additionalFields.length > 0) {
+      order.additional_fields = additionalFields;
+    }
 
     this.session.status = "completed";
     this.currentOrder = order;
