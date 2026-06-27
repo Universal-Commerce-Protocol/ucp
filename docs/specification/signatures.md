@@ -672,13 +672,19 @@ verify_rest_request(request):
     key_set = resolve_signer_key_set(request.headers)
     public_key = find_key_by_kid(key_set, keyid)
     if not public_key:
-        return error("key_not_found")
+        return skip_signature("key_not_found")
 
+   // pre-2a. WBA-shape signatures bind key identity to key bytes:
+   // keyid MUST equal the matched JWK's RFC 7638 thumbprint
+   // (see IRA step 4 / WBA architecture draft §4.2).
+   if sig_input.tag == "web-bot-auth":
+       if keyid != rfc7638_thumbprint(public_key):
+           return skip_signature("signature_invalid")
     // 2a. Skip keys whose algorithm this verifier does not support.
     // The kty/crv/alg vocabularies are open (see Signature Algorithms);
     // an unsupported key never invalidates the whole key set.
     if not algorithm_supported(public_key):
-        return error("algorithm_unsupported")
+        return skip_signature("algorithm_unsupported")
 
     // 2b. Enforce covered-component requirements (all regimes/transports).
     // Bind the target, the body when present, and every integrity-relevant
@@ -695,9 +701,9 @@ verify_rest_request(request):
     if "Signature-Agent" in request.headers: required += ["signature-agent"]
     for component in required:
         if component not in components:
-            // coverage failure, not a crypto failure; under multi-signature
-            // handling this is skip-and-try-next (see IRA step 5)
-            return error("signature_invalid")
+            // coverage failure, a target/body/header the signature does not
+            // cover is treated as unsigned (see IRA step 5)
+            return skip_signature("coverage_insufficient")
 
     // 3. Verify body digest (if body present)
     if "content-digest" in components:
@@ -714,7 +720,7 @@ verify_rest_request(request):
     // 5. Verify signature
     signature = parse_signature(request.headers["Signature"])
     if not verify(signature_base, signature, public_key):
-        return error("signature_invalid")
+        return skip_signature("signature_invalid")
 
     return success()
 
@@ -735,7 +741,7 @@ verify_rest_response(response, signer_profile_url):
 
     // 2. Resolve signer's public key from the signer's profile.
     profile = fetch_profile(signer_profile_url)
-    public_key = find_key_by_kid(profile, keyid)
+    public_key = find_key_by_kid(profile.signing_keys, keyid)
     if not public_key:
         return error("key_not_found")
 
