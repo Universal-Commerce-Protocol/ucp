@@ -1281,14 +1281,16 @@ JWK Set, which a signer can optionally reuse as its Web Bot Auth key
 source. The `Signature-Agent` header's `type` parameter selects
 how a verifier resolves the advertised keys. The parameter and
 its `jwks_uri`/`cimd`/`directory` values are defined in §4.1 of
-[draft-meunier-http-message-signatures-directory](https://datatracker.ietf.org/doc/html/draft-meunier-http-message-signatures-directory).
+[draft-meunier-webbotauth-httpsig-directory-00](https://datatracker.ietf.org/doc/draft-meunier-webbotauth-httpsig-directory/00/).
 Each variant can stand alone or point back at the UCP profile:
 
 - **`type=jwks_uri`** — the member value is a JWK Set URL, fetched
   directly. Point it at the UCP profile URL and the profile's `keys[]`
   serves as the JWK Set: one document is both profile and key source.
   Integrity derives from TLS to the profile origin, with no per-key
-  self-signature.
+  self-signature. Set `type=jwks_uri` explicitly: omitting `type`
+  defaults to `directory` (below), which expects a signed
+  directory, not a static profile.
 
   ```text
   Signature-Agent: sig1="https://platform.example/.well-known/ucp";type=jwks_uri
@@ -1353,7 +1355,7 @@ below processes a single signature.
       [Signature-Agent parsing rules](signatures.md#rest-request-verification).
       Such a signature **MUST** satisfy the WBA agent-signature
       requirements in
-      [draft-meunier-web-bot-auth-architecture-05](https://datatracker.ietf.org/doc/draft-meunier-web-bot-auth-architecture/05/)
+      [draft-meunier-webbotauth-httpsig-protocol-00](https://datatracker.ietf.org/doc/draft-meunier-webbotauth-httpsig-protocol/00/)
       §4.2 (see [WBA Interop](signatures.md#wba-interop) for the
       signer-side shape). The member value **MUST** be an HTTPS URL.
       Its `type` selects resolution: `jwks_uri` and `cimd` reach the

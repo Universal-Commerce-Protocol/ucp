@@ -302,7 +302,7 @@ per item 3 of the opt-in list below.
 
 To opt in, a signer makes the following changes to their primary UCP
 signature. Items marked **MUST** are required by
-[draft-meunier-web-bot-auth-architecture-05](https://datatracker.ietf.org/doc/draft-meunier-web-bot-auth-architecture/05/)
+[draft-meunier-webbotauth-httpsig-protocol-00](https://datatracker.ietf.org/doc/draft-meunier-webbotauth-httpsig-protocol/00/)
 §4.2; consult that draft for full details.
 
 1. **Use an algorithm the WBA verifier accepts.** WBA permits any
@@ -334,7 +334,7 @@ signature. Items marked **MUST** are required by
    interval SHOULD be at most 24 hours.
 6. **SHOULD include a `nonce`** for anti-replay — a base64url-encoded
    random value (RECOMMENDED 64 bytes), unique within the
-   `created`/`expires` window (WBA §4.2.2). UCP's `Idempotency-Key` is
+   `created`/`expires` window (WBA §4.2.3). UCP's `Idempotency-Key` is
    business-layer payload deduplication, not a transport-bound nonce,
    and does not substitute. A verifying origin **MAY** require a `nonce` and
    re-challenge (HTTP 429) a signature that lacks or replays one
@@ -347,14 +347,14 @@ signature **MUST** still cover the same components a default UCP
 signature does (the Required set in the
 [Signed Components](#rest-request-signing) table); WBA accepts them as
 "additional components" per
-[draft-meunier-web-bot-auth-architecture-05](https://datatracker.ietf.org/doc/draft-meunier-web-bot-auth-architecture/05/)
-§4.2.3. The verifier enforces this regardless of `tag` per the
+[draft-meunier-webbotauth-httpsig-protocol-00](https://datatracker.ietf.org/doc/draft-meunier-webbotauth-httpsig-protocol/00/)
+§4.2.4. The verifier enforces this regardless of `tag` per the
 [Identity Resolution Algorithm](overview.md#identity-resolution-algorithm),
 so opting into Web Bot Auth never widens what UCP authenticates.
 
 **Interop is one-way.** A UCP signer satisfies a Web Bot Auth
 verifier — WBA verifiers accept UCP's richer covered set as
-permitted "additional components" (architecture-05 §4.2.3). The
+permitted "additional components" (protocol-00 §4.2.4). The
 reverse does not hold: a minimal WBA signature (covering only
 `@authority`) fails UCP's coverage gate and is rejected. UCP's goal
 is to be verifiable *by* WBA verifiers, not to accept arbitrary WBA

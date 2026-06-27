@@ -83,6 +83,7 @@ gclid
 gpay
 grepable
 gtin
+httpsig
 ietf
 ingestions
 inlinehilite
@@ -130,6 +131,7 @@ upsell
 upsells
 variante
 vulnz
+webbotauth
 worktree
 yaml
 yml
