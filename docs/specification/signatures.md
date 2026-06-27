@@ -352,6 +352,15 @@ signature does (the Required set in the
 [Identity Resolution Algorithm](overview.md#identity-resolution-algorithm),
 so opting into Web Bot Auth never widens what UCP authenticates.
 
+**Interop is one-way.** A UCP signer satisfies a Web Bot Auth
+verifier — WBA verifiers accept UCP's richer covered set as
+permitted "additional components" (architecture-05 §4.2.3). The
+reverse does not hold: a minimal WBA signature (covering only
+`@authority`) fails UCP's coverage gate and is rejected. UCP's goal
+is to be verifiable *by* WBA verifiers, not to accept arbitrary WBA
+signers — a UCP verifier accepts a strict subset of what a WBA
+verifier does.
+
 UCP verifiers see the same signature with three new things:
 
 * The `tag` parameter is an RFC 9421 §2.3 signature parameter unknown
@@ -660,6 +669,14 @@ jwks_uri = "https://platform.example/.well-known/ucp"
 * **Platform → Business requests:** Profile URL from `UCP-Agent` header
 * **Business → Platform webhooks:** Profile URL from `UCP-Agent` header
 
+Both routines below verify a **single candidate** signature.
+`skip_signature(reason)` means the candidate does not authenticate the
+message: under multi-signature handling
+([RFC 9421 §4.3](https://www.rfc-editor.org/rfc/rfc9421#section-4.3); see
+the [Identity Resolution Algorithm](overview.md#identity-resolution-algorithm)),
+the verifier tries the next candidate and rejects the message only when
+**every** candidate skips. `success()` authenticates the message.
+
 ```text
 verify_rest_request(request):
     // 1. Parse Signature-Input
@@ -709,7 +726,7 @@ verify_rest_request(request):
     if "content-digest" in components:
         expected = "sha-256=:" + base64(sha256(request.body_bytes)) + ":"
         if request.headers["Content-Digest"] != expected:
-            return error("digest_mismatch")
+            return skip_signature("digest_mismatch")
 
     // 4. Reconstruct signature base
     signature_base = build_signature_base(
@@ -743,13 +760,13 @@ verify_rest_response(response, signer_profile_url):
     profile = fetch_profile(signer_profile_url)
     public_key = find_key_by_kid(profile.signing_keys, keyid)
     if not public_key:
-        return error("key_not_found")
+        return skip_signature("key_not_found")
 
     // 2a. Skip keys whose algorithm this verifier does not support.
     // The kty/crv/alg vocabularies are open (see Signature Algorithms);
     // an unsupported key never invalidates the whole key set.
     if not algorithm_supported(public_key):
-        return error("algorithm_unsupported")
+        return skip_signature("algorithm_unsupported")
 
     // 2b. Enforce covered-component requirements for responses (all regimes).
     // No method/idempotency to bind, but the body still MUST be covered.
@@ -757,13 +774,13 @@ verify_rest_response(response, signer_profile_url):
     if response.has_body: required += ["content-digest", "content-type"]
     for component in required:
         if component not in components:
-            return error("signature_invalid")
+            return skip_signature("signature_invalid")
 
     // 3. Verify body digest (if body present)
     if "content-digest" in components:
         expected = "sha-256=:" + base64(sha256(response.body_bytes)) + ":"
         if response.headers["Content-Digest"] != expected:
-            return error("digest_mismatch")
+            return skip_signature("digest_mismatch")
 
     // 4. Reconstruct signature base
     signature_base = build_signature_base(
@@ -774,7 +791,7 @@ verify_rest_response(response, signer_profile_url):
     // 5. Verify signature
     signature = parse_signature(response.headers["Signature"])
     if not verify(signature_base, signature, public_key):
-        return error("signature_invalid")
+        return skip_signature("signature_invalid")
 
     return success()
 ```

@@ -564,6 +564,14 @@ as a Web Bot Auth key source. The two arrays carry the same JWK content
 (semantically equivalent); UCP-only verifiers read `signing_keys[]`;
 WBA-shape verifiers read `keys[]`.
 
+A WBA-shape verifier reads `keys[]` from this profile **only when the
+`Signature-Agent` header selects it** with `type=jwks_uri` (or `type=cimd`)
+pointing at the profile URL. The default `type=directory` (when `type` is
+omitted) instead expects a *signed* directory document at
+`/.well-known/http-message-signatures-directory`, not a static profile, so
+it will not read `keys[]` from a static `/.well-known/ucp`. See
+[Deployment Patterns for WBA Interop](#deployment-patterns-for-wba-interop).
+
 This example uses two keys. Whether a deployment needs one or two depends
 on the algorithms its counterparties accept — many need only one; see
 [Signature Algorithms](signatures.md#signature-algorithms). The two keys
