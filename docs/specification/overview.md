@@ -79,19 +79,24 @@ All capability and service names **MUST** use the format:
 
 #### Authority Binding
 
-Every capability declares a `schema` URL (the machine-readable JSON Schema,
-**REQUIRED**) and a `spec` URL (human-readable documentation). The origin of the
-`schema` URL **MUST** match the namespace authority encoded in the capability
-name.
+Reverse-domain names serve two purposes: collision-safe **identifiers** (keys
+and references), and **entities** — capabilities, services, and payment
+handlers — that declare a fetched `schema` URL describing them. Authority
+binding applies to every entity with a remote `schema`: a declared `schema`
+URL's origin **MUST** match the namespace authority in its name.
+
+A capability **MUST** declare a `schema`; services and payment handlers declare
+one where their transport or handler defines it. Each entity **MAY** also
+declare a `spec` URL (human-readable documentation).
 
 This binding guarantees **provenance, not trust**: a valid binding proves only
-that the capability's reverse-domain name is controlled by the party that owns
-the corresponding domain — a capability cannot be published under a namespace
-its author does not control. It does **not** assert that the capability is
-trustworthy, correct, or worth supporting. Whether to negotiate, trust, or
-implement a capability is always the client's decision; this binding only tells
-the client *who* is making the claim. Provenance is established from domain
-ownership and evaluated at negotiation time.
+that the reverse-domain name is controlled by the party that owns the
+corresponding domain — an entity cannot be published under a namespace its
+author does not control. It does **not** assert that the entity is trustworthy,
+correct, or worth supporting. Whether to negotiate, trust, or implement it is
+always the client's decision; this binding only tells the client *who* is making
+the claim. Provenance is established from domain ownership and evaluated at
+negotiation time.
 
 The `spec` URL is documentation, not part of the machine trust path, so its
 origin is **not** authority-bound: it **MUST** be `https` but **MAY** be served
@@ -100,10 +105,10 @@ from any host (e.g. a docs subdomain or third-party docs host). Only the
 
 ##### Derivation algorithm
 
-The authority is derived **from the `schema` URL host** — which names the owning
-domain directly, with no ambiguity about where the domain ends — and validated
-as a label prefix of the capability name. For the `schema` URL of a capability
-whose name is `name`, a platform **MUST** apply the following:
+The authority is derived **from the `schema` URL host** — which names the
+owning domain directly, with no ambiguity about where the domain ends — and
+validated as a label prefix of the entity's name. For the `schema` URL of an
+entity whose name is `name`, a platform **MUST** apply the following:
 
 1. Parse the URL with a conformant (WHATWG) URL parser. It **MUST** parse,
    **MUST** use the `https` scheme, and **MUST NOT** contain userinfo (a
@@ -113,18 +118,19 @@ whose name is `name`, a platform **MUST** apply the following:
 2. The host **MUST** be a registered domain name of at least two labels.
    IP-literal hosts (`https://203.0.113.10/...`) and single-label hosts
    (`https://localhost/...`) are invalid authorities.
-3. Normalize the host (lowercase; strip any trailing `.`; internationalized
-   domains in A-label / punycode form) and **reverse its labels** to form the
-   `authority_prefix` (host `ucp.dev` → `dev.ucp`).
+3. Take the URL's hostname (the host without any port), normalize it (lowercase;
+   strip a trailing `.`; internationalized domains in A-label / punycode form),
+   and **reverse its labels** to form the `authority_prefix` (host `ucp.dev` →
+   `dev.ucp`).
 4. The binding is valid if and only if `name` begins with `authority_prefix`
    followed by a `.` (a literal trailing dot). The trailing-dot boundary is
    required so that `com.example` (from host `example.com`) cannot satisfy a
    neighboring namespace like `com.examplecorp.*`, where it is a textual but
-   not label-aligned prefix; it also guarantees a non-empty
-   `{service}.{capability}` remainder.
+   not label-aligned prefix; it also guarantees a non-empty remainder after the
+   prefix.
 
-The `{service}.{capability}` remainder is treated as opaque by this check; it is
-not inspected or split.
+The remaining labels after the authority prefix are treated as opaque by this
+check; they are not inspected or split.
 
 | Capability name                     | `schema` host      | `authority_prefix` | Result     |
 | ----------------------------------- | ------------------ | ------------------ | ---------- |
@@ -136,26 +142,35 @@ not inspected or split.
 | `com.examplecorp.pay`               | `example.com`      | `com.example`      | **reject** |
 | `com.example.pay`                   | `cdn.example.com`  | `com.example.cdn`  | **reject** |
 
-A capability's `schema` is served from a host whose reversed labels are a prefix
-of its name. A canonical apex host (`example.com` for `com.example.*`) always
+An entity's `schema` is served from a host whose reversed labels are a prefix of
+its name. A canonical apex host (`example.com` for `com.example.*`) always
 satisfies this; a subdomain satisfies it only when its labels line up with the
 namespace path (`shopping.ucp.dev` for `dev.ucp.shopping.*`). Unrelated
 subdomains such as a shared CDN do **not** satisfy it — host the canonical
 schema on a name-aligned origin.
 
+The check uses the `schema` URL host directly and does not consult the
+[Public Suffix List](https://publicsuffix.org/), so it treats a **public
+suffix** — a domain under which independent parties can register names, from
+`co.uk` to the list's private-section suffixes operated by services that let
+third parties register subdomains or buckets (`github.io`, object storage, app
+platforms) — as an ordinary authority. Co-tenants under such a suffix satisfy
+the same prefix, so declare entities only under a **registrable domain** (a
+public suffix plus one label) that you exclusively control.
+
 ##### Enforcement
 
 A platform **MUST** validate each business-declared `schema` URL before fetching
-it. If the URL's origin does not match the capability's namespace authority (per
+it. If the URL's origin does not match the entity's namespace authority (per
 [Derivation algorithm](#derivation-algorithm)), the platform **MUST NOT** fetch
-it and **MUST** reject the capability — treated as not present and never
+it and **MUST** reject the entity — treated as not present and never
 activated. A `spec` URL **MUST** be a valid `https` URL.
 
 The platform fetches and composes business-declared schemas to validate every
 request and response, so validating the binding ensures each composed schema is
-sourced from the party that owns the capability's namespace. A business
-**SHOULD** apply the same check to the platform profile and exclude any
-capability whose binding fails.
+sourced from the party that owns the entity's namespace. A business **SHOULD**
+apply the same check to the platform profile and exclude any entity whose
+binding fails.
 
 Binding validates the declared hostname for provenance; it is **not** a
 fetch-safety control and does not authorize dereferencing. Fetching the `schema`

@@ -378,8 +378,17 @@ whose `iss` does not match a listed `oauth2` mechanism entry (see
 ### Provider Configuration
 
 Each key in `config.providers` is a reverse-domain identifier for an IdP
-namespace; its value is an array of mechanism entries. Each entry is
-described by its `type`:
+namespace; its value is an array of mechanism entries.
+
+A provider key is a reverse-domain **identifier**, not a schema-bearing entity:
+it declares no `schema` URL, so the
+[Authority Binding](overview.md#authority-binding) (which binds an entity's
+`schema` URL to its namespace authority) does not apply here. A provider's trust
+anchor is its `auth_url`, governed by the discovery rules below; binding
+`auth_url` to the provider's namespace authority is a possible future hardening,
+tracked separately.
+
+Each entry is described by its `type`:
 
 | Field | Type | Required | Description |
 | :---- | :--- | :------- | :---------- |
