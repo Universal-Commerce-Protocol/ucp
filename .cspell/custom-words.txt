@@ -17,6 +17,7 @@ Commerce
 Credentialless
 Depot
 Diffie
+EDITMSG
 EWALLET
 Ed25519
 EdDSA
