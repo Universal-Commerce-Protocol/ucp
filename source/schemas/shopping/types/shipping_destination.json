@@ -16,6 +16,12 @@
           "type": "string",
           "description": "ID specific to this shipping destination.",
           "ucp_request": "optional"
+        },
+        "one_time_use": {
+          "type": "boolean",
+          "default": false,
+          "ucp_request": "optional",
+          "description": "Best-effort hint that this destination should not be retained beyond the immediate transaction (e.g., not added to the buyer's address book or marketing profile)."
         }
       },
       "required": [
