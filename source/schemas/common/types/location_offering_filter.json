@@ -4,30 +4,6 @@
   "title": "Location Offering Filter",
   "description": "Filter criteria for location offerings, separating static amenities/services from dynamic inventory.",
   "type": "object",
-  "$defs": {
-    "inventory_filter": {
-      "type": "object",
-      "title": "Inventory Filter",
-      "description": "Filter for a specific physical item (e.g., retail product or dish) and its required availability.",
-      "required": ["id"],
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "The unique identifier of the item (e.g., product or variant ID in shopping, or dish ID in food ordering)."
-        },
-        "type": {
-          "type": "string",
-          "description": "The type of the item, helping backend routing. Well-known values: 'product' (shopping), 'dish' (food)."
-        },
-        "quantity": {
-          "type": "integer",
-          "minimum": 1,
-          "description": "Minimum quantity required to be available at the location."
-        }
-      },
-      "additionalProperties": true
-    }
-  },
   "properties": {
     "amenities": {
       "type": "array",
@@ -39,7 +15,7 @@
     "inventory": {
       "type": "array",
       "items": {
-        "$ref": "#/$defs/inventory_filter"
+        "$ref": "inventory_filter.json"
       },
       "description": "Filter by real-time availability of inventory (e.g., retail products or restaurant dishes) at the location. Matches locations that have ALL the listed items in stock (AND logic)."
     }
