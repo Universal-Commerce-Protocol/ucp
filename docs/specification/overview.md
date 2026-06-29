@@ -1907,7 +1907,7 @@ Both businesses and platforms declare a single version in their profiles:
 
 Version compatibility operates at three layers — **transport bindings**,
 the **core protocol**, and **capability versions** — each evolving on its
-own cadence (see [Versioning](../versioning.md#layered-versioning) for the
+own cadence (see [Versioning](/versioning/#layered-versioning) for the
 layer model). The protocol version (`ucp.version`) governs the
 cross-cutting mechanisms shared by every transport binding: discovery,
 negotiation flow, signature requirements, profile structure, and the
