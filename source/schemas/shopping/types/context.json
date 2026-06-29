@@ -38,12 +38,23 @@
         "$ref": "../../common/types/reverse_domain_name.json"
       }
     },
-    "payment_handlers": {
+    "payment": {
       "type": "array",
-      "description": "Buyer-preferred payment handlers in priority order (most preferred first). Each provided value SHOULD map to a handler advertised in the Business profile's `ucp.payment_handlers`. The Business SHOULD use it to preselect or prioritize that handler and MAY ignore unavailable or ineligible values; unrecognized values MUST be ignored without error.",
-      "uniqueItems": true,
+      "description": "Buyer-preferred payment handlers in priority order (most preferred first). Each entry names a handler advertised in the Business profile's `ucp.payment_handlers`, optionally narrowed to preferred instrument types. The Business SHOULD use it to preselect or prioritize the handler (and type, when given) and MAY ignore unavailable or ineligible entries; unrecognized values MUST be ignored without error.",
       "items": {
-        "$ref": "../../common/types/reverse_domain_name.json"
+        "type": "object",
+        "required": ["handler"],
+        "properties": {
+          "handler": {
+            "$ref": "../../common/types/reverse_domain_name.json",
+            "description": "Handler registry key advertised in the Business profile's `ucp.payment_handlers`."
+          },
+          "types": {
+            "type": "array",
+            "description": "Optional preferred instrument types for this handler, in priority order, aligned with the handler's advertised `payment_instrument.type` values (for example `card` or `bank`). Unrecognized values MUST be ignored.",
+            "items": { "type": "string" }
+          }
+        }
       }
     }
   }

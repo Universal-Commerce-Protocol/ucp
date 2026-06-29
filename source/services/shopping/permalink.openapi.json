@@ -121,7 +121,7 @@
     }
   },
   "x-ucp-query-semantics": {
-    "description": "OpenAPI cannot enumerate arbitrary JSON Pointer field-path query parameters such as buyer/email, context/postal_code, context/payment_handlers/0, attribution/ref, discounts/codes/0, or profile-specific fields. Permalink query syntax omits the leading '/' for UCP field paths, but Businesses may also accept canonical JSON Pointer names. The Business resolves these field paths against its active schemas, capabilities, and internal logic. The permalink specification defines the normative query partitioning and redirect semantics.",
+    "description": "OpenAPI cannot enumerate arbitrary JSON Pointer field-path query parameters such as buyer/email, context/postal_code, context/payment/0/handler, attribution/ref, discounts/codes/0, or profile-specific fields. Permalink query syntax omits the leading '/' for UCP field paths, but Businesses may also accept canonical JSON Pointer names. The Business resolves these field paths against its active schemas, capabilities, and internal logic. The permalink specification defines the normative query partitioning and redirect semantics.",
     "control_parameters": [
       "continue_to"
     ],

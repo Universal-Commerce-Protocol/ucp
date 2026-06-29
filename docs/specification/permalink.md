@@ -296,7 +296,7 @@ determines which URL fields have UCP meaning.
 
 ```text
 context/postal_code=94105
-context/payment_handlers/0=com.example.wallet
+context/payment/0/handler=com.example.wallet
 buyer/email=alice%40example.com
 attribution/utm_source=social
 ```
@@ -308,7 +308,7 @@ map to:
 {
   "context": {
     "postal_code": "94105",
-    "payment_handlers": ["com.example.wallet"]
+    "payment": [{ "handler": "com.example.wallet" }]
   },
   "buyer": { "email": "alice@example.com" },
   "attribution": { "utm_source": "social" }
@@ -578,7 +578,7 @@ Location: https://merchant.example/collections/spring?utm_source=email
 ### Buyer-directed purchase link
 
 ```text
-https://merchant.example/buy/sku_kit:3,~Z2lkOi8vc2hvcGlmeS9Qcm9kdWN0VmFyaWFudC83MDg4MTQxMg:2?discounts/codes/0=VIP20&discounts/codes/1=WELCOME&buyer/email=alice%40foo.com&buyer/phone_number=123-456-7890&context/address_country=US&context/postal_code=94105&context/language=en-US&attribution/ref=creator_42&attribution/utm_source=social&context/payment_handlers/0=com.example.wallet
+https://merchant.example/buy/sku_kit:3,~Z2lkOi8vc2hvcGlmeS9Qcm9kdWN0VmFyaWFudC83MDg4MTQxMg:2?discounts/codes/0=VIP20&discounts/codes/1=WELCOME&buyer/email=alice%40foo.com&buyer/phone_number=123-456-7890&context/address_country=US&context/postal_code=94105&context/language=en-US&attribution/ref=creator_42&attribution/utm_source=social&context/payment/0/handler=com.example.wallet
 ```
 
 Initialized data:
@@ -609,7 +609,7 @@ Initialized data:
     "address_country": "US",
     "postal_code": "94105",
     "language": "en-US",
-    "payment_handlers": ["com.example.wallet"]
+    "payment": [{ "handler": "com.example.wallet" }]
   },
   "attribution": {
     "ref": "creator_42",
@@ -618,8 +618,8 @@ Initialized data:
 }
 ```
 
-`context/payment_handlers` is a preference hint: a Business SHOULD use it to
-preselect or prioritize the handler and MAY ignore unavailable or ineligible
+`context/payment` is a preference hint: a Business SHOULD use it to preselect
+or prioritize the handler (and type) and MAY ignore unavailable or ineligible
 values.
 
 Possible resolution:
@@ -659,7 +659,7 @@ SHOULD include only data that is appropriate for the channel.
 
 Broad-campaign links SHOULD prefer item IDs, quantities, coarse context,
 compact extension fields such as discount codes, `continue_to`, a
-`context/payment_handlers` preference, and non-UCP campaign query parameters.
+`context/payment` preference, and non-UCP campaign query parameters.
 
 Buyer-directed links MAY include minimal buyer prefill, such as:
 
