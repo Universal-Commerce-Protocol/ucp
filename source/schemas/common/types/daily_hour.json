@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/schemas/common/types/daily_hours.json",
-  "title": "Daily Hours",
+  "$id": "https://ucp.dev/schemas/common/types/daily_hour.json",
+  "title": "Daily Hour",
   "description": "Operating hours for a specific day of the week.",
   "type": "object",
   "required": ["day"],

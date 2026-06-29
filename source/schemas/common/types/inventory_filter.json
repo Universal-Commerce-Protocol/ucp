@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/inventory_filter.json",
+  "title": "Inventory Filter",
+  "description": "Filter for a specific inventory and its required availability.",
+  "type": "object",
+  "required": ["id"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "The unique identifier of the item (e.g., product or variant ID in shopping, or dish ID in food ordering)."
+    },
+    "type": {
+      "type": "string",
+      "description": "The type of the item, helping backend routing. Well-known values: 'product' (shopping), 'dish' (food)."
+    },
+    "quantity": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Minimum quantity required to be available at the location."
+    }
+  },
+  "additionalProperties": true
+}

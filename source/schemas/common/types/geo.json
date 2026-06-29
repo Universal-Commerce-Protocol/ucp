@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/common/types/geo.json",
-  "title": "Geo Representation",
+  "title": "Geo",
   "description": "Geographic information.",
   "type": "object",
   "required": ["latitude", "longitude"],

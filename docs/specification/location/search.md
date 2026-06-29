@@ -99,7 +99,7 @@ Supports two distinct, industry-agnostic spatial search models:
 ## Pagination
 
 Cursor-based pagination for list operations. Cursors are opaque strings
-that implementations MAY encode as stateless keyset tokens.
+that implementations **MAY** encode as stateless keyset tokens.
 
 ### Page Size
 
@@ -119,5 +119,5 @@ error. Clients MUST NOT assume the response size equals the requested limit.
 
 ## Transport Bindings
 
-* [REST Binding](rest.md#search): `POST /location/search`
-* [MCP Binding](mcp.md#search_location): `search_location` tool
+* [REST Binding](rest.md#post-locationssearch): `POST /location/search`
+* [MCP Binding](mcp.md#search_locations): `search_locations` tool
