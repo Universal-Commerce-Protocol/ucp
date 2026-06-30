@@ -7,6 +7,21 @@
   "ucp_shared_request": true,
   "required": ["type", "line_item_ids"],
   "additionalProperties": true,
+  "allOf": [
+    {
+      "if": {
+        "properties": { "type": { "const": "shipping" } }
+      },
+      "then": {
+        "properties": {
+          "address_constraints": {
+            "$ref": "address_constraint.json",
+            "description": "Constraint on the destination postal address — what address fields must be populated to return a valid set of shipping options."
+          }
+        }
+      }
+    }
+  ],
   "properties": {
     "type": {
       "type": "string",
