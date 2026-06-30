@@ -1522,26 +1522,32 @@ def define_env(env):
         if param.get("in") == "header":
           req_headers.append(param)
 
-      # 3. Extract Response Headers (Assumes 200 OK)
-      res_headers_defs = (
-        operation.get("responses", {}).get("200", {}).get("headers", {})
-      )
+      # 3. Extract Response Headers
       res_headers = []
-      for name, header in res_headers_defs.items():
-        if "$ref" in header:
-          resolved = _resolve_json_pointer(header["$ref"], data)
-          if resolved:
-            h = resolved.copy()
+      seen_res_headers = set()
+      for response in operation.get("responses", {}).values():
+        if not isinstance(response, dict):
+          continue
+
+        for name, header in response.get("headers", {}).items():
+          if name in seen_res_headers:
+            continue
+          seen_res_headers.add(name)
+
+          if "$ref" in header:
+            resolved = _resolve_json_pointer(header["$ref"], data)
+            if resolved:
+              h = resolved.copy()
+              h["name"] = name
+              res_headers.append(h)
+            else:
+              # If ref not resolved, just use name
+              h = {"name": name, "description": "Ref not resolved"}
+              res_headers.append(h)
+          else:
+            h = header.copy()
             h["name"] = name
             res_headers.append(h)
-          else:
-            # If ref not resolved, just use name
-            h = {"name": name, "description": "Ref not resolved"}
-            res_headers.append(h)
-        else:
-          h = header.copy()
-          h["name"] = name
-          res_headers.append(h)
 
       if not req_headers and not res_headers:
         return "_No headers defined._"

@@ -80,6 +80,16 @@ All request and response bodies **MUST** be valid JSON as specified in
 
 All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
+### Response Timing
+
+Business responses **MAY** include the
+[`Server-Timing`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Server-Timing){ target="_blank" }
+header to report business-side processing duration. When present, UCP responses
+**SHOULD** use the `ucp` metric with `dur` in milliseconds, for example
+`Server-Timing: ucp;dur=42.3`. This value excludes network time and is
+informational; platforms **SHOULD** measure client-observed latency
+independently.
+
 ## Operations
 
 | Operation | Method | Endpoint | Description |
@@ -132,6 +142,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
     ```json
     HTTP/1.1 201 Created
     Content-Type: application/json
+    Server-Timing: ucp;dur=42.3
 
     {
       "ucp": {
@@ -182,6 +193,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
     ```json
     HTTP/1.1 200 OK
     Content-Type: application/json
+    Server-Timing: ucp;dur=18.7
 
     {
       "ucp": { "version": "{{ ucp_version }}", "status": "error" },
@@ -487,6 +499,10 @@ operations unless otherwise noted.
     3. Return `409 Conflict` if the key is reused with a mismatched body.
     See [Message Signatures — Idempotency Key Requirements](signatures.md#replay-protection)
     for the full payload-matching contract.
+* **Server-Timing**: Responses **MAY** include `Server-Timing` with the `ucp`
+    metric to expose business-side processing duration in milliseconds. This
+    value is informational and **MUST NOT** be used as a substitute for
+    platform-measured end-to-end latency.
 
 ## Protocol Mechanics
 
