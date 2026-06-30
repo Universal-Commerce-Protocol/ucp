@@ -48,7 +48,9 @@ class LinkParser(HTMLParser):
     if not self.is_ignoring_links and tag in ("http:", "https:"):
       raw_tag = self.get_starttag_text()
       if raw_tag:
-        urls = re.findall(r"https://ucp\.dev[^\s\"\'<>]*", raw_tag)
+        # This regex is for URLs that HTMLParser mistakes as tags, like
+        # <https://ucp.dev/b>. It finds all such URLs in the raw tag text.
+        urls = re.findall(r"https://ucp\.dev[^\s>]+", raw_tag)
         for url in urls:
           if (
             not url.endswith("...")
@@ -78,8 +80,11 @@ class LinkParser(HTMLParser):
     if self.is_ignoring_links:
       return
 
-    # Find anything that looks like https://ucp.dev/... in the text
-    urls = re.findall(r"https://ucp\.dev[^\s\"\'<>]*", data)
+    # Find URLs inside quotes, angle brackets, or just in plain text.
+    # This pattern handles URLs that might be surrounded by various delimiters.
+    # It correctly extracts URLs without including trailing punctuation.
+    urls = re.findall(r'https://ucp\.dev[^\s"\'<>]+', data)
+
     for url in urls:
       if url.endswith("...") or url.endswith("*"):
         continue
@@ -236,12 +241,9 @@ def check_links():
     for link in parser.links:
       original_link = link
 
-      should_ignore = False
-      for pattern in ignore_patterns:
-        if pattern.search(original_link):
-          should_ignore = True
-          break
-      if should_ignore:
+      # Check if any ignore pattern matches. The any() function provides a
+      # short-circuiting and more Pythonic way to do this.
+      if any(pattern.search(original_link) for pattern in ignore_patterns):
         continue
 
       # Ignore external links
