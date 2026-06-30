@@ -207,7 +207,7 @@ The request body contains an array of identifiers and optional context that appl
 | Name     | Type                                                        | Required | Description                                                                                                                                         |
 | -------- | ----------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
 | ucp      | any                                                         | **Yes**  | UCP metadata for catalog responses.                                                                                                                 |
-| products | Array[any]                                                  | **Yes**  | Products matching the requested identifiers. May contain fewer items if some identifiers not found, or more if identifiers match multiple products. |
+| products | Array\[[Product](/draft/specification/reference/#product)\] | **Yes**  | Products matching the requested identifiers. May contain fewer items if some identifiers not found, or more if identifiers match multiple products. |
 | messages | Array\[[Message](/draft/specification/reference/#message)\] | No       | Errors, warnings, or informational messages about the requested items.                                                                              |
 
 #### Example: Batch Lookup with Context

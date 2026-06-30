@@ -258,11 +258,11 @@ Request body for catalog lookup.
 
 ### Lookup Response
 
-| Name     | Type          | Required | Description                                                                                                                                         |
-| -------- | ------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ucp      | any           | **Yes**  | UCP metadata for catalog responses.                                                                                                                 |
-| products | Array[any]    | **Yes**  | Products matching the requested identifiers. May contain fewer items if some identifiers not found, or more if identifiers match multiple products. |
-| messages | Array[object] | No       | Errors, warnings, or informational messages about the requested items.                                                                              |
+| Name     | Type           | Required | Description                                                                                                                                         |
+| -------- | -------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ucp      | any            | **Yes**  | UCP metadata for catalog responses.                                                                                                                 |
+| products | Array[Product] | **Yes**  | Products matching the requested identifiers. May contain fewer items if some identifiers not found, or more if identifiers match multiple products. |
+| messages | Array[object]  | No       | Errors, warnings, or informational messages about the requested items.                                                                              |
 
 #### Lookup Example
 
