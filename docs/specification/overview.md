@@ -70,12 +70,13 @@ All capability and service names **MUST** use the format:
 
 **Examples:**
 
-| Name                                | Authority   | Service  | Capability       |
-| ----------------------------------- | ----------- | -------- | ---------------- |
-| `dev.ucp.shopping.checkout`         | ucp.dev     | shopping | checkout         |
-| `dev.ucp.shopping.fulfillment`      | ucp.dev     | shopping | fulfillment      |
-| `dev.ucp.common.identity_linking`   | ucp.dev     | common   | identity_linking |
-| `com.example.payments.installments` | example.com | payments | installments     |
+| Name                                 | Authority   | Service  | Capability        |
+| ------------------------------------ | ----------- | -------- | ----------------- |
+| `dev.ucp.shopping.checkout`          | ucp.dev     | shopping | checkout          |
+| `dev.ucp.shopping.additional_fields` | ucp.dev     | shopping | additional_fields |
+| `dev.ucp.shopping.fulfillment`       | ucp.dev     | shopping | fulfillment       |
+| `dev.ucp.common.identity_linking`    | ucp.dev     | common   | identity_linking  |
+| `com.example.payments.installments`  | example.com | payments | installments      |
 
 #### Spec URL Binding
 
@@ -205,6 +206,7 @@ When an extension declares multiple parents:
 
 Extensions can be:
 
+- **Official**: `dev.ucp.shopping.additional_fields` extends `dev.ucp.shopping.checkout` and `dev.ucp.shopping.order`
 - **Official**: `dev.ucp.shopping.fulfillment` extends `dev.ucp.shopping.checkout`
 - **Vendor**: `com.example.installments` extends `dev.ucp.shopping.checkout`
 
@@ -1010,11 +1012,11 @@ root capability.
 
 **Selection Examples:**
 
-| Response Type | Includes                        | Does NOT Include             |
-| ------------- | ------------------------------- | ---------------------------- |
-| Checkout      | checkout, discount, fulfillment | cart, order                  |
-| Cart          | cart, discount                  | checkout, fulfillment, order |
-| Order         | order                           | checkout, cart, discount     |
+| Response Type | Includes                                           | Does NOT Include             |
+| ------------- | -------------------------------------------------- | ---------------------------- |
+| Checkout      | checkout, additional_fields, discount, fulfillment | cart, order                  |
+| Cart          | cart, discount                                     | checkout, fulfillment, order |
+| Order         | order, additional_fields                          | checkout, cart, discount     |
 
 ## Identity & Authentication
 

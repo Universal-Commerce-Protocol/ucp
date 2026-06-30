@@ -49,6 +49,7 @@ nav:
               - MCP: specification/checkout-mcp.md
               - A2A: specification/checkout-a2a.md
               - Embedded: specification/embedded-checkout.md
+          - Additional Fields Extension: specification/additional-fields.md
           - AP2 Mandates Extension: specification/ap2-mandates.md
           - Buyer Consent Extension: specification/buyer-consent.md
           - Discounts Extension: specification/discount.md
@@ -73,6 +74,7 @@ nav:
           - Transports:
               - REST: specification/order-rest.md
               - MCP: specification/order-mcp.md
+          - Additional Fields Extension: specification/order-additional-fields.md
       - Identity Linking Capability: specification/identity-linking.md
       - Payment Handlers:
           - Guide: specification/payment-handler-guide.md
@@ -304,6 +306,11 @@ plugins:
               per-session delegation negotiation, URL parameters, native UI
               event mappings, W3C Payment Request conceptual alignment, and
               core lifecycle messages.
+          - specification/additional-fields.md: >-
+              Additional Fields Extension, defining merchant-configured checkout
+              data collection fields, value submission semantics, open input
+              type extensibility, and standard text, boolean, date, and choice
+              input hints.
           - specification/ap2-mandates.md: >-
               AP2 Mandates Extension, detailing secure, cryptographically bound
               checkout commitments (using SD-JWT+kb digital credentials and
@@ -382,6 +389,9 @@ plugins:
               Model Context Protocol (MCP) transport binding for the Order
               Capability, detailing the JSON-RPC tool interface and parameters
               for fetching order states.
+          - specification/order-additional-fields.md: >-
+              Order Additional Fields Extension, defining compact read-only
+              summaries of additional field values captured during checkout.
           - specification/identity-linking.md: >-
               User authentication via the Identity Linking Capability,
               specifying direct B2C/B2B OAuth 2.0 flows (with PKCE and
