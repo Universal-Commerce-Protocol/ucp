@@ -1560,6 +1560,34 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#http-headers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        HTTP Headers
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="HTTP Headers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#specific-header-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Specific Header Requirements
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#error-handling" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2521,6 +2549,34 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#http-headers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        HTTP Headers
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="HTTP Headers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#specific-header-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Specific Header Requirements
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#error-handling" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3387,6 +3443,115 @@ via the UCP envelope.</p>
 <code>/catalog/product</code> is a single-resource operation. A missing product is an
 application error with <code>unrecoverable</code> severity — the agent should not retry
 with the same identifier.</p>
+<h2 id="http-headers">HTTP Headers<a class="headerlink" href="#http-headers" title="Permanent link">&para;</a></h2>
+<p>The following headers are defined for the HTTP binding and apply to all
+operations unless otherwise noted.</p>
+<p><strong>Request Headers</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Header</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>Authorization</code></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Should contain oauth token representing the following 2 schemes: 1. Platform self authenticating (client_credentials). 2. Platform authenticating on behalf of end user (authorization_code).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>X-API-Key</code></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Authenticates the platform with a reusable api key allocated to the platform by the business.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>Signature</code></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">RFC 9421 HTTP Message Signature. Required when using HTTP Message Signatures for authentication. Format: <code>sig1=:&lt;base64-signature&gt;:</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>Signature-Input</code></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">RFC 9421 Signature-Input header. Required when using HTTP Message Signatures for authentication. Format: <code>sig1=("@method" "@path" ...);created=&lt;timestamp&gt;;keyid="&lt;key-id&gt;"</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>Content-Digest</code></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Body digest per RFC 9530. Required for requests/responses with a body. Format: <code>sha-256=:&lt;base64-digest&gt;:</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>Request-Id</code></td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">For tracing the requests across network layers and components.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>User-Agent</code></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Identifies the user agent string making the call.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>UCP-Agent</code></td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Identifies the UCP agent making the call. All requests MUST include the UCP-Agent header containing the signer's profile URI using RFC 8941 Dictionary syntax. The URL MUST point to /.well-known/ucp. Format: profile="https://example.com/.well-known/ucp".</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>Content-Type</code></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Representation Metadata. Tells the receiver what the data in the message body actually is.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>Accept</code></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Content Negotiation. The client tells the server what data formats it is capable of understanding.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>Accept-Language</code></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Localization. Tells the receiver the user's preferred natural languages, often with "weights" or priorities.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>Accept-Encoding</code></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Compression. The client tells the server which content-codings it supports, usually for compression.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Response Headers</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Header</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>Signature</code></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">RFC 9421 HTTP Message Signature for response. Contains the signature value in the format <code>sig1=:&lt;base64-signature&gt;:</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>Signature-Input</code></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">RFC 9421 Signature-Input header for response. Describes signed components, timestamp, and key ID.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>Content-Digest</code></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">JCS-canonicalized body digest per RFC 8785. Format: <code>sha-256=:&lt;base64-digest&gt;:</code>.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="specific-header-requirements">Specific Header Requirements<a class="headerlink" href="#specific-header-requirements" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>UCP-Agent</strong>: All requests <strong>MUST</strong> include the <code>UCP-Agent</code> header
+    containing the platform profile URI using Dictionary Structured Field syntax
+    (<a href="https://datatracker.ietf.org/doc/html/rfc8941" target="_blank">RFC 8941</a>).
+    Format: <code>profile="https://platform.example/profile"</code>.</li>
+</ul>
 <h2 id="error-handling">Error Handling<a class="headerlink" href="#error-handling" title="Permanent link">&para;</a></h2>
 <p>UCP uses a two-layer error model separating transport errors from business outcomes.</p>
 <h3 id="transport-errors">Transport Errors<a class="headerlink" href="#transport-errors" title="Permanent link">&para;</a></h3>

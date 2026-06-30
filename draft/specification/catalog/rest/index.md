@@ -499,6 +499,39 @@ When the identifier does not resolve to a product, the server returns HTTP 200 w
 
 Unlike `/catalog/lookup` (which returns partial results for batch requests), `/catalog/product` is a single-resource operation. A missing product is an application error with `unrecoverable` severity — the agent should not retry with the same identifier.
 
+## HTTP Headers
+
+The following headers are defined for the HTTP binding and apply to all operations unless otherwise noted.
+
+**Request Headers**
+
+| Header            | Required | Description                                                                                                                                                                                                                                                   |
+| ----------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Authorization`   | No       | Should contain oauth token representing the following 2 schemes: 1. Platform self authenticating (client_credentials). 2. Platform authenticating on behalf of end user (authorization_code).                                                                 |
+| `X-API-Key`       | No       | Authenticates the platform with a reusable api key allocated to the platform by the business.                                                                                                                                                                 |
+| `Signature`       | No       | RFC 9421 HTTP Message Signature. Required when using HTTP Message Signatures for authentication. Format: `sig1=:<base64-signature>:`.                                                                                                                         |
+| `Signature-Input` | No       | RFC 9421 Signature-Input header. Required when using HTTP Message Signatures for authentication. Format: `sig1=("@method" "@path" ...);created=<timestamp>;keyid="<key-id>"`.                                                                                 |
+| `Content-Digest`  | No       | Body digest per RFC 9530. Required for requests/responses with a body. Format: `sha-256=:<base64-digest>:`.                                                                                                                                                   |
+| `Request-Id`      | **Yes**  | For tracing the requests across network layers and components.                                                                                                                                                                                                |
+| `User-Agent`      | No       | Identifies the user agent string making the call.                                                                                                                                                                                                             |
+| `UCP-Agent`       | **Yes**  | Identifies the UCP agent making the call. All requests MUST include the UCP-Agent header containing the signer's profile URI using RFC 8941 Dictionary syntax. The URL MUST point to /.well-known/ucp. Format: profile="https://example.com/.well-known/ucp". |
+| `Content-Type`    | No       | Representation Metadata. Tells the receiver what the data in the message body actually is.                                                                                                                                                                    |
+| `Accept`          | No       | Content Negotiation. The client tells the server what data formats it is capable of understanding.                                                                                                                                                            |
+| `Accept-Language` | No       | Localization. Tells the receiver the user's preferred natural languages, often with "weights" or priorities.                                                                                                                                                  |
+| `Accept-Encoding` | No       | Compression. The client tells the server which content-codings it supports, usually for compression.                                                                                                                                                          |
+
+**Response Headers**
+
+| Header            | Required | Description                                                                                                           |
+| ----------------- | -------- | --------------------------------------------------------------------------------------------------------------------- |
+| `Signature`       | No       | RFC 9421 HTTP Message Signature for response. Contains the signature value in the format `sig1=:<base64-signature>:`. |
+| `Signature-Input` | No       | RFC 9421 Signature-Input header for response. Describes signed components, timestamp, and key ID.                     |
+| `Content-Digest`  | No       | JCS-canonicalized body digest per RFC 8785. Format: `sha-256=:<base64-digest>:`.                                      |
+
+### Specific Header Requirements
+
+- **UCP-Agent**: All requests **MUST** include the `UCP-Agent` header containing the platform profile URI using Dictionary Structured Field syntax ([RFC 8941](https://datatracker.ietf.org/doc/html/rfc8941)). Format: `profile="https://platform.example/profile"`.
+
 ## Error Handling
 
 UCP uses a two-layer error model separating transport errors from business outcomes.
