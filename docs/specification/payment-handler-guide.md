@@ -723,6 +723,48 @@ instrument acquisition. Instead, the specification **SHOULD** clearly document:
   business for usage, which is critical for security, based on the available
   `config` and `checkout`.
 
+### Runtime Actions
+
+**Definition:** Runtime instructions that a handler may emit during checkout to
+complete or improve processing of an instrument produced by the handler. Actions
+are carried in the checkout response's top-level `actions` array and use the
+base Checkout action envelope: `code`, `severity`, and `config`.
+
+Payment handler action codes are part of the handler's runtime contract. They
+are not negotiated as independent UCP capabilities, and they do not carry their
+own authoritative spec URL at runtime. Platforms resolve each action through the
+active payment handler's advertised `spec`, `schema`, and `config`, mirroring how
+payment instruments use `handler_id` to resolve their handler contract.
+
+Action severity values are:
+
+| Severity | Meaning |
+| :------- | :------ |
+| `optional` | May be ignored; checkout can still complete. |
+| `required` | Must be resolved before checkout can complete, but the checkout resource remains otherwise usable. |
+| `blocking` | Blocks the current attempted transition; resolve, choose an allowed alternate path, or escalate before retrying. |
+
+Handler specifications that emit actions **MUST** define for each action code:
+
+- The action's purpose and when it may be emitted.
+- The valid `severity` values and fallback behavior when unsupported,
+  abandoned, or failed.
+- The `config` schema and any security requirements for interpreting it.
+- The platform execution requirements, including any UI, native API, redirect,
+  background execution, or out-of-band behavior.
+- The completion criteria and how completion is reflected in ordinary checkout
+  state or handler-owned side channels.
+
+A platform that initiates checkout with an instrument produced by a handler is
+committing to the handler's required runtime action surface for that instrument,
+unless the handler explicitly defines partial support or fallback behavior.
+
+UCP defines standard payment action specs for common card-authentication flows,
+including [Device Data Collection](payment-actions/device-data-collection.md)
+and [3DS Challenge](payment-actions/three-ds-challenge.md). A payment handler
+may adopt these standard action codes as part of its runtime contract instead of
+defining equivalent handler-specific actions.
+
 ### Processing
 
 **Definition:** The steps a participant (typically business or PSP) takes to
@@ -806,6 +848,14 @@ Before publishing a payment handler specification, verify:
 - [ ] API calls or SDK usage is shown with examples
 - [ ] Binding requirements are specified
 - [ ] Checkout Payment Instrument creation and shape is well-defined
+
+### Runtime Actions
+
+- [ ] Runtime action codes are documented, if the handler may emit actions
+- [ ] Each action defines its `config` schema, security requirements, platform
+      behavior, completion criteria, and fallback behavior
+- [ ] Required action support is clear for every instrument type the handler
+      produces
 
 ### Processing
 

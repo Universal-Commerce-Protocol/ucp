@@ -93,6 +93,14 @@
       "description": "List of messages with error and info about the checkout session state.",
       "ucp_request": "omit"
     },
+    "actions": {
+      "type": "array",
+      "items": {
+        "$ref": "../common/types/action.json"
+      },
+      "description": "List of runtime instructions emitted by the business. Each action code is defined by an active capability, extension, or payment handler in the checkout. The owning specification defines the config schema, platform behavior, security requirements, completion criteria, and resulting checkout updates. See the Checkout Actions section for severity semantics.",
+      "ucp_request": "omit"
+    },
     "links": {
       "type": "array",
       "items": {

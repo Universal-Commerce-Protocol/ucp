@@ -511,6 +511,82 @@ The platform resolves the recoverable error programmatically while
 rendering the allergen disclosure in proximity to the referenced line
 item.
 
+## Actions
+
+Checkout responses may include [runtime actions](overview.md#runtime-actions) in
+the top-level `actions` array. Runtime actions use the common UCP envelope
+(`code`, `severity`, `config`); the owning capability, extension, or payment
+handler defines the action's meaning, configuration schema, platform behavior,
+security requirements, completion criteria, and resulting checkout updates.
+
+This section only defines how the common action model applies to the checkout
+lifecycle. General action ownership, discovery, severity, and schema-resolution
+rules are defined in [Runtime Actions](overview.md#runtime-actions).
+
+### Checkout Processing
+
+Actions are distinct from messages. Messages describe checkout state and carry
+buyer-facing content; actions are scoped runtime instructions. A checkout
+response can contain both.
+
+Checkout interprets action severity as follows:
+
+| Severity | Checkout behavior |
+| :------- | :---------------- |
+| `optional` | Platform **MAY** ignore the action. Checkout can still complete successfully. |
+| `required` | Platform **MUST** resolve the action before checkout can complete successfully, but the checkout remains otherwise usable. The platform may continue to update, retrieve, or cancel the checkout while the action is outstanding. |
+| `blocking` | The action blocks the current attempted checkout transition, such as `complete_checkout`. The platform **MUST** resolve the action, choose an allowed alternate path, or escalate via `continue_url` before retrying that transition. |
+
+When processing a checkout response, platforms should resolve terminal and
+recoverable errors before actions. Optional actions can be attempted best-effort.
+Required actions should be resolved before final completion. Blocking actions
+should be handled immediately because the attempted transition cannot proceed
+until the action resolves or the platform follows the owning specification's
+fallback path.
+
+If the platform cannot execute a required or blocking checkout action, it
+**MUST** follow the fallback behavior defined by the owning action specification.
+For checkout, that fallback is typically selecting a different payment
+instrument, retrying with different checkout state, or escalating to the
+business-hosted checkout via `continue_url`. When ECP is available for the
+checkout, the platform **MAY** satisfy escalation by loading `continue_url` in an
+embedded context.
+
+Completion is defined by the owning action specification. For some actions, the
+platform updates checkout state with a handler-defined field. For others, the
+rendered surface or invoked provider reports directly to the business, and the
+platform's next checkout call causes the business to observe that the external
+step has completed.
+
+### Examples
+
+Actions appear under the top-level `actions` array on the checkout response:
+
+```json
+{
+  "ucp": { "version": "{{ ucp_version }}", "status": "success" },
+  "id": "chk_abc123",
+  "status": "complete_in_progress",
+  "actions": [
+    {
+      "code": "dev.ucp.payment.three_ds_challenge",
+      "severity": "blocking",
+      "config": {
+        "url": "https://business.example.com/ucp/payment/3ds/session_456",
+        "timeout_seconds": 300
+      }
+    }
+  ]
+}
+```
+
+In this example, checkout does not define the URL or 3DS semantics. The active
+payment handler adopts the standard
+[3DS Challenge](payment-actions/three-ds-challenge.md) action as part of its
+runtime contract, including how the platform executes the challenge, how
+completion is observed, and what fallback applies if the action cannot be
+executed.
+
 ## Continue URL
 
 The `continue_url` field enables checkout handoff from platform to business UI,
@@ -796,6 +872,10 @@ field or omitting them.
 ### Message Warning
 
 {{ schema_fields('types/message_warning', 'checkout') }}
+
+### Action
+
+{{ schema_fields('types/action', 'checkout') }}
 
 ### Payment
 

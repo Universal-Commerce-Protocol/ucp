@@ -78,6 +78,9 @@ nav:
           - Guide: specification/payment-handler-guide.md
           - Template: specification/payment-handler-template.md
           - Tokenization Guide: specification/tokenization-guide.md
+          - Standard Payment Actions:
+              - Device Data Collection: specification/payment-actions/device-data-collection.md
+              - 3DS Challenge: specification/payment-actions/three-ds-challenge.md
           - Examples:
               - Processor Tokenizer: "specification/examples/\
                   processor-tokenizer-payment-handler.md"

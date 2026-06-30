@@ -410,6 +410,29 @@ Content-Type: application/json
 
 ---
 
+## Runtime Payment Authentication Actions
+
+This platform tokenizer example focuses on token issuance, binding, and
+detokenization. It does not itself define device data collection or 3DS
+challenge actions. Those actions are part of the runtime contract of the payment
+handler or processing integration that owns payment authorization.
+
+A card-processing handler that uses tokens produced by this tokenizer may adopt
+standard UCP payment actions such as:
+
+| Code | Purpose | Spec |
+| :--- | :------ | :--- |
+| `dev.ucp.payment.device_data_collection` | Run invisible device/browser data collection associated with a payment instrument or attempt. | [Device Data Collection](../payment-actions/device-data-collection.md) |
+| `dev.ucp.payment.three_ds_challenge` | Present a buyer-facing 3DS challenge during payment completion. | [3DS Challenge](../payment-actions/three-ds-challenge.md) |
+
+When those actions are emitted during checkout, the platform executes the action
+according to the owning payment handler's runtime contract. The tokenizer token
+and selected payment instrument are resubmitted unchanged after the action's
+`action.done` message; UCP does not add DDC or 3DS result fields to the token
+credential or payment instrument.
+
+---
+
 ## PSP Integration
 
 ### Prerequisites
