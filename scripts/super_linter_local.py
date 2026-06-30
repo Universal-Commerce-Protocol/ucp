@@ -46,6 +46,11 @@ def main():
     default="main",
     help="Default branch to compare against (default: main)",
   )
+  parser.add_argument(
+    "--step-name",
+    default=None,
+    help="Specific step name to find (optional)",
+  )
 
   args = parser.parse_args()
 
@@ -55,7 +60,7 @@ def main():
     print(f"Error: {workflow_path} not found.")
     sys.exit(1)
 
-  with workflow_path.open() as f:
+  with workflow_path.open(encoding="utf-8") as f:
     workflow = yaml.safe_load(f)
 
   lint_step = None
@@ -65,12 +70,22 @@ def main():
     steps = job_data.get("steps", [])
 
     for step in steps:
-      if step.get("name") == "Lint Code Base":
+      if (args.step_name and step.get("name") == args.step_name) or (
+        not args.step_name
+        and "super-linter/super-linter" in step.get("uses", "")
+      ):
         lint_step = step
         break
+    if lint_step:
+      break
 
   if not lint_step:
-    print("Error: Could not find 'Lint Code Base' step in workflow.")
+    search_term = (
+      f"name '{args.step_name}'"
+      if args.step_name
+      else "uses 'super-linter/super-linter'"
+    )
+    print(f"Error: Could not find step with {search_term} in workflow.")
     sys.exit(1)
 
   assert lint_step is not None
@@ -110,6 +125,12 @@ def main():
   try:
     result = subprocess.run(cmd, check=False)
     sys.exit(result.returncode)
+  except FileNotFoundError:
+    print(
+      f"\nError: Container runtime '{args.runtime}' not found. "
+      "Please ensure Docker or Podman is installed and in your PATH."
+    )
+    sys.exit(1)
   except KeyboardInterrupt:
     print("\nInterrupted by user")
     sys.exit(1)

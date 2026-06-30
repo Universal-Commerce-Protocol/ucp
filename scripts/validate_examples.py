@@ -109,6 +109,7 @@ Exit codes: 0 if all pass or skip; 1 if any block fails or errors.
 """
 
 import argparse
+import concurrent.futures
 import json
 import re
 import subprocess
@@ -190,7 +191,7 @@ def extract_blocks(filepath: Path) -> list[dict]:
   fence with no intervening fence — and emits an error block for the
   second one. Per contract, at most one annotation per block.
   """
-  lines = filepath.read_text().splitlines()
+  lines = filepath.read_text(encoding="utf-8").splitlines()
   blocks: list[dict] = []
   i = 0
   pending_annotation = None
@@ -357,10 +358,34 @@ def lower_ellipsis_to_sentinels(content: str) -> str:
   return content
 
 
+def remove_trailing_commas(content: str) -> str:
+  """Stage 5. Remove trailing commas from arrays and objects."""
+  result = []
+  in_string = False
+  i = 0
+  while i < len(content):
+    ch = content[i]
+    if ch == '"' and (i == 0 or content[i - 1] != "\\"):
+      in_string = not in_string
+      result.append(ch)
+    elif ch == "," and not in_string:
+      j = i + 1
+      while j < len(content) and content[j].isspace():
+        j += 1
+      if j < len(content) and content[j] in "]}":
+        pass  # skip comma
+      else:
+        result.append(ch)
+    else:
+      result.append(ch)
+    i += 1
+  return "".join(result)
+
+
 def reduce_to_canonical_json(raw: str) -> str:
   """Layer 1 → Layer 2. Pure text transformation, no JSON parse.
 
-  Applies the four authoring conveniences in order. Output is
+  Applies the authoring conveniences in order. Output is
   parsable by json.loads. String-sentinel "..." survives into
   Layer 3 and is interpreted there as an elision marker.
   """
@@ -368,6 +393,7 @@ def reduce_to_canonical_json(raw: str) -> str:
   raw = expand_templates(raw)
   raw = strip_line_comments(raw)
   raw = lower_ellipsis_to_sentinels(raw)
+  raw = remove_trailing_commas(raw)
   return raw
 
 
@@ -682,7 +708,9 @@ def validate_payload(
 ) -> tuple[bool, list[dict]]:
   """Validate a payload via ucp-schema validate."""
   full_schema = schema_base / f"{schema_path}.json"
-  with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+  with tempfile.NamedTemporaryFile(
+    mode="w", suffix=".json", delete=False, encoding="utf-8"
+  ) as f:
     json.dump(payload, f)
     tmp_path = f.name
 
@@ -734,12 +762,12 @@ def validate_payload_with_schema(
   tmp_payload = None
   try:
     with tempfile.NamedTemporaryFile(
-      mode="w", suffix=".json", delete=False
+      mode="w", suffix=".json", delete=False, encoding="utf-8"
     ) as f:
       json.dump(schema_dict, f)
       tmp_schema = f.name
     with tempfile.NamedTemporaryFile(
-      mode="w", suffix=".json", delete=False
+      mode="w", suffix=".json", delete=False, encoding="utf-8"
     ) as f:
       json.dump(payload, f)
       tmp_payload = f.name
@@ -791,17 +819,17 @@ def load_scaffold(
   name = schema_path.replace("/", "_")
   specific = scaffolds_dir / f"{name}_{direction}_{op}.json"
   if specific.exists():
-    return json.loads(specific.read_text())
+    return json.loads(specific.read_text(encoding="utf-8"))
 
   # Try direction-only: checkout_response.json
   dir_only = scaffolds_dir / f"{name}_{direction}.json"
   if dir_only.exists():
-    return json.loads(dir_only.read_text())
+    return json.loads(dir_only.read_text(encoding="utf-8"))
 
   # Try generic: checkout.json
   generic = scaffolds_dir / f"{name}.json"
   if generic.exists():
-    return json.loads(generic.read_text())
+    return json.loads(generic.read_text(encoding="utf-8"))
 
   return None
 
@@ -1108,6 +1136,12 @@ def main() -> int:
     action="store_true",
     help="Just list blocks without validating",
   )
+  parser.add_argument(
+    "--format",
+    choices=["text", "json"],
+    default="text",
+    help="Output format (default: text)",
+  )
   args = parser.parse_args()
 
   # Resolve paths relative to script location
@@ -1149,9 +1183,13 @@ def main() -> int:
 
   # Validate
   results: list[Result] = []
-  for block in all_blocks:
-    result = process_block(block, schema_base, scaffolds_dir)
-    results.append(result)
+  with concurrent.futures.ThreadPoolExecutor() as executor:
+    future_to_block = {
+      executor.submit(process_block, block, schema_base, scaffolds_dir): block
+      for block in all_blocks
+    }
+    for future in concurrent.futures.as_completed(future_to_block):
+      results.append(future.result())
 
   # Report
   passed = sum(1 for r in results if r.status == "ok")
@@ -1159,13 +1197,30 @@ def main() -> int:
   errors = sum(1 for r in results if r.status == "error")
   skipped = sum(1 for r in results if r.status == "skip")
 
+  if args.format == "json":
+    json_output = []
+    for r in results:
+      if r.status in ("fail", "error"):
+        json_output.append(
+          {
+            "file": r.file,
+            "line": r.line,
+            "status": r.status,
+            "message": r.message,
+          }
+        )
+    print(json.dumps(json_output, indent=2))
+    return 0 if (failed == 0 and errors == 0) else 1
+
   # Print failures and errors first
   for r in results:
     if r.status in ("fail", "error"):
-      print(r)
+      # cspell:disable-next-line
+      print(r)  # noqa: T201
   for r in results:
     if r.status == "skip":
-      print(r)
+      # cspell:disable-next-line
+      print(r)  # noqa: T201
 
   print(
     f"\n{passed} passed, {failed} failed, {errors} errors, {skipped} skipped"

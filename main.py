@@ -186,12 +186,19 @@ def _resolve_schema(
   if bundle:
     cmd.append("--bundle")
 
-  result = subprocess.run(
-    cmd,
-    capture_output=True,
-    text=True,
-    check=False,
-  )
+  try:
+    result = subprocess.run(
+      cmd,
+      capture_output=True,
+      text=True,
+      check=False,
+    )
+  except FileNotFoundError:
+    raise RuntimeError(
+      "ucp-schema not found. Please install it using "
+      "`cargo install ucp-schema`."
+    ) from None
+
   if result.returncode == 0:
     data = json.loads(result.stdout)
     _resolved_schema_cache[cache_key] = data
@@ -235,13 +242,20 @@ def define_env(env):
     """Resolve a schema using ucp-schema CLI (delegates to module-level fn)."""
     return _resolve_schema(schema_path, direction, operation, bundle=False)
 
+  _json_file_cache: dict[str, dict] = {}
+
   def _load_json_file(entity_name):
     """Try loading a JSON file from the configured directories."""
+    if entity_name in _json_file_cache:
+      return _json_file_cache[entity_name]
+
     for schemas_dir in schemas_dirs:
       full_path = Path(schemas_dir) / (entity_name + ".json")
       try:
         with full_path.open(encoding="utf-8") as f:
-          return json.load(f)
+          data = json.load(f)
+          _json_file_cache[entity_name] = data
+          return data
       except FileNotFoundError:
         continue
     return None

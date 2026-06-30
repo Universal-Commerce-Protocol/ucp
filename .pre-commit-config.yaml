@@ -23,21 +23,21 @@ repos:
       #    invalidate examples across many docs (cross-file regression).
       - id: validate-examples-changed
         name: Validate JSON examples (changed docs)
-        entry: python3 scripts/validate_examples.py --schema-base source/schemas/ --file
+        entry: python scripts/validate_examples.py --schema-base source/schemas/ --file
         language: system
         pass_filenames: true
         files: ^docs/.*\.md$
         stages: [pre-commit, pre-push]
       - id: validate-examples-full
         name: Validate JSON examples (full corpus)
-        entry: python3 scripts/validate_examples.py --schema-base source/schemas/
+        entry: python scripts/validate_examples.py --schema-base source/schemas/
         language: system
         pass_filenames: false
         files: ^(source/schemas/|scripts/validate_examples\.py$)
         stages: [pre-commit, pre-push]
       - id: validate-examples-tests
         name: Validator unit tests
-        entry: python3 scripts/test_validate_examples.py
+        entry: python scripts/test_validate_examples.py
         language: system
         pass_filenames: false
         files: ^scripts/(validate_examples|test_validate_examples)\.py$

@@ -1,15 +1,19 @@
 """Script to check for broken internal links and anchors in the built site."""
 
+import argparse
 import os
 import sys
+import json
 import re
 from html.parser import HTMLParser
+import requests
+from concurrent.futures import ThreadPoolExecutor
+import concurrent.futures
 from urllib.parse import urlparse, unquote
 from pathlib import Path
 from collections import defaultdict
 
 # Configuration
-ROOT_DIR = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("local_preview")
 SITE_URL = os.environ.get("SITE_URL", "https://ucp.dev/")
 
 # Ensure trailing slash for site url to match correctly
@@ -39,6 +43,22 @@ class LinkParser(HTMLParser):
 
   def handle_starttag(self, tag, attrs):
     """Extract href from anchor tags and id/name attributes from all tags."""
+    # Handle bare URLs surrounded by angle brackets (e.g., <https://ucp.dev/b>)
+    # HTMLParser mistakenly treats these as HTML tags instead of text data.
+    if not self.is_ignoring_links and tag in ("http:", "https:"):
+      raw_tag = self.get_starttag_text()
+      if raw_tag:
+        # This regex is for URLs that HTMLParser mistakes as tags, like
+        # <https://ucp.dev/b>. It finds all such URLs in the raw tag text.
+        urls = re.findall(r"https://ucp\.dev[^\s>]+", raw_tag)
+        for url in urls:
+          if (
+            not url.endswith("...")
+            and not url.endswith("*")
+            and url not in self.links
+          ):
+            self.links.append(url)
+
     attrs_dict = dict(attrs)
     if tag == "a" and "href" in attrs_dict:
       href = attrs_dict["href"]
@@ -60,8 +80,11 @@ class LinkParser(HTMLParser):
     if self.is_ignoring_links:
       return
 
-    # Find anything that looks like https://ucp.dev/... in the text
-    urls = re.findall(r"https://ucp\.dev[^\s\"\'<>]*", data)
+    # Find URLs inside quotes, angle brackets, or just in plain text.
+    # This pattern handles URLs that might be surrounded by various delimiters.
+    # It correctly extracts URLs without including trailing punctuation.
+    urls = re.findall(r'https://ucp\.dev[^\s"\'<>]+', data)
+
     for url in urls:
       if url.endswith("...") or url.endswith("*"):
         continue
@@ -71,30 +94,57 @@ class LinkParser(HTMLParser):
 
 def check_links():
   """Scan the built documentation site for broken links and anchors."""
-  if not ROOT_DIR.exists():
+  parser = argparse.ArgumentParser(
+    description="Check for broken internal links and anchors in the built site."
+  )
+  parser.add_argument(
+    "root_dir",
+    nargs="?",
+    type=Path,
+    default=Path("local_preview"),
+    help="Directory containing the built site (default: local_preview)",
+  )
+  parser.add_argument(
+    "--check-external",
+    action="store_true",
+    help="Check external links for reachability (can be slow).",
+  )
+  parser.add_argument(
+    "--format",
+    choices=["text", "json"],
+    default="text",
+    help="Output format (default: text)",
+  )
+  args = parser.parse_args()
+  root_dir = args.root_dir
+
+  if not root_dir.exists():
     print(
-      f"Error: {ROOT_DIR} does not exist. Run build_local.sh (local) "
-      "or mkdocs build (CI) first."
+      f"Error: {root_dir} does not exist. "
+      "Ensure you've run `mkdocs build` or `mkdocs serve` and specified "
+      "the correct output directory, or mkdocs build (CI) first."
     )
     sys.exit(1)
 
   ignore_patterns = []
-  if Path(".linkignore").exists():
-    try:
-      with Path.open(".linkignore", "r", encoding="utf-8") as f:
-        for line in f:
-          line = line.strip()
-          if line and not line.startswith("#"):
-            try:
-              ignore_patterns.append(re.compile(line))
-            except re.error as e:
-              print(f"Warning: Invalid regex in .linkignore '{line}': {e}")
-    except Exception as e:
-      print(f"Warning: Could not read .linkignore: {e}")
+  try:
+    with Path(".linkignore").open("r", encoding="utf-8") as f:
+      for line in f:
+        line = line.strip()
+        if line and not line.startswith("#"):
+          try:
+            ignore_patterns.append(re.compile(line))
+          except re.error as e:
+            print(f"Warning: Invalid regex in .linkignore '{line}': {e}")
+  except FileNotFoundError:
+    pass  # .linkignore is optional and it is safe to skip
+  except Exception as e:
+    print(f"Warning: Could not read .linkignore: {e}")
 
-  print(f"Scanning {ROOT_DIR} for broken links (Site URL: {SITE_URL})...")
+  if args.format != "json":
+    print(f"Scanning {root_dir} for broken links (Site URL: {SITE_URL})...")
 
-  html_files = list(ROOT_DIR.rglob("*.html"))
+  html_files = list(root_dir.rglob("*.html"))
   file_cache = {}  # Cache parsed IDs for each file to avoid re-parsing
   # Structure: errors_by_version[version][file_path] = [list of error details]
   errors_by_version = defaultdict(lambda: defaultdict(list))
@@ -116,9 +166,53 @@ def check_links():
       # print(f"Failed to parse {path}: {e}") # Reduce noise
       return None
 
+  def check_external_link(link):
+    try:
+      # Use a timeout to prevent hanging and a user-agent to avoid some blocks
+      headers = {
+        "User-Agent": (
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+          "AppleWebKit/537.36 (KHTML, like Gecko) "
+          "Chrome/91.0.4472.124 Safari/537.36"
+        )
+      }
+      response = requests.head(
+        link, timeout=10, allow_redirects=True, headers=headers
+      )
+
+      # Some sites block HEAD requests (403, 404, 405) or rate limit like
+      # GitHub (429). In this case, we retry with a GET request.
+      if response.status_code in (403, 404, 405, 429):
+        response = requests.get(
+          link, timeout=10, allow_redirects=True, headers=headers
+        )
+
+      if 200 <= response.status_code < 400 or response.status_code == 429:
+        return True, None
+      else:
+        return (
+          False,
+          f"External link returned status code {response.status_code}",
+        )
+    except requests.exceptions.RequestException as e:
+      return False, f"Failed to connect: {e}"
+
+  # Parallelize HTML file parsing
+  with ThreadPoolExecutor() as executor:
+    futures = {
+      executor.submit(get_file_ids, html_file): html_file
+      for html_file in html_files
+    }
+    for future in futures:
+      _ = future.result()  # Ensure all files are parsed and cached
+
+  # For parallel external link checking
+  external_links_to_check = set()
+  file_external_links = defaultdict(list)
+
   for file_path in html_files:
     try:
-      rel_path = file_path.relative_to(ROOT_DIR)
+      rel_path = file_path.relative_to(root_dir)
       first_part = rel_path.parts[0]
 
       # Heuristic for version detection
@@ -129,7 +223,7 @@ def check_links():
         is_version = True
 
       version = first_part if is_version else "root"
-    except Exception:
+    except (ValueError, IndexError):
       version = "unknown"
 
     try:
@@ -147,23 +241,25 @@ def check_links():
     for link in parser.links:
       original_link = link
 
-      should_ignore = False
-      for pattern in ignore_patterns:
-        if pattern.search(original_link):
-          should_ignore = True
-          break
-      if should_ignore:
+      # Check if any ignore pattern matches. The any() function provides a
+      # short-circuiting and more Pythonic way to do this.
+      if any(pattern.search(original_link) for pattern in ignore_patterns):
         continue
 
       # Ignore external links
       if link.startswith(("mailto:", "tel:", "javascript:", "data:")):
         continue
 
+      # Check external links if --check-external is set
       parsed = urlparse(link)
       if parsed.scheme and parsed.scheme in ("http", "https"):
         if not link.startswith(SITE_URL):
-          continue  # External link
-        # Internal absolute URL (e.g. https://ucp.dev/foo) -> /foo
+          if args.check_external:
+            external_links_to_check.add(link)
+            file_external_links[file_path].append((version, link))
+          continue  # External links are handled or ignored beyond this point
+
+        # Internal absolute URL
         link = link[len(SITE_URL) - 1 :]  # Keep the leading slash
 
       path_part = parsed.path
@@ -195,11 +291,11 @@ def check_links():
             parts[0] in ["latest", "draft"]
             or re.match(r"^\d{4}-\d{2}-\d{2}$", parts[0])
           )
-          and not (ROOT_DIR / parts[0]).exists()
+          and not (root_dir / parts[0]).exists()
         ):
           rel_path = parts[1]
 
-        target_file = ROOT_DIR / rel_path
+        target_file = root_dir / rel_path
       else:
         # Relative path
         target_file = file_path.parent / path_part
@@ -240,7 +336,40 @@ def check_links():
             f"  Target: {target_file}#{anchor_part} (Anchor not found)"
           )
 
+  # Process external links in parallel
+  if args.check_external and external_links_to_check:
+    if args.format != "json":
+      print(
+        f"Checking {len(external_links_to_check)} external links in parallel..."
+      )
+    external_results = {}
+    with ThreadPoolExecutor(max_workers=20) as executor:
+      future_to_link = {
+        executor.submit(check_external_link, link_url): link_url
+        for link_url in external_links_to_check
+      }
+      for future in concurrent.futures.as_completed(future_to_link):
+        link_url = future_to_link[future]
+        external_results[link_url] = future.result()
+
+    for file_path, links in file_external_links.items():
+      for version, link in links:
+        is_valid, error_msg = external_results[link]
+        if not is_valid:
+          errors_by_version[version][str(file_path)].append(
+            f"  External Link: {link}\n  Reason: {error_msg}"
+          )
+
   if errors_by_version:
+    if args.format == "json":
+      out = []
+      for v, files in errors_by_version.items():
+        for fp, errs in files.items():
+          for e in errs:
+            out.append({"version": v, "file": fp, "error": e.strip()})
+      print(json.dumps(out, indent=2))
+      sys.exit(1)
+
     total_errors = sum(
       sum(len(errs) for errs in files.values())
       for files in errors_by_version.values()
@@ -255,7 +384,8 @@ def check_links():
           print(e)
     sys.exit(1)
   else:
-    print("All internal links validated successfully.")
+    if args.format != "json":
+      print("All links validated successfully.")
 
 
 if __name__ == "__main__":
