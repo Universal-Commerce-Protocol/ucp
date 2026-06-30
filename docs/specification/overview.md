@@ -77,18 +77,108 @@ All capability and service names **MUST** use the format:
 | `dev.ucp.common.identity_linking`   | ucp.dev     | common   | identity_linking |
 | `com.example.payments.installments` | example.com | payments | installments     |
 
-#### Spec URL Binding
+#### Authority Binding
 
-The `spec` and `schema` fields are **REQUIRED** for all capabilities. The origin
-of these URLs **MUST** match the namespace authority:
+Reverse-domain names serve two purposes: collision-safe **identifiers** (keys
+and references), and **entities** — capabilities, services, and payment
+handlers — that declare a fetched `schema` URL describing them. Authority
+binding applies to every entity with a remote `schema`: a declared `schema`
+URL's origin **MUST** match the namespace authority in its name.
 
-| Namespace       | Required Origin           |
-| --------------- | ------------------------- |
-| `dev.ucp.*`     | `https://ucp.dev/...`     |
-| `com.example.*` | `https://example.com/...` |
+A capability **MUST** declare a `schema`; services and payment handlers declare
+one where their transport or handler defines it. Each entity **MAY** also
+declare a `spec` URL (human-readable documentation).
 
-Platform **MUST** validate this binding and **SHOULD** reject capabilities where
-the spec origin does not match the namespace authority.
+This binding guarantees **provenance, not trust**: a valid binding proves only
+that the reverse-domain name is controlled by the party that owns the
+corresponding domain — an entity cannot be published under a namespace its
+author does not control. It does **not** assert that the entity is trustworthy,
+correct, or worth supporting. Whether to negotiate, trust, or implement it is
+always the client's decision; this binding only tells the client *who* is making
+the claim. Provenance is established from domain ownership and evaluated at
+negotiation time.
+
+The `spec` URL is documentation, not part of the machine trust path, so its
+origin is **not** authority-bound: it **MUST** be `https` but **MAY** be served
+from any host (e.g. a docs subdomain or third-party docs host). Only the
+`schema` URL carries the authority binding defined below.
+
+##### Derivation algorithm
+
+The authority is derived **from the `schema` URL host** — which names the
+owning domain directly, with no ambiguity about where the domain ends — and
+validated as a label prefix of the entity's name. For the `schema` URL of an
+entity whose name is `name`, a platform **MUST** apply the following:
+
+1. Parse the URL with a conformant (WHATWG) URL parser. It **MUST** parse,
+   **MUST** use the `https` scheme, and **MUST NOT** contain userinfo (a
+   `user:pass@` component). Substring matching on the raw URL is **NOT**
+   permitted — e.g. `https://ucp.dev@evil.example/x.json` has host
+   `evil.example`, not `ucp.dev`.
+2. The host **MUST** be a registered domain name of at least two labels.
+   IP-literal hosts (`https://203.0.113.10/...`) and single-label hosts
+   (`https://localhost/...`) are invalid authorities.
+3. Take the URL's hostname (the host without any port), normalize it (lowercase;
+   strip a trailing `.`; internationalized domains in A-label / punycode form),
+   and **reverse its labels** to form the `authority_prefix` (host `ucp.dev` →
+   `dev.ucp`).
+4. The binding is valid if and only if `name` begins with `authority_prefix`
+   followed by a `.` (a literal trailing dot). The trailing-dot boundary is
+   required so that `com.example` (from host `example.com`) cannot satisfy a
+   neighboring namespace like `com.examplecorp.*`, where it is a textual but
+   not label-aligned prefix; it also guarantees a non-empty remainder after the
+   prefix.
+
+The remaining labels after the authority prefix are treated as opaque by this
+check; they are not inspected or split.
+
+| Capability name                     | `schema` host      | `authority_prefix` | Result     |
+| ----------------------------------- | ------------------ | ------------------ | ---------- |
+| `dev.ucp.shopping.checkout`         | `ucp.dev`          | `dev.ucp`          | **accept** |
+| `dev.ucp.shopping.checkout`         | `shopping.ucp.dev` | `dev.ucp.shopping` | **accept** |
+| `com.example.payments.installments` | `example.com`      | `com.example`      | **accept** |
+| `com.example.pay`                   | `evil.example`     | `example.evil`     | **reject** |
+| `dev.ucp.shopping.checkout`         | `evil.example`     | `example.evil`     | **reject** |
+| `com.examplecorp.pay`               | `example.com`      | `com.example`      | **reject** |
+| `com.example.pay`                   | `cdn.example.com`  | `com.example.cdn`  | **reject** |
+
+An entity's `schema` is served from a host whose reversed labels are a prefix of
+its name. A canonical apex host (`example.com` for `com.example.*`) always
+satisfies this; a subdomain satisfies it only when its labels line up with the
+namespace path (`shopping.ucp.dev` for `dev.ucp.shopping.*`). Unrelated
+subdomains such as a shared CDN do **not** satisfy it — host the canonical
+schema on a name-aligned origin.
+
+The check uses the `schema` URL host directly and does not consult the
+[Public Suffix List](https://publicsuffix.org/), so it treats a **public
+suffix** — a domain under which independent parties can register names, from
+`co.uk` to the list's private-section suffixes operated by services that let
+third parties register subdomains or buckets (`github.io`, object storage, app
+platforms) — as an ordinary authority. Co-tenants under such a suffix satisfy
+the same prefix, so declare entities only under a **registrable domain** (a
+public suffix plus one label) that you exclusively control.
+
+##### Enforcement
+
+A platform **MUST** validate each business-declared `schema` URL before fetching
+it. If the URL's origin does not match the entity's namespace authority (per
+[Derivation algorithm](#derivation-algorithm)), the platform **MUST NOT** fetch
+it and **MUST** reject the entity — treated as not present and never
+activated. A `spec` URL **MUST** be a valid `https` URL.
+
+The platform fetches and composes business-declared schemas to validate every
+request and response, so validating the binding ensures each composed schema is
+sourced from the party that owns the entity's namespace. A business **SHOULD**
+apply the same check to the platform profile and exclude any entity whose
+binding fails.
+
+Binding validates the declared hostname for provenance; it is **not** a
+fetch-safety control and does not authorize dereferencing. Fetching the `schema`
+URL — like any URL fetched during discovery — is additionally subject to the
+protocol's URL fetch-safety requirements, which guard the *resolved* address
+(not just the hostname) against server-side request forgery toward special-use
+or cloud-metadata addresses and DNS rebinding. The hostname check and the
+resolved-address check are independent, and both apply.
 
 #### Governance Model
 
@@ -657,8 +747,10 @@ metadata:
 2. **Discovery**: Platforms **MAY** fetch the business profile from
     `/.well-known/ucp` before initiating requests. If fetched, platforms
     **SHOULD** cache the profile according to HTTP cache-control directives.
-3. **Namespace Validation**: Platforms **MUST** validate that capability `spec`
-    URI origins match namespace authorities.
+3. **Namespace Validation**: Before fetching, platforms **MUST** validate that
+    each capability's `schema` URL origin matches its namespace authority (see
+    [Authority Binding](#authority-binding)) and **MUST** reject capabilities
+    that fail this binding.
 4. **Schema Resolution**: Platforms **MUST** fetch and compose schemas for
     negotiated capabilities before making requests.
 
@@ -666,7 +758,10 @@ metadata:
 
 1. **Profile Resolution**: Upon receiving a request with a platform profile
     URI, businesses **MUST** fetch and validate the platform profile unless
-    already cached.
+    already cached. Because businesses negotiate by capability name and serve
+    their own schemas, they do not normally dereference platform-declared
+    `schema` URLs; they **SHOULD** nonetheless verify the namespace binding (see
+    [Authority Binding](#authority-binding)) as defense in depth.
 2. **Capability Intersection**: Businesses **MUST** compute the intersection of
     platform and business capabilities.
 3. **Extension Validation**: Extensions without their parent capability in the
