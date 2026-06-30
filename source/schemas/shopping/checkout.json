@@ -93,6 +93,14 @@
       "description": "List of messages with error and info about the checkout session state.",
       "ucp_request": "omit"
     },
+    "actions": {
+      "type": "array",
+      "items": {
+        "$ref": "../common/types/action.json"
+      },
+      "description": "List of actions emitted by the business. Each action code is defined or adopted by an active entity in the checkout. The associated spec defines config schema, platform behavior, security requirements, completion criteria, fallback behavior, and resulting checkout updates.",
+      "ucp_request": "omit"
+    },
     "links": {
       "type": "array",
       "items": {

@@ -54,8 +54,9 @@ fulfillment details more relevant for physical goods.
 ### Checkout Status Lifecycle
 
 The checkout `status` field indicates the current phase of the session and
-determines what action is required next. The business sets the status; the
-platform receives messages indicating what's needed to progress.
+identifies what the platform can do next. The business sets the status; the
+platform receives messages and, when applicable, actions indicating what's
+needed to progress.
 
 ```text
        +------------+                         +---------------------+
@@ -113,6 +114,74 @@ platform receives messages indicating what's needed to progress.
 
 * **`canceled`**: Checkout session is invalid or expired. Platform should
     start a new checkout session if needed.
+
+### Actions
+
+Checkout responses may include [actions](actions.md) in the top-level
+`actions` array. When no checkout action is outstanding, businesses **SHOULD**
+omit `actions` or return it as an empty array. Actions are distinct from
+messages: messages describe checkout state for the buyer or platform, while
+actions are scoped runtime instructions that an active capability, extension, or
+payment handler asks the platform to execute.
+
+Checkout defines how the common action severities apply to the checkout
+lifecycle:
+
+| Severity | Checkout behavior |
+| :------- | :---------------- |
+| `optional` | The platform **MAY** ignore the action. Checkout can still complete successfully. |
+| `required` | The platform **MUST** resolve the action before checkout can complete successfully, but the checkout remains otherwise usable. The platform may still update, retrieve, or cancel the checkout while the action is outstanding. |
+| `blocking` | The action blocks the current attempted checkout transition, such as `complete_checkout`. The platform **MUST** resolve the action, choose an allowed alternate path (such as modifying the primitive that caused the blocking action to surface), or escalate via `continue_url` before retrying that transition. |
+
+When processing a checkout response, platforms should resolve terminal and
+recoverable errors before actions. Optional actions can be attempted best-effort.
+Required actions should be resolved before final completion. Blocking actions
+should be handled immediately because the attempted transition cannot proceed
+until the action resolves or the platform follows the owning specification's
+fallback path.
+
+If the platform cannot execute a required or blocking checkout action, it
+**MUST** follow the fallback behavior defined by the owning action specification.
+For checkout, common fallback paths include retrying with different checkout
+state, selecting a different payment instrument, canceling the checkout, or
+escalating to the business-hosted checkout via `continue_url`. When Embedded
+Checkout is available, the platform **MAY** satisfy escalation by loading
+`continue_url` in an embedded context if the embedded checkout contract allows it.
+
+Completion is defined by the owning action specification. Resolving an action
+does not imply that checkout completed successfully. After action completion, the
+platform re-drives the operation that was blocked or retrieves the checkout; the
+business then returns the next authoritative checkout state.
+
+Action `id` values are stable for the same unresolved action occurrence. If a
+business returns the same action `id` again, the platform should treat it as the
+same outstanding action rather than a new one. If the platform changes checkout
+state in a way that supersedes an outstanding action, such as changing the
+selected payment instrument or removing an eligibility claim, the business must
+stop applying stale completion signals for the superseded action to the new
+checkout state.
+
+#### Example
+
+A checkout extension can require a student eligibility verification action before
+completion. The extension owns the action code and defines the `config` schema,
+URL trust policy, completion criteria, and fallback behavior.
+
+<!-- ucp:example schema=shopping/checkout target=$.actions op=read -->
+```json
+[
+  {
+    "id": "student-verification-1",
+    "code": "com.example.identity.verify_student_status",
+    "severity": "required",
+    "config": {
+      "url": "https://verify.example.com/session/abc123",
+      "requested_claim": "student",
+      "timeout_seconds": 300
+    }
+  }
+]
+```
 
 ### Error Handling
 
@@ -796,6 +865,10 @@ field or omitting them.
 ### Message Warning
 
 {{ schema_fields('types/message_warning', 'checkout') }}
+
+### Action
+
+{{ schema_fields('types/action', 'checkout') }}
 
 ### Payment
 
