@@ -97,6 +97,11 @@
           },
           "description": "Discounts successfully applied (code-based and automatic).",
           "ucp_request": "omit"
+        },
+        "approaching": {
+          "$ref": "types/approaching_discount.json",
+          "description": "Promotions the buyer is close to unlocking. Omitted in requests.",
+          "ucp_request": "omit"
         }
       }
     },
