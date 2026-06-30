@@ -20,6 +20,7 @@
     "ap2_with_merchant_authorization": {
       "type": "object",
       "description": "AP2 extension data including merchant authorization.",
+      "required": ["merchant_authorization"],
       "properties": {
         "merchant_authorization": {
           "$ref": "#/$defs/merchant_authorization",
