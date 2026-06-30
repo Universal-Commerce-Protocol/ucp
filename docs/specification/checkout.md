@@ -39,6 +39,12 @@ the processing specifications for collecting payment instruments
 (e.g., Google Pay, Shop Pay). When the buyer submits payment, the platform
 populates the `payment.instruments` array with the collected instrument data.
 
+Businesses may also populate `payment.instruments[]` on responses with
+display-safe payment instruments from their own user state, such as payment
+methods the authenticated buyer has saved with the business. See
+[Business-Owned Response Values](business-owned-response-values.md) for the
+identity-linked response pattern and a saved payment instrument example.
+
 The `payment` object is optional on checkout creation and may be omitted for
 use cases that don't require payment processing (e.g., quote generation, cart
 management).
