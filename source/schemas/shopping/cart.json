@@ -62,7 +62,7 @@
       }
     },
     "context": {
-      "$ref": "types/context.json",
+      "$ref": "../common/types/context.json",
       "description": "Buyer signals for localization (country, region, postal_code). Merchant uses for pricing, availability, currency. Falls back to geo-IP if omitted.",
       "ucp_request": {
         "create": "optional",
@@ -70,7 +70,7 @@
       }
     },
     "signals": {
-      "$ref": "types/signals.json",
+      "$ref": "../common/types/signals.json",
       "ucp_request": {
         "create": "optional",
         "update": "optional"

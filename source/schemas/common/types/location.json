@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/location.json",
+  "title": "Location",
+  "description": "A physical location (e.g., store, restaurant, locker, warehouse).",
+  "type": "object",
+  "required": ["id", "name"],
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique location identifier.",
+      "ucp_request": {
+        "transition": {
+          "from": "omit",
+          "to": "optional",
+          "description": "Location ids MAY be specified by platforms in requests."
+        }
+      }
+    },
+    "name": {
+      "type": "string",
+      "description": "Location display name.",
+      "ucp_request": {
+        "transition": {
+          "from": "required",
+          "to": "omit",
+          "description": "Location names should not be specified by platforms."
+        }
+      }
+    },
+    "address": {
+      "$ref": "postal_address.json",
+      "description": "Physical address of the location."
+    },
+    "geo": {
+      "$ref": "geo.json",
+      "description": "Geographic coordinates and geofence for the location.",
+      "ucp_request": "omit"
+    },
+    "hours": {
+      "type": "array",
+      "description": "Regular weekly operating hours. For overnight hours, use two entries across two days.",
+      "items": {
+        "$ref": "daily_hour.json"
+      },
+      "ucp_request": "omit"
+    },
+    "exception_hours": {
+      "type": "array",
+      "description": "Exception hours for specific dates (holidays, closures, etc.).",
+      "items": {
+        "$ref": "exception_hour.json"
+      },
+      "ucp_request": "omit"
+    },
+    "timezone": {
+      "type": "string",
+      "description": "IANA timezone identifier (e.g., 'America/New_York'). MUST be set when hours or exception_hours are present Required for correct interpretation.",
+      "ucp_request": "omit"
+    }
+  }
+}

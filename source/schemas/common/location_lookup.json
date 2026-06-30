@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/location_lookup.json",
+  "name": "dev.ucp.common.location.lookup",
+  "title": "Location Lookup",
+  "description": "Location lookup by identifier. Supports batch retrieval (lookup_locations) and single-location detail (get_location).",
+  "type": "object",
+  "$defs": {
+    "lookup_request": {
+      "type": "object",
+      "description": "Request body for batch location lookup.",
+      "required": ["ids"],
+      "properties": {
+        "ids": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1,
+          "description": "Identifiers of the locations to lookup. Implementations MUST support location ID."
+        },
+        "filters": {
+          "$ref": "types/location_filter.json",
+          "description": "Filter criteria to narrow returned locations. All specified filters combine with AND logic."
+        },
+        "context": {
+          "$ref": "types/context.json"
+        },
+        "signals": {
+          "$ref": "types/signals.json"
+        }
+      }
+    },
+    "lookup_response": {
+      "type": "object",
+      "required": [
+        "ucp",
+        "locations"
+      ],
+      "properties": {
+        "ucp": {
+          "$ref": "../ucp.json#/$defs/response_catalog_schema"
+        },
+        "locations": {
+          "type": "array",
+          "items": {
+            "$ref": "types/location.json"
+          },
+          "description": "Locations matching the requested identifiers and filters. May contain fewer locations if some identifiers are not found."
+        },
+        "messages": {
+          "type": "array",
+          "items": {
+            "$ref": "types/message.json"
+          },
+          "description": "Errors, warnings, or informational messages about the requested locations."
+        }
+      }
+    }
+  }
+}

@@ -1,9 +1,9 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/schemas/shopping/catalog_search.json",
-  "name": "dev.ucp.shopping.catalog.search",
-  "title": "Catalog Search",
-  "description": "Product catalog search capability.",
+  "$id": "https://ucp.dev/schemas/common/location_search.json",
+  "name": "dev.ucp.common.location.search",
+  "title": "Location Search",
+  "description": "Location search capability. Supports natural language queries, structured filtering, and pagination.",
   "type": "object",
   "$defs": {
     "search_request": {
@@ -11,22 +11,19 @@
       "properties": {
         "query": {
           "type": "string",
-          "description": "Free-text search query."
+          "description": "Free-text search query for natural language location search (e.g., 'restaurants near me that deliver', 'hotels with pool')."
         },
         "context": {
-          "$ref": "../common/types/context.json"
+          "$ref": "types/context.json"
         },
         "signals": {
-          "$ref": "../common/types/signals.json"
-        },
-        "attribution": {
-          "$ref": "types/attribution.json"
+          "$ref": "types/signals.json"
         },
         "filters": {
-          "$ref": "types/search_filters.json"
+          "$ref": "types/location_filter.json"
         },
         "pagination": {
-          "$ref": "../common/types/pagination.json#/$defs/request"
+          "$ref": "types/pagination.json#/$defs/request"
         }
       }
     },
@@ -34,26 +31,26 @@
       "type": "object",
       "required": [
         "ucp",
-        "products"
+        "locations"
       ],
       "properties": {
         "ucp": {
           "$ref": "../ucp.json#/$defs/response_catalog_schema"
         },
-        "products": {
+        "locations": {
           "type": "array",
           "items": {
-            "$ref": "types/product.json"
+            "$ref": "types/location.json"
           },
-          "description": "Products matching the search criteria."
+          "description": "Locations matching the search criteria."
         },
         "pagination": {
-          "$ref": "../common/types/pagination.json#/$defs/response"
+          "$ref": "types/pagination.json#/$defs/response"
         },
         "messages": {
           "type": "array",
           "items": {
-            "$ref": "../common/types/message.json"
+            "$ref": "types/message.json"
           },
           "description": "Errors, warnings, or informational messages about the search results."
         }

@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/location_offering_filter.json",
+  "title": "Location Offering Filter",
+  "description": "Filter criteria for location offerings, separating static amenities/services from dynamic inventory.",
+  "type": "object",
+  "properties": {
+    "amenities": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Filter by static services, amenities, or capabilities of the location (e.g., 'free_wifi', 'wheelchair_accessible', 'parking', 'curbside_pickup'). Matches locations that have ALL the listed amenities (AND logic)."
+    },
+    "inventory": {
+      "type": "array",
+      "items": {
+        "$ref": "inventory_filter.json"
+      },
+      "description": "Filter by real-time availability of inventory (e.g., retail products or restaurant dishes) at the location. Matches locations that have ALL the listed items in stock (AND logic)."
+    }
+  },
+  "additionalProperties": true
+}

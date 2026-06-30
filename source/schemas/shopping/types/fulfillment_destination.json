@@ -10,7 +10,8 @@
       "$ref": "shipping_destination.json"
     },
     {
-      "$ref": "retail_location.json"
+      "$ref": "../../common/types/location.json",
+      "description": "A pickup retail location (e.g. store, locker, etc.)."
     }
   ]
 }

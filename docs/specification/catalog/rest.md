@@ -71,7 +71,7 @@ Businesses advertise REST transport availability through their UCP profile at
 
 Maps to the [Catalog Search](search.md) capability.
 
-{{ method_fields('search_catalog', 'rest.openapi.json', 'catalog/rest') }}
+{{ method_fields('search_catalog', 'shopping/rest.openapi.json', 'catalog/rest') }}
 
 #### Example
 
@@ -201,7 +201,7 @@ for supported identifiers, resolution behavior, and client correlation requireme
 The request body contains an array of identifiers and optional context that
 applies to all lookups in the batch.
 
-{{ method_fields('lookup_catalog', 'rest.openapi.json', 'catalog/rest') }}
+{{ method_fields('lookup_catalog', 'shopping/rest.openapi.json', 'catalog/rest') }}
 
 #### Example: Batch Lookup with Context
 
@@ -353,7 +353,7 @@ messages indicating which identifiers were not found.
 Maps to the [Catalog Lookup](lookup.md#get-product-get_product) capability. Returns a singular
 `product` object (not an array) for full product detail page rendering.
 
-{{ method_fields('get_product', 'rest.openapi.json', 'catalog/rest') }}
+{{ method_fields('get_product', 'shopping/rest.openapi.json', 'catalog/rest') }}
 
 #### Example: With Option Selection
 
