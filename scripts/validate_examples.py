@@ -953,12 +953,16 @@ def process_block(
   except RuntimeError as e:
     return Result(file, line, "error", str(e), annotation)
 
-  # 6. Coverage check — def= selects the base validation schema;
-  # target= optionally selects a sub-schema within that base for
-  # partial examples. Final validation still runs against the full
-  # selected base schema after scaffold merge.
+  # 6. Coverage check — pick the schema the example is checked against.
+  # Container capabilities (no root body; request/response shapes under
+  # $defs/{op}_{direction}, e.g. catalog) derive the shape from op+direction,
+  # matching what `ucp-schema validate` selects. def= remains the explicit
+  # selector for shapes that aren't an operation+direction (a transport's
+  # error_response, a profile's business_schema, a sub-type). target=
+  # optionally narrows to a sub-schema for partial examples.
+  defs = resolved.get("$defs", {})
+  op_key = f"{op}_{direction}"
   if schema_def:
-    defs = resolved.get("$defs", {})
     if schema_def not in defs:
       return Result(
         file,
@@ -968,6 +972,8 @@ def process_block(
         annotation,
       )
     validation_schema = defs[schema_def]
+  elif "properties" not in resolved and op_key in defs:
+    validation_schema = defs[op_key]
   else:
     validation_schema = resolved
 

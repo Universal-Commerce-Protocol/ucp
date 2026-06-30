@@ -28,7 +28,8 @@ on:
       - "release/**"
     paths:
       - ".github/workflows/docs.yml"
-      - "requirements-docs.txt"
+      - "pyproject.toml"
+      - "uv.lock"
       - "mkdocs.yml"
       - "main.py"
       - "hooks.py"
@@ -58,7 +59,7 @@ jobs:
 
       - name: Check for changed files in source
         id: source_files_changed
-        uses: tj-actions/changed-files@v46
+        uses: tj-actions/changed-files@v47
         with:
           files: source/**
 
