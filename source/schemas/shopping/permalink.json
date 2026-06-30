@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/permalink.json",
+  "name": "dev.ucp.shopping.permalink",
+  "title": "Permalink Capability",
+  "description": "Browser-addressable shopping intent capability: defines a Business browser endpoint and redirect resolution. It defines no shopping-state fields of its own; permalink query parameters address existing UCP field paths.",
+  "$defs": {
+    "endpoint": {
+      "type": "string",
+      "pattern": "^https://[^/?#\\s\\\\@]+(?:/[^?#\\s\\\\]*[^/?#\\s\\\\])?$",
+      "description": "Absolute HTTPS browser endpoint with a non-empty authority and without userinfo, query, fragment, whitespace, backslashes, or trailing slash. Optional compact item path and query parameters are appended to this endpoint."
+    },
+    "config": {
+      "type": "object",
+      "description": "Business browser endpoint configuration for shopping permalinks.",
+      "required": ["endpoint"],
+      "properties": {
+        "endpoint": {
+          "$ref": "#/$defs/endpoint"
+        }
+      },
+      "additionalProperties": true
+    },
+    "dev.ucp.shopping.permalink": {
+      "platform_schema": {
+        "title": "Permalink Capability (Platform)",
+        "description": "Platform-level permalink capability declaration. Platforms advertise support for shopping permalinks; the permalink endpoint is business-specific, so no platform config is required.",
+        "allOf": [
+          { "$ref": "../capability.json#/$defs/platform_schema" }
+        ]
+      },
+      "business_schema": {
+        "title": "Permalink Capability (Business)",
+        "description": "Business declaration for the UCP shopping permalink browser endpoint.",
+        "allOf": [
+          {
+            "$ref": "../capability.json#/$defs/business_schema"
+          },
+          {
+            "required": ["config"],
+            "properties": {
+              "config": {
+                "$ref": "#/$defs/config"
+              }
+            }
+          }
+        ]
+      },
+      "response_schema": {
+        "title": "Permalink Capability (Response)",
+        "description": "Shopping permalink capability reference in API responses.",
+        "allOf": [
+          {
+            "$ref": "../capability.json#/$defs/response_schema"
+          }
+        ]
+      }
+    }
+  }
+}
