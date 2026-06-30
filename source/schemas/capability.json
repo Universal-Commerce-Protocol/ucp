@@ -27,6 +27,15 @@
                 }
               ],
               "description": "Parent capability(s) this extends. Present for extensions, absent for root capabilities. Use array for multi-parent extensions."
+            },
+            "operations": {
+              "type": "array",
+              "description": "Operation IDs driven by this capability. Root capabilities SHOULD declare the operationIds (matching OpenAPI operationId or OpenRPC method name) that are enabled when this capability is active. Extensions MUST NOT declare operations — they augment the payload of their parent's operations, not introduce new ones. Platforms MUST NOT invoke operations whose root capability is absent from the negotiated intersection.",
+              "items": {
+                "type": "string",
+                "description": "An operation identifier matching the OpenAPI operationId or OpenRPC method name in the service's transport definition."
+              },
+              "minItems": 1
             }
           }
         }
