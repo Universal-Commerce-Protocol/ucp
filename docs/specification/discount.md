@@ -113,11 +113,14 @@ when they're applied.
 The `allocations` array breaks down where each discount dollar landed, using
 JSONPath to identify targets:
 
-| Path Pattern        | Target           |
-| ------------------- | ---------------- |
-| `$.line_items[0]`   | First line item  |
-| `$.line_items[1]`   | Second line item |
-| `$.totals.shipping` | Shipping cost    |
+| Path Pattern                         | Target            |
+| ------------------------------------ | ----------------- |
+| `$.line_items[0]`                    | First line item   |
+| `$.line_items[1]`                    | Second line item  |
+| `$.totals[?@.type == "fulfillment"]` | Fulfillment total |
+
+`totals` is an ordered array of entries, so a total is targeted by an RFC 9535
+filter on its `type` (e.g. `fulfillment`, `tax`, `fee`) rather than a named key.
 
 This enables platforms to explain exactly how much each discount contributed to
 each line item, even when multiple discounts stack.
