@@ -773,16 +773,19 @@ def define_env(env):
 
         # --- Logic to determine Display Type ---
         if "oneOf" in details:
-          # List of values embedded within an oneOf
-          f_type = "OneOf["
-          for idx, one_of_type in enumerate(details.get("oneOf", [])):
+          # Render each branch: a $ref becomes a type link, an inline
+          # branch shows its JSON type (matching the prose oneOf renderer
+          # above). Without the inline case, a oneOf of scalars such as
+          # capability `extends` (string | array) rendered as "OneOf[]".
+          parts = []
+          for one_of_type in details.get("oneOf", []):
             if "$ref" in one_of_type:
-              f_type += create_link(
-                one_of_type["$ref"], spec_file_name, context
+              parts.append(
+                create_link(one_of_type["$ref"], spec_file_name, context)
               )
-              if idx < len(details.get("oneOf", [])) - 1:
-                f_type += ", "
-          f_type += "]"
+            elif one_of_type.get("type"):
+              parts.append(f"`{one_of_type['type']}`")
+          f_type = f"OneOf[{', '.join(parts)}]"
         elif ref:
           if version_data:
             f_type = version_data.get("type", "any")
@@ -794,8 +797,30 @@ def define_env(env):
           link = create_link(items_ref, spec_file_name, context)
           f_type = f"Array[{link}]"
         elif f_type == "array":
-          # Array of Primitives
-          inner_type = items.get("type", "any")
+          # Array of primitives, or of a composed/bundled item whose type
+          # is not stated inline (e.g. items defined via allOf, where a
+          # $ref to the item type was inlined during resolution). Recover a
+          # label from the item type, a $ref link, or a title so the cell
+          # does not fall back to the uninformative "any".
+          inner_type = items.get("type")
+          if not inner_type:
+            branches = (
+              items["allOf"]
+              if isinstance(items.get("allOf"), list)
+              else [items]
+            )
+            for branch in branches:
+              if not isinstance(branch, dict):
+                continue
+              if branch.get("$ref"):
+                inner_type = create_link(
+                  branch["$ref"], spec_file_name, context
+                )
+                break
+              if branch.get("title"):
+                inner_type = branch["title"]
+                break
+            inner_type = inner_type or "object"
           f_type = f"Array[{inner_type}]"
 
         # --- Handle Description ---
