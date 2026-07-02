@@ -6123,8 +6123,8 @@ within the UCP.</p>
 </table>
 <hr />
 <h3 id="reverse-domain-name">Reverse Domain Name<a class="headerlink" href="#reverse-domain-name" title="Permanent link">&para;</a></h3>
-<p>Reverse-domain identifier used for collision-safe namespacing of capabilities, services, handlers, eligibility claims, and extension-contributed keys. Must contain at least two dot-separated segments (e.g., 'dev.ucp.shopping.checkout', 'com.example.loyalty_gold').</p>
-<p><strong>Pattern:</strong> <code>^[a-z][a-z0-9]*(?:\.[a-z][a-z0-9_]*)+$</code></p>
+<p>Reverse-domain identifier used for collision-safe namespacing of capabilities, services, handlers, eligibility claims, and extension-contributed keys. Must contain at least two dot-separated segments (e.g., 'dev.ucp.shopping.checkout', 'com.example.loyalty_gold'). Segments after the first are domain- or identifier-derived: they may contain interior hyphens, may start with a digit, and may contain underscores (e.g., 'com.example-shop.checkout', 'com.2example.cart', 'dev.ucp.common.identity_linking'), but must not start or end with a hyphen. The first segment (the reversed top-level domain) is letters and digits, and may contain interior hyphens to support internationalized (punycode) top-level domains such as 'xn--p1ai'.</p>
+<p><strong>Pattern:</strong> <code>^[a-z](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9_-]*[a-z0-9_])?)+$</code></p>
 <hr />
 <h3 id="signed-amount">Signed Amount<a class="headerlink" href="#signed-amount" title="Permanent link">&para;</a></h3>
 <p>Monetary amount in the currency's minor unit as defined by ISO 4217. Refer to the currency's exponent to determine minor-to-major ratio (e.g., 2 for USD, 0 for JPY, 3 for KWD). May be negative — the sign is intrinsic to the value (e.g., discounts are negative, charges are positive).</p>

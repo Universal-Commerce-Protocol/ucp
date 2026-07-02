@@ -27,6 +27,8 @@ Businesses advertise consent support in their profile. The capability can extend
     "dev.ucp.shopping.buyer_consent": [
       {
         "version": "draft",
+        "spec": "https://ucp.dev/draft/specification/buyer-consent",
+        "schema": "https://ucp.dev/draft/schemas/shopping/buyer_consent.json",
         "extends": [
           "dev.ucp.shopping.cart",
           "dev.ucp.shopping.checkout"

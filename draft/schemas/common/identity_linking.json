@@ -20,7 +20,7 @@
     "scope_token": {
       "type": "string",
       "description": "OAuth scope string formed by joining a capability name and a scope name with a colon: '{capability}:{scope}', e.g. 'dev.ucp.shopping.order:read'. Capability names use reverse-DNS naming; scope names denote the permission granted, defined by each capability's spec (e.g. 'read', 'manage', 'create'). Platforms request these strings verbatim in OAuth 'scope' parameters; issued tokens carry them in the 'scope' claim.",
-      "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9_]*)+:[a-z][a-z0-9_]*$"
+      "pattern": "^[a-z](?:[a-z0-9-]*[a-z0-9])?(?:\\.[a-z0-9](?:[a-z0-9_-]*[a-z0-9_])?)+:[a-z][a-z0-9_]*$"
     },
     "provider": {
       "type": "object",
@@ -129,5 +129,5 @@
       }
     }
   },
-  "version": "2026-06-30"
+  "version": "2026-07-02"
 }

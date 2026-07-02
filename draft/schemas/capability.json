@@ -15,14 +15,12 @@
             "extends": {
               "oneOf": [
                 {
-                  "type": "string",
-                  "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9_]*)+$"
+                  "$ref": "https://ucp.dev/draft/schemas/common/types/reverse_domain_name.json"
                 },
                 {
                   "type": "array",
                   "items": {
-                    "type": "string",
-                    "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9_]*)+$"
+                    "$ref": "https://ucp.dev/draft/schemas/common/types/reverse_domain_name.json"
                   },
                   "minItems": 1
                 }
@@ -50,10 +48,15 @@
     },
     "business_schema": {
       "title": "Capability (Business Schema)",
-      "description": "Capability configuration for business/merchant level. May include business-specific config overrides.",
+      "description": "Capability declaration for business/merchant discovery. Requires the `schema` URL so platforms can fetch and compose it during negotiation; may also include business-specific config overrides.",
       "allOf": [
         {
           "$ref": "#/$defs/base"
+        },
+        {
+          "required": [
+            "schema"
+          ]
         }
       ]
     },

@@ -585,13 +585,41 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#spec-url-binding" class="md-nav__link">
+  <a href="#authority-binding" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Spec URL Binding
+        Authority Binding
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Authority Binding">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#derivation-algorithm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Derivation algorithm
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#enforcement" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Enforcement
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -3422,13 +3450,41 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#spec-url-binding" class="md-nav__link">
+  <a href="#authority-binding" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Spec URL Binding
+        Authority Binding
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Authority Binding">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#derivation-algorithm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Derivation algorithm
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#enforcement" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Enforcement
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -4782,29 +4838,140 @@ capability identifiers. This eliminates the need for a central registry.</p>
 </tr>
 </tbody>
 </table>
-<h4 id="spec-url-binding">Spec URL Binding<a class="headerlink" href="#spec-url-binding" title="Permanent link">&para;</a></h4>
-<p>The <code>spec</code> and <code>schema</code> fields are <strong>REQUIRED</strong> for all capabilities. The origin
-of these URLs <strong>MUST</strong> match the namespace authority:</p>
+<h4 id="authority-binding">Authority Binding<a class="headerlink" href="#authority-binding" title="Permanent link">&para;</a></h4>
+<p>Reverse-domain names serve two purposes: collision-safe <strong>identifiers</strong> (keys
+and references), and <strong>entities</strong> — capabilities, services, and payment
+handlers — that declare a fetched <code>schema</code> URL describing them. Authority
+binding applies to every entity with a remote <code>schema</code>: a declared <code>schema</code>
+URL's origin <strong>MUST</strong> match the namespace authority in its name.</p>
+<p>A capability <strong>MUST</strong> declare a <code>schema</code>; services and payment handlers declare
+one where their transport or handler defines it. Each entity <strong>MAY</strong> also
+declare a <code>spec</code> URL (human-readable documentation).</p>
+<p>This binding guarantees <strong>provenance, not trust</strong>: a valid binding proves only
+that the reverse-domain name is controlled by the party that owns the
+corresponding domain — an entity cannot be published under a namespace its
+author does not control. It does <strong>not</strong> assert that the entity is trustworthy,
+correct, or worth supporting. Whether to negotiate, trust, or implement it is
+always the client's decision; this binding only tells the client <em>who</em> is making
+the claim. Provenance is established from domain ownership and evaluated at
+negotiation time.</p>
+<p>The <code>spec</code> URL is documentation, not part of the machine trust path, so its
+origin is <strong>not</strong> authority-bound: it <strong>MUST</strong> be <code>https</code> but <strong>MAY</strong> be served
+from any host (e.g. a docs subdomain or third-party docs host). Only the
+<code>schema</code> URL carries the authority binding defined below.</p>
+<h5 id="derivation-algorithm">Derivation algorithm<a class="headerlink" href="#derivation-algorithm" title="Permanent link">&para;</a></h5>
+<p>The authority is derived <strong>from the <code>schema</code> URL host</strong> — which names the
+owning domain directly, with no ambiguity about where the domain ends — and
+validated as a label prefix of the entity's name. For the <code>schema</code> URL of an
+entity whose name is <code>name</code>, a platform <strong>MUST</strong> apply the following:</p>
+<ol>
+<li>Parse the URL with a conformant (WHATWG) URL parser. It <strong>MUST</strong> parse,
+   <strong>MUST</strong> use the <code>https</code> scheme, and <strong>MUST NOT</strong> contain userinfo (a
+   <code>user:pass@</code> component). Substring matching on the raw URL is <strong>NOT</strong>
+   permitted — e.g. <code>https://ucp.dev@evil.example/x.json</code> has host
+   <code>evil.example</code>, not <code>ucp.dev</code>.</li>
+<li>The host <strong>MUST</strong> be a registered domain name of at least two labels.
+   IP-literal hosts (<code>https://203.0.113.10/...</code>) and single-label hosts
+   (<code>https://localhost/...</code>) are invalid authorities.</li>
+<li>Take the URL's hostname (the host without any port), normalize it (lowercase;
+   strip a trailing <code>.</code>; internationalized domains in A-label / punycode form),
+   and <strong>reverse its labels</strong> to form the <code>authority_prefix</code> (host <code>ucp.dev</code> →
+   <code>dev.ucp</code>).</li>
+<li>The binding is valid if and only if <code>name</code> begins with <code>authority_prefix</code>
+   followed by a <code>.</code> (a literal trailing dot). The trailing-dot boundary is
+   required so that <code>com.example</code> (from host <code>example.com</code>) cannot satisfy a
+   neighboring namespace like <code>com.examplecorp.*</code>, where it is a textual but
+   not label-aligned prefix; it also guarantees a non-empty remainder after the
+   prefix.</li>
+</ol>
+<p>The remaining labels after the authority prefix are treated as opaque by this
+check; they are not inspected or split.</p>
 <table>
 <thead>
 <tr>
-<th>Namespace</th>
-<th>Required Origin</th>
+<th>Capability name</th>
+<th><code>schema</code> host</th>
+<th><code>authority_prefix</code></th>
+<th>Result</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>dev.ucp.*</code></td>
-<td><code>https://ucp.dev/...</code></td>
+<td><code>dev.ucp.shopping.checkout</code></td>
+<td><code>ucp.dev</code></td>
+<td><code>dev.ucp</code></td>
+<td><strong>accept</strong></td>
 </tr>
 <tr>
-<td><code>com.example.*</code></td>
-<td><code>https://example.com/...</code></td>
+<td><code>dev.ucp.shopping.checkout</code></td>
+<td><code>shopping.ucp.dev</code></td>
+<td><code>dev.ucp.shopping</code></td>
+<td><strong>accept</strong></td>
+</tr>
+<tr>
+<td><code>com.example.payments.installments</code></td>
+<td><code>example.com</code></td>
+<td><code>com.example</code></td>
+<td><strong>accept</strong></td>
+</tr>
+<tr>
+<td><code>com.example.pay</code></td>
+<td><code>evil.example</code></td>
+<td><code>example.evil</code></td>
+<td><strong>reject</strong></td>
+</tr>
+<tr>
+<td><code>dev.ucp.shopping.checkout</code></td>
+<td><code>evil.example</code></td>
+<td><code>example.evil</code></td>
+<td><strong>reject</strong></td>
+</tr>
+<tr>
+<td><code>com.examplecorp.pay</code></td>
+<td><code>example.com</code></td>
+<td><code>com.example</code></td>
+<td><strong>reject</strong></td>
+</tr>
+<tr>
+<td><code>com.example.pay</code></td>
+<td><code>cdn.example.com</code></td>
+<td><code>com.example.cdn</code></td>
+<td><strong>reject</strong></td>
 </tr>
 </tbody>
 </table>
-<p>Platform <strong>MUST</strong> validate this binding and <strong>SHOULD</strong> reject capabilities where
-the spec origin does not match the namespace authority.</p>
+<p>An entity's <code>schema</code> is served from a host whose reversed labels are a prefix of
+its name. A canonical apex host (<code>example.com</code> for <code>com.example.*</code>) always
+satisfies this; a subdomain satisfies it only when its labels line up with the
+namespace path (<code>shopping.ucp.dev</code> for <code>dev.ucp.shopping.*</code>). Unrelated
+subdomains such as a shared CDN do <strong>not</strong> satisfy it — host the canonical
+schema on a name-aligned origin.</p>
+<p>The check uses the <code>schema</code> URL host directly and does not consult the
+<a href="https://publicsuffix.org/">Public Suffix List</a>, so it treats a <strong>public
+suffix</strong> — a domain under which independent parties can register names, from
+<code>co.uk</code> to the list's private-section suffixes operated by services that let
+third parties register subdomains or buckets (<code>github.io</code>, object storage, app
+platforms) — as an ordinary authority. Co-tenants under such a suffix satisfy
+the same prefix, so declare entities only under a <strong>registrable domain</strong> (a
+public suffix plus one label) that you exclusively control.</p>
+<h5 id="enforcement">Enforcement<a class="headerlink" href="#enforcement" title="Permanent link">&para;</a></h5>
+<p>A platform <strong>MUST</strong> validate each business-declared <code>schema</code> URL before fetching
+it. If the URL's origin does not match the entity's namespace authority (per
+<a href="#derivation-algorithm">Derivation algorithm</a>), the platform <strong>MUST NOT</strong> fetch
+it and <strong>MUST</strong> reject the entity — treated as not present and never
+activated. A <code>spec</code> URL <strong>MUST</strong> be a valid <code>https</code> URL. A platform <strong>MUST NOT</strong> follow redirects (<code>3xx</code>) when fetching a <code>schema</code> URL, consistent with profile fetches.</p>
+<p>The platform fetches and composes business-declared schemas to validate every
+request and response, so validating the binding ensures each composed schema is
+sourced from the party that owns the entity's namespace. A business <strong>SHOULD</strong>
+apply the same check to the platform profile and exclude any entity whose
+binding fails.</p>
+<p>Binding validates the declared hostname for provenance; it is <strong>not</strong> a
+fetch-safety control and does not authorize dereferencing. Fetching the <code>schema</code>
+URL — like any URL fetched during discovery — is additionally subject to the
+protocol's URL fetch-safety requirements, which guard the <em>resolved</em> address
+(not just the hostname) against server-side request forgery toward special-use
+or cloud-metadata addresses and DNS rebinding. The hostname check and the
+resolved-address check are independent, and both apply.</p>
 <h4 id="governance-model">Governance Model<a class="headerlink" href="#governance-model" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
@@ -5427,8 +5594,10 @@ metadata:</p>
 <li><strong>Discovery</strong>: Platforms <strong>MAY</strong> fetch the business profile from
     <code>/.well-known/ucp</code> before initiating requests. If fetched, platforms
     <strong>SHOULD</strong> cache the profile according to HTTP cache-control directives.</li>
-<li><strong>Namespace Validation</strong>: Platforms <strong>MUST</strong> validate that capability <code>spec</code>
-    URI origins match namespace authorities.</li>
+<li><strong>Namespace Validation</strong>: Before fetching, platforms <strong>MUST</strong> validate that
+    each capability's <code>schema</code> URL origin matches its namespace authority (see
+    <a href="#authority-binding">Authority Binding</a>) and <strong>MUST</strong> reject capabilities
+    that fail this binding.</li>
 <li><strong>Schema Resolution</strong>: Platforms <strong>MUST</strong> fetch and compose schemas for
     negotiated capabilities before making requests.</li>
 </ol>
@@ -5436,7 +5605,10 @@ metadata:</p>
 <ol>
 <li><strong>Profile Resolution</strong>: Upon receiving a request with a platform profile
     URI, businesses <strong>MUST</strong> fetch and validate the platform profile unless
-    already cached.</li>
+    already cached. Because businesses negotiate by capability name and serve
+    their own schemas, they do not normally dereference platform-declared
+    <code>schema</code> URLs; they <strong>SHOULD</strong> nonetheless verify the namespace binding (see
+    <a href="#authority-binding">Authority Binding</a>) as defense in depth.</li>
 <li><strong>Capability Intersection</strong>: Businesses <strong>MUST</strong> compute the intersection of
     platform and business capabilities.</li>
 <li><strong>Extension Validation</strong>: Extensions without their parent capability in the

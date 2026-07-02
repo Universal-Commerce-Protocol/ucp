@@ -5,7 +5,7 @@
   "description": "Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.",
   "type": "object",
   "propertyNames": {
-    "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9_]*)+$",
+    "$ref": "https://ucp.dev/draft/schemas/common/types/reverse_domain_name.json",
     "description": "Reverse-domain identifier (e.g., dev.ucp.buyer_ip, com.example.device_id)."
   },
   "properties": {

@@ -3492,8 +3492,15 @@ whose <code>iss</code> does not match a listed <code>oauth2</code> mechanism ent
 </ul>
 <h3 id="provider-configuration">Provider Configuration<a class="headerlink" href="#provider-configuration" title="Permanent link">&para;</a></h3>
 <p>Each key in <code>config.providers</code> is a reverse-domain identifier for an IdP
-namespace; its value is an array of mechanism entries. Each entry is
-described by its <code>type</code>:</p>
+namespace; its value is an array of mechanism entries.</p>
+<p>A provider key is a reverse-domain <strong>identifier</strong>, not a schema-bearing entity:
+it declares no <code>schema</code> URL, so the
+<a href="../overview/#authority-binding">Authority Binding</a> (which binds an entity's
+<code>schema</code> URL to its namespace authority) does not apply here. A provider's trust
+anchor is its <code>auth_url</code>, governed by the discovery rules below; binding
+<code>auth_url</code> to the provider's namespace authority is a possible future hardening,
+tracked separately.</p>
+<p>Each entry is described by its <code>type</code>:</p>
 <table>
 <thead>
 <tr>
