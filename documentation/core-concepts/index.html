@@ -1699,9 +1699,9 @@ authentication are resolved together.</p>
 </span><span id="__span-2-38"><a id="__codelineno-2-38" name="__codelineno-2-38" href="#__codelineno-2-38"></a><span class="p">}</span>
 </span></code></pre></div>
 <h2 id="namespace-governance">Namespace Governance<a class="headerlink" href="#namespace-governance" title="Permanent link">&para;</a></h2>
-<p>UCP uses reverse-domain naming to embed governance authority directly into
-capability and service identifiers. This eliminates the need for a central
-registry — domain owners control their own namespace.</p>
+<p>UCP uses reverse-domain naming to embed governance authority directly into its
+reverse-domain identifiers. This eliminates the need for a central registry —
+domain owners control their own namespace.</p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>{reverse-domain}.{service}.{capability}
 </span></code></pre></div>
 <table>
@@ -1730,9 +1730,18 @@ registry — domain owners control their own namespace.</p>
 </tr>
 </tbody>
 </table>
-<p>The <code>spec</code> and <code>schema</code> URLs declared in a capability must originate from the
-namespace authority domain. Platforms <strong>MUST</strong> validate this binding to prevent
-spoofed capabilities.</p>
+<p>Reverse-domain names are used both as collision-safe <strong>identifiers</strong> (keys and
+references) and by <strong>entities</strong> — capabilities, services, and payment
+handlers — that declare a <code>schema</code> URL. An entity's <code>schema</code> URL must
+originate from its namespace authority domain. This guarantees
+<strong>provenance</strong> — that the reverse-domain name is controlled by the domain
+owner — not that the entity is trustworthy; whether to trust or support it
+remains the client's decision.</p>
+<p>Platforms <strong>MUST</strong> validate this binding for declared <code>schema</code> URLs and <strong>MUST</strong>
+reject entities that fail it. Identifiers carry no fetched URL, and the <code>spec</code>
+(documentation) URL is not authority-bound (any <code>https</code> origin). See
+<a href="/latest/specification/overview.md#authority-binding">Authority Binding</a> for the
+normative algorithm.</p>
 <p>The <code>dev.ucp.*</code> namespace is reserved exclusively for capabilities governed by
 the UCP Tech Council. Any vendor can define and publish capabilities under their
 own domain — <code>org.acme.*</code> — without UCP maintainer approval. Vendor
