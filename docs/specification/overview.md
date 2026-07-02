@@ -164,7 +164,7 @@ A platform **MUST** validate each business-declared `schema` URL before fetching
 it. If the URL's origin does not match the entity's namespace authority (per
 [Derivation algorithm](#derivation-algorithm)), the platform **MUST NOT** fetch
 it and **MUST** reject the entity — treated as not present and never
-activated. A `spec` URL **MUST** be a valid `https` URL.
+activated. A `spec` URL **MUST** be a valid `https` URL. A platform **MUST NOT** follow redirects (`3xx`) when fetching a `schema` URL, consistent with profile fetches.
 
 The platform fetches and composes business-declared schemas to validate every
 request and response, so validating the binding ensures each composed schema is
