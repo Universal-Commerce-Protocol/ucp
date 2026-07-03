@@ -467,7 +467,7 @@ POST /webhooks/ucp/orders HTTP/1.1
 Host: platform.example.com
 Content-Type: application/json
 UCP-Agent: profile="https://merchant.example/.well-known/ucp"
-Content-Digest: sha-256=:X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=:
+Content-Digest: sha-256=:X48E9q...:
 Signature-Input: sig1=("@method" "@authority" "@path" "content-digest" "content-type");keyid="merchant-2026"
 Signature: sig1=:MEUCIQDTxNq8h7LGHpvVZQp1iHkFp9+3N8Mxk2zH1wK4YuVN8w...:
 

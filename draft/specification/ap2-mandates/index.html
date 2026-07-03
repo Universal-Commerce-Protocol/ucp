@@ -2882,14 +2882,29 @@ business to verify the mandate's signature.</p>
 <p>This extension uses the cryptographic primitives defined in the
 <a href="../signatures/">Message Signatures</a> specification:</p>
 <ul>
-<li><strong>Algorithms:</strong> ES256 (required), ES384, ES512</li>
+<li><strong>Algorithm:</strong> per AP2's Checkout JWT signing rule — AP2 v0.2 requires
+  ECDSA (<code>ES256</code>/<code>ES384</code>/<code>ES512</code>); see the note below.</li>
 <li><strong>Canonicalization:</strong> JCS (<a href="https://datatracker.ietf.org/doc/html/rfc8785">RFC 8785</a>)</li>
 <li><strong>Key Format:</strong> JWK (<a href="https://datatracker.ietf.org/doc/html/rfc7517">RFC 7517</a>)</li>
 <li><strong>Key Discovery:</strong> <code>signing_keys[]</code> in <code>/.well-known/ucp</code> (see
   <a href="../overview/#key-discovery">Key Discovery</a>)</li>
 </ul>
-<p>See <a href="../signatures/">Message Signatures</a> for complete details on algorithms,
-key format, and key rotation.</p>
+<p>See <a href="../signatures/">Message Signatures</a> for key format and rotation.</p>
+<blockquote>
+<p><strong>Note (algorithm requirement).</strong> AP2 binds the Payment Mandate to the
+Checkout via <code>hash(checkout_jwt)</code>; the underlying security property is
+per-session unpredictability of the signed bytes — which UCP's unique
+per-session Checkout <code>id</code> supplies structurally. AP2 v0.2 is internally
+inconsistent on how to require this: <code>specification.md</code> states an
+algorithm-class rule (non-deterministic only, e.g. ECDSA), while the
+Security &amp; Privacy considerations state an entropy rule satisfied by any
+algorithm given sufficient payload entropy.
+<a href="https://github.com/google-agentic-commerce/AP2/issues/268">AP2 #268</a>
+tracks converging on the entropy formulation. Follow AP2 for the
+authoritative rule; under the entropy reading a UCP Checkout JWT may be
+signed with any algorithm (including Ed25519), letting one key serve both
+AP2 mandate signing and Web Bot Auth.</p>
+</blockquote>
 <h3 id="business-authorization">Business Authorization<a class="headerlink" href="#business-authorization" title="Permanent link">&para;</a></h3>
 <p>Businesses <strong>MUST</strong> embed their signature in the checkout response body under
 <code>ap2.merchant_authorization</code> using <strong>JWS Detached Content</strong> format
@@ -2927,7 +2942,7 @@ transmitted separately (as the checkout body itself).</p>
 <td style="text-align: left;"><code>alg</code></td>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;">Yes</td>
-<td style="text-align: left;">Signature algorithm (<code>ES256</code>, <code>ES384</code>, <code>ES512</code>)</td>
+<td style="text-align: left;">Signature algorithm accepted by AP2 (e.g. <code>ES256</code>)</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>kid</code></td>
@@ -3170,7 +3185,7 @@ with <code>ap2.merchant_authorization</code> embedded in the response body.</p>
 </span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>
 </span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>    // Decode and validate header
 </span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>    header = json_decode(base64url_decode(encoded_header))
-</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>    assert header.alg in [&quot;ES256&quot;, &quot;ES384&quot;, &quot;ES512&quot;]
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>    assert header.alg in ap2_accepted_algorithms  // ES256/ES384/ES512 per AP2 v0.2
 </span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>
 </span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>    // Reconstruct signed payload (checkout minus ap2)
 </span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>    payload = checkout without &quot;ap2&quot; field
