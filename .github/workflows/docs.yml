@@ -28,7 +28,8 @@ on:
       - "release/**"
     paths:
       - ".github/workflows/docs.yml"
-      - "requirements-docs.txt"
+      - "pyproject.toml"
+      - "uv.lock"
       - "mkdocs.yml"
       - "main.py"
       - "hooks.py"
