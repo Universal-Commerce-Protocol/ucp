@@ -184,7 +184,7 @@ human-readable fields that platforms render directly.
 | --------------------- | ------------- | -------- | ------------------------------------------------------- |
 | `groups[].options[]`  | `title`       | Yes      | Primary label that distinguishes from siblings          |
 | `groups[].options[]`  | `description` | No       | Supplementary context for the title                     |
-| `groups[].options[]`  | `totals`      | Yes      | Cost breakdown for this option: an array of `total` objects (`type`, `amount`, `display_text`) |
+| `groups[].options[]`  | `totals`      | Yes      | Cost breakdown: an array of `total` objects             |
 | `available_methods[]` | `description` | No       | Standalone explanation of alternative availability      |
 
 ### Business Responsibilities
