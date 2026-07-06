@@ -357,7 +357,22 @@ than a new `requires_billing_postal_code` flag.
           "required_fields": ["postal_code", "address_country"]
         },
         "credentials": [
-          { "type": "token" }
+          {
+            "type": "token",
+            "constraints": {
+              "funding_sources": [
+                {
+                  "type": "pan",
+                  "constraints": { "required_fields": ["cvc"] }
+                },
+                { "type": "network_token" }
+              ]
+            }
+          },
+          {
+            "type": "network_token",
+            "constraints": { "required_fields": ["eci_value"] }
+          }
         ]
       }
     }
@@ -677,14 +692,20 @@ constraints are meaningful (e.g., `brands` for cards), and
 
 **Base Credential Schemas:**
 
-| Schema                                                                           | Description                   |
-| :------------------------------------------------------------------------------- | :---------------------------- |
-| [`payment_credential.json`](site:schemas/shopping/types/payment_credential.json) | Base: type discriminator only |
-| [`token_credential.json`](site:schemas/shopping/types/token_credential.json)     | Token: type + token string    |
+| Schema                                                                                       | Description                                          |
+| :------------------------------------------------------------------------------------------- | :--------------------------------------------------- |
+| [`payment_credential.json`](site:schemas/shopping/types/payment_credential.json)             | Base: type discriminator only                        |
+| [`token_credential.json`](site:schemas/shopping/types/token_credential.json)                 | Token credential; may constrain underlying sources   |
+| [`pan_credential.json`](site:schemas/shopping/types/pan_credential.json)                     | Funding primary account number credential            |
+| [`network_token_credential.json`](site:schemas/shopping/types/network_token_credential.json) | Network token credential with transaction cryptogram |
+| [`card_credential.json`](site:schemas/shopping/types/card_credential.json)                   | Deprecated legacy combined card credential           |
 
 UCP provides base schemas for universal payment credentials. Authors **MAY**
 extend these schemas to include handler-specific credential context. Handlers
-**MAY** define multiple credential types for different instrument flows.
+**MAY** define multiple credential types for different instrument flows. New
+card-based designs SHOULD prefer `pan` and `network_token` over the deprecated
+legacy `card` credential, because the verification fields are different enough
+to model as separate credential shapes.
 
 The specification **MUST** define which credential types are accepted by the
 handler. Credential schemas that can appear in
@@ -692,6 +713,12 @@ handler. Credential schemas that can appear in
 `$defs.constraint` typed constraint entry. That entry lets handler declarations
 say both "this credential family is accepted" and, when needed, which optional
 credential fields are required in the current context.
+
+When a checkout accepts a `token` credential, use
+`constraints.funding_sources[]` only when token acceptance depends on the
+underlying source represented by the token. For example, a handler can accept a
+token while requiring CVC if the token represents a PAN, and separately accept a
+network-token-backed token.
 
 **Important:** If using token credentials, the schema **MUST** include an
 expiration field (`expiry`, `ttl`, or similar) to ensure platforms know when to

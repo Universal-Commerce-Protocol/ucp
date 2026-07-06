@@ -17,7 +17,10 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["credential", "binding"],
+                "required": [
+                  "credential",
+                  "binding"
+                ],
                 "properties": {
                   "credential": {
                     "$ref": "../../schemas/shopping/types/payment_credential.json",
@@ -30,12 +33,11 @@
                 }
               },
               "examples": {
-                "card_credential_agent": {
-                  "summary": "Agent tokenizing on behalf of merchant",
+                "pan_credential_agent": {
+                  "summary": "Agent tokenizing a PAN credential on behalf of merchant",
                   "value": {
                     "credential": {
-                      "type": "card",
-                      "card_number_type": "fpan",
+                      "type": "pan",
                       "number": "4111111111111111",
                       "expiry_month": 12,
                       "expiry_year": 2026,
@@ -50,12 +52,11 @@
                     }
                   }
                 },
-                "card_credential_merchant": {
-                  "summary": "Merchant tokenizing for themselves",
+                "pan_credential_merchant": {
+                  "summary": "Merchant tokenizing a PAN credential for themselves",
                   "value": {
                     "credential": {
-                      "type": "card",
-                      "card_number_type": "fpan",
+                      "type": "pan",
                       "number": "4111111111111111",
                       "expiry_month": 12,
                       "expiry_year": 2026,
@@ -67,17 +68,17 @@
                     }
                   }
                 },
-                "card_credential_network_token": {
-                  "summary": "Card credential (network token)",
+                "network_token_credential": {
+                  "summary": "Agent tokenizing a network token credential",
                   "value": {
                     "credential": {
-                      "type": "card",
-                      "card_number_type": "network_token",
-                      "number": "4111111111111111",
+                      "type": "network_token",
+                      "number": "5204240000004242",
                       "expiry_month": 12,
                       "expiry_year": 2026,
                       "cryptogram": "gXc5UCLnM6ckD7pjM1TdPA==",
                       "eci_value": "07",
+                      "token_requestor_id": "12345678901",
                       "name": "Jane Doe"
                     },
                     "binding": {
@@ -99,7 +100,9 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": ["token"],
+                  "required": [
+                    "token"
+                  ],
                   "properties": {
                     "token": {
                       "type": "string",
@@ -132,7 +135,10 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["token", "binding"],
+                "required": [
+                  "token",
+                  "binding"
+                ],
                 "properties": {
                   "token": {
                     "type": "string",
@@ -179,11 +185,10 @@
                   "$ref": "../../schemas/shopping/types/payment_credential.json"
                 },
                 "examples": {
-                  "card_credential_fpan": {
-                    "summary": "Card credential (FPAN)",
+                  "pan_credential": {
+                    "summary": "PAN credential",
                     "value": {
-                      "type": "card",
-                      "card_number_type": "fpan",
+                      "type": "pan",
                       "number": "4111111111111111",
                       "expiry_month": 12,
                       "expiry_year": 2026,
@@ -191,16 +196,16 @@
                       "name": "Jane Doe"
                     }
                   },
-                  "card_credential_network_token": {
-                    "summary": "Card credential (network token)",
+                  "network_token_credential": {
+                    "summary": "Network token credential",
                     "value": {
-                      "type": "card",
-                      "card_number_type": "network_token",
-                      "number": "4111111111111111",
+                      "type": "network_token",
+                      "number": "5204240000004242",
                       "expiry_month": 12,
                       "expiry_year": 2026,
                       "cryptogram": "gXc5UCLnM6ckD7pjM1TdPA==",
                       "eci_value": "07",
+                      "token_requestor_id": "12345678901",
                       "name": "Jane Doe"
                     }
                   }

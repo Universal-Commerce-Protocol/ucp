@@ -34,8 +34,8 @@ processing.
 This pattern is ideal for platforms that operate as wallet providers with
 compliant credential storage.
 
-**Note:** While this example uses card credentials, the pattern applies to
-**any credential type**. Compliance requirements vary by credential type
+**Note:** While this example uses PAN and network token credentials, the pattern
+applies to **any credential type**. Compliance requirements vary by credential type
 (e.g., PCI DSS for cards).
 
 ### Key Benefits
@@ -176,7 +176,7 @@ platform's handler specification (referenced via `spec`) documents the
 `/detokenize` endpoint URL exposed by the platform's
 **payment credential provider**.
 
-The handler accepts [CardCredential](site:schemas/shopping/types/card_credential.json) for tokenization and produces [TokenCredential](site:schemas/shopping/types/token_credential.json) for checkout.
+The handler accepts [PAN Credential](site:schemas/shopping/types/pan_credential.json) and [Network Token Credential](site:schemas/shopping/types/network_token_credential.json) source credentials for tokenization and produces [Token Credential](site:schemas/shopping/types/token_credential.json) for checkout.
 
 **Note:** The result of `/detokenize` contains **sensitive payment data**.
 Both the sender (platform's credential provider) and receiver
@@ -208,7 +208,21 @@ credential type (e.g., PCI DSS for cards).
             {
               "type": "card",
               "constraints": {
-                "brands": ["visa", "mastercard"]
+                "brands": ["visa", "mastercard"],
+                "credentials": [
+                  {
+                    "type": "token",
+                    "constraints": {
+                      "funding_sources": [
+                        {
+                          "type": "pan",
+                          "constraints": { "required_fields": ["cvc"] }
+                        },
+                        { "type": "network_token" }
+                      ]
+                    }
+                  }
+                ]
               }
             }
           ],
@@ -244,7 +258,21 @@ The response config includes runtime token lifecycle information.
     {
       "type": "card",
       "constraints": {
-        "brands": ["visa", "mastercard"]
+        "brands": ["visa", "mastercard"],
+        "credentials": [
+          {
+            "type": "token",
+            "constraints": {
+              "funding_sources": [
+                {
+                  "type": "pan",
+                  "constraints": { "required_fields": ["cvc"] }
+                },
+                { "type": "network_token" }
+              ]
+            }
+          }
+        ]
       }
     }
   ],
@@ -342,7 +370,21 @@ registry using `platform_config`.
             {
               "type": "card",
               "constraints": {
-                "brands": ["visa", "mastercard", "amex", "discover"]
+                "brands": ["visa", "mastercard", "amex", "discover"],
+                "credentials": [
+                  {
+                    "type": "token",
+                    "constraints": {
+                      "funding_sources": [
+                        {
+                          "type": "pan",
+                          "constraints": { "required_fields": ["cvc"] }
+                        },
+                        { "type": "network_token" }
+                      ]
+                    }
+                  }
+                ]
               }
             }
           ],

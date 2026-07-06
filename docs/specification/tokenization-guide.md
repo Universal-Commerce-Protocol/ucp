@@ -24,10 +24,10 @@ This guide is for **implementers building tokenization payment handlers**. It
 defines the shared API, security requirements, and conformance criteria that all
 tokenization handlers follow.
 
-**Note:** While the examples in this guide use card credentials, tokenization
-patterns apply to **any sensitive credential type**—bank accounts, digital
-wallets, loyalty accounts, etc. Compliance requirements (e.g., PCI DSS for
-cards) vary by credential type.
+**Note:** While the examples in this guide use PAN and network token
+credentials, tokenization patterns apply to **any sensitive credential type**—bank
+accounts, digital wallets, loyalty accounts, etc. Compliance requirements
+(e.g., PCI DSS for cards) vary by credential type.
 
 We offer a range of examples to utilize forms of tokenization in UCP:
 
@@ -57,16 +57,16 @@ Tokenization handlers transform credentials between source and checkout forms:
 |   | source_         |                      | checkout_               |  |
 |   | credentials     |    What goes IN      | credentials             |  |
 |   |                 |<---------------      |                         |  |
-|   | * card/fpan     |                      | What comes OUT          |  |
-|   | * card/dpan     |                ----->| * token                 |  |
+|   | * pan           |                      | What comes OUT          |  |
+|   | * network_token |                ----->| * token                 |  |
 |   |                 |                      |                         |  |
 |   +-----------------+                      +-------------------------+  |
 |                                                                         |
 +-------------------------------------------------------------------------+
 ```
 
-Tokenization handlers accept source credentials (e.g., card with FPAN) and
-produce checkout credentials (e.g., tokens).
+Tokenization handlers accept source credentials (e.g., PAN or network token
+credentials) and produce checkout credentials (e.g., tokens).
 
 ### Token Lifecycle
 
@@ -123,8 +123,7 @@ Content-Type: application/json
 
 {
   "credential": {
-    "type": "card",
-    "card_number_type": "fpan",
+    "type": "pan",
     "number": "4111111111111111",
     "expiry_month": 12,
     "expiry_year": 2026,
@@ -174,8 +173,7 @@ Authorization: Bearer {caller_access_token}
 <!-- ucp:example skip reason="tokenization API, not UCP payload" -->
 ```json
 {
-  "type": "card",
-  "card_number_type": "fpan",
+  "type": "pan",
   "number": "4111111111111111",
   "expiry_month": 12,
   "expiry_year": 2026,
@@ -235,7 +233,7 @@ When publishing your handler, your specification document **MUST** include:
 
 | Instrument | Source Credentials           | Checkout Credentials |
 | :--------- | :--------------------------- | :------------------- |
-| `card`     | `card` (fpan, network_token) | `token`              |
+| `card`     | `pan`, `network_token`       | `token`              |
 
 **Token Lifecycle:** Single-use (invalidated after detokenization)
 
@@ -265,13 +263,15 @@ A tokenizer handler conforms to this pattern if it:
 
 ## References
 
-| Resource                | URL                                                                                                             |
-| :---------------------- | :-------------------------------------------------------------------------------------------------------------- |
-| Tokenization OpenAPI    | [handlers/tokenization/openapi.json](site:handlers/tokenization/openapi.json)                                   |
-| Identity Schema         | [schemas/shopping/types/payment_identity.json](site:schemas/shopping/types/payment_identity.json)               |
-| Binding Schema          | [schemas/shopping/types/binding.json](site:schemas/shopping/types/binding.json)                                 |
-| Token Credential Schema | [schemas/shopping/types/token_credential.json](site:schemas/shopping/types/token_credential.json)               |
-| Card Instrument Schema  | [schemas/shopping/types/card_payment_instrument.json](site:schemas/shopping/types/card_payment_instrument.json) |
+| Resource                | URL                                                                                                               |
+| :---------------------- | :---------------------------------------------------------------------------------------------------------------- |
+| Tokenization OpenAPI    | [handlers/tokenization/openapi.json](site:handlers/tokenization/openapi.json)                                     |
+| Identity Schema         | [schemas/shopping/types/payment_identity.json](site:schemas/shopping/types/payment_identity.json)                 |
+| Binding Schema          | [schemas/shopping/types/binding.json](site:schemas/shopping/types/binding.json)                                   |
+| Token Credential Schema | [schemas/shopping/types/token_credential.json](site:schemas/shopping/types/token_credential.json)                 |
+| PAN Credential Schema   | [schemas/shopping/types/pan_credential.json](site:schemas/shopping/types/pan_credential.json)                     |
+| Network Token Schema    | [schemas/shopping/types/network_token_credential.json](site:schemas/shopping/types/network_token_credential.json) |
+| Card Instrument Schema  | [schemas/shopping/types/card_payment_instrument.json](site:schemas/shopping/types/card_payment_instrument.json)   |
 
 ---
 

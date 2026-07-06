@@ -25,9 +25,9 @@ This handler implements a **"Tokenize to Process"** flow where the entity
 that generates the token (the Tokenizer) is the same entity that processes
 the final payment (the Processor).
 
-**Note:** While this example uses card credentials, the pattern applies to
-**any credential type**. Compliance requirements vary by credential type
-(e.g., PCI DSS for cards).
+**Note:** While this example uses PAN and network token credentials, the
+pattern applies to **any credential type**. Compliance requirements vary by
+credential type (e.g., PCI DSS for cards).
 
 This specification unifies two common implementation scenarios:
 
@@ -123,7 +123,21 @@ The handler's specification (referenced via the `spec` field) documents the
             {
               "type": "card",
               "constraints": {
-                "brands": ["visa", "mastercard", "amex"]
+                "brands": ["visa", "mastercard", "amex"],
+                "credentials": [
+                  {
+                    "type": "token",
+                    "constraints": {
+                      "funding_sources": [
+                        {
+                          "type": "pan",
+                          "constraints": { "required_fields": ["cvc"] }
+                        },
+                        { "type": "network_token" }
+                      ]
+                    }
+                  }
+                ]
               }
             }
           ],
@@ -158,7 +172,21 @@ The response config includes runtime information about what's available for this
     {
       "type": "card",
       "constraints": {
-        "brands": ["visa", "mastercard", "amex"]
+        "brands": ["visa", "mastercard", "amex"],
+        "credentials": [
+          {
+            "type": "token",
+            "constraints": {
+              "funding_sources": [
+                {
+                  "type": "pan",
+                  "constraints": { "required_fields": ["cvc"] }
+                },
+                { "type": "network_token" }
+              ]
+            }
+          }
+        ]
       }
     }
   ],
@@ -205,7 +233,26 @@ business's configuration.
           "id": "processor_tokenizer",
           "version": "{{ ucp_version }}",
           "available_instruments": [
-            {"type": "card", "constraints": {"brands": ["visa", "mastercard", "amex"]}}
+            {
+              "type": "card",
+              "constraints": {
+                "brands": ["visa", "mastercard", "amex"],
+                "credentials": [
+                  {
+                    "type": "token",
+                    "constraints": {
+                      "funding_sources": [
+                        {
+                          "type": "pan",
+                          "constraints": { "required_fields": ["cvc"] }
+                        },
+                        { "type": "network_token" }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
           ],
           "config": {
             "environment": "production",
@@ -288,7 +335,7 @@ Content-Type: application/json
 * **Requirements:**
     1. Deploy the `endpoint` on their own infrastructure.
     2. Internally map tokens to PANs in their own database.
-* **Security:** **CRITICAL.** For card credentials, the Business **MUST** be
+* **Security:** **CRITICAL.** For PAN credentials, the Business **MUST** be
     PCI DSS compliant as they are receiving raw PANs at their endpoint.
     Other credential types have their own compliance requirements.
 
