@@ -19,6 +19,22 @@
       "items": { "type": "string" },
       "ucp_request": "omit"
     },
+    "constraints": {
+      "allOf": [
+        { "$ref": "constraint.json" },
+        {
+          "type": "object",
+          "properties": {
+            "destination": {
+              "$ref": "address_constraint.json",
+              "description": "Constraint on the destination postal address. For shipping, this describes which address fields must be populated to return a valid set of shipping options."
+            }
+          }
+        }
+      ],
+      "description": "Constraints on data needed to resolve this fulfillment method. Method-specific schemas MAY add additional constraint keys.",
+      "ucp_request": "omit"
+    },
     "fulfillable_on": {
       "type": ["string", "null"],
       "description": "'now' for immediate availability, or ISO 8601 date for future (preorders, transfers).",
