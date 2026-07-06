@@ -269,7 +269,7 @@ The Platform identifies `{handler_name}` in the business's UCP profile
 }
 ```
 
-#### Step 2: {Action Name}
+#### Step 2: {Step Name}
 
 {Description of what the Platform does in this step.}
 
@@ -279,7 +279,7 @@ The Platform identifies `{handler_name}` in the business's UCP profile
 // Example SDK usage or API call
 ```
 
-#### Step 3: {Action Name}
+#### Step 3: {Step Name}
 
 {Continue for all steps...}
 

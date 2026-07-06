@@ -743,8 +743,9 @@ Handler specifications that emit actions **MUST** define for each action code:
 - The valid `severity` values and fallback behavior when unsupported,
   abandoned, expired, or failed.
 - The `config` schema and any security requirements for interpreting it.
-- The platform execution requirements, including any UI, native API, redirect,
-  background execution, or out-of-band behavior.
+- The platform execution requirements, including any buyer-facing interaction or
+  input collection, native API, redirect, background execution, or out-of-band
+  behavior.
 - The completion criteria and how completion is reflected in ordinary checkout
   state or handler-owned side channels.
 - Any handler-scoped negotiation needed before the action can be emitted.

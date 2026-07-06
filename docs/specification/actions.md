@@ -64,7 +64,7 @@ An action is carried in an entity response using the common envelope below:
 
 | Field | Required | Meaning |
 | :---- | :------- | :------ |
-| `id` | Yes | Opaque identifier for this action occurrence. Stable while the same action remains outstanding. |
+| `id` | Yes | Opaque identifier for this action occurrence. Stable while the same action remains outstanding. Unique per containing entity. |
 | `code` | Yes | Reverse-domain action code. The code resolves to the active entity specification that owns the action. |
 | `severity` | Yes | Consequence of not handling the action: `optional`, `required`, or `blocking`. |
 | `config` | Yes | Action-specific configuration. The owning specification defines the schema and semantics. Use `{}` when no configuration is needed. |
@@ -118,11 +118,13 @@ operation and the business returns the next authoritative entity state.
 
 ## Action Identity and Idempotency
 
-The `id` field identifies an action occurrence, not just an action type.
+The `id` field identifies an action occurrence, not just an action type. It is
+scoped to the containing entity: not just unique for the given `code`. Platforms should correlate actions using the containing entity plus `id`.
+
 Businesses **MUST** follow these rules:
 
 * `id` values **MUST** be unique among outstanding actions for the containing
-    entity.
+    entity, regardless of `code`.
 * The same unresolved action occurrence **MUST** keep the same `id` across
     repeated responses, retries, and polling.
 * A new occurrence, even with the same `code` and similar `config`, **MUST** use

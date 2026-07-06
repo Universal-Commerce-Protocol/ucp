@@ -94,8 +94,8 @@ needed to progress.
 ### Status Values
 
 * **`incomplete`**: Checkout session is missing required information or has
-    issues that need resolution. Platform should inspect `messages` array for
-    context and should attempt to resolve via Update Checkout.
+    issues that need resolution. Platform should inspect `messages` and
+    `actions` for context and should attempt to resolve via Update Checkout.
 
 * **`requires_escalation`**: Checkout session requires information that
     cannot be provided via API, or buyer input is required. Platform should
@@ -130,15 +130,27 @@ lifecycle:
 | Severity | Checkout behavior |
 | :------- | :---------------- |
 | `optional` | The platform **MAY** ignore the action. Checkout can still complete successfully. |
-| `required` | The platform **MUST** resolve the action before checkout can complete successfully, but the checkout remains otherwise usable. The platform may still update, retrieve, or cancel the checkout while the action is outstanding. |
+| `required` | The platform **MUST** resolve the action before checkout can become `ready_for_complete`. The platform may still update, retrieve, or cancel the checkout while the action is outstanding. |
 | `blocking` | The action blocks the current attempted checkout transition, such as `complete_checkout`. The platform **MUST** resolve the action, choose an allowed alternate path (such as modifying the primitive that caused the blocking action to surface), or escalate via `continue_url` before retrying that transition. |
 
-When processing a checkout response, platforms should resolve terminal and
-recoverable errors before actions. Optional actions can be attempted best-effort.
-Required actions should be resolved before final completion. Blocking actions
-should be handled immediately because the attempted transition cannot proceed
-until the action resolves or the platform follows the owning specification's
-fallback path.
+When processing a checkout response, platforms should inspect checkout state,
+messages, and actions together. Recommended handling priority:
+
+1. Handle response-level failures first. If the response is an error envelope,
+   follow error handling; there is no checkout resource to advance. If the
+   checkout is already `completed` or `canceled`, treat that terminal status as
+   authoritative before considering any action.
+2. Handle `blocking` actions next because the attempted transition cannot
+   proceed until the action resolves or the platform follows the owning
+   specification's fallback path.
+3. Handle recoverable `messages`, `required` actions, and
+   `optional` actions in the order that best fits the checkout flow. UCP does
+   not define a relative priority among them. Recoverable messages can be
+   resolved by updating checkout state and retrying the relevant operation;
+   required actions must be resolved before final completion; optional actions
+   can be attempted best-effort.
+4. If unresolved messages or actions require handoff, escalate via
+   `continue_url` when the checkout response provides one.
 
 If the platform cannot execute a required or blocking checkout action, it
 **MUST** follow the fallback behavior defined by the owning action specification.
@@ -154,12 +166,12 @@ platform re-drives the operation that was blocked or retrieves the checkout; the
 business then returns the next authoritative checkout state.
 
 Action `id` values are stable for the same unresolved action occurrence. If a
-business returns the same action `id` again, the platform should treat it as the
-same outstanding action rather than a new one. If the platform changes checkout
-state in a way that supersedes an outstanding action, such as changing the
-selected payment instrument or removing an eligibility claim, the business must
-stop applying stale completion signals for the superseded action to the new
-checkout state.
+business returns the same action `id` again for the checkout, the platform should
+treat it as the same outstanding action rather than a new one. If the platform
+changes checkout state in a way that supersedes an outstanding action, such as
+changing the selected payment instrument or removing an eligibility claim, the
+business must stop applying stale completion signals for the superseded action to
+the new checkout state.
 
 #### Example
 
