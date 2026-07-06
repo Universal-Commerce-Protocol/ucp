@@ -30,9 +30,9 @@ decrypts them locally.
 This pattern is ideal when businesses want to avoid round-trip latency to a
 tokenizer at payment time.
 
-**Note:** While this example uses card credentials (requiring PCI DSS
-compliance), the encryption pattern applies to **any credential type**.
-Compliance requirements vary by credential type.
+**Note:** While this example uses PAN and network token credentials (requiring
+PCI DSS compliance for PAN data), the encryption pattern applies to **any
+credential type**. Compliance requirements vary by credential type.
 
 ### Key Benefits
 
@@ -101,7 +101,7 @@ key with the platform.
 
 While businesses receive only encrypted `EncryptedCredential` payloads during
 checkout, they decrypt these payloads locally to obtain raw credentials for
-payment processing. **For card credentials**, businesses MUST be **PCI DSS
+payment processing. **For PAN credentials**, businesses MUST be **PCI DSS
 compliant** because they will handle raw PANs. This includes:
 
 * Secure key management for decryption keys
@@ -121,15 +121,15 @@ Businesses advertise the platform's handler. The `business_id` field identifies
 the business, which the platform uses to look up the correct public key for
 encryption.
 
-The only supported instrument schema is [CardPaymentInstrument](site:schemas/shopping/types/card_payment_instrument.json), the only supported checkout credential schema is `EncryptedCredential`, and the only supported source credential schema is [CardCredential](site:schemas/shopping/types/card_credential.json).
+The only supported instrument schema is [CardPaymentInstrument](site:schemas/shopping/types/card_payment_instrument.json), the only supported checkout credential schema is `EncryptedCredential`, and the supported source credential schemas are [PAN Credential](site:schemas/shopping/types/pan_credential.json) and [Network Token Credential](site:schemas/shopping/types/network_token_credential.json).
 
 **Note:** The `EncryptedCredential` shape would be formally defined in the handler's schema (referenced via the `schema` field in the handler declaration).
 
-**Note:** `CardCredential` contains raw PANs. For card credentials, the
+**Note:** `PAN Credential` contains raw PANs. For PAN credentials, the
 platform's vaulting service must be **PCI DSS compliant** when handling these
 credentials. Businesses receive only encrypted payloads but must be PCI DSS
-compliant once they decrypt card credentials locally. Other credential types
-have their own compliance requirements.
+compliant once they decrypt PAN credentials locally. Other credential types have
+their own compliance requirements.
 
 #### Business Config (Discovery)
 
@@ -157,7 +157,10 @@ have their own compliance requirements.
             {
               "type": "card",
               "constraints": {
-                "brands": ["visa", "mastercard"]
+                "brands": ["visa", "mastercard"],
+                "credentials": [
+                  { "type": "encrypted" }
+                ]
               }
             }
           ],
@@ -195,7 +198,10 @@ The response config includes information about the encryption used.
     {
       "type": "card",
       "constraints": {
-        "brands": ["visa", "mastercard"]
+        "brands": ["visa", "mastercard"],
+        "credentials": [
+          { "type": "encrypted" }
+        ]
       }
     }
   ],
@@ -269,7 +275,10 @@ registry using `platform_config`.
             {
               "type": "card",
               "constraints": {
-                "brands": ["visa", "mastercard", "amex", "discover"]
+                "brands": ["visa", "mastercard", "amex", "discover"],
+                "credentials": [
+                  { "type": "encrypted" }
+                ]
               }
             }
           ],

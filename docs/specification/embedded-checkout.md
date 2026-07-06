@@ -1590,7 +1590,15 @@ account, or wallet credential) available to the buyer.
 
 {{ schema_fields('types/token_credential_resp', 'embedded-checkout') }}
 
-### Card Credential
+### PAN Credential
+
+{{ schema_fields('types/pan_credential', 'embedded-checkout') }}
+
+### Network Token Credential
+
+{{ schema_fields('types/network_token_credential', 'embedded-checkout') }}
+
+### Legacy Card Credential
 
 {{ schema_fields('types/card_credential', 'embedded-checkout') }}
 

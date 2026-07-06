@@ -27,6 +27,7 @@
                   "type": "array",
                   "items": {
                     "oneOf": [
+                      { "$ref": "network_token_credential.json#/$defs/constraint" },
                       { "$ref": "token_credential.json#/$defs/constraint" },
                       {
                         "title": "Extension Credential Constraint",
@@ -37,7 +38,7 @@
                             "not": {
                               "required": ["type"],
                               "properties": {
-                                "type": { "const": "token" }
+                                "type": { "enum": ["network_token", "token"] }
                               }
                             }
                           }
