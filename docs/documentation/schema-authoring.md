@@ -420,6 +420,65 @@ typos in core metadata like the `ucp` block).
 }
 ```
 
+### Constraint Objects
+
+UCP uses `constraints` objects when a declaration or response needs to narrow
+what is acceptable without changing the base payload schema. A constraint is a
+runtime requirement attached to a concrete context, not a global schema change.
+
+All new constraint objects **SHOULD** extend
+[`constraint.json`](site:{{ ucp_version }}/schemas/shopping/types/constraint.json):
+
+- `required_fields` names fields on the constrained object that must be present
+  in an acceptable instance for this context.
+- Domain-specific constraint keys remain sibling properties. For example, the
+  base payment instrument can require `billing_address` and add a nested
+  `billing_address` constraint describing which address fields are needed.
+- Concrete schemas **SHOULD** narrow `required_fields` to the known property names
+  of the constrained schema when machine validation is valuable, while leaving
+  the object open to future domain-specific keys.
+
+Prefer field-level constraints over ad-hoc booleans. For example, prefer
+`required_fields: ["billing_address"]` plus a nested address constraint over
+new booleans such as `requires_billing_address` or
+`requires_billing_postal_code`.
+
+<!-- ucp:example skip reason="schema authoring example" -->
+```json
+{
+  "type": "card",
+  "constraints": {
+    "brands": ["visa", "mastercard"],
+    "required_fields": ["billing_address"],
+    "billing_address": {
+      "required_fields": ["postal_code", "address_country"]
+    }
+  }
+}
+```
+
+For arrays of constraints over a typed family, extend
+[`type_constraint.json`](site:{{ ucp_version }}/schemas/shopping/types/type_constraint.json). Each
+known branch should publish a `$defs/constraint` entry with a `type` discriminator
+and, when applicable, a narrowed `constraints` body. The parent schema can then
+validate UCP-defined branches while still leaving an extension point for
+handler-specific branches.
+
+<!-- ucp:example skip reason="schema authoring example" -->
+```json
+{
+  "credentials": [
+    { "type": "token" },
+    {
+      "type": "com.example.wallet_token",
+      "constraints": {
+        "required_fields": ["assurance_level"]
+      }
+    }
+  ]
+}
+```
+
 ### Property-Count Constraints (`minProperties` / `maxProperties`)
 
 By default, UCP schemas do not set `minProperties` or `maxProperties` on

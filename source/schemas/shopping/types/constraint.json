@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/constraint.json",
+  "title": "Constraint",
+  "description": "The base shape of a constraint object. `required_fields` names properties of the constrained object that MUST be present in an acceptable instance. Additional properties are domain-specific constraint keys defined by concrete constraint schemas.",
+  "type": "object",
+  "properties": {
+    "required_fields": {
+      "type": "array",
+      "items": { "type": "string" },
+      "uniqueItems": true,
+      "minItems": 1,
+      "description": "Names of properties on the constrained object that MUST be present in an acceptable instance. Concrete constraint schemas may narrow these to known property names when they want default machine validation for the current schema version."
+    }
+  }
+}

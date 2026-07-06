@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/address_constraint.json",
+  "title": "Address Constraint",
+  "description": "Constraint object for a postal address. `required_fields` is narrowed to postal address property names for default machine validation of the current schema shape.",
+  "allOf": [
+    { "$ref": "constraint.json" },
+    {
+      "type": "object",
+      "properties": {
+        "required_fields": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "street_address",
+              "extended_address",
+              "address_locality",
+              "address_region",
+              "address_country",
+              "postal_code",
+              "first_name",
+              "last_name",
+              "phone_number"
+            ]
+          },
+          "uniqueItems": true
+        }
+      }
+    }
+  ],
+  "examples": [
+    { "required_fields": ["postal_code", "address_country"] }
+  ]
+}
