@@ -312,6 +312,59 @@ authoritative value returned in the `response_schema`.
 In this example, the business's PSP is not configured for Discover, so Discover
 is excluded from the response even though the platform supports it.
 
+#### Constraint Semantics
+
+`available_instruments[].constraints` describes what an acceptable instrument
+must satisfy for a handler declaration or resolved checkout response. Constraint
+objects extend [`Constraint`](site:schemas/shopping/types/constraint.json):
+
+| Constraint key | Meaning |
+| :------------- | :------ |
+| `required_fields` | Field names from the constrained object that must be present in this context. |
+| Domain-specific keys | Additional constraints defined by the concrete instrument or handler schema. |
+
+Base payment instruments define these common constraints:
+
+| Key | Description |
+| :-- | :---------- |
+| `required_fields` | Base payment instrument fields required by this handler. The base schema currently narrows this to `billing_address`. |
+| `billing_address` | Nested [`AddressConstraint`](site:schemas/shopping/types/address_constraint.json) for required billing address fields. |
+
+Card instruments inherit those base constraints and add card-specific constraints:
+
+| Key | Description |
+| :-- | :---------- |
+| `brands` | Accepted card network names, such as `visa`, `mastercard`, or `amex`. |
+| `credentials` | Accepted credential families and credential-specific constraints. Entries are typed constraints; UCP-defined entries are machine-validated and handler schemas can add their own entries. |
+
+Use field-level constraints instead of handler-specific booleans when the
+requirement is about data that is already modeled by a schema. For example, an
+AVS postal-code requirement is expressed as a billing address constraint rather
+than a new `requires_billing_postal_code` flag.
+
+<!-- ucp:example schema=payment_handler def=business_schema -->
+```json
+{
+  "id": "processor_tokenizer_1234",
+  "version": "{{ ucp_version }}",
+  "available_instruments": [
+    {
+      "type": "card",
+      "constraints": {
+        "brands": ["visa", "mastercard"],
+        "required_fields": ["billing_address"],
+        "billing_address": {
+          "required_fields": ["postal_code", "address_country"]
+        },
+        "credentials": [
+          { "type": "token" }
+        ]
+      }
+    }
+  ]
+}
+```
+
 ---
 
 #### Defining the Schema
@@ -511,16 +564,20 @@ multiple instrument types for different payment flows.
 Each instrument schema defines its own `available_*` variant in `$defs` that
 specifies what constraints are valid for that instrument type. For example,
 [`card_payment_instrument.json`](site:schemas/shopping/types/card_payment_instrument.json)
-defines `available_card_payment_instrument` with a `brands` constraint.
+defines `available_card_payment_instrument` with card-specific constraints such
+as `brands` and accepted `credentials`. Base payment-instrument constraints such
+as `billing_address` also apply.
 
-| Schema                                                                                                 | Constraints                                                     |
-| :----------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------- |
-| [`available_payment_instrument.json`](site:schemas/shopping/types/available_payment_instrument.json)   | Base: type, constraints (open object)                           |
-| `card_payment_instrument.json#/$defs/available_card_payment_instrument`                                | Extends base with `constraints.brands` for card networks        |
+| Schema                                                                                               | Constraints                                                      |
+| :--------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------- |
+| [`available_payment_instrument.json`](site:schemas/shopping/types/available_payment_instrument.json) | Base: type, `required_fields`, and `billing_address` constraints |
+| `card_payment_instrument.json#/$defs/available_card_payment_instrument`                              | Extends base with `brands` and `credentials`                     |
 
 Handlers reference these instrument-defined schemas when declaring
 `available_instruments`. The **instrument schema authors** define what
-constraints are meaningful (e.g., `brands` for cards), and **platforms/businesses** use this to advertise what they support (e.g., `["visa", "mastercard"]`).
+constraints are meaningful (e.g., `brands` for cards), and
+**platforms/businesses** use this to advertise what they support (e.g.,
+`["visa", "mastercard"]`).
 
 **Example `types/tokenizer_instrument.json`**:
 
@@ -543,14 +600,19 @@ constraints are meaningful (e.g., `brands` for cards), and **platforms/businesse
           "properties": {
             "type": { "const": "tokenizer_card" },
             "constraints": {
-              "type": "object",
-              "properties": {
-                "tokenization_types": {
-                  "type": "array",
-                  "items": { "type": "string" },
-                  "description": "Supported tokenization types (e.g., ['network_token', 'merchant_token'])."
+              "allOf": [
+                { "$ref": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/types/constraint.json" },
+                {
+                  "type": "object",
+                  "properties": {
+                    "tokenization_types": {
+                      "type": "array",
+                      "items": { "type": "string" },
+                      "description": "Supported tokenization types (e.g., ['network_token', 'merchant_token'])."
+                    }
+                  }
                 }
-              }
+              ]
             }
           }
         }
@@ -625,7 +687,11 @@ extend these schemas to include handler-specific credential context. Handlers
 **MAY** define multiple credential types for different instrument flows.
 
 The specification **MUST** define which credential types are accepted by the
-handler.
+handler. Credential schemas that can appear in
+`available_instruments[].constraints.credentials[]` **SHOULD** also define a
+`$defs.constraint` typed constraint entry. That entry lets handler declarations
+say both "this credential family is accepted" and, when needed, which optional
+credential fields are required in the current context.
 
 **Important:** If using token credentials, the schema **MUST** include an
 expiration field (`expiry`, `ttl`, or similar) to ensure platforms know when to
@@ -654,6 +720,21 @@ refresh credentials.
       "type": "string",
       "format": "date-time",
       "description": "Token expiration. Platforms must refresh before this time."
+    }
+  },
+  "$defs": {
+    "constraint": {
+      "title": "Tokenizer Card Token Constraint",
+      "description": "Typed constraint entry for tokenizer card token credentials.",
+      "allOf": [
+        { "$ref": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/types/type_constraint.json" },
+        {
+          "type": "object",
+          "properties": {
+            "type": { "const": "tokenizer_card_token" }
+          }
+        }
+      ]
     }
   }
 }
