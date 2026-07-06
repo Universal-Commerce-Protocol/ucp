@@ -270,7 +270,12 @@ method, and when. Use cases:
       {
         "type": "shipping",
         "line_item_ids": ["shirt", "pants"],
-        "fulfillable_on": "now"
+        "fulfillable_on": "now",
+        "constraints": {
+          "destination": {
+            "required_fields": ["postal_code", "address_country"]
+          }
+        }
       },
       {
         "type": "pickup",
@@ -282,6 +287,12 @@ method, and when. Use cases:
   }
 }
 ```
+
+For methods whose options depend on a destination, `constraints.destination`
+can describe which postal address fields are needed before the business can
+return a valid set of options. In the example above, the business can confirm
+shipping availability from postal code and country without requiring a full
+street address up front.
 
 The `description` field enables platforms to surface alternatives to buyers:
 
