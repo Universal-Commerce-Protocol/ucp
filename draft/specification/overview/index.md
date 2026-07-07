@@ -773,8 +773,8 @@ Content-Type: application/json
   "messages": [
     {
       "type": "error",
-      "code": "version_unsupported",
-      "content": "UCP version 2024-01-01 is not supported",
+      "code": "capabilities_incompatible",
+      "content": "No compatible capabilities in the intersection",
       "severity": "unrecoverable"
     }
   ],
@@ -849,8 +849,8 @@ Protocol errors use standard HTTP status codes and headers. Response bodies are 
       "messages": [
         {
           "type": "error",
-          "code": "version_unsupported",
-          "content": "UCP version 2024-01-01 is not supported",
+          "code": "capabilities_incompatible",
+          "content": "No compatible capabilities in the intersection",
           "severity": "unrecoverable"
         }
       ],
