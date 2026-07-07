@@ -490,7 +490,7 @@ Host: platform.example.com
 Content-Type: application/json
 UCP-Agent: profile="https://merchant.example/.well-known/ucp"
 Content-Digest: sha-256=:X48E9q...:
-Signature-Input: sig1=("@method" "@authority" "@path" "content-digest" "content-type");keyid="merchant-2026"
+Signature-Input: sig1=("@method" "@authority" "@path" "ucp-agent" "content-digest" "content-type");keyid="merchant-2026"
 Signature: sig1=:MEUCIQDTxNq8h7LGHpvVZQp1iHkFp9+3N8Mxk2zH1wK4YuVN8w...:
 
 {"id":"order_abc123","event_id":"evt_123","created_time":"2026-01-15T12:00:00Z",...}
