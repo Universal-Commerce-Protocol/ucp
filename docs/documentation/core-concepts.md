@@ -252,8 +252,11 @@ which features apply to a given interaction.
 
 Both business and platform profiles share a common base structure — a `ucp`
 object declaring protocol version, services, capabilities, and payment handlers,
-alongside a `signing_keys` array of JWK public keys. The `ucp` object differs
-between the two: the business profile uses a business-specific schema (hosted at
+alongside a `keys` array of JWK public keys (a valid
+[RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517) JWK Set,
+reusable as a Web Bot Auth key source). The `ucp` object differs
+between the two: the business profile uses a business-specific schema
+(hosted at
 `/.well-known/ucp`), while the platform profile uses a platform-specific schema
 (hosted at a URI the platform advertises per-request). This dual-purpose profile
 — capabilities *and* keys in a single document — means discovery and
@@ -297,7 +300,7 @@ authentication are resolved together.
       }]
     }
   },
-  "signing_keys": [{ "kid": "key_2026", "kty": "EC", "crv": "P-256", "x": "WbbXwVYGdJoP4Xm3qCkGvBRcRvKtEfXDbWvPzpPS8LA", "y": "sP4jHHxYqC89HBo8TjrtVOAGHfJDflYxw7MFMxuFMPY", "alg": "ES256" }]
+  "keys": [{ "kid": "key_2026", "kty": "EC", "crv": "P-256", "x": "WbbXwVYGdJoP4Xm3qCkGvBRcRvKtEfXDbWvPzpPS8LA", "y": "sP4jHHxYqC89HBo8TjrtVOAGHfJDflYxw7MFMxuFMPY", "alg": "ES256" }]
 }
 ```
 
@@ -401,7 +404,7 @@ Key lookup:
 1. Obtain the signer's profile URL (from `UCP-Agent` header or
    `/.well-known/ucp`).
 2. Fetch and cache the profile.
-3. Match the `keyid` from `Signature-Input` to a `kid` in `signing_keys[]`.
+3. Match the `keyid` from `Signature-Input` to a `kid` in `keys[]`.
 4. Verify the signature using the corresponding public key.
 
 ### Authentication Mechanisms
