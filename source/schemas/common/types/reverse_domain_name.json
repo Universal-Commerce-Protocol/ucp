@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/common/types/reverse_domain_name.json",
   "title": "Reverse Domain Name",
-  "description": "Reverse-domain identifier used for collision-safe namespacing of capabilities, services, handlers, eligibility claims, and extension-contributed keys. Must contain at least two dot-separated segments (e.g., 'dev.ucp.shopping.checkout', 'com.example-shop.loyalty_gold'). Hyphens are allowed inside segments to support domain-derived namespaces, but segments must not start or end with a hyphen.",
+  "description": "Reverse-domain identifier used for collision-safe namespacing of capabilities, services, handlers, eligibility claims, and extension-contributed keys. Must contain at least two dot-separated segments (e.g., 'dev.ucp.shopping.checkout', 'com.example.loyalty_gold').",
   "type": "string",
-  "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z](?:[a-z0-9_-]*[a-z0-9_])?)+$"
+  "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9_]*)+$"
 }
