@@ -117,6 +117,14 @@
       "description": "Optional merchant links (policies, FAQs).",
       "ucp_request": "omit"
     },
+    "policies": {
+      "type": "array",
+      "items": {
+        "$ref": "types/policy.json"
+      },
+      "description": "Policies (e.g., return/refund terms) that apply to the items in this cart. `applies_to` targets are relative to the response root; when absent or empty, refer to the URLs in `links[]`.",
+      "ucp_request": "omit"
+    },
     "continue_url": {
       "type": "string",
       "format": "uri",

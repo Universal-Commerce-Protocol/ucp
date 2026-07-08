@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/policy.json",
+  "title": "Policy",
+  "description": "A durable business rule about the items in a response — return/refund terms, warranty, and the like — at the time of purchase. Every policy carries a `type` (an open reverse-DNS vocabulary) and a `description` so a platform can present it without understanding its type-specific fields; type-specific fields (gated by `type`) add structured context for platforms that model that type. Policies are reference data; the obligation to display a term to the buyer is carried by a `messages[]` warning whose `code` equals the policy `type` — see the Policies section of the specification.",
+  "type": "object",
+  "required": [
+    "type",
+    "description"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "type": {
+      "type": "string",
+      "description": "Policy type discriminator. Open reverse-DNS vocabulary. Well-known values: `dev.ucp.shopping.policy.refund` (return/refund terms), `dev.ucp.shopping.policy.warranty` (warranty terms). Businesses MAY define custom types in their own domain (e.g., `com.example.policy.price_match`). Platforms MUST tolerate unknown values."
+    },
+    "description": {
+      "$ref": "../../common/types/description.json",
+      "description": "Human-readable policy summary in one or more formats (plain, markdown, html). Required on every policy so a platform can present it without understanding any type-specific fields. This is not the buyer-facing disclosure — display is compelled by a `messages[]` warning (see the Policies section)."
+    },
+    "applies_to": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "RFC 9535 JSONPath expressions identifying the targets this policy applies to, relative to the embedding response root (e.g., `$.line_items[0]` in cart/checkout, `$.products[2]` in catalog). When omitted, the policy applies to the entire response. When multiple policies of the same `type` match an item, the most specific `applies_to` match wins."
+    },
+    "url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Optional link to the full policy document. When omitted, platforms fall back to the corresponding `links[]` entry by type convention (e.g., a policy with `type: \"dev.ucp.shopping.policy.refund\"` falls back to `links[].type == \"refund_policy\"`)."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "const": "dev.ucp.shopping.policy.refund"
+          }
+        }
+      },
+      "then": {
+        "$ref": "policy_refund.json"
+      }
+    }
+  ]
+}

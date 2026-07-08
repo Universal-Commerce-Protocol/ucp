@@ -81,6 +81,13 @@
             "$ref": "../common/types/message.json"
           },
           "description": "Errors, warnings, or informational messages about the requested items."
+        },
+        "policies": {
+          "type": "array",
+          "items": {
+            "$ref": "types/policy.json"
+          },
+          "description": "Policies (e.g., return/refund terms) that apply to the products in this response. `applies_to` targets are relative to the response root; when absent or empty, refer to the URLs in `links[]`."
         }
       }
     },
@@ -170,6 +177,13 @@
             "$ref": "../common/types/message.json"
           },
           "description": "Warnings or informational messages about the product (e.g., price recently changed, limited availability)."
+        },
+        "policies": {
+          "type": "array",
+          "items": {
+            "$ref": "types/policy.json"
+          },
+          "description": "Policies (e.g., return/refund terms) that apply to this product. `applies_to` targets are relative to the response root; when absent or empty, refer to the URLs in `links[]`."
         }
       }
     }

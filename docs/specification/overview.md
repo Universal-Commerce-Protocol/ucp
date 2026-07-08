@@ -1731,6 +1731,152 @@ Detailed definitions for endpoints, schemas, and valid extensions for each
 capability are provided in their respective specification files. Extensions are
 typically versioned and defined alongside their parent capability.
 
+## Policies
+
+A policy is a business rule — return/refund terms, warranty, subscription
+terms, and the like — that applies to the items in a response at the time of
+purchase, carried in a core `policies[]` array alongside `messages[]` and
+`links[]`.
+
+### Policy types
+
+A business publishes well-known and custom policies. Every policy carries a
+`type` drawn from an open, reverse-DNS vocabulary.
+
+| Well-known type | Description |
+| :-- | :-- |
+| `dev.ucp.shopping.policy.refund` | Return/refund terms (see [Refund Policy](reference.md#refund-policy)). |
+| `dev.ucp.shopping.policy.warranty` | Warranty terms. |
+
+Businesses **MAY** define custom types in their own domain (e.g.,
+`com.example.policy.price_match`). Beyond `type`, a policy **MAY** carry
+type-specific fields, such as a refund policy's `window`.
+
+### Targeting
+
+`applies_to` is an array of RFC 9535 JSONPath expressions, evaluated relative to
+the **embedding response root** — the same convention `messages[].path` uses.
+The root differs by surface: `$.line_items[N]` on cart and checkout,
+`$.products[N]` on catalog search and lookup, `$.product` on get_product.
+
+- **Omitted `applies_to`** ⇒ the policy applies to the entire response. This is
+  the common case: a single site-wide policy is one entry with no targeting,
+  never repeated per item.
+- **Most-specific match wins.** When multiple policies of the same `type` match
+  an item, the entry whose `applies_to` most specifically names that item wins
+  — a path naming a specific item beats a response-wide policy.
+
+### Absent vs. empty
+
+When `policies[]` is absent or empty for a given response, the platform
+**SHOULD** refer to the general policy resources in `links[]` (e.g.,
+`refund_policy`, or per-variant `seller.links` in catalog).
+
+### Presenting policies
+
+Policies describe the business rules applied to the items. A platform **MAY**
+reason over them for its own decisions — eligibility, a computed return
+deadline. So that a policy is always presentable — even by a platform that does
+not model its `type` — a business **MUST** provide a `description`, a
+human-readable summary a platform **MAY** surface to the buyer. Presenting a
+policy is optional.
+
+When a business **requires** a policy to be shown to the buyer — a final-sale
+item, a regulatory notice — it **MUST** emit a `messages[]` warning that:
+
+- sets `presentation: "disclosure"`, so the platform displays the content and
+  cannot hide or dismiss it (see
+  [Warning Presentation](checkout.md#warning-presentation));
+- sets `path` to the item the notice concerns; and
+- sets `code` to the policy's `type`, linking the notice to its policy.
+
+The warning is type-agnostic: the platform shows its content without
+understanding the policy behind it, so one channel handles everything from
+final-sale terms to regulatory notices.
+
+A platform pairs a disclosure with its policy when the warning's `code` equals
+the policy's `type` and its `path` targets the same item — a
+`code: "dev.ucp.shopping.policy.refund"` notice on `$.line_items[2]` belongs to
+the refund policy scoped to that line.
+
+### Relationship to `links[]`
+
+`links[]` and `policies[]` are complementary. `links[]` is the always-present
+fallback — a labeled URL, response-wide, usually one per type. `policies[]` is
+the structured layer when available — typed, with optional per-item
+`applies_to` targeting and multiple entries (a response-wide default plus
+overrides). A policy's `type` corresponds to a `links[].type` by convention
+(`dev.ucp.shopping.policy.refund` ⇄ `refund_policy`); when a policy omits
+`url`, platforms resolve the link of the corresponding type for the full
+document.
+
+### Examples
+
+A single site-wide refund policy, no targeting:
+
+<!-- ucp:example schema=shopping/checkout target=$.policies -->
+```json
+[
+  {
+    "type": "dev.ucp.shopping.policy.refund",
+    "description": { "plain": "Free 30-day returns from delivery." },
+    "window": { "days": 30, "from": "delivered" }
+  }
+]
+```
+
+A site-wide default with a per-item final-sale override — most-specific match
+wins for line item 2:
+
+<!-- ucp:example schema=shopping/checkout target=$.policies -->
+```json
+[
+  {
+    "type": "dev.ucp.shopping.policy.refund",
+    "description": { "plain": "Free 30-day returns from delivery." },
+    "window": { "days": 30, "from": "delivered" }
+  },
+  {
+    "type": "dev.ucp.shopping.policy.refund",
+    "description": { "plain": "Engraved items are final sale and cannot be returned." },
+    "applies_to": ["$.line_items[2]"],
+    "url": "https://example.com/returns#final-sale",
+    "final_sale": true
+  }
+]
+```
+
+Because that item is final sale, the business also emits a `messages[]`
+disclosure so the term is shown at the item — the policy states the fact, the
+message compels its display. Its `code` equals the policy `type`, linking the
+disclosure to the structured refund policy above:
+
+<!-- ucp:example schema=shopping/checkout target=$.messages -->
+```json
+[
+  {
+    "type": "warning",
+    "code": "dev.ucp.shopping.policy.refund",
+    "path": "$.line_items[2]",
+    "presentation": "disclosure",
+    "content": "Engraved items are final sale and cannot be returned."
+  }
+]
+```
+
+A custom type a platform does not model is still readable from `description`:
+
+<!-- ucp:example schema=shopping/catalog_search op=search direction=response target=$.policies -->
+```json
+[
+  {
+    "type": "com.example.policy.price_match",
+    "description": { "plain": "We match competitor prices for 14 days after purchase." },
+    "applies_to": ["$.products[0]"]
+  }
+]
+```
+
 ## Security
 
 ### Transport Security
