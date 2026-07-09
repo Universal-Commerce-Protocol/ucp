@@ -7,6 +7,7 @@
   "$defs": {
     "endpoint": {
       "type": "string",
+      "format": "uri",
       "pattern": "^https://[^/?#\\s\\\\@]+(?:/[^?#\\s\\\\]*[^/?#\\s\\\\])?$",
       "description": "Absolute HTTPS browser endpoint with a non-empty authority and without userinfo, query, fragment, whitespace, backslashes, or trailing slash. Optional compact item path and query parameters are appended to this endpoint."
     },
