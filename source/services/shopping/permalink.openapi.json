@@ -18,10 +18,11 @@
   ],
   "paths": {
     "/": {
+      "description": "No-item permalink path. With config.endpoint set to https://merchant.example/buy, this route resolves URLs such as https://merchant.example/buy/?context/postal_code=94105&continue_to=/; the no-trailing-slash constraint applies to the advertised config.endpoint value, not this resolved route URL.",
       "get": {
         "operationId": "resolve_permalink",
         "summary": "Resolve permalink",
-        "description": "Resolves a browser-addressable shopping intent from query parameters and redirects the browser to an appropriate buyer-facing destination.",
+        "description": "Resolves a no-item browser-addressable shopping intent from query parameters and redirects the browser to an appropriate buyer-facing destination.",
         "parameters": [
           {
             "$ref": "#/components/parameters/continue_to"
