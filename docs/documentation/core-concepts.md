@@ -303,9 +303,9 @@ authentication are resolved together.
 
 ## Namespace Governance
 
-UCP uses reverse-domain naming to embed governance authority directly into
-capability and service identifiers. This eliminates the need for a central
-registry — domain owners control their own namespace.
+UCP uses reverse-domain naming to embed governance authority directly into its
+reverse-domain identifiers. This eliminates the need for a central registry —
+domain owners control their own namespace.
 
 ```text
 {reverse-domain}.{service}.{capability}
@@ -317,9 +317,19 @@ registry — domain owners control their own namespace.
 | `dev.shopify.catalog` | shopify.dev | Shopify |
 | `com.example.payments.installments` | example.com | example.com |
 
-The `spec` and `schema` URLs declared in a capability must originate from the
-namespace authority domain. Platforms **MUST** validate this binding to prevent
-spoofed capabilities.
+Reverse-domain names are used both as collision-safe **identifiers** (keys and
+references) and by **entities** — capabilities, services, and payment
+handlers — that declare a `schema` URL. An entity's `schema` URL must
+originate from its namespace authority domain. This guarantees
+**provenance** — that the reverse-domain name is controlled by the domain
+owner — not that the entity is trustworthy; whether to trust or support it
+remains the client's decision.
+
+Platforms **MUST** validate this binding for declared `schema` URLs and **MUST**
+reject entities that fail it. Identifiers carry no fetched URL, and the `spec`
+(documentation) URL is not authority-bound (any `https` origin). See
+[Authority Binding](../specification/overview.md#authority-binding) for the
+normative algorithm.
 
 The `dev.ucp.*` namespace is reserved exclusively for capabilities governed by
 the UCP Tech Council. Any vendor can define and publish capabilities under their
