@@ -467,12 +467,6 @@ Adding, rotating, or removing a key updates this single array. Removal
 is the security-critical case: a revoked or compromised key is not
 effectively revoked until it is absent from `keys[]`.
 
-Profiles migrating from an earlier major version **MAY** additionally
-publish a legacy `signing_keys[]` array for interop with verifiers built
-before `keys[]` became canonical; those verifiers read `signing_keys[]`,
-while UCP verifiers at this version read `keys[]` and ignore the legacy
-array.
-
 UCP defines two well-known key types: **EC** (ECDSA P-256, P-384) and
 **OKP** (EdDSA Ed25519); the key-type, curve, and algorithm
 vocabularies are open and verifiers skip keys they do not recognize.
