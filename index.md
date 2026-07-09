@@ -366,6 +366,8 @@ Gap
 
 Hilton
 
+Iconic
+
 IHG
 
 Klarna
@@ -463,6 +465,8 @@ Flipkart
 Gap
 
 Hilton
+
+Iconic
 
 IHG
 
