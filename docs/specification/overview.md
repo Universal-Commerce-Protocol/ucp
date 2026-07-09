@@ -1010,8 +1010,8 @@ task through the standard web interface.
       "messages": [
         {
           "type": "error",
-          "code": "version_unsupported",
-          "content": "UCP version 2024-01-01 is not supported",
+          "code": "capabilities_incompatible",
+          "content": "No compatible capabilities in the intersection",
           "severity": "unrecoverable"
         }
       ],
@@ -1092,8 +1092,8 @@ task through the standard web interface.
           "messages": [
             {
               "type": "error",
-              "code": "version_unsupported",
-              "content": "UCP version 2024-01-01 is not supported",
+              "code": "capabilities_incompatible",
+              "content": "No compatible capabilities in the intersection",
               "severity": "unrecoverable"
             }
           ],
