@@ -3,36 +3,35 @@
   "$id": "https://ucp.dev/schemas/shopping/types/available_payment_instrument.json",
   "title": "Available Payment Instrument",
   "description": "An instrument type available from a payment handler with optional constraints.",
-  "type": "object",
-  "required": ["type"],
-  "properties": {
-    "type": {
-      "type": "string",
-      "description": "The instrument type identifier (e.g., 'card', 'gift_card'). References an instrument schema's type constant."
-    },
-    "constraints": {
-      "allOf": [
-        { "$ref": "constraint.json" },
-        {
-          "type": "object",
-          "properties": {
-            "required_fields": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "enum": ["billing_address"]
-              },
-              "uniqueItems": true
-            },
-            "billing_address": {
-              "$ref": "address_constraint.json",
-              "description": "Constraint on the instrument's `billing_address` field. The address itself is required only when `billing_address` appears in this object's `required_fields`."
+  "allOf": [
+    { "$ref": "type_constraint.json" },
+    {
+      "type": "object",
+      "properties": {
+        "constraints": {
+          "allOf": [
+            { "$ref": "constraint.json" },
+            {
+              "type": "object",
+              "properties": {
+                "billing_address": {
+                  "$ref": "constraint.json",
+                  "description": "Local constraint on the instrument's `billing_address` field."
+                },
+                "credentials": {
+                  "type": "array",
+                  "items": { "$ref": "type_constraint.json" },
+                  "uniqueItems": true,
+                  "minItems": 1,
+                  "description": "Credential specific constraints accepted for the payment instrument branch selected by `type`. Concrete instrument schemas can narrow known credential entries while preserving handler-extended credential entries."
+                }
+              }
             }
-          }
+          ],
+          "description": "Constraints on this instrument type. Base payment instrument constraints can require and describe `billing_address` and `credentials`; concrete instrument schemas SHOULD add instrument-specific constraint keys while remaining open to extensions.",
+          "minProperties": 1
         }
-      ],
-      "description": "Constraints on this instrument type. Base payment instrument constraints can require and describe `billing_address`; concrete instrument schemas SHOULD add instrument-specific constraint keys while remaining open to extensions.",
-      "minProperties": 1
+      }
     }
-  }
+  ]
 }

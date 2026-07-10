@@ -24,30 +24,16 @@
                   "description": "Limit to specific card brands (e.g., ['visa', 'mastercard', 'amex'])."
                 },
                 "credentials": {
-                  "type": "array",
                   "items": {
-                    "oneOf": [
-                      { "$ref": "token_credential.json#/$defs/constraint" },
-                      {
-                        "title": "Extension Credential Constraint",
-                        "description": "Extension point for handler-specific credential constraint entries. UCP-defined credential types are excluded here so their concrete constraint schemas remain machine-validated.",
-                        "allOf": [
-                          { "$ref": "type_constraint.json" },
-                          {
-                            "not": {
-                              "required": ["type"],
-                              "properties": {
-                                "type": { "const": "token" }
-                              }
-                            }
-                          }
-                        ]
+                    "if": {
+                      "type": "object",
+                      "required": ["type"],
+                      "properties": {
+                        "type": { "const": "token" }
                       }
-                    ]
-                  },
-                  "uniqueItems": true,
-                  "minItems": 1,
-                  "description": "Credential types and credential-specific constraints accepted for this instrument. UCP-defined credential entries are machine-validated; handler-specific schemas can add their own entries."
+                    },
+                    "then": { "$ref": "token_credential.json#/$defs/constraint" }
+                  }
                 }
               }
             }

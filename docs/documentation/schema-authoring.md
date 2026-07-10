@@ -429,13 +429,17 @@ runtime requirement attached to a concrete context, not a global schema change.
 All new constraint objects **SHOULD** extend
 [`constraint.json`](site:{{ ucp_version }}/schemas/shopping/types/constraint.json):
 
-- `required_fields` names fields on the constrained object that must be present
-  in an acceptable instance for this context.
+- `required_fields` names fields on the local constrained object that must be
+  present in an acceptable instance for this context.
+- The schema property that embeds the constraint defines the target object. For
+  example, `available_instruments[].constraints` targets the payment instrument,
+  while `constraints.billing_address` targets that instrument's billing address.
 - Domain-specific constraint keys remain sibling properties. For example, the
   base payment instrument can require `billing_address` and add a nested
   `billing_address` constraint describing which address fields are needed.
-- Concrete schemas **SHOULD** narrow `required_fields` to the known property names
-  of the constrained schema when machine validation is valuable, while leaving
+- Reusable base schemas **SHOULD NOT** close `required_fields` with enums when
+  the target object can be extended. Concrete resolved schemas MAY narrow
+  `required_fields` when they own the complete target vocabulary, while leaving
   the object open to future domain-specific keys.
 
 Prefer field-level constraints over ad-hoc booleans. For example, prefer
