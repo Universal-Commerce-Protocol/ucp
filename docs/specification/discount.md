@@ -178,8 +178,21 @@ via the `messages[]` array:
 | `discount_code_invalid`                | Code not found or malformed                 |
 | `discount_code_already_applied`        | Code is already applied                     |
 | `discount_code_combination_disallowed` | Cannot combine with another active discount |
+| `discount_code_usage_limit_reached`    | Code has reached its maximum number of allowed uses |
+| `discount_code_stacking_conflict`      | Code is valid, but a higher-priority discount already applied takes precedence |
 | `discount_code_user_not_logged_in`     | Code requires authenticated user            |
 | `discount_code_user_ineligible`        | User does not meet eligibility criteria     |
+
+`discount_code_usage_limit_reached` differs from `discount_code_already_applied`:
+the latter means the buyer is trying to apply a code that is already active on
+*this* cart or checkout; the former means the code's overall usage allowance
+(global or per-customer) has been exhausted by other carts/customers.
+
+`discount_code_stacking_conflict` differs from `discount_code_combination_disallowed`:
+the latter means the business has an explicit rule that these specific
+discounts cannot combine; the former means the code matched and was valid,
+but discount-stacking or best-deal resolution rules resulted in a different,
+already-active discount taking precedence instead.
 
 ## Automatic Discounts
 
