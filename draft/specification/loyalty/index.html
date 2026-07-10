@@ -2751,7 +2751,6 @@ extended.</p>
 <h3 id="entities">Entities<a class="headerlink" href="#entities" title="Permanent link">&para;</a></h3>
 <h4 id="loyalty">Loyalty<a class="headerlink" href="#loyalty" title="Permanent link">&para;</a></h4>
 <p>Key-value map whose keys represent buyer/platform asserted eligibility claims and whose values represent associated membership information. All loyalty keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</p>
-<p>Key-value map whose keys represent buyer/platform asserted eligibility claims and whose values represent associated membership information. All loyalty keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</p>
 <h4 id="loyalty-membership">Loyalty Membership<a class="headerlink" href="#loyalty-membership" title="Permanent link">&para;</a></h4>
 <p>Loyalty membership the business has accepted for the eligibility claim represented by the parent map key. Programs that can be joined independently MUST be modeled as separate sibling entries under the loyalty map, distinguished by reverse-domain naming (e.g., 'com.example.rewards' and 'com.example.rewards.card').</p>
 <table>
@@ -2887,7 +2886,6 @@ extended.</p>
 </tbody>
 </table>
 <h4 id="reward-amount">Reward Amount<a class="headerlink" href="#reward-amount" title="Permanent link">&para;</a></h4>
-<p>Non-negative integer amount denominated in the minor unit of the associated reward currency. The associated reward currency's <code>decimal_places</code> defines the minor-to-major ratio and defaults to 0 when omitted.</p>
 <p>Non-negative integer amount denominated in the minor unit of the associated reward currency. The associated reward currency's <code>decimal_places</code> defines the minor-to-major ratio and defaults to 0 when omitted.</p>
 <h4 id="reward-currency">Reward Currency<a class="headerlink" href="#reward-currency" title="Permanent link">&para;</a></h4>
 <p>The currency of the loyalty reward.</p>

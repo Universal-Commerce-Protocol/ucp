@@ -126,8 +126,6 @@ Businesses can follow the standard advertising mechanism to advertise loyalty su
 
 Key-value map whose keys represent buyer/platform asserted eligibility claims and whose values represent associated membership information. All loyalty keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.
 
-Key-value map whose keys represent buyer/platform asserted eligibility claims and whose values represent associated membership information. All loyalty keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.
-
 #### Loyalty Membership
 
 Loyalty membership the business has accepted for the eligibility claim represented by the parent map key. Programs that can be joined independently MUST be modeled as separate sibling entries under the loyalty map, distinguished by reverse-domain naming (e.g., 'com.example.rewards' and 'com.example.rewards.card').
@@ -170,8 +168,6 @@ Quantifiable reward type and optional earning forecast for the current transacti
 | earning_forecast | object | No       | Preview of rewards to be earned from the current transaction.                        |
 
 #### Reward Amount
-
-Non-negative integer amount denominated in the minor unit of the associated reward currency. The associated reward currency's `decimal_places` defines the minor-to-major ratio and defaults to 0 when omitted.
 
 Non-negative integer amount denominated in the minor unit of the associated reward currency. The associated reward currency's `decimal_places` defines the minor-to-major ratio and defaults to 0 when omitted.
 

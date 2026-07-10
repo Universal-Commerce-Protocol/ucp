@@ -8110,8 +8110,6 @@ The business passes the `token` (composite object) to their Payment Handler / PS
 
 JWS Detached Content signature (RFC 7515 Appendix F) over the checkout response body (excluding ap2 field). Format: `<base64url-header>..<base64url-signature>`. The header MUST contain 'alg' (ES256/ES384/ES512) and 'kid' claims. The signature covers both the header and JCS-canonicalized checkout payload.
 
-JWS Detached Content signature (RFC 7515 Appendix F) over the checkout response body (excluding ap2 field). Format: `<base64url-header>..<base64url-signature>`. The header MUST contain 'alg' (ES256/ES384/ES512) and 'kid' claims. The signature covers both the header and JCS-canonicalized checkout payload.
-
 **Pattern:** `^[A-Za-z0-9_-]+\.\.[A-Za-z0-9_-]+$`
 
 ### AP2 Checkout Response
@@ -8125,8 +8123,6 @@ AP2 extension data including merchant authorization.
 | merchant_authorization | string | No       | Merchant's signature proving checkout terms are authentic. |
 
 ### Checkout Mandate
-
-SD-JWT+kb credential in `ap2.checkout_mandate`. Proving user authorization for the checkout. Contains the full checkout including `ap2.merchant_authorization`.
 
 SD-JWT+kb credential in `ap2.checkout_mandate`. Proving user authorization for the checkout. Contains the full checkout including `ap2.merchant_authorization`.
 
@@ -8146,8 +8142,6 @@ AP2 extension data including checkout mandate.
 
 Error codes specific to AP2 mandate verification.
 
-Error codes specific to AP2 mandate verification.
-
 **Enum:** `mandate_required`, `agent_missing_key`, `mandate_invalid_signature`, `mandate_expired`, `mandate_scope_mismatch`, `merchant_authorization_invalid`, `merchant_authorization_missing`
 
 | Error Code                       | Description                                                       |
@@ -8158,6 +8152,7 @@ Error codes specific to AP2 mandate verification.
 | `mandate_expired`                | The mandate `exp` timestamp has passed.                           |
 | `mandate_scope_mismatch`         | The mandate is bound to a different checkout.                     |
 | `merchant_authorization_invalid` | The business authorization signature could not be verified.       |
+| `merchant_authorization_missing` | The checkout response omits `ap2.merchant_authorization`.         |
 
 # Buyer Consent Extension
 
@@ -9959,8 +9954,6 @@ Businesses can follow the standard advertising mechanism to advertise loyalty su
 
 Key-value map whose keys represent buyer/platform asserted eligibility claims and whose values represent associated membership information. All loyalty keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.
 
-Key-value map whose keys represent buyer/platform asserted eligibility claims and whose values represent associated membership information. All loyalty keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.
-
 #### Loyalty Membership
 
 Loyalty membership the business has accepted for the eligibility claim represented by the parent map key. Programs that can be joined independently MUST be modeled as separate sibling entries under the loyalty map, distinguished by reverse-domain naming (e.g., 'com.example.rewards' and 'com.example.rewards.card').
@@ -10003,8 +9996,6 @@ Quantifiable reward type and optional earning forecast for the current transacti
 | earning_forecast | object | No       | Preview of rewards to be earned from the current transaction.                        |
 
 #### Reward Amount
-
-Non-negative integer amount denominated in the minor unit of the associated reward currency. The associated reward currency's `decimal_places` defines the minor-to-major ratio and defaults to 0 when omitted.
 
 Non-negative integer amount denominated in the minor unit of the associated reward currency. The associated reward currency's `decimal_places` defines the minor-to-major ratio and defaults to 0 when omitted.
 
@@ -19718,13 +19709,9 @@ Info code identifying the type of informational message. Standard codes are defi
 
 JWS Detached Content signature (RFC 7515 Appendix F) over the checkout response body (excluding ap2 field). Format: `<base64url-header>..<base64url-signature>`. The header MUST contain 'alg' (ES256/ES384/ES512) and 'kid' claims. The signature covers both the header and JCS-canonicalized checkout payload.
 
-JWS Detached Content signature (RFC 7515 Appendix F) over the checkout response body (excluding ap2 field). Format: `<base64url-header>..<base64url-signature>`. The header MUST contain 'alg' (ES256/ES384/ES512) and 'kid' claims. The signature covers both the header and JCS-canonicalized checkout payload.
-
 **Pattern:** `^[A-Za-z0-9_-]+\.\.[A-Za-z0-9_-]+$`
 
 #### Checkout Mandate
-
-SD-JWT+kb credential in `ap2.checkout_mandate`. Proving user authorization for the checkout. Contains the full checkout including `ap2.merchant_authorization`.
 
 SD-JWT+kb credential in `ap2.checkout_mandate`. Proving user authorization for the checkout. Contains the full checkout including `ap2.merchant_authorization`.
 
@@ -19774,8 +19761,6 @@ Checkout extended with AP2 mandate support.
 
 Error codes specific to AP2 mandate verification.
 
-Error codes specific to AP2 mandate verification.
-
 **Enum:** `mandate_required`, `agent_missing_key`, `mandate_invalid_signature`, `mandate_expired`, `mandate_scope_mismatch`, `merchant_authorization_invalid`, `merchant_authorization_missing`
 
 ______________________________________________________________________
@@ -19806,8 +19791,6 @@ A buyer's consent decision for a specific refinement of a parent purpose (e.g., 
 | links       | Array[object] | No       | Optional segment-specific links (e.g., channel terms or privacy disclosures).                                                                                                                                                                                                 |
 
 #### Consent
-
-Per-purpose consent. Keys are reverse-DNS purpose identifiers. UCP defines four well-known purposes: `dev.ucp.consent.marketing`, `dev.ucp.consent.analytics`, `dev.ucp.consent.preferences`, `dev.ucp.consent.sale_or_sharing`. Vendors and merchants may define additional purposes under their own reverse-DNS namespace.
 
 Per-purpose consent. Keys are reverse-DNS purpose identifiers. UCP defines four well-known purposes: `dev.ucp.consent.marketing`, `dev.ucp.consent.analytics`, `dev.ucp.consent.preferences`, `dev.ucp.consent.sale_or_sharing`. Vendors and merchants may define additional purposes under their own reverse-DNS namespace.
 
@@ -20217,13 +20200,9 @@ Catalog filters extended with a fulfillment destination filter and a method-type
 
 #### Dev.Ucp.Shopping.Catalog.Search
 
-Catalog search composition with fulfillment (extends dev.ucp.shopping.catalog.search).
-
 *No properties defined.*
 
 #### Dev.Ucp.Shopping.Catalog.Lookup
-
-Catalog lookup composition with fulfillment (extends dev.ucp.shopping.catalog.lookup).
 
 *No properties defined.*
 

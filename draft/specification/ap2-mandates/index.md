@@ -368,8 +368,6 @@ The business passes the `token` (composite object) to their Payment Handler / PS
 
 JWS Detached Content signature (RFC 7515 Appendix F) over the checkout response body (excluding ap2 field). Format: `<base64url-header>..<base64url-signature>`. The header MUST contain 'alg' (ES256/ES384/ES512) and 'kid' claims. The signature covers both the header and JCS-canonicalized checkout payload.
 
-JWS Detached Content signature (RFC 7515 Appendix F) over the checkout response body (excluding ap2 field). Format: `<base64url-header>..<base64url-signature>`. The header MUST contain 'alg' (ES256/ES384/ES512) and 'kid' claims. The signature covers both the header and JCS-canonicalized checkout payload.
-
 **Pattern:** `^[A-Za-z0-9_-]+\.\.[A-Za-z0-9_-]+$`
 
 ### AP2 Checkout Response
@@ -383,8 +381,6 @@ AP2 extension data including merchant authorization.
 | merchant_authorization | string | No       | Merchant's signature proving checkout terms are authentic. |
 
 ### Checkout Mandate
-
-SD-JWT+kb credential in `ap2.checkout_mandate`. Proving user authorization for the checkout. Contains the full checkout including `ap2.merchant_authorization`.
 
 SD-JWT+kb credential in `ap2.checkout_mandate`. Proving user authorization for the checkout. Contains the full checkout including `ap2.merchant_authorization`.
 
@@ -404,8 +400,6 @@ AP2 extension data including checkout mandate.
 
 Error codes specific to AP2 mandate verification.
 
-Error codes specific to AP2 mandate verification.
-
 **Enum:** `mandate_required`, `agent_missing_key`, `mandate_invalid_signature`, `mandate_expired`, `mandate_scope_mismatch`, `merchant_authorization_invalid`, `merchant_authorization_missing`
 
 | Error Code                       | Description                                                       |
@@ -416,3 +410,4 @@ Error codes specific to AP2 mandate verification.
 | `mandate_expired`                | The mandate `exp` timestamp has passed.                           |
 | `mandate_scope_mismatch`         | The mandate is bound to a different checkout.                     |
 | `merchant_authorization_invalid` | The business authorization signature could not be verified.       |
+| `merchant_authorization_missing` | The checkout response omits `ap2.merchant_authorization`.         |

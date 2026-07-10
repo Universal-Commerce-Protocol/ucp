@@ -853,13 +853,9 @@ Info code identifying the type of informational message. Standard codes are defi
 
 JWS Detached Content signature (RFC 7515 Appendix F) over the checkout response body (excluding ap2 field). Format: `<base64url-header>..<base64url-signature>`. The header MUST contain 'alg' (ES256/ES384/ES512) and 'kid' claims. The signature covers both the header and JCS-canonicalized checkout payload.
 
-JWS Detached Content signature (RFC 7515 Appendix F) over the checkout response body (excluding ap2 field). Format: `<base64url-header>..<base64url-signature>`. The header MUST contain 'alg' (ES256/ES384/ES512) and 'kid' claims. The signature covers both the header and JCS-canonicalized checkout payload.
-
 **Pattern:** `^[A-Za-z0-9_-]+\.\.[A-Za-z0-9_-]+$`
 
 #### Checkout Mandate
-
-SD-JWT+kb credential in `ap2.checkout_mandate`. Proving user authorization for the checkout. Contains the full checkout including `ap2.merchant_authorization`.
 
 SD-JWT+kb credential in `ap2.checkout_mandate`. Proving user authorization for the checkout. Contains the full checkout including `ap2.merchant_authorization`.
 
@@ -909,8 +905,6 @@ Checkout extended with AP2 mandate support.
 
 Error codes specific to AP2 mandate verification.
 
-Error codes specific to AP2 mandate verification.
-
 **Enum:** `mandate_required`, `agent_missing_key`, `mandate_invalid_signature`, `mandate_expired`, `mandate_scope_mismatch`, `merchant_authorization_invalid`, `merchant_authorization_missing`
 
 ______________________________________________________________________
@@ -941,8 +935,6 @@ A buyer's consent decision for a specific refinement of a parent purpose (e.g., 
 | links       | Array[object] | No       | Optional segment-specific links (e.g., channel terms or privacy disclosures).                                                                                                                                                                                                 |
 
 #### Consent
-
-Per-purpose consent. Keys are reverse-DNS purpose identifiers. UCP defines four well-known purposes: `dev.ucp.consent.marketing`, `dev.ucp.consent.analytics`, `dev.ucp.consent.preferences`, `dev.ucp.consent.sale_or_sharing`. Vendors and merchants may define additional purposes under their own reverse-DNS namespace.
 
 Per-purpose consent. Keys are reverse-DNS purpose identifiers. UCP defines four well-known purposes: `dev.ucp.consent.marketing`, `dev.ucp.consent.analytics`, `dev.ucp.consent.preferences`, `dev.ucp.consent.sale_or_sharing`. Vendors and merchants may define additional purposes under their own reverse-DNS namespace.
 
@@ -1352,13 +1344,9 @@ Catalog filters extended with a fulfillment destination filter and a method-type
 
 #### Dev.Ucp.Shopping.Catalog.Search
 
-Catalog search composition with fulfillment (extends dev.ucp.shopping.catalog.search).
-
 *No properties defined.*
 
 #### Dev.Ucp.Shopping.Catalog.Lookup
-
-Catalog lookup composition with fulfillment (extends dev.ucp.shopping.catalog.lookup).
 
 *No properties defined.*
 
