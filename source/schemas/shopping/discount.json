@@ -76,6 +76,10 @@
             "$ref": "#/$defs/allocation"
           },
           "description": "Breakdown of where this discount was allocated. Sum of allocation amounts equals total amount."
+        },
+        "gift_line_item_id": {
+          "type": "string",
+          "description": "The `id` of the `line_items[]` entry granted to the cart or checkout as a free or discounted gift because of this discount (e.g. a 'buy X get Y free' or free-gift-with-purchase promotion). Present only when the discount's effect is granting a line item rather than reducing the price of one; omitted for ordinary amount-based discounts."
         }
       }
     },

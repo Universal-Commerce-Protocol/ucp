@@ -191,6 +191,112 @@ segment, or promotional rules:
 - Cannot be removed by the platform
 - Surfaced for transparency (platform can explain to user why discount was applied)
 
+## Gift Line Items
+
+Some discounts grant an entirely new line item to the cart or checkout — a
+free or discounted product — rather than reducing the price of items the
+buyer already added (e.g. "buy one get one free," or a free-gift-with-purchase
+promotion).
+
+When a discount grants a line item this way:
+
+- The granted item **MUST** appear as a normal entry in `line_items[]`, with
+  its price reflecting the discount (typically `0`, but a reduced non-zero
+  price is also valid for "buy X get Y at $Z" patterns).
+- The corresponding `applied_discount` entry **MUST** set
+  `gift_line_item_id` to that line item's `id`, so platforms can attribute
+  the item to the promotion rather than treating it as an unexplained
+  addition.
+- `gift_line_item_id` is omitted for ordinary amount-based discounts — it
+  only applies when the discount's effect is granting a line item, not
+  reducing the price of one.
+
+This lets a platform render, for example, "Free gift: T-Shirt — added by
+Summer Sale" instead of surfacing an unexplained zero-price item.
+
+### Example: Free gift with purchase
+
+=== "Request"
+
+    <!-- ucp:example schema=shopping/cart op=update direction=request -->
+    ```json
+    {
+      "id": "...",
+      "line_items": [
+        {
+          "item": {
+            "id": "prod_shoes"
+          },
+          "quantity": 1
+        }
+      ],
+      "discounts": {
+        "codes": ["FREEGIFT"]
+      }
+    }
+    ```
+
+=== "Response"
+
+    <!-- ucp:example schema=shopping/cart op=read -->
+    ```json
+    {
+      "ucp": { ... },
+      "id": "...",
+      "currency": "...",
+      "line_items": [
+        {
+          "id": "li_1",
+          "item": {
+            "id": "prod_shoes",
+            "title": "Running Shoes",
+            "price": 8000
+          },
+          "quantity": 1,
+          "totals": [
+            {"type": "subtotal", "amount": 8000},
+            {"type": "total", "amount": 8000}
+          ]
+        },
+        {
+          "id": "li_2",
+          "item": {
+            "id": "prod_socks_gift",
+            "title": "Socks",
+            "price": 0
+          },
+          "quantity": 1,
+          "totals": [
+            {"type": "subtotal", "amount": 0},
+            {"type": "total", "amount": 0}
+          ]
+        }
+      ],
+      "discounts": {
+        "codes": ["FREEGIFT"],
+        "applied": [
+          {
+            "code": "FREEGIFT",
+            "title": "Free Socks with Shoe Purchase",
+            "amount": 1200,
+            "gift_line_item_id": "li_2"
+          }
+        ]
+      },
+      "totals": [
+        {"type": "subtotal", "display_text": "Subtotal", "amount": 8000},
+        {"type": "total", "display_text": "Total", "amount": 8000}
+      ]
+    }
+    ```
+
+Here, `applied_discount.amount` (1200) reflects the retail value of the
+gifted item, even though it doesn't appear as a line-item or order-level
+discount total — the gift is already reflected by the granted line item's
+own `0` price. Platforms use `gift_line_item_id` to find and label `li_2`,
+and `amount` to communicate the gift's value to the buyer (e.g. "$12 value,
+free").
+
 ## Eligibility Claims
 
 Eligibility claims are buyer claims about eligible benefits (see
