@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/available_payment_term.json",
+  "title": "Available Payment Term",
+  "description": "A payment term offered by the business, defining how line items can be paid for over time.",
+  "type": "object",
+  "required": ["id", "name", "line_item_ids", "schedules"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for this payment term."
+    },
+    "name": {
+      "type": "string",
+      "description": "Human-readable name for this payment term, such as `Pay Now`, `Net-30`, `Pay in 4`, or `Deposit + Balance at Check-in`."
+    },
+    "description": {
+      "type": "string",
+      "description": "Optional buyer-facing explanation of the payment term."
+    },
+    "line_item_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "description": "IDs of line items this payment term can be applied to."
+    },
+    "schedules": {
+      "type": "array",
+      "items": {
+        "$ref": "payment_schedule.json"
+      },
+      "minItems": 1,
+      "description": "Payment schedules within this term defining when payments are due, if used."
+    }
+  }
+}

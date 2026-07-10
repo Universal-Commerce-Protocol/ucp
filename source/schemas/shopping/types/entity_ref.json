@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/entity_ref.json",
+  "title": "Entity Reference",
+  "description": "Flexible reference by ID, schedule ID, schedule type, or any combination thereof. Enables semantic grouping and specific targeting.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Entity ID to reference. Context-dependent: line item ID for line_item_refs, payment term ID for term_refs."
+    },
+    "schedule_id": {
+      "type": "string",
+      "description": "Match by entity schedule ID."
+    },
+    "schedule_type": {
+      "$ref": "schedule_type.json",
+      "description": "Match by schedule type."
+    }
+  },
+  "examples": [
+    { "id": "li_123" },
+    { "id": "pt_pay_in_4" },
+    { "schedule_type": "immediate" },
+    { "schedule_type": "deferred" },
+    { "id": "pt_pay_in_4", "schedule_type": "immediate" },
+    { "schedule_id": "deposit-uuid" }
+  ]
+}
