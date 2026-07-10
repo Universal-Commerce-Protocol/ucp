@@ -766,6 +766,10 @@ If businesses have specific logic to enforce field existence in `buyer` and
 addresses (i.e. `fulfillment_address`, `billing_address`), this is the right
 place to set these expectations via `messages`.
 
+The response is the Checkout object; the example below shows the synchronous
+`completed` case. See core [Complete Checkout](checkout.md#complete-checkout)
+for status and `order` semantics.
+
 === "Request"
 
     <!-- ucp:example schema=shopping/checkout op=complete direction=request -->

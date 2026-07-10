@@ -85,6 +85,11 @@
       "description": "Different cart totals.",
       "ucp_request": "omit"
     },
+    "actions": {
+      "$ref": "../common/types/actions.json",
+      "description": "Outstanding extension-defined Actions for this checkout.",
+      "ucp_request": "omit"
+    },
     "messages": {
       "type": "array",
       "items": {

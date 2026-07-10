@@ -31,6 +31,93 @@ Schema notes:
     unless otherwise specified
 - Amounts format: Minor units (cents)
 
+## Actions
+
+An Action is an outstanding unit of extension-defined work for a Platform to
+process while a Cart or Checkout progresses. Actions appear only in responses,
+under the `actions` map. The common fields identify the work but do not
+define how to process it; the active extension does.
+
+Actions and Messages have different roles. An Action represents outstanding
+work: it carries an identity and extension-owned processing
+configuration. A Message communicates
+explanatory or diagnostic context about resource state. Messages do not
+define how an Action is processed or
+determine its outcome, and neither an Action nor a Message implies the other.
+
+For example, a Business can surface one outstanding Action beside an
+explanatory Message (an illustrative, partial fragment):
+
+<!-- ucp:example skip reason="illustrative fragment" -->
+```json
+{
+  "actions": {
+    "com.example.identity.student_verification": [
+      {
+        "id": "verify-student-1",
+        "required": true,
+        "config": {
+          "verification_url": "https://business.example.com/verify/abc"
+        }
+      }
+    ]
+  },
+  "messages": [
+    {
+      "type": "info",
+      "code": "eligibility_accepted",
+      "content": "Student discount applied provisionally. Verify your status."
+    }
+  ]
+}
+```
+
+The Action identifies the outstanding work and carries the extension-owned
+processing configuration under `config`; the Message provides explanatory
+context about resource state. The
+[checkout eligibility example](checkout.md#eligibility-verification-at-completion)
+composes this pattern into a complete Student Verification flow.
+
+Whenever the Business processes a request and produces a successful response,
+`actions` is the complete current snapshot of outstanding Action instances, not
+a delta. A duplicate request handled through idempotency may reproduce its
+original cached snapshot (see
+[Message Signatures — Replay Protection](signatures.md#replay-protection)).
+
+Each Action key is a reverse-domain name. It names the extension that defines
+the instances under it, including their `config`, how they are processed, and
+their outcomes. That extension contributes the key to the containing Cart or
+Checkout schema through `allOf` composition (see
+[Schema Composition](#schema-composition)); capability negotiation selects which
+extensions are active. Each value is a non-empty array, allowing a Business to
+surface multiple outstanding instances under one extension key.
+
+Every instance shares a set of common fields:
+
+- `id` — a non-empty identifier, unique for the lifetime of the containing Cart
+  or Checkout.
+- `required` — whether the instance gates the effect its extension
+  specifies.
+- `config` — an optional extension-owned configuration object.
+
+`id` and `required` are required on every instance; `config` is optional. An
+extension defines the instance-specific data a Platform needs to process its
+work under `config`; `config` is the extension-owned channel for that data.
+
+An Action instance also remains open to additional top-level fields for forward
+compatibility. A Platform **MUST** tolerate and ignore Action instance
+fields it does not recognize.
+
+While the same piece of outstanding work persists across responses, it keeps
+the same key and `id`. A replacement is a new instance with a new `id`; an `id`
+is never reused within the containing Cart or Checkout.
+
+A Business **MUST** emit an Action key only when the extension it names is
+active for the containing capability in the negotiated intersection. The
+composed JSON Schema can validate the common fields and each extension's key and
+`config`, but checking whether the extension is active also requires the
+negotiated capability context.
+
 ## Discovery, Governance, and Negotiation
 
 UCP separates protocol version compatibility from capability negotiation.

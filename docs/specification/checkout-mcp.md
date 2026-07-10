@@ -610,8 +610,9 @@ Maps to the [Complete Checkout](checkout.md#complete-checkout) operation.
 
 #### Output Schema
 
-* [Checkout](checkout.md#complete-checkout) object, containing a partial
-   `order` that holds only `id` and `permalink_url`.
+* [Checkout](checkout.md#complete-checkout) object. See core
+   [Complete Checkout](checkout.md#complete-checkout) for status and `order`
+   semantics.
 
 ### `cancel_checkout`
 

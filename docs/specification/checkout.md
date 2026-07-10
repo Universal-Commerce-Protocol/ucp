@@ -54,7 +54,7 @@ fulfillment details more relevant for physical goods.
 ### Checkout Status Lifecycle
 
 The checkout `status` field indicates the current phase of the session and
-determines what action is required next. The business sets the status; the
+determines what processing is required next. The business sets the status; the
 platform receives messages indicating what's needed to progress.
 
 ```text
@@ -94,7 +94,9 @@ platform receives messages indicating what's needed to progress.
 
 * **`incomplete`**: Checkout session is missing required information or has
     issues that need resolution. Platform should inspect `messages` array for
-    context and should attempt to resolve via Update Checkout.
+    context and should attempt to resolve via Update Checkout. When an active
+    extension surfaces a required Action, that instance may identify work
+    the Business needs completed before it can return `ready_for_complete`.
 
 * **`requires_escalation`**: Checkout session requires information that
     cannot be provided via API, or buyer input is required. Platform should
@@ -103,16 +105,45 @@ platform receives messages indicating what's needed to progress.
     Then hand off to buyer via `continue_url`.
 
 * **`ready_for_complete`**: Checkout session has all necessary information
-    and platform can finalize programmatically. Platform can call
-    Complete Checkout.
+    and platform can finalize programmatically. No required Action remains
+    outstanding. Platform can call Complete Checkout.
 
-* **`complete_in_progress`**: Business is processing the Complete Checkout
-    request.
+* **`complete_in_progress`**: The Complete Checkout request was accepted and the
+    Business is processing the order. The response **MAY** include a required
+    Action and **MUST NOT** contain `order`. See [Actions](#actions) for how the
+    Platform proceeds.
 
-* **`completed`**: Order placed successfully.
+* **`completed`**: Order placed successfully. `order` is present and no required
+    Action remains outstanding.
 
 * **`canceled`**: Checkout session is invalid or expired. Platform should
-    start a new checkout session if needed.
+    start a new checkout session if needed. No required Action remains
+    outstanding.
+
+### Actions
+
+When an active extension has outstanding work for the checkout, it surfaces the
+instances in the response-only `actions` map. The map, common instance fields
+(`id`, `required`, `config`), completeness-snapshot rule, and active-key
+membership rule are defined once in
+[Overview — Actions](overview.md#actions); this section states only how the
+checkout status lifecycle interprets them. [Status Values](#status-values) is
+the authoritative home for the status invariants governing outstanding required
+Actions.
+
+A `required: true` instance gates the effect its extension defines within the
+containing status:
+
+* While `incomplete`, a required Action identifies work the Business needs
+    completed before it can return `ready_for_complete`. After processing the
+    Action according to its extension, the Platform **SHOULD** use
+    [Get Checkout](#get-checkout) or a subsequent [Update Checkout](#update-checkout)
+    response to obtain the latest Checkout.
+* When Complete Checkout returns `complete_in_progress`, the Platform processes
+    any required Action according to its extension. Once that processing
+    completes, the Platform **SHOULD** use [Get Checkout](#get-checkout) to
+    retrieve the updated state. See [Complete Checkout](#complete-checkout) for
+    asynchronous processing and idempotency.
 
 ### Error Handling
 
@@ -326,10 +357,10 @@ unverified **MUST** result in `type: "error"` with
 
 A claim is resolved when it is either **verified** or **rescinded**:
 
-* **Verified**: The Business confirms the claim against a proof provided at
-  completion time. UCP does not prescribe how verification occurs — proof
-  may come from the payment credential, an identity verification capability,
-  or any other mechanism negotiated between Platform and Business.
+* **Verified**: The Business confirms the claim against a proof. UCP does not
+  prescribe how verification occurs — proof may come from the payment
+  credential, a required Action surfaced by a negotiated extension, or any
+  other mechanism negotiated between Platform and Business.
 * **Rescinded**: The Platform removes the claim from `context.eligibility`
   before completion (e.g., buyer changes payment method, withdraws a
   membership claim). Once removed, the Business recalculates without it.
@@ -340,44 +371,95 @@ access to restricted products.
 
 **When verification fails:**
 
-Verification failure **MUST** only affect the `messages` array. The
-Business **MUST** return an error in `messages` with
+The Business **MUST** return an error in `messages` with
 `code: "eligibility_invalid"` and `severity: "recoverable"`. Messages
 **SHOULD** use the `path` field to identify which specific claim(s) could
-not be verified. The Platform **MAY** then provide valid proof and
-resubmit, restructure the checkout (e.g., remove ineligible items, update
-claims), or abandon the attempt.
+not be verified. Any Action or discount state contributed by a negotiated
+extension **MAY** remain current according to that extension. The Platform
+**MAY** then retry that extension's verification flow, use
+[Update Checkout](#update-checkout) for ordinary checkout changes (e.g.,
+remove ineligible items) or to rescind the claim, or abandon the attempt.
 
-For example, the Platform claims a store card benefit via
-`context.eligibility`. The Business applies member pricing during the session.
-At completion, the payment credential does not match the claimed instrument:
+##### Example: resolving a claim with a verification Action
+
+This example is illustrative. It uses a negotiated vendor extension,
+`com.example.identity.student_verification`, that contributes a key of the same
+name to `actions` and defines the instance `config` and verification transport.
+It composes that extension with `context.eligibility`, a provisional
+[Discount](discount.md), a required [Action](#actions), and `messages`.
+
+The provisional discount fields (`provisional`, `eligibility`) belong to the
+[Discount extension](discount.md#eligibility-claims) and are available only when
+that extension is active for the checkout.
+
+**1. Claim accepted, discount provisional, verification Action outstanding.**
+The Platform submits `org.example.student` in `context.eligibility` on Create
+Checkout. The Business accepts the claim and, with the Discount extension
+active, returns a provisional discount, an explanatory `info` message, and a
+required verification Action. The claim is unresolved, so the checkout stays
+`incomplete`:
 
 <!-- ucp:example schema=shopping/checkout op=read -->
 ```json
 {
-  "ucp": { "version": "2026-01-11", "status": "success", "payment_handlers": { ... } },
-  "id": "checkout_abc",
-  "status": "ready_for_complete",
-  "currency": "...",
+  "ucp": { ... },
+  "id": "chk_student_1",
+  "status": "incomplete",
+  "currency": "USD",
   "line_items": [ ... ],
+  "discounts": {
+    "applied": [
+      {
+        "title": "Student 10% Off",
+        "amount": 500,
+        "automatic": true,
+        "provisional": true,
+        "eligibility": "org.example.student"
+      }
+    ]
+  },
   "totals": [ ... ],
   "links": [ ... ],
+  "actions": {
+    "com.example.identity.student_verification": [
+      {
+        "id": "verify-student-1",
+        "required": true,
+        "config": {
+          "verification_url": "https://business.example.com/verify/abc"
+        }
+      }
+    ]
+  },
   "messages": [
     {
-      "type": "error",
-      "code": "eligibility_invalid",
-      "severity": "recoverable",
-      "content": "Payment credential does not match the claimed store card benefit.",
+      "type": "info",
+      "code": "eligibility_accepted",
+      "content": "Student discount applied provisionally. Verify your student status to keep it.",
       "path": "$.context.eligibility[0]"
     }
   ]
 }
 ```
 
-The Platform can resolve this by having the buyer switch to the qualifying
-payment instrument, or by removing the claim from `context.eligibility` to
-renegotiate the checkout (obtaining updated pricing, availability, etc.)
-and then resubmitting for completion.
+The Platform runs the extension-defined verification flow. The Business receives
+the outcome out of band. Once that flow is complete, the Platform uses
+[Get Checkout](#get-checkout) to retrieve the updated state.
+
+**2. Verified.** The Business resolves the claim: the verification Action is
+removed from `actions`, the discount is confirmed (no longer `provisional`), and
+the explanatory `info` message is updated. With the claim resolved, the checkout
+**MAY** advance to `ready_for_complete`.
+
+**3. Invalid proof.** If the submitted proof does not verify, the claim stays
+unresolved. The Business returns an `eligibility_invalid` error with
+`severity: recoverable` (per [When verification fails](#eligibility-verification-at-completion))
+and the checkout does not reach `ready_for_complete`. The Platform **MAY**
+provide valid proof and retry the verification flow, or rescind the claim.
+
+**4. Rescission.** The Platform rescinds the claim with an
+[Update Checkout](#update-checkout) that removes it from `context.eligibility`;
+the Business then recalculates without the provisional discount.
 
 ### Warning Presentation
 
@@ -657,16 +739,43 @@ will replace the existing checkout session state on the business side.
 ### Complete Checkout
 
 This is the final checkout placement call. To be invoked when the user has
-committed to pay and place an order for the chosen items. The response of this
-call is the checkout object with the `order` field populated in it. The returned
-`order` provides necessary identifiers, such as `id` and `permalink_url`,
-that can be used to reference the full state of the placed order.
+committed to pay and place an order for the chosen items. Complete Checkout
+completes checkout and places the order from `ready_for_complete`.
+
+The response is the checkout object:
+
+* When completion finishes synchronously, `status` is `completed` and the
+    `order` field is present, providing necessary identifiers such as `id` and
+    `permalink_url` that can be used to reference the full state of the placed
+    order.
+* When completion is accepted for asynchronous processing, `status`
+    is `complete_in_progress` and no `order` is present. The response **MAY**
+    include a required Action. The Platform processes any required Action and,
+    once that processing completes, uses [Get Checkout](#get-checkout) to
+    retrieve the updated state (see [Actions](#actions)). If no Action is
+    present, [Get Checkout](#get-checkout) remains how the Platform retrieves
+    the latest Checkout state while the Business processes completion
+    asynchronously.
+* Any other status retains its core
+    [Checkout status lifecycle](#checkout-status-lifecycle) semantics — for
+    example `incomplete` for a recoverable change, or `requires_escalation` for
+    buyer handoff.
+
+The Platform uses [Get Checkout](#get-checkout) to retrieve the latest Checkout
+state during accepted asynchronous processing and **MUST NOT** use Complete
+Checkout to poll or resume accepted processing. If the transport result of a
+Complete Checkout call is unknown, the Platform **MAY** retry it with the same
+idempotency key — that is a retry of the original request, not a new call. Any
+later new Complete Checkout call made after the checkout returns to
+`ready_for_complete` **MUST** use a fresh idempotency key,
+even if the payload is unchanged.
+
 At the time of order persistence, fields from `Checkout` **MAY** be used
 to construct the order representation (i.e. information like `line_items`,
 `fulfillment` will be used to create the initial order representation).
 
-After this call, other details will be updated through subsequent events
-as the order, and its associated items, moves through the supply chain.
+After the order is placed, other details will be updated through subsequent
+events as the order, and its associated items, move through the supply chain.
 
 {{ method_fields('complete_checkout', 'rest.openapi.json', 'checkout') }}
 

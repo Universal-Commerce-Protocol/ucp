@@ -230,7 +230,7 @@ claims **MUST** be resolved (see
 
 ### Example: Provisional Discount with Attribution
 
-Building on the store card example from
+Using the same claim-resolution pattern described in
 [Eligibility Verification at Completion](checkout.md#eligibility-verification-at-completion),
 the discount extension provides structured attribution. The Platform claims a
 store card benefit; the Business surfaces the provisional discount with full

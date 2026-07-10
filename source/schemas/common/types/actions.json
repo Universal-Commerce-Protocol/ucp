@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/actions.json",
+  "title": "Actions",
+  "description": "Outstanding extension-defined Action instances, keyed by reverse-domain extension name.",
+  "$defs": {
+    "instance": {
+      "type": "object",
+      "description": "Common fields for one outstanding Action instance are id, required, and optional config. Extensions define instance-specific processing data under config. Additional properties are permitted for forward compatibility.",
+      "required": [
+        "id",
+        "required"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Identifier for this Action instance, unique for the lifetime of the containing resource.",
+          "ucp_request": "omit"
+        },
+        "required": {
+          "type": "boolean",
+          "description": "Whether this Action instance gates the parent-specific effect defined by its extension.",
+          "ucp_request": "omit"
+        },
+        "config": {
+          "type": "object",
+          "description": "Extension-owned configuration for this Action instance.",
+          "additionalProperties": true,
+          "ucp_request": "omit"
+        }
+      }
+    }
+  },
+  "type": "object",
+  "propertyNames": {
+    "$ref": "reverse_domain_name.json"
+  },
+  "additionalProperties": {
+    "type": "array",
+    "minItems": 1,
+    "items": {
+      "$ref": "#/$defs/instance"
+    }
+  }
+}
