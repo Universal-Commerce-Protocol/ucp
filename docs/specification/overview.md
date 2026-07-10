@@ -1429,7 +1429,12 @@ below processes a single signature.
    `jwks_uri` to obtain the JWK Set. Integrity derives from TLS to the
    resolved origin.
 4. **Match the signature's `keyid`** to a `kid` in the resolved key
-   list. **Skip** this signature if no match. For WBA-shape signatures
+   list. When resolving, **skip keys not usable for signature
+   verification**: any key marked `use:"enc"`, or whose `key_ops` is
+   present but does not include `"verify"`
+   ([RFC 7517](https://www.rfc-editor.org/rfc/rfc7517) §4.2, §4.3). Keys
+   that set `use:"sig"` or omit both members remain eligible. **Skip**
+   this signature if no eligible key matches. For WBA-shape signatures
    (`tag="web-bot-auth"`), the verifier **MUST** also confirm `keyid`
    equals the [RFC 7638](https://www.rfc-editor.org/rfc/rfc7638) SHA-256
    thumbprint of the matched JWK — the WBA architecture draft §4.2

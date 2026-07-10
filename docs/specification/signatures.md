@@ -683,7 +683,9 @@ verify_rest_request(request):
     // 2. Resolve signer's public key (capability-based; see
     // overview.md#identity-resolution-algorithm).
     key_set = resolve_signer_key_set(request.headers)
-    public_key = find_key_by_kid(key_set, keyid)
+    // sig_capable skips keys not usable for verification: use:"enc", or
+    // key_ops present without "verify" (RFC 7517 §4.2, §4.3)
+    public_key = find_key_by_kid(sig_capable(key_set), keyid)
     if not public_key:
         return skip_signature("key_not_found")
 
@@ -754,7 +756,8 @@ verify_rest_response(response, signer_profile_url):
 
     // 2. Resolve signer's public key from the signer's profile.
     profile = fetch_profile(signer_profile_url)
-    public_key = find_key_by_kid(profile.keys, keyid)
+    // signature-capable keys only (see request path; RFC 7517 §4.2, §4.3)
+    public_key = find_key_by_kid(sig_capable(profile.keys), keyid)
     if not public_key:
         return skip_signature("key_not_found")
 
