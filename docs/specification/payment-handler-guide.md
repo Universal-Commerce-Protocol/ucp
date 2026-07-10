@@ -315,33 +315,34 @@ is excluded from the response even though the platform supports it.
 #### Constraint Semantics
 
 `available_instruments[].constraints` describes what an acceptable instrument
-must satisfy for a handler declaration or resolved checkout response. Constraint
-objects extend [`Constraint`](site:schemas/shopping/types/constraint.json):
+must satisfy for a handler declaration or resolved checkout response. A
+[`Constraint`](site:schemas/shopping/types/constraint.json) is a sparse overlay
+on the instrument's base schema, using a bounded, JSON-Schema-aligned vocabulary:
 
 | Constraint key | Meaning |
 | :------------- | :------ |
-| `required_fields` | Field names from the constrained object that must be present in this context. |
-| Domain-specific keys | Additional constraints defined by the concrete instrument or handler schema. |
+| `required` | Names of the instrument's properties that MUST be present in this context (e.g. `billing_address`). |
+| `properties` | Per-property nested constraints — each value is itself a `Constraint` applied to that property (e.g. `billing_address` narrowing which address fields are required). |
+| `enum` | Allowed values for a constrained property (a per-merchant closed value set). |
+| Domain-specific keys | Additional keys defined by the concrete instrument or handler schema, e.g. `credentials`, `brands`. |
 
 Base payment instruments define these common constraints:
 
 | Key | Description |
 | :-- | :---------- |
-| `required_fields` | Payment instrument fields required by this handler. The base schema intentionally keeps this list open for handler-specific instrument extensions; `billing_address` is the standard base field constrained here. |
-| `billing_address` | Nested local [`Constraint`](site:schemas/shopping/types/constraint.json) whose `required_fields` values name billing-address fields. |
-| `credentials` | Accepted credential families and credential-specific constraints. Entries are typed constraints; concrete instrument schemas can narrow known entries while still allowing handler-specific entries. |
+| `required` / `properties` | Which instrument fields are required and their nested requirements. `billing_address` is the standard base field; `properties.billing_address.required` names the address fields needed (e.g. AVS postal code). |
+| `credentials` | Accepted credential families as a typed list — each entry is a `Constraint` carrying a `type` discriminator plus that credential's `required` fields. Discrimination is a data lookup: the consumer applies the entry matching the submitted credential; unknown `type` values are handler/extension branches. |
 
-Card instruments inherit those base constraints and add card-specific constraints:
+Card instruments add:
 
 | Key | Description |
 | :-- | :---------- |
-| `brands` | Accepted card network names, such as `visa`, `mastercard`, or `amex`. |
-| `credentials` | Refines the base typed credential list with UCP-defined card credential entries while preserving extension credential entries. |
+| `brands` | Accepted card network names (e.g. `visa`, `mastercard`) — a capability advertisement, open to any string. The accepted network is derived from the credential, so this is a capability rather than a field-value constraint. |
 
-Use field-level constraints instead of handler-specific booleans when the
-requirement is about data that is already modeled by a schema. For example, an
-AVS postal-code requirement is expressed as a billing address constraint rather
-than a new `requires_billing_postal_code` flag.
+Express requirements as field-level constraints instead of handler-specific
+booleans. For example, an AVS postal-code requirement is
+`properties.billing_address.required: ["postal_code"]`, not a new
+`requires_billing_postal_code` flag.
 
 <!-- ucp:example schema=payment_handler def=business_schema -->
 ```json
@@ -353,12 +354,15 @@ than a new `requires_billing_postal_code` flag.
       "type": "card",
       "constraints": {
         "brands": ["visa", "mastercard"],
-        "required_fields": ["billing_address"],
-        "billing_address": {
-          "required_fields": ["postal_code", "address_country"]
+        "required": ["billing_address"],
+        "properties": {
+          "billing_address": {
+            "required": ["postal_code", "address_country"]
+          }
         },
         "credentials": [
-          { "type": "token" }
+          { "type": "pan",           "required": ["cvc"] },
+          { "type": "network_token", "required": ["cryptogram"] }
         ]
       }
     }
@@ -578,15 +582,14 @@ is the payment-instrument application of the generic
 that selected branch. Each instrument schema defines its own `available_*`
 variant in `$defs` that specializes this typed entry. For example,
 [`card_payment_instrument.json`](site:schemas/shopping/types/card_payment_instrument.json)
-defines `available_card_payment_instrument` as the `card` branch with
-card-specific constraints such as `brands` and card credential refinements. Base
-payment-instrument constraints such as `billing_address` and `credentials` also
-apply.
+defines `available_card_payment_instrument` as the `card` branch. Card-specific
+constraints (`brands`, accepted `credentials`) ride on the open base `Constraint`,
+so the card branch only pins `type: "card"`.
 
-| Schema                                                                                               | Constraints                                                                                      |
-| :--------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------- |
-| [`available_payment_instrument.json`](site:schemas/shopping/types/available_payment_instrument.json) | Base typed entry: type, open `required_fields`, `billing_address`, and `credentials` constraints |
-| `card_payment_instrument.json#/$defs/available_card_payment_instrument`                              | Card branch: `type: "card"`, `brands`, and card credential refinements                           |
+| Schema                                                                                               | Constraints                                                                                       |
+| :--------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------ |
+| [`available_payment_instrument.json`](site:schemas/shopping/types/available_payment_instrument.json) | Base: `type` + a `Constraint` (`required`/`properties`/`enum`) plus a `credentials` typed list    |
+| `card_payment_instrument.json#/$defs/available_card_payment_instrument`                              | Card branch: pins `type: "card"`; `brands` and credential entries ride on the open base           |
 
 Handlers reference these instrument-defined schemas from
 `$defs.{handler_name}.available_payment_instrument` when they need machine

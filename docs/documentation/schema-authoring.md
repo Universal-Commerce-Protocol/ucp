@@ -429,22 +429,23 @@ runtime requirement attached to a concrete context, not a global schema change.
 All new constraint objects **SHOULD** extend
 [`constraint.json`](site:{{ ucp_version }}/schemas/shopping/types/constraint.json):
 
-- `required_fields` names fields on the local constrained object that must be
-  present in an acceptable instance for this context.
-- The schema property that embeds the constraint defines the target object. For
-  example, `available_instruments[].constraints` targets the payment instrument,
-  while `constraints.billing_address` targets that instrument's billing address.
-- Domain-specific constraint keys remain sibling properties. For example, the
-  base payment instrument can require `billing_address` and add a nested
-  `billing_address` constraint describing which address fields are needed.
-- Reusable base schemas **SHOULD NOT** close `required_fields` with enums when
-  the target object can be extended. Concrete resolved schemas MAY narrow
-  `required_fields` when they own the complete target vocabulary, while leaving
-  the object open to future domain-specific keys.
+- `required` names properties of the constrained object that must be present in
+  an acceptable instance for this context.
+- `properties` maps a property name to a nested `Constraint` applied to that
+  property (recursive), e.g. `billing_address` narrowing which address fields are
+  required. The schema property that embeds the constraint defines the target
+  object: `available_instruments[].constraints` targets the payment instrument,
+  and `properties.billing_address` targets that instrument's billing address.
+- `enum` restricts a property's value to a per-merchant allowed set. This is a
+  runtime, per-party value restriction, not a base-schema enum — it does not
+  close the protocol vocabulary.
+- A constraint is a sparse overlay on an already-typed base schema, so it carries
+  no `type` and stays open: it narrows named properties and never forbids unknown
+  ones (no `additionalProperties:false`, `oneOf`, or `if`/`then`).
 
 Prefer field-level constraints over ad-hoc booleans. For example, prefer
-`required_fields: ["billing_address"]` plus a nested address constraint over
-new booleans such as `requires_billing_address` or
+`required: ["billing_address"]` plus `properties.billing_address.required`
+over new booleans such as `requires_billing_address` or
 `requires_billing_postal_code`.
 
 <!-- ucp:example skip reason="schema authoring example" -->
@@ -453,31 +454,32 @@ new booleans such as `requires_billing_address` or
   "type": "card",
   "constraints": {
     "brands": ["visa", "mastercard"],
-    "required_fields": ["billing_address"],
-    "billing_address": {
-      "required_fields": ["postal_code", "address_country"]
+    "required": ["billing_address"],
+    "properties": {
+      "billing_address": {
+        "required": ["postal_code", "address_country"]
+      }
     }
   }
 }
 ```
 
-For arrays of constraints over a typed family, extend
-[`type_constraint.json`](site:{{ ucp_version }}/schemas/shopping/types/type_constraint.json). Each
-known branch should publish a `$defs/constraint` entry with a `type` discriminator
-and, when applicable, a narrowed `constraints` body. The parent schema can then
-validate UCP-defined branches while still leaving an extension point for
-handler-specific branches.
+For arrays of constraints over a typed family, use
+[`type_constraint.json`](site:{{ ucp_version }}/schemas/shopping/types/type_constraint.json):
+a list where each entry is a `Constraint` carrying a `type` discriminator plus
+that branch's `required` fields. Discrimination is a data lookup over the list —
+the consumer applies the entry matching the submitted instance's `type` — so
+UCP-defined branches and handler/extension branches coexist without a schema
+`oneOf` or `if`/`then`.
 
 <!-- ucp:example skip reason="schema authoring example" -->
 ```json
 {
   "credentials": [
-    { "type": "token" },
+    { "type": "pan", "required": ["cvc"] },
     {
       "type": "com.example.wallet_token",
-      "constraints": {
-        "required_fields": ["assurance_level"]
-      }
+      "required": ["assurance_level"]
     }
   ]
 }

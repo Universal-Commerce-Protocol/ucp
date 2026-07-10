@@ -1,18 +1,19 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/shopping/types/type_constraint.json",
-  "title": "Type Constraint",
-  "description": "Base shape for a constraint entry that selects one branch of a typed or discriminated family. The `type` value identifies the selected branch, and `constraints` applies to that branch's schema. Domain-specific schemas extend this base to document what the `type` refers to and to narrow `constraints` to the selected branch's constraint schema.",
-  "type": "object",
-  "required": ["type"],
-  "properties": {
-    "type": {
-      "type": "string",
-      "description": "The discriminator value for the constrained branch. Concrete schemas typically narrow this with `const`, `enum`, or another type-family constraint. Unknown values are reserved for extension schemas that document their own constraints."
-    },
-    "constraints": {
-      "$ref": "constraint.json",
-      "description": "Constraints applied to the branch selected by `type`. Concrete typed-constraint schemas should narrow this to the selected branch's constraint schema. Omit when accepting the branch with only its schema-defined required fields."
+  "title": "Typed Constraint",
+  "description": "A Constraint for one branch of a discriminated family (e.g. an accepted credential type), carrying a `type` discriminator inline. Consumers match the submitted instance's discriminator to `type` and apply this constraint. Discrimination is a data lookup over a list, NOT a schema `oneOf`/`if`/`then` — so unknown `type` values are simply handler/extension branches and pass through untouched.",
+  "allOf": [
+    { "$ref": "constraint.json" },
+    {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "The discriminator value this constraint applies to (e.g. a credential type). Open string: unknown values are extension branches."
+        }
+      }
     }
-  }
+  ]
 }

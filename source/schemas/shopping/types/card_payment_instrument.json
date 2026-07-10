@@ -6,37 +6,13 @@
   "$defs": {
     "available_card_payment_instrument": {
       "title": "Available Card Payment Instrument",
-      "description": "Declares card instrument availability with card-specific constraints.",
+      "description": "Declares card instrument availability. Card-specific constraints ride on the open base Constraint: `constraints.properties.brand.enum` limits accepted card networks, and `constraints.credentials[]` lists accepted credential types (e.g. `pan`, `network_token`) with their required fields. No card-specific schema keys are needed.",
       "allOf": [
         { "$ref": "available_payment_instrument.json" },
         {
           "type": "object",
           "properties": {
-            "type": { "const": "card" },
-            "constraints": {
-              "type": "object",
-              "properties": {
-                "brands": {
-                  "type": "array",
-                  "items": { "type": "string" },
-                  "minItems": 1,
-                  "uniqueItems": true,
-                  "description": "Limit to specific card brands (e.g., ['visa', 'mastercard', 'amex'])."
-                },
-                "credentials": {
-                  "items": {
-                    "if": {
-                      "type": "object",
-                      "required": ["type"],
-                      "properties": {
-                        "type": { "const": "token" }
-                      }
-                    },
-                    "then": { "$ref": "token_credential.json#/$defs/constraint" }
-                  }
-                }
-              }
-            }
+            "type": { "const": "card" }
           }
         }
       ]

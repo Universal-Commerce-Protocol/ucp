@@ -2,15 +2,25 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/shopping/types/constraint.json",
   "title": "Constraint",
-  "description": "Reusable local mixin for a constraint object. The schema property that embeds this mixin defines the constrained target object. `required_fields` names properties of that local target MUST be present in an acceptable instance. Additional properties are domain-specific constraint keys defined by concrete constraint schemas.",
+  "description": "A sparse overlay describing what an acceptable instance of the constrained object must satisfy, consumed by the platform to learn per-merchant requirements. Uses a bounded, JSON-Schema-aligned vocabulary: `required` (which properties must be present), `properties` (per-property nested constraints, recursive), and `enum` (allowed values for a property). Deliberately open — it only narrows named properties and never forbids unknown ones (no `additionalProperties:false`, `oneOf`, `if`/`then`, `not`, or cross-file `$ref`). It is an overlay on the already-typed base schema, so it carries no `type`.",
   "type": "object",
   "properties": {
-    "required_fields": {
+    "required": {
       "type": "array",
       "items": { "type": "string" },
       "uniqueItems": true,
+      "description": "Names of properties on the constrained object that MUST be present in an acceptable instance. Open string list so extension fields can be named without changing this schema."
+    },
+    "properties": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#" },
+      "description": "Per-property nested constraints. Each value is itself a Constraint applied to that property (recursive), e.g. `billing_address` narrows which address fields are required."
+    },
+    "enum": {
+      "type": "array",
       "minItems": 1,
-      "description": "Names of properties on the local constrained object that MUST be present in an acceptable instance. The base mixin intentionally accepts any string so extension schemas can add fields without changing this schema; concrete resolved schemas may narrow this list when they own the complete target vocabulary."
+      "uniqueItems": true,
+      "description": "If present, the constrained property's value MUST equal one of these. A per-merchant allowed-value set (e.g. accepted card brands); it restricts values at runtime and does not close the protocol vocabulary."
     }
   }
 }

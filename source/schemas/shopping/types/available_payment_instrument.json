@@ -2,36 +2,31 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/shopping/types/available_payment_instrument.json",
   "title": "Available Payment Instrument",
-  "description": "An instrument type available from a payment handler with optional constraints.",
-  "allOf": [
-    { "$ref": "type_constraint.json" },
-    {
-      "type": "object",
-      "properties": {
-        "constraints": {
-          "allOf": [
-            { "$ref": "constraint.json" },
-            {
-              "type": "object",
-              "properties": {
-                "billing_address": {
-                  "$ref": "constraint.json",
-                  "description": "Local constraint on the instrument's `billing_address` field."
-                },
-                "credentials": {
-                  "type": "array",
-                  "items": { "$ref": "type_constraint.json" },
-                  "uniqueItems": true,
-                  "minItems": 1,
-                  "description": "Credential specific constraints accepted for the payment instrument branch selected by `type`. Concrete instrument schemas can narrow known credential entries while preserving handler-extended credential entries."
-                }
-              }
+  "description": "An instrument type a handler accepts, with a Constraint describing what an acceptable instrument of this type must satisfy.",
+  "type": "object",
+  "required": ["type"],
+  "properties": {
+    "type": {
+      "type": "string",
+      "description": "The instrument type identifier (e.g., 'card'). References an instrument schema's type constant."
+    },
+    "constraints": {
+      "allOf": [
+        { "$ref": "constraint.json" },
+        {
+          "type": "object",
+          "properties": {
+            "credentials": {
+              "type": "array",
+              "items": { "$ref": "type_constraint.json" },
+              "uniqueItems": true,
+              "minItems": 1,
+              "description": "Accepted credential families and their per-family constraints, each a Typed Constraint keyed by `type`. The consumer applies the entry matching the submitted credential; unknown types are handler/extension branches. This is a data list, not a schema `oneOf`."
             }
-          ],
-          "description": "Constraints on this instrument type. Base payment instrument constraints can require and describe `billing_address` and `credentials`; concrete instrument schemas SHOULD add instrument-specific constraint keys while remaining open to extensions.",
-          "minProperties": 1
+          }
         }
-      }
+      ],
+      "description": "Constraint on an acceptable instrument. `required`/`properties`/`enum` describe presence and allowed values of the instrument's own fields (e.g. `billing_address`, `brand`); `credentials` extends it with per-credential-type constraints. Open to instrument-specific keys."
     }
-  ]
+  }
 }
