@@ -531,9 +531,9 @@ Opt-in declaration (business MAY return multiple groups per method):
 ### Business Profile
 
 Businesses declare what fulfillment configurations they support using
-`merchant_config`:
+`business_config`:
 
-{{ schema_fields('types/merchant_fulfillment_config', 'fulfillment') }}
+{{ schema_fields('types/business_fulfillment_config', 'fulfillment') }}
 
 <!-- ucp:example schema=profile def=business_schema target=$.ucp.capabilities -->
 ```json
