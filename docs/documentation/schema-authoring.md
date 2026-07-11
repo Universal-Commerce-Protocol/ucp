@@ -443,6 +443,15 @@ All new constraint objects **SHOULD** extend
   no `type` and stays open: it narrows named properties and never forbids unknown
   ones (no `additionalProperties:false`, `oneOf`, or `if`/`then`).
 
+`constraints` covers only field-level requirements over the *submitted* object.
+Two related but distinct axes use their own keys, **not** `constraints`:
+**accepted-value menus** for derived or selected attributes (e.g.
+`accepts: { "brand": ["visa", "mastercard"] }` — a card's network is derived, not
+a submitted field, so it is a menu, not a field constraint), and **discriminated
+per-subtype requirements** (e.g. `credentials`, below). Keeping them separate is
+what lets `constraints` stay a genuine bounded JSON Schema over the object's own
+fields.
+
 Prefer field-level constraints over ad-hoc booleans. For example, prefer
 `required: ["billing_address"]` plus `properties.billing_address.required`
 over new booleans such as `requires_billing_address` or
@@ -453,14 +462,18 @@ over new booleans such as `requires_billing_address` or
 {
   "type": "card",
   "constraints": {
-    "brands": ["visa", "mastercard"],
     "required": ["billing_address"],
     "properties": {
       "billing_address": {
         "required": ["postal_code", "address_country"]
       }
     }
-  }
+  },
+  "accepts": { "brand": ["visa", "mastercard"] },
+  "credentials": [
+    { "type": "pan",           "constraints": { "required": ["cvc"] } },
+    { "type": "network_token", "constraints": { "required": ["cryptogram"] } }
+  ]
 }
 ```
 
@@ -476,10 +489,10 @@ UCP-defined branches and handler/extension branches coexist without a schema
 ```json
 {
   "credentials": [
-    { "type": "pan", "required": ["cvc"] },
+    { "type": "pan", "constraints": { "required": ["cvc"] } },
     {
       "type": "com.example.wallet_token",
-      "required": ["assurance_level"]
+      "constraints": { "required": ["assurance_level"] }
     }
   ]
 }

@@ -2,31 +2,34 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/shopping/types/available_payment_instrument.json",
   "title": "Available Payment Instrument",
-  "description": "An instrument type a handler accepts, with a Constraint describing what an acceptable instrument of this type must satisfy.",
+  "description": "An instrument type a handler accepts. What it accepts is declared along three distinct axes, each with its own mechanism: `constraints` (a bounded JSON Schema over the instrument's own fields), `accepts` (menus of derived/selected options), and `credentials` (per-credential-type requirements, discriminated by a data lookup).",
   "type": "object",
   "required": ["type"],
   "properties": {
     "type": {
       "type": "string",
-      "description": "The instrument type identifier (e.g., 'card'). References an instrument schema's type constant."
+      "description": "The instrument type identifier (e.g., 'card')."
     },
     "constraints": {
-      "allOf": [
-        { "$ref": "constraint.json" },
-        {
-          "type": "object",
-          "properties": {
-            "credentials": {
-              "type": "array",
-              "items": { "$ref": "type_constraint.json" },
-              "uniqueItems": true,
-              "minItems": 1,
-              "description": "Accepted credential families and their per-family constraints, each a Typed Constraint keyed by `type`. The consumer applies the entry matching the submitted credential; unknown types are handler/extension branches. This is a data list, not a schema `oneOf`."
-            }
-          }
-        }
-      ],
-      "description": "Constraint on an acceptable instrument. `required`/`properties`/`enum` describe presence and allowed values of the instrument's own fields (e.g. `billing_address`, `brand`); `credentials` extends it with per-credential-type constraints. Open to instrument-specific keys."
+      "$ref": "constraint.json",
+      "description": "A Constraint (bounded JSON Schema) over the instrument's OWN submitted fields: `required` (presence) and `properties.<field>.enum` (allowed values). This is the only part that is a runnable schema over the instrument."
+    },
+    "accepts": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": { "type": "string" },
+        "uniqueItems": true,
+        "minItems": 1
+      },
+      "description": "Menus of derived/selected attributes the handler supports (e.g. `{ \"brand\": [\"visa\",\"mastercard\"] }`). Consumers read these to OFFER options; the attribute is derived (e.g. card network from the PAN), not a submitted field, so it is a menu rather than a field-value constraint. A uniform map keyed by attribute, open to new attributes."
+    },
+    "credentials": {
+      "type": "array",
+      "items": { "$ref": "type_constraint.json" },
+      "uniqueItems": true,
+      "minItems": 1,
+      "description": "Accepted credential families with per-family requirements — each a Typed Constraint keyed by `type`. Discriminated by data lookup on the submitted credential's `type`; unknown types are handler/extension branches. A list, not a schema `oneOf`."
     }
   }
 }

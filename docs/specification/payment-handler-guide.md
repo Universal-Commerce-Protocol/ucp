@@ -218,8 +218,8 @@ and typically includes different configuration:
   "available_instruments": [
     {
       "type": "card",
-      "constraints": {
-        "brands": ["visa", "mastercard"]
+      "accepts": {
+        "brand": ["visa", "mastercard"]
       }
     }
   ],
@@ -242,8 +242,8 @@ and typically includes different configuration:
   "available_instruments": [
     {
       "type": "card",
-      "constraints": {
-        "brands": ["visa", "mastercard", "amex", "discover"]
+      "accepts": {
+        "brand": ["visa", "mastercard", "amex", "discover"]
       }
     }
   ],
@@ -264,8 +264,8 @@ and typically includes different configuration:
   "available_instruments": [
     {
       "type": "card",
-      "constraints": {
-        "brands": ["visa", "mastercard"]
+      "accepts": {
+        "brand": ["visa", "mastercard"]
       }
     }
   ],
@@ -305,44 +305,37 @@ authoritative value returned in the `response_schema`.
 
 | Source | `available_instruments` |
 | :----- | :---------------------- |
-| Platform profile | `[{type: "card", constraints: {brands: ["visa", "mastercard", "amex", "discover"]}}]` |
-| Business profile | `[{type: "card", constraints: {brands: ["visa", "mastercard", "amex"]}}]` |
-| **Response (resolved)** | `[{type: "card", constraints: {brands: ["visa", "mastercard", "amex"]}}]` |
+| Platform profile | `[{type: "card", accepts: {brand: ["visa", "mastercard", "amex", "discover"]}}]` |
+| Business profile | `[{type: "card", accepts: {brand: ["visa", "mastercard", "amex"]}}]` |
+| **Response (resolved)** | `[{type: "card", accepts: {brand: ["visa", "mastercard", "amex"]}}]` |
 
 In this example, the business's PSP is not configured for Discover, so Discover
 is excluded from the response even though the platform supports it.
 
 #### Constraint Semantics
 
-`available_instruments[].constraints` describes what an acceptable instrument
-must satisfy for a handler declaration or resolved checkout response. A
-[`Constraint`](site:schemas/shopping/types/constraint.json) is a sparse overlay
-on the instrument's base schema, using a bounded, JSON-Schema-aligned vocabulary:
+An `available_instruments[]` entry declares what an acceptable instrument must
+satisfy along **three distinct axes**, each with its own mechanism:
 
-| Constraint key | Meaning |
-| :------------- | :------ |
-| `required` | Names of the instrument's properties that MUST be present in this context (e.g. `billing_address`). |
-| `properties` | Per-property nested constraints — each value is itself a `Constraint` applied to that property (e.g. `billing_address` narrowing which address fields are required). |
-| `enum` | Allowed values for a constrained property (a per-merchant closed value set). |
-| Domain-specific keys | Additional keys defined by the concrete instrument or handler schema, e.g. `credentials`, `brands`. |
+| Axis | Key | Mechanism |
+| :--- | :-- | :-------- |
+| Field requirements | `constraints` | A [`Constraint`](site:schemas/shopping/types/constraint.json) — a bounded JSON Schema over the instrument's OWN submitted fields: `required` (presence) and `properties.<field>.enum` (allowed values). |
+| Accepted options | `accepts` | A uniform map of derived/selected attributes to supported values (e.g. `{ "brand": ["visa","mastercard"] }`). Read to OFFER options; the attribute (e.g. card network) is derived, not a submitted field — a menu, not a field-value constraint. |
+| Credential requirements | `credentials` | A typed list keyed by credential `type`, each carrying its own `Constraint`. Applied by data lookup on the submitted credential's `type`; unknown types are handler/extension branches (never a schema `oneOf`). |
 
-Base payment instruments define these common constraints:
+Within `constraints`:
 
 | Key | Description |
 | :-- | :---------- |
-| `required` / `properties` | Which instrument fields are required and their nested requirements. `billing_address` is the standard base field; `properties.billing_address.required` names the address fields needed (e.g. AVS postal code). |
-| `credentials` | Accepted credential families as a typed list — each entry is a `Constraint` carrying a `type` discriminator plus that credential's `required` fields. Discrimination is a data lookup: the consumer applies the entry matching the submitted credential; unknown `type` values are handler/extension branches. |
-
-Card instruments add:
-
-| Key | Description |
-| :-- | :---------- |
-| `brands` | Accepted card network names (e.g. `visa`, `mastercard`) — a capability advertisement, open to any string. The accepted network is derived from the credential, so this is a capability rather than a field-value constraint. |
+| `required` | Instrument fields that MUST be present (e.g. `billing_address`). |
+| `properties` | Per-field nested constraints, recursive — `properties.billing_address.required` names the address fields needed (AVS postal code); `properties.<field>.enum` restricts a field's value (a per-merchant runtime set, not a base-schema enum). |
 
 Express requirements as field-level constraints instead of handler-specific
-booleans. For example, an AVS postal-code requirement is
-`properties.billing_address.required: ["postal_code"]`, not a new
-`requires_billing_postal_code` flag.
+booleans. An AVS postal-code requirement is
+`constraints.properties.billing_address.required: ["postal_code"]`, not a new
+`requires_billing_postal_code` flag. An accepted-brands list is `accepts.brand`,
+not a bespoke `brands` key — so accepted-value menus stay uniform instead of
+proliferating.
 
 <!-- ucp:example schema=payment_handler def=business_schema -->
 ```json
@@ -353,18 +346,20 @@ booleans. For example, an AVS postal-code requirement is
     {
       "type": "card",
       "constraints": {
-        "brands": ["visa", "mastercard"],
         "required": ["billing_address"],
         "properties": {
           "billing_address": {
             "required": ["postal_code", "address_country"]
           }
-        },
-        "credentials": [
-          { "type": "pan",           "required": ["cvc"] },
-          { "type": "network_token", "required": ["cryptogram"] }
-        ]
-      }
+        }
+      },
+      "accepts": {
+        "brand": ["visa", "mastercard"]
+      },
+      "credentials": [
+        { "type": "pan",           "constraints": { "required": ["cvc"] } },
+        { "type": "network_token", "constraints": { "required": ["cryptogram"] } }
+      ]
     }
   ]
 }

@@ -2,18 +2,17 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/shopping/types/type_constraint.json",
   "title": "Typed Constraint",
-  "description": "A Constraint for one branch of a discriminated family (e.g. an accepted credential type), carrying a `type` discriminator inline. Consumers match the submitted instance's discriminator to `type` and apply this constraint. Discrimination is a data lookup over a list, NOT a schema `oneOf`/`if`/`then` — so unknown `type` values are simply handler/extension branches and pass through untouched.",
-  "allOf": [
-    { "$ref": "constraint.json" },
-    {
-      "type": "object",
-      "required": ["type"],
-      "properties": {
-        "type": {
-          "type": "string",
-          "description": "The discriminator value this constraint applies to (e.g. a credential type). Open string: unknown values are extension branches."
-        }
-      }
+  "description": "One entry of a discriminated family (e.g. an accepted credential type): a `type` discriminator plus a `Constraint` over that branch's own fields. Consumers apply the entry whose `type` matches the submitted instance — a data lookup, NOT a schema `oneOf`/`if`. Unknown `type` values are handler/extension branches and pass through.",
+  "type": "object",
+  "required": ["type"],
+  "properties": {
+    "type": {
+      "type": "string",
+      "description": "The discriminator value this entry applies to (e.g. a credential type). Open string: unknown values are extension branches."
+    },
+    "constraints": {
+      "$ref": "constraint.json",
+      "description": "A Constraint (bounded JSON Schema) over the fields of the branch selected by `type`."
     }
-  ]
+  }
 }
