@@ -1652,8 +1652,11 @@ which features apply to a given interaction.</p>
 <h3 id="profile-structure">Profile Structure<a class="headerlink" href="#profile-structure" title="Permanent link">&para;</a></h3>
 <p>Both business and platform profiles share a common base structure — a <code>ucp</code>
 object declaring protocol version, services, capabilities, and payment handlers,
-alongside a <code>signing_keys</code> array of JWK public keys. The <code>ucp</code> object differs
-between the two: the business profile uses a business-specific schema (hosted at
+alongside a <code>keys</code> array of JWK public keys (a valid
+<a href="https://datatracker.ietf.org/doc/html/rfc7517">RFC 7517</a> JWK Set,
+reusable as a Web Bot Auth key source). The <code>ucp</code> object differs
+between the two: the business profile uses a business-specific schema
+(hosted at
 <code>/.well-known/ucp</code>), while the platform profile uses a platform-specific schema
 (hosted at a URI the platform advertises per-request). This dual-purpose profile
 — capabilities <em>and</em> keys in a single document — means discovery and
@@ -1695,7 +1698,7 @@ authentication are resolved together.</p>
 </span><span id="__span-2-34"><a id="__codelineno-2-34" name="__codelineno-2-34" href="#__codelineno-2-34"></a><span class="w">      </span><span class="p">}]</span>
 </span><span id="__span-2-35"><a id="__codelineno-2-35" name="__codelineno-2-35" href="#__codelineno-2-35"></a><span class="w">    </span><span class="p">}</span>
 </span><span id="__span-2-36"><a id="__codelineno-2-36" name="__codelineno-2-36" href="#__codelineno-2-36"></a><span class="w">  </span><span class="p">},</span>
-</span><span id="__span-2-37"><a id="__codelineno-2-37" name="__codelineno-2-37" href="#__codelineno-2-37"></a><span class="w">  </span><span class="nt">&quot;signing_keys&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nt">&quot;kid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;key_2026&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;kty&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EC&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;crv&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;P-256&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;x&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;WbbXwVYGdJoP4Xm3qCkGvBRcRvKtEfXDbWvPzpPS8LA&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;y&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sP4jHHxYqC89HBo8TjrtVOAGHfJDflYxw7MFMxuFMPY&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;alg&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ES256&quot;</span><span class="w"> </span><span class="p">}]</span>
+</span><span id="__span-2-37"><a id="__codelineno-2-37" name="__codelineno-2-37" href="#__codelineno-2-37"></a><span class="w">  </span><span class="nt">&quot;keys&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nt">&quot;kid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;key_2026&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;kty&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EC&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;crv&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;P-256&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;x&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;WbbXwVYGdJoP4Xm3qCkGvBRcRvKtEfXDbWvPzpPS8LA&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;y&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sP4jHHxYqC89HBo8TjrtVOAGHfJDflYxw7MFMxuFMPY&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;alg&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ES256&quot;</span><span class="w"> </span><span class="p">}]</span>
 </span><span id="__span-2-38"><a id="__codelineno-2-38" name="__codelineno-2-38" href="#__codelineno-2-38"></a><span class="p">}</span>
 </span></code></pre></div>
 <h2 id="namespace-governance">Namespace Governance<a class="headerlink" href="#namespace-governance" title="Permanent link">&para;</a></h2>
@@ -1802,7 +1805,7 @@ capability negotiation, eliminating a separate key management step.</p>
 <li>Obtain the signer's profile URL (from <code>UCP-Agent</code> header or
    <code>/.well-known/ucp</code>).</li>
 <li>Fetch and cache the profile.</li>
-<li>Match the <code>keyid</code> from <code>Signature-Input</code> to a <code>kid</code> in <code>signing_keys[]</code>.</li>
+<li>Match the <code>keyid</code> from <code>Signature-Input</code> to a <code>kid</code> in <code>keys[]</code>.</li>
 <li>Verify the signature using the corresponding public key.</li>
 </ol>
 <h3 id="authentication-mechanisms">Authentication Mechanisms<a class="headerlink" href="#authentication-mechanisms" title="Permanent link">&para;</a></h3>
