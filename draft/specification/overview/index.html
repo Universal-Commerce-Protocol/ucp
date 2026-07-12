@@ -5366,35 +5366,16 @@ and <strong>MAY</strong> be omitted, though useful commerce profiles normally ad
 least one capability.</p>
 <p>Profiles <strong>MAY</strong> include public JSON Web Keys used for HTTP Message
 Signatures and signed webhooks. When a profile publishes signing keys,
-they <strong>MUST</strong> appear in <code>signing_keys[]</code> — the canonical UCP profile
-field that every UCP verifier reads. This preserves backward
-compatibility with every existing UCP verifier.</p>
-<p>Profiles <strong>MAY</strong> additionally publish a top-level <code>keys[]</code> array per
-<a href="https://datatracker.ietf.org/doc/html/rfc7517">RFC 7517</a> (JWK Set
-Format) that <strong>mirrors</strong> <code>signing_keys[]</code>. RFC 7517 §5 permits
-additional members alongside <code>keys</code>, so the same document is
-simultaneously a UCP profile and a valid JWK Set — which a signer can
-reuse as its Web Bot Auth key source. See
+they <strong>MUST</strong> appear in the top-level <code>keys[]</code> array — the canonical
+UCP profile field that every UCP verifier reads. <code>keys[]</code> is a JWK Set
+per <a href="https://datatracker.ietf.org/doc/html/rfc7517">RFC 7517</a>, so the
+same document is simultaneously a UCP profile and a valid JWK Set —
+which a signer can reuse as its Web Bot Auth key source. See
 <a href="#deployment-patterns-for-wba-interop">Deployment Patterns for WBA Interop</a>
-below. When both arrays are present, they <strong>MUST</strong> list the same set
-of <code>kid</code> values, and entries sharing a <code>kid</code> <strong>MUST</strong> be semantically
-equivalent — i.e., have identical base64url JWK SHA-256 Thumbprints, as
-defined in
-<a href="https://rfc-editor.org/rfc/rfc7638#section-3.2">Section 3.2 of RFC 7638</a>
-for RSA and EC, and in
-<a href="https://rfc-editor.org/rfc/rfc8037#appendix-A.3">Appendix A.3 of RFC 8037</a>
-for Ed25519. Serialization differences such as member order are not
-significant.</p>
-<p>Adding, rotating, or removing a key <strong>MUST</strong> update both arrays
-atomically. Removal is the security-critical case: a verifier reads only
-one array, so a key dropped from <code>signing_keys[]</code> but still listed in
-<code>keys[]</code> (or vice versa) keeps verifying — a revoked or compromised key
-is not effectively revoked until it is absent from <strong>both</strong> arrays.</p>
-<p>Publishing the top-level <code>keys[]</code> is what makes the profile a valid
-JWK Set. A future UCP version <strong>will</strong> promote <code>keys[]</code> to the canonical
-field and deprecate <code>signing_keys[]</code>, so the profile is a JWK Set
-without dual publication; profiles publishing both arrays today are
-positioned for that transition.</p>
+below.</p>
+<p>Adding, rotating, or removing a key updates this single array. Removal
+is the security-critical case: a revoked or compromised key is not
+effectively revoked until it is absent from <code>keys[]</code>.</p>
 <p>UCP defines two well-known key types: <strong>EC</strong> (ECDSA P-256, P-384) and
 <strong>OKP</strong> (EdDSA Ed25519); the key-type, curve, and algorithm
 vocabularies are open and verifiers skip keys they do not recognize.
@@ -5507,7 +5488,7 @@ lookup, and rotation.</p>
 </span><span id="__span-8-102"><a id="__codelineno-8-102" name="__codelineno-8-102" href="#__codelineno-8-102"></a><span class="w">      </span><span class="p">]</span>
 </span><span id="__span-8-103"><a id="__codelineno-8-103" name="__codelineno-8-103" href="#__codelineno-8-103"></a><span class="w">    </span><span class="p">}</span>
 </span><span id="__span-8-104"><a id="__codelineno-8-104" name="__codelineno-8-104" href="#__codelineno-8-104"></a><span class="w">  </span><span class="p">},</span>
-</span><span id="__span-8-105"><a id="__codelineno-8-105" name="__codelineno-8-105" href="#__codelineno-8-105"></a><span class="w">  </span><span class="nt">&quot;signing_keys&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-8-105"><a id="__codelineno-8-105" name="__codelineno-8-105" href="#__codelineno-8-105"></a><span class="w">  </span><span class="nt">&quot;keys&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 </span><span id="__span-8-106"><a id="__codelineno-8-106" name="__codelineno-8-106" href="#__codelineno-8-106"></a><span class="w">    </span><span class="p">{</span>
 </span><span id="__span-8-107"><a id="__codelineno-8-107" name="__codelineno-8-107" href="#__codelineno-8-107"></a><span class="w">      </span><span class="nt">&quot;kid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;poqkLGiymh_W0uP6PZFw-dvez3QJT5SolqXBCW38r0U&quot;</span><span class="p">,</span>
 </span><span id="__span-8-108"><a id="__codelineno-8-108" name="__codelineno-8-108" href="#__codelineno-8-108"></a><span class="w">      </span><span class="nt">&quot;kty&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;OKP&quot;</span><span class="p">,</span>
@@ -5525,36 +5506,16 @@ lookup, and rotation.</p>
 </span><span id="__span-8-120"><a id="__codelineno-8-120" name="__codelineno-8-120" href="#__codelineno-8-120"></a><span class="w">      </span><span class="nt">&quot;use&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sig&quot;</span><span class="p">,</span>
 </span><span id="__span-8-121"><a id="__codelineno-8-121" name="__codelineno-8-121" href="#__codelineno-8-121"></a><span class="w">      </span><span class="nt">&quot;alg&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ES256&quot;</span>
 </span><span id="__span-8-122"><a id="__codelineno-8-122" name="__codelineno-8-122" href="#__codelineno-8-122"></a><span class="w">    </span><span class="p">}</span>
-</span><span id="__span-8-123"><a id="__codelineno-8-123" name="__codelineno-8-123" href="#__codelineno-8-123"></a><span class="w">  </span><span class="p">],</span>
-</span><span id="__span-8-124"><a id="__codelineno-8-124" name="__codelineno-8-124" href="#__codelineno-8-124"></a><span class="w">  </span><span class="nt">&quot;keys&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-</span><span id="__span-8-125"><a id="__codelineno-8-125" name="__codelineno-8-125" href="#__codelineno-8-125"></a><span class="w">    </span><span class="p">{</span>
-</span><span id="__span-8-126"><a id="__codelineno-8-126" name="__codelineno-8-126" href="#__codelineno-8-126"></a><span class="w">      </span><span class="nt">&quot;kid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;poqkLGiymh_W0uP6PZFw-dvez3QJT5SolqXBCW38r0U&quot;</span><span class="p">,</span>
-</span><span id="__span-8-127"><a id="__codelineno-8-127" name="__codelineno-8-127" href="#__codelineno-8-127"></a><span class="w">      </span><span class="nt">&quot;kty&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;OKP&quot;</span><span class="p">,</span>
-</span><span id="__span-8-128"><a id="__codelineno-8-128" name="__codelineno-8-128" href="#__codelineno-8-128"></a><span class="w">      </span><span class="nt">&quot;crv&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Ed25519&quot;</span><span class="p">,</span>
-</span><span id="__span-8-129"><a id="__codelineno-8-129" name="__codelineno-8-129" href="#__codelineno-8-129"></a><span class="w">      </span><span class="nt">&quot;x&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs&quot;</span><span class="p">,</span>
-</span><span id="__span-8-130"><a id="__codelineno-8-130" name="__codelineno-8-130" href="#__codelineno-8-130"></a><span class="w">      </span><span class="nt">&quot;use&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sig&quot;</span><span class="p">,</span>
-</span><span id="__span-8-131"><a id="__codelineno-8-131" name="__codelineno-8-131" href="#__codelineno-8-131"></a><span class="w">      </span><span class="nt">&quot;alg&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EdDSA&quot;</span>
-</span><span id="__span-8-132"><a id="__codelineno-8-132" name="__codelineno-8-132" href="#__codelineno-8-132"></a><span class="w">    </span><span class="p">},</span>
-</span><span id="__span-8-133"><a id="__codelineno-8-133" name="__codelineno-8-133" href="#__codelineno-8-133"></a><span class="w">    </span><span class="p">{</span>
-</span><span id="__span-8-134"><a id="__codelineno-8-134" name="__codelineno-8-134" href="#__codelineno-8-134"></a><span class="w">      </span><span class="nt">&quot;kid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;business_2025&quot;</span><span class="p">,</span>
-</span><span id="__span-8-135"><a id="__codelineno-8-135" name="__codelineno-8-135" href="#__codelineno-8-135"></a><span class="w">      </span><span class="nt">&quot;kty&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EC&quot;</span><span class="p">,</span>
-</span><span id="__span-8-136"><a id="__codelineno-8-136" name="__codelineno-8-136" href="#__codelineno-8-136"></a><span class="w">      </span><span class="nt">&quot;crv&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;P-256&quot;</span><span class="p">,</span>
-</span><span id="__span-8-137"><a id="__codelineno-8-137" name="__codelineno-8-137" href="#__codelineno-8-137"></a><span class="w">      </span><span class="nt">&quot;x&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;qIVYZVLCrPZHGHjP17CTW0_-D9Lfw0EkjqF7xB4FivA&quot;</span><span class="p">,</span>
-</span><span id="__span-8-138"><a id="__codelineno-8-138" name="__codelineno-8-138" href="#__codelineno-8-138"></a><span class="w">      </span><span class="nt">&quot;y&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Mc4nN9LTDOBhfoUeg8Ye9WedFRhnZXZJA12Qp0zZ6F0&quot;</span><span class="p">,</span>
-</span><span id="__span-8-139"><a id="__codelineno-8-139" name="__codelineno-8-139" href="#__codelineno-8-139"></a><span class="w">      </span><span class="nt">&quot;use&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sig&quot;</span><span class="p">,</span>
-</span><span id="__span-8-140"><a id="__codelineno-8-140" name="__codelineno-8-140" href="#__codelineno-8-140"></a><span class="w">      </span><span class="nt">&quot;alg&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ES256&quot;</span>
-</span><span id="__span-8-141"><a id="__codelineno-8-141" name="__codelineno-8-141" href="#__codelineno-8-141"></a><span class="w">    </span><span class="p">}</span>
-</span><span id="__span-8-142"><a id="__codelineno-8-142" name="__codelineno-8-142" href="#__codelineno-8-142"></a><span class="w">  </span><span class="p">]</span>
-</span><span id="__span-8-143"><a id="__codelineno-8-143" name="__codelineno-8-143" href="#__codelineno-8-143"></a><span class="p">}</span>
+</span><span id="__span-8-123"><a id="__codelineno-8-123" name="__codelineno-8-123" href="#__codelineno-8-123"></a><span class="w">  </span><span class="p">]</span>
+</span><span id="__span-8-124"><a id="__codelineno-8-124" name="__codelineno-8-124" href="#__codelineno-8-124"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>The business profile advertises the business's available transports,
 capabilities, payment handlers, and public verification keys. This
-example publishes signing keys in <strong>both</strong> <code>signing_keys[]</code> (the
-canonical UCP profile field) and top-level <code>keys[]</code> (the RFC 7517
-JWK Set mirror) so the same document is also a valid JWK Set — reusable
-as a Web Bot Auth key source. The two arrays carry the same JWK content
-(semantically equivalent); UCP-only verifiers read <code>signing_keys[]</code>;
-WBA-shape verifiers read <code>keys[]</code>.</p>
+example publishes signing keys in the canonical top-level <code>keys[]</code>
+array (an RFC 7517 JWK Set), so the same document is also a valid JWK
+Set — reusable as a Web Bot Auth key source. Every UCP verifier reads
+<code>keys[]</code>, whether it resolved the key via <code>UCP-Agent</code> or via
+<code>Signature-Agent</code>.</p>
 <p>A WBA-shape verifier reads <code>keys[]</code> from this profile <strong>only when the
 <code>Signature-Agent</code> header selects it</strong> with <code>type=jwks_uri</code> (or <code>type=cimd</code>)
 pointing at the profile URL. The default <code>type=directory</code> (when <code>type</code> is
@@ -5573,7 +5534,7 @@ here:</p>
   (<code>ap2.merchant_authorization</code>).</li>
 </ul>
 <p>A business that does not interact with AP2 or WBA may publish a single
-ES256 key in <code>signing_keys[]</code> only (the universal baseline). See
+ES256 key in <code>keys[]</code> (the universal baseline). See
 <a href="#key-discovery">Key Discovery</a> for key lookup and resolution,
 <a href="#deployment-patterns-for-wba-interop">Deployment Patterns for WBA Interop</a>
 for hosting choices, and <a href="../signatures/">Message Signatures</a> for
@@ -5669,7 +5630,7 @@ example:</p>
 </span><span id="__span-9-79"><a id="__codelineno-9-79" name="__codelineno-9-79" href="#__codelineno-9-79"></a><span class="w">      </span><span class="p">]</span>
 </span><span id="__span-9-80"><a id="__codelineno-9-80" name="__codelineno-9-80" href="#__codelineno-9-80"></a><span class="w">    </span><span class="p">}</span>
 </span><span id="__span-9-81"><a id="__codelineno-9-81" name="__codelineno-9-81" href="#__codelineno-9-81"></a><span class="w">  </span><span class="p">},</span>
-</span><span id="__span-9-82"><a id="__codelineno-9-82" name="__codelineno-9-82" href="#__codelineno-9-82"></a><span class="w">  </span><span class="nt">&quot;signing_keys&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-9-82"><a id="__codelineno-9-82" name="__codelineno-9-82" href="#__codelineno-9-82"></a><span class="w">  </span><span class="nt">&quot;keys&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 </span><span id="__span-9-83"><a id="__codelineno-9-83" name="__codelineno-9-83" href="#__codelineno-9-83"></a><span class="w">    </span><span class="p">{</span>
 </span><span id="__span-9-84"><a id="__codelineno-9-84" name="__codelineno-9-84" href="#__codelineno-9-84"></a><span class="w">      </span><span class="nt">&quot;kid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;platform_2025&quot;</span><span class="p">,</span>
 </span><span id="__span-9-85"><a id="__codelineno-9-85" name="__codelineno-9-85" href="#__codelineno-9-85"></a><span class="w">      </span><span class="nt">&quot;kty&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EC&quot;</span><span class="p">,</span>
@@ -6226,14 +6187,13 @@ key resolution mechanism for
 <a href="https://www.rfc-editor.org/rfc/rfc9421">RFC 9421</a> HTTP Message
 Signatures.</p>
 <p>See <a href="#profile-structure">Profile Structure</a> for the publishing
-contract (canonical <code>signing_keys[]</code>, optional <code>keys[]</code> mirror,
-cross-array equivalence rule). Verifiers read the key list that matches
-how they resolved the key:</p>
+contract (the canonical top-level <code>keys[]</code> JWK Set). Both resolution
+paths read the same list:</p>
 <ul>
-<li><strong>Resolved via <code>UCP-Agent</code></strong> (default UCP key lookup) — read
-  <code>signing_keys[]</code>.</li>
+<li><strong>Resolved via <code>UCP-Agent</code></strong> (default UCP key lookup) — read <code>keys[]</code>.</li>
 <li><strong>Resolved via <code>Signature-Agent</code></strong> (Web Bot Auth, optional) — read
-  top-level <code>keys[]</code>.</li>
+  <code>keys[]</code>; the <code>cimd</code>/<code>directory</code> variants reach the JWK Set through
+  their own documents.</li>
 </ul>
 <p>For the full verifier algorithm — capability-based key resolution,
 profile fetching, and covered-component enforcement — see
@@ -6373,7 +6333,7 @@ below processes a single signature.</p>
    it supports whose header is present:<ul>
 <li><strong><code>UCP-Agent</code> — default UCP key lookup, supported by every UCP
   verifier.</strong> Resolve the <code>UCP-Agent</code> profile URL and read
-  <code>signing_keys[]</code>. This path applies to UCP signatures that are
+  <code>keys[]</code>. This path applies to UCP signatures that are
   untagged (default UCP) or carry <code>tag="web-bot-auth"</code> (the
   dual-audience shape); the verifier resolves them via <code>UCP-Agent</code>,
   treats <code>signature-agent</code> as an ordinary covered component, and
@@ -6409,13 +6369,18 @@ below processes a single signature.</p>
 <li><strong>Fetch the document</strong> per <a href="#fetching">§Fetching</a>. If the fetch
    fails (DNS error, network failure, non-2xx response, parse failure),
    <strong>skip</strong> this signature.</li>
-<li><strong>Locate the key list.</strong> <code>signing_keys[]</code> when resolved via
-   <code>UCP-Agent</code>; the top-level <code>keys[]</code> (RFC 7517 JWK Set) when resolved
-   via <code>Signature-Agent</code> <code>type=jwks_uri</code>; for <code>type=cimd</code>, dereference
-   the document's <code>jwks_uri</code> to obtain the JWK Set. Integrity derives
-   from TLS to the resolved origin.</li>
+<li><strong>Locate the key list.</strong> The profile's top-level <code>keys[]</code> (RFC 7517
+   JWK Set) when resolved via <code>UCP-Agent</code> or via <code>Signature-Agent</code>
+   <code>type=jwks_uri</code>; for <code>type=cimd</code>, dereference the document's
+   <code>jwks_uri</code> to obtain the JWK Set. Integrity derives from TLS to the
+   resolved origin.</li>
 <li><strong>Match the signature's <code>keyid</code></strong> to a <code>kid</code> in the resolved key
-   list. <strong>Skip</strong> this signature if no match. For WBA-shape signatures
+   list. When resolving, <strong>skip keys not usable for signature
+   verification</strong>: any key marked <code>use:"enc"</code>, or whose <code>key_ops</code> is
+   present but does not include <code>"verify"</code>
+   (<a href="https://www.rfc-editor.org/rfc/rfc7517">RFC 7517</a> §4.2, §4.3). Keys
+   that set <code>use:"sig"</code> or omit both members remain eligible. <strong>Skip</strong>
+   this signature if no eligible key matches. For WBA-shape signatures
    (<code>tag="web-bot-auth"</code>), the verifier <strong>MUST</strong> also confirm <code>keyid</code>
    equals the <a href="https://www.rfc-editor.org/rfc/rfc7638">RFC 7638</a> SHA-256
    thumbprint of the matched JWK — the WBA architecture draft §4.2

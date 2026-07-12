@@ -324,13 +324,9 @@ A profile document is a JSON object with a required `ucp` member. The `ucp` memb
 
 For both business and platform profiles, `ucp.version`, `ucp.services`, and `ucp.payment_handlers` are required. The `services` and `payment_handlers` registries **MUST** be present even when empty. `ucp.capabilities` is optional and **MAY** be omitted, though useful commerce profiles normally advertise at least one capability.
 
-Profiles **MAY** include public JSON Web Keys used for HTTP Message Signatures and signed webhooks. When a profile publishes signing keys, they **MUST** appear in `signing_keys[]` — the canonical UCP profile field that every UCP verifier reads. This preserves backward compatibility with every existing UCP verifier.
+Profiles **MAY** include public JSON Web Keys used for HTTP Message Signatures and signed webhooks. When a profile publishes signing keys, they **MUST** appear in the top-level `keys[]` array — the canonical UCP profile field that every UCP verifier reads. `keys[]` is a JWK Set per [RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517), so the same document is simultaneously a UCP profile and a valid JWK Set — which a signer can reuse as its Web Bot Auth key source. See [Deployment Patterns for WBA Interop](#deployment-patterns-for-wba-interop) below.
 
-Profiles **MAY** additionally publish a top-level `keys[]` array per [RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517) (JWK Set Format) that **mirrors** `signing_keys[]`. RFC 7517 §5 permits additional members alongside `keys`, so the same document is simultaneously a UCP profile and a valid JWK Set — which a signer can reuse as its Web Bot Auth key source. See [Deployment Patterns for WBA Interop](#deployment-patterns-for-wba-interop) below. When both arrays are present, they **MUST** list the same set of `kid` values, and entries sharing a `kid` **MUST** be semantically equivalent — i.e., have identical base64url JWK SHA-256 Thumbprints, as defined in [Section 3.2 of RFC 7638](https://rfc-editor.org/rfc/rfc7638#section-3.2) for RSA and EC, and in [Appendix A.3 of RFC 8037](https://rfc-editor.org/rfc/rfc8037#appendix-A.3) for Ed25519. Serialization differences such as member order are not significant.
-
-Adding, rotating, or removing a key **MUST** update both arrays atomically. Removal is the security-critical case: a verifier reads only one array, so a key dropped from `signing_keys[]` but still listed in `keys[]` (or vice versa) keeps verifying — a revoked or compromised key is not effectively revoked until it is absent from **both** arrays.
-
-Publishing the top-level `keys[]` is what makes the profile a valid JWK Set. A future UCP version **will** promote `keys[]` to the canonical field and deprecate `signing_keys[]`, so the profile is a JWK Set without dual publication; profiles publishing both arrays today are positioned for that transition.
+Adding, rotating, or removing a key updates this single array. Removal is the security-critical case: a revoked or compromised key is not effectively revoked until it is absent from `keys[]`.
 
 UCP defines two well-known key types: **EC** (ECDSA P-256, P-384) and **OKP** (EdDSA Ed25519); the key-type, curve, and algorithm vocabularies are open and verifiers skip keys they do not recognize. See [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md) for key format, algorithms, lookup, and rotation.
 
@@ -443,25 +439,6 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
       ]
     }
   },
-  "signing_keys": [
-    {
-      "kid": "poqkLGiymh_W0uP6PZFw-dvez3QJT5SolqXBCW38r0U",
-      "kty": "OKP",
-      "crv": "Ed25519",
-      "x": "JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs",
-      "use": "sig",
-      "alg": "EdDSA"
-    },
-    {
-      "kid": "business_2025",
-      "kty": "EC",
-      "crv": "P-256",
-      "x": "qIVYZVLCrPZHGHjP17CTW0_-D9Lfw0EkjqF7xB4FivA",
-      "y": "Mc4nN9LTDOBhfoUeg8Ye9WedFRhnZXZJA12Qp0zZ6F0",
-      "use": "sig",
-      "alg": "ES256"
-    }
-  ],
   "keys": [
     {
       "kid": "poqkLGiymh_W0uP6PZFw-dvez3QJT5SolqXBCW38r0U",
@@ -484,7 +461,7 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
 }
 ```
 
-The business profile advertises the business's available transports, capabilities, payment handlers, and public verification keys. This example publishes signing keys in **both** `signing_keys[]` (the canonical UCP profile field) and top-level `keys[]` (the RFC 7517 JWK Set mirror) so the same document is also a valid JWK Set — reusable as a Web Bot Auth key source. The two arrays carry the same JWK content (semantically equivalent); UCP-only verifiers read `signing_keys[]`; WBA-shape verifiers read `keys[]`.
+The business profile advertises the business's available transports, capabilities, payment handlers, and public verification keys. This example publishes signing keys in the canonical top-level `keys[]` array (an RFC 7517 JWK Set), so the same document is also a valid JWK Set — reusable as a Web Bot Auth key source. Every UCP verifier reads `keys[]`, whether it resolved the key via `UCP-Agent` or via `Signature-Agent`.
 
 A WBA-shape verifier reads `keys[]` from this profile **only when the `Signature-Agent` header selects it** with `type=jwks_uri` (or `type=cimd`) pointing at the profile URL. The default `type=directory` (when `type` is omitted) instead expects a *signed* directory document at `/.well-known/http-message-signatures-directory`, not a static profile, so it will not read `keys[]` from a static `/.well-known/ucp`. See [Deployment Patterns for WBA Interop](#deployment-patterns-for-wba-interop).
 
@@ -493,7 +470,7 @@ This example uses two keys. Whether a deployment needs one or two depends on the
 - An **Ed25519** key (OKP) for HTTP transport identity, WBA-compatible. The `kid` is the JWK SHA-256 Thumbprint per RFC 7638.
 - An **ECDSA P-256** key (EC) for AP2 mandate signing (`ap2.merchant_authorization`).
 
-A business that does not interact with AP2 or WBA may publish a single ES256 key in `signing_keys[]` only (the universal baseline). See [Key Discovery](#key-discovery) for key lookup and resolution, [Deployment Patterns for WBA Interop](#deployment-patterns-for-wba-interop) for hosting choices, and [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md) for signing mechanics.
+A business that does not interact with AP2 or WBA may publish a single ES256 key in `keys[]` (the universal baseline). See [Key Discovery](#key-discovery) for key lookup and resolution, [Deployment Patterns for WBA Interop](#deployment-patterns-for-wba-interop) for hosting choices, and [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md) for signing mechanics.
 
 Businesses that support older protocol versions **SHOULD** include a `supported_versions` object mapping each older version to a version-specific profile URI. See [Protocol Version](#protocol-version) for details.
 
@@ -583,7 +560,7 @@ Platform profiles are similar and include signing keys for capabilities requirin
       ]
     }
   },
-  "signing_keys": [
+  "keys": [
     {
       "kid": "platform_2025",
       "kty": "EC",
@@ -984,10 +961,10 @@ Regardless of authentication mechanism, verifiers **MUST** ensure the authentica
 
 Both parties publish public keys in their UCP profile. Platforms fetch the business profile at `/.well-known/ucp`; businesses fetch the platform profile from the `UCP-Agent` header (or `Signature-Agent` header when Web Bot Auth interop is in use). The same profile that provides capabilities also provides verification keys — this is UCP's key resolution mechanism for [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421) HTTP Message Signatures.
 
-See [Profile Structure](#profile-structure) for the publishing contract (canonical `signing_keys[]`, optional `keys[]` mirror, cross-array equivalence rule). Verifiers read the key list that matches how they resolved the key:
+See [Profile Structure](#profile-structure) for the publishing contract (the canonical top-level `keys[]` JWK Set). Both resolution paths read the same list:
 
-- **Resolved via `UCP-Agent`** (default UCP key lookup) — read `signing_keys[]`.
-- **Resolved via `Signature-Agent`** (Web Bot Auth, optional) — read top-level `keys[]`.
+- **Resolved via `UCP-Agent`** (default UCP key lookup) — read `keys[]`.
+- **Resolved via `Signature-Agent`** (Web Bot Auth, optional) — read `keys[]`; the `cimd`/`directory` variants reach the JWK Set through their own documents.
 
 For the full verifier algorithm — capability-based key resolution, profile fetching, and covered-component enforcement — see [Identity Resolution Algorithm](#identity-resolution-algorithm) below. For key format (JWK), supported algorithms, key rotation procedures, and the Web Bot Auth interop signature shape, see [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md).
 
@@ -1059,11 +1036,11 @@ UCP and Web Bot Auth define two key-resolution mechanisms. Which one a verifier 
 A request MAY carry multiple signatures per [RFC 9421 §4.3](https://www.rfc-editor.org/rfc/rfc9421#section-4.3). Verifiers attempt each signature independently; the request is authenticated when at least one signature verifies. The algorithm below processes a single signature.
 
 1. **Resolve the signing key.** A verifier uses a resolution mechanism it supports whose header is present:
-   - **`UCP-Agent` — default UCP key lookup, supported by every UCP verifier.** Resolve the `UCP-Agent` profile URL and read `signing_keys[]`. This path applies to UCP signatures that are untagged (default UCP) or carry `tag="web-bot-auth"` (the dual-audience shape); the verifier resolves them via `UCP-Agent`, treats `signature-agent` as an ordinary covered component, and need not implement Web Bot Auth key discovery. (Verifying a dual-audience signature does still require supporting the key's algorithm — whichever the signer used, per [Signature Algorithms](http://ucp.dev/draft/specification/signatures/#signature-algorithms) — and RFC 9421 §2.1.2 Dictionary-member component selection to cover `signature-agent;key="<label>"`.) Signatures with tags other than `web-bot-auth` are skipped unless UCP defines or explicitly accepts that tag.
+   - **`UCP-Agent` — default UCP key lookup, supported by every UCP verifier.** Resolve the `UCP-Agent` profile URL and read `keys[]`. This path applies to UCP signatures that are untagged (default UCP) or carry `tag="web-bot-auth"` (the dual-audience shape); the verifier resolves them via `UCP-Agent`, treats `signature-agent` as an ordinary covered component, and need not implement Web Bot Auth key discovery. (Verifying a dual-audience signature does still require supporting the key's algorithm — whichever the signer used, per [Signature Algorithms](http://ucp.dev/draft/specification/signatures/#signature-algorithms) — and RFC 9421 §2.1.2 Dictionary-member component selection to cover `signature-agent;key="<label>"`.) Signatures with tags other than `web-bot-auth` are skipped unless UCP defines or explicitly accepts that tag.
    - **`Signature-Agent` — Web Bot Auth key lookup, OPTIONAL (WBA-aware verifiers).** For a signature carrying `tag="web-bot-auth"`, a WBA-aware verifier **MAY** instead resolve via the `Signature-Agent` member, parsed per the [Signature-Agent parsing rules](http://ucp.dev/draft/specification/signatures/#rest-request-verification). Such a signature **MUST** satisfy the WBA agent-signature requirements in [draft-meunier-webbotauth-httpsig-protocol-00](https://datatracker.ietf.org/doc/draft-meunier-webbotauth-httpsig-protocol/00/) §4.2 (see [WBA Interop](http://ucp.dev/draft/specification/signatures/#wba-interop) for the signer-side shape). The member value **MUST** be an HTTPS URL. Its `type` selects resolution: `jwks_uri` and `cimd` reach the keys through the signer's profile and are resolved by the steps below; the `directory` mechanism is defined by the directory draft (see [Deployment Patterns](#deployment-patterns-for-wba-interop)). `data:` URI inline form is out of scope for UCP-WBA interop. **Skip** this signature if no mechanism the verifier supports can resolve its key — the required header is absent, no `Signature-Agent` member matches the signature label, the URL is non-HTTPS, or the `tag` is scoped to a purpose this verifier does not handle.
 1. **Fetch the document** per [§Fetching](#fetching). If the fetch fails (DNS error, network failure, non-2xx response, parse failure), **skip** this signature.
-1. **Locate the key list.** `signing_keys[]` when resolved via `UCP-Agent`; the top-level `keys[]` (RFC 7517 JWK Set) when resolved via `Signature-Agent` `type=jwks_uri`; for `type=cimd`, dereference the document's `jwks_uri` to obtain the JWK Set. Integrity derives from TLS to the resolved origin.
-1. **Match the signature's `keyid`** to a `kid` in the resolved key list. **Skip** this signature if no match. For WBA-shape signatures (`tag="web-bot-auth"`), the verifier **MUST** also confirm `keyid` equals the [RFC 7638](https://www.rfc-editor.org/rfc/rfc7638) SHA-256 thumbprint of the matched JWK — the WBA architecture draft §4.2 requires this, binding the advertised key identity to its bytes. If it fails, skip this signature.
+1. **Locate the key list.** The profile's top-level `keys[]` (RFC 7517 JWK Set) when resolved via `UCP-Agent` or via `Signature-Agent` `type=jwks_uri`; for `type=cimd`, dereference the document's `jwks_uri` to obtain the JWK Set. Integrity derives from TLS to the resolved origin.
+1. **Match the signature's `keyid`** to a `kid` in the resolved key list. When resolving, **skip keys not usable for signature verification**: any key marked `use:"enc"`, or whose `key_ops` is present but does not include `"verify"` ([RFC 7517](https://www.rfc-editor.org/rfc/rfc7517) §4.2, §4.3). Keys that set `use:"sig"` or omit both members remain eligible. **Skip** this signature if no eligible key matches. For WBA-shape signatures (`tag="web-bot-auth"`), the verifier **MUST** also confirm `keyid` equals the [RFC 7638](https://www.rfc-editor.org/rfc/rfc7638) SHA-256 thumbprint of the matched JWK — the WBA architecture draft §4.2 requires this, binding the advertised key identity to its bytes. If it fails, skip this signature.
 1. **Enforce covered-component requirements, in every regime.** Independent of `tag` and transport, the signature **MUST** cover the request target (`@method`, `@authority`, `@path`; `@query` when a query string is present), the body when present (`content-digest`, `content-type`), and each of these request headers when present: `ucp-agent`, `signature-agent`, `idempotency-key` (a closed set — a header added to UCP later is gate-required only if its defining section says so). If any such component is absent from the signature's covered set, **skip** this signature — a target, body, or header the signature does not cover is treated as unsigned. This prevents a signature satisfying only Web Bot Auth's minimal covered set (`@authority`, `signature-agent`) from authenticating a UCP request whose body, method, or path is unbound. (Whether a request must carry `Idempotency-Key` at all is a binding-level rule, separate from this coverage check.)
 1. **Verify the signature** using the matched key. The signing algorithm is derived from the JWK's `kty`/`crv`. If the verifier does not support the matched key's `kty`, `crv`, or `alg`, **skip** this signature; it yields `algorithm_unsupported` if no other signature authenticates the request.
 

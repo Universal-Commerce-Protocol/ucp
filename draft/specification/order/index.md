@@ -478,7 +478,7 @@ Signature: sig1=:MEUCIQDTxNq8h7LGHpvVZQp1iHkFp9+3N8Mxk2zH1wK4YuVN8w...:
 
 1. Compute SHA-256 digest of the raw request body and set `Content-Digest` header
 1. Build signature base per [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421)
-1. Sign using a key from `signing_keys` in the business's UCP profile
+1. Sign using a key from `keys` in the business's UCP profile
 1. Set `Signature-Input` and `Signature` headers
 
 See [Message Signatures - REST Request Signing](http://ucp.dev/draft/specification/signatures/#rest-request-signing) for complete algorithm.
@@ -489,7 +489,7 @@ See [Message Signatures - REST Request Signing](http://ucp.dev/draft/specificati
 
 1. Parse `Signature-Input` to extract `keyid` and signed components
 1. Fetch business's UCP profile from `/.well-known/ucp` (cache as appropriate)
-1. Locate key in `signing_keys` with matching `kid`
+1. Locate key in `keys` with matching `kid`
 1. Verify `Content-Digest` matches SHA-256 of raw body
 1. Reconstruct signature base and verify signature
 

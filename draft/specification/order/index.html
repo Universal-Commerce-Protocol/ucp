@@ -3908,7 +3908,7 @@ to ensure authenticity and integrity. Signatures follow the
 <ol>
 <li>Compute SHA-256 digest of the raw request body and set <code>Content-Digest</code> header</li>
 <li>Build signature base per <a href="https://www.rfc-editor.org/rfc/rfc9421">RFC 9421</a></li>
-<li>Sign using a key from <code>signing_keys</code> in the business's UCP profile</li>
+<li>Sign using a key from <code>keys</code> in the business's UCP profile</li>
 <li>Set <code>Signature-Input</code> and <code>Signature</code> headers</li>
 </ol>
 <p>See <a href="../signatures/#rest-request-signing">Message Signatures - REST Request Signing</a>
@@ -3918,7 +3918,7 @@ for complete algorithm.</p>
 <ol>
 <li>Parse <code>Signature-Input</code> to extract <code>keyid</code> and signed components</li>
 <li>Fetch business's UCP profile from <code>/.well-known/ucp</code> (cache as appropriate)</li>
-<li>Locate key in <code>signing_keys</code> with matching <code>kid</code></li>
+<li>Locate key in <code>keys</code> with matching <code>kid</code></li>
 <li>Verify <code>Content-Digest</code> matches SHA-256 of raw body</li>
 <li>Reconstruct signature base and verify signature</li>
 </ol>

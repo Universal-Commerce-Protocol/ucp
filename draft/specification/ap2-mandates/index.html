@@ -2854,7 +2854,7 @@ and the platform.</p>
 <h3 id="platform-profile-advertisement">Platform Profile Advertisement<a class="headerlink" href="#platform-profile-advertisement" title="Permanent link">&para;</a></h3>
 <p>Platforms declare support in their profile. If the platform is operating under
 the trusted platform provider model, the platform <strong>MUST</strong> provide at least one
-key in the top-level <code>signing_keys</code> array in their profile.</p>
+key in the top-level <code>keys</code> array in their profile.</p>
 <h3 id="activation-and-session-locking">Activation and Session Locking<a class="headerlink" href="#activation-and-session-locking" title="Permanent link">&para;</a></h3>
 <ol>
 <li>The platform advertises its profile URI (transport-specific mechanism).</li>
@@ -2873,7 +2873,7 @@ key in the top-level <code>signing_keys</code> array in their profile.</p>
 <p>To utilize this extension, a public signing key <strong>MUST</strong> be available for the
 business to verify the mandate's signature.</p>
 <ul>
-<li><strong>Platform Provider Flow:</strong> Key provided in the platform profile's <code>signing_keys</code>.</li>
+<li><strong>Platform Provider Flow:</strong> Key provided in the platform profile's <code>keys</code>.</li>
 <li><strong>User Credential Flow:</strong> Key bound to the digital payment credential.</li>
 </ul>
 <p>If a public key cannot be resolved, or if the signature is invalid, the business
@@ -2886,7 +2886,7 @@ business to verify the mandate's signature.</p>
   ECDSA (<code>ES256</code>/<code>ES384</code>/<code>ES512</code>); see the note below.</li>
 <li><strong>Canonicalization:</strong> JCS (<a href="https://datatracker.ietf.org/doc/html/rfc8785">RFC 8785</a>)</li>
 <li><strong>Key Format:</strong> JWK (<a href="https://datatracker.ietf.org/doc/html/rfc7517">RFC 7517</a>)</li>
-<li><strong>Key Discovery:</strong> <code>signing_keys[]</code> in <code>/.well-known/ucp</code> (see
+<li><strong>Key Discovery:</strong> <code>keys[]</code> in <code>/.well-known/ucp</code> (see
   <a href="../overview/#key-discovery">Key Discovery</a>)</li>
 </ul>
 <p>See <a href="../signatures/">Message Signatures</a> for key format and rotation.</p>
@@ -2948,7 +2948,7 @@ transmitted separately (as the checkout body itself).</p>
 <td style="text-align: left;"><code>kid</code></td>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;">Yes</td>
-<td style="text-align: left;">Key ID referencing the business's <code>signing_keys</code></td>
+<td style="text-align: left;">Key ID referencing the business's <code>keys</code></td>
 </tr>
 </tbody>
 </table>
@@ -3195,7 +3195,7 @@ with <code>ap2.merchant_authorization</code> embedded in the response body.</p>
 </span><span id="__span-4-15"><a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a>    signing_input = encoded_header + &quot;.&quot; + base64url_encode(canonical_bytes)
 </span><span id="__span-4-16"><a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a>
 </span><span id="__span-4-17"><a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a>    // Get business&#39;s public key and verify
-</span><span id="__span-4-18"><a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a>    public_key = get_key_by_kid(merchant_profile.signing_keys, header.kid)
+</span><span id="__span-4-18"><a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a>    public_key = get_key_by_kid(merchant_profile.keys, header.kid)
 </span><span id="__span-4-19"><a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a>    return verify(encoded_signature, signing_input, public_key, header.alg)
 </span></code></pre></div>
 <h3 id="step-2-user-consent-mandate-generation">Step 2: User Consent &amp; Mandate Generation<a class="headerlink" href="#step-2-user-consent-mandate-generation" title="Permanent link">&para;</a></h3>
@@ -3301,7 +3301,7 @@ request:</p>
 </span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>payload = embedded_checkout without &quot;ap2&quot; field
 </span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>signing_input = encoded_header + &quot;.&quot; + base64url_encode(jcs_canonicalize(payload))
 </span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>
-</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>my_key = get_key_by_kid(my_signing_keys, header.kid)
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>my_key = get_key_by_kid(my_keys, header.kid)
 </span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>verify(encoded_signature, signing_input, my_key, header.alg)
 </span></code></pre></div>
 </li>
@@ -3382,7 +3382,7 @@ checkout.</p>
 </tr>
 <tr>
 <td style="text-align: left;"><code>agent_missing_key</code></td>
-<td style="text-align: left;">Platform profile lacks a valid <code>signing_keys</code> entry.</td>
+<td style="text-align: left;">Platform profile lacks a valid <code>keys</code> entry.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>mandate_invalid_signature</code></td>
