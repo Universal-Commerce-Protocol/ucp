@@ -80,6 +80,19 @@
       },
       "description": "Fulfillment data: buyer expectations and what actually happened."
     },
+    "payment": {
+      "type": "object",
+      "description": "How the order was paid. Reflects current state and may change post-purchase (e.g. order edits). Present when the business surfaces payment details on the order.",
+      "properties": {
+        "instruments": {
+          "type": "array",
+          "items": {
+            "$ref": "types/order_payment_instrument.json"
+          },
+          "description": "The payment instruments used on the order."
+        }
+      }
+    },
     "adjustments": {
       "type": "array",
       "items": {
