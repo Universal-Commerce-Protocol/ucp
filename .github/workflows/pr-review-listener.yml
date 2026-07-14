@@ -1,0 +1,12 @@
+name: PR Review Listener
+on:
+  pull_request_review:
+    types: [submitted, dismissed]
+
+jobs:
+  signal:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Signal success
+        run: |
+          echo "PR ${{ github.event.pull_request.number }} review state changed."
