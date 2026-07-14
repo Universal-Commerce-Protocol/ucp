@@ -39,11 +39,13 @@ under the `actions` map. The common fields identify the work but do not
 define how to process it; the active extension does.
 
 Actions and Messages have different roles. An Action represents outstanding
-work: it carries an identity and extension-owned processing
-configuration. A Message communicates
-explanatory or diagnostic context about resource state. Messages do not
-define how an Action is processed or
-determine its outcome, and neither an Action nor a Message implies the other.
+work: it carries an identity and extension-owned processing configuration. A
+Message communicates explanatory or diagnostic context about resource state and
+can identify an exact Action occurrence through its RFC 9535 `path`. When a
+Message includes `path`, the Business **MUST** make it an RFC 9535 JSONPath
+expression relative to the root of the Cart or Checkout UCP response object.
+Messages do not define how an Action is processed or determine its outcome, and
+neither an Action nor a Message requires the other.
 
 For example, a Business can surface one outstanding Action beside an
 explanatory Message (an illustrative, partial fragment):
@@ -66,15 +68,16 @@ explanatory Message (an illustrative, partial fragment):
     {
       "type": "info",
       "code": "eligibility_accepted",
-      "content": "Student discount applied provisionally. Verify your status."
+      "content": "Student discount applied provisionally. Verify your status.",
+      "path": "$.actions['com.example.identity.student_verification'][0]"
     }
   ]
 }
 ```
 
-The Action identifies the outstanding work and carries the extension-owned
-processing configuration under `config`; the Message provides explanatory
-context about resource state. The
+The Action identifies the outstanding work and carries extension-owned
+processing configuration under `config`. The Message's `path` selects the exact
+Action occurrence it explains. The
 [checkout eligibility example](checkout.md#eligibility-verification-at-completion)
 composes this pattern into a complete Student Verification flow.
 
@@ -83,6 +86,23 @@ Whenever the Business processes a request and produces a successful response,
 a delta. A duplicate request handled through idempotency may reproduce its
 original cached snapshot (see
 [Message Signatures — Replay Protection](signatures.md#replay-protection)).
+
+An Action's `required` value and an operation-specific outcome are orthogonal.
+The same Action can remain required for its Action-defined effect and be the
+reason a particular attempted effect was not applied. To report that
+relationship in a response to a state-changing operation, the Business **MUST**
+return the current resource with a `recoverable` error Message whose `path`
+selects the exact Action occurrence. The Business **MAY** include an info or
+warning Message whose `path` selects an Action occurrence when explaining
+outstanding work without reporting an operation failure. No Action-specific
+Message type or separate `blocking` Action severity is defined.
+
+The returned Cart or Checkout and its parent lifecycle are authoritative for the
+state after the operation. Processing the Action does not automatically apply
+the earlier requested effect. If the Platform later re-drives that effect, it
+submits a new operation under the existing
+[Replay Protection](signatures.md#replay-protection) rules; Actions add no
+idempotency mechanism.
 
 Each Action key is a reverse-domain **Action type**: the name identifies the
 type of outstanding work, which is not necessarily the name of the extension

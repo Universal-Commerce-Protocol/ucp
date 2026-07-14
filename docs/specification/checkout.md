@@ -146,6 +146,28 @@ within the containing status:
     [Complete Checkout](#complete-checkout) for asynchronous processing and
     idempotency.
 
+`required` does not select the Checkout status or report the outcome of a
+particular operation. The same Action can remain `required: true` while a
+recoverable error Message reports that it prevented one attempted effect. In
+that case, the Business returns the current Checkout and sets the Message's
+`path` to the exact Action occurrence, as defined in
+[Overview — Actions](overview.md#actions). The Action remains required while its
+defined gate persists; the response-scoped error does not turn it into a lock on
+unrelated Checkout operations.
+
+If a required Action prevents Complete Checkout from being accepted, the
+Business **MUST** return the current Checkout with `status: incomplete` and a
+recoverable error Message whose `path` selects that exact Action occurrence.
+`complete_in_progress` means that Complete Checkout was accepted for asynchronous
+processing, whether the Business is processing internally or waiting for a
+required Action surfaced by that accepted operation.
+
+After processing an Action, the Platform **SHOULD** obtain the latest Checkout
+through [Get Checkout](#get-checkout) or a subsequent
+[Update Checkout](#update-checkout) response. If it then re-drives a previously
+rejected effect, that is a new operation under the existing idempotency rules;
+Action processing does not replay the earlier request.
+
 ### Error Handling
 
 The `messages` array contains errors, warnings, and informational messages
@@ -153,15 +175,16 @@ about the checkout state. `ucp.status` is the shape discriminator —
 `"success"` means the response carries the expected payload, `"error"`
 means it carries error information instead. Each error message carries a `type`,
 `code`, `severity`, `content`, and an optional `path` that identifies the
-specific field or line item the message refers to (see [The `path` Field](#the-path-field) below).
-The `severity` field prescribes the recommended platform action:
+specific response component the message refers to, including a field, line
+item, or Action occurrence (see [The `path` Field](#the-path-field) below). The
+`severity` field prescribes the recommended platform action:
 
-| Severity                | Meaning                                          | Platform Action                                                   |
-| :---------------------- | :----------------------------------------------- | :---------------------------------------------------------------- |
-| `recoverable`           | Platform can resolve by modifying inputs via API | Update resource and retry                                         |
-| `requires_buyer_input`  | Business requires input not available via API    | Hand off via `continue_url`                                       |
-| `requires_buyer_review` | Buyer review and authorization is required       | Hand off via `continue_url`                                       |
-| `unrecoverable`         | No resource exists to act on                     | Retry with new resource or inputs, or hand off via `continue_url` |
+| Severity                | Meaning                                       | Platform Action                                                               |
+| :---------------------- | :-------------------------------------------- | :---------------------------------------------------------------------------- |
+| `recoverable`           | Platform can resolve the condition in band    | Modify inputs or process a related Action; submit a new operation when needed |
+| `requires_buyer_input`  | Business requires input not available via API | Hand off via `continue_url`                                                   |
+| `requires_buyer_review` | Buyer review and authorization is required    | Hand off via `continue_url`                                                   |
+| `unrecoverable`         | No resource exists to act on                  | Retry with new resource or inputs, or hand off via `continue_url`             |
 
 Errors with `requires_*` severity contribute to `status: requires_escalation`.
 Both result in buyer handoff, but represent different checkout states.
@@ -208,6 +231,10 @@ requirement (delivery scheduling), and a review requirement (high-value order).
 The latter two require handoff and serve as explicit signals to the platform.
 Businesses **SHOULD** surface such messages as early as possible, and platforms
 **SHOULD** prioritize resolving recoverable errors before initiating handoff.
+When a recoverable error's `path` selects an Action occurrence, the Platform
+processes it according to [Actions](#actions) and re-evaluates the latest
+Checkout before submitting another operation. The example algorithm below
+covers recoverable input errors whose paths do not select Actions.
 
 <!-- ucp:example schema=shopping/checkout target=$.messages op=read -->
 ```json
@@ -290,16 +317,15 @@ Example: `out_of_stock` requires specific upfront UX, whereas
 
 #### The `path` Field
 
-The optional `path` field on a message anchors the error to a specific
-component of the response payload. Platforms use it to associate error
-messages with the input field or line item that caused them - for example,
-highlighting a specific buyer field in a form or flagging a specific
-cart line.
+The optional `path` field on a message anchors it to a specific component of the
+response payload. Platforms use it to associate messages with an input field,
+line item, or Action occurrence — for example, highlighting a specific buyer
+field, flagging a cart line, or identifying the Action related to an operation
+outcome.
 
 `path` **MUST** be an [RFC 9535](https://www.rfc-editor.org/rfc/rfc9535)
-JSONPath expression relative to the root of the UCP response object.
-Property names **MUST** use snake_case matching the request schema.
-When `path` is omitted, the message applies to the response as a whole.
+JSONPath expression relative to the root of the UCP response object. When `path`
+is omitted, the message applies to the response as a whole.
 
 **Simple field reference:**
 
@@ -315,17 +341,14 @@ When `path` is omitted, the message applies to the response as a whole.
 { "path": "$.line_items[0].quantity" }
 ```
 
-**Filter expression (optional, when referencing a specific item by ID):**
+**Action occurrence:**
 
 <!-- ucp:example skip reason="path schema example" -->
 ```json
-{ "path": "$.line_items[?(@.id=='line-item-uuid')].quantity" }
+{
+  "path": "$.actions['com.example.identity.student_verification'][0]"
+}
 ```
-
-Filter expressions are valid RFC 9535 syntax and **MAY** be used when
-referencing a specific line item by `id` is clearer than its index.
-Index-based paths are equally valid; the business returns indices that
-are unambiguous within the response.
 
 **Specificity rule:** A path to a specific field (e.g.,
 `$.line_items[0].quantity`) takes precedence over a path to its parent
@@ -373,10 +396,13 @@ access to restricted products.
 **When verification fails:**
 
 The Business **MUST** return an error in `messages` with
-`code: "eligibility_invalid"` and `severity: "recoverable"`. Messages
-**SHOULD** use the `path` field to identify which specific claim(s) could
-not be verified. Any Action or discount state contributed by a negotiated
-extension **MAY** remain current according to that extension. The Platform
+`code: "eligibility_invalid"` and `severity: "recoverable"`. When a required
+Action prevents the requested effect, the Business **MUST** set that error
+Message's `path` to select the exact Action occurrence as specified in
+[Actions](#actions). Otherwise, the Business **SHOULD** use `path` to identify
+which specific claim(s) could not be verified. Any Action or discount state
+contributed by a negotiated extension **MAY** remain current according to that
+extension. The Platform
 **MAY** then retry that extension's verification flow, use
 [Update Checkout](#update-checkout) for ordinary checkout changes (e.g.,
 remove ineligible items) or to rescind the claim, or abandon the attempt.
@@ -438,7 +464,7 @@ required verification Action. The claim is unresolved, so the checkout stays
       "type": "info",
       "code": "eligibility_accepted",
       "content": "Student discount applied provisionally. Verify your student status to keep it.",
-      "path": "$.context.eligibility[0]"
+      "path": "$.actions['com.example.identity.student_verification'][0]"
     }
   ]
 }
