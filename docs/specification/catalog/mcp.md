@@ -64,7 +64,7 @@ Businesses advertise MCP transport availability through their UCP profile at
 MCP clients **MUST** include a `meta` object in every request containing
 protocol metadata:
 
-<!-- ucp:example schema=shopping/catalog_search def=search_request op=create direction=request extract=$.params.arguments.catalog -->
+<!-- ucp:example schema=shopping/catalog_search op=search direction=request extract=$.params.arguments.catalog -->
 ```json
 {
   "jsonrpc": "2.0",
@@ -121,7 +121,7 @@ Maps to the [Catalog Search](search.md) capability.
 
 === "Request"
 
-    <!-- ucp:example schema=shopping/catalog_search def=search_request op=create direction=request extract=$.params.arguments.catalog -->
+    <!-- ucp:example schema=shopping/catalog_search op=search direction=request extract=$.params.arguments.catalog -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -159,7 +159,7 @@ Maps to the [Catalog Search](search.md) capability.
 
 === "Response"
 
-    <!-- ucp:example schema=shopping/catalog_search def=search_response op=read direction=response extract=$.result.structuredContent -->
+    <!-- ucp:example schema=shopping/catalog_search op=search direction=response extract=$.result.structuredContent -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -281,7 +281,7 @@ The `catalog.ids` parameter accepts an array of identifiers and optional context
 
 === "Request"
 
-    <!-- ucp:example schema=shopping/catalog_lookup def=lookup_request op=create direction=request extract=$.params.arguments.catalog -->
+    <!-- ucp:example schema=shopping/catalog_lookup op=lookup direction=request extract=$.params.arguments.catalog -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -308,7 +308,7 @@ The `catalog.ids` parameter accepts an array of identifiers and optional context
 
 === "Response"
 
-    <!-- ucp:example schema=shopping/catalog_lookup def=lookup_response op=read direction=response extract=$.result.structuredContent -->
+    <!-- ucp:example schema=shopping/catalog_lookup op=lookup direction=response extract=$.result.structuredContent -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -404,7 +404,7 @@ The `catalog.ids` parameter accepts an array of identifiers and optional context
 When some identifiers are not found, the response includes the found products. The
 response MAY include informational messages indicating which identifiers were not found.
 
-<!-- ucp:example schema=shopping/catalog_lookup def=lookup_response op=read extract=$.result.structuredContent -->
+<!-- ucp:example schema=shopping/catalog_lookup op=lookup extract=$.result.structuredContent -->
 ```json
 {
   "jsonrpc": "2.0",
@@ -471,7 +471,7 @@ Maps to the [Catalog Lookup](lookup.md#get-product-get_product) capability. Retu
 
 === "Request"
 
-    <!-- ucp:example schema=shopping/catalog_lookup def=get_product_request op=create direction=request extract=$.params.arguments.catalog -->
+    <!-- ucp:example schema=shopping/catalog_lookup op=get_product direction=request extract=$.params.arguments.catalog -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -502,7 +502,7 @@ Maps to the [Catalog Lookup](lookup.md#get-product-get_product) capability. Retu
 
 === "Response"
 
-    <!-- ucp:example schema=shopping/catalog_lookup def=get_product_response op=read direction=response extract=$.result.structuredContent -->
+    <!-- ucp:example schema=shopping/catalog_lookup op=get_product direction=response extract=$.result.structuredContent -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -654,7 +654,7 @@ When all requested identifiers fail to resolve, the response contains an empty `
 array. The response MAY include informational messages indicating which identifiers were
 not found.
 
-<!-- ucp:example schema=shopping/catalog_lookup def=lookup_response op=read direction=response extract=$.result.structuredContent -->
+<!-- ucp:example schema=shopping/catalog_lookup op=lookup direction=response extract=$.result.structuredContent -->
 ```json
 {
   "jsonrpc": "2.0",

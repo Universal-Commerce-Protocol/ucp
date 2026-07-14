@@ -1,0 +1,35 @@
+---
+name: PR Governance
+
+on:
+  pull_request_target:
+    types: [
+      opened, 
+      synchronize, 
+      reopened, 
+      ready_for_review, 
+      review_requested, 
+      review_request_removed, 
+      assigned, 
+      unassigned
+    ]
+  workflow_run:
+    workflows: ["PR Review Listener"]
+    types: [completed]
+
+jobs:
+  governance:
+    name: Reviews
+    permissions:
+      statuses: write
+      contents: read
+      pull-requests: read
+    # Use the reusable workflow defined in the central governance repository
+    # zizmor: ignore[ref-confusion]
+    uses: Universal-Commerce-Protocol/.github/.github/workflows/reusable-governance.yml@main
+    with:
+      pr-number: ${{ github.event.pull_request.number }}
+      commit-sha: ${{ github.event.pull_request.head.sha || github.event.workflow_run.head_sha }}
+    secrets:
+      # Required: An org-level Read token to read team memberships
+      ORG_READ_TOKEN: ${{ secrets.ORG_READ_TOKEN }}
