@@ -508,11 +508,8 @@ const UcpData = {
         spec: "https://ucp.dev/{{ ucp_version }}/specification/fulfillment",
         schema: "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json",
         config: {
-          allows_multi_destination: {
-            shipping: false,
-            pickup: false
-          },
-          allows_method_combinations: [
+          multi_destination: [],
+          method_combinations: [
             ["shipping"],
             ["pickup"]
           ]
@@ -529,7 +526,7 @@ const UcpData = {
     ],
     "dev.ucp.shopping.buyer_consent": [
       {
-        extends: "dev.ucp.shopping.checkout",
+        extends: ["dev.ucp.shopping.cart", "dev.ucp.shopping.checkout"],
         version: "{{ ucp_version }}",
         spec: "https://ucp.dev/{{ ucp_version }}/specification/buyer-consent",
         schema: "https://ucp.dev/{{ ucp_version }}/schemas/shopping/buyer_consent.json"
@@ -990,7 +987,7 @@ class UcpApp {
   }
 
   prepareUpdatePayload(checkoutResponse) {
-    const patch = { id: checkoutResponse.id }; // deprecated: id is provided in URL path
+    const patch = {}; // id is provided in URL path
     const errors = checkoutResponse.messages || [];
 
     if (errors.some(e => e.path === "$.buyer.email")) {

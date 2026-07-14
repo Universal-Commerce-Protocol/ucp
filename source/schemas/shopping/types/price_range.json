@@ -10,11 +10,11 @@
   ],
   "properties": {
     "min": {
-      "$ref": "price.json",
+      "$ref": "../../common/types/price.json",
       "description": "Minimum price in the range."
     },
     "max": {
-      "$ref": "price.json",
+      "$ref": "../../common/types/price.json",
       "description": "Maximum price in the range."
     }
   }

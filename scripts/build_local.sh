@@ -12,11 +12,15 @@ PROJECT_ROOT=$(pwd)
 WORKTREE_DIR="build_temp"
 OUTPUT_DIR="local_preview"
 GH_PAGES_BRANCH="gh-pages"
+export SPEC_URL="/latest/specification/overview/"
 
 # Ensure tools are available
 # Prepend the project's venv bin to PATH so mike finds mkdocs properly
 # Also add ucp-schema binary from sibling directory
 export PATH="$PROJECT_ROOT/.venv/bin:$PROJECT_ROOT/../ucp-schema/target/release:$PATH:$HOME/.cargo/bin"
+
+echo "Syncing dependencies with uv..."
+uv sync
 
 # Check UCP-Schema CLI version vs current Crates.io version and prompt
 PURPLE='\033[1;35m'
@@ -24,9 +28,13 @@ NC='\033[0m' # No Color
 echo "Using ucp-schema CLI: $(which ucp-schema)"
 UCP_CLI_VERSION=$(ucp-schema --version | sed 's/ucp-schema //')
 echo "Local ucp-schema version:  '$UCP_CLI_VERSION'"
-UCP_CRATES_VERSION=$(cargo search ucp-schema -q | sed 's/ucp-schema = "//' | sed 's/".*$//')
+UCP_CRATES_VERSION=$(cargo info ucp-schema | sed -n 's/^version: //p')
 echo "Crates ucp-schema version: '$UCP_CRATES_VERSION'"
 if [[ $UCP_CLI_VERSION != "$UCP_CRATES_VERSION" ]]; then
+	if [[ "$CI" = "true" ]]; then
+		echo -e "${PURPLE}*ucp-schema version mismatch in CI*${NC}"
+		exit 1
+	fi
 	while true; do
 		echo -e "${PURPLE}*ucp-schema version mismatch*${NC}"
 		read -r -p " Continue? (y/n) " yn
@@ -37,7 +45,7 @@ if [[ $UCP_CLI_VERSION != "$UCP_CRATES_VERSION" ]]; then
 			;;
 		[Nn]*)
 			echo "exiting..."
-			exit
+			exit 1
 			;;
 		*) echo "invalid response" ;;
 		esac
@@ -52,17 +60,17 @@ fi
 
 echo "Using Mike: $(which mike)"
 
-MAIN_ONLY=false
-if [[ "$1" == "--main-only" ]]; then
-	MAIN_ONLY=true
-	echo "Running in MAIN_ONLY mode. Skipping release branches."
+DRAFT_ONLY=false
+if [[ "$1" == "--draft-only" ]]; then
+	DRAFT_ONLY=true
+	echo "Running in DRAFT_ONLY mode. Skipping release branches."
 fi
 
 echo "=== Setup ==="
 rm -rf "$OUTPUT_DIR"
 
 echo "=== Syncing Release Branches ==="
-if [ "$MAIN_ONLY" = false ]; then
+if [ "$DRAFT_ONLY" = false ]; then
 	git fetch origin
 	# Sync local gh-pages with remote to avoid divergence errors
 	git branch -f gh-pages origin/gh-pages 2>/dev/null || true
@@ -76,7 +84,7 @@ fi
 # List of folders we want to extract later
 EXTRACT_LIST="draft latest versions.json"
 
-if [ "$MAIN_ONLY" = false ]; then
+if [ "$DRAFT_ONLY" = false ]; then
 	for branch in $RELEASE_BRANCHES; do
 		version=$(echo "$branch" | sed 's/release\///')
 
@@ -111,6 +119,10 @@ echo ">>> Building Current Version (Draft & Latest)"
 export DOCS_MODE=spec
 export UCP_BUILD_VERSION="draft"
 mike deploy draft
+if [ "$DRAFT_ONLY" = true ]; then
+	echo ">>> Aliasing draft to latest for local preview..."
+	mike alias -u draft latest
+fi
 
 echo ">>> Building Root Site"
 # Build root site FIRST so we establish the base (index.html, etc.)
@@ -124,5 +136,8 @@ echo "Extracting: $EXTRACT_LIST"
 git archive "$GH_PAGES_BRANCH" $EXTRACT_LIST | tar -x -C "$OUTPUT_DIR"
 
 echo "=== Build Complete! ==="
-echo "Run this command to serve:"
-echo "python3 -m http.server 8000 -d $OUTPUT_DIR"
+echo "To serve the fully built site (with versioning):"
+echo "  python3 -m http.server 8000 -d $OUTPUT_DIR"
+echo ""
+echo "Alternative (faster for live editing current version):"
+echo "  uv run mkdocs serve"

@@ -51,6 +51,15 @@ plan to do this through a phased rollout across markets, including India,
 Indonesia, Latin America, and others. We are adapting the protocol to support
 broader regional use cases and localized payment interoperability.
 
+### Expanding across industries
+
+We are scaling UCP across a broader range of industries, focusing on industries with foundational actions that can be standardized into functional primitives. This architecture allows us to shape how businesses engage on AI platforms across entire user journeys, backing their presence with real-time data and secure checkout experiences.
+
+New specifications are being developed with industry leaders across key industries including:
+
+* **Food:** New UCP capabilities and schema to enable restaurant and menu discovery across the wide array of modification options, dish selection to checkout with tipping and delivery notes.
+* **Lodging:** New UCP capabilities and schema for hotels discovery, room selection with various rate options, booking with guest details, provision, and payment scheduling.
+
 ## Build with us
 
 The future of commerce cannot be built in a vacuum. We invite businesses,

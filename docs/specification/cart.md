@@ -56,6 +56,7 @@ When the cart capability is negotiated, platforms can convert a cart to checkout
 by providing `cart_id` in the Create Checkout request. The cart contents
 (`line_items`, `context`, `buyer`) initialize the checkout session.
 
+<!-- ucp:example schema=shopping/cart def=checkout op=create direction=request -->
 ```json
 {
   "cart_id": "cart_abc123",
@@ -87,6 +88,18 @@ SHOULD be linked for the duration of the checkout.
     completion of the checkout, or other business logic. Subsequent operations
     on a cleared cart ID return `not_found`; the platform can start a new
     session with `create_cart`.
+
+## Scopes
+
+The Cart capability defines the following well-known scopes for
+user-authenticated access:
+
+| Scope | Description |
+| :--- | :--- |
+| `dev.ucp.shopping.cart:manage` | All cart operations on behalf of the authenticated user — create, read, update, persist. |
+
+Scope declaration, derivation, and rules for extending this set with
+custom scopes are defined in [Identity Linking — Scopes](identity-linking.md#scopes).
 
 ## Guidelines
 
@@ -133,9 +146,10 @@ error response instead of creating a cart resource. `ucp.status` is the
 primary discriminator; the absence of `id` is a consistent secondary
 indicator:
 
+<!-- ucp:example schema=common/types/error_response op=read -->
 ```json
 {
-  "ucp": { "version": "2026-01-15", "status": "error" },
+  "ucp": { "version": "{{ ucp_version }}", "status": "error" },
   "messages": [
     {
       "type": "error",
@@ -219,6 +233,15 @@ and abuse prevention. Signal values MUST NOT be buyer-asserted claims. See
 requirements.
 
 {{ schema_fields('types/signals', 'checkout') }}
+
+### Attribution
+
+Platform-provided referral and conversion-event context — campaign IDs,
+click identifiers, and source/medium markers communicated by the platform.
+See [Attribution](overview.md#attribution) for details and consent
+requirements.
+
+{{ schema_fields('types/attribution', 'checkout') }}
 
 ### Total
 
