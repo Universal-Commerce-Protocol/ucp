@@ -359,6 +359,13 @@ Base UCP does not define `line_items[].selling_plan`; Platforms and Businesses
 SHOULD use this only when they know the Business supports the profile or
 extension that defines it.
 
+Field paths address top-level Cart or Checkout fields and positional entries
+within them, and their values MAY reference identifiers the buyer already knows,
+such as a variant or destination ID. They cannot address entries keyed by
+identifiers the Business generates only while constructing purchasable state —
+line-item or fulfillment-group IDs — since those do not exist when the link is
+authored.
+
 ### Non-UCP Query Parameters
 
 UCP does not insert non-UCP query parameters into initialized shopping data.
@@ -439,6 +446,14 @@ its default purchase destination. If purchasable state cannot be constructed, a
 Business SHOULD route the buyer to a valid `continue_to` destination when
 present; otherwise it SHOULD route the buyer to a safe fallback, such as the
 storefront root, cart, or a buyer-facing remediation page.
+
+A Business decides how to construct that state: it MAY merge the permalink
+items into an existing cart, create a new cart, or stage a separate checkout,
+and MAY either offer the buyer a choice or apply an automated policy.
+The permalink expresses buyer intent; the response conveys the resulting state.
+A Business MAY also require additional steps — such as verification, eligibility
+or age gating, or authentication — before it constructs purchasable state, and
+routes the buyer accordingly.
 
 A Business SHOULD apply query parameters it understands. Applied parameters may
 affect server-side state or destination selection, and are not required to
@@ -629,14 +644,44 @@ HTTP/1.1 303 See Other
 Location: https://checkout.merchant.example/session/chk_123
 ```
 
+### Pickup with a pre-selected destination
+
+```text
+https://merchant.example/buy/sku_123:1?fulfillment/methods/0/type=pickup&fulfillment/methods/0/selected_destination_id=loc_1375
+```
+
+Initialized data:
+
+<!-- ucp:example schema=shopping/checkout op=create direction=request -->
+```json
+{
+  "line_items": [{ "item": { "id": "sku_123" }, "quantity": 1 }],
+  "fulfillment": {
+    "methods": [{ "type": "pickup", "selected_destination_id": "loc_1375" }]
+  }
+}
+```
+
+When the fulfillment extension is active for the flow, a permalink can
+pre-select a fulfillment method and a destination the buyer already knows — for
+example, a store chosen from a locator. This uses the same field-path mechanism
+as any extension: `methods/0` addresses cart-level fulfillment positionally,
+because the cart — and any per-line-item or per-group fulfillment keyed on
+server-generated IDs — does not exist until the Business resolves the link.
+
+Possible resolution:
+
+```http
+HTTP/1.1 303 See Other
+Location: https://checkout.merchant.example/session/chk_123
+```
+
 ## Security Considerations
 
 A permalink endpoint is an unauthenticated browser GET. Every component of the
 URL is externally supplied and untrusted, and browsers, prefetchers,
 link-preview bots, and security scanners load permalink URLs without buyer
-intent. A Business
-therefore MUST treat permalink resolution as safe and idempotent: repeated loads
-of the same URL MUST NOT cause additional side effects.
+intent.
 
 A Business MUST validate every input as untrusted: compact-path and `~`-encoded
 item tokens (see [Item ID Token](#item-id-token)), `continue_to`
