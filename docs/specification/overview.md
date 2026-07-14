@@ -84,20 +84,54 @@ a delta. A duplicate request handled through idempotency may reproduce its
 original cached snapshot (see
 [Message Signatures — Replay Protection](signatures.md#replay-protection)).
 
-Each Action key is a reverse-domain name. It names the extension that defines
-the instances under it, including their `config`, how they are processed, and
-their outcomes. That extension contributes the key to the containing Cart or
-Checkout schema through `allOf` composition (see
-[Schema Composition](#schema-composition)); capability negotiation selects which
-extensions are active. Each value is a non-empty array, allowing a Business to
-surface multiple outstanding instances under one extension key.
+Each Action key is a reverse-domain **Action type**: the name identifies the
+type of outstanding work, which is not necessarily the name of the extension
+that declares it. An active extension declares each Action type and defines its
+`config`, how a Platform processes it, its trust and fallback, and its outcomes.
+A single extension can declare more than one Action type. Each declaring
+extension contributes its Action-type keys to the containing Cart or Checkout
+schema through `allOf` composition (see
+[Schema Composition](#schema-composition)), and capability negotiation selects
+which extensions are active. Negotiating an extension activates the whole
+contract it declares, including every Action type within it.
+
+Action type keys follow existing [Namespace Governance](#namespace-governance)
+rules: an extension can declare only types within a reverse-domain namespace
+controlled by its schema authority. An extension can use its own name as the key
+for a single Action type — as the
+[Student Verification example](checkout.md#eligibility-verification-at-completion)
+does — or declare several Action types under distinct keys. Each value is a
+non-empty array of outstanding instances of that one Action type. The key
+identifies the type, so an instance carries no separate type discriminator; a
+Business surfaces multiple outstanding instances of the same type as multiple
+entries in that array.
+
+The `actions` map does not define a processing order across Action types. Within
+a single type's array, JSON preserves the order of its instances, and the
+extension that declares the type defines whether that order carries processing
+meaning. When ordering across Action types matters, the declaring extension
+defines the sequencing; a Business **MAY** represent that sequencing by emitting
+only the currently actionable types in successive responses, since each
+successful response is a complete snapshot of outstanding work.
+
+For example (illustrative only), a negotiated vendor extension
+`com.example.payment.authentication` declares two Action types:
+`com.example.payment.authentication.device_data_collection`, an invisible
+device- and browser-data collection step, and
+`com.example.payment.authentication.three_ds_challenge`, a Buyer-facing
+authentication step. Because the collection step precedes the challenge, the
+Business can emit the `device_data_collection` type first and, once its instance
+is processed, emit the `three_ds_challenge` type in a later response. This shows
+one extension declaring multiple Action types and sequencing them across
+responses; it does not standardize device data collection or the authentication
+challenge, which are illustrative here.
 
 Every instance shares a set of common fields:
 
 - `id` — a non-empty identifier, unique for the lifetime of the containing Cart
   or Checkout.
-- `required` — whether the instance gates the effect its extension
-  specifies.
+- `required` — whether the instance gates the effect specified for its Action
+  type.
 - `config` — an optional extension-owned configuration object.
 
 `id` and `required` are required on every instance; `config` is optional. An
@@ -112,11 +146,11 @@ While the same piece of outstanding work persists across responses, it keeps
 the same key and `id`. A replacement is a new instance with a new `id`; an `id`
 is never reused within the containing Cart or Checkout.
 
-A Business **MUST** emit an Action key only when the extension it names is
-active for the containing capability in the negotiated intersection. The
-composed JSON Schema can validate the common fields and each extension's key and
-`config`, but checking whether the extension is active also requires the
-negotiated capability context.
+A Business **MUST** emit an Action type only when an extension that declares it
+is active for the containing capability in the negotiated intersection. The
+composed JSON Schema can validate the common fields and each declared type's key
+and `config` shape, but confirming that the declaring extension is active also
+requires the negotiated capability context.
 
 ## Discovery, Governance, and Negotiation
 

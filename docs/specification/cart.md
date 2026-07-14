@@ -95,7 +95,7 @@ The cart surfaces outstanding Action instances in its response-only `actions`
 map, defined in [Overview — Actions](overview.md#actions).
 
 The cart has no status lifecycle. A `required: true` instance gates only the
-cart effect its extension specifies. The Business **MUST NOT** treat an
+cart effect specified for its Action type. The Business **MUST NOT** treat an
 outstanding Action as a reason to reject an unrelated cart operation. The
 Platform **MAY** continue to add, remove, and update items while an instance is
 outstanding.

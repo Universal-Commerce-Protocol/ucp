@@ -122,28 +122,29 @@ platform receives messages indicating what's needed to progress.
 
 ### Actions
 
-When an active extension has outstanding work for the checkout, it surfaces the
-instances in the response-only `actions` map. The map, common instance fields
-(`id`, `required`, `config`), completeness-snapshot rule, and active-key
-membership rule are defined once in
-[Overview — Actions](overview.md#actions); this section states only how the
-checkout status lifecycle interprets them. [Status Values](#status-values) is
-the authoritative home for the status invariants governing outstanding required
-Actions.
+When an active extension has outstanding work for the checkout, the Business
+surfaces instances under the Action types that extension declares in the
+response-only `actions` map. The map, common instance fields (`id`, `required`,
+`config`), completeness-snapshot rule, and active-type membership rule are
+defined once in [Overview — Actions](overview.md#actions); this section states
+only how the checkout status lifecycle interprets them.
+[Status Values](#status-values) is the authoritative home for the status
+invariants governing outstanding required Actions.
 
-A `required: true` instance gates the effect its extension defines within the
-containing status:
+A `required: true` instance gates the effect specified for its Action type
+within the containing status:
 
 * While `incomplete`, a required Action identifies work the Business needs
     completed before it can return `ready_for_complete`. After processing the
-    Action according to its extension, the Platform **SHOULD** use
-    [Get Checkout](#get-checkout) or a subsequent [Update Checkout](#update-checkout)
-    response to obtain the latest Checkout.
+    Action according to its Action type's contract, the Platform **SHOULD** use
+    [Get Checkout](#get-checkout) or a subsequent
+    [Update Checkout](#update-checkout) response to obtain the latest Checkout.
 * When Complete Checkout returns `complete_in_progress`, the Platform processes
-    any required Action according to its extension. Once that processing
-    completes, the Platform **SHOULD** use [Get Checkout](#get-checkout) to
-    retrieve the updated state. See [Complete Checkout](#complete-checkout) for
-    asynchronous processing and idempotency.
+    any required Action according to its Action type's contract. Once that
+    processing completes, the Platform **SHOULD** use
+    [Get Checkout](#get-checkout) to retrieve the updated state. See
+    [Complete Checkout](#complete-checkout) for asynchronous processing and
+    idempotency.
 
 ### Error Handling
 
@@ -383,10 +384,11 @@ remove ineligible items) or to rescind the claim, or abandon the attempt.
 ##### Example: resolving a claim with a verification Action
 
 This example is illustrative. It uses a negotiated vendor extension,
-`com.example.identity.student_verification`, that contributes a key of the same
-name to `actions` and defines the instance `config` and verification transport.
-It composes that extension with `context.eligibility`, a provisional
-[Discount](discount.md), a required [Action](#actions), and `messages`.
+`com.example.identity.student_verification`, that declares a single Action type
+under a key of the same name in `actions` and defines the instance `config` and
+verification transport. It composes that extension with `context.eligibility`, a
+provisional [Discount](discount.md), a required [Action](#actions), and
+`messages`.
 
 The provisional discount fields (`provisional`, `eligibility`) belong to the
 [Discount extension](discount.md#eligibility-claims) and are available only when

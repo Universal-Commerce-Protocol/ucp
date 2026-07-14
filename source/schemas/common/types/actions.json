@@ -2,11 +2,11 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/common/types/actions.json",
   "title": "Actions",
-  "description": "Outstanding extension-defined Action instances, keyed by reverse-domain extension name.",
+  "description": "Outstanding extension-defined Action instances, keyed by reverse-domain Action type, not extension name.",
   "$defs": {
     "instance": {
       "type": "object",
-      "description": "Common fields for one outstanding Action instance are id, required, and optional config. Extensions define instance-specific processing data under config. Additional properties are permitted for forward compatibility.",
+      "description": "Common fields for one outstanding Action instance are id, required, and optional config. The extension declaring the Action type defines type-specific processing data under config. Additional properties are permitted for forward compatibility.",
       "required": [
         "id",
         "required"
@@ -21,12 +21,12 @@
         },
         "required": {
           "type": "boolean",
-          "description": "Whether this Action instance gates the parent-specific effect defined by its extension.",
+          "description": "Whether this Action instance gates the parent-specific effect specified for its Action type.",
           "ucp_request": "omit"
         },
         "config": {
           "type": "object",
-          "description": "Extension-owned configuration for this Action instance.",
+          "description": "Configuration defined by the extension that declares this Action type.",
           "additionalProperties": true,
           "ucp_request": "omit"
         }
@@ -39,6 +39,7 @@
   },
   "additionalProperties": {
     "type": "array",
+    "description": "Non-empty instances of one Action type. JSON preserves array order; the declaring extension defines whether order has processing semantics.",
     "minItems": 1,
     "items": {
       "$ref": "#/$defs/instance"
