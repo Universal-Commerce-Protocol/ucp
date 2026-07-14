@@ -172,6 +172,34 @@ composed JSON Schema can validate the common fields and each declared type's key
 and `config` shape, but confirming that the declaring extension is active also
 requires the negotiated capability context.
 
+### Trust and Execution Boundaries
+
+Negotiating an extension confirms support for its complete Action-type contract
+before runtime. That agreement does not make every future runtime value or
+delegate trusted. Each instance remains subject to the composed schema, the
+Action-type contract, and Platform policy.
+
+The active Action-type contract defines which `config` fields a Platform processes
+and what they mean. A Platform **MUST NOT** treat any other field as an
+instruction to load content, render HTML, execute code, run a shell command, or
+invoke a native API.
+
+A Platform **MAY** apply additional trust or runtime policy and **MAY** decline
+any instance that does not satisfy it. Supporting a whole extension does not
+require a Platform to accept every runtime value.
+
+A Platform **MUST NOT** assume that the effect gated by an Action succeeded
+merely because an Action surface or external interaction completed. A later Cart
+or Checkout response from the Business and its parent lifecycle remain
+authoritative for that outcome.
+
+The declaring extension defines the concrete trust, execution, and fallback rules.
+The common Actions contract defines no generic machinery: no URL scheme, origin,
+or delegate policy; no sandbox, permission, or presentation model; no timeout,
+failure, or recovery model; and no callback, result, state, polling, or
+executor. Each concrete Action type adds only the machinery its own processing
+requires.
+
 ## Discovery, Governance, and Negotiation
 
 UCP separates protocol version compatibility from capability negotiation.
