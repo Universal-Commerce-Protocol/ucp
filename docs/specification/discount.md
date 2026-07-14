@@ -193,26 +193,35 @@ segment, or promotional rules:
 
 ## Gift Line Items
 
-Some discounts grant an entirely new line item to the cart or checkout — a
-free or discounted product — rather than reducing the price of items the
-buyer already added (e.g. "buy one get one free," or a free-gift-with-purchase
-promotion).
+Some discounts grant one or more entirely new line items to the cart or
+checkout — a free or discounted product — rather than reducing the price of
+items the buyer already added (e.g. "buy one get one free," or a
+free-gift-with-purchase promotion).
 
-When a discount grants a line item this way:
+When a discount grants line items this way:
 
-- The granted item **MUST** appear as a normal entry in `line_items[]`, with
-  its price reflecting the discount (typically `0`, but a reduced non-zero
-  price is also valid for "buy X get Y at $Z" patterns).
+- Each granted item **MUST** appear as a normal entry in `line_items[]`,
+  with its price reflecting the discount (typically `0`, but a reduced
+  non-zero price is also valid for "buy X get Y at $Z" patterns).
 - The corresponding `applied_discount` entry **MUST** set
-  `gift_line_item_id` to that line item's `id`, so platforms can attribute
-  the item to the promotion rather than treating it as an unexplained
-  addition.
-- `gift_line_item_id` is omitted for ordinary amount-based discounts — it
-  only applies when the discount's effect is granting a line item, not
-  reducing the price of one.
+  `gift_line_item_ids` to those line items' `id`s, so platforms can
+  attribute the items to the promotion rather than treating them as
+  unexplained additions. Most promotions grant a single gift, so this is
+  usually a one-element array — it holds more than one entry when a single
+  discount grants multiple gift units (e.g. "buy 2, get 2 free" scaling with
+  how much the buyer already added).
+- `gift_line_item_ids` is omitted for ordinary amount-based discounts — it
+  only applies when the discount's effect is granting line items, not
+  reducing the price of ones already in the cart.
 
 This lets a platform render, for example, "Free gift: T-Shirt — added by
 Summer Sale" instead of surfacing an unexplained zero-price item.
+
+`applied_discount.amount` is still required even when `gift_line_item_ids`
+is present: by the time a gift line item is serialized its price already
+reflects the discount (typically `0`), and the schema has no separate
+"regular price" field to recover the gift's value from — `amount` is the
+only place that value is communicated. See the example below.
 
 ### Example: Free gift with purchase
 
@@ -279,7 +288,7 @@ Summer Sale" instead of surfacing an unexplained zero-price item.
             "code": "FREEGIFT",
             "title": "Free Socks with Shoe Purchase",
             "amount": 1200,
-            "gift_line_item_id": "li_2"
+            "gift_line_item_ids": ["li_2"]
           }
         ]
       },
@@ -293,9 +302,30 @@ Summer Sale" instead of surfacing an unexplained zero-price item.
 Here, `applied_discount.amount` (1200) reflects the retail value of the
 gifted item, even though it doesn't appear as a line-item or order-level
 discount total — the gift is already reflected by the granted line item's
-own `0` price. Platforms use `gift_line_item_id` to find and label `li_2`,
+own `0` price. Platforms use `gift_line_item_ids` to find and label `li_2`,
 and `amount` to communicate the gift's value to the buyer (e.g. "$12 value,
 free").
+
+### Example: Multiple gifts from one discount
+
+A "buy 2 shirts, get 2 socks free" promotion where the buyer added 4 shirts
+grants two gift line items from the same discount:
+
+<!-- ucp:example schema=shopping/cart target=$.discounts.applied -->
+```json
+[
+  {
+    "code": "BUYSHIRTGETSOCKS",
+    "title": "Free Socks with Every 2 Shirts",
+    "amount": 2400,
+    "gift_line_item_ids": ["li_2", "li_3"]
+  }
+]
+```
+
+`amount` (2400) is the combined retail value of both gifted pairs of socks;
+`gift_line_item_ids` lists each one so the platform can label them
+individually.
 
 ## Eligibility Claims
 

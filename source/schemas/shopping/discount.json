@@ -77,9 +77,12 @@
           },
           "description": "Breakdown of where this discount was allocated. Sum of allocation amounts equals total amount."
         },
-        "gift_line_item_id": {
-          "type": "string",
-          "description": "The `id` of the `line_items[]` entry granted to the cart or checkout as a free or discounted gift because of this discount (e.g. a 'buy X get Y free' or free-gift-with-purchase promotion). Present only when the discount's effect is granting a line item rather than reducing the price of one; omitted for ordinary amount-based discounts."
+        "gift_line_item_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "The `id`s of the `line_items[]` entries granted to the cart or checkout as a free or discounted gift because of this discount (e.g. a 'buy X get Y free' or free-gift-with-purchase promotion). More than one entry when a single discount grants multiple gift units (e.g. 'buy 2, get 2 free' scaling with quantity). Present only when the discount's effect is granting one or more line items rather than reducing the price of one; omitted for ordinary amount-based discounts."
         }
       }
     },
