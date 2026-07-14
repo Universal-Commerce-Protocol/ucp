@@ -102,7 +102,7 @@ Businesses declare support by adding `dev.ucp.shopping.ap2_mandate` to their
 
 Platforms declare support in their profile. If the platform is operating under
 the trusted platform provider model, the platform **MUST** provide at least one
-key in the top-level `signing_keys` array in their profile.
+key in the top-level `keys` array in their profile.
 
 ### Activation and Session Locking
 
@@ -121,7 +121,7 @@ key in the top-level `signing_keys` array in their profile.
 To utilize this extension, a public signing key **MUST** be available for the
 business to verify the mandate's signature.
 
-* **Platform Provider Flow:** Key provided in the platform profile's `signing_keys`.
+* **Platform Provider Flow:** Key provided in the platform profile's `keys`.
 * **User Credential Flow:** Key bound to the digital payment credential.
 
 If a public key cannot be resolved, or if the signature is invalid, the business
@@ -136,7 +136,7 @@ This extension uses the cryptographic primitives defined in the
   ECDSA (`ES256`/`ES384`/`ES512`); see the note below.
 * **Canonicalization:** JCS ([RFC 8785](https://datatracker.ietf.org/doc/html/rfc8785))
 * **Key Format:** JWK ([RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517))
-* **Key Discovery:** `signing_keys[]` in `/.well-known/ucp` (see
+* **Key Discovery:** `keys[]` in `/.well-known/ucp` (see
   [Key Discovery](overview.md#key-discovery))
 
 See [Message Signatures](signatures.md) for key format and rotation.
@@ -188,7 +188,7 @@ transmitted separately (as the checkout body itself).
 | Claim | Type   | Required | Description                                        |
 | :---- | :----- | :------- | :------------------------------------------------- |
 | `alg` | string | Yes      | Signature algorithm accepted by AP2 (e.g. `ES256`) |
-| `kid` | string | Yes      | Key ID referencing the business's `signing_keys`   |
+| `kid` | string | Yes      | Key ID referencing the business's `keys`           |
 
 **Signature Computation:**
 
@@ -325,7 +325,7 @@ verify_merchant_authorization(checkout, merchant_profile):
     signing_input = encoded_header + "." + base64url_encode(canonical_bytes)
 
     // Get business's public key and verify
-    public_key = get_key_by_kid(merchant_profile.signing_keys, header.kid)
+    public_key = get_key_by_kid(merchant_profile.keys, header.kid)
     return verify(encoded_signature, signing_input, public_key, header.alg)
 ```
 
@@ -430,7 +430,7 @@ Upon receiving the `complete` request, the business **MUST**:
     payload = embedded_checkout without "ap2" field
     signing_input = encoded_header + "." + base64url_encode(jcs_canonicalize(payload))
 
-    my_key = get_key_by_kid(my_signing_keys, header.kid)
+    my_key = get_key_by_kid(my_keys, header.kid)
     verify(encoded_signature, signing_input, my_key, header.alg)
     ```
 
@@ -474,8 +474,9 @@ The `ap2` object included in COMPLETE checkout requests.
 | Error Code                       | Description                                                       |
 | :------------------------------- | :---------------------------------------------------------------- |
 | `mandate_required`               | AP2 was negotiated, but the request lacks `ap2.checkout_mandate`. |
-| `agent_missing_key`              | Platform profile lacks a valid `signing_keys` entry.              |
+| `agent_missing_key`              | Platform profile lacks a valid `keys` entry.                      |
 | `mandate_invalid_signature`      | The mandate signature cannot be verified.                         |
 | `mandate_expired`                | The mandate `exp` timestamp has passed.                           |
 | `mandate_scope_mismatch`         | The mandate is bound to a different checkout.                     |
 | `merchant_authorization_invalid` | The business authorization signature could not be verified.       |
+| `merchant_authorization_missing` | The checkout response omits `ap2.merchant_authorization`.         |
