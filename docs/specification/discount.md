@@ -220,16 +220,19 @@ This lets a platform render, for example, "Free gift: T-Shirt — added by
 Summer Sale" instead of surfacing an unexplained zero-price item.
 
 `applied_discount.amount` is still required even when `gift_line_item_ids`
-is present. The granted line item's own `price` and `totals[]` already
-carry its regular value and discount delta — same as for any other
-line-item-targeted discount — so `amount` is technically re-derivable from
-`line_items[]`. It stays explicit anyway for the same reason `amount` isn't
-dropped for ordinary discounts either, even though it already equals
-`sum(allocations[].amount)`: a platform shouldn't have to cross-reference
-into `line_items[]` (or sum an array) just to answer "how much was this
-discount worth" — `amount` gives that number directly, and
-`allocations`/`gift_line_item_ids` are there for whoever wants the
-breakdown. See the example below.
+is present, for the same reason it's required for every discount, gift or
+not: `allocations` is optional, so there may be nothing to sum at all. And
+even when a gift line item's own `price`/`totals[]` correctly show its
+regular value and discount delta, nothing guarantees this is the *only*
+discount touching that line item — an unrelated discount (e.g. a
+storewide percentage-off) can add its own `items_discount` entry to the
+same line item, and nothing in `totals[]` says which discount produced
+which entry. Reading the line item's totals only tells you the combined
+effect of everything that hit it, not this discount's individual share.
+`amount` is the one value a platform can always attribute to this specific
+discount, regardless of whether the business provides `allocations` or how
+many other discounts happen to be stacked on the same items. See the
+example below.
 
 ### Example: Free gift with purchase
 
