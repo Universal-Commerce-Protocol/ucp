@@ -1,0 +1,23 @@
+{
+  "ucp": {
+    "version": "2026-01-01",
+    "status": "success"
+  },
+  "id": "cart_scaffold",
+  "currency": "USD",
+  "line_items": [
+    {
+      "id": "li_scaffold",
+      "item": { "id": "item_scaffold", "title": "Scaffold Item", "price": 1000 },
+      "quantity": 1,
+      "totals": [
+        { "type": "subtotal", "amount": 1000 },
+        { "type": "total", "amount": 1000 }
+      ]
+    }
+  ],
+  "totals": [
+    { "type": "subtotal", "amount": 1000 },
+    { "type": "total", "amount": 1000 }
+  ]
+}

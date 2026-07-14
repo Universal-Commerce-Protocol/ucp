@@ -18,7 +18,7 @@
           "description": "JSONPath to the allocation target (e.g., '$.line_items[0]', '$.totals.shipping')."
         },
         "amount": {
-          "$ref": "types/amount.json",
+          "$ref": "../common/types/amount.json",
           "description": "Amount allocated to this target in ISO 4217 minor units."
         }
       }
@@ -40,7 +40,7 @@
           "description": "Human-readable discount name (e.g., 'Summer Sale 20% Off')."
         },
         "amount": {
-          "$ref": "types/amount.json",
+          "$ref": "../common/types/amount.json",
           "description": "Total discount amount in ISO 4217 minor units."
         },
         "automatic": {
@@ -67,7 +67,7 @@
           "description": "True if this discount requires additional verification."
         },
         "eligibility": {
-          "$ref": "types/reverse_domain_name.json",
+          "$ref": "../common/types/reverse_domain_name.json",
           "description": "The eligibility claim accepted by the Business for this discount. Corresponds to a value from context.eligibility. Omitted for code-based and non-eligibility automatic discounts."
         },
         "allocations": {

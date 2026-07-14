@@ -39,6 +39,7 @@ nav:
       - Roadmap: documentation/roadmap.md
       - Schema Authoring: documentation/schema-authoring.md
       - Versioning: versioning.md
+      - Announcements: documentation/announcements.md
   - Specification:
       - Overview: specification/overview.md
       - Checkout Capability:
@@ -52,6 +53,8 @@ nav:
           - Buyer Consent Extension: specification/buyer-consent.md
           - Discounts Extension: specification/discount.md
           - Fulfillment Extension: specification/fulfillment.md
+          - Loyalty Extension: specification/loyalty.md
+          - Split Payments Extension: specification/split-payments.md
       - Cart Capability:
           - Overview: specification/cart.md
           - Transports:
@@ -121,7 +124,7 @@ extra:
 
 # Configuration
 theme:
-  logo: assets/updated-icon.svg
+  logo: assets/UCP-small.svg
   favicon: assets/favicon.png
   name: material
   font:
@@ -262,6 +265,9 @@ plugins:
               UCP's strict date-based versioning policy (YYYY-MM-DD) and
               compatibility guidelines for managing breaking changes and
               release branches.
+          - documentation/announcements.md: >-
+              General announcements, release notes, and community updates for
+              the Universal Commerce Protocol.
         Specification:
           - specification/overview.md: >-
               Master technical specification of UCP, discovery mechanisms,
@@ -315,6 +321,12 @@ plugins:
           - specification/fulfillment.md: >-
               Fulfillment extension for checkouts, defining delivery methods,
               pickup destinations, and method-agnostic UI rendering contracts.
+          - specification/loyalty.md: >-
+              Loyalty Extension, enabling high-fidelity member benefit recognition
+              during catalog, cart, and checkout by defining schemas for
+              memberships, tiers, benefits, and reward earning forecasts while
+              managing provisional eligibility claims and enforcing
+              data-minimization privacy rules.
         Cart Capability:
           - specification/cart.md: >-
               Pre-purchase Cart Capability, detailing item collection, state

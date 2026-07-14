@@ -25,6 +25,8 @@ within the UCP.
 
 ## Type Schemas
 
+{{ auto_generate_schema_reference('types', 'reference', include_extensions=False, base_dir='source/schemas/common') }}
+
 {{ auto_generate_schema_reference('types', 'reference', include_extensions=False) }}
 
 ### Selected Payment Instrument {: #payment-instrument-selected-payment-instrument }
@@ -83,6 +85,12 @@ The `ucp` object included in checkout responses.
 The `ucp` object included in cart responses.
 
 {{ extension_schema_fields('ucp.json#/$defs/response_cart_schema', 'reference') }}
+
+### Catalog Response Metadata {: #ucp-response-catalog-schema }
+
+The `ucp` object included in catalog responses.
+
+{{ extension_schema_fields('ucp.json#/$defs/response_catalog_schema', 'reference') }}
 
 ### Order Response Metadata {: #ucp-response-order-schema }
 

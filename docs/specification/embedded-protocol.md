@@ -93,19 +93,21 @@ application-level error codes.
 
 **Success Response:**
 
+<!-- ucp:example schema=transports/embedded_message def=response -->
 ```json
 {
   "jsonrpc": "2.0",
-  "id": "...",
+  "id": "req_1",
   "result": {
-    "ucp": { "version": "{{ ucp_version }}", "status": "success" },
-    ...
+    "ucp": { "version": "{{ ucp_version }}", "status": "success" }
+    // ... result fields
   }
 }
 ```
 
 **Error Response:**
 
+<!-- ucp:example schema=common/types/error_response op=read direction=response extract=$.result -->
 ```json
 {
   "jsonrpc": "2.0",
@@ -132,6 +134,7 @@ registry.
 For example, if a request cannot be processed (unknown method, malformed
 params), the host **MUST** respond with a JSON-RPC `error`:
 
+<!-- ucp:example schema=transports/embedded_message def=error_response -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -252,6 +255,7 @@ data or an `error_response`.
 
 **Example Success Response:**
 
+<!-- ucp:example schema=transports/embedded_message def=response -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -265,6 +269,7 @@ data or an `error_response`.
 
 **Example Error Response:**
 
+<!-- ucp:example schema=common/types/error_response op=read direction=response extract=$.result -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -295,21 +300,24 @@ the credential is corrupted). The session error **SHOULD** include a
 
 **Example — auth failure escalated to session error:**
 
+<!-- ucp:example schema=common/types/error_response op=read direction=response extract=$.params.error -->
 ```json
 {
     "jsonrpc": "2.0",
     "method": "ec.error",
     "params": {
-        "ucp": { "version": "{{ ucp_version }}", "status": "error" },
-        "messages": [
-            {
-                "type": "error",
-                "code": "not_supported_error",
-                "content": "Requested auth credential type is not supported",
-                "severity": "unrecoverable"
-            }
-        ],
-        "continue_url": "https://merchant.example.com"
+        "error": {
+            "ucp": { "version": "{{ ucp_version }}", "status": "error" },
+            "messages": [
+                {
+                    "type": "error",
+                    "code": "not_supported_error",
+                    "content": "Requested auth credential type is not supported",
+                    "severity": "unrecoverable"
+                }
+            ],
+            "continue_url": "https://merchant.example.com"
+        }
     }
 }
 ```
@@ -327,29 +335,34 @@ continuing. Each capability defines its own session error notification method
 
 **Notification Payload:**
 
-- `ucp` (object, **REQUIRED**): UCP protocol metadata. `status` **MUST** be
-    `"error"`.
-- `messages` (array, **REQUIRED**): One or more messages describing the failure.
-- `continue_url` (string, **OPTIONAL**): URL for buyer handoff or session
-    recovery.
+- `error` (object, **REQUIRED**): Session-level error response.
+    - `ucp` (object, **REQUIRED**): UCP protocol metadata. `status`
+        **MUST** be `"error"`.
+    - `messages` (array, **REQUIRED**): One or more messages describing the
+        failure.
+    - `continue_url` (string, **OPTIONAL**): URL for buyer handoff or session
+        recovery.
 
 **Example:**
 
+<!-- ucp:example schema=common/types/error_response op=read direction=response extract=$.params.error -->
 ```json
 {
     "jsonrpc": "2.0",
     "method": "ec.error",
     "params": {
-        "ucp": { "version": "{{ ucp_version }}", "status": "error" },
-        "messages": [
-            {
-                "type": "error",
-                "code": "not_supported_error",
-                "content": "Requested auth credential type is not supported.",
-                "severity": "unrecoverable"
-            }
-        ],
-        "continue_url": "https://merchant.example.com/checkout/abc123"
+        "error": {
+            "ucp": { "version": "{{ ucp_version }}", "status": "error" },
+            "messages": [
+                {
+                    "type": "error",
+                    "code": "not_supported_error",
+                    "content": "Requested auth credential type is not supported.",
+                    "severity": "unrecoverable"
+                }
+            ],
+            "continue_url": "https://merchant.example.com/checkout/abc123"
+        }
     }
 }
 ```
@@ -377,6 +390,7 @@ Both are notifications — the host **MUST NOT** respond.
 
 **Example — start notification (cart):**
 
+<!-- ucp:example schema=transports/embedded_message def=request direction=request -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -385,9 +399,9 @@ Both are notifications — the host **MUST NOT** respond.
         "cart": {
             "id": "cart_123",
             "currency": "USD",
-            "totals": [/* ... */],
-            "line_items": [/* ... */],
-            "buyer": {/* ... */}
+            "totals": [ ... ],
+            "line_items": [ ... ],
+            "buyer": { ... }
         }
     }
 }
@@ -395,6 +409,7 @@ Both are notifications — the host **MUST NOT** respond.
 
 **Example — complete notification (checkout):**
 
+<!-- ucp:example schema=transports/embedded_message def=request direction=request -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -426,6 +441,7 @@ resource, not just the changed fields.
 
 **Example — line items changed (checkout):**
 
+<!-- ucp:example schema=transports/embedded_message def=request direction=request -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -433,8 +449,8 @@ resource, not just the changed fields.
     "params": {
         "checkout": {
             "id": "checkout_123",
-            "totals": [/* ... */],
-            "line_items": [/* ... */]
+            "totals": [ ... ],
+            "line_items": [ ... ]
             // ... other checkout fields
         }
     }
@@ -443,6 +459,7 @@ resource, not just the changed fields.
 
 **Example — messages changed (cart):**
 
+<!-- ucp:example schema=transports/embedded_message def=request direction=request -->
 ```json
 {
     "jsonrpc": "2.0",
@@ -450,7 +467,7 @@ resource, not just the changed fields.
     "params": {
         "cart": {
             "id": "cart_123",
-            "line_items": [/* ... */],
+            "line_items": [ ... ],
             "messages": [
                 {
                     "type": "error",

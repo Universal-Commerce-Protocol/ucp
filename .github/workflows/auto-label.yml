@@ -1,8 +1,7 @@
 name: Auto Label Merged PRs
 
 on:
-  pull_request:
-    types: [closed]
+  push:
     branches:
       - main
       - "release/**"
@@ -11,20 +10,33 @@ jobs:
   label_prs:
     runs-on: ubuntu-latest
 
-    if: github.event.pull_request.merged == true
-
     permissions:
       pull-requests: write
 
     steps:
       - name: Apply labels based on Conventional Commits
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
-            const title = context.payload.pull_request.title.toLowerCase();
-            const prNumber = context.payload.pull_request.number;
             const owner = context.repo.owner;
             const repo = context.repo.repo;
+            const commit_sha = context.sha;
+
+            // Find the PR associated with this push (merge commit or squash merge)
+            const { data: prs } = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+              owner,
+              repo,
+              commit_sha
+            });
+
+            if (prs.length === 0) {
+              console.log('No PR found for this commit. Skipping.');
+              return;
+            }
+
+            const pr = prs[0];
+            const title = pr.title.toLowerCase();
+            const prNumber = pr.number;
 
             let labelsToAdd = [];
 
