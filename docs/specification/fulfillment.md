@@ -184,7 +184,7 @@ human-readable fields that platforms render directly.
 | --------------------- | ------------- | -------- | ------------------------------------------------------- |
 | `groups[].options[]`  | `title`       | Yes      | Primary label that distinguishes from siblings          |
 | `groups[].options[]`  | `description` | No       | Supplementary context for the title                     |
-| `groups[].options[]`  | `total`       | Yes      | Price in minor units (may be null if not yet available) |
+| `groups[].options[]`  | `totals`      | Yes      | Cost breakdown: an array of `total` objects             |
 | `available_methods[]` | `description` | No       | Standalone explanation of alternative availability      |
 
 ### Business Responsibilities
@@ -531,9 +531,9 @@ Opt-in declaration (business MAY return multiple groups per method):
 ### Business Profile
 
 Businesses declare what fulfillment configurations they support using
-`merchant_config`:
+`business_config`:
 
-{{ schema_fields('types/merchant_fulfillment_config', 'fulfillment') }}
+{{ schema_fields('types/business_fulfillment_config', 'fulfillment') }}
 
 <!-- ucp:example schema=profile def=business_schema target=$.ucp.capabilities -->
 ```json
