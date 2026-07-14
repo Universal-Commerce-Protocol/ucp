@@ -26,6 +26,7 @@ This document specifies the Model Context Protocol (MCP) binding for the
 Businesses advertise MCP transport availability through their UCP profile at
 `/.well-known/ucp`.
 
+<!-- ucp:example schema=profile def=business_schema -->
 ```json
 {
   "ucp": {
@@ -56,7 +57,8 @@ Businesses advertise MCP transport availability through their UCP profile at
           "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/cart.json"
         }
       ]
-    }
+    },
+    "payment_handlers": {}
   }
 }
 ```
@@ -66,6 +68,7 @@ Businesses advertise MCP transport availability through their UCP profile at
 MCP clients **MUST** include a `meta` object in every request containing
 protocol metadata:
 
+<!-- ucp:example schema=shopping/cart op=create direction=request extract=$.params.arguments.cart -->
 ```json
 {
   "jsonrpc": "2.0",
@@ -79,7 +82,7 @@ protocol metadata:
           "profile": "https://platform.example/profiles/shopping-agent.json"
         }
       },
-      "cart": { ... }
+      "cart": { "line_items": [ ... ] }
     }
   }
 }
@@ -127,6 +130,7 @@ Maps to the [Create Cart](cart.md#create-cart) operation.
 
 === "Request"
 
+    <!-- ucp:example schema=shopping/cart op=create direction=request extract=$.params.arguments.cart -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -162,6 +166,7 @@ Maps to the [Create Cart](cart.md#create-cart) operation.
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/cart op=read direction=response extract=$.result.structuredContent -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -208,7 +213,7 @@ Maps to the [Create Cart](cart.md#create-cart) operation.
         "content": [
           {
             "type": "text",
-            "text": "{\"ucp\":{...},\"id\":\"cart_abc123\",...}"
+            "text": "{\"ucp\":{…},…}"
           }
         ]
       }
@@ -219,13 +224,14 @@ Maps to the [Create Cart](cart.md#create-cart) operation.
 
     All items out of stock — no cart resource is created:
 
+    <!-- ucp:example schema=common/types/error_response op=read direction=response extract=$.result.structuredContent -->
     ```json
     {
       "jsonrpc": "2.0",
       "id": 1,
       "result": {
         "structuredContent": {
-          "ucp": { "version": "2026-01-15", "status": "error" },
+          "ucp": { "version": "{{ ucp_version }}", "status": "error" },
           "messages": [
             {
               "type": "error",
@@ -237,7 +243,7 @@ Maps to the [Create Cart](cart.md#create-cart) operation.
           "continue_url": "https://merchant.com/"
         },
         "content": [
-          {"type": "text", "text": "{\"ucp\":{...},\"messages\":[...]}"}
+          {"type": "text", "text": "{\"ucp\":{…},…}"}
         ]
       }
     }
@@ -259,6 +265,7 @@ Maps to the [Get Cart](cart.md#get-cart) operation.
 
 === "Request"
 
+    <!-- ucp:example schema=transports/mcp_tool_call def=request direction=request -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -280,6 +287,7 @@ Maps to the [Get Cart](cart.md#get-cart) operation.
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/cart op=read direction=response extract=$.result.structuredContent -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -326,7 +334,7 @@ Maps to the [Get Cart](cart.md#get-cart) operation.
         "content": [
           {
             "type": "text",
-            "text": "{\"ucp\":{...},\"id\":\"cart_abc123\",...}"
+            "text": "{\"ucp\":{…},…}"
           }
         ]
       }
@@ -335,6 +343,7 @@ Maps to the [Get Cart](cart.md#get-cart) operation.
 
 === "Not Found"
 
+    <!-- ucp:example schema=common/types/error_response op=read direction=response extract=$.result.structuredContent -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -343,6 +352,7 @@ Maps to the [Get Cart](cart.md#get-cart) operation.
         "structuredContent": {
           "ucp": {
             "version": "{{ ucp_version }}",
+            "status": "error",
             "capabilities": {
               "dev.ucp.shopping.cart": [{"version": "{{ ucp_version }}"}]
             }
@@ -360,7 +370,7 @@ Maps to the [Get Cart](cart.md#get-cart) operation.
         "content": [
           {
             "type": "text",
-            "text": "{\"ucp\":{...},\"messages\":[...],\"continue_url\":\"...\"}"
+            "text": "{\"ucp\":{…},…}"
           }
         ]
       }
@@ -385,6 +395,7 @@ Maps to the [Update Cart](cart.md#update-cart) operation.
 
 === "Request"
 
+    <!-- ucp:example schema=transports/mcp_tool_call def=request direction=request -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -427,6 +438,7 @@ Maps to the [Update Cart](cart.md#update-cart) operation.
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/cart op=read direction=response extract=$.result.structuredContent -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -486,7 +498,7 @@ Maps to the [Update Cart](cart.md#update-cart) operation.
         "content": [
           {
             "type": "text",
-            "text": "{\"ucp\":{...},\"id\":\"cart_abc123\",...}"
+            "text": "{\"ucp\":{…},…}"
           }
         ]
       }
@@ -509,6 +521,7 @@ Maps to the [Cancel Cart](cart.md#cancel-cart) operation.
 
 === "Request"
 
+    <!-- ucp:example schema=transports/mcp_tool_call def=request direction=request -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -531,6 +544,7 @@ Maps to the [Cancel Cart](cart.md#cancel-cart) operation.
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/cart op=read direction=response extract=$.result.structuredContent -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -576,7 +590,7 @@ Maps to the [Cancel Cart](cart.md#cancel-cart) operation.
         "content": [
           {
             "type": "text",
-            "text": "{\"ucp\":{...},\"id\":\"cart_abc123\",...}"
+            "text": "{\"ucp\":{…},…}"
           }
         ]
       }
@@ -601,6 +615,7 @@ Business outcomes (including not found and validation errors) are returned as
 JSON-RPC `result` with `structuredContent` containing the UCP envelope and
 `messages`:
 
+<!-- ucp:example schema=common/types/error_response op=read direction=response extract=$.result.structuredContent -->
 ```json
 {
   "jsonrpc": "2.0",
@@ -609,6 +624,7 @@ JSON-RPC `result` with `structuredContent` containing the UCP envelope and
     "structuredContent": {
       "ucp": {
         "version": "{{ ucp_version }}",
+        "status": "error",
         "capabilities": {
           "dev.ucp.shopping.cart": [{"version": "{{ ucp_version }}"}]
         }
@@ -624,7 +640,7 @@ JSON-RPC `result` with `structuredContent` containing the UCP envelope and
       "continue_url": "https://merchant.com/"
     },
     "content": [
-      {"type": "text", "text": "{\"ucp\":{...},\"messages\":[...]}"}
+      {"type": "text", "text": "{\"ucp\":{…},…}"}
     ]
   }
 }

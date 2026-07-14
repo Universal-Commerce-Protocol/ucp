@@ -120,6 +120,7 @@ image: assets/banner.png
               <img src="assets/partner/codeveloped/Walmart.svg" alt="Walmart" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
               <span>Walmart</span>
             </div>
+            <div class="flex-break"></div>
             <div class="partner-logo">
               <img src="assets/partner/codeveloped/Amazon.svg" alt="Amazon" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
               <span>Amazon</span>
@@ -562,7 +563,7 @@ image: assets/banner.png
   const tabs = ['tab-shopping', 'tab-lodging', 'tab-food'];
   const tabButtons = document.querySelectorAll('#industry-tabs .tab-btn');
   let autoplayTimeout;
-  
+
   function autoplay() {
     currentTabIdx = (currentTabIdx + 1) % tabs.length;
     const nextBtn = tabButtons[currentTabIdx];
@@ -571,18 +572,18 @@ image: assets/banner.png
     }
     autoplayTimeout = setTimeout(autoplay, 3000);
   }
-  
+
   function startAutoplay() {
     clearTimeout(autoplayTimeout);
     autoplayTimeout = setTimeout(autoplay, 3000);
   }
-  
+
   function stopAutoplay() {
     clearTimeout(autoplayTimeout);
   }
-  
+
   startAutoplay();
-  
+
   const industryTabsContainer = document.getElementById('industry-tabs');
   if (industryTabsContainer) {
     industryTabsContainer.addEventListener('mouseenter', stopAutoplay);
@@ -765,6 +766,10 @@ image: assets/banner.png
       <div class="partner-logo">
         <img src="assets/partner/codeveloped/lodging/Hilton.svg" alt="Hilton" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
         <span>Hilton</span>
+      </div>
+      <div class="partner-logo">
+        <img src="assets/partner/endorsed/iconic.svg" alt="Iconic" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+        <span>Iconic</span>
       </div>
       <div class="partner-logo">
         <img src="assets/partner/endorsed/ihg.svg" alt="IHG" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
@@ -962,6 +967,10 @@ image: assets/banner.png
       <div class="partner-logo">
         <img src="assets/partner/codeveloped/lodging/Hilton.svg" alt="Hilton" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
         <span>Hilton</span>
+      </div>
+      <div class="partner-logo">
+        <img src="assets/partner/endorsed/iconic.svg" alt="Iconic" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+        <span>Iconic</span>
       </div>
       <div class="partner-logo">
         <img src="assets/partner/endorsed/ihg.svg" alt="IHG" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
