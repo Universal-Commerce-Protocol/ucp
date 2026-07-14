@@ -1,6 +1,47 @@
 exclude: '^(\.github/|\.vscode/).*|CODE_OF_CONDUCT\.md|CHANGELOG\.md'
 
 repos:
+  - repo: local
+    hooks:
+      - id: block-corporate-registries
+        name: Block corporate registries in uv.lock
+        entry: '(?i)(pkgs\.shopify\.io|us-npm\.pkg\.dev)'
+        language: pygrep
+        files: ^uv\.lock$
+        description: "Avoid corporate URLs (PR #108, #368). Fix: 'uv lock --refresh'."
+      # Docs-example validator. Requires the ucp-schema binary on PATH;
+      # install with `cargo install ucp-schema`. CI runs the full-corpus
+      # check on every PR as the mandatory backstop
+      # (.github/workflows/docs.yml).
+      #
+      # Two-hook split for fast local feedback:
+      #  - validate-examples-changed: doc edits validate only changed files
+      #    (~0.6s/file). Catches direct annotation/schema-binding errors
+      #    immediately at commit time.
+      #  - validate-examples-full: schema or validator-code edits trigger a
+      #    full-corpus check (~12s) because a single schema change can
+      #    invalidate examples across many docs (cross-file regression).
+      - id: validate-examples-changed
+        name: Validate JSON examples (changed docs)
+        entry: python3 scripts/validate_examples.py --schema-base source/schemas/ --file
+        language: system
+        pass_filenames: true
+        files: ^docs/.*\.md$
+        stages: [pre-commit, pre-push]
+      - id: validate-examples-full
+        name: Validate JSON examples (full corpus)
+        entry: python3 scripts/validate_examples.py --schema-base source/schemas/
+        language: system
+        pass_filenames: false
+        files: ^(source/schemas/|scripts/validate_examples\.py$)
+        stages: [pre-commit, pre-push]
+      - id: validate-examples-tests
+        name: Validator unit tests
+        entry: python3 scripts/test_validate_examples.py
+        language: system
+        pass_filenames: false
+        files: ^scripts/(validate_examples|test_validate_examples)\.py$
+        stages: [pre-commit, pre-push]
   - repo: https://github.com/streetsidesoftware/cspell-cli
     rev: v9.3.3
     hooks:
@@ -55,5 +96,6 @@ repos:
     hooks:
       - id: prettier
         name: prettier-css
-        types: [css]  # Only run on CSS files
-        # If you want it to run on EVERYTHING (JS, JSON, MD), remove the 'types' line.
+        # Only run on CSS files
+        types: [css]
+        # To run on everything (JS, JSON, MD), remove the 'types' line.

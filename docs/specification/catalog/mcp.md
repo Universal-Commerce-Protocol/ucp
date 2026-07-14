@@ -26,19 +26,21 @@ This document specifies the Model Context Protocol (MCP) binding for the
 Businesses advertise MCP transport availability through their UCP profile at
 `/.well-known/ucp`.
 
+<!-- ucp:example schema=profile def=business_schema -->
 ```json
 {
   "ucp": {
     "version": "{{ ucp_version }}",
     "services": {
-      "dev.ucp.shopping": {
-        "version": "{{ ucp_version }}",
-        "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview",
-        "mcp": {
+      "dev.ucp.shopping": [
+        {
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview",
+          "transport": "mcp",
           "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/mcp.openrpc.json",
           "endpoint": "https://business.example.com/ucp/mcp"
         }
-      }
+      ]
     },
     "capabilities": {
       "dev.ucp.shopping.catalog.search": [{
@@ -51,7 +53,8 @@ Businesses advertise MCP transport availability through their UCP profile at
         "spec": "https://ucp.dev/{{ ucp_version }}/specification/catalog/lookup",
         "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/catalog_lookup.json"
       }]
-    }
+    },
+    "payment_handlers": {}
   }
 }
 ```
@@ -61,6 +64,7 @@ Businesses advertise MCP transport availability through their UCP profile at
 MCP clients **MUST** include a `meta` object in every request containing
 protocol metadata:
 
+<!-- ucp:example schema=shopping/catalog_search op=search direction=request extract=$.params.arguments.catalog -->
 ```json
 {
   "jsonrpc": "2.0",
@@ -117,6 +121,7 @@ Maps to the [Catalog Search](search.md) capability.
 
 === "Request"
 
+    <!-- ucp:example schema=shopping/catalog_search op=search direction=request extract=$.params.arguments.catalog -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -154,6 +159,7 @@ Maps to the [Catalog Search](search.md) capability.
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/catalog_search op=search direction=response extract=$.result.structuredContent -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -213,7 +219,7 @@ Maps to the [Catalog Search](search.md) capability.
                   "description": { "plain": "Size 10 variant" },
                   "price": { "amount": 12000, "currency": "USD" },
                   "availability": { "available": true },
-                  "selected_options": [
+                  "options": [
                     { "name": "Size", "label": "10" }
                   ],
                   "tags": ["running", "road", "neutral"],
@@ -275,6 +281,7 @@ The `catalog.ids` parameter accepts an array of identifiers and optional context
 
 === "Request"
 
+    <!-- ucp:example schema=shopping/catalog_lookup op=lookup direction=request extract=$.params.arguments.catalog -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -301,6 +308,7 @@ The `catalog.ids` parameter accepts an array of identifiers and optional context
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/catalog_lookup op=lookup direction=response extract=$.result.structuredContent -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -396,6 +404,7 @@ The `catalog.ids` parameter accepts an array of identifiers and optional context
 When some identifiers are not found, the response includes the found products. The
 response MAY include informational messages indicating which identifiers were not found.
 
+<!-- ucp:example schema=shopping/catalog_lookup op=lookup extract=$.result.structuredContent -->
 ```json
 {
   "jsonrpc": "2.0",
@@ -414,11 +423,14 @@ response MAY include informational messages indicating which identifiers were no
         {
           "id": "prod_abc123",
           "title": "Blue Runner Pro",
+          "description": {
+            "plain": "A comfortable everyday running shoe."
+          },
           "price_range": {
             "min": { "amount": 12000, "currency": "USD" },
             "max": { "amount": 12000, "currency": "USD" }
           },
-          "variants": []
+          "variants": [ ... ]
         }
       ],
       "messages": [
@@ -459,6 +471,7 @@ Maps to the [Catalog Lookup](lookup.md#get-product-get_product) capability. Retu
 
 === "Request"
 
+    <!-- ucp:example schema=shopping/catalog_lookup op=get_product direction=request extract=$.params.arguments.catalog -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -489,6 +502,7 @@ Maps to the [Catalog Lookup](lookup.md#get-product-get_product) capability. Retu
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/catalog_lookup op=get_product direction=response extract=$.result.structuredContent -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -553,7 +567,7 @@ Maps to the [Catalog Lookup](lookup.md#get-product-get_product) capability. Retu
                 "description": { "plain": "Blue, Size 10" },
                 "price": { "amount": 12000, "currency": "USD" },
                 "availability": { "available": true },
-                "selected_options": [
+                "options": [
                   { "name": "Color", "label": "Blue" },
                   { "name": "Size", "label": "10" }
                 ]
@@ -565,7 +579,7 @@ Maps to the [Catalog Lookup](lookup.md#get-product-get_product) capability. Retu
                 "description": { "plain": "Blue, Size 12" },
                 "price": { "amount": 15000, "currency": "USD" },
                 "availability": { "available": true },
-                "selected_options": [
+                "options": [
                   { "name": "Color", "label": "Blue" },
                   { "name": "Size", "label": "12" }
                 ]
@@ -588,6 +602,7 @@ When the identifier does not resolve to a product, the server returns a
 successful JSON-RPC result with `ucp.status: "error"` and a descriptive
 message. This is an application outcome, not a transport error.
 
+<!-- ucp:example schema=common/types/error_response op=read direction=response extract=$.result.structuredContent -->
 ```json
 {
   "jsonrpc": "2.0",
@@ -622,14 +637,10 @@ UCP uses a two-layer error model separating transport errors from business outco
 
 ### Transport Errors
 
-Use JSON-RPC 2.0 error codes for protocol-level issues that prevent request processing:
-
-| Code | Meaning |
-| :--- | :--- |
-| -32600 | Invalid Request - Malformed JSON-RPC |
-| -32601 | Method not found |
-| -32602 | Invalid params - Missing required parameter |
-| -32603 | Internal error |
+Transport-level failures (authentication, rate limiting, unavailability) that
+prevent request processing are returned as JSON-RPC `error`. See the
+[Core Specification](../overview.md#error-codes) for the complete error code
+registry and JSON-RPC error code mappings.
 
 ### Business Outcomes
 
@@ -643,6 +654,7 @@ When all requested identifiers fail to resolve, the response contains an empty `
 array. The response MAY include informational messages indicating which identifiers were
 not found.
 
+<!-- ucp:example schema=shopping/catalog_lookup op=lookup direction=response extract=$.result.structuredContent -->
 ```json
 {
   "jsonrpc": "2.0",

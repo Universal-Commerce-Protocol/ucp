@@ -1,0 +1,14 @@
+{
+  "ucp": {
+    "version": "2026-01-01",
+    "status": "error"
+  },
+  "messages": [
+    {
+      "type": "error",
+      "code": "scaffold_error",
+      "content": "Scaffold error message",
+      "severity": "unrecoverable"
+    }
+  ]
+}

@@ -34,14 +34,9 @@ community feedback.
 To move beyond isolated transactions, we are expanding the protocol's scope to
 tackle key user journeys such as multi-item checkout, loyalty, and lifecycle
 management, while ensuring the business's brand and logic remain central to all
-shopping experiences. Key upcoming initiatives include:
+shopping experiences. With product discovery, cart building, and post-order
+management now part of the specification, key upcoming initiatives include:
 
-* **Product discovery and post-order management:** By facilitating the entire
-    journey, we help businesses maximize lifetime and average order value rather
-    than just processing a single item for checkout.
-* **Cart and basket building:** Support for multi-item checkout from a
-    business, complex basket rules (e.g., promotions, tax, shipping), and varied
-    fulfillment logic that reflects how people actually shop.
 * **Loyalty & Member benefits:** Capabilities to enable loyalty and member
     benefits to help users find the best value and businesses achieve a deeper
     connection with their consumers through account linking.
@@ -55,6 +50,15 @@ geographies, ensuring that "simple and open" means accessible to everyone. We
 plan to do this through a phased rollout across markets, including India,
 Indonesia, Latin America, and others. We are adapting the protocol to support
 broader regional use cases and localized payment interoperability.
+
+### Expanding across industries
+
+We are scaling UCP across a broader range of industries, focusing on industries with foundational actions that can be standardized into functional primitives. This architecture allows us to shape how businesses engage on AI platforms across entire user journeys, backing their presence with real-time data and secure checkout experiences.
+
+New specifications are being developed with industry leaders across key industries including:
+
+* **Food:** New UCP capabilities and schema to enable restaurant and menu discovery across the wide array of modification options, dish selection to checkout with tipping and delivery notes.
+* **Lodging:** New UCP capabilities and schema for hotels discovery, room selection with various rate options, booking with guest details, provision, and payment scheduling.
 
 ## Build with us
 

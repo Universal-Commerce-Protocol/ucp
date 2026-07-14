@@ -117,11 +117,12 @@ platform receives messages indicating what's needed to progress.
 ### Error Handling
 
 The `messages` array contains errors, warnings, and informational messages
-about the checkout state. Error messages include a `severity` field that
-reflects the resource state and recommended action. When `ucp.status`
-is `"success"`, a resource is returned and severity indicates the
-recommended action. When `ucp.status` is `"error"`, no valid resource
-exists — severity is `unrecoverable`:
+about the checkout state. `ucp.status` is the shape discriminator —
+`"success"` means the response carries the expected payload, `"error"`
+means it carries error information instead. Each error message carries a `type`,
+`code`, `severity`, `content`, and an optional `path` that identifies the
+specific field or line item the message refers to (see [The `path` Field](#the-path-field) below).
+The `severity` field prescribes the recommended platform action:
 
 | Severity                | Meaning                                          | Platform Action                                                   |
 | :---------------------- | :----------------------------------------------- | :---------------------------------------------------------------- |
@@ -142,10 +143,12 @@ placement (e.g., high-value order approval, first-purchase policy).
 When the business cannot create a new resource or the requested resource
 no longer exists, the response contains `ucp.status: "error"` with
 `messages` describing the failure — no resource is included in the
-response body. Error responses MUST use `severity: "unrecoverable"`.
+response body. When no resource exists to act on, messages SHOULD use
+`severity: "unrecoverable"`.
 For example, a business may reject a create checkout request where all
 items are unavailable:
 
+<!-- ucp:example schema=common/types/error_response op=read -->
 ```json
 {
   "ucp": { "version": "2026-01-11", "status": "error" },
@@ -174,30 +177,29 @@ The latter two require handoff and serve as explicit signals to the platform.
 Businesses **SHOULD** surface such messages as early as possible, and platforms
 **SHOULD** prioritize resolving recoverable errors before initiating handoff.
 
+<!-- ucp:example schema=shopping/checkout target=$.messages op=read -->
 ```json
-{
-  "status": "requires_escalation",
-  "messages": [
-    {
-      "type": "error",
-      "code": "invalid_phone",
-      "severity": "recoverable",
-      "content": "Phone number format is invalid"
-    },
-    {
-      "type": "error",
-      "code": "schedule_delivery",
-      "severity": "requires_buyer_input",
-      "content": "Select delivery window for your purchase"
-    },
-    {
-      "type": "error",
-      "code": "high_value_order",
-      "severity": "requires_buyer_review",
-      "content": "Orders over $500 require additional verification"
-    }
-  ]
-}
+[
+  {
+    "type": "error",
+    "code": "invalid_phone",
+    "severity": "recoverable",
+    "path": "$.buyer.phone_number",
+    "content": "Phone number format is invalid"
+  },
+  {
+    "type": "error",
+    "code": "schedule_delivery",
+    "severity": "requires_buyer_input",
+    "content": "Select delivery window for your purchase"
+  },
+  {
+    "type": "error",
+    "code": "high_value_order",
+    "severity": "requires_buyer_review",
+    "content": "Orders over $500 require additional verification"
+  }
+]
 ```
 
 Example error processing algorithm:
@@ -205,21 +207,25 @@ Example error processing algorithm:
 ```text
 GIVEN response with messages array
 
-IF ucp.status = "error"
-  -- No resource exists; severity is unrecoverable
-  RETRY with new resource or inputs, or hand off via continue_url
-  RETURN
-
 FILTER errors FROM messages WHERE type = "error"
 
 PARTITION errors INTO
   recoverable           WHERE severity = "recoverable"
   requires_buyer_input  WHERE severity = "requires_buyer_input"
   requires_buyer_review WHERE severity = "requires_buyer_review"
+  unrecoverable         WHERE severity = "unrecoverable"
+
+IF unrecoverable is not empty
+  RETRY with new resource or inputs, or hand off via continue_url
+  RETURN
 
 IF recoverable is not empty
   FOR EACH error IN recoverable
-    ATTEMPT to fix error (e.g., reformat phone number)
+    IF error.path is present
+      IDENTIFY the field at error.path in the request payload
+      ATTEMPT to fix that field (e.g., reformat phone at $.buyer.phone_number)
+    ELSE
+      ATTEMPT generic fix based on error.code
   CALL Update Checkout
   RETURN and re-evaluate response
 
@@ -249,6 +255,50 @@ messages or deferring to checkout completion.
 
 Example: `out_of_stock` requires specific upfront UX, whereas
 `payment_required` can be handled generically at submission.
+
+#### The `path` Field
+
+The optional `path` field on a message anchors the error to a specific
+component of the response payload. Platforms use it to associate error
+messages with the input field or line item that caused them - for example,
+highlighting a specific buyer field in a form or flagging a specific
+cart line.
+
+`path` **MUST** be an [RFC 9535](https://www.rfc-editor.org/rfc/rfc9535)
+JSONPath expression relative to the root of the UCP response object.
+Property names **MUST** use snake_case matching the request schema.
+When `path` is omitted, the message applies to the response as a whole.
+
+**Simple field reference:**
+
+<!-- ucp:example skip reason="path schema example" -->
+```json
+{ "path": "$.buyer.email" }
+```
+
+**Indexed array element:**
+
+<!-- ucp:example skip reason="path schema example" -->
+```json
+{ "path": "$.line_items[0].quantity" }
+```
+
+**Filter expression (optional, when referencing a specific item by ID):**
+
+<!-- ucp:example skip reason="path schema example" -->
+```json
+{ "path": "$.line_items[?(@.id=='line-item-uuid')].quantity" }
+```
+
+Filter expressions are valid RFC 9535 syntax and **MAY** be used when
+referencing a specific line item by `id` is clearer than its index.
+Index-based paths are equally valid; the business returns indices that
+are unambiguous within the response.
+
+**Specificity rule:** A path to a specific field (e.g.,
+`$.line_items[0].quantity`) takes precedence over a path to its parent
+(e.g., `$.line_items[0]`). When multiple errors apply to the same field,
+each message **SHOULD** carry the most specific path applicable.
 
 #### Eligibility Verification at Completion
 
@@ -302,13 +352,16 @@ For example, the Platform claims a store card benefit via
 `context.eligibility`. The Business applies member pricing during the session.
 At completion, the payment credential does not match the claimed instrument:
 
+<!-- ucp:example schema=shopping/checkout op=read -->
 ```json
 {
-  "ucp": { "version": "2026-01-11", "status": "success" },
+  "ucp": { "version": "2026-01-11", "status": "success", "payment_handlers": { ... } },
   "id": "checkout_abc",
   "status": "ready_for_complete",
-  "line_items": [ "..." ],
-  "totals": [ "..." ],
+  "currency": "...",
+  "line_items": [ ... ],
+  "totals": [ ... ],
+  "links": [ ... ],
   "messages": [
     {
       "type": "error",
@@ -409,21 +462,28 @@ what they receive from the business.
 A checkout response containing both a recoverable error and a disclosure
 warning on a line item:
 
+<!-- ucp:example schema=shopping/checkout op=read -->
 ```json
 {
-  "ucp": { "version": "{{ ucp_version }}", "status": "success" },
+  "ucp": { "version": "{{ ucp_version }}", "status": "success", "payment_handlers": { ... } },
   "id": "chk_abc123",
   "status": "incomplete",
   "currency": "USD",
   "line_items": [
     {
       "id": "li_1",
-      "item": { "id": "item_456", "title": "Artisan Nut Butter Collection", "image_url": "https://merchant.com/nut-butter.jpg" },
+      "item": { "id": "item_456", "title": "Artisan Nut Butter Collection", "price": 1299, "image_url": "https://merchant.com/nut-butter.jpg" },
       "quantity": 1,
-      "totals": [{ "type": "subtotal", "amount": 1299 }]
+      "totals": [
+        { "type": "subtotal", "amount": 1299 },
+        { "type": "total", "amount": 1299 }
+      ]
     }
   ],
-  "totals": [{ "type": "total", "amount": 1299 }],
+  "totals": [
+    { "type": "subtotal", "amount": 1299 },
+    { "type": "total", "amount": 1299 }
+  ],
   "messages": [
     {
       "type": "error",
@@ -493,6 +553,18 @@ platform can prefill checkout state when initiating a buy-now flow.
 > [REST transport binding](checkout-rest.md). Accessing a permalink returns a
 > redirect to the checkout UI or renders the checkout page directly.
 
+## Scopes
+
+The Checkout capability defines the following well-known scopes for
+user-authenticated access:
+
+| Scope | Description |
+| :--- | :--- |
+| `dev.ucp.shopping.checkout:manage` | All checkout operations on behalf of the authenticated user — create, update, complete, and cancel checkout sessions. |
+
+Scope declaration, derivation, and rules for extending this set with
+custom scopes are defined in [Identity Linking — Scopes](identity-linking.md#scopes).
+
 ## Guidelines
 
 (In addition to the overarching guidelines)
@@ -552,6 +624,11 @@ To be invoked by the platform when the user has expressed purchase intent
 **Recommendation**: To minimize discrepancies and a streamlined user experience,
 product data (price/title etc.) provided by the business through the feeds
 **SHOULD** match the actual attributes returned in the response.
+
+When the [Cart](cart.md) capability is negotiated, the request payload
+should accept an additional `cart_id` field for cart-to-checkout conversion. See
+[Cart → Cart-to-Checkout Conversion](cart.md#cart-to-checkout-conversion) for
+the field contract.
 
 {{ method_fields('create_checkout', 'rest.openapi.json', 'checkout') }}
 
@@ -642,9 +719,14 @@ requirements.
 
 {{ schema_fields('types/signals', 'checkout') }}
 
-### Fulfillment Option
+### Attribution
 
-{{ extension_schema_fields('fulfillment.json#/$defs/fulfillment_option', 'checkout') }}
+Platform-provided referral and conversion-event context — campaign IDs,
+click identifiers, and source/medium markers communicated by the platform.
+See [Attribution](overview.md#attribution) for details and consent
+requirements.
+
+{{ schema_fields('types/attribution', 'checkout') }}
 
 ### Item
 
@@ -834,8 +916,9 @@ when provided.
 
 **Split tax, itemized at top-level:**
 
+<!-- ucp:example schema=shopping/checkout target=$.totals op=read -->
 ```json
-"totals": [
+[
   { "type": "subtotal",    "display_text": "Subtotal",    "amount": 5750 },
   { "type": "fulfillment", "display_text": "Shipping",    "amount": 899 },
   { "type": "tax",         "display_text": "Federal Tax", "amount": 332 },
@@ -846,8 +929,9 @@ when provided.
 
 **Collapsed fees with optional breakdown:**
 
+<!-- ucp:example schema=shopping/checkout target=$.totals op=read -->
 ```json
-"totals": [
+[
   { "type": "subtotal", "display_text": "Subtotal", "amount": 4999 },
   {
     "type": "fee", "display_text": "Fees", "amount": 549,
@@ -863,8 +947,9 @@ when provided.
 
 **Discount and account credit — negative amounts:**
 
+<!-- ucp:example schema=shopping/checkout target=$.totals op=read -->
 ```json
-"totals": [
+[
   { "type": "subtotal",       "display_text": "Subtotal",       "amount": 10000 },
   { "type": "discount",       "display_text": "Summer Sale",    "amount": -1500 },
   { "type": "tax",            "display_text": "Tax",            "amount": 680 },

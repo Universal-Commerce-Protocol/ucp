@@ -39,7 +39,7 @@
         "capabilities": {
           "type": "object",
           "description": "Required capability versions, keyed by capability name. Keys must be a subset of the extension's $defs keys.",
-          "propertyNames": { "$ref": "shopping/types/reverse_domain_name.json" },
+          "propertyNames": { "$ref": "common/types/reverse_domain_name.json" },
           "additionalProperties": { "$ref": "#/$defs/version_constraint" }
         }
       },
@@ -92,7 +92,7 @@
         "services": {
           "type": "object",
           "description": "Service registry keyed by reverse-domain name.",
-          "propertyNames": { "$ref": "shopping/types/reverse_domain_name.json" },
+          "propertyNames": { "$ref": "common/types/reverse_domain_name.json" },
           "additionalProperties": {
             "type": "array",
             "items": { "$ref": "service.json#/$defs/base" }
@@ -101,7 +101,7 @@
         "capabilities": {
           "type": "object",
           "description": "Capability registry keyed by reverse-domain name.",
-          "propertyNames": { "$ref": "shopping/types/reverse_domain_name.json" },
+          "propertyNames": { "$ref": "common/types/reverse_domain_name.json" },
           "additionalProperties": {
             "type": "array",
             "items": { "$ref": "capability.json#/$defs/base" }
@@ -110,13 +110,35 @@
         "payment_handlers": {
           "type": "object",
           "description": "Payment handler registry keyed by reverse-domain name.",
-          "propertyNames": { "$ref": "shopping/types/reverse_domain_name.json" },
+          "propertyNames": { "$ref": "common/types/reverse_domain_name.json" },
           "additionalProperties": {
             "type": "array",
             "items": { "$ref": "payment_handler.json#/$defs/base" }
           }
         }
       }
+    },
+
+    "success": {
+      "description": "UCP metadata with status 'success'. Use for response branches that carry the expected payload.",
+      "allOf": [
+        { "$ref": "#/$defs/base" },
+        {
+          "properties": { "status": { "const": "success" } },
+          "required": ["status"]
+        }
+      ]
+    },
+
+    "error": {
+      "description": "UCP metadata with status 'error'. Use for response branches that carry error information.",
+      "allOf": [
+        { "$ref": "#/$defs/base" },
+        {
+          "properties": { "status": { "const": "error" } },
+          "required": ["status"]
+        }
+      ]
     },
 
     "platform_schema": {

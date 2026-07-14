@@ -26,19 +26,21 @@ This document specifies the HTTP/REST binding for the
 Businesses advertise REST transport availability through their UCP profile at
 `/.well-known/ucp`.
 
+<!-- ucp:example schema=profile def=business_schema -->
 ```json
 {
   "ucp": {
     "version": "{{ ucp_version }}",
     "services": {
-      "dev.ucp.shopping": {
-        "version": "{{ ucp_version }}",
-        "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview",
-        "rest": {
+      "dev.ucp.shopping": [
+        {
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview",
+          "transport": "rest",
           "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/rest.openapi.json",
           "endpoint": "https://business.example.com/ucp"
         }
-      }
+      ]
     },
     "capabilities": {
       "dev.ucp.shopping.catalog.search": [{
@@ -51,7 +53,8 @@ Businesses advertise REST transport availability through their UCP profile at
         "spec": "https://ucp.dev/{{ ucp_version }}/specification/catalog/lookup",
         "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/catalog_lookup.json"
       }]
-    }
+    },
+    "payment_handlers": {}
   }
 }
 ```
@@ -74,6 +77,7 @@ Maps to the [Catalog Search](search.md) capability.
 
 === "Request"
 
+    <!-- ucp:example schema=shopping/catalog_search op=search direction=request -->
     ```json
     {
       "query": "blue running shoes",
@@ -96,6 +100,7 @@ Maps to the [Catalog Search](search.md) capability.
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/catalog_search op=search -->
     ```json
     {
       "ucp": {
@@ -151,7 +156,7 @@ Maps to the [Catalog Search](search.md) capability.
               "description": { "plain": "Size 10 variant" },
               "price": { "amount": 12000, "currency": "USD" },
               "availability": { "available": true },
-              "selected_options": [
+              "options": [
                 { "name": "Size", "label": "10" }
               ],
               "tags": ["running", "road", "neutral"],
@@ -202,6 +207,7 @@ applies to all lookups in the batch.
 
 === "Request"
 
+    <!-- ucp:example schema=shopping/catalog_lookup op=lookup direction=request -->
     ```json
     POST /catalog/lookup HTTP/1.1
     Host: business.example.com
@@ -218,6 +224,7 @@ applies to all lookups in the batch.
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/catalog_lookup op=lookup -->
     ```json
     {
       "ucp": {
@@ -268,6 +275,7 @@ applies to all lookups in the batch.
               "id": "prod_def456_size10",
               "sku": "TBX-GRN-10",
               "title": "Talla 10",
+              "description": { "plain": "Variante talla 10" },
               "price": { "amount": 15000, "currency": "USD" },
               "availability": { "available": true },
               "inputs": [
@@ -288,6 +296,7 @@ messages indicating which identifiers were not found.
 
 === "Request"
 
+    <!-- ucp:example schema=shopping/catalog_lookup op=lookup direction=request -->
     ```json
     {
       "ids": ["prod_abc123", "prod_invalid", "prod_def456"]
@@ -296,6 +305,7 @@ messages indicating which identifiers were not found.
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/catalog_lookup op=lookup -->
     ```json
     {
       "ucp": {
@@ -310,6 +320,8 @@ messages indicating which identifiers were not found.
         {
           "id": "prod_abc123",
           "title": "Blue Runner Pro",
+          "description": { "plain": "Lightweight running shoes." },
+          "variants": [ ... ],
           "price_range": {
             "min": { "amount": 12000, "currency": "USD" },
             "max": { "amount": 12000, "currency": "USD" }
@@ -318,6 +330,8 @@ messages indicating which identifiers were not found.
         {
           "id": "prod_def456",
           "title": "Trail Blazer X",
+          "description": { "plain": "Trail shoes with superior traction." },
+          "variants": [ ... ],
           "price_range": {
             "min": { "amount": 15000, "currency": "USD" },
             "max": { "amount": 15000, "currency": "USD" }
@@ -348,6 +362,7 @@ on option values and returns variants matching the selection.
 
 === "Request"
 
+    <!-- ucp:example schema=shopping/catalog_lookup op=get_product direction=request -->
     ```json
     POST /catalog/product HTTP/1.1
     Host: business.example.com
@@ -367,6 +382,7 @@ on option values and returns variants matching the selection.
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/catalog_lookup op=get_product -->
     ```json
     {
       "ucp": {
@@ -427,7 +443,7 @@ on option values and returns variants matching the selection.
             "description": { "plain": "Blue, Size 10" },
             "price": { "amount": 12000, "currency": "USD" },
             "availability": { "available": true },
-            "selected_options": [
+            "options": [
               { "name": "Color", "label": "Blue" },
               { "name": "Size", "label": "10" }
             ]
@@ -439,7 +455,7 @@ on option values and returns variants matching the selection.
             "description": { "plain": "Blue, Size 12" },
             "price": { "amount": 15000, "currency": "USD" },
             "availability": { "available": true },
-            "selected_options": [
+            "options": [
               { "name": "Color", "label": "Blue" },
               { "name": "Size", "label": "12" }
             ]
@@ -465,6 +481,7 @@ with `ucp.status: "error"` and a descriptive message. This is an application
 outcome, not a transport error — the handler executed and reports its result
 via the UCP envelope.
 
+<!-- ucp:example schema=common/types/error_response op=read -->
 ```json
 {
   "ucp": {
@@ -492,6 +509,20 @@ Unlike `/catalog/lookup` (which returns partial results for batch requests),
 application error with `unrecoverable` severity — the agent should not retry
 with the same identifier.
 
+## HTTP Headers
+
+The following headers are defined for the HTTP binding and apply to all
+operations unless otherwise noted.
+
+{{ header_fields('search_catalog', 'rest.openapi.json') }}
+
+### Specific Header Requirements
+
+* **UCP-Agent**: All requests **MUST** include the `UCP-Agent` header
+    containing the platform profile URI using Dictionary Structured Field syntax
+    ([RFC 8941](https://datatracker.ietf.org/doc/html/rfc8941){target="_blank"}).
+    Format: `profile="https://platform.example/profile"`.
+
 ## Error Handling
 
 UCP uses a two-layer error model separating transport errors from business outcomes.
@@ -518,6 +549,7 @@ for message semantics and common scenarios.
 When all requested identifiers fail lookup, the `products` array is empty. The response
 MAY include informational messages indicating which identifiers were not found.
 
+<!-- ucp:example schema=shopping/catalog_lookup op=lookup -->
 ```json
 {
   "ucp": {

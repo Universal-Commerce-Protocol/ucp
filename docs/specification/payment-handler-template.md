@@ -133,6 +133,7 @@ for the full pattern.
 
 #### Example Handler Declaration
 
+<!-- ucp:example skip reason="handler config template" -->
 ```json
 {
   "ucp": {
@@ -207,6 +208,7 @@ Platforms advertise support for this handler in their UCP profile's
 
 #### Example Platform Handler Declaration
 
+<!-- ucp:example skip reason="handler config template" -->
 ```json
 {
   "ucp": {
@@ -245,6 +247,7 @@ Platforms **MUST** follow this flow to acquire a payment instrument:
 The Platform identifies `{handler_name}` in the business's UCP profile
 `payment_handlers` registry (from `/.well-known/ucp`).
 
+<!-- ucp:example skip reason="handler config template" -->
 ```json
 {
   "ucp": {
@@ -284,6 +287,7 @@ The Platform identifies `{handler_name}` in the business's UCP profile
 
 The Platform submits the checkout with the constructed payment instrument.
 
+<!-- ucp:example skip reason="handler config template" -->
 ```json
 POST /checkout-sessions/{checkout_id}/complete
 Content-Type: application/json
