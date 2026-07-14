@@ -172,16 +172,16 @@ via the `messages[]` array:
 
 **Error codes for rejected discounts:**
 
-| Code                                   | Description                                 |
-| -------------------------------------- | ------------------------------------------- |
-| `discount_code_expired`                | Code has expired                            |
-| `discount_code_invalid`                | Code not found or malformed                 |
-| `discount_code_already_applied`        | Code is already applied                     |
-| `discount_code_combination_disallowed` | Cannot combine with another active discount |
-| `discount_code_usage_limit_reached`    | Code has reached its maximum number of allowed uses |
+| Code                                   | Description                                                                    |
+| -------------------------------------- | ------------------------------------------------------------------------------ |
+| `discount_code_expired`                | Code has expired                                                               |
+| `discount_code_invalid`                | Code not found or malformed                                                    |
+| `discount_code_already_applied`        | Code is already applied                                                        |
+| `discount_code_combination_disallowed` | Cannot combine with another active discount                                    |
+| `discount_code_usage_limit_reached`    | Code has reached its maximum number of allowed uses                            |
 | `discount_code_stacking_conflict`      | Code is valid, but a higher-priority discount already applied takes precedence |
-| `discount_code_user_not_logged_in`     | Code requires authenticated user            |
-| `discount_code_user_ineligible`        | User does not meet eligibility criteria     |
+| `discount_code_user_not_logged_in`     | Code requires authenticated user                                               |
+| `discount_code_user_ineligible`        | User does not meet eligibility criteria                                        |
 
 `discount_code_usage_limit_reached` differs from `discount_code_already_applied`:
 the latter means the buyer is trying to apply a code that is already active on
