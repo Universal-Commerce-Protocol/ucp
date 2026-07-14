@@ -78,18 +78,108 @@ All capability and service names **MUST** use the format:
 | `dev.ucp.common.identity_linking`    | ucp.dev     | common   | identity_linking  |
 | `com.example.payments.installments`  | example.com | payments | installments      |
 
-#### Spec URL Binding
+#### Authority Binding
 
-The `spec` and `schema` fields are **REQUIRED** for all capabilities. The origin
-of these URLs **MUST** match the namespace authority:
+Reverse-domain names serve two purposes: collision-safe **identifiers** (keys
+and references), and **entities** — capabilities, services, and payment
+handlers — that declare a fetched `schema` URL describing them. Authority
+binding applies to every entity with a remote `schema`: a declared `schema`
+URL's origin **MUST** match the namespace authority in its name.
 
-| Namespace       | Required Origin           |
-| --------------- | ------------------------- |
-| `dev.ucp.*`     | `https://ucp.dev/...`     |
-| `com.example.*` | `https://example.com/...` |
+A capability **MUST** declare a `schema`; services and payment handlers declare
+one where their transport or handler defines it. Each entity **MAY** also
+declare a `spec` URL (human-readable documentation).
 
-Platform **MUST** validate this binding and **SHOULD** reject capabilities where
-the spec origin does not match the namespace authority.
+This binding guarantees **provenance, not trust**: a valid binding proves only
+that the reverse-domain name is controlled by the party that owns the
+corresponding domain — an entity cannot be published under a namespace its
+author does not control. It does **not** assert that the entity is trustworthy,
+correct, or worth supporting. Whether to negotiate, trust, or implement it is
+always the client's decision; this binding only tells the client *who* is making
+the claim. Provenance is established from domain ownership and evaluated at
+negotiation time.
+
+The `spec` URL is documentation, not part of the machine trust path, so its
+origin is **not** authority-bound: it **MUST** be `https` but **MAY** be served
+from any host (e.g. a docs subdomain or third-party docs host). Only the
+`schema` URL carries the authority binding defined below.
+
+##### Derivation algorithm
+
+The authority is derived **from the `schema` URL host** — which names the
+owning domain directly, with no ambiguity about where the domain ends — and
+validated as a label prefix of the entity's name. For the `schema` URL of an
+entity whose name is `name`, a platform **MUST** apply the following:
+
+1. Parse the URL with a conformant (WHATWG) URL parser. It **MUST** parse,
+   **MUST** use the `https` scheme, and **MUST NOT** contain userinfo (a
+   `user:pass@` component). Substring matching on the raw URL is **NOT**
+   permitted — e.g. `https://ucp.dev@evil.example/x.json` has host
+   `evil.example`, not `ucp.dev`.
+2. The host **MUST** be a registered domain name of at least two labels.
+   IP-literal hosts (`https://203.0.113.10/...`) and single-label hosts
+   (`https://localhost/...`) are invalid authorities.
+3. Take the URL's hostname (the host without any port), normalize it (lowercase;
+   strip a trailing `.`; internationalized domains in A-label / punycode form),
+   and **reverse its labels** to form the `authority_prefix` (host `ucp.dev` →
+   `dev.ucp`).
+4. The binding is valid if and only if `name` begins with `authority_prefix`
+   followed by a `.` (a literal trailing dot). The trailing-dot boundary is
+   required so that `com.example` (from host `example.com`) cannot satisfy a
+   neighboring namespace like `com.examplecorp.*`, where it is a textual but
+   not label-aligned prefix; it also guarantees a non-empty remainder after the
+   prefix.
+
+The remaining labels after the authority prefix are treated as opaque by this
+check; they are not inspected or split.
+
+| Capability name                     | `schema` host      | `authority_prefix` | Result     |
+| ----------------------------------- | ------------------ | ------------------ | ---------- |
+| `dev.ucp.shopping.checkout`         | `ucp.dev`          | `dev.ucp`          | **accept** |
+| `dev.ucp.shopping.checkout`         | `shopping.ucp.dev` | `dev.ucp.shopping` | **accept** |
+| `com.example.payments.installments` | `example.com`      | `com.example`      | **accept** |
+| `com.example.pay`                   | `evil.example`     | `example.evil`     | **reject** |
+| `dev.ucp.shopping.checkout`         | `evil.example`     | `example.evil`     | **reject** |
+| `com.examplecorp.pay`               | `example.com`      | `com.example`      | **reject** |
+| `com.example.pay`                   | `cdn.example.com`  | `com.example.cdn`  | **reject** |
+
+An entity's `schema` is served from a host whose reversed labels are a prefix of
+its name. A canonical apex host (`example.com` for `com.example.*`) always
+satisfies this; a subdomain satisfies it only when its labels line up with the
+namespace path (`shopping.ucp.dev` for `dev.ucp.shopping.*`). Unrelated
+subdomains such as a shared CDN do **not** satisfy it — host the canonical
+schema on a name-aligned origin.
+
+The check uses the `schema` URL host directly and does not consult the
+[Public Suffix List](https://publicsuffix.org/), so it treats a **public
+suffix** — a domain under which independent parties can register names, from
+`co.uk` to the list's private-section suffixes operated by services that let
+third parties register subdomains or buckets (`github.io`, object storage, app
+platforms) — as an ordinary authority. Co-tenants under such a suffix satisfy
+the same prefix, so declare entities only under a **registrable domain** (a
+public suffix plus one label) that you exclusively control.
+
+##### Enforcement
+
+A platform **MUST** validate each business-declared `schema` URL before fetching
+it. If the URL's origin does not match the entity's namespace authority (per
+[Derivation algorithm](#derivation-algorithm)), the platform **MUST NOT** fetch
+it and **MUST** reject the entity — treated as not present and never
+activated. A `spec` URL **MUST** be a valid `https` URL. A platform **MUST NOT** follow redirects (`3xx`) when fetching a `schema` URL, consistent with profile fetches.
+
+The platform fetches and composes business-declared schemas to validate every
+request and response, so validating the binding ensures each composed schema is
+sourced from the party that owns the entity's namespace. A business **SHOULD**
+apply the same check to the platform profile and exclude any entity whose
+binding fails.
+
+Binding validates the declared hostname for provenance; it is **not** a
+fetch-safety control and does not authorize dereferencing. Fetching the `schema`
+URL — like any URL fetched during discovery — is additionally subject to the
+protocol's URL fetch-safety requirements, which guard the *resolved* address
+(not just the hostname) against server-side request forgery toward special-use
+or cloud-metadata addresses and DNS rebinding. The hostname check and the
+resolved-address check are independent, and both apply.
 
 #### Governance Model
 
@@ -365,10 +455,25 @@ registries **MUST** be present even when empty. `ucp.capabilities` is optional
 and **MAY** be omitted, though useful commerce profiles normally advertise at
 least one capability.
 
-Profiles **MAY** include `signing_keys`, an array of public EC JSON Web Keys
-used for HTTP Message Signatures and signed webhooks. See
-[Message Signatures](signatures.md) for key format, algorithms, lookup, and
-rotation.
+Profiles **MAY** include public JSON Web Keys used for HTTP Message
+Signatures and signed webhooks. When a profile publishes signing keys,
+they **MUST** appear in the top-level `keys[]` array — the canonical
+UCP profile field that every UCP verifier reads. `keys[]` is a JWK Set
+per [RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517), so the
+same document is simultaneously a UCP profile and a valid JWK Set —
+which a signer can reuse as its Web Bot Auth key source. See
+[Deployment Patterns for WBA Interop](#deployment-patterns-for-wba-interop)
+below.
+
+Adding, rotating, or removing a key updates this single array. Removal
+is the security-critical case: a revoked or compromised key is not
+effectively revoked until it is absent from `keys[]`.
+
+UCP defines two well-known key types: **EC** (ECDSA P-256, P-384) and
+**OKP** (EdDSA Ed25519); the key-type, curve, and algorithm
+vocabularies are open and verifiers skip keys they do not recognize.
+See [Message Signatures](signatures.md) for key format, algorithms,
+lookup, and rotation.
 
 #### Business Profile
 
@@ -439,6 +544,11 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
           "spec": "https://ucp.dev/{{ ucp_version }}/specification/identity-linking",
           "schema": "https://ucp.dev/{{ ucp_version }}/schemas/common/identity_linking.json",
           "config": {
+            "providers": {
+              "com.example.idp": [
+                { "type": "oauth2", "auth_url": "https://accounts.example.com/" }
+              ]
+            },
             "scopes": {
               "dev.ucp.shopping.order:read":   {},
               "dev.ucp.shopping.order:manage": {}
@@ -475,13 +585,21 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
       ]
     }
   },
-  "signing_keys": [
+  "keys": [
+    {
+      "kid": "poqkLGiymh_W0uP6PZFw-dvez3QJT5SolqXBCW38r0U",
+      "kty": "OKP",
+      "crv": "Ed25519",
+      "x": "JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs",
+      "use": "sig",
+      "alg": "EdDSA"
+    },
     {
       "kid": "business_2025",
       "kty": "EC",
       "crv": "P-256",
-      "x": "WbbXwVYGdJoP4Xm3qCkGvBRcRvKtEfXDbWvPzpPS8LA",
-      "y": "sP4jHHxYqC89HBo8TjrtVOAGHfJDflYxw7MFMxuFMPY",
+      "x": "qIVYZVLCrPZHGHjP17CTW0_-D9Lfw0EkjqF7xB4FivA",
+      "y": "Mc4nN9LTDOBhfoUeg8Ye9WedFRhnZXZJA12Qp0zZ6F0",
       "use": "sig",
       "alg": "ES256"
     }
@@ -490,9 +608,37 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
 ```
 
 The business profile advertises the business's available transports,
-capabilities, payment handlers, and public verification keys. See
-[Key Discovery](#key-discovery) for key lookup and resolution, and
-[Message Signatures](signatures.md) for signing mechanics.
+capabilities, payment handlers, and public verification keys. This
+example publishes signing keys in the canonical top-level `keys[]`
+array (an RFC 7517 JWK Set), so the same document is also a valid JWK
+Set — reusable as a Web Bot Auth key source. Every UCP verifier reads
+`keys[]`, whether it resolved the key via `UCP-Agent` or via
+`Signature-Agent`.
+
+A WBA-shape verifier reads `keys[]` from this profile **only when the
+`Signature-Agent` header selects it** with `type=jwks_uri` (or `type=cimd`)
+pointing at the profile URL. The default `type=directory` (when `type` is
+omitted) instead expects a *signed* directory document at
+`/.well-known/http-message-signatures-directory`, not a static profile, so
+it will not read `keys[]` from a static `/.well-known/ucp`. See
+[Deployment Patterns for WBA Interop](#deployment-patterns-for-wba-interop).
+
+This example uses two keys. Whether a deployment needs one or two depends
+on the algorithms its counterparties accept — many need only one; see
+[Signature Algorithms](signatures.md#signature-algorithms). The two keys
+here:
+
+- An **Ed25519** key (OKP) for HTTP transport identity, WBA-compatible.
+  The `kid` is the JWK SHA-256 Thumbprint per RFC 7638.
+- An **ECDSA P-256** key (EC) for AP2 mandate signing
+  (`ap2.merchant_authorization`).
+
+A business that does not interact with AP2 or WBA may publish a single
+ES256 key in `keys[]` (the universal baseline). See
+[Key Discovery](#key-discovery) for key lookup and resolution,
+[Deployment Patterns for WBA Interop](#deployment-patterns-for-wba-interop)
+for hosting choices, and [Message Signatures](signatures.md) for
+signing mechanics.
 
 Businesses that support older protocol versions **SHOULD** include a
 `supported_versions` object mapping each older version to a
@@ -589,7 +735,7 @@ example:
       ]
     }
   },
-  "signing_keys": [
+  "keys": [
     {
       "kid": "platform_2025",
       "kty": "EC",
@@ -654,8 +800,10 @@ metadata:
 2. **Discovery**: Platforms **MAY** fetch the business profile from
     `/.well-known/ucp` before initiating requests. If fetched, platforms
     **SHOULD** cache the profile according to HTTP cache-control directives.
-3. **Namespace Validation**: Platforms **MUST** validate that capability `spec`
-    URI origins match namespace authorities.
+3. **Namespace Validation**: Before fetching, platforms **MUST** validate that
+    each capability's `schema` URL origin matches its namespace authority (see
+    [Authority Binding](#authority-binding)) and **MUST** reject capabilities
+    that fail this binding.
 4. **Schema Resolution**: Platforms **MUST** fetch and compose schemas for
     negotiated capabilities before making requests.
 
@@ -663,7 +811,10 @@ metadata:
 
 1. **Profile Resolution**: Upon receiving a request with a platform profile
     URI, businesses **MUST** fetch and validate the platform profile unless
-    already cached.
+    already cached. Because businesses negotiate by capability name and serve
+    their own schemas, they do not normally dereference platform-declared
+    `schema` URLs; they **SHOULD** nonetheless verify the namespace binding (see
+    [Authority Binding](#authority-binding)) as defense in depth.
 2. **Capability Intersection**: Businesses **MUST** compute the intersection of
     platform and business capabilities.
 3. **Extension Validation**: Extensions without their parent capability in the
@@ -735,7 +886,7 @@ the result in the UCP response:
 | ---------------------- | ------------------------------------------------------ | ---- | ------ |
 | `signature_missing`    | Required signature header/field not present            | 401  | -32000 |
 | `signature_invalid`    | Signature verification failed                          | 401  | -32000 |
-| `key_not_found`        | Key ID not found in signer's `signing_keys`            | 401  | -32000 |
+| `key_not_found`        | Key ID not found in signer's published key set         | 401  | -32000 |
 | `digest_mismatch`      | Body digest doesn't match `Content-Digest` header      | 400  | -32600 |
 | `algorithm_unsupported`| Signature algorithm not supported                      | 400  | -32600 |
 
@@ -820,8 +971,8 @@ task through the standard web interface.
       "messages": [
         {
           "type": "error",
-          "code": "version_unsupported",
-          "content": "UCP version 2024-01-01 is not supported",
+          "code": "capabilities_incompatible",
+          "content": "No compatible capabilities in the intersection",
           "severity": "unrecoverable"
         }
       ],
@@ -902,8 +1053,8 @@ task through the standard web interface.
           "messages": [
             {
               "type": "error",
-              "code": "version_unsupported",
-              "content": "UCP version 2024-01-01 is not supported",
+              "code": "capabilities_incompatible",
+              "content": "No compatible capabilities in the intersection",
               "severity": "unrecoverable"
             }
           ],
@@ -1028,6 +1179,13 @@ negotiate capabilities and verify identity. This design enables
 **permissionless onboarding** — any platform with a discoverable profile
 can interact with any business without prior registration.
 
+**Web Bot Auth interop.** Signers opting into WBA-shape signatures
+additionally emit a `Signature-Agent` header advertising their keys. See
+[Identity Resolution Algorithm](#identity-resolution-algorithm) for how
+verifiers resolve identity and
+[Message Signatures — WBA Interop](signatures.md#wba-interop) for the
+signature shape.
+
 ### Authentication Mechanisms
 
 Businesses **SHOULD** authenticate platforms to prevent impersonation and ensure
@@ -1062,24 +1220,29 @@ authenticated identity is consistent with the `UCP-Agent` header:
 
 ### Key Discovery
 
-Both parties publish public keys in the `signing_keys` array of their
-UCP profile. Platforms fetch the business profile at `/.well-known/ucp`;
-businesses fetch the platform profile from the `UCP-Agent` header. The
-same profile that provides capabilities also provides verification
-keys — this is UCP's key resolution mechanism for
+Both parties publish public keys in their UCP profile. Platforms fetch
+the business profile at `/.well-known/ucp`; businesses fetch the
+platform profile from the `UCP-Agent` header (or `Signature-Agent`
+header when Web Bot Auth interop is in use). The same profile that
+provides capabilities also provides verification keys — this is UCP's
+key resolution mechanism for
 [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421) HTTP Message
 Signatures.
 
-**Key Lookup:**
+See [Profile Structure](#profile-structure) for the publishing
+contract (the canonical top-level `keys[]` JWK Set). Both resolution
+paths read the same list:
 
-1. Obtain the signer's profile URL
-2. Fetch profile (or serve from cache)
-3. Extract `keyid` from `Signature-Input` and match to `kid` in
-   `signing_keys[]`
-4. Verify signature using the corresponding public key
+- **Resolved via `UCP-Agent`** (default UCP key lookup) — read `keys[]`.
+- **Resolved via `Signature-Agent`** (Web Bot Auth, optional) — read
+  `keys[]`; the `cimd`/`directory` variants reach the JWK Set through
+  their own documents.
 
-For key format (JWK), supported algorithms, key rotation procedures, and
-complete signing/verification mechanics, see
+For the full verifier algorithm — capability-based key resolution,
+profile fetching, and covered-component enforcement — see
+[Identity Resolution Algorithm](#identity-resolution-algorithm) below.
+For key format (JWK), supported algorithms, key rotation procedures,
+and the Web Bot Auth interop signature shape, see
 [Message Signatures](signatures.md).
 
 ### Profile Requirements
@@ -1132,24 +1295,197 @@ request access. Strategies include:
   profile in the background; when the platform retries, the validated
   profile is cached and capability negotiation proceeds synchronously
 
-When fetching profiles, the following apply:
+These rules apply to any URL dereferenced during identity resolution —
+the profile, and any `jwks_uri` or CIMD document a verifier follows:
 
-1. Implementations **MUST** reject profile URLs not served over HTTPS.
-2. Implementations **MUST NOT** follow redirects (3xx) on profile fetches.
-3. Implementations **SHOULD** enforce connect and response timeouts on
-   profile fetches.
+1. Implementations **MUST** reject URLs not served over HTTPS.
+2. Implementations **MUST NOT** follow redirects (3xx).
+3. Implementations **SHOULD** enforce connect and response timeouts.
 4. Implementations **SHOULD** cache profiles with a minimum TTL floor
    of 60 seconds, regardless of the origin's `Cache-Control` headers.
 5. Implementations **MAY** refresh profiles asynchronously using
    stale-while-revalidate semantics.
 6. On signature verification failure with an unknown `kid`,
-   implementations **MAY** force-refresh the cached profile — but
-   **MUST NOT** do so more than once per TTL floor per origin.
+   implementations **SHOULD** force-refresh the cached profile once —
+   but **MUST NOT** do so more than once per TTL floor per origin.
+7. Implementations **MUST** reject URLs that resolve to special-use IP
+   addresses ([RFC 6890](https://www.rfc-editor.org/rfc/rfc6890) —
+   loopback, link-local including the cloud-metadata address
+   `169.254.169.254`, private, and other reserved ranges), except a
+   loopback target when the verifier itself runs on the same loopback
+   interface (local development). Verifiers **SHOULD** validate the
+   resolved address, not just the hostname (to resist DNS rebinding),
+   and **SHOULD NOT** dereference a URL contained within a fetched
+   document (e.g. a CIMD `jwks_uri`) that resolves to such an address.
+8. Implementations **SHOULD** bound the response body size to prevent
+   unbounded-response resource exhaustion. A UCP profile is an
+   identity/capability manifest, not a data payload (documented profiles
+   are under 5 KiB); since the schema sets no size limit, this bound is a
+   deployment guard, and verifiers **SHOULD** set it no lower than
+   128 KiB so it does not reject conformant profiles.
 
 If a profile cannot be fetched (timeout, DNS failure, 5xx) or fails
 validation (invalid schema, signing keys, signature mismatch),
 businesses **MUST** reject the request with an appropriate error and
 status code (see [Error Handling](#error-handling)).
+
+### Deployment Patterns for WBA Interop
+
+A UCP profile carrying a top-level `keys[]` array is a valid RFC 7517
+JWK Set, which a signer can optionally reuse as its Web Bot Auth key
+source. The `Signature-Agent` header's `type` parameter selects
+how a verifier resolves the advertised keys. The parameter and
+its `jwks_uri`/`cimd`/`directory` values are defined in §4.1 of
+[draft-meunier-webbotauth-httpsig-directory-00](https://datatracker.ietf.org/doc/draft-meunier-webbotauth-httpsig-directory/00/).
+Each variant can stand alone or point back at the UCP profile:
+
+- **`type=jwks_uri`** — the member value is a JWK Set URL, fetched
+  directly. Point it at the UCP profile URL and the profile's `keys[]`
+  serves as the JWK Set: one document is both profile and key source.
+  Integrity derives from TLS to the profile origin, with no per-key
+  self-signature. Set `type=jwks_uri` explicitly: omitting `type`
+  defaults to `directory` (below), which expects a signed
+  directory, not a static profile.
+
+  ```text
+  Signature-Agent: sig1="https://platform.example/.well-known/ucp";type=jwks_uri
+  ```
+
+- **`type=cimd`** — the member value is a Client ID Metadata Document
+  ([draft-ietf-oauth-client-id-metadata-document](https://datatracker.ietf.org/doc/draft-ietf-oauth-client-id-metadata-document/))
+  whose `jwks_uri` **MAY** point back at the UCP profile. Use when a
+  counterparty consumes CIMD-shaped agent identity.
+
+  ```text
+  Signature-Agent: sig1="https://platform.example/agent";type=cimd
+  ```
+
+- **`type=directory`** *(default)* — when `type` is omitted or set to
+  `directory`, the member value is an **origin** (not a full URL): the
+  verifier appends the registered well-known path
+  (`/.well-known/http-message-signatures-directory`) to that origin and
+  fetches a signed directory there. Its format, per-key self-signatures,
+  and media type are defined by the directory draft §5.2.
+
+  ```text
+  Signature-Agent: sig1="https://platform.example"  # type omitted -> directory
+  Signature-Agent: sig1="https://platform.example";type=directory  # explicit
+  ```
+
+### Identity Resolution Algorithm
+
+UCP and Web Bot Auth define two key-resolution mechanisms. Which one a
+verifier uses is chosen by **verifier capability and the headers
+present**, not by the signature's `tag` — the `tag` is a hint, not a
+gate. Default UCP key lookup (`UCP-Agent`) is supported by every UCP
+verifier and works for any UCP signature; Web Bot Auth key lookup
+(`Signature-Agent`) is an optional, additive layer.
+
+A request MAY carry multiple signatures per
+[RFC 9421 §4.3](https://www.rfc-editor.org/rfc/rfc9421#section-4.3).
+Verifiers attempt each signature independently; the request is
+authenticated when at least one signature verifies. The algorithm
+below processes a single signature.
+
+1. **Resolve the signing key.** A verifier uses a resolution mechanism
+   it supports whose header is present:
+    - **`UCP-Agent` — default UCP key lookup, supported by every UCP
+      verifier.** Resolve the `UCP-Agent` profile URL and read
+      `keys[]`. This path applies to UCP signatures that are
+      untagged (default UCP) or carry `tag="web-bot-auth"` (the
+      dual-audience shape); the verifier resolves them via `UCP-Agent`,
+      treats `signature-agent` as an ordinary covered component, and
+      need not implement Web Bot Auth key discovery. (Verifying a
+      dual-audience signature does still require supporting the key's
+      algorithm — whichever the signer used, per
+      [Signature Algorithms](signatures.md#signature-algorithms) — and
+      RFC 9421 §2.1.2 Dictionary-member component selection to cover
+      `signature-agent;key="<label>"`.) Signatures with tags
+      other than `web-bot-auth` are skipped unless UCP defines
+      or explicitly accepts that tag.
+    - **`Signature-Agent` — Web Bot Auth key lookup, OPTIONAL
+      (WBA-aware verifiers).** For a signature carrying
+      `tag="web-bot-auth"`, a WBA-aware verifier **MAY** instead resolve
+      via the `Signature-Agent` member, parsed per the
+      [Signature-Agent parsing rules](signatures.md#rest-request-verification).
+      Such a signature **MUST** satisfy the WBA agent-signature
+      requirements in
+      [draft-meunier-webbotauth-httpsig-protocol-00](https://datatracker.ietf.org/doc/draft-meunier-webbotauth-httpsig-protocol/00/)
+      §4.2 (see [WBA Interop](signatures.md#wba-interop) for the
+      signer-side shape). The member value **MUST** be an HTTPS URL.
+      Its `type` selects resolution: `jwks_uri` and `cimd` reach the
+      keys through the signer's profile and are resolved by the steps
+      below; the `directory` mechanism is defined by the directory draft
+      (see [Deployment Patterns](#deployment-patterns-for-wba-interop)).
+      `data:` URI inline form is out of scope for UCP-WBA interop.
+   **Skip** this signature if no mechanism the verifier supports can
+   resolve its key — the required header is absent, no `Signature-Agent`
+   member matches the signature label, the URL is non-HTTPS, or the
+   `tag` is scoped to a purpose this verifier does not handle.
+2. **Fetch the document** per [§Fetching](#fetching). If the fetch
+   fails (DNS error, network failure, non-2xx response, parse failure),
+   **skip** this signature.
+3. **Locate the key list.** The profile's top-level `keys[]` (RFC 7517
+   JWK Set) when resolved via `UCP-Agent` or via `Signature-Agent`
+   `type=jwks_uri`; for `type=cimd`, dereference the document's
+   `jwks_uri` to obtain the JWK Set. Integrity derives from TLS to the
+   resolved origin.
+4. **Match the signature's `keyid`** to a `kid` in the resolved key
+   list. When resolving, **skip keys not usable for signature
+   verification**: any key marked `use:"enc"`, or whose `key_ops` is
+   present but does not include `"verify"`
+   ([RFC 7517](https://www.rfc-editor.org/rfc/rfc7517) §4.2, §4.3). Keys
+   that set `use:"sig"` or omit both members remain eligible. **Skip**
+   this signature if no eligible key matches. For WBA-shape signatures
+   (`tag="web-bot-auth"`), the verifier **MUST** also confirm `keyid`
+   equals the [RFC 7638](https://www.rfc-editor.org/rfc/rfc7638) SHA-256
+   thumbprint of the matched JWK — the WBA architecture draft §4.2
+   requires this, binding the advertised key identity to its bytes. If
+   it fails, skip this signature.
+5. **Enforce covered-component requirements, in every regime.**
+   Independent of `tag` and transport, the signature **MUST** cover the
+   request target (`@method`, `@authority`, `@path`; `@query` when a
+   query string is present), the body when present (`content-digest`,
+   `content-type`), and each of these request headers when present:
+   `ucp-agent`, `signature-agent`, `idempotency-key` (a closed set — a
+   header added to UCP later is gate-required only if its defining
+   section says so). If any
+   such component is absent from the signature's covered set, **skip**
+   this signature — a target, body, or header the signature does not
+   cover is treated as unsigned. This prevents a signature satisfying only
+   Web Bot Auth's minimal covered set (`@authority`, `signature-agent`)
+   from authenticating a UCP request whose body, method, or path is
+   unbound. (Whether a request must carry `Idempotency-Key` at all is a
+   binding-level rule, separate from this coverage check.)
+6. **Verify the signature** using the matched key. The signing
+   algorithm is derived from the JWK's `kty`/`crv`. If the verifier
+   does not support the matched key's `kty`, `crv`, or `alg`, **skip**
+   this signature; it yields `algorithm_unsupported` if no other
+   signature authenticates the request.
+
+The request **MUST** be rejected (`key_not_found`,
+`algorithm_unsupported`, or related error) only when every signature
+has been skipped or fails verification.
+
+**Authenticated identity.** When a signature verifies, the
+authenticated signer is identified by the URL that supplied the
+verifying key — the `Signature-Agent` URL for WBA-shape signatures,
+the `UCP-Agent` URL for default UCP signatures.
+Both URLs may be present in the same request; the identity attached
+to the request is determined by which signature verified, not by
+which headers were sent. When multiple signatures verify, each
+identifies the signer only as the URL that supplied its key — a key
+resolved via `Signature-Agent` proves control of that key source, not
+of the `UCP-Agent` profile (whose URL is merely a signed header value).
+Implementations **MUST** treat the request as a single authenticated
+identity only when those URLs are the same after normalization;
+otherwise they are distinct identities and policy decides whether
+either suffices.
+
+This rule governs **HTTP transport identity**. Payload-layer
+assertions (e.g., AP2 mandate JWTs carried in the request body) have
+their own identity binding and key-resolution rules; see
+[AP2 Mandates](ap2-mandates.md).
 
 ## Payment Architecture
 

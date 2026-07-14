@@ -39,6 +39,7 @@ nav:
       - Roadmap: documentation/roadmap.md
       - Schema Authoring: documentation/schema-authoring.md
       - Versioning: versioning.md
+      - Announcements: documentation/announcements.md
   - Specification:
       - Overview: specification/overview.md
       - Checkout Capability:
@@ -266,6 +267,9 @@ plugins:
               UCP's strict date-based versioning policy (YYYY-MM-DD) and
               compatibility guidelines for managing breaking changes and
               release branches.
+          - documentation/announcements.md: >-
+              General announcements, release notes, and community updates for
+              the Universal Commerce Protocol.
         Specification:
           - specification/overview.md: >-
               Master technical specification of UCP, discovery mechanisms,
