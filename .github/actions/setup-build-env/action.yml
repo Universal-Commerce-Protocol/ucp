@@ -20,7 +20,11 @@ runs:
       id: get-version
       shell: bash
       run: |
-        VERSION=$(curl -s https://crates.io/api/v1/crates/ucp-schema | jq -r '.crate.max_version')
+        VERSION=$(cargo info ucp-schema | sed -n 's/^version: //p')
+        if [[ -z "$VERSION" ]]; then
+          echo "Error: Failed to fetch valid version from crates.io using cargo info" >&2
+          exit 1
+        fi
         echo "version=$VERSION" >> $GITHUB_OUTPUT
 
     - name: Cache ucp-schema binary
@@ -33,7 +37,7 @@ runs:
     - name: Install ucp-schema
       if: steps.cache-ucp-schema.outputs.cache-hit != 'true'
       shell: bash
-      run: cargo install ucp-schema
+      run: cargo install ucp-schema --version ${{ steps.get-version.outputs.version }}
 
     - name: Add cargo to PATH
       shell: bash
