@@ -913,7 +913,16 @@ def define_env(env):
             parent_required_list,
           )
           desc = embedded_schema_data.get("description", "")
-          if desc and need_header:
+          # Scalar schemas (a string/enum with no properties or
+          # composition) already embed their description in the rendered
+          # fallback table; prepending it here would duplicate it. Only
+          # structured schemas — whose table is a property grid that omits
+          # the description — need the description prepended.
+          is_structured = any(
+            key in embedded_schema_data
+            for key in ("properties", "allOf", "oneOf", "$ref")
+          )
+          if desc and need_header and is_structured:
             return f"{desc}\n\n{table}"
           return table
         else:
