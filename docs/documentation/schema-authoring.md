@@ -224,7 +224,7 @@ Each entity type defines **three variants** for different contexts:
   "dev.ucp.shopping.fulfillment": [{
     "version": "{{ ucp_version }}",
     "config": {
-      "allows_multi_destination": {"shipping": true}
+      "multi_destination": [{"method": "shipping"}]
     }
   }]
 }
@@ -318,6 +318,10 @@ Because modern code generators (e.g. [Quicktype](https://quicktype.io/)) transla
 classes (e.g., Go structs or Java Enums), certain schema constraints will cause deserialization errors on older clients
 as the protocol evolves.  Avoiding such changes helps minimize the need to up-version the protocol.
 
+A second failure mode comes from composition itself: extensions extend a base with `allOf`, which can only *add*
+constraints. An `allOf` of two enums (or two `oneOf`s) *intersects* their members — it never unions in a new value or
+branch — so a closed `enum`, `oneOf`, or `additionalProperties: false` is a one-way door an extension cannot widen.
+
 ### Open Enumerations
 
 If a field's list of values might expand in the future (e.g., adding a `"refunded"` status or a new payment method),
@@ -349,6 +353,46 @@ versions, strict type discriminators, or days of the week).
   "type": "string",
   "enum": ["open", "completed", "expired"],
   "description": "Lifecycle state. This domain is strictly bounded; unknown states represent a breakdown in the state machine and MUST be rejected."
+}
+```
+
+### Variants (`oneOf`)
+
+`oneOf` models a sum type — a field that is *one of several shapes* — but it is **closed**, with the same one-way-door
+problem as `enum`: an extension cannot add a branch (an `allOf` of two `oneOf`s intersects their branches, it does not
+union them), and under open objects (`additionalProperties: true`) a payload matching two branches fails `oneOf`
+validation.
+
+For a variant set that may grow, model it as open in one of two ways:
+
+- an **open discriminator** — an open `type`/`kind` string that names the active form, with tolerant readers, exactly
+  like an open enumeration; or
+- a single **open object with documented precedence** — when the active form is implied by which field is present
+  rather than a tag, a stated rule decides which one wins if more than one appears.
+
+Reserve `oneOf` for permanently fixed variant sets — the same bar as a closed `enum`.
+
+<!-- ucp:example skip reason="schema authoring example" -->
+```json
+// PREFER: an open `kind` discriminator — a new variant is a new value; readers tolerate unknowns
+"target": {
+  "type": "object",
+  "required": ["kind"],
+  "properties": {
+    "kind": {
+      "type": "string",
+      "description": "Delivery target. Well-known: `email`, `sms`. Unknown values MUST be tolerated.",
+      "examples": ["email", "sms"]
+    }
+  }
+}
+
+// AVOID: oneOf — adding a `push` variant means adding a branch, which an extension cannot do
+"target": {
+  "oneOf": [
+    { "required": ["email_address"], "properties": { "email_address": { "type": "string" } } },
+    { "required": ["phone_number"],  "properties": { "phone_number":  { "type": "string" } } }
+  ]
 }
 ```
 
@@ -651,12 +695,22 @@ shows an envelope but only a subtree is the UCP payload under validation.
 <!-- ucp:example schema=shopping/checkout op=create direction=request extract=$.params.arguments.checkout -->
 ```
 
-**Schema with `$defs`.** Some schemas (e.g. catalog) define request/response
-inside `$defs`. Use `def=` to extract and validate against the named
-definition.
+**Schema with `$defs`.** Some schemas hold several message shapes under
+`$defs`. When a capability's request and response are different objects (e.g.
+catalog: a search request is a query, a search response is a list of products),
+just name the operation and direction — the validator selects
+`$defs/{op}_{direction}` automatically:
 
 ```text
-<!-- ucp:example schema=shopping/catalog_search def=request_schema direction=request -->
+<!-- ucp:example schema=shopping/catalog_search op=search direction=response extract=$.result.structuredContent -->
+```
+
+For a shape that isn't an operation+direction — a transport's `error_response`,
+a profile's `business_schema`, or a named sub-type — select it explicitly with
+`def=`:
+
+```text
+<!-- ucp:example schema=transports/jsonrpc def=error_response op=read -->
 ```
 
 **Empty body.** A `{}` payload (e.g. cancel, GET) validates trivially against

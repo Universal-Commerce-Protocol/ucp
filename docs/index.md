@@ -768,6 +768,10 @@ image: assets/banner.png
         <span>Hilton</span>
       </div>
       <div class="partner-logo">
+        <img src="assets/partner/endorsed/iconic.svg" alt="Iconic" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+        <span>Iconic</span>
+      </div>
+      <div class="partner-logo">
         <img src="assets/partner/endorsed/ihg.svg" alt="IHG" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
         <span>IHG</span>
       </div>
@@ -963,6 +967,10 @@ image: assets/banner.png
       <div class="partner-logo">
         <img src="assets/partner/codeveloped/lodging/Hilton.svg" alt="Hilton" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
         <span>Hilton</span>
+      </div>
+      <div class="partner-logo">
+        <img src="assets/partner/endorsed/iconic.svg" alt="Iconic" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+        <span>Iconic</span>
       </div>
       <div class="partner-logo">
         <img src="assets/partner/endorsed/ihg.svg" alt="IHG" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">

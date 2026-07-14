@@ -428,7 +428,7 @@ def test_process_block_integration() -> None:
   # def= selects a schema variant; target= selects a sub-schema within it.
   md = (
     "<!-- ucp:example schema=profile def=business_schema target=$.ucp.capabilities -->\n"  # noqa: E501
-    '```json\n{ "dev.ucp.shopping.checkout": [{ "version": "{{ ucp_version }}" }] }\n```\n'  # noqa: E501
+    '```json\n{ "dev.ucp.shopping.checkout": [{ "version": "{{ ucp_version }}", "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/checkout.json" }] }\n```\n'  # noqa: E501
   )
   result = _process(md)
   _check(
