@@ -497,7 +497,7 @@ Opt-in declaration (business MAY return multiple groups per method):
 
 ### Business Profile
 
-Businesses declare what fulfillment configurations they support using `merchant_config`:
+Businesses declare what fulfillment configurations they support using `business_config`:
 
 | Name                | Type          | Required | Description                                                                                                                                                                                                 |
 | ------------------- | ------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

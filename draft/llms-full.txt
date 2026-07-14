@@ -9479,7 +9479,7 @@ Opt-in declaration (business MAY return multiple groups per method):
 
 ### Business Profile
 
-Businesses declare what fulfillment configurations they support using `merchant_config`:
+Businesses declare what fulfillment configurations they support using `business_config`:
 
 | Name                | Type          | Required | Description                                                                                                                                                                                                 |
 | ------------------- | ------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -19389,15 +19389,6 @@ ______________________________________________________________________
 | quantity  | integer                                                 | **Yes**  | Quantity of the item being purchased.                  |
 | totals    | Array\[[Total](/draft/specification/reference/#total)\] | **Yes**  | Line item totals breakdown.                            |
 | parent_id | string                                                  | No       | Parent line item identifier for any nested structures. |
-
-______________________________________________________________________
-
-### Merchant Fulfillment Config
-
-| Name                | Type          | Required | Description                                                                                                                                                                                                 |
-| ------------------- | ------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| multi_destination   | Array[object] | No       | Method types that permit multiple destinations within one cart (e.g. split shipping across addresses). Listing a method permits it; an omitted method does not. Open — businesses MAY list any method type. |
-| method_combinations | Array[array]  | No       | Method-type combinations the business permits within one cart. Each inner array is a permitted set of method `type` values (e.g. shipping + pickup).                                                        |
 
 ______________________________________________________________________
 

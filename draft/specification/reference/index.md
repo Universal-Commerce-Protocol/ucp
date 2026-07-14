@@ -557,15 +557,6 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-### Merchant Fulfillment Config
-
-| Name                | Type          | Required | Description                                                                                                                                                                                                 |
-| ------------------- | ------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| multi_destination   | Array[object] | No       | Method types that permit multiple destinations within one cart (e.g. split shipping across addresses). Listing a method permits it; an omitted method does not. Open — businesses MAY list any method type. |
-| method_combinations | Array[array]  | No       | Method-type combinations the business permits within one cart. Each inner array is a permitted set of method `type` values (e.g. shipping + pickup).                                                        |
-
-______________________________________________________________________
-
 ### Option Value
 
 | Name  | Type   | Required | Description                                                                                                                                           |
