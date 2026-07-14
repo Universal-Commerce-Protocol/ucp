@@ -23,12 +23,12 @@
       "items": {
         "type": "string"
       },
-      "description": "RFC 9535 JSONPath expressions identifying the targets this policy applies to, relative to the embedding response root (e.g., `$.line_items[0]` in cart/checkout, `$.products[2]` in catalog). When omitted, the policy applies to the entire response. When multiple policies of the same `type` match an item, the most specific `applies_to` match wins."
+      "description": "RFC 9535 JSONPath expressions identifying the nodes this policy applies to, relative to the embedding response root (e.g., `$.line_items[0]` in cart/checkout, `$.products[2]` in catalog). Each target covers the node it names and everything nested under it, so a target on a product also covers its variants. A singular query (RFC 9535 Section 2.3.5.1; name and index selectors only) names a single node; filters, wildcards, and slices match a set. When omitted, the policy applies to the entire response. When policies of the same `type` contest a node, the narrowest target wins and overrides the rest. See the Policies section for how specificity resolves."
     },
     "url": {
       "type": "string",
       "format": "uri",
-      "description": "Optional link to the full policy document. When omitted, platforms fall back to the corresponding `links[]` entry by type convention (e.g., a policy with `type: \"dev.ucp.shopping.policy.refund\"` falls back to `links[].type == \"refund_policy\"`)."
+      "description": "Optional link to the full policy document."
     }
   },
   "allOf": [

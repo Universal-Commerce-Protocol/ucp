@@ -2,38 +2,6 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/shopping/types/policy_refund.json",
   "title": "Refund Policy",
-  "description": "Refund-specific fields layered onto the base Policy envelope when `type == \"dev.ucp.shopping.policy.refund\"`. Covers pre-purchase disclosure of the return/refund window only. Post-purchase resolution — return methods, fees, refund destination, supported resolutions — is out of scope and belongs to a future return-action capability, where the buyer-supplied reason, item condition, and return origin are known.",
-  "type": "object",
-  "properties": {
-    "window": {
-      "type": "object",
-      "description": "The return window the business commits to — a duration, not a pre-computed deadline. Absent when `final_sale` is true.",
-      "required": [
-        "days",
-        "from"
-      ],
-      "properties": {
-        "days": {
-          "type": "integer",
-          "minimum": 1,
-          "description": "Length of the return window in days."
-        },
-        "from": {
-          "type": "string",
-          "description": "Anchor event from which the window is measured. Open vocabulary. Well-known values: `delivered` (industry default), `shipped`, `placed`. Platforms MUST tolerate unknown values."
-        }
-      }
-    },
-    "final_sale": {
-      "type": "boolean",
-      "default": false,
-      "description": "When true, the targeted items are non-returnable (final sale) and no return window applies. Mutually exclusive with `window`."
-    }
-  },
-  "not": {
-    "required": [
-      "window",
-      "final_sale"
-    ]
-  }
+  "description": "Refund-specific fields layered onto the base Policy envelope when `type == \"dev.ucp.shopping.policy.refund\"`. Placeholder: the structured refund body (return window, resolutions, fees) is defined by the refund policy proposal. Until then a refund policy carries the base `type` + `description` and adds no further fields.",
+  "type": "object"
 }
