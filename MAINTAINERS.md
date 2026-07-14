@@ -23,7 +23,7 @@ design of the protocol.
 
 <!-- cSpell:ignore Amit Handa Anurag Sinha Daniel Wyckoff Drew Olson -->
 <!-- cSpell:ignore Greg Smith Ilya Grigorik Imran Hoosain James Andersen -->
-<!-- cSpell:ignore Jing Li Lee Richmond Maxime Najim Naga Malepati -->
+<!-- cSpell:ignore Jing Li Lee Richmond Maxime Najim Uddhav Kambli -->
 <!-- cSpell:ignore Patrick Jordan Prasad Wangikar Scot DeDeo Twum Djin -->
 <!-- cSpell:ignore Victoria Duggan -->
 | Name | Company |
@@ -39,10 +39,10 @@ design of the protocol.
 | Jing Li | Google |
 | Lee Richmond | Shopify |
 | Maxime Najim | Target |
-| Naga Malepati | Wayfair |
 | Patrick Jordan | Microsoft |
 | Prasad Wangikar | Stripe |
 | Scot DeDeo | Salesforce |
+| Uddhav Kambli | Wayfair |
 | Victoria Duggan | Shopify |
 
 ## Governance Council
