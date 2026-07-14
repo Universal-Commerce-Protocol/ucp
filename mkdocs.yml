@@ -30,7 +30,6 @@ edit_uri: edit/main/docs/
 nav:
   - Overview:
       - Home: index.md
-      - Announcements: documentation/announcements.md
       - Core Concepts: documentation/core-concepts.md
       - Specification: !ENV [
           SPEC_URL,
@@ -40,6 +39,7 @@ nav:
       - Roadmap: documentation/roadmap.md
       - Schema Authoring: documentation/schema-authoring.md
       - Versioning: versioning.md
+      - Announcements: documentation/announcements.md
   - Specification:
       - Overview: specification/overview.md
       - Checkout Capability:
@@ -251,9 +251,6 @@ plugins:
               Fundamental UCP abstractions, including the decoupled separation
               of capabilities, extensions, services, and the decentralized
               protocol negotiation model.
-          - documentation/announcements.md: >-
-              General announcements, release notes, and community updates for
-              the Universal Commerce Protocol.
           - documentation/ucp-and-ap2.md: >-
               Integration patterns with the Agent Payments Protocol (AP2) to
               facilitate secure, agent-mediated checkout commitments and
@@ -268,6 +265,9 @@ plugins:
               UCP's strict date-based versioning policy (YYYY-MM-DD) and
               compatibility guidelines for managing breaking changes and
               release branches.
+          - documentation/announcements.md: >-
+              General announcements, release notes, and community updates for
+              the Universal Commerce Protocol.
         Specification:
           - specification/overview.md: >-
               Master technical specification of UCP, discovery mechanisms,

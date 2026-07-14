@@ -8,39 +8,68 @@
   "$defs": {
     "jwk_public_key": {
       "type": "object",
-      "description": "EC public JSON Web Key used for HTTP Message Signatures and signed webhook verification. UCP profiles publish public keys only; private key material MUST NOT appear in a profile. Additional public JWK members are permitted; consumers ignore unknown members.",
-      "required": ["kid", "kty", "crv", "x", "y"],
+      "description": "Public JSON Web Key used for HTTP Message Signatures and signed webhook verification. UCP profiles publish public keys only; private key material MUST NOT appear in a profile. Well-known key types: EC (ECDSA P-256, P-384) and OKP (EdDSA Ed25519); OKP keys are RECOMMENDED for signers opting into Web Bot Auth (WBA) interop on HTTP transport. A single profile MAY publish keys of either or both types; consumers select keys by kid. The kty, crv, and alg vocabularies are OPEN: verifiers MUST tolerate key types, curves, and algorithms they do not recognize, selecting keys by kid at verification time. An unsupported key affects only the signature that references it (algorithm_unsupported) and MUST NOT cause whole-profile rejection. Additional public JWK members are permitted; consumers ignore unknown members.",
+      "required": ["kid", "kty"],
       "properties": {
         "kid": {
           "type": "string",
-          "description": "Key identifier referenced by Signature-Input keyid."
+          "description": "Key identifier referenced by Signature-Input keyid. For keys used in dual-audience (Web Bot Auth) signatures, the kid MUST be the key's JWK SHA-256 Thumbprint (RFC 7638) so UCP-Agent and Signature-Agent lookups resolve the same key; otherwise the kid MAY be any stable string."
         },
         "kty": {
           "type": "string",
-          "const": "EC",
-          "description": "JWK key type. UCP profile signing keys use EC."
+          "examples": ["EC", "OKP"],
+          "description": "JWK key type. Well-known values: EC for ECDSA (P-256, P-384); OKP for EdDSA (Ed25519). Open vocabulary; verifiers tolerate unrecognized types and select keys by kid."
         },
         "crv": {
           "type": "string",
-          "description": "Elliptic curve name, e.g. P-256 or P-384."
+          "examples": ["P-256", "P-384", "Ed25519"],
+          "description": "Curve name. Well-known values: P-256, P-384 (EC); Ed25519 (OKP). Open vocabulary."
         },
         "x": {
           "type": "string",
-          "description": "Public key x coordinate for EC keys."
+          "description": "Public key value, base64url-encoded. For EC, the x coordinate (RFC 7518 §6.2); for OKP, the public key (RFC 8037 §2)."
         },
         "y": {
           "type": "string",
-          "description": "Public key y coordinate for EC keys."
+          "description": "EC public key y coordinate, base64url-encoded (RFC 7518 §6.2). Not used by OKP keys."
+        },
+        "alg": {
+          "type": "string",
+          "examples": ["ES256", "ES384", "EdDSA"],
+          "description": "JWA algorithm associated with this public key. Optional; verifiers derive the algorithm from crv when alg is omitted. When present for a well-known curve it MUST match: ES256 with P-256, ES384 with P-384, EdDSA with Ed25519."
         },
         "use": {
           "type": "string",
           "description": "JWK public key use. UCP examples use sig for signatures."
-        },
-        "alg": {
-          "type": "string",
-          "description": "JWA algorithm associated with this public key."
         }
       },
+      "allOf": [
+        {
+          "title": "EC keys carry crv, x, y",
+          "if": { "properties": { "kty": { "const": "EC" } }, "required": ["kty"] },
+          "then": { "required": ["crv", "x", "y"] }
+        },
+        {
+          "title": "OKP keys carry crv, x",
+          "if": { "properties": { "kty": { "const": "OKP" } }, "required": ["kty"] },
+          "then": { "required": ["crv", "x"] }
+        },
+        {
+          "title": "P-256 pairs with ES256",
+          "if": { "properties": { "crv": { "const": "P-256" } }, "required": ["crv"] },
+          "then": { "properties": { "alg": { "const": "ES256" } } }
+        },
+        {
+          "title": "P-384 pairs with ES384",
+          "if": { "properties": { "crv": { "const": "P-384" } }, "required": ["crv"] },
+          "then": { "properties": { "alg": { "const": "ES384" } } }
+        },
+        {
+          "title": "Ed25519 pairs with EdDSA",
+          "if": { "properties": { "crv": { "const": "Ed25519" } }, "required": ["crv"] },
+          "then": { "properties": { "alg": { "const": "EdDSA" } } }
+        }
+      ],
       "not": {
         "anyOf": [
           { "required": ["d"] },
@@ -65,9 +94,9 @@
           "$ref": "ucp.json#/$defs/base",
           "description": "Protocol metadata, capabilities, services, and payment handlers advertised by this party."
         },
-        "signing_keys": {
+        "keys": {
           "type": "array",
-          "description": "Public keys used to verify signatures from this profile owner.",
+          "description": "Canonical UCP profile field for publishing signing keys, as a JWK Set per RFC 7517. When a profile publishes signing keys, they MUST appear here; this is where every UCP verifier reads them. Publishing keys[] makes the UCP profile a valid JWK Set that a signer can reuse as its Web Bot Auth key source: a WBA-shape verifier resolving via Signature-Agent type=jwks_uri pointed at this profile reads these keys, and the cimd and directory variants reach them through their own documents. See the Deployment Patterns for WBA Interop section in the overview for hosting patterns.",
           "items": { "$ref": "#/$defs/jwk_public_key" }
         }
       },
