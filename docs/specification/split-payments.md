@@ -173,8 +173,12 @@ MUST process each request as a fresh, full submission, without
 reference to prior requests or responses.
 
 > [!NOTE]
-> **Idempotency & Correlation during Recovery Retries:**
-> When retrying a partially authorized split payment with a modified set of payment instruments (e.g., replacing a declined card), the request payload changes and therefore **MUST** use a new idempotency key. Downstream systems cannot rely on the idempotency key to correlate the retry with previous partial authorizations; they must use the stable Checkout Session `id` to correlate and reconcile these distinct attempts.
+> Each split payments submission is processed as a complete,
+> self-contained request: a modified instrument set is a new submission,
+> requiring a fresh [idempotency key](signatures.md#replay-protection).
+> Split-payments state — including authorizations — does not persist
+> between submissions; the unwind-on-failure requirement above
+> enforces this.
 
 **Per-instrument reporting:** when a split is incomplete or has failed,
 the business MUST emit a `payment_failed` error for each failed
