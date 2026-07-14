@@ -25,6 +25,7 @@ This document specifies the REST binding for the [Cart Capability](cart.md).
 Businesses advertise REST transport availability through their UCP profile at
 `/.well-known/ucp`.
 
+<!-- ucp:example schema=profile def=business_schema -->
 ```json
 {
   "ucp": {
@@ -55,7 +56,8 @@ Businesses advertise REST transport availability through their UCP profile at
           "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/cart.json"
         }
       ]
-    }
+    },
+    "payment_handlers": {}
   }
 }
 ```
@@ -101,6 +103,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
 === "Request"
 
+    <!-- ucp:example schema=shopping/cart op=create direction=request -->
     ```json
     POST /carts HTTP/1.1
     UCP-Agent: profile="https://platform.example/profile"
@@ -125,6 +128,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/cart op=read -->
     ```json
     HTTP/1.1 201 Created
     Content-Type: application/json
@@ -174,12 +178,13 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
     All items out of stock — no cart resource is created:
 
+    <!-- ucp:example schema=common/types/error_response op=read -->
     ```json
     HTTP/1.1 200 OK
     Content-Type: application/json
 
     {
-      "ucp": { "version": "2026-01-15", "status": "error" },
+      "ucp": { "version": "{{ ucp_version }}", "status": "error" },
       "messages": [
         {
           "type": "error",
@@ -206,13 +211,14 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
 === "Request"
 
-    ```json
+    ```http
     GET /carts/{id} HTTP/1.1
     UCP-Agent: profile="https://platform.example/profile"
     ```
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/cart op=read -->
     ```json
     HTTP/1.1 200 OK
     Content-Type: application/json
@@ -259,6 +265,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
 === "Not Found"
 
+    <!-- ucp:example schema=common/types/error_response op=read -->
     ```json
     HTTP/1.1 200 OK
     Content-Type: application/json
@@ -299,6 +306,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
 === "Request"
 
+    <!-- ucp:example schema=shopping/cart op=update direction=request -->
     ```json
     PUT /carts/{id} HTTP/1.1
     UCP-Agent: profile="https://platform.example/profile"
@@ -332,6 +340,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/cart op=read -->
     ```json
     HTTP/1.1 200 OK
     Content-Type: application/json
@@ -403,6 +412,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
 === "Request"
 
+    <!-- ucp:example schema=shopping/cart op=cancel direction=request -->
     ```json
     POST /carts/{id}/cancel HTTP/1.1
     UCP-Agent: profile="https://platform.example/profile"
@@ -413,6 +423,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/cart op=read -->
     ```json
     HTTP/1.1 200 OK
     Content-Type: application/json
@@ -472,8 +483,10 @@ operations unless otherwise noted.
 * **Idempotency-Key**: Operations that modify state **SHOULD** support
     idempotency. When provided, the server **MUST**:
     1. Store the key with the operation result for at least 24 hours.
-    2. Return the cached result for duplicate keys.
-    3. Return `409 Conflict` if the key is reused with different parameters.
+    2. Return the cached result for duplicate keys whose request body matches the original.
+    3. Return `409 Conflict` if the key is reused with a mismatched body.
+    See [Message Signatures — Idempotency Key Requirements](signatures.md#replay-protection)
+    for the full payload-matching contract.
 
 ## Protocol Mechanics
 
@@ -507,6 +520,7 @@ code registry and transport binding examples.
 Business outcomes (including not found and validation errors) are returned with
 HTTP 200 and the UCP envelope containing `messages`:
 
+<!-- ucp:example schema=common/types/error_response op=read -->
 ```json
 {
   "ucp": {

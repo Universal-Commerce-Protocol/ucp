@@ -66,6 +66,7 @@ instrument or a future redemption capability, not by this loyalty extension.
 * One membership can offer multiple types of accumulable/collectable rewards, each having
   its own usage and redemption rules.
 
+<!-- ucp:example schema=common/loyalty def=loyalty extract=$.loyalty -->
 ```json
 {
   "loyalty": {
@@ -100,6 +101,7 @@ catalog lookup, cart, and checkout capabilities. Businesses MAY advertise loyalt
 support for any subset of these capabilities. Platforms SHOULD check which resources are
 extended.
 
+<!-- ucp:example schema=profile def=business_schema extract=$.ucp.capabilities target=$.ucp.capabilities -->
 ```json
 {
   "ucp": {
@@ -282,6 +284,7 @@ a warning message to disclose the inapplicability of the second discount.
 
 === "Request"
 
+    <!-- ucp:example schema=shopping/cart op=create direction=request -->
     ```json
     {
       "context": {
@@ -300,6 +303,7 @@ a warning message to disclose the inapplicability of the second discount.
 
 === "Response"
 
+    <!-- ucp:example schema=common/loyalty def=loyalty extract=$.loyalty -->
     ```json
     {
       "discounts": {
@@ -349,6 +353,7 @@ non-provisional and `display_id` is returned.
 
 === "Request"
 
+    <!-- ucp:example schema=shopping/cart op=create direction=request -->
     ```json
     {
       "context": {
@@ -367,6 +372,7 @@ non-provisional and `display_id` is returned.
 
 === "Response"
 
+    <!-- ucp:example schema=common/loyalty def=loyalty extract=$.loyalty -->
     ```json
     {
       "discounts": {
@@ -408,6 +414,7 @@ If the claim cannot be verified, the business MUST return a recoverable error vi
 
 === "Request"
 
+    <!-- ucp:example schema=shopping/cart op=create direction=request -->
     ```json
     {
       "context": {
@@ -426,6 +433,7 @@ If the claim cannot be verified, the business MUST return a recoverable error vi
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/cart extract=$.messages target=$.messages -->
     ```json
     {
       "messages": [
@@ -459,6 +467,7 @@ hold the Retail Club membership and the Retail Card. The platform can then rende
 
 === "Request"
 
+    <!-- ucp:example schema=shopping/cart op=create direction=request -->
     ```json
     {
       "context": {
@@ -480,6 +489,7 @@ hold the Retail Club membership and the Retail Card. The platform can then rende
 
 === "Response"
 
+    <!-- ucp:example schema=common/loyalty def=loyalty extract=$.loyalty -->
     ```json
     {
       "line_items": [
@@ -575,6 +585,7 @@ calculated.
 
 === "Request"
 
+    <!-- ucp:example schema=shopping/cart op=create direction=request -->
     ```json
     {
       "context": {
@@ -593,6 +604,7 @@ calculated.
 
 === "Response"
 
+    <!-- ucp:example schema=common/loyalty def=loyalty extract=$.loyalty -->
     ```json
     {
       "line_items": [

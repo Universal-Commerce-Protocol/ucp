@@ -26,6 +26,7 @@ This document specifies the Model Context Protocol (MCP) binding for the
 Businesses advertise MCP transport availability through their UCP profile at
 `/.well-known/ucp`.
 
+<!-- ucp:example schema=profile def=business_schema -->
 ```json
 {
   "ucp": {
@@ -49,7 +50,8 @@ Businesses advertise MCP transport availability through their UCP profile at
           "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/order.json"
         }
       ]
-    }
+    },
+    "payment_handlers": {}
   }
 }
 ```
@@ -59,6 +61,7 @@ Businesses advertise MCP transport availability through their UCP profile at
 MCP clients **MUST** include a `meta` object in every request containing
 protocol metadata:
 
+<!-- ucp:example schema=transports/mcp_tool_call def=request direction=request -->
 ```json
 {
   "jsonrpc": "2.0",
@@ -107,6 +110,7 @@ current-state snapshot of an order.
 
 === "Request"
 
+    <!-- ucp:example schema=transports/mcp_tool_call def=request direction=request -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -128,6 +132,7 @@ current-state snapshot of an order.
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/order op=read direction=response extract=$.result.structuredContent -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -195,7 +200,7 @@ current-state snapshot of an order.
         "content": [
           {
             "type": "text",
-            "text": "{\"ucp\":{...},\"id\":\"order_abc123\",...}"
+            "text": "{\"ucp\":{…},…}"
           }
         ]
       }
@@ -204,6 +209,7 @@ current-state snapshot of an order.
 
 === "Not Found"
 
+    <!-- ucp:example schema=common/types/error_response op=read direction=response extract=$.result.structuredContent -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -238,6 +244,7 @@ current-state snapshot of an order.
 
 === "Not Authorized"
 
+    <!-- ucp:example schema=common/types/error_response op=read direction=response extract=$.result.structuredContent -->
     ```json
     {
       "jsonrpc": "2.0",
