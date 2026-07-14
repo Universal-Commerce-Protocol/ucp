@@ -15,7 +15,7 @@
     "capabilities": {},
     "payment_handlers": {}
   },
-  "signing_keys": [
+  "keys": [
     {
       "kid": "key_2026",
       "kty": "EC",

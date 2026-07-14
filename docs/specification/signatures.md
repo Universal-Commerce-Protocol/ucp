@@ -52,8 +52,7 @@ for all HTTP-based transports:
 |              optional — open vocabulary, counterparty-driven    |
 |              (see Signature Algorithms)                         |
 |  Key Format: JWK (RFC 7517 + RFC 8037 for Ed25519)              |
-|  Key Discovery: signing_keys[] (canonical) or top-level keys[]  |
-|                 (RFC 7517 JWK Set mirror) in /.well-known/ucp   |
+|  Key Discovery: keys[] (RFC 7517 JWK Set) in /.well-known/ucp   |
 |  Replay Protection: idempotency-key (business layer)            |
 +-----------------------------------------------------------------+
                               |
@@ -173,7 +172,7 @@ types, and verifiers skip those they cannot use.
 
 **EC Example (ES256):**
 
-<!-- ucp:example schema=profile extract=$ target=$.signing_keys[0] -->
+<!-- ucp:example schema=profile extract=$ target=$.keys[0] -->
 ```json
 {
   "kid": "key-2024-01-15",
@@ -188,7 +187,7 @@ types, and verifiers skip those they cannot use.
 
 **OKP Example (Ed25519 / EdDSA):**
 
-<!-- ucp:example schema=profile extract=$ target=$.signing_keys[0] -->
+<!-- ucp:example schema=profile extract=$ target=$.keys[0] -->
 ```json
 {
   "kid": "poqkLGiymh_W0uP6PZFw-dvez3QJT5SolqXBCW38r0U",
@@ -221,14 +220,12 @@ mechanism).
 
 To rotate keys without service interruption:
 
-1. **Add new key** — Publish new key in the profile's `signing_keys[]`
-   (and mirror in `keys[]` if the profile uses the JWKS-superset form)
+1. **Add new key** — Publish the new key in the profile's `keys[]`
    alongside existing keys
 2. **Start signing** — Begin signing with the new key
 3. **Grace period** — Continue accepting signatures from old keys (minimum 7 days)
-4. **Remove old key** — Remove the old key from `signing_keys[]` (and
-   from `keys[]` if published). A key still listed in either array
-   continues to verify.
+4. **Remove old key** — Remove the old key from `keys[]`. A key still
+   listed in `keys[]` continues to verify.
 
 **Recommendations:**
 
@@ -237,9 +234,8 @@ To rotate keys without service interruption:
 
 **Key Compromise Response:**
 
-1. Immediately remove the compromised key from `signing_keys[]` and
-   `keys[]` (if published); it continues to verify until absent from
-   both arrays
+1. Immediately remove the compromised key from `keys[]`; it continues
+   to verify until absent from the array
 2. Add new key with different `kid`
 3. Reject all signatures made with compromised key
 
@@ -687,7 +683,9 @@ verify_rest_request(request):
     // 2. Resolve signer's public key (capability-based; see
     // overview.md#identity-resolution-algorithm).
     key_set = resolve_signer_key_set(request.headers)
-    public_key = find_key_by_kid(key_set, keyid)
+    // sig_capable skips keys not usable for verification: use:"enc", or
+    // key_ops present without "verify" (RFC 7517 §4.2, §4.3)
+    public_key = find_key_by_kid(sig_capable(key_set), keyid)
     if not public_key:
         return skip_signature("key_not_found")
 
@@ -758,7 +756,8 @@ verify_rest_response(response, signer_profile_url):
 
     // 2. Resolve signer's public key from the signer's profile.
     profile = fetch_profile(signer_profile_url)
-    public_key = find_key_by_kid(profile.signing_keys, keyid)
+    // signature-capable keys only (see request path; RFC 7517 §4.2, §4.3)
+    public_key = find_key_by_kid(sig_capable(profile.keys), keyid)
     if not public_key:
         return skip_signature("key_not_found")
 
