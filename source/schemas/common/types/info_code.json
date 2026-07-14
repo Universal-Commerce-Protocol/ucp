@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/info_code.json",
+  "title": "Info Code",
+  "description": "Info code identifying the type of informational message. Standard codes are defined in capability specifications (see examples) and have standardized semantics; freeform codes are permitted.",
+  "type": "string",
+  "examples": [
+    "identity_optional",
+    "signal",
+    "free_shipping",
+    "not_found"
+  ]
+}

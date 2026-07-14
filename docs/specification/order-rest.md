@@ -25,6 +25,7 @@ This document specifies the REST binding for the [Order Capability](order.md).
 Businesses advertise REST transport availability through their UCP profile at
 `/.well-known/ucp`.
 
+<!-- ucp:example schema=profile def=business_schema -->
 ```json
 {
   "ucp": {
@@ -48,7 +49,8 @@ Businesses advertise REST transport availability through their UCP profile at
           "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/order.json"
         }
       ]
-    }
+    },
+    "payment_handlers": {}
   }
 }
 ```
@@ -95,7 +97,7 @@ Returns the current-state snapshot of an order.
 
 === "Request"
 
-    ```json
+    ```http
     GET /orders/order_abc123 HTTP/1.1
     UCP-Agent: profile="https://platform.example/.well-known/ucp"
     Accept: application/json
@@ -105,6 +107,7 @@ Returns the current-state snapshot of an order.
 
 === "Response"
 
+    <!-- ucp:example schema=shopping/order op=read -->
     ```json
     HTTP/1.1 200 OK
     Content-Type: application/json
@@ -172,6 +175,7 @@ Returns the current-state snapshot of an order.
 
 === "Not Found"
 
+    <!-- ucp:example schema=common/types/error_response op=read -->
     ```json
     HTTP/1.1 200 OK
     Content-Type: application/json
@@ -197,6 +201,7 @@ Returns the current-state snapshot of an order.
 
 === "Not Authorized"
 
+    <!-- ucp:example schema=common/types/error_response op=read -->
     ```json
     HTTP/1.1 200 OK
     Content-Type: application/json

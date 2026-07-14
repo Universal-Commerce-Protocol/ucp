@@ -123,6 +123,7 @@ Line items reflect what was purchased at checkout and their current state.
 
 **Quantity Structure:**
 
+<!-- ucp:example schema=shopping/types/order_line_item target=$.quantity -->
 ```json
 {
   "original": 3,   // Quantity from the original checkout
@@ -172,6 +173,7 @@ Examples: `refund`, `return`, `credit`, `price_adjustment`, `dispute`,
 
 ## Example
 
+<!-- ucp:example schema=shopping/order op=read -->
 ```json
 {
   "ucp": {
@@ -346,6 +348,7 @@ that includes a `messages` array describing the outcome:
 
 **Order not found:**
 
+<!-- ucp:example schema=common/types/error_response op=read -->
 ```json
 {
   "ucp": {
@@ -368,6 +371,7 @@ that includes a `messages` array describing the outcome:
 
 **Not authorized:**
 
+<!-- ucp:example schema=common/types/error_response op=read -->
 ```json
 {
   "ucp": {
@@ -441,11 +445,14 @@ platform's profile and uses it to send order lifecycle events.
 
 **Example:**
 
+<!-- ucp:example schema=profile def=platform_schema target=$.ucp.capabilities -->
 ```json
 {
   "dev.ucp.shopping.order": [
     {
       "version": "{{ ucp_version }}",
+      "spec": "https://ucp.dev/{{ ucp_version }}/specification/order",
+      "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/order.json",
       "config": {
         "webhook_url": "https://platform.example.com/webhooks/ucp/orders"
       }
@@ -477,7 +484,7 @@ POST /webhooks/ucp/orders HTTP/1.1
 Host: platform.example.com
 Content-Type: application/json
 UCP-Agent: profile="https://merchant.example/.well-known/ucp"
-Content-Digest: sha-256=:X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=:
+Content-Digest: sha-256=:X48E9q...:
 Signature-Input: sig1=("@method" "@authority" "@path" "content-digest" "content-type");keyid="merchant-2026"
 Signature: sig1=:MEUCIQDTxNq8h7LGHpvVZQp1iHkFp9+3N8Mxk2zH1wK4YuVN8w...:
 
@@ -488,7 +495,7 @@ Signature: sig1=:MEUCIQDTxNq8h7LGHpvVZQp1iHkFp9+3N8Mxk2zH1wK4YuVN8w...:
 
 1. Compute SHA-256 digest of the raw request body and set `Content-Digest` header
 2. Build signature base per [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421)
-3. Sign using a key from `signing_keys` in the business's UCP profile
+3. Sign using a key from `keys` in the business's UCP profile
 4. Set `Signature-Input` and `Signature` headers
 
 See [Message Signatures - REST Request Signing](signatures.md#rest-request-signing)
@@ -500,7 +507,7 @@ for complete algorithm.
 
 1. Parse `Signature-Input` to extract `keyid` and signed components
 2. Fetch business's UCP profile from `/.well-known/ucp` (cache as appropriate)
-3. Locate key in `signing_keys` with matching `kid`
+3. Locate key in `keys` with matching `kid`
 4. Verify `Content-Digest` matches SHA-256 of raw body
 5. Reconstruct signature base and verify signature
 

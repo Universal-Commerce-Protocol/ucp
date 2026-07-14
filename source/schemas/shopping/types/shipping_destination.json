@@ -7,7 +7,7 @@
   "ucp_shared_request": true,
   "allOf": [
     {
-      "$ref": "postal_address.json"
+      "$ref": "../../common/types/postal_address.json"
     },
     {
       "type": "object",

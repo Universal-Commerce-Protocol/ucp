@@ -6,11 +6,11 @@
   "type": "object",
   "properties": {
     "min": {
-      "$ref": "amount.json",
+      "$ref": "../../common/types/amount.json",
       "description": "Minimum price in ISO 4217 minor units."
     },
     "max": {
-      "$ref": "amount.json",
+      "$ref": "../../common/types/amount.json",
       "description": "Maximum price in ISO 4217 minor units."
     }
   }

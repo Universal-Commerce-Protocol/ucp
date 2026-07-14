@@ -170,7 +170,12 @@ declarations, safety warnings) that platforms must not hide or dismiss. See
 [Warning Presentation](../checkout.md#warning-presentation) for the full
 rendering contract.
 
-**Note**: All catalog errors use `severity: "recoverable"` - agents handle them programmatically (retry, inform user, show alternatives).
+**Note**: Most catalog errors use `severity: "recoverable"` - agents
+handle them programmatically (retry, inform user, show alternatives).
+`get_product` returns `severity: "unrecoverable"` when an identifier
+doesn't resolve; agents MUST NOT retry the same `id` (see the
+[REST](rest.md#product-not-found) and [MCP](mcp.md#product-not-found)
+examples).
 
 #### Message (Error)
 
@@ -190,6 +195,7 @@ rendering contract.
 
 When search finds no matches, return an empty array without messages.
 
+<!-- ucp:example schema=shopping/catalog_search op=search -->
 ```json
 {
   "ucp": {...},
@@ -204,6 +210,7 @@ This is not an error - the query was valid but returned no results.
 When a product is available but has delayed fulfillment, return the product with
 a warning message. Use the `path` field to target specific variants.
 
+<!-- ucp:example schema=shopping/catalog_search op=search -->
 ```json
 {
   "ucp": {...},
@@ -247,6 +254,7 @@ When requested identifiers don't exist, return success with the found products
 (if any). The response MAY include informational messages indicating which
 identifiers were not found.
 
+<!-- ucp:example schema=shopping/catalog_lookup op=lookup -->
 ```json
 {
   "ucp": {...},
@@ -271,6 +279,7 @@ return it as a warning with `presentation: "disclosure"`. The `path` field targe
 relevant component in the response — when it targets a product, the
 disclosure applies to all of its variants.
 
+<!-- ucp:example schema=shopping/catalog_search op=search -->
 ```json
 {
   "ucp": {...},
@@ -278,16 +287,23 @@ disclosure applies to all of its variants.
     {
       "id": "prod_nut_butter",
       "title": "Artisan Nut Butter Collection",
+      "description": { "plain": "Assorted artisan nut butters." },
+      "price_range": {
+        "min": { "amount": 1299, "currency": "USD" },
+        "max": { "amount": 1499, "currency": "USD" }
+      },
       "variants": [
         {
           "id": "var_almond",
           "title": "Almond Butter",
+          "description": { "plain": "Smooth almond butter." },
           "price": { "amount": 1299, "currency": "USD" },
           "availability": { "available": true }
         },
         {
           "id": "var_cashew",
           "title": "Cashew Butter",
+          "description": { "plain": "Creamy cashew butter." },
           "price": { "amount": 1499, "currency": "USD" },
           "availability": { "available": true }
         }
