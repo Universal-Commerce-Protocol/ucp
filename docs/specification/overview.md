@@ -542,38 +542,17 @@ least one capability.
 
 Profiles **MAY** include public JSON Web Keys used for HTTP Message
 Signatures and signed webhooks. When a profile publishes signing keys,
-they **MUST** appear in `signing_keys[]` — the canonical UCP profile
-field that every UCP verifier reads. This preserves backward
-compatibility with every existing UCP verifier.
-
-Profiles **MAY** additionally publish a top-level `keys[]` array per
-[RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517) (JWK Set
-Format) that **mirrors** `signing_keys[]`. RFC 7517 §5 permits
-additional members alongside `keys`, so the same document is
-simultaneously a UCP profile and a valid JWK Set — which a signer can
-reuse as its Web Bot Auth key source. See
+they **MUST** appear in the top-level `keys[]` array — the canonical
+UCP profile field that every UCP verifier reads. `keys[]` is a JWK Set
+per [RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517), so the
+same document is simultaneously a UCP profile and a valid JWK Set —
+which a signer can reuse as its Web Bot Auth key source. See
 [Deployment Patterns for WBA Interop](#deployment-patterns-for-wba-interop)
-below. When both arrays are present, they **MUST** list the same set
-of `kid` values, and entries sharing a `kid` **MUST** be semantically
-equivalent — i.e., have identical base64url JWK SHA-256 Thumbprints, as
-defined in
-[Section 3.2 of RFC 7638](https://rfc-editor.org/rfc/rfc7638#section-3.2)
-for RSA and EC, and in
-[Appendix A.3 of RFC 8037](https://rfc-editor.org/rfc/rfc8037#appendix-A.3)
-for Ed25519. Serialization differences such as member order are not
-significant.
+below.
 
-Adding, rotating, or removing a key **MUST** update both arrays
-atomically. Removal is the security-critical case: a verifier reads only
-one array, so a key dropped from `signing_keys[]` but still listed in
-`keys[]` (or vice versa) keeps verifying — a revoked or compromised key
-is not effectively revoked until it is absent from **both** arrays.
-
-Publishing the top-level `keys[]` is what makes the profile a valid
-JWK Set. A future UCP version **will** promote `keys[]` to the canonical
-field and deprecate `signing_keys[]`, so the profile is a JWK Set
-without dual publication; profiles publishing both arrays today are
-positioned for that transition.
+Adding, rotating, or removing a key updates this single array. Removal
+is the security-critical case: a revoked or compromised key is not
+effectively revoked until it is absent from `keys[]`.
 
 UCP defines two well-known key types: **EC** (ECDSA P-256, P-384) and
 **OKP** (EdDSA Ed25519); the key-type, curve, and algorithm
@@ -691,25 +670,6 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
       ]
     }
   },
-  "signing_keys": [
-    {
-      "kid": "poqkLGiymh_W0uP6PZFw-dvez3QJT5SolqXBCW38r0U",
-      "kty": "OKP",
-      "crv": "Ed25519",
-      "x": "JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs",
-      "use": "sig",
-      "alg": "EdDSA"
-    },
-    {
-      "kid": "business_2025",
-      "kty": "EC",
-      "crv": "P-256",
-      "x": "qIVYZVLCrPZHGHjP17CTW0_-D9Lfw0EkjqF7xB4FivA",
-      "y": "Mc4nN9LTDOBhfoUeg8Ye9WedFRhnZXZJA12Qp0zZ6F0",
-      "use": "sig",
-      "alg": "ES256"
-    }
-  ],
   "keys": [
     {
       "kid": "poqkLGiymh_W0uP6PZFw-dvez3QJT5SolqXBCW38r0U",
@@ -734,12 +694,11 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
 
 The business profile advertises the business's available transports,
 capabilities, payment handlers, and public verification keys. This
-example publishes signing keys in **both** `signing_keys[]` (the
-canonical UCP profile field) and top-level `keys[]` (the RFC 7517
-JWK Set mirror) so the same document is also a valid JWK Set — reusable
-as a Web Bot Auth key source. The two arrays carry the same JWK content
-(semantically equivalent); UCP-only verifiers read `signing_keys[]`;
-WBA-shape verifiers read `keys[]`.
+example publishes signing keys in the canonical top-level `keys[]`
+array (an RFC 7517 JWK Set), so the same document is also a valid JWK
+Set — reusable as a Web Bot Auth key source. Every UCP verifier reads
+`keys[]`, whether it resolved the key via `UCP-Agent` or via
+`Signature-Agent`.
 
 A WBA-shape verifier reads `keys[]` from this profile **only when the
 `Signature-Agent` header selects it** with `type=jwks_uri` (or `type=cimd`)
@@ -760,7 +719,7 @@ here:
   (`ap2.merchant_authorization`).
 
 A business that does not interact with AP2 or WBA may publish a single
-ES256 key in `signing_keys[]` only (the universal baseline). See
+ES256 key in `keys[]` (the universal baseline). See
 [Key Discovery](#key-discovery) for key lookup and resolution,
 [Deployment Patterns for WBA Interop](#deployment-patterns-for-wba-interop)
 for hosting choices, and [Message Signatures](signatures.md) for
@@ -861,7 +820,7 @@ example:
       ]
     }
   },
-  "signing_keys": [
+  "keys": [
     {
       "kid": "platform_2025",
       "kty": "EC",
@@ -1356,14 +1315,13 @@ key resolution mechanism for
 Signatures.
 
 See [Profile Structure](#profile-structure) for the publishing
-contract (canonical `signing_keys[]`, optional `keys[]` mirror,
-cross-array equivalence rule). Verifiers read the key list that matches
-how they resolved the key:
+contract (the canonical top-level `keys[]` JWK Set). Both resolution
+paths read the same list:
 
-- **Resolved via `UCP-Agent`** (default UCP key lookup) — read
-  `signing_keys[]`.
+- **Resolved via `UCP-Agent`** (default UCP key lookup) — read `keys[]`.
 - **Resolved via `Signature-Agent`** (Web Bot Auth, optional) — read
-  top-level `keys[]`.
+  `keys[]`; the `cimd`/`directory` variants reach the JWK Set through
+  their own documents.
 
 For the full verifier algorithm — capability-based key resolution,
 profile fetching, and covered-component enforcement — see
@@ -1518,7 +1476,7 @@ below processes a single signature.
    it supports whose header is present:
     - **`UCP-Agent` — default UCP key lookup, supported by every UCP
       verifier.** Resolve the `UCP-Agent` profile URL and read
-      `signing_keys[]`. This path applies to UCP signatures that are
+      `keys[]`. This path applies to UCP signatures that are
       untagged (default UCP) or carry `tag="web-bot-auth"` (the
       dual-audience shape); the verifier resolves them via `UCP-Agent`,
       treats `signature-agent` as an ordinary covered component, and
@@ -1552,13 +1510,18 @@ below processes a single signature.
 2. **Fetch the document** per [§Fetching](#fetching). If the fetch
    fails (DNS error, network failure, non-2xx response, parse failure),
    **skip** this signature.
-3. **Locate the key list.** `signing_keys[]` when resolved via
-   `UCP-Agent`; the top-level `keys[]` (RFC 7517 JWK Set) when resolved
-   via `Signature-Agent` `type=jwks_uri`; for `type=cimd`, dereference
-   the document's `jwks_uri` to obtain the JWK Set. Integrity derives
-   from TLS to the resolved origin.
+3. **Locate the key list.** The profile's top-level `keys[]` (RFC 7517
+   JWK Set) when resolved via `UCP-Agent` or via `Signature-Agent`
+   `type=jwks_uri`; for `type=cimd`, dereference the document's
+   `jwks_uri` to obtain the JWK Set. Integrity derives from TLS to the
+   resolved origin.
 4. **Match the signature's `keyid`** to a `kid` in the resolved key
-   list. **Skip** this signature if no match. For WBA-shape signatures
+   list. When resolving, **skip keys not usable for signature
+   verification**: any key marked `use:"enc"`, or whose `key_ops` is
+   present but does not include `"verify"`
+   ([RFC 7517](https://www.rfc-editor.org/rfc/rfc7517) §4.2, §4.3). Keys
+   that set `use:"sig"` or omit both members remain eligible. **Skip**
+   this signature if no eligible key matches. For WBA-shape signatures
    (`tag="web-bot-auth"`), the verifier **MUST** also confirm `keyid`
    equals the [RFC 7638](https://www.rfc-editor.org/rfc/rfc7638) SHA-256
    thumbprint of the matched JWK — the WBA architecture draft §4.2
