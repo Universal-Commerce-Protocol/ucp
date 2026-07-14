@@ -201,8 +201,10 @@ free-gift-with-purchase promotion).
 When a discount grants line items this way:
 
 - Each granted item **MUST** appear as a normal entry in `line_items[]`,
-  with its price reflecting the discount (typically `0`, but a reduced
-  non-zero price is also valid for "buy X get Y at $Z" patterns).
+  priced at its regular value — the same as any other line item — with the
+  discount reflected in that line item's own `totals[]`
+  (`items_discount`/`total`), exactly like a non-gift discount. Do not zero
+  out `item.price` itself.
 - The corresponding `applied_discount` entry **MUST** set
   `gift_line_item_ids` to those line items' `id`s, so platforms can
   attribute the items to the promotion rather than treating them as
@@ -218,10 +220,16 @@ This lets a platform render, for example, "Free gift: T-Shirt — added by
 Summer Sale" instead of surfacing an unexplained zero-price item.
 
 `applied_discount.amount` is still required even when `gift_line_item_ids`
-is present: by the time a gift line item is serialized its price already
-reflects the discount (typically `0`), and the schema has no separate
-"regular price" field to recover the gift's value from — `amount` is the
-only place that value is communicated. See the example below.
+is present. The granted line item's own `price` and `totals[]` already
+carry its regular value and discount delta — same as for any other
+line-item-targeted discount — so `amount` is technically re-derivable from
+`line_items[]`. It stays explicit anyway for the same reason `amount` isn't
+dropped for ordinary discounts either, even though it already equals
+`sum(allocations[].amount)`: a platform shouldn't have to cross-reference
+into `line_items[]` (or sum an array) just to answer "how much was this
+discount worth" — `amount` gives that number directly, and
+`allocations`/`gift_line_item_ids` are there for whoever wants the
+breakdown. See the example below.
 
 ### Example: Free gift with purchase
 
@@ -272,11 +280,12 @@ only place that value is communicated. See the example below.
           "item": {
             "id": "prod_socks_gift",
             "title": "Socks",
-            "price": 0
+            "price": 1200
           },
           "quantity": 1,
           "totals": [
-            {"type": "subtotal", "amount": 0},
+            {"type": "subtotal", "amount": 1200},
+            {"type": "items_discount", "amount": -1200},
             {"type": "total", "amount": 0}
           ]
         }
@@ -288,44 +297,98 @@ only place that value is communicated. See the example below.
             "code": "FREEGIFT",
             "title": "Free Socks with Shoe Purchase",
             "amount": 1200,
-            "gift_line_item_ids": ["li_2"]
+            "gift_line_item_ids": ["li_2"],
+            "allocations": [
+              {"path": "$.line_items[1]", "amount": 1200}
+            ]
           }
         ]
       },
       "totals": [
-        {"type": "subtotal", "display_text": "Subtotal", "amount": 8000},
+        {"type": "subtotal", "display_text": "Subtotal", "amount": 9200},
+        {"type": "items_discount", "display_text": "Item Discounts", "amount": -1200},
         {"type": "total", "display_text": "Total", "amount": 8000}
       ]
     }
     ```
 
-Here, `applied_discount.amount` (1200) reflects the retail value of the
-gifted item, even though it doesn't appear as a line-item or order-level
-discount total — the gift is already reflected by the granted line item's
-own `0` price. Platforms use `gift_line_item_ids` to find and label `li_2`,
-and `amount` to communicate the gift's value to the buyer (e.g. "$12 value,
-free").
+`li_2` shows its full $12 value in `item.price` and `subtotal`, then `-1200`
+in `items_discount` brings its own total to `0` — the same pattern as any
+other discounted line item. `applied_discount.amount` (1200) and
+`allocations` just mirror what `li_2`'s own totals already say;
+`gift_line_item_ids` is the only genuinely new piece of information, and it
+tells the platform *why* `li_2` exists at all.
 
 ### Example: Multiple gifts from one discount
 
 A "buy 2 shirts, get 2 socks free" promotion where the buyer added 4 shirts
-grants two gift line items from the same discount:
+grants two gift line items from the same discount. `li_1` is the 4 shirts;
+`li_2` and `li_3` are the two free pairs of socks:
 
-<!-- ucp:example schema=shopping/cart target=$.discounts.applied -->
+<!-- ucp:example schema=shopping/cart op=read -->
 ```json
-[
-  {
-    "code": "BUYSHIRTGETSOCKS",
-    "title": "Free Socks with Every 2 Shirts",
-    "amount": 2400,
-    "gift_line_item_ids": ["li_2", "li_3"]
-  }
-]
+{
+  "ucp": { ... },
+  "id": "...",
+  "currency": "...",
+  "line_items": [
+    {
+      "id": "li_1",
+      "item": {"id": "prod_shirt", "title": "Shirt", "price": 3000},
+      "quantity": 4,
+      "totals": [
+        {"type": "subtotal", "amount": 12000},
+        {"type": "total", "amount": 12000}
+      ]
+    },
+    {
+      "id": "li_2",
+      "item": {"id": "prod_socks_gift", "title": "Socks", "price": 1200},
+      "quantity": 1,
+      "totals": [
+        {"type": "subtotal", "amount": 1200},
+        {"type": "items_discount", "amount": -1200},
+        {"type": "total", "amount": 0}
+      ]
+    },
+    {
+      "id": "li_3",
+      "item": {"id": "prod_socks_gift", "title": "Socks", "price": 1200},
+      "quantity": 1,
+      "totals": [
+        {"type": "subtotal", "amount": 1200},
+        {"type": "items_discount", "amount": -1200},
+        {"type": "total", "amount": 0}
+      ]
+    }
+  ],
+  "discounts": {
+    "applied": [
+      {
+        "title": "Free Socks with Every 2 Shirts",
+        "amount": 2400,
+        "automatic": true,
+        "gift_line_item_ids": ["li_2", "li_3"],
+        "allocations": [
+          {"path": "$.line_items[1]", "amount": 1200},
+          {"path": "$.line_items[2]", "amount": 1200}
+        ]
+      }
+    ]
+  },
+  "totals": [
+    {"type": "subtotal", "display_text": "Subtotal", "amount": 14400},
+    {"type": "items_discount", "display_text": "Item Discounts", "amount": -2400},
+    {"type": "total", "display_text": "Total", "amount": 12000}
+  ]
+}
 ```
 
-`amount` (2400) is the combined retail value of both gifted pairs of socks;
-`gift_line_item_ids` lists each one so the platform can label them
-individually.
+`amount` (2400) still equals the sum of the two gift line items' own
+`items_discount` totals (1200 + 1200) — which is exactly why it's safe to
+read `amount` directly instead of cross-referencing `gift_line_item_ids`
+against `line_items[]` yourself, the same way you would for any other
+line-item-targeted discount.
 
 ## Eligibility Claims
 
