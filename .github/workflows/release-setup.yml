@@ -30,7 +30,7 @@ jobs:
     steps:
       - name: Generate GitHub App Token (if available)
         id: app-token
-        uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@v2
         # Only attempt this if the secret exists (e.g., on the main repo)
         env:
           APP_ID: ${{ secrets.RELEASE_APP_ID }}
@@ -40,7 +40,7 @@ jobs:
           private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
 
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           # Checkout the newly created branch
           ref: ${{ github.ref_name }}

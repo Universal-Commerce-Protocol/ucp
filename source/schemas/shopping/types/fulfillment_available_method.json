@@ -10,8 +10,7 @@
   "properties": {
     "type": {
       "type": "string",
-      "enum": ["shipping", "pickup"],
-      "description": "Fulfillment method type this availability applies to.",
+      "description": "Fulfillment method type this availability applies to. Well-known values: `shipping`, `pickup`; businesses MAY use additional values.",
       "ucp_request": "omit"
     },
     "line_item_ids": {

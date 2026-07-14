@@ -24,8 +24,8 @@ jobs:
       contents: read
       actions: read
     steps:
-      - uses: actions/checkout@v4
-      - uses: streetsidesoftware/cspell-action@v7
+      - uses: actions/checkout@v5
+      - uses: streetsidesoftware/cspell-action@v8
         with:
           incremental_files_only: true
           config: .cspell.json
