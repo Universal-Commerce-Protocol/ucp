@@ -12,7 +12,7 @@
     },
     "is_closed": {
       "type": "boolean",
-      "description": "If true, the location is closed on this day. When true, intervals MUST be omitted."
+      "description": "If true, the location is closed on this day. When true, is_24_hours and intervals MUST be omitted."
     },
     "is_24_hours": {
       "type": "boolean",

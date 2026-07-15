@@ -40,7 +40,7 @@
     },
     "hours": {
       "type": "array",
-      "description": "Regular weekly operating hours. For overnight hours, use two entries across two days.",
+      "description": "Regular weekly operating hours. For overnight hours, use two entries across two days (first entry ending with 24:00 and second entry starting 00:00).",
       "items": {
         "$ref": "daily_hour.json"
       },
@@ -48,7 +48,7 @@
     },
     "exception_hours": {
       "type": "array",
-      "description": "Exception hours for specific dates (holidays, closures, etc.).",
+      "description": "Exception hours for specific dates (holidays, closures, etc.). For overnight hours, use two entries across two days (first entry ending with 24:00 and second entry starting 00:00).",
       "items": {
         "$ref": "exception_hour.json"
       },
@@ -56,7 +56,7 @@
     },
     "timezone": {
       "type": "string",
-      "description": "IANA timezone identifier (e.g., 'America/New_York'). MUST be set when hours or exception_hours are present Required for correct interpretation.",
+      "description": "IANA timezone identifier (e.g., 'America/New_York'). MUST be set when hours or exception_hours are present. Required for correct interpretation.",
       "ucp_request": "omit"
     }
   }

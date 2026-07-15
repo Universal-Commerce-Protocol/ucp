@@ -16,7 +16,7 @@
           "properties": {
             "center": {
               "$ref": "geo.json",
-              "description": "The center coordinates. If omitted, the user's coarse location hints in the request context MUST be used to derive the center."
+              "description": "The center coordinates. If omitted, the user's coarse location hints in the request context MUST be used to derive the center via forward geocoding strategies."
             },
             "max_distance": {
               "type": "number",
@@ -28,8 +28,7 @@
         },
         "geofence_point": {
           "$ref": "geo.json",
-          "description": "Filter locations whose geofence contains a specific point (e.g., delivery area check).",
-          "additionalProperties": false
+          "description": "Filter locations whose geofence contains a specific point (e.g., delivery area check)."
         }
       },
       "additionalProperties": false
@@ -45,7 +44,7 @@
         "open_at": {
           "type": "string",
           "format": "date-time",
-          "description": "Only return locations that are open at the specified date and time (RFC 3339) in the location's local time."
+          "description": "An RFC 3339 instant. The business converts it to the location's local timezone and evaluates against the known hours."
         }
       },
       "additionalProperties": false
@@ -53,6 +52,5 @@
     "offerings": {
       "$ref": "location_offering_filter.json"
     }
-  },
-  "additionalProperties": true
+  }
 }
