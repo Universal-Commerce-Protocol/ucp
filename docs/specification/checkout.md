@@ -109,9 +109,9 @@ platform receives messages indicating what's needed to progress.
     outstanding. Platform can call Complete Checkout.
 
 * **`complete_in_progress`**: The Complete Checkout request was accepted and the
-    Business is processing the order. The response **MAY** include a required
-    Action and **MUST NOT** contain `order`. See [Actions](#actions) for how the
-    Platform proceeds.
+    Business is processing the order. The response **MUST NOT** contain `order`.
+    A required Action can be outstanding in this state. See [Actions](#actions)
+    for how the Platform proceeds.
 
 * **`completed`**: Order placed successfully. `order` is present and no required
     Action remains outstanding.
@@ -124,10 +124,9 @@ platform receives messages indicating what's needed to progress.
 
 When an active extension has outstanding work for the checkout, the Business
 surfaces instances under the Action types that extension declares in the
-response-only `actions` map. The map, common instance fields (`id`, `required`,
-`config`), completeness-snapshot rule, and active-type membership rule are
-defined once in [Overview — Actions](overview.md#actions); this section states
-only how the checkout status lifecycle interprets them.
+response-only `actions` map. The common rules are defined in
+[Overview — Actions](overview.md#actions); this section states only how the
+checkout status lifecycle interprets them.
 [Status Values](#status-values) is the authoritative home for the status
 invariants governing outstanding required Actions.
 
@@ -777,8 +776,8 @@ The response is the checkout object:
     `permalink_url` that can be used to reference the full state of the placed
     order.
 * When completion is accepted for asynchronous processing, `status`
-    is `complete_in_progress` and no `order` is present. The response **MAY**
-    include a required Action. The Platform processes any required Action and,
+    is `complete_in_progress` and no `order` is present. A required Action can be
+    outstanding in this state. The Platform processes any required Action and,
     once that processing completes, uses [Get Checkout](#get-checkout) to
     retrieve the updated state (see [Actions](#actions)). If no Action is
     present, [Get Checkout](#get-checkout) remains how the Platform retrieves

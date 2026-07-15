@@ -150,6 +150,54 @@ as the first element. Platforms SHOULD treat the first element as featured.
 
 {{ schema_fields('types/rating', 'catalog') }}
 
+## Actions
+
+Catalog Search, batch Lookup, and successful Get Product responses can include
+extension-defined Actions. In Catalog, an Action is work that may affect which
+products the Business returns or how the Platform handles them. `required` means
+the Action is required for the effect its type defines.
+
+For Search and batch Lookup, the Business decides whether to return zero, some,
+or all otherwise relevant products under the Action-type contract and its own
+policy. A Message can point to the Action to explain the response. Successful
+Get Product still includes `product`; its existing error response is unchanged.
+
+After processing an Action, the Platform performs a fresh Catalog operation and
+the later Business response is authoritative. Actions add no Catalog lifecycle,
+polling, or resume behavior. The common shape and rules are defined in
+[Overview — Actions](../overview.md#actions).
+
+For example, this Search response returns no products and explains that age
+verification may affect the results:
+
+<!-- ucp:example schema=shopping/catalog_search op=search -->
+```json
+{
+  "ucp": {...},
+  "products": [],
+  "actions": {
+    "com.example.identity.age_verification": [
+      {
+        "id": "age-check-1",
+        "required": true
+      }
+    ]
+  },
+  "messages": [
+    {
+      "type": "info",
+      "code": "age_verification_required",
+      "content": "Complete age verification to see age-restricted products matching your search.",
+      "path": "$.actions['com.example.identity.age_verification'][0]"
+    }
+  ]
+}
+```
+
+Returning zero products is one Business choice; returning a subset or the full
+result set is also conformant. The Action type and Message code are illustrative;
+Catalog defines neither.
+
 ## Messages and Error Handling
 
 All catalog responses include an optional `messages` array that allows businesses

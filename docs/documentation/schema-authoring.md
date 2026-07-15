@@ -452,7 +452,8 @@ When they apply to the Action type, extension authors should define:
   identifying any field that is executable or causes content to be loaded;
 - relevant schemes, origins, delegates, and trust anchors;
 - presentation, isolation, and permission controls;
-- how the Business observes processing and updates the parent resource;
+- how the Business observes processing and reflects its effect in a later
+  parent response;
 - behavior when processing is declined, unsupported, abandoned, expired, or
   failed, including the fallback for each relevant case;
 - the Action-specific conditions under which work is resolved, superseded, or

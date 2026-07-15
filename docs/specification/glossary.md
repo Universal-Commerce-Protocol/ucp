@@ -28,7 +28,7 @@ acronym in each specification Markdown file spells out the full term (e.g.,
 
 | Term                            | Acronym | Definition                                                                                                                                                |
 | :------------------------------ | :------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Action**                      | -       | Outstanding unit of extension-defined work for a Platform to process while a Cart or Checkout progresses; appears only in responses, in `actions`.        |
+| **Action**                      | -       | Outstanding extension-defined work for a Platform to process; appears only in the response-only `actions` map of adopting capabilities.                   |
 | **Agent Payments Protocol**     | AP2     | An open protocol designed to enable AI agents to securely interoperate and complete payments autonomously. UCP leverages AP2 for secure payment mandates. |
 | **Agent2Agent Protocol**        | A2A     | An open standard for secure, collaborative communication between diverse AI agents. UCP can use A2A as a transport layer.                                 |
 | **Capability**                  | -       | A standalone core feature that a business supports (e.g., Checkout, Identity Linking). Capabilities are the fundamental "verbs" of UCP.                   |

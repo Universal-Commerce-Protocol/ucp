@@ -34,16 +34,28 @@ Schema notes:
 ## Actions
 
 An Action is an outstanding unit of extension-defined work for a Platform to
-process while a Cart or Checkout progresses. Actions appear only in responses,
-under the `actions` map. The common fields identify the work but do not
-define how to process it; the active extension does.
+process. Actions appear only in responses, under the `actions` map. The common
+fields identify the work but do not define how to process it; the active
+extension does.
+
+This section defines the common Actions shape and the invariants every adopting
+response shares. The shape is reusable, but a capability supports Actions only
+when its specification explicitly adopts it and defines the parent-specific
+behavior: where Actions appear, how the parent interprets `required` and
+Messages, and how a later response reflects processing. Schema composition alone
+does not establish support. Cart, Checkout, and Catalog adopt this shape; see
+[Cart — Actions](cart.md#actions),
+[Checkout — Actions](checkout.md#actions), and
+[Catalog — Actions](catalog/index.md#actions) for their parent-specific
+contracts.
 
 Actions and Messages have different roles. An Action represents outstanding
 work: it carries an identity and extension-owned processing configuration. A
-Message communicates explanatory or diagnostic context about resource state and
-can identify an exact Action occurrence through its RFC 9535 `path`. When a
-Message includes `path`, the Business **MUST** make it an RFC 9535 JSONPath
-expression relative to the root of the Cart or Checkout UCP response object.
+Message communicates explanatory or diagnostic context about the current
+response and can identify an exact Action occurrence through its RFC 9535
+`path`. When a Message includes `path`, the Business **MUST** make it an RFC
+9535 JSONPath expression relative to the root of the containing UCP response
+object.
 Messages do not define how an Action is processed or determine its outcome, and
 neither an Action nor a Message requires the other.
 
@@ -81,35 +93,41 @@ Action occurrence it explains. The
 [checkout eligibility example](checkout.md#eligibility-verification-at-completion)
 composes this pattern into a complete Student Verification flow.
 
-Whenever the Business processes a request and produces a successful response,
-`actions` is the complete current snapshot of outstanding Action instances, not
-a delta. A duplicate request handled through idempotency may reproduce its
-original cached snapshot (see
+For a newly processed successful response from a capability that adopts Actions,
+the Business **MUST** include every outstanding Action and **MUST** omit
+`actions` when none are outstanding.
+
+Cart and Checkout define request idempotency separately. Duplicate requests
+follow those existing rules and can return the original cached response,
+including its `actions` (see
 [Message Signatures — Replay Protection](signatures.md#replay-protection)).
 
 An Action's `required` value and an operation-specific outcome are orthogonal.
 The same Action can remain required for its Action-defined effect and be the
-reason a particular attempted effect was not applied. To report that
-relationship in a response to a state-changing operation, the Business **MUST**
-return the current resource with a `recoverable` error Message whose `path`
-selects the exact Action occurrence. The Business **MAY** include an info or
-warning Message whose `path` selects an Action occurrence when explaining
-outstanding work without reporting an operation failure. No Action-specific
-Message type or separate `blocking` Action severity is defined.
+reason a particular attempted effect was not applied. A Business **MAY** include
+an info or warning Message whose `path` selects an Action occurrence to explain
+the current response without reporting an operation failure. For a
+state-changing operation whose requested effect was gated, the Business
+**MUST** instead return the current resource with a `recoverable` error Message
+whose `path` selects the exact Action occurrence. No Action-specific Message
+type or separate `blocking` Action severity is defined.
 
-The returned Cart or Checkout and its parent lifecycle are authoritative for the
-state after the operation. Processing the Action does not automatically apply
-the earlier requested effect. If the Platform later re-drives that effect, it
-submits a new operation under the existing
-[Replay Protection](signatures.md#replay-protection) rules; Actions add no
-idempotency mechanism.
+The Business's response is authoritative for the state after the operation: the
+returned resource, together with any parent lifecycle its capability defines, is
+the source of truth. Processing an Action does not automatically apply the
+earlier requested effect. After processing, the Platform performs a normal fresh
+operation, and the later response is authoritative; Actions add no lifecycle,
+polling, resume, or replay mechanism of their own. Where a capability defines
+request idempotency — Cart and Checkout — re-driving an effect submits a new
+operation under the existing
+[Replay Protection](signatures.md#replay-protection) rules.
 
 Each Action key is a reverse-domain **Action type**: the name identifies the
 type of outstanding work, which is not necessarily the name of the extension
 that declares it. An active extension declares each Action type and defines its
 `config`, how a Platform processes it, its trust and fallback, and its outcomes.
 A single extension can declare more than one Action type. Each declaring
-extension contributes its Action-type keys to the containing Cart or Checkout
+extension contributes its Action-type keys to the containing capability's
 schema through `allOf` composition (see
 [Schema Composition](#schema-composition)), and capability negotiation selects
 which extensions are active. Negotiating an extension activates the whole
@@ -130,9 +148,7 @@ The `actions` map does not define a processing order across Action types. Within
 a single type's array, JSON preserves the order of its instances, and the
 extension that declares the type defines whether that order carries processing
 meaning. When ordering across Action types matters, the declaring extension
-defines the sequencing; a Business **MAY** represent that sequencing by emitting
-only the currently actionable types in successive responses, since each
-successful response is a complete snapshot of outstanding work.
+defines the sequencing and which Action types become outstanding at each step.
 
 For example (illustrative only), a negotiated vendor extension
 `com.example.payment.authentication` declares two Action types:
@@ -148,8 +164,8 @@ challenge, which are illustrative here.
 
 Every instance shares a set of common fields:
 
-- `id` — a non-empty identifier, unique for the lifetime of the containing Cart
-  or Checkout.
+- `id` — a non-empty identifier, unique for the lifetime of the containing
+  resource.
 - `required` — whether the instance gates the effect specified for its Action
   type.
 - `config` — an optional extension-owned configuration object.
@@ -164,7 +180,7 @@ fields it does not recognize.
 
 While the same piece of outstanding work persists across responses, it keeps
 the same key and `id`. A replacement is a new instance with a new `id`; an `id`
-is never reused within the containing Cart or Checkout.
+is never reused within the containing resource.
 
 A Business **MUST** emit an Action type only when an extension that declares it
 is active for the containing capability in the negotiated intersection. The
@@ -189,9 +205,9 @@ any instance that does not satisfy it. Supporting a whole extension does not
 require a Platform to accept every runtime value.
 
 A Platform **MUST NOT** assume that the effect gated by an Action succeeded
-merely because an Action surface or external interaction completed. A later Cart
-or Checkout response from the Business and its parent lifecycle remain
-authoritative for that outcome.
+merely because an Action surface or external interaction completed. A later
+response from the Business, together with any parent lifecycle its capability
+defines, remains authoritative for that outcome.
 
 The declaring extension defines the concrete trust, execution, and fallback rules.
 The common Actions contract defines no generic machinery: no URL scheme, origin,
