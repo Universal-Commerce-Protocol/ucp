@@ -514,7 +514,7 @@ with the same identifier.
 The following headers are defined for the HTTP binding and apply to all
 operations unless otherwise noted.
 
-{{ header_fields('search_catalog', 'rest.openapi.json') }}
+{{ header_fields('search_catalog', 'shopping/rest.openapi.json') }}
 
 ### Specific Header Requirements
 
