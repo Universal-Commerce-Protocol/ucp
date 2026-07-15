@@ -70,8 +70,11 @@
         {
           "type": "object",
           "properties": {
-            "fulfillment": { "$ref": "#/$defs/catalog_fulfillment" }
-          }
+            "fulfillment": {
+              "$ref": "#/$defs/catalog_fulfillment",
+              "description": "Fulfillment options and availability for this variant."
+            }
+	  }
         }
       ]
     },
@@ -97,8 +100,11 @@
         {
           "type": "object",
           "properties": {
-            "fulfillment": { "$ref": "#/$defs/catalog_fulfillment" }
-          }
+            "fulfillment": {
+              "$ref": "#/$defs/catalog_fulfillment",
+              "description": "Fulfillment options and availability for this variant."
+            }
+	  }
         }
       ]
     },
