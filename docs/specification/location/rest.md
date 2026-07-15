@@ -170,7 +170,6 @@ Maps to the [Location Search](search.md) capability.
           "inventory": [
             {
               "id": "item_id_phone_15_pro",
-              "type": "product",
               "quantity": 1
             }
           ]
