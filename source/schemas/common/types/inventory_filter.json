@@ -2,17 +2,13 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/common/types/inventory_filter.json",
   "title": "Inventory Filter",
-  "description": "Filter for a specific inventory and its required availability.",
+  "description": "Filter for a specific inventory and its required availability. `id` is dependent on the industry offering the inventory (e.g., product/variant ID from shopping catalog, dish ID from food menu).",
   "type": "object",
   "required": ["id"],
   "properties": {
     "id": {
       "type": "string",
       "description": "The unique identifier of the item (e.g., product or variant ID in shopping, or dish ID in food ordering)."
-    },
-    "type": {
-      "type": "string",
-      "description": "The type of the item, helping backend routing. Well-known values: 'product' (shopping), 'dish' (food)."
     },
     "quantity": {
       "type": "integer",

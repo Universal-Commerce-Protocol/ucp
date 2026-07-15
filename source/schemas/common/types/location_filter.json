@@ -16,7 +16,7 @@
           "properties": {
             "center": {
               "$ref": "geo.json",
-              "description": "The center coordinates. If omitted, the user's course location hints in the request context MUST be used to derive the center."
+              "description": "The center coordinates. If omitted, the user's coarse location hints in the request context MUST be used to derive the center."
             },
             "max_distance": {
               "type": "number",
