@@ -46,7 +46,7 @@ This is vertical-agnostic and enables key commerce flows such as:
     * **Inventory**: Dynamic availability of goods (e.g., retail products or restaurant dishes).
 * **Geofencing**: Locations can define a `geofence_radius` around their coordinates.
     This is used to determine if a location can serve a specific user (e.g., delivery area check).
-    Clients can perform proximity searches (`distance` filter) or coverage checks (`geofence` filter) using the filter.
+    Clients can perform proximity searches (`distance` filter) or coverage checks (`geofence_point` filter) using the filter.
 * **Operating Hours**: Weekly schedules (`hours`) and date-specific overrides
     (`exception_hours` - e.g., holidays, temporary closures) associated with a timezone.
 
@@ -109,20 +109,17 @@ Messages communicate business outcomes and provide context:
 | `warning` | Important conditions affecting purchase | `permanently_closed`, `temporary_closure` |
 | `info` | Additional context without issues | `not_found`, `holiday_hours_active` |
 
-**Note**: Most catalog errors use `severity: "recoverable"` - agents
-handle them programmatically (retry, inform user, show alternatives).
-
 #### Message (Error)
 
-{{ schema_fields('types/message_error', 'catalog') }}
+{{ schema_fields('types/message_error', 'location') }}
 
 #### Message (Warning)
 
-{{ schema_fields('types/message_warning', 'catalog') }}
+{{ schema_fields('types/message_warning', 'location') }}
 
 #### Message (Info)
 
-{{ schema_fields('types/message_info', 'catalog') }}
+{{ schema_fields('types/message_info', 'location') }}
 
 ### Common Scenarios
 

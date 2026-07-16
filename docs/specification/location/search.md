@@ -119,5 +119,5 @@ error. Clients MUST NOT assume the response size equals the requested limit.
 
 ## Transport Bindings
 
-* [REST Binding](rest.md#post-locationssearch): `POST /location/search`
+* [REST Binding](rest.md#post-locationssearch): `POST /locations/search`
 * [MCP Binding](mcp.md#search_locations): `search_locations` tool
