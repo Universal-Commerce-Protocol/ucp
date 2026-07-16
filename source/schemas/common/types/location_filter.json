@@ -52,5 +52,6 @@
     "offerings": {
       "$ref": "location_offering_filter.json"
     }
-  }
+  },
+  "additionalProperties": true
 }
