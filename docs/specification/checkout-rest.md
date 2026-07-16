@@ -1445,8 +1445,8 @@ Response signatures are **OPTIONAL** for:
 HTTP/1.1 200 OK
 Content-Type: application/json
 Content-Digest: sha-256=:Y5fK8nLmPqRsT3vWxYzAbCdEfGhIjKlMnO...:
-Signature-Input: sig1=("@status" "content-digest" "content-type");keyid="merchant-2025"
-Signature: sig1=:MFQCIH7kL9nM2oP5qR8sT1uV4wX6yZaB3cD...:
+Signature-Input: sig1=("@status" "content-digest" "content-type");keyid="merchant-2026"
+Signature: sig1=:6G4i8TS6oUkGrx8KnCFUpsSPwd74...:
 
 {"id":"chk_123","status":"completed","order":{"id":"ord_456"}}
 ```
