@@ -37,6 +37,10 @@
       },
       "description": "Industry-standard product identifiers for cross-reference and correlation."
     },
+    "condition": {
+      "type": "string",
+      "description": "Item condition. Well-known values: `new`, `refurbished`, `used`."
+    },
     "handle": {
       "type": "string",
       "description": "URL-safe variant handle/slug."
