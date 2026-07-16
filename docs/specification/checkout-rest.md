@@ -804,7 +804,12 @@ place to set these expectations via `messages`.
       },
       "signals": {
         "dev.ucp.buyer_ip": "203.0.113.42",
-        "dev.ucp.user_agent": "Mozilla/5.0 ..."
+        "dev.ucp.user_agent": "Mozilla/5.0 ...",
+        "dev.ucp.user_id": "0a041b9462caa4a31bac3567e...",
+        "dev.ucp.user_location": {
+          "address_region": "CA",
+          "address_country": "US"
+        }
       }
     }
     ```

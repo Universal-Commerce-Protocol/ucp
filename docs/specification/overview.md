@@ -1696,7 +1696,12 @@ POST /checkout-sessions/{id}/complete
   },
   "signals": {
     "dev.ucp.buyer_ip": "203.0.113.42",
-    "dev.ucp.user_agent": "Mozilla/5.0 ..."
+    "dev.ucp.user_agent": "Mozilla/5.0 ...",
+    "dev.ucp.user_id": "0a041b9462caa4a31bac3567e...",
+    "dev.ucp.user_location": {
+      "address_region": "SC",
+      "address_country": "US"
+    }
   }
 }
 ```
@@ -1763,7 +1768,12 @@ POST /checkout-sessions/{id}/complete
   },
   "signals": {
     "dev.ucp.buyer_ip": "203.0.113.42",
-    "dev.ucp.user_agent": "Mozilla/5.0 ..."
+    "dev.ucp.user_agent": "Mozilla/5.0 ...",
+    "dev.ucp.user_id": "0a041b9462caa4a31bac3567e...",
+    "dev.ucp.user_location": {
+      "address_region": "CA",
+      "address_country": "US"
+    }
   }
 }
 ```
@@ -1845,6 +1855,7 @@ POST /checkout-sessions/{id}/complete
   },
   "signals": {
     "dev.ucp.buyer_ip": "203.0.113.42",
+    "dev.ucp.user_id": "0a041b9462caa4a31bac3567e...",
     "com.example.risk_score": 0.95
   },
   "ap2": {
@@ -1930,7 +1941,7 @@ certified and handle:
 UCP supports fraud prevention through [Signals](#signals) and the
 payment architecture:
 
-- Platforms provide transaction environment [signals](#signals) (IP, user
+- Platforms provide transaction environment [signals](#signals) (e.g., IP, user
     agent) on catalog, cart, and checkout requests
 - Businesses can require additional fields in handler configurations (e.g.,
     3DS requirements)
