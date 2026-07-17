@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/location_filter.json",
+  "title": "Location Filter",
+  "description": "Filter criteria to narrow location search/lookup results. All specified filters combine with AND logic.",
+  "type": "object",
+  "properties": {
+    "geo": {
+      "type": "object",
+      "description": "Filter locations by geographic proximity or geofence coverage.",
+      "properties": {
+        "distance": {
+          "type": "object",
+          "description": "Filter locations within a maximum distance from a center point (proximity search).",
+          "required": ["max_distance"],
+          "properties": {
+            "center": {
+              "$ref": "geo.json",
+              "description": "The center coordinates. If omitted, the user's coarse location hints in the request context MUST be used to derive the center via forward geocoding strategies."
+            },
+            "max_distance": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Maximum distance in RFC 7035 distance unit (meters)."
+            }
+          },
+          "additionalProperties": false
+        },
+        "geofence_point": {
+          "$ref": "geo.json",
+          "description": "Filter locations whose geofence contains a specific point (e.g., delivery area check)."
+        }
+      },
+      "additionalProperties": false
+    },
+    "hours": {
+      "type": "object",
+      "description": "Filter by operating hours. If both values are specified, behavior is implementation-defined (usually open_at takes precedence or OR logic is enforced).",
+      "properties": {
+        "open_now": {
+          "type": "boolean",
+          "description": "Only return locations that are currently open."
+        },
+        "open_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "An RFC 3339 instant. The business converts it to the location's local timezone and evaluates against the known hours."
+        }
+      },
+      "additionalProperties": false
+    },
+    "offerings": {
+      "$ref": "location_offering_filter.json"
+    }
+  },
+  "additionalProperties": true
+}

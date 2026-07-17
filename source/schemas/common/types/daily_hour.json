@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/daily_hour.json",
+  "title": "Daily Hour",
+  "description": "Operating hours for a specific day of the week.",
+  "type": "object",
+  "required": ["day"],
+  "properties": {
+    "day": {
+      "type": "string",
+      "enum": ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+    },
+    "is_closed": {
+      "type": "boolean",
+      "description": "If true, the location is closed on this day. When true, is_24_hours and intervals MUST be omitted."
+    },
+    "is_24_hours": {
+      "type": "boolean",
+      "description": "If true, open 24 hours on this day. When true, intervals MUST be omitted."
+    },
+    "intervals": {
+      "type": "array",
+      "description": "One or more open intervals for this day. Supports split shifts.",
+      "items": {
+        "$ref": "time_interval.json"
+      }
+    }
+  }
+}

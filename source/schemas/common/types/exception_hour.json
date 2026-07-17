@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/exception_hour.json",
+  "title": "Exception Hour",
+  "description": "Operating hours for a specific date (e.g., holiday or temporary change).",
+  "type": "object",
+  "required": ["date"],
+  "properties": {
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "An ISO 8601 date."
+    },
+    "label": {
+      "type": "string",
+      "description": "Human readable explanation for the exception (e.g., 'Thanksgiving')."
+    },
+    "is_closed": {
+      "type": "boolean",
+      "description": "If true, the location is closed on this date. When true, is_24_hours and intervals MUST be omitted."
+    },
+    "is_24_hours": {
+      "type": "boolean",
+      "description": "If true, open 24 hours on this date. When true, intervals MUST be omitted."
+    },
+    "intervals": {
+      "type": "array",
+      "description": "One or more open intervals for this date.",
+      "items": {
+        "$ref": "time_interval.json"
+      }
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/geo.json",
+  "title": "Geo",
+  "description": "Geographic information.",
+  "type": "object",
+  "required": ["latitude", "longitude"],
+  "properties": {
+    "latitude": {
+      "type": "number",
+      "minimum": -90,
+      "maximum": 90,
+      "description": "Latitude in decimal degrees."
+    },
+    "longitude": {
+      "type": "number",
+      "minimum": -180,
+      "maximum": 180,
+      "description": "Longitude in decimal degrees."
+    },
+    "geofence_radius": {
+      "type": "number",
+      "description": "Geofence radius in RFC 7035 distance unit (meters). Used for proximity detection."
+    }
+  }
+}
