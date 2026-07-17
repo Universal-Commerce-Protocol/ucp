@@ -609,7 +609,7 @@ def define_env(env):
     return "\n".join(md)
 
   def _field_visibility(field_name, ucp_request, required_list):
-    """Render the Visibility cell for a schema field.
+    """Render the Requirement cell for a schema field.
 
     The base ``required`` array defines *response* visibility (responses never
     omit a defined field, so a field is either ``required`` or ``optional`` in
@@ -753,7 +753,7 @@ def define_env(env):
 
     md = []
     if need_header:
-      md = ["| Name | Type | Visibility | Description |"]
+      md = ["| Name | Type | Requirement | Description |"]
       md.append("| :--- | :--- | :--- | :--- |")
 
     if "allOf" in properties:
@@ -919,7 +919,7 @@ def define_env(env):
             desc += "<br>"
           desc += f"**Enum:** {formatted_enums}"
 
-        # --- Handle Visibility (required/optional/omit per request op + response) ---
+        # --- Handle Requirement (required/optional/omit per request op + response) ---
         visibility = _field_visibility(
           field_name, ucp_annotation, required_list
         )
