@@ -608,17 +608,17 @@ def define_env(env):
 
     return "\n".join(md)
 
-  def _field_visibility(field_name, ucp_request, required_list):
+  def _field_requirement(field_name, ucp_request, required_list):
     """Render the Requirement cell for a schema field.
 
-    The base ``required`` array defines *response* visibility (responses never
-    omit a defined field, so a field is either ``required`` or ``optional`` in
-    responses). The ``ucp_request`` annotation overrides *request* visibility —
-    either a single value applied to every request operation, or a per-operation
-    map over ``create``/``update``/``complete``. Request operations left
-    unannotated inherit the response visibility.
+    The base ``required`` array defines the *response* requirement (responses
+    never omit a defined field, so a field is either ``required`` or ``optional``
+    in responses). The ``ucp_request`` annotation overrides the *request*
+    requirement — either a single value applied to every request operation, or a
+    per-operation map over ``create``/``update``/``complete``. Request operations
+    left unannotated inherit the response requirement.
 
-    The response visibility is the default: request operations that share it are
+    The response requirement is the default: request operations that share it are
     omitted from the cell, so only the *differences* are spelled out. Returns a
     Markdown string such as ``**Required**`` (same everywhere) or
     ``**Required**; optional on update``.
@@ -636,7 +636,7 @@ def define_env(env):
       return f"{base_disp}; {word.get(ucp_request, ucp_request)} in requests"
 
     if isinstance(ucp_request, dict):
-      # Only keep operations whose visibility differs from the response default;
+      # Only keep operations whose requirement differs from the response default;
       # the rest inherit it and would be redundant to spell out.
       diff_request = {}
       for op in ("create", "update", "complete"):
@@ -646,7 +646,7 @@ def define_env(env):
       if not diff_request:
         return base_disp
 
-      # Group adjacent request operations that share a visibility value so the
+      # Group adjacent request operations that share a requirement value so the
       # cell stays compact (e.g. "required on create & update").
       groups = []  # list of (value, [ops]) preserving operation order
       for op in ("create", "update", "complete"):
@@ -790,7 +790,7 @@ def define_env(env):
           )
           continue
 
-        # Capture the request-visibility annotation before `details` may be
+        # Capture the request-requirement annotation before `details` may be
         # reassigned during $ref resolution below.
         ucp_annotation = (
           details.get("ucp_request") if isinstance(details, dict) else None
@@ -920,11 +920,11 @@ def define_env(env):
           desc += f"**Enum:** {formatted_enums}"
 
         # --- Handle Requirement (required/optional/omit per request op + response) ---
-        visibility = _field_visibility(
+        requirement = _field_requirement(
           field_name, ucp_annotation, required_list
         )
 
-        md.append(f"| {field_name} | {f_type} | {visibility} | {desc} |")
+        md.append(f"| {field_name} | {f_type} | {requirement} | {desc} |")
 
     return "\n".join(md)
 
