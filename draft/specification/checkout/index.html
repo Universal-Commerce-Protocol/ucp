@@ -4428,7 +4428,7 @@ custom scopes are defined in <a href="../identity-linking/#scopes">Identity Link
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -4436,97 +4436,97 @@ custom scopes are defined in <a href="../identity-linking/#scopes">Identity Link
 <tr>
 <td style="text-align: left;">ucp</td>
 <td style="text-align: left;">any</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">UCP metadata for checkout responses.</td>
 </tr>
 <tr>
 <td style="text-align: left;">id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Unique identifier of the checkout session.</td>
 </tr>
 <tr>
 <td style="text-align: left;">line_items</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#line-item">Line Item Response</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">List of line items being checked out.</td>
 </tr>
 <tr>
 <td style="text-align: left;">buyer</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#buyer">Buyer</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Representation of the buyer.</td>
 </tr>
 <tr>
 <td style="text-align: left;">context</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#context">Context</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Provisional buyer signals for relevance and localization—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data. Context SHOULD be non-identifying and can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context.</td>
 </tr>
 <tr>
 <td style="text-align: left;">signals</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#signals">Signals</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
 </tr>
 <tr>
 <td style="text-align: left;">attribution</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#attribution">Attribution</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.</td>
 </tr>
 <tr>
 <td style="text-align: left;">status</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details.<br><strong>Enum:</strong> <code>incomplete</code>, <code>requires_escalation</code>, <code>ready_for_complete</code>, <code>complete_in_progress</code>, <code>completed</code>, <code>canceled</code></td>
 </tr>
 <tr>
 <td style="text-align: left;">currency</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.</td>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#totals">Totals</a></td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Different cart totals.</td>
 </tr>
 <tr>
 <td style="text-align: left;">messages</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#message">Message</a>]</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">List of messages with error and info about the checkout session state.</td>
 </tr>
 <tr>
 <td style="text-align: left;">links</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#link">Link</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.</td>
 </tr>
 <tr>
 <td style="text-align: left;">expires_at</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.</td>
 </tr>
 <tr>
 <td style="text-align: left;">continue_url</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">URL for checkout handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements.</td>
 </tr>
 <tr>
 <td style="text-align: left;">payment</td>
 <td style="text-align: left;"><a href="/draft/specification/checkout/#payment">Payment</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Payment configuration containing handlers.</td>
 </tr>
 <tr>
 <td style="text-align: left;">order</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#order-confirmation">Order Confirmation</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Details about an order created for this checkout session.</td>
 </tr>
 </tbody>
@@ -4579,7 +4579,7 @@ the field contract.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -4587,37 +4587,37 @@ the field contract.</p>
 <tr>
 <td style="text-align: left;">line_items</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#line-item">Line Item</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">List of line items being checked out.</td>
 </tr>
 <tr>
 <td style="text-align: left;">buyer</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#buyer">Buyer</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Representation of the buyer.</td>
 </tr>
 <tr>
 <td style="text-align: left;">context</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#context">Context</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Provisional buyer signals for relevance and localization—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data. Context SHOULD be non-identifying and can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context.</td>
 </tr>
 <tr>
 <td style="text-align: left;">signals</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#signals">Signals</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
 </tr>
 <tr>
 <td style="text-align: left;">attribution</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#attribution">Attribution</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.</td>
 </tr>
 <tr>
 <td style="text-align: left;">payment</td>
 <td style="text-align: left;"><a href="/draft/specification/checkout/#payment">Payment</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Payment configuration containing handlers.</td>
 </tr>
 </tbody>
@@ -4638,7 +4638,7 @@ time of checkout session creation.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -4646,7 +4646,7 @@ time of checkout session creation.</p>
 <tr>
 <td style="text-align: left;">id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">The unique identifier of the checkout session.Defined in path.</td>
 </tr>
 </tbody>
@@ -4664,7 +4664,7 @@ will replace the existing checkout session state on the business side.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -4672,43 +4672,43 @@ will replace the existing checkout session state on the business side.</p>
 <tr>
 <td style="text-align: left;">id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">The unique identifier of the checkout session.Defined in path.</td>
 </tr>
 <tr>
 <td style="text-align: left;">line_items</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#line-item">Line Item</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">List of line items being checked out.</td>
 </tr>
 <tr>
 <td style="text-align: left;">buyer</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#buyer">Buyer</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Representation of the buyer.</td>
 </tr>
 <tr>
 <td style="text-align: left;">context</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#context">Context</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Provisional buyer signals for relevance and localization—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data. Context SHOULD be non-identifying and can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context.</td>
 </tr>
 <tr>
 <td style="text-align: left;">signals</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#signals">Signals</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
 </tr>
 <tr>
 <td style="text-align: left;">attribution</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#attribution">Attribution</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.</td>
 </tr>
 <tr>
 <td style="text-align: left;">payment</td>
 <td style="text-align: left;"><a href="/draft/specification/checkout/#payment">Payment</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Payment configuration containing handlers.</td>
 </tr>
 </tbody>
@@ -4732,7 +4732,7 @@ as the order, and its associated items, moves through the supply chain.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -4740,25 +4740,25 @@ as the order, and its associated items, moves through the supply chain.</p>
 <tr>
 <td style="text-align: left;">id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">The unique identifier of the checkout session.Defined in path.</td>
 </tr>
 <tr>
 <td style="text-align: left;">signals</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#signals">Signals</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
 </tr>
 <tr>
 <td style="text-align: left;">attribution</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#attribution">Attribution</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.</td>
 </tr>
 <tr>
 <td style="text-align: left;">payment</td>
 <td style="text-align: left;"><a href="/draft/specification/checkout/#payment">Payment</a></td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Payment configuration containing handlers.</td>
 </tr>
 </tbody>
@@ -4777,7 +4777,7 @@ that is not equal to <code>completed</code> or <code>canceled</code> <strong>SHO
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -4785,7 +4785,7 @@ that is not equal to <code>completed</code> or <code>canceled</code> <strong>SHO
 <tr>
 <td style="text-align: left;">id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">The unique identifier of the checkout session.Defined in path.</td>
 </tr>
 </tbody>
@@ -4808,7 +4808,7 @@ defined below:</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -4816,25 +4816,25 @@ defined below:</p>
 <tr>
 <td style="text-align: left;">first_name</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">First name of the buyer.</td>
 </tr>
 <tr>
 <td style="text-align: left;">last_name</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Last name of the buyer.</td>
 </tr>
 <tr>
 <td style="text-align: left;">email</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Email of the buyer.</td>
 </tr>
 <tr>
 <td style="text-align: left;">phone_number</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">E.164 standard.</td>
 </tr>
 </tbody>
@@ -4851,7 +4851,7 @@ binding transaction data.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -4859,43 +4859,43 @@ binding transaction data.</p>
 <tr>
 <td style="text-align: left;">address_country</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">The country, as a 2-letter ISO 3166-1 alpha-2 code (e.g. "US"). A 3-letter alpha-3 code or full country name MAY also be used.</td>
 </tr>
 <tr>
 <td style="text-align: left;">address_region</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">The first-level administrative region within the country (e.g. a state or province such as California).</td>
 </tr>
 <tr>
 <td style="text-align: left;">postal_code</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">The postal code (e.g. "94043").</td>
 </tr>
 <tr>
 <td style="text-align: left;">intent</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Background context describing buyer's intent (e.g., 'looking for a gift under $50', 'need something durable for outdoor use'). Informs relevance, recommendations, and personalization.</td>
 </tr>
 <tr>
 <td style="text-align: left;">language</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Preferred language for content. Use IETF BCP 47 language tags (e.g., 'en', 'fr-CA', 'zh-Hans'). For REST, equivalent to Accept-Language header—platforms SHOULD fall back to Accept-Language when this field is absent; when provided, overrides Accept-Language. Businesses MAY return content in a different language if unavailable.</td>
 </tr>
 <tr>
 <td style="text-align: left;">currency</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Preferred currency (ISO 4217, e.g., 'EUR', 'USD'). Businesses determine presentment currency from context and authoritative signals; this hint MAY inform selection in multi-currency markets. Also serves as the denomination for price filter values — platforms SHOULD include this field when sending price filters. Response prices include explicit currency confirming the resolution.</td>
 </tr>
 <tr>
 <td style="text-align: left;">eligibility</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#reverse-domain-name">Reverse Domain Name</a>]</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Buyer claims about eligible benefits such as loyalty membership, payment instrument perks, and similar. Recognized claims MAY inform the Business response (e.g., member-only product availability, adjusted pricing in catalog, provisional discounts at cart or checkout). Businesses MUST ignore unrecognized values without error. Values MUST use reverse-domain naming (e.g., 'com.example.loyalty_gold', 'org.school.student') and MUST be non-identifying.</td>
 </tr>
 </tbody>
@@ -4913,7 +4913,7 @@ requirements.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -4921,13 +4921,13 @@ requirements.</p>
 <tr>
 <td style="text-align: left;">dev.ucp.buyer_ip</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Client's IP address (IPv4 or IPv6).</td>
 </tr>
 <tr>
 <td style="text-align: left;">dev.ucp.user_agent</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Client's HTTP User-Agent header or equivalent.</td>
 </tr>
 </tbody>
@@ -4945,7 +4945,7 @@ requirements.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -4953,7 +4953,7 @@ requirements.</p>
 <tr>
 <td style="text-align: left;">id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">The product identifier, often the SKU, required to resolve the product details associated with this line item. Should be recognized by both the Platform, and the Business.</td>
 </tr>
 </tbody>
@@ -4964,7 +4964,7 @@ requirements.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -4972,7 +4972,7 @@ requirements.</p>
 <tr>
 <td style="text-align: left;">id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">The product identifier, often the SKU, required to resolve the product details associated with this line item. Should be recognized by both the Platform, and the Business.</td>
 </tr>
 </tbody>
@@ -4983,7 +4983,7 @@ requirements.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -4991,25 +4991,25 @@ requirements.</p>
 <tr>
 <td style="text-align: left;">id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">The product identifier, often the SKU, required to resolve the product details associated with this line item. Should be recognized by both the Platform, and the Business.</td>
 </tr>
 <tr>
 <td style="text-align: left;">title</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Product title.</td>
 </tr>
 <tr>
 <td style="text-align: left;">price</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#amount">Amount</a></td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Unit price in ISO 4217 minor units.</td>
 </tr>
 <tr>
 <td style="text-align: left;">image_url</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Product image URI.</td>
 </tr>
 </tbody>
@@ -5021,7 +5021,7 @@ requirements.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -5029,13 +5029,13 @@ requirements.</p>
 <tr>
 <td style="text-align: left;">item</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#item">Item</a></td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
 <td style="text-align: left;">quantity</td>
 <td style="text-align: left;">integer</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Quantity of the item being purchased.</td>
 </tr>
 </tbody>
@@ -5046,7 +5046,7 @@ requirements.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -5054,25 +5054,25 @@ requirements.</p>
 <tr>
 <td style="text-align: left;">id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
 <td style="text-align: left;">item</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#item">Item</a></td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
 <td style="text-align: left;">quantity</td>
 <td style="text-align: left;">integer</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Quantity of the item being purchased.</td>
 </tr>
 <tr>
 <td style="text-align: left;">parent_id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Parent line item identifier for any nested structures.</td>
 </tr>
 </tbody>
@@ -5083,7 +5083,7 @@ requirements.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -5091,31 +5091,31 @@ requirements.</p>
 <tr>
 <td style="text-align: left;">id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
 <td style="text-align: left;">item</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#item">Item</a></td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
 <td style="text-align: left;">quantity</td>
 <td style="text-align: left;">integer</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Quantity of the item being purchased.</td>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#total">Total</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Line item totals breakdown.</td>
 </tr>
 <tr>
 <td style="text-align: left;">parent_id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Parent line item identifier for any nested structures.</td>
 </tr>
 </tbody>
@@ -5174,7 +5174,7 @@ field or omitting them.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -5182,7 +5182,7 @@ field or omitting them.</p>
 <tr>
 <td style="text-align: left;">instruments</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#payment-instrument-selected-payment-instrument">Payment Instrument Selected Payment Instrument</a>]</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">The payment instruments available for this payment. Each instrument is associated with a specific handler via the handler_id field. Handlers can extend the base payment_instrument schema to add handler-specific fields.</td>
 </tr>
 </tbody>
@@ -5194,7 +5194,7 @@ field or omitting them.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -5202,43 +5202,43 @@ field or omitting them.</p>
 <tr>
 <td style="text-align: left;">id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">A unique identifier for this instrument instance, assigned by the platform.</td>
 </tr>
 <tr>
 <td style="text-align: left;">handler_id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">The unique identifier for the handler instance that produced this instrument. This corresponds to the 'id' field in the Payment Handler definition.</td>
 </tr>
 <tr>
 <td style="text-align: left;">type</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">The broad category of the instrument (e.g., 'card', 'tokenized_card'). Specific schemas will constrain this to a constant value.</td>
 </tr>
 <tr>
 <td style="text-align: left;">billing_address</td>
 <td style="text-align: left;">object</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">The billing address associated with this payment method.</td>
 </tr>
 <tr>
 <td style="text-align: left;">credential</td>
 <td style="text-align: left;">object</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">The base definition for any payment credential. Handlers define specific credential types.</td>
 </tr>
 <tr>
 <td style="text-align: left;">display</td>
 <td style="text-align: left;">object</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Display information for this payment instrument. Each payment instrument schema defines its specific display properties, as outlined by the payment handler.</td>
 </tr>
 <tr>
 <td style="text-align: left;">selected</td>
 <td style="text-align: left;">boolean</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Whether this instrument is selected by the user.</td>
 </tr>
 </tbody>
@@ -5249,7 +5249,7 @@ field or omitting them.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -5257,7 +5257,7 @@ field or omitting them.</p>
 <tr>
 <td style="text-align: left;">type</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">The credential type discriminator. Specific schemas will constrain this to a constant value.</td>
 </tr>
 </tbody>
@@ -5271,7 +5271,7 @@ field or omitting them.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -5279,37 +5279,37 @@ field or omitting them.</p>
 <tr>
 <td style="text-align: left;">version</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Entity version in YYYY-MM-DD format.</td>
 </tr>
 <tr>
 <td style="text-align: left;">spec</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">URL to human-readable specification document.</td>
 </tr>
 <tr>
 <td style="text-align: left;">schema</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">URL to JSON Schema defining this entity's structure and payloads.</td>
 </tr>
 <tr>
 <td style="text-align: left;">id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Unique identifier for this entity instance. Used to disambiguate when multiple instances exist.</td>
 </tr>
 <tr>
 <td style="text-align: left;">config</td>
 <td style="text-align: left;">object</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Entity-specific configuration. Structure defined by each entity's schema.</td>
 </tr>
 <tr>
 <td style="text-align: left;">extends</td>
 <td style="text-align: left;">OneOf[<code>string</code>, <code>array</code>]</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Parent capability(s) this extends. Present for extensions, absent for root capabilities. Use array for multi-parent extensions.</td>
 </tr>
 </tbody>
@@ -5320,7 +5320,7 @@ field or omitting them.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -5328,19 +5328,19 @@ field or omitting them.</p>
 <tr>
 <td style="text-align: left;">type</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Cost category. Well-known values: subtotal, items_discount, discount, fulfillment, tax, fee, total. Businesses MAY use additional values.</td>
 </tr>
 <tr>
 <td style="text-align: left;">display_text</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Text to display against the amount. Should reflect appropriate method (e.g., 'Shipping', 'Delivery').</td>
 </tr>
 <tr>
 <td style="text-align: left;">amount</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#signed-amount">Signed Amount</a></td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Monetary amount in the currency's minor unit as defined by ISO 4217. Refer to the currency's exponent to determine minor-to-major ratio (e.g., 2 for USD, 0 for JPY, 3 for KWD). May be negative — the sign is intrinsic to the value (e.g., discounts are negative, charges are positive).</td>
 </tr>
 </tbody>
@@ -5500,7 +5500,7 @@ when provided.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -5508,49 +5508,49 @@ when provided.</p>
 <tr>
 <td style="text-align: left;">version</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">UCP version in YYYY-MM-DD format.</td>
 </tr>
 <tr>
 <td style="text-align: left;">status</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Application-level status of the UCP operation.<br><strong>Enum:</strong> <code>success</code>, <code>error</code></td>
 </tr>
 <tr>
 <td style="text-align: left;">services</td>
 <td style="text-align: left;">object</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Service registry keyed by reverse-domain name.</td>
 </tr>
 <tr>
 <td style="text-align: left;">capabilities</td>
 <td style="text-align: left;">object</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Capability registry keyed by reverse-domain name.</td>
 </tr>
 <tr>
 <td style="text-align: left;">payment_handlers</td>
 <td style="text-align: left;">object</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Payment handler registry keyed by reverse-domain name.</td>
 </tr>
 <tr>
 <td style="text-align: left;">services</td>
 <td style="text-align: left;">any</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
 <td style="text-align: left;">capabilities</td>
 <td style="text-align: left;">any</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
 <td style="text-align: left;">payment_handlers</td>
 <td style="text-align: left;">any</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;"></td>
 </tr>
 </tbody>
@@ -5561,7 +5561,7 @@ when provided.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -5569,19 +5569,19 @@ when provided.</p>
 <tr>
 <td style="text-align: left;">id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Unique order identifier.</td>
 </tr>
 <tr>
 <td style="text-align: left;">label</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Human-readable label for identifying the order. MUST only be provided by the business.</td>
 </tr>
 <tr>
 <td style="text-align: left;">permalink_url</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Permalink to access the order on merchant site.</td>
 </tr>
 </tbody>

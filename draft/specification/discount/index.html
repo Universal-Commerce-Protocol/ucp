@@ -2749,7 +2749,7 @@ discount codes.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -2757,13 +2757,13 @@ discount codes.</p>
 <tr>
 <td style="text-align: left;">codes</td>
 <td style="text-align: left;">Array[string]</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Discount codes to apply. Case-insensitive. Replaces previously submitted codes. Send empty array to clear.</td>
 </tr>
 <tr>
 <td style="text-align: left;">applied</td>
 <td style="text-align: left;">Array[object]</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Discounts successfully applied (code-based and automatic).</td>
 </tr>
 </tbody>
@@ -2775,7 +2775,7 @@ discount codes.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -2783,55 +2783,55 @@ discount codes.</p>
 <tr>
 <td style="text-align: left;">code</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">The discount code. Omitted for automatic discounts.</td>
 </tr>
 <tr>
 <td style="text-align: left;">title</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Human-readable discount name (e.g., 'Summer Sale 20% Off').</td>
 </tr>
 <tr>
 <td style="text-align: left;">amount</td>
 <td style="text-align: left;">integer</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Total discount amount in ISO 4217 minor units.</td>
 </tr>
 <tr>
 <td style="text-align: left;">automatic</td>
 <td style="text-align: left;">boolean</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">True if applied automatically by merchant rules (no code required).</td>
 </tr>
 <tr>
 <td style="text-align: left;">method</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Allocation method. 'each' = applied independently per item. 'across' = split proportionally by value.<br><strong>Enum:</strong> <code>each</code>, <code>across</code></td>
 </tr>
 <tr>
 <td style="text-align: left;">priority</td>
 <td style="text-align: left;">integer</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Stacking order for discount calculation. Lower numbers applied first (1 = first).</td>
 </tr>
 <tr>
 <td style="text-align: left;">provisional</td>
 <td style="text-align: left;">boolean</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">True if this discount requires additional verification.</td>
 </tr>
 <tr>
 <td style="text-align: left;">eligibility</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">The eligibility claim accepted by the Business for this discount. Corresponds to a value from context.eligibility. Omitted for code-based and non-eligibility automatic discounts.</td>
 </tr>
 <tr>
 <td style="text-align: left;">allocations</td>
 <td style="text-align: left;">Array[object]</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Breakdown of where this discount was allocated. Sum of allocation amounts equals total amount.</td>
 </tr>
 </tbody>
@@ -2843,7 +2843,7 @@ discount codes.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -2851,13 +2851,13 @@ discount codes.</p>
 <tr>
 <td style="text-align: left;">path</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">JSONPath to the allocation target (e.g., '$.line_items[0]', '$.totals.shipping').</td>
 </tr>
 <tr>
 <td style="text-align: left;">amount</td>
 <td style="text-align: left;">integer</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Amount allocated to this target in ISO 4217 minor units.</td>
 </tr>
 </tbody>

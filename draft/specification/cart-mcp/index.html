@@ -2855,7 +2855,7 @@ include additional metadata fields.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -2863,31 +2863,31 @@ include additional metadata fields.</p>
 <tr>
 <td style="text-align: left;">line_items</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#line-item">Line Item</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Cart line items. Same structure as checkout. Full replacement on update.</td>
 </tr>
 <tr>
 <td style="text-align: left;">context</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#context">Context</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Buyer signals for localization (country, region, postal_code). Merchant uses for pricing, availability, currency. Falls back to geo-IP if omitted.</td>
 </tr>
 <tr>
 <td style="text-align: left;">signals</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#signals">Signals</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
 </tr>
 <tr>
 <td style="text-align: left;">attribution</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#attribution">Attribution</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.</td>
 </tr>
 <tr>
 <td style="text-align: left;">buyer</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#buyer">Buyer</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Optional buyer information for personalized estimates.</td>
 </tr>
 </tbody>
@@ -2898,7 +2898,7 @@ include additional metadata fields.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -2906,79 +2906,79 @@ include additional metadata fields.</p>
 <tr>
 <td style="text-align: left;">ucp</td>
 <td style="text-align: left;">any</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">UCP metadata for cart responses. No payment handlers needed pre-checkout.</td>
 </tr>
 <tr>
 <td style="text-align: left;">id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Unique cart identifier.</td>
 </tr>
 <tr>
 <td style="text-align: left;">line_items</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#line-item">Line Item Response</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Cart line items. Same structure as checkout. Full replacement on update.</td>
 </tr>
 <tr>
 <td style="text-align: left;">context</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#context">Context</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Buyer signals for localization (country, region, postal_code). Merchant uses for pricing, availability, currency. Falls back to geo-IP if omitted.</td>
 </tr>
 <tr>
 <td style="text-align: left;">signals</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#signals">Signals</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
 </tr>
 <tr>
 <td style="text-align: left;">attribution</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#attribution">Attribution</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.</td>
 </tr>
 <tr>
 <td style="text-align: left;">buyer</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#buyer">Buyer</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Optional buyer information for personalized estimates.</td>
 </tr>
 <tr>
 <td style="text-align: left;">currency</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">ISO 4217 currency code. Determined by merchant based on context or geo-IP.</td>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#totals">Totals</a></td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Estimated cost breakdown. May be partial if shipping/tax not yet calculable.</td>
 </tr>
 <tr>
 <td style="text-align: left;">messages</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#message">Message</a>]</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Validation messages, warnings, or informational notices.</td>
 </tr>
 <tr>
 <td style="text-align: left;">links</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#link">Link</a>]</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Optional merchant links (policies, FAQs).</td>
 </tr>
 <tr>
 <td style="text-align: left;">continue_url</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">URL for cart handoff and session recovery. Enables sharing and human-in-the-loop flows.</td>
 </tr>
 <tr>
 <td style="text-align: left;">expires_at</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Cart expiry timestamp (RFC 3339). Optional.</td>
 </tr>
 </tbody>
@@ -3114,7 +3114,7 @@ include additional metadata fields.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -3122,79 +3122,79 @@ include additional metadata fields.</p>
 <tr>
 <td style="text-align: left;">ucp</td>
 <td style="text-align: left;">any</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">UCP metadata for cart responses. No payment handlers needed pre-checkout.</td>
 </tr>
 <tr>
 <td style="text-align: left;">id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Unique cart identifier.</td>
 </tr>
 <tr>
 <td style="text-align: left;">line_items</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#line-item">Line Item Response</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Cart line items. Same structure as checkout. Full replacement on update.</td>
 </tr>
 <tr>
 <td style="text-align: left;">context</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#context">Context</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Buyer signals for localization (country, region, postal_code). Merchant uses for pricing, availability, currency. Falls back to geo-IP if omitted.</td>
 </tr>
 <tr>
 <td style="text-align: left;">signals</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#signals">Signals</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
 </tr>
 <tr>
 <td style="text-align: left;">attribution</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#attribution">Attribution</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.</td>
 </tr>
 <tr>
 <td style="text-align: left;">buyer</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#buyer">Buyer</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Optional buyer information for personalized estimates.</td>
 </tr>
 <tr>
 <td style="text-align: left;">currency</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">ISO 4217 currency code. Determined by merchant based on context or geo-IP.</td>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#totals">Totals</a></td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Estimated cost breakdown. May be partial if shipping/tax not yet calculable.</td>
 </tr>
 <tr>
 <td style="text-align: left;">messages</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#message">Message</a>]</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Validation messages, warnings, or informational notices.</td>
 </tr>
 <tr>
 <td style="text-align: left;">links</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#link">Link</a>]</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Optional merchant links (policies, FAQs).</td>
 </tr>
 <tr>
 <td style="text-align: left;">continue_url</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">URL for cart handoff and session recovery. Enables sharing and human-in-the-loop flows.</td>
 </tr>
 <tr>
 <td style="text-align: left;">expires_at</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Cart expiry timestamp (RFC 3339). Optional.</td>
 </tr>
 </tbody>
@@ -3323,7 +3323,7 @@ include additional metadata fields.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -3331,37 +3331,37 @@ include additional metadata fields.</p>
 <tr>
 <td style="text-align: left;">id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Unique cart identifier.</td>
 </tr>
 <tr>
 <td style="text-align: left;">line_items</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#line-item">Line Item</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Cart line items. Same structure as checkout. Full replacement on update.</td>
 </tr>
 <tr>
 <td style="text-align: left;">context</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#context">Context</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Buyer signals for localization (country, region, postal_code). Merchant uses for pricing, availability, currency. Falls back to geo-IP if omitted.</td>
 </tr>
 <tr>
 <td style="text-align: left;">signals</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#signals">Signals</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
 </tr>
 <tr>
 <td style="text-align: left;">attribution</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#attribution">Attribution</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.</td>
 </tr>
 <tr>
 <td style="text-align: left;">buyer</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#buyer">Buyer</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Optional buyer information for personalized estimates.</td>
 </tr>
 </tbody>
@@ -3372,7 +3372,7 @@ include additional metadata fields.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -3380,79 +3380,79 @@ include additional metadata fields.</p>
 <tr>
 <td style="text-align: left;">ucp</td>
 <td style="text-align: left;">any</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">UCP metadata for cart responses. No payment handlers needed pre-checkout.</td>
 </tr>
 <tr>
 <td style="text-align: left;">id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Unique cart identifier.</td>
 </tr>
 <tr>
 <td style="text-align: left;">line_items</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#line-item">Line Item Response</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Cart line items. Same structure as checkout. Full replacement on update.</td>
 </tr>
 <tr>
 <td style="text-align: left;">context</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#context">Context</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Buyer signals for localization (country, region, postal_code). Merchant uses for pricing, availability, currency. Falls back to geo-IP if omitted.</td>
 </tr>
 <tr>
 <td style="text-align: left;">signals</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#signals">Signals</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
 </tr>
 <tr>
 <td style="text-align: left;">attribution</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#attribution">Attribution</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.</td>
 </tr>
 <tr>
 <td style="text-align: left;">buyer</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#buyer">Buyer</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Optional buyer information for personalized estimates.</td>
 </tr>
 <tr>
 <td style="text-align: left;">currency</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">ISO 4217 currency code. Determined by merchant based on context or geo-IP.</td>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#totals">Totals</a></td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Estimated cost breakdown. May be partial if shipping/tax not yet calculable.</td>
 </tr>
 <tr>
 <td style="text-align: left;">messages</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#message">Message</a>]</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Validation messages, warnings, or informational notices.</td>
 </tr>
 <tr>
 <td style="text-align: left;">links</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#link">Link</a>]</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Optional merchant links (policies, FAQs).</td>
 </tr>
 <tr>
 <td style="text-align: left;">continue_url</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">URL for cart handoff and session recovery. Enables sharing and human-in-the-loop flows.</td>
 </tr>
 <tr>
 <td style="text-align: left;">expires_at</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Cart expiry timestamp (RFC 3339). Optional.</td>
 </tr>
 </tbody>
@@ -3582,7 +3582,7 @@ include additional metadata fields.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -3590,79 +3590,79 @@ include additional metadata fields.</p>
 <tr>
 <td style="text-align: left;">ucp</td>
 <td style="text-align: left;">any</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">UCP metadata for cart responses. No payment handlers needed pre-checkout.</td>
 </tr>
 <tr>
 <td style="text-align: left;">id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Unique cart identifier.</td>
 </tr>
 <tr>
 <td style="text-align: left;">line_items</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#line-item">Line Item Response</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Cart line items. Same structure as checkout. Full replacement on update.</td>
 </tr>
 <tr>
 <td style="text-align: left;">context</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#context">Context</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Buyer signals for localization (country, region, postal_code). Merchant uses for pricing, availability, currency. Falls back to geo-IP if omitted.</td>
 </tr>
 <tr>
 <td style="text-align: left;">signals</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#signals">Signals</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
 </tr>
 <tr>
 <td style="text-align: left;">attribution</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#attribution">Attribution</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.</td>
 </tr>
 <tr>
 <td style="text-align: left;">buyer</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#buyer">Buyer</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Optional buyer information for personalized estimates.</td>
 </tr>
 <tr>
 <td style="text-align: left;">currency</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">ISO 4217 currency code. Determined by merchant based on context or geo-IP.</td>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#totals">Totals</a></td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Estimated cost breakdown. May be partial if shipping/tax not yet calculable.</td>
 </tr>
 <tr>
 <td style="text-align: left;">messages</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#message">Message</a>]</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Validation messages, warnings, or informational notices.</td>
 </tr>
 <tr>
 <td style="text-align: left;">links</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#link">Link</a>]</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Optional merchant links (policies, FAQs).</td>
 </tr>
 <tr>
 <td style="text-align: left;">continue_url</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">URL for cart handoff and session recovery. Enables sharing and human-in-the-loop flows.</td>
 </tr>
 <tr>
 <td style="text-align: left;">expires_at</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Cart expiry timestamp (RFC 3339). Optional.</td>
 </tr>
 </tbody>

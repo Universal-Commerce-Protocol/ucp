@@ -2679,7 +2679,7 @@ array identifying which request identifiers resolved to it, and how.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -2687,13 +2687,13 @@ array identifying which request identifiers resolved to it, and how.</p>
 <tr>
 <td style="text-align: left;">id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">The identifier from the lookup request that resolved to this variant.</td>
 </tr>
 <tr>
 <td style="text-align: left;">match</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">How the request identifier resolved to this variant. Well-known values: <code>exact</code> (input directly identifies this variant, e.g., variant ID, SKU), <code>featured</code> (server selected this variant as representative, e.g., product ID resolved to best match). Businesses MAY implement and provide additional resolution strategies.</td>
 </tr>
 </tbody>
@@ -2732,7 +2732,7 @@ from the response.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -2740,31 +2740,31 @@ from the response.</p>
 <tr>
 <td style="text-align: left;">ids</td>
 <td style="text-align: left;">Array[string]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Identifiers to lookup. Implementations MUST support product ID and variant ID; MAY support secondary identifiers (SKU, handle, etc.).</td>
 </tr>
 <tr>
 <td style="text-align: left;">filters</td>
 <td style="text-align: left;">object</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Filter criteria to narrow returned products and variants. All specified filters combine with AND logic.</td>
 </tr>
 <tr>
 <td style="text-align: left;">context</td>
 <td style="text-align: left;">object</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Provisional buyer signals for relevance and localization—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data. Context SHOULD be non-identifying and can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context.</td>
 </tr>
 <tr>
 <td style="text-align: left;">signals</td>
 <td style="text-align: left;">object</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
 </tr>
 <tr>
 <td style="text-align: left;">attribution</td>
 <td style="text-align: left;">object</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.</td>
 </tr>
 </tbody>
@@ -2775,7 +2775,7 @@ from the response.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -2783,19 +2783,19 @@ from the response.</p>
 <tr>
 <td style="text-align: left;">ucp</td>
 <td style="text-align: left;">any</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">UCP metadata for catalog responses.</td>
 </tr>
 <tr>
 <td style="text-align: left;">products</td>
 <td style="text-align: left;">Array[Product]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Products matching the requested identifiers. May contain fewer items if some identifiers not found, or more if identifiers match multiple products.</td>
 </tr>
 <tr>
 <td style="text-align: left;">messages</td>
 <td style="text-align: left;">Array[object]</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Errors, warnings, or informational messages about the requested items.</td>
 </tr>
 </tbody>
@@ -2900,7 +2900,7 @@ selection changes the availability map.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -2908,43 +2908,43 @@ selection changes the availability map.</p>
 <tr>
 <td style="text-align: left;">id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Product or variant identifier. Implementations MUST support product ID and variant ID.</td>
 </tr>
 <tr>
 <td style="text-align: left;">selected</td>
 <td style="text-align: left;">Array[object]</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Partial or full option selections for interactive variant narrowing. When provided, response option values include availability signals (available, exists) relative to these selections.</td>
 </tr>
 <tr>
 <td style="text-align: left;">preferences</td>
 <td style="text-align: left;">Array[string]</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Option names in relaxation priority order. When no exact variant matches all selections, the server drops options from the end of this list first. E.g., ['Color', 'Size'] keeps Color and relaxes Size.</td>
 </tr>
 <tr>
 <td style="text-align: left;">filters</td>
 <td style="text-align: left;">object</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Filter criteria to narrow returned variants. All specified filters combine with AND logic.</td>
 </tr>
 <tr>
 <td style="text-align: left;">context</td>
 <td style="text-align: left;">object</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Provisional buyer signals for relevance and localization—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data. Context SHOULD be non-identifying and can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context.</td>
 </tr>
 <tr>
 <td style="text-align: left;">signals</td>
 <td style="text-align: left;">object</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
 </tr>
 <tr>
 <td style="text-align: left;">attribution</td>
 <td style="text-align: left;">object</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.</td>
 </tr>
 </tbody>
@@ -2955,7 +2955,7 @@ selection changes the availability map.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -2963,19 +2963,19 @@ selection changes the availability map.</p>
 <tr>
 <td style="text-align: left;">ucp</td>
 <td style="text-align: left;">any</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">UCP metadata for catalog responses.</td>
 </tr>
 <tr>
 <td style="text-align: left;">product</td>
 <td style="text-align: left;">object</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">The requested product with full detail. Singular — this is a single-resource operation.</td>
 </tr>
 <tr>
 <td style="text-align: left;">messages</td>
 <td style="text-align: left;">Array[object]</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Warnings or informational messages about the product (e.g., price recently changed, limited availability).</td>
 </tr>
 </tbody>

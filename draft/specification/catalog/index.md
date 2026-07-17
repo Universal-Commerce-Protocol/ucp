@@ -40,24 +40,24 @@ Businesses determine market assignment—including currency—based on context s
 
 When `context.eligibility` claims are present, Businesses that accept them **MAY** adjust `price` / `list_price` directly for strikethrough display and **MAY** use `messages` with `code: "eligibility_benefit"` to attribute the adjustment to a specific claim.
 
-| Name            | Type                                                                                | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| --------------- | ----------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| address_country | string                                                                              | No       | The country, as a 2-letter ISO 3166-1 alpha-2 code (e.g. "US"). A 3-letter alpha-3 code or full country name MAY also be used.                                                                                                                                                                                                                                                                                                                                     |
-| address_region  | string                                                                              | No       | The first-level administrative region within the country (e.g. a state or province such as California).                                                                                                                                                                                                                                                                                                                                                            |
-| postal_code     | string                                                                              | No       | The postal code (e.g. "94043").                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| intent          | string                                                                              | No       | Background context describing buyer's intent (e.g., 'looking for a gift under $50', 'need something durable for outdoor use'). Informs relevance, recommendations, and personalization.                                                                                                                                                                                                                                                                            |
-| language        | string                                                                              | No       | Preferred language for content. Use IETF BCP 47 language tags (e.g., 'en', 'fr-CA', 'zh-Hans'). For REST, equivalent to Accept-Language header—platforms SHOULD fall back to Accept-Language when this field is absent; when provided, overrides Accept-Language. Businesses MAY return content in a different language if unavailable.                                                                                                                            |
-| currency        | string                                                                              | No       | Preferred currency (ISO 4217, e.g., 'EUR', 'USD'). Businesses determine presentment currency from context and authoritative signals; this hint MAY inform selection in multi-currency markets. Also serves as the denomination for price filter values — platforms SHOULD include this field when sending price filters. Response prices include explicit currency confirming the resolution.                                                                      |
-| eligibility     | Array\[[Reverse Domain Name](/draft/specification/reference/#reverse-domain-name)\] | No       | Buyer claims about eligible benefits such as loyalty membership, payment instrument perks, and similar. Recognized claims MAY inform the Business response (e.g., member-only product availability, adjusted pricing in catalog, provisional discounts at cart or checkout). Businesses MUST ignore unrecognized values without error. Values MUST use reverse-domain naming (e.g., 'com.example.loyalty_gold', 'org.school.student') and MUST be non-identifying. |
+| Name            | Type                                                                                | Requirement | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| --------------- | ----------------------------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| address_country | string                                                                              | Optional    | The country, as a 2-letter ISO 3166-1 alpha-2 code (e.g. "US"). A 3-letter alpha-3 code or full country name MAY also be used.                                                                                                                                                                                                                                                                                                                                     |
+| address_region  | string                                                                              | Optional    | The first-level administrative region within the country (e.g. a state or province such as California).                                                                                                                                                                                                                                                                                                                                                            |
+| postal_code     | string                                                                              | Optional    | The postal code (e.g. "94043").                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| intent          | string                                                                              | Optional    | Background context describing buyer's intent (e.g., 'looking for a gift under $50', 'need something durable for outdoor use'). Informs relevance, recommendations, and personalization.                                                                                                                                                                                                                                                                            |
+| language        | string                                                                              | Optional    | Preferred language for content. Use IETF BCP 47 language tags (e.g., 'en', 'fr-CA', 'zh-Hans'). For REST, equivalent to Accept-Language header—platforms SHOULD fall back to Accept-Language when this field is absent; when provided, overrides Accept-Language. Businesses MAY return content in a different language if unavailable.                                                                                                                            |
+| currency        | string                                                                              | Optional    | Preferred currency (ISO 4217, e.g., 'EUR', 'USD'). Businesses determine presentment currency from context and authoritative signals; this hint MAY inform selection in multi-currency markets. Also serves as the denomination for price filter values — platforms SHOULD include this field when sending price filters. Response prices include explicit currency confirming the resolution.                                                                      |
+| eligibility     | Array\[[Reverse Domain Name](/draft/specification/reference/#reverse-domain-name)\] | Optional    | Buyer claims about eligible benefits such as loyalty membership, payment instrument perks, and similar. Recognized claims MAY inform the Business response (e.g., member-only product availability, adjusted pricing in catalog, provisional discounts at cart or checkout). Businesses MUST ignore unrecognized values without error. Values MUST use reverse-domain naming (e.g., 'com.example.loyalty_gold', 'org.school.student') and MUST be non-identifying. |
 
 ### Signals
 
 Environment data provided by the platform to support authorization and abuse prevention. Signal values MUST NOT be buyer-asserted claims. See [Signals](http://ucp.dev/draft/specification/overview/#signals) for details and privacy requirements.
 
-| Name               | Type   | Required | Description                                    |
-| ------------------ | ------ | -------- | ---------------------------------------------- |
-| dev.ucp.buyer_ip   | string | No       | Client's IP address (IPv4 or IPv6).            |
-| dev.ucp.user_agent | string | No       | Client's HTTP User-Agent header or equivalent. |
+| Name               | Type   | Requirement | Description                                    |
+| ------------------ | ------ | ----------- | ---------------------------------------------- |
+| dev.ucp.buyer_ip   | string | Optional    | Client's IP address (IPv4 or IPv6).            |
+| dev.ucp.user_agent | string | Optional    | Client's HTTP User-Agent header or equivalent. |
 
 ### Attribution
 
@@ -71,22 +71,22 @@ A catalog item representing a sellable item with one or more purchasable variant
 
 `media` and `variants` are ordered arrays. Businesses SHOULD return the most relevant variant and image first—default for lookups, best match based on query and context for search. Platforms SHOULD treat the first element as featured.
 
-| Name             | Type                                                                      | Required | Description                                                                                      |
-| ---------------- | ------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------ |
-| id               | string                                                                    | **Yes**  | Global ID (GID) uniquely identifying this product.                                               |
-| handle           | string                                                                    | No       | URL-safe slug for SEO-friendly URLs (e.g., 'blue-runner-pro'). Use id for stable API references. |
-| title            | string                                                                    | **Yes**  | Product title.                                                                                   |
-| description      | [Description](/draft/specification/reference/#description)                | **Yes**  | Product description in one or more formats.                                                      |
-| url              | string                                                                    | No       | Canonical product page URL.                                                                      |
-| categories       | Array\[[Category](/draft/specification/reference/#category)\]             | No       | Product categories with optional taxonomy identifiers.                                           |
-| price_range      | [Price Range](/draft/specification/reference/#price-range)                | **Yes**  | Price range across all variants.                                                                 |
-| list_price_range | [Price Range](/draft/specification/reference/#price-range)                | No       | List price range before discounts (for strikethrough display).                                   |
-| media            | Array\[[Media](/draft/specification/reference/#media)\]                   | No       | Product media (images, videos, 3D models). First item is the featured media for listings.        |
-| options          | Array\[[Product Option](/draft/specification/reference/#product-option)\] | No       | Product options (Size, Color, etc.).                                                             |
-| variants         | Array\[[Variant](/draft/specification/reference/#variant)\]               | **Yes**  | Purchasable variants of this product. First item is the featured variant for listings.           |
-| rating           | [Rating](/draft/specification/reference/#rating)                          | No       | Aggregate product rating.                                                                        |
-| tags             | Array[string]                                                             | No       | Product tags for categorization and search.                                                      |
-| metadata         | object                                                                    | No       | Business-defined custom data extending the standard product model.                               |
+| Name             | Type                                                                      | Requirement  | Description                                                                                      |
+| ---------------- | ------------------------------------------------------------------------- | ------------ | ------------------------------------------------------------------------------------------------ |
+| id               | string                                                                    | **Required** | Global ID (GID) uniquely identifying this product.                                               |
+| handle           | string                                                                    | Optional     | URL-safe slug for SEO-friendly URLs (e.g., 'blue-runner-pro'). Use id for stable API references. |
+| title            | string                                                                    | **Required** | Product title.                                                                                   |
+| description      | [Description](/draft/specification/reference/#description)                | **Required** | Product description in one or more formats.                                                      |
+| url              | string                                                                    | Optional     | Canonical product page URL.                                                                      |
+| categories       | Array\[[Category](/draft/specification/reference/#category)\]             | Optional     | Product categories with optional taxonomy identifiers.                                           |
+| price_range      | [Price Range](/draft/specification/reference/#price-range)                | **Required** | Price range across all variants.                                                                 |
+| list_price_range | [Price Range](/draft/specification/reference/#price-range)                | Optional     | List price range before discounts (for strikethrough display).                                   |
+| media            | Array\[[Media](/draft/specification/reference/#media)\]                   | Optional     | Product media (images, videos, 3D models). First item is the featured media for listings.        |
+| options          | Array\[[Product Option](/draft/specification/reference/#product-option)\] | Optional     | Product options (Size, Color, etc.).                                                             |
+| variants         | Array\[[Variant](/draft/specification/reference/#variant)\]               | **Required** | Purchasable variants of this product. First item is the featured variant for listings.           |
+| rating           | [Rating](/draft/specification/reference/#rating)                          | Optional     | Aggregate product rating.                                                                        |
+| tags             | Array[string]                                                             | Optional     | Product tags for categorization and search.                                                      |
+| metadata         | object                                                                    | Optional     | Business-defined custom data extending the standard product model.                               |
 
 ### Variant
 
@@ -96,26 +96,26 @@ In lookup responses, each variant carries an `inputs` array for correlation: whi
 
 `media` is an ordered array. Businesses SHOULD return the featured variant image as the first element. Platforms SHOULD treat the first element as featured.
 
-| Name         | Type                                                                        | Required | Description                                                                               |
-| ------------ | --------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------- |
-| id           | string                                                                      | **Yes**  | Global ID (GID) uniquely identifying this variant. Used as item.id in checkout.           |
-| sku          | string                                                                      | No       | Business-assigned identifier for inventory and fulfillment.                               |
-| barcodes     | Array[object]                                                               | No       | Industry-standard product identifiers for cross-reference and correlation.                |
-| handle       | string                                                                      | No       | URL-safe variant handle/slug.                                                             |
-| title        | string                                                                      | **Yes**  | Variant display title (e.g., 'Blue / Large').                                             |
-| description  | [Description](/draft/specification/reference/#description)                  | **Yes**  | Variant description in one or more formats.                                               |
-| url          | string                                                                      | No       | Canonical variant page URL.                                                               |
-| categories   | Array\[[Category](/draft/specification/reference/#category)\]               | No       | Variant categories with optional taxonomy identifiers.                                    |
-| price        | [Price](/draft/specification/reference/#price)                              | **Yes**  | Current selling price.                                                                    |
-| list_price   | [Price](/draft/specification/reference/#price)                              | No       | List price before discounts (for strikethrough display).                                  |
-| unit_price   | object                                                                      | No       | Price per standard unit of measurement. MAY be omitted when unit pricing does not apply.  |
-| availability | [Availability](/draft/specification/reference/#availability)                | No       | Variant availability for purchase.                                                        |
-| options      | Array\[[Selected Option](/draft/specification/reference/#selected-option)\] | No       | Option values that define this variant (e.g., Color: Blue, Size: Large).                  |
-| media        | Array\[[Media](/draft/specification/reference/#media)\]                     | No       | Variant media (images, videos, 3D models). First item is the featured media for listings. |
-| rating       | [Rating](/draft/specification/reference/#rating)                            | No       | Variant rating.                                                                           |
-| tags         | Array[string]                                                               | No       | Variant tags for categorization and search.                                               |
-| metadata     | object                                                                      | No       | Business-defined custom data extending the standard variant model.                        |
-| seller       | object                                                                      | No       | Optional seller context for this variant.                                                 |
+| Name         | Type                                                                        | Requirement  | Description                                                                               |
+| ------------ | --------------------------------------------------------------------------- | ------------ | ----------------------------------------------------------------------------------------- |
+| id           | string                                                                      | **Required** | Global ID (GID) uniquely identifying this variant. Used as item.id in checkout.           |
+| sku          | string                                                                      | Optional     | Business-assigned identifier for inventory and fulfillment.                               |
+| barcodes     | Array[object]                                                               | Optional     | Industry-standard product identifiers for cross-reference and correlation.                |
+| handle       | string                                                                      | Optional     | URL-safe variant handle/slug.                                                             |
+| title        | string                                                                      | **Required** | Variant display title (e.g., 'Blue / Large').                                             |
+| description  | [Description](/draft/specification/reference/#description)                  | **Required** | Variant description in one or more formats.                                               |
+| url          | string                                                                      | Optional     | Canonical variant page URL.                                                               |
+| categories   | Array\[[Category](/draft/specification/reference/#category)\]               | Optional     | Variant categories with optional taxonomy identifiers.                                    |
+| price        | [Price](/draft/specification/reference/#price)                              | **Required** | Current selling price.                                                                    |
+| list_price   | [Price](/draft/specification/reference/#price)                              | Optional     | List price before discounts (for strikethrough display).                                  |
+| unit_price   | object                                                                      | Optional     | Price per standard unit of measurement. MAY be omitted when unit pricing does not apply.  |
+| availability | [Availability](/draft/specification/reference/#availability)                | Optional     | Variant availability for purchase.                                                        |
+| options      | Array\[[Selected Option](/draft/specification/reference/#selected-option)\] | Optional     | Option values that define this variant (e.g., Color: Blue, Size: Large).                  |
+| media        | Array\[[Media](/draft/specification/reference/#media)\]                     | Optional     | Variant media (images, videos, 3D models). First item is the featured media for listings. |
+| rating       | [Rating](/draft/specification/reference/#rating)                            | Optional     | Variant rating.                                                                           |
+| tags         | Array[string]                                                               | Optional     | Variant tags for categorization and search.                                               |
+| metadata     | object                                                                      | Optional     | Business-defined custom data extending the standard variant model.                        |
+| seller       | object                                                                      | Optional     | Optional seller context for this variant.                                                 |
 
 ### Price
 
@@ -123,10 +123,10 @@ See [Price](/draft/specification/reference/#price) in the [Schema Reference](/dr
 
 ### Price Range
 
-| Name | Type                                           | Required | Description                 |
-| ---- | ---------------------------------------------- | -------- | --------------------------- |
-| min  | [Price](/draft/specification/reference/#price) | **Yes**  | Minimum price in the range. |
-| max  | [Price](/draft/specification/reference/#price) | **Yes**  | Maximum price in the range. |
+| Name | Type                                           | Requirement  | Description                 |
+| ---- | ---------------------------------------------- | ------------ | --------------------------- |
+| min  | [Price](/draft/specification/reference/#price) | **Required** | Minimum price in the range. |
+| max  | [Price](/draft/specification/reference/#price) | **Required** | Maximum price in the range. |
 
 ### Media
 
@@ -134,34 +134,34 @@ See [Media](/draft/specification/reference/#media) in the [Schema Reference](/dr
 
 ### Product Option
 
-| Name   | Type                                                                  | Required | Description                          |
-| ------ | --------------------------------------------------------------------- | -------- | ------------------------------------ |
-| name   | string                                                                | **Yes**  | Option name (e.g., 'Size', 'Color'). |
-| values | Array\[[Option Value](/draft/specification/reference/#option-value)\] | **Yes**  | Available values for this option.    |
+| Name   | Type                                                                  | Requirement  | Description                          |
+| ------ | --------------------------------------------------------------------- | ------------ | ------------------------------------ |
+| name   | string                                                                | **Required** | Option name (e.g., 'Size', 'Color'). |
+| values | Array\[[Option Value](/draft/specification/reference/#option-value)\] | **Required** | Available values for this option.    |
 
 ### Option Value
 
-| Name  | Type   | Required | Description                                                                                                                                           |
-| ----- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| id    | string | No       | Optional server-assigned identifier for this option value. When present in a selected_option, the server SHOULD use it for matching instead of label. |
-| label | string | **Yes**  | Display text for this option value (e.g., 'Small', 'Blue').                                                                                           |
+| Name  | Type   | Requirement  | Description                                                                                                                                           |
+| ----- | ------ | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| id    | string | Optional     | Optional server-assigned identifier for this option value. When present in a selected_option, the server SHOULD use it for matching instead of label. |
+| label | string | **Required** | Display text for this option value (e.g., 'Small', 'Blue').                                                                                           |
 
 ### Selected Option
 
-| Name  | Type   | Required | Description                                                                                                                                             |
-| ----- | ------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| name  | string | **Yes**  | Option name (e.g., 'Size').                                                                                                                             |
-| id    | string | No       | Optional option value identifier from option_value.id. When present, the server SHOULD use it for matching; name and label remain required for display. |
-| label | string | **Yes**  | Selected option label (e.g., 'Large').                                                                                                                  |
+| Name  | Type   | Requirement  | Description                                                                                                                                             |
+| ----- | ------ | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| name  | string | **Required** | Option name (e.g., 'Size').                                                                                                                             |
+| id    | string | Optional     | Optional option value identifier from option_value.id. When present, the server SHOULD use it for matching; name and label remain required for display. |
+| label | string | **Required** | Selected option label (e.g., 'Large').                                                                                                                  |
 
 ### Rating
 
-| Name      | Type    | Required | Description                                                |
-| --------- | ------- | -------- | ---------------------------------------------------------- |
-| value     | number  | **Yes**  | Average rating value.                                      |
-| scale_min | number  | No       | Minimum value on the rating scale (e.g., 1 for 1-5 stars). |
-| scale_max | number  | **Yes**  | Maximum value on the rating scale (e.g., 5 for 5-star).    |
-| count     | integer | No       | Number of reviews contributing to the rating.              |
+| Name      | Type    | Requirement  | Description                                                |
+| --------- | ------- | ------------ | ---------------------------------------------------------- |
+| value     | number  | **Required** | Average rating value.                                      |
+| scale_min | number  | Optional     | Minimum value on the rating scale (e.g., 1 for 1-5 stars). |
+| scale_max | number  | **Required** | Maximum value on the rating scale (e.g., 5 for 5-star).    |
+| count     | integer | Optional     | Number of reviews contributing to the rating.              |
 
 ## Messages and Error Handling
 

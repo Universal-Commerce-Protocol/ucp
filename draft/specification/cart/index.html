@@ -2982,7 +2982,7 @@ custom scopes are defined in <a href="../identity-linking/#scopes">Identity Link
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -2990,79 +2990,79 @@ custom scopes are defined in <a href="../identity-linking/#scopes">Identity Link
 <tr>
 <td style="text-align: left;">ucp</td>
 <td style="text-align: left;">any</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">UCP metadata for cart responses. No payment handlers needed pre-checkout.</td>
 </tr>
 <tr>
 <td style="text-align: left;">id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Unique cart identifier.</td>
 </tr>
 <tr>
 <td style="text-align: left;">line_items</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#line-item">Line Item Response</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Cart line items. Same structure as checkout. Full replacement on update.</td>
 </tr>
 <tr>
 <td style="text-align: left;">context</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#context">Context</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Buyer signals for localization (country, region, postal_code). Merchant uses for pricing, availability, currency. Falls back to geo-IP if omitted.</td>
 </tr>
 <tr>
 <td style="text-align: left;">signals</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#signals">Signals</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
 </tr>
 <tr>
 <td style="text-align: left;">attribution</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#attribution">Attribution</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.</td>
 </tr>
 <tr>
 <td style="text-align: left;">buyer</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#buyer">Buyer</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Optional buyer information for personalized estimates.</td>
 </tr>
 <tr>
 <td style="text-align: left;">currency</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">ISO 4217 currency code. Determined by merchant based on context or geo-IP.</td>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#totals">Totals</a></td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Estimated cost breakdown. May be partial if shipping/tax not yet calculable.</td>
 </tr>
 <tr>
 <td style="text-align: left;">messages</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#message">Message</a>]</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Validation messages, warnings, or informational notices.</td>
 </tr>
 <tr>
 <td style="text-align: left;">links</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#link">Link</a>]</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Optional merchant links (policies, FAQs).</td>
 </tr>
 <tr>
 <td style="text-align: left;">continue_url</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">URL for cart handoff and session recovery. Enables sharing and human-in-the-loop flows.</td>
 </tr>
 <tr>
 <td style="text-align: left;">expires_at</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Cart expiry timestamp (RFC 3339). Optional.</td>
 </tr>
 </tbody>
@@ -3152,7 +3152,7 @@ consistent data structures when converting a cart to a checkout session.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -3160,37 +3160,37 @@ consistent data structures when converting a cart to a checkout session.</p>
 <tr>
 <td style="text-align: left;">version</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">UCP version in YYYY-MM-DD format.</td>
 </tr>
 <tr>
 <td style="text-align: left;">status</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Application-level status of the UCP operation.<br><strong>Enum:</strong> <code>success</code>, <code>error</code></td>
 </tr>
 <tr>
 <td style="text-align: left;">services</td>
 <td style="text-align: left;">object</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Service registry keyed by reverse-domain name.</td>
 </tr>
 <tr>
 <td style="text-align: left;">capabilities</td>
 <td style="text-align: left;">object</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Capability registry keyed by reverse-domain name.</td>
 </tr>
 <tr>
 <td style="text-align: left;">payment_handlers</td>
 <td style="text-align: left;">object</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Payment handler registry keyed by reverse-domain name.</td>
 </tr>
 <tr>
 <td style="text-align: left;">capabilities</td>
 <td style="text-align: left;">any</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;"></td>
 </tr>
 </tbody>
@@ -3202,7 +3202,7 @@ consistent data structures when converting a cart to a checkout session.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -3210,13 +3210,13 @@ consistent data structures when converting a cart to a checkout session.</p>
 <tr>
 <td style="text-align: left;">item</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#item">Item</a></td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
 <td style="text-align: left;">quantity</td>
 <td style="text-align: left;">integer</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Quantity of the item being purchased.</td>
 </tr>
 </tbody>
@@ -3227,7 +3227,7 @@ consistent data structures when converting a cart to a checkout session.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -3235,25 +3235,25 @@ consistent data structures when converting a cart to a checkout session.</p>
 <tr>
 <td style="text-align: left;">id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
 <td style="text-align: left;">item</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#item">Item</a></td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
 <td style="text-align: left;">quantity</td>
 <td style="text-align: left;">integer</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Quantity of the item being purchased.</td>
 </tr>
 <tr>
 <td style="text-align: left;">parent_id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Parent line item identifier for any nested structures.</td>
 </tr>
 </tbody>
@@ -3264,7 +3264,7 @@ consistent data structures when converting a cart to a checkout session.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -3272,31 +3272,31 @@ consistent data structures when converting a cart to a checkout session.</p>
 <tr>
 <td style="text-align: left;">id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
 <td style="text-align: left;">item</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#item">Item</a></td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
 <td style="text-align: left;">quantity</td>
 <td style="text-align: left;">integer</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Quantity of the item being purchased.</td>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#total">Total</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Line item totals breakdown.</td>
 </tr>
 <tr>
 <td style="text-align: left;">parent_id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Parent line item identifier for any nested structures.</td>
 </tr>
 </tbody>
@@ -3307,7 +3307,7 @@ consistent data structures when converting a cart to a checkout session.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -3315,25 +3315,25 @@ consistent data structures when converting a cart to a checkout session.</p>
 <tr>
 <td style="text-align: left;">id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">The product identifier, often the SKU, required to resolve the product details associated with this line item. Should be recognized by both the Platform, and the Business.</td>
 </tr>
 <tr>
 <td style="text-align: left;">title</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Product title.</td>
 </tr>
 <tr>
 <td style="text-align: left;">price</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#amount">Amount</a></td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Unit price in ISO 4217 minor units.</td>
 </tr>
 <tr>
 <td style="text-align: left;">image_url</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Product image URI.</td>
 </tr>
 </tbody>
@@ -3344,7 +3344,7 @@ consistent data structures when converting a cart to a checkout session.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -3352,25 +3352,25 @@ consistent data structures when converting a cart to a checkout session.</p>
 <tr>
 <td style="text-align: left;">first_name</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">First name of the buyer.</td>
 </tr>
 <tr>
 <td style="text-align: left;">last_name</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Last name of the buyer.</td>
 </tr>
 <tr>
 <td style="text-align: left;">email</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Email of the buyer.</td>
 </tr>
 <tr>
 <td style="text-align: left;">phone_number</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">E.164 standard.</td>
 </tr>
 </tbody>
@@ -3381,7 +3381,7 @@ consistent data structures when converting a cart to a checkout session.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -3389,43 +3389,43 @@ consistent data structures when converting a cart to a checkout session.</p>
 <tr>
 <td style="text-align: left;">address_country</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">The country, as a 2-letter ISO 3166-1 alpha-2 code (e.g. "US"). A 3-letter alpha-3 code or full country name MAY also be used.</td>
 </tr>
 <tr>
 <td style="text-align: left;">address_region</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">The first-level administrative region within the country (e.g. a state or province such as California).</td>
 </tr>
 <tr>
 <td style="text-align: left;">postal_code</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">The postal code (e.g. "94043").</td>
 </tr>
 <tr>
 <td style="text-align: left;">intent</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Background context describing buyer's intent (e.g., 'looking for a gift under $50', 'need something durable for outdoor use'). Informs relevance, recommendations, and personalization.</td>
 </tr>
 <tr>
 <td style="text-align: left;">language</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Preferred language for content. Use IETF BCP 47 language tags (e.g., 'en', 'fr-CA', 'zh-Hans'). For REST, equivalent to Accept-Language header—platforms SHOULD fall back to Accept-Language when this field is absent; when provided, overrides Accept-Language. Businesses MAY return content in a different language if unavailable.</td>
 </tr>
 <tr>
 <td style="text-align: left;">currency</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Preferred currency (ISO 4217, e.g., 'EUR', 'USD'). Businesses determine presentment currency from context and authoritative signals; this hint MAY inform selection in multi-currency markets. Also serves as the denomination for price filter values — platforms SHOULD include this field when sending price filters. Response prices include explicit currency confirming the resolution.</td>
 </tr>
 <tr>
 <td style="text-align: left;">eligibility</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#reverse-domain-name">Reverse Domain Name</a>]</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Buyer claims about eligible benefits such as loyalty membership, payment instrument perks, and similar. Recognized claims MAY inform the Business response (e.g., member-only product availability, adjusted pricing in catalog, provisional discounts at cart or checkout). Businesses MUST ignore unrecognized values without error. Values MUST use reverse-domain naming (e.g., 'com.example.loyalty_gold', 'org.school.student') and MUST be non-identifying.</td>
 </tr>
 </tbody>
@@ -3440,7 +3440,7 @@ requirements.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -3448,13 +3448,13 @@ requirements.</p>
 <tr>
 <td style="text-align: left;">dev.ucp.buyer_ip</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Client's IP address (IPv4 or IPv6).</td>
 </tr>
 <tr>
 <td style="text-align: left;">dev.ucp.user_agent</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Client's HTTP User-Agent header or equivalent.</td>
 </tr>
 </tbody>
@@ -3474,7 +3474,7 @@ identity, well-known types, repeating types, and sub-line semantics.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -3482,19 +3482,19 @@ identity, well-known types, repeating types, and sub-line semantics.</p>
 <tr>
 <td style="text-align: left;">type</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Cost category. Well-known values: subtotal, items_discount, discount, fulfillment, tax, fee, total. Businesses MAY use additional values.</td>
 </tr>
 <tr>
 <td style="text-align: left;">display_text</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Text to display against the amount. Should reflect appropriate method (e.g., 'Shipping', 'Delivery').</td>
 </tr>
 <tr>
 <td style="text-align: left;">amount</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#signed-amount">Signed Amount</a></td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Monetary amount in the currency's minor unit as defined by ISO 4217. Refer to the currency's exponent to determine minor-to-major ratio (e.g., 2 for USD, 0 for JPY, 3 for KWD). May be negative — the sign is intrinsic to the value (e.g., discounts are negative, charges are positive).</td>
 </tr>
 </tbody>

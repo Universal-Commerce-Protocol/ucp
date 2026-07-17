@@ -5063,7 +5063,7 @@ standard formats:</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -5071,43 +5071,43 @@ standard formats:</p>
 <tr>
 <td style="text-align: left;">version</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Entity version in YYYY-MM-DD format.</td>
 </tr>
 <tr>
 <td style="text-align: left;">spec</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">URL to human-readable specification document.</td>
 </tr>
 <tr>
 <td style="text-align: left;">schema</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">URL to JSON Schema defining this entity's structure and payloads.</td>
 </tr>
 <tr>
 <td style="text-align: left;">id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Unique identifier for this entity instance. Used to disambiguate when multiple instances exist.</td>
 </tr>
 <tr>
 <td style="text-align: left;">config</td>
 <td style="text-align: left;">object</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Entity-specific configuration. Structure defined by each entity's schema.</td>
 </tr>
 <tr>
 <td style="text-align: left;">transport</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Transport protocol for this service binding.<br><strong>Enum:</strong> <code>rest</code>, <code>mcp</code>, <code>a2a</code>, <code>embedded</code></td>
 </tr>
 <tr>
 <td style="text-align: left;">endpoint</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Endpoint URL for this transport binding.</td>
 </tr>
 </tbody>
@@ -5147,7 +5147,7 @@ functionality is supported and where to find documentation and schemas.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -5155,37 +5155,37 @@ functionality is supported and where to find documentation and schemas.</p>
 <tr>
 <td style="text-align: left;">version</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Entity version in YYYY-MM-DD format.</td>
 </tr>
 <tr>
 <td style="text-align: left;">spec</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">URL to human-readable specification document.</td>
 </tr>
 <tr>
 <td style="text-align: left;">schema</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">URL to JSON Schema defining this entity's structure and payloads.</td>
 </tr>
 <tr>
 <td style="text-align: left;">id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Unique identifier for this entity instance. Used to disambiguate when multiple instances exist.</td>
 </tr>
 <tr>
 <td style="text-align: left;">config</td>
 <td style="text-align: left;">object</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Entity-specific configuration. Structure defined by each entity's schema.</td>
 </tr>
 <tr>
 <td style="text-align: left;">extends</td>
 <td style="text-align: left;">OneOf[<code>string</code>, <code>array</code>]</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Parent capability(s) this extends. Present for extensions, absent for root capabilities. Use array for multi-parent extensions.</td>
 </tr>
 </tbody>

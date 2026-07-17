@@ -2758,7 +2758,7 @@ extended.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -2766,37 +2766,37 @@ extended.</p>
 <tr>
 <td style="text-align: left;">id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Unique loyalty membership identifier.</td>
 </tr>
 <tr>
 <td style="text-align: left;">name</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Business specific name of the loyalty membership/program.</td>
 </tr>
 <tr>
 <td style="text-align: left;">display_id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">A masked or partial version of the membership id for user recognition (e.g., '****5678'). MUST NOT be set if the membership has not been verified.</td>
 </tr>
 <tr>
 <td style="text-align: left;">tiers</td>
 <td style="text-align: left;">Array[object]</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Active or display-safe tier context for this membership. Most programs are single-status (one entry); programs with parallel status dimensions (e.g., current and lifetime) populate one entry per active tier. Omitted when no tier context has been resolved.</td>
 </tr>
 <tr>
 <td style="text-align: left;">rewards</td>
 <td style="text-align: left;">Array[object]</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Reward types and earning forecasts associated with this membership. Each object encapsulates one type of reward.</td>
 </tr>
 <tr>
 <td style="text-align: left;">provisional</td>
 <td style="text-align: left;">boolean</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">True if this membership requires additional verification.</td>
 </tr>
 </tbody>
@@ -2808,7 +2808,7 @@ extended.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -2816,19 +2816,19 @@ extended.</p>
 <tr>
 <td style="text-align: left;">id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Unique identifier for the membership tier.</td>
 </tr>
 <tr>
 <td style="text-align: left;">name</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">The human-readable name of the tier (e.g., 'Platinum').</td>
 </tr>
 <tr>
 <td style="text-align: left;">benefits</td>
 <td style="text-align: left;">Array[object]</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">List of benefits associated with this tier.</td>
 </tr>
 </tbody>
@@ -2840,7 +2840,7 @@ extended.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -2848,13 +2848,13 @@ extended.</p>
 <tr>
 <td style="text-align: left;">id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Unique identifier for the tier benefit.</td>
 </tr>
 <tr>
 <td style="text-align: left;">description</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">A display-ready, human-readable explanation of this benefit (e.g. 'Early access to sales').</td>
 </tr>
 </tbody>
@@ -2866,7 +2866,7 @@ extended.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -2874,13 +2874,13 @@ extended.</p>
 <tr>
 <td style="text-align: left;">currency</td>
 <td style="text-align: left;">object</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">A unit of value that customers can accumulate through various commercial activities.</td>
 </tr>
 <tr>
 <td style="text-align: left;">earning_forecast</td>
 <td style="text-align: left;">object</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Preview of rewards to be earned from the current transaction.</td>
 </tr>
 </tbody>
@@ -2894,7 +2894,7 @@ extended.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -2902,19 +2902,19 @@ extended.</p>
 <tr>
 <td style="text-align: left;">name</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Human-readable name of the currency (e.g. 'LoyaltyStars').</td>
 </tr>
 <tr>
 <td style="text-align: left;">code</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Business-specific representation of the currency (e.g. 'LST').</td>
 </tr>
 <tr>
 <td style="text-align: left;">decimal_places</td>
 <td style="text-align: left;">integer</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">The position of a digit to the right of a decimal point. Applies to all amount related fields for rewards.</td>
 </tr>
 </tbody>
@@ -2926,7 +2926,7 @@ extended.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -2934,13 +2934,13 @@ extended.</p>
 <tr>
 <td style="text-align: left;">amount</td>
 <td style="text-align: left;">integer</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Total rewards to be earned if the transaction completes.</td>
 </tr>
 <tr>
 <td style="text-align: left;">breakdown</td>
 <td style="text-align: left;">Array[object]</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">List of breakdown of earning contributing to the total.</td>
 </tr>
 </tbody>
@@ -2952,7 +2952,7 @@ extended.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -2960,25 +2960,25 @@ extended.</p>
 <tr>
 <td style="text-align: left;">id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Unique rewards breakdown rule identifier.</td>
 </tr>
 <tr>
 <td style="text-align: left;">amount</td>
 <td style="text-align: left;">integer</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Rewards earned from this rule.</td>
 </tr>
 <tr>
 <td style="text-align: left;">description</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">A display-ready, human-readable rationale for the specific rewards (e.g. 2x on footwear).</td>
 </tr>
 <tr>
 <td style="text-align: left;">benefit_id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Optional <code>id</code> of the membership_tier_benefit that produced this rewards rule. Resolves against <code>membership_tier_benefit.id</code> within the same parent loyalty membership.</td>
 </tr>
 </tbody>

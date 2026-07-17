@@ -2893,7 +2893,7 @@ adjustment to a specific claim.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -2901,43 +2901,43 @@ adjustment to a specific claim.</p>
 <tr>
 <td style="text-align: left;">address_country</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">The country, as a 2-letter ISO 3166-1 alpha-2 code (e.g. "US"). A 3-letter alpha-3 code or full country name MAY also be used.</td>
 </tr>
 <tr>
 <td style="text-align: left;">address_region</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">The first-level administrative region within the country (e.g. a state or province such as California).</td>
 </tr>
 <tr>
 <td style="text-align: left;">postal_code</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">The postal code (e.g. "94043").</td>
 </tr>
 <tr>
 <td style="text-align: left;">intent</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Background context describing buyer's intent (e.g., 'looking for a gift under $50', 'need something durable for outdoor use'). Informs relevance, recommendations, and personalization.</td>
 </tr>
 <tr>
 <td style="text-align: left;">language</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Preferred language for content. Use IETF BCP 47 language tags (e.g., 'en', 'fr-CA', 'zh-Hans'). For REST, equivalent to Accept-Language header—platforms SHOULD fall back to Accept-Language when this field is absent; when provided, overrides Accept-Language. Businesses MAY return content in a different language if unavailable.</td>
 </tr>
 <tr>
 <td style="text-align: left;">currency</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Preferred currency (ISO 4217, e.g., 'EUR', 'USD'). Businesses determine presentment currency from context and authoritative signals; this hint MAY inform selection in multi-currency markets. Also serves as the denomination for price filter values — platforms SHOULD include this field when sending price filters. Response prices include explicit currency confirming the resolution.</td>
 </tr>
 <tr>
 <td style="text-align: left;">eligibility</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#reverse-domain-name">Reverse Domain Name</a>]</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Buyer claims about eligible benefits such as loyalty membership, payment instrument perks, and similar. Recognized claims MAY inform the Business response (e.g., member-only product availability, adjusted pricing in catalog, provisional discounts at cart or checkout). Businesses MUST ignore unrecognized values without error. Values MUST use reverse-domain naming (e.g., 'com.example.loyalty_gold', 'org.school.student') and MUST be non-identifying.</td>
 </tr>
 </tbody>
@@ -2951,7 +2951,7 @@ and abuse prevention. Signal values MUST NOT be buyer-asserted claims. See
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -2959,13 +2959,13 @@ and abuse prevention. Signal values MUST NOT be buyer-asserted claims. See
 <tr>
 <td style="text-align: left;">dev.ucp.buyer_ip</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Client's IP address (IPv4 or IPv6).</td>
 </tr>
 <tr>
 <td style="text-align: left;">dev.ucp.user_agent</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Client's HTTP User-Agent header or equivalent.</td>
 </tr>
 </tbody>
@@ -2986,7 +2986,7 @@ and context for search. Platforms SHOULD treat the first element as featured.</p
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -2994,85 +2994,85 @@ and context for search. Platforms SHOULD treat the first element as featured.</p
 <tr>
 <td style="text-align: left;">id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Global ID (GID) uniquely identifying this product.</td>
 </tr>
 <tr>
 <td style="text-align: left;">handle</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">URL-safe slug for SEO-friendly URLs (e.g., 'blue-runner-pro'). Use id for stable API references.</td>
 </tr>
 <tr>
 <td style="text-align: left;">title</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Product title.</td>
 </tr>
 <tr>
 <td style="text-align: left;">description</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#description">Description</a></td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Product description in one or more formats.</td>
 </tr>
 <tr>
 <td style="text-align: left;">url</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Canonical product page URL.</td>
 </tr>
 <tr>
 <td style="text-align: left;">categories</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#category">Category</a>]</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Product categories with optional taxonomy identifiers.</td>
 </tr>
 <tr>
 <td style="text-align: left;">price_range</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#price-range">Price Range</a></td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Price range across all variants.</td>
 </tr>
 <tr>
 <td style="text-align: left;">list_price_range</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#price-range">Price Range</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">List price range before discounts (for strikethrough display).</td>
 </tr>
 <tr>
 <td style="text-align: left;">media</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#media">Media</a>]</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Product media (images, videos, 3D models). First item is the featured media for listings.</td>
 </tr>
 <tr>
 <td style="text-align: left;">options</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#product-option">Product Option</a>]</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Product options (Size, Color, etc.).</td>
 </tr>
 <tr>
 <td style="text-align: left;">variants</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#variant">Variant</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Purchasable variants of this product. First item is the featured variant for listings.</td>
 </tr>
 <tr>
 <td style="text-align: left;">rating</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#rating">Rating</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Aggregate product rating.</td>
 </tr>
 <tr>
 <td style="text-align: left;">tags</td>
 <td style="text-align: left;">Array[string]</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Product tags for categorization and search.</td>
 </tr>
 <tr>
 <td style="text-align: left;">metadata</td>
 <td style="text-align: left;">object</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Business-defined custom data extending the standard product model.</td>
 </tr>
 </tbody>
@@ -3090,7 +3090,7 @@ as the first element. Platforms SHOULD treat the first element as featured.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -3098,109 +3098,109 @@ as the first element. Platforms SHOULD treat the first element as featured.</p>
 <tr>
 <td style="text-align: left;">id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Global ID (GID) uniquely identifying this variant. Used as item.id in checkout.</td>
 </tr>
 <tr>
 <td style="text-align: left;">sku</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Business-assigned identifier for inventory and fulfillment.</td>
 </tr>
 <tr>
 <td style="text-align: left;">barcodes</td>
 <td style="text-align: left;">Array[object]</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Industry-standard product identifiers for cross-reference and correlation.</td>
 </tr>
 <tr>
 <td style="text-align: left;">handle</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">URL-safe variant handle/slug.</td>
 </tr>
 <tr>
 <td style="text-align: left;">title</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Variant display title (e.g., 'Blue / Large').</td>
 </tr>
 <tr>
 <td style="text-align: left;">description</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#description">Description</a></td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Variant description in one or more formats.</td>
 </tr>
 <tr>
 <td style="text-align: left;">url</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Canonical variant page URL.</td>
 </tr>
 <tr>
 <td style="text-align: left;">categories</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#category">Category</a>]</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Variant categories with optional taxonomy identifiers.</td>
 </tr>
 <tr>
 <td style="text-align: left;">price</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#price">Price</a></td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Current selling price.</td>
 </tr>
 <tr>
 <td style="text-align: left;">list_price</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#price">Price</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">List price before discounts (for strikethrough display).</td>
 </tr>
 <tr>
 <td style="text-align: left;">unit_price</td>
 <td style="text-align: left;">object</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Price per standard unit of measurement. MAY be omitted when unit pricing does not apply.</td>
 </tr>
 <tr>
 <td style="text-align: left;">availability</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#availability">Availability</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Variant availability for purchase.</td>
 </tr>
 <tr>
 <td style="text-align: left;">options</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#selected-option">Selected Option</a>]</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Option values that define this variant (e.g., Color: Blue, Size: Large).</td>
 </tr>
 <tr>
 <td style="text-align: left;">media</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#media">Media</a>]</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Variant media (images, videos, 3D models). First item is the featured media for listings.</td>
 </tr>
 <tr>
 <td style="text-align: left;">rating</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#rating">Rating</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Variant rating.</td>
 </tr>
 <tr>
 <td style="text-align: left;">tags</td>
 <td style="text-align: left;">Array[string]</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Variant tags for categorization and search.</td>
 </tr>
 <tr>
 <td style="text-align: left;">metadata</td>
 <td style="text-align: left;">object</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Business-defined custom data extending the standard variant model.</td>
 </tr>
 <tr>
 <td style="text-align: left;">seller</td>
 <td style="text-align: left;">object</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Optional seller context for this variant.</td>
 </tr>
 </tbody>
@@ -3213,7 +3213,7 @@ as the first element. Platforms SHOULD treat the first element as featured.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -3221,13 +3221,13 @@ as the first element. Platforms SHOULD treat the first element as featured.</p>
 <tr>
 <td style="text-align: left;">min</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#price">Price</a></td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Minimum price in the range.</td>
 </tr>
 <tr>
 <td style="text-align: left;">max</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#price">Price</a></td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Maximum price in the range.</td>
 </tr>
 </tbody>
@@ -3240,7 +3240,7 @@ as the first element. Platforms SHOULD treat the first element as featured.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -3248,13 +3248,13 @@ as the first element. Platforms SHOULD treat the first element as featured.</p>
 <tr>
 <td style="text-align: left;">name</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Option name (e.g., 'Size', 'Color').</td>
 </tr>
 <tr>
 <td style="text-align: left;">values</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#option-value">Option Value</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Available values for this option.</td>
 </tr>
 </tbody>
@@ -3265,7 +3265,7 @@ as the first element. Platforms SHOULD treat the first element as featured.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -3273,13 +3273,13 @@ as the first element. Platforms SHOULD treat the first element as featured.</p>
 <tr>
 <td style="text-align: left;">id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Optional server-assigned identifier for this option value. When present in a selected_option, the server SHOULD use it for matching instead of label.</td>
 </tr>
 <tr>
 <td style="text-align: left;">label</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Display text for this option value (e.g., 'Small', 'Blue').</td>
 </tr>
 </tbody>
@@ -3290,7 +3290,7 @@ as the first element. Platforms SHOULD treat the first element as featured.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -3298,19 +3298,19 @@ as the first element. Platforms SHOULD treat the first element as featured.</p>
 <tr>
 <td style="text-align: left;">name</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Option name (e.g., 'Size').</td>
 </tr>
 <tr>
 <td style="text-align: left;">id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Optional option value identifier from option_value.id. When present, the server SHOULD use it for matching; name and label remain required for display.</td>
 </tr>
 <tr>
 <td style="text-align: left;">label</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Selected option label (e.g., 'Large').</td>
 </tr>
 </tbody>
@@ -3321,7 +3321,7 @@ as the first element. Platforms SHOULD treat the first element as featured.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -3329,25 +3329,25 @@ as the first element. Platforms SHOULD treat the first element as featured.</p>
 <tr>
 <td style="text-align: left;">value</td>
 <td style="text-align: left;">number</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Average rating value.</td>
 </tr>
 <tr>
 <td style="text-align: left;">scale_min</td>
 <td style="text-align: left;">number</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Minimum value on the rating scale (e.g., 1 for 1-5 stars).</td>
 </tr>
 <tr>
 <td style="text-align: left;">scale_max</td>
 <td style="text-align: left;">number</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Maximum value on the rating scale (e.g., 5 for 5-star).</td>
 </tr>
 <tr>
 <td style="text-align: left;">count</td>
 <td style="text-align: left;">integer</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Number of reviews contributing to the rating.</td>
 </tr>
 </tbody>

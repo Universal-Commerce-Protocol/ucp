@@ -106,15 +106,15 @@ A **service** defines the API surface for a vertical (shopping, common, etc.). S
 
 Full service declaration for platform-level discovery. All transports require `version`, `spec`, and `transport`. REST, MCP, and embedded additionally require `schema`.
 
-| Name      | Type   | Required | Description                                                                                     |
-| --------- | ------ | -------- | ----------------------------------------------------------------------------------------------- |
-| version   | string | **Yes**  | Entity version in YYYY-MM-DD format.                                                            |
-| spec      | string | **Yes**  | URL to human-readable specification document.                                                   |
-| schema    | string | No       | URL to JSON Schema defining this entity's structure and payloads.                               |
-| id        | string | No       | Unique identifier for this entity instance. Used to disambiguate when multiple instances exist. |
-| config    | object | No       | Entity-specific configuration. Structure defined by each entity's schema.                       |
-| transport | string | **Yes**  | Transport protocol for this service binding. **Enum:** `rest`, `mcp`, `a2a`, `embedded`         |
-| endpoint  | string | No       | Endpoint URL for this transport binding.                                                        |
+| Name      | Type   | Requirement  | Description                                                                                     |
+| --------- | ------ | ------------ | ----------------------------------------------------------------------------------------------- |
+| version   | string | **Required** | Entity version in YYYY-MM-DD format.                                                            |
+| spec      | string | **Required** | URL to human-readable specification document.                                                   |
+| schema    | string | Optional     | URL to JSON Schema defining this entity's structure and payloads.                               |
+| id        | string | Optional     | Unique identifier for this entity instance. Used to disambiguate when multiple instances exist. |
+| config    | object | Optional     | Entity-specific configuration. Structure defined by each entity's schema.                       |
+| transport | string | **Required** | Transport protocol for this service binding. **Enum:** `rest`, `mcp`, `a2a`, `embedded`         |
+| endpoint  | string | Optional     | Endpoint URL for this transport binding.                                                        |
 
 Transport definitions **MUST** be thin: they declare method names and reference base schemas only. See [Requirements](#requirements) for details.
 
@@ -155,14 +155,14 @@ A **capability** is a feature within a service. It declares what functionality i
 
 Full capability declaration for platform-level discovery. Includes spec/schema URLs for agent fetching.
 
-| Name    | Type                       | Required | Description                                                                                                                     |
-| ------- | -------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| version | string                     | **Yes**  | Entity version in YYYY-MM-DD format.                                                                                            |
-| spec    | string                     | **Yes**  | URL to human-readable specification document.                                                                                   |
-| schema  | string                     | **Yes**  | URL to JSON Schema defining this entity's structure and payloads.                                                               |
-| id      | string                     | No       | Unique identifier for this entity instance. Used to disambiguate when multiple instances exist.                                 |
-| config  | object                     | No       | Entity-specific configuration. Structure defined by each entity's schema.                                                       |
-| extends | OneOf\[`string`, `array`\] | No       | Parent capability(s) this extends. Present for extensions, absent for root capabilities. Use array for multi-parent extensions. |
+| Name    | Type                       | Requirement  | Description                                                                                                                     |
+| ------- | -------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------- |
+| version | string                     | **Required** | Entity version in YYYY-MM-DD format.                                                                                            |
+| spec    | string                     | **Required** | URL to human-readable specification document.                                                                                   |
+| schema  | string                     | **Required** | URL to JSON Schema defining this entity's structure and payloads.                                                               |
+| id      | string                     | Optional     | Unique identifier for this entity instance. Used to disambiguate when multiple instances exist.                                 |
+| config  | object                     | Optional     | Entity-specific configuration. Structure defined by each entity's schema.                                                       |
+| extends | OneOf\[`string`, `array`\] | Optional     | Parent capability(s) this extends. Present for extensions, absent for root capabilities. Use array for multi-parent extensions. |
 
 #### Extensions
 

@@ -38,29 +38,29 @@ Fulfillment applies only to items requiring physical delivery. Items not requiri
 
 ### Properties
 
-| Name        | Type                                                                         | Required | Description |
-| ----------- | ---------------------------------------------------------------------------- | -------- | ----------- |
-| fulfillment | [Catalog Fulfillment](/draft/specification/fulfillment/#catalog-fulfillment) | No       |             |
+| Name        | Type                                                                         | Requirement | Description |
+| ----------- | ---------------------------------------------------------------------------- | ----------- | ----------- |
+| fulfillment | [Catalog Fulfillment](/draft/specification/fulfillment/#catalog-fulfillment) | Optional    |             |
 
 ### Entities
 
 #### Fulfillment
 
-| Name              | Type                                                                                                  | Required | Description                         |
-| ----------------- | ----------------------------------------------------------------------------------------------------- | -------- | ----------------------------------- |
-| methods           | Array\[[Fulfillment Method](/draft/specification/reference/#fulfillment-method)\]                     | No       | Fulfillment methods for cart items. |
-| available_methods | Array\[[Fulfillment Available Method](/draft/specification/reference/#fulfillment-available-method)\] | No       | Inventory availability hints.       |
+| Name              | Type                                                                                                  | Requirement | Description                         |
+| ----------------- | ----------------------------------------------------------------------------------------------------- | ----------- | ----------------------------------- |
+| methods           | Array\[[Fulfillment Method](/draft/specification/reference/#fulfillment-method)\]                     | Optional    | Fulfillment methods for cart items. |
+| available_methods | Array\[[Fulfillment Available Method](/draft/specification/reference/#fulfillment-available-method)\] | Optional    | Inventory availability hints.       |
 
 #### Fulfillment Method
 
-| Name                    | Type                                                                                        | Required | Description                                                                                                  |
-| ----------------------- | ------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------ |
-| id                      | string                                                                                      | **Yes**  | Unique fulfillment method identifier.                                                                        |
-| type                    | string                                                                                      | **Yes**  | Fulfillment method type. Well-known values: `shipping`, `pickup`. Businesses MAY use additional values.      |
-| line_item_ids           | Array[string]                                                                               | **Yes**  | Line item IDs fulfilled via this method.                                                                     |
-| destinations            | Array\[[Fulfillment Destination](/draft/specification/reference/#fulfillment-destination)\] | No       | Available destinations. For shipping: addresses. For pickup: retail locations.                               |
-| selected_destination_id | ['string', 'null']                                                                          | No       | ID of the selected destination.                                                                              |
-| groups                  | Array\[[Fulfillment Group](/draft/specification/reference/#fulfillment-group)\]             | No       | Fulfillment groups for selecting options. Agent sets selected_option_id on groups to choose shipping method. |
+| Name                    | Type                                                                                        | Requirement  | Description                                                                                                  |
+| ----------------------- | ------------------------------------------------------------------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------ |
+| id                      | string                                                                                      | **Required** | Unique fulfillment method identifier.                                                                        |
+| type                    | string                                                                                      | **Required** | Fulfillment method type. Well-known values: `shipping`, `pickup`. Businesses MAY use additional values.      |
+| line_item_ids           | Array[string]                                                                               | **Required** | Line item IDs fulfilled via this method.                                                                     |
+| destinations            | Array\[[Fulfillment Destination](/draft/specification/reference/#fulfillment-destination)\] | Optional     | Available destinations. For shipping: addresses. For pickup: retail locations.                               |
+| selected_destination_id | ['string', 'null']                                                                          | Optional     | ID of the selected destination.                                                                              |
+| groups                  | Array\[[Fulfillment Group](/draft/specification/reference/#fulfillment-group)\]             | Optional     | Fulfillment groups for selecting options. Agent sets selected_option_id on groups to choose shipping method. |
 
 #### Fulfillment Destination
 
@@ -68,64 +68,64 @@ This object MUST be one of the following types: [Shipping Destination](/draft/sp
 
 #### Shipping Destination
 
-| Name             | Type   | Required | Description                                                                                                                                                                                                                               |
-| ---------------- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| extended_address | string | No       | An address extension such as an apartment number, C/O or alternative name.                                                                                                                                                                |
-| street_address   | string | No       | The street address.                                                                                                                                                                                                                       |
-| address_locality | string | No       | The locality in which the street address is, and which is in the region. For example, Mountain View.                                                                                                                                      |
-| address_region   | string | No       | The region in which the locality is, and which is in the country. Required for applicable countries (i.e. state in US, province in CA). For example, California or another appropriate first-level Administrative division.               |
-| address_country  | string | No       | The country. Recommended to be in 2-letter ISO 3166-1 alpha-2 format, for example "US". For backward compatibility, a 3-letter ISO 3166-1 alpha-3 country code such as "SGP" or a full country name such as "Singapore" can also be used. |
-| postal_code      | string | No       | The postal code. For example, 94043.                                                                                                                                                                                                      |
-| first_name       | string | No       | Optional. First name of the contact associated with the address.                                                                                                                                                                          |
-| last_name        | string | No       | Optional. Last name of the contact associated with the address.                                                                                                                                                                           |
-| phone_number     | string | No       | Optional. Phone number of the contact associated with the address.                                                                                                                                                                        |
-| id               | string | **Yes**  | ID specific to this shipping destination.                                                                                                                                                                                                 |
+| Name             | Type   | Requirement  | Description                                                                                                                                                                                                                               |
+| ---------------- | ------ | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| extended_address | string | Optional     | An address extension such as an apartment number, C/O or alternative name.                                                                                                                                                                |
+| street_address   | string | Optional     | The street address.                                                                                                                                                                                                                       |
+| address_locality | string | Optional     | The locality in which the street address is, and which is in the region. For example, Mountain View.                                                                                                                                      |
+| address_region   | string | Optional     | The region in which the locality is, and which is in the country. Required for applicable countries (i.e. state in US, province in CA). For example, California or another appropriate first-level Administrative division.               |
+| address_country  | string | Optional     | The country. Recommended to be in 2-letter ISO 3166-1 alpha-2 format, for example "US". For backward compatibility, a 3-letter ISO 3166-1 alpha-3 country code such as "SGP" or a full country name such as "Singapore" can also be used. |
+| postal_code      | string | Optional     | The postal code. For example, 94043.                                                                                                                                                                                                      |
+| first_name       | string | Optional     | Optional. First name of the contact associated with the address.                                                                                                                                                                          |
+| last_name        | string | Optional     | Optional. Last name of the contact associated with the address.                                                                                                                                                                           |
+| phone_number     | string | Optional     | Optional. Phone number of the contact associated with the address.                                                                                                                                                                        |
+| id               | string | **Required** | ID specific to this shipping destination.                                                                                                                                                                                                 |
 
 #### Retail Location
 
-| Name    | Type                                                             | Required | Description                       |
-| ------- | ---------------------------------------------------------------- | -------- | --------------------------------- |
-| id      | string                                                           | **Yes**  | Unique location identifier.       |
-| name    | string                                                           | **Yes**  | Location name (e.g., store name). |
-| address | [Postal Address](/draft/specification/reference/#postal-address) | No       | Physical address of the location. |
+| Name    | Type                                                             | Requirement  | Description                       |
+| ------- | ---------------------------------------------------------------- | ------------ | --------------------------------- |
+| id      | string                                                           | **Required** | Unique location identifier.       |
+| name    | string                                                           | **Required** | Location name (e.g., store name). |
+| address | [Postal Address](/draft/specification/reference/#postal-address) | Optional     | Physical address of the location. |
 
 #### Fulfillment Group
 
-| Name               | Type                                                                              | Required | Description                                                            |
-| ------------------ | --------------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------- |
-| id                 | string                                                                            | **Yes**  | Group identifier for referencing merchant-generated groups in updates. |
-| line_item_ids      | Array[string]                                                                     | **Yes**  | Line item IDs included in this group/package.                          |
-| options            | Array\[[Fulfillment Option](/draft/specification/reference/#fulfillment-option)\] | No       | Available fulfillment options for this group.                          |
-| selected_option_id | ['string', 'null']                                                                | No       | ID of the selected fulfillment option for this group.                  |
+| Name               | Type                                                                              | Requirement  | Description                                                            |
+| ------------------ | --------------------------------------------------------------------------------- | ------------ | ---------------------------------------------------------------------- |
+| id                 | string                                                                            | **Required** | Group identifier for referencing merchant-generated groups in updates. |
+| line_item_ids      | Array[string]                                                                     | **Required** | Line item IDs included in this group/package.                          |
+| options            | Array\[[Fulfillment Option](/draft/specification/reference/#fulfillment-option)\] | Optional     | Available fulfillment options for this group.                          |
+| selected_option_id | ['string', 'null']                                                                | Optional     | ID of the selected fulfillment option for this group.                  |
 
 #### Fulfillment Option
 
-| Name                      | Type                                                       | Required | Description                                                                                                                                             |
-| ------------------------- | ---------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| id                        | string                                                     | **Yes**  | Unique identifier for this fulfillment option.                                                                                                          |
-| title                     | string                                                     | **Yes**  | Short label that distinguishes this option from its siblings (e.g. 'Standard', 'Express Shipping', 'Curbside Pickup').                                  |
-| description               | [Description](/draft/specification/reference/#description) | No       | Supplementary context for the title (e.g. 'Arrives in 4 business days', 'Arrives Dec 12-15 via FedEx'). Directly renderable; MUST NOT repeat the title. |
-| carrier                   | string                                                     | No       | Carrier name (for shipping).                                                                                                                            |
-| earliest_fulfillment_time | string                                                     | No       | Earliest fulfillment date.                                                                                                                              |
-| latest_fulfillment_time   | string                                                     | No       | Latest fulfillment date.                                                                                                                                |
-| totals                    | Array\[[Total](/draft/specification/reference/#total)\]    | **Yes**  | Fulfillment option totals breakdown.                                                                                                                    |
+| Name                      | Type                                                       | Requirement  | Description                                                                                                                                             |
+| ------------------------- | ---------------------------------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| id                        | string                                                     | **Required** | Unique identifier for this fulfillment option.                                                                                                          |
+| title                     | string                                                     | **Required** | Short label that distinguishes this option from its siblings (e.g. 'Standard', 'Express Shipping', 'Curbside Pickup').                                  |
+| description               | [Description](/draft/specification/reference/#description) | Optional     | Supplementary context for the title (e.g. 'Arrives in 4 business days', 'Arrives Dec 12-15 via FedEx'). Directly renderable; MUST NOT repeat the title. |
+| carrier                   | string                                                     | Optional     | Carrier name (for shipping).                                                                                                                            |
+| earliest_fulfillment_time | string                                                     | Optional     | Earliest fulfillment date.                                                                                                                              |
+| latest_fulfillment_time   | string                                                     | Optional     | Latest fulfillment date.                                                                                                                                |
+| totals                    | Array\[[Total](/draft/specification/reference/#total)\]    | **Required** | Fulfillment option totals breakdown.                                                                                                                    |
 
 #### Fulfillment Available Method
 
-| Name           | Type               | Required | Description                                                                                                                          |
-| -------------- | ------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| type           | string             | **Yes**  | Fulfillment method type this availability applies to. Well-known values: `shipping`, `pickup`; businesses MAY use additional values. |
-| line_item_ids  | Array[string]      | **Yes**  | Line items available for this fulfillment method.                                                                                    |
-| fulfillable_on | ['string', 'null'] | No       | 'now' for immediate availability, or ISO 8601 date for future (preorders, transfers).                                                |
-| description    | string             | No       | Human-readable availability info (e.g., 'Available for pickup at Downtown Store today').                                             |
+| Name           | Type               | Requirement  | Description                                                                                                                          |
+| -------------- | ------------------ | ------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| type           | string             | **Required** | Fulfillment method type this availability applies to. Well-known values: `shipping`, `pickup`; businesses MAY use additional values. |
+| line_item_ids  | Array[string]      | **Required** | Line items available for this fulfillment method.                                                                                    |
+| fulfillable_on | ['string', 'null'] | Optional     | 'now' for immediate availability, or ISO 8601 date for future (preorders, transfers).                                                |
+| description    | string             | Optional     | Human-readable availability info (e.g., 'Available for pickup at Downtown Store today').                                             |
 
 #### Total
 
-| Name         | Type                                                           | Required | Description                                                                                                                                                                                                                                                                                 |
-| ------------ | -------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| type         | string                                                         | **Yes**  | Cost category. Well-known values: subtotal, items_discount, discount, fulfillment, tax, fee, total. Businesses MAY use additional values.                                                                                                                                                   |
-| display_text | string                                                         | No       | Text to display against the amount. Should reflect appropriate method (e.g., 'Shipping', 'Delivery').                                                                                                                                                                                       |
-| amount       | [Signed Amount](/draft/specification/reference/#signed-amount) | **Yes**  | Monetary amount in the currency's minor unit as defined by ISO 4217. Refer to the currency's exponent to determine minor-to-major ratio (e.g., 2 for USD, 0 for JPY, 3 for KWD). May be negative — the sign is intrinsic to the value (e.g., discounts are negative, charges are positive). |
+| Name         | Type                                                           | Requirement  | Description                                                                                                                                                                                                                                                                                 |
+| ------------ | -------------------------------------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type         | string                                                         | **Required** | Cost category. Well-known values: subtotal, items_discount, discount, fulfillment, tax, fee, total. Businesses MAY use additional values.                                                                                                                                                   |
+| display_text | string                                                         | Optional     | Text to display against the amount. Should reflect appropriate method (e.g., 'Shipping', 'Delivery').                                                                                                                                                                                       |
+| amount       | [Signed Amount](/draft/specification/reference/#signed-amount) | **Required** | Monetary amount in the currency's minor unit as defined by ISO 4217. Refer to the currency's exponent to determine minor-to-major ratio (e.g., 2 for USD, 0 for JPY, 3 for KWD). May be negative — the sign is intrinsic to the value (e.g., discounts are negative, charges are positive). |
 
 #### Postal Address
 
@@ -331,45 +331,45 @@ A discovered option `id` lets a buyer's choice carry forward: a business SHOULD 
 
 How a catalog variant can be fulfilled. Mirrors checkout `fulfillment`.
 
-| Name    | Type          | Required | Description                           |
-| ------- | ------------- | -------- | ------------------------------------- |
-| methods | Array[object] | No       | Fulfillment methods for this variant. |
+| Name    | Type          | Requirement | Description                           |
+| ------- | ------------- | ----------- | ------------------------------------- |
+| methods | Array[object] | Optional    | Fulfillment methods for this variant. |
 
 #### Catalog Fulfillment Method
 
 A fulfillment method on a catalog variant: how the variant can be fulfilled, and its availability.
 
-| Name         | Type          | Required | Description                                                                                                                                                                                                                                                                                                                                  |
-| ------------ | ------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| type         | string        | **Yes**  | Fulfillment method type. Well-known values: `shipping`, `pickup`. Businesses MAY use additional values.                                                                                                                                                                                                                                      |
-| description  | object        | No       | Short buyer-facing summary (e.g. 'Ships in 2–4 business days').                                                                                                                                                                                                                                                                              |
-| availability | object        | No       | Availability of this variant via this method at the specified or inferred location.                                                                                                                                                                                                                                                          |
-| location     | string        | No       | The location resolved for this method, where appropriate (e.g. the pickup store or location), as a location id.                                                                                                                                                                                                                              |
-| options      | Array[object] | No       | Fulfillment options for this method (e.g. Standard, Express) to describe per-choice details such as cost, time estimates, etc. Optional and selective: without a destination or full cart, a business SHOULD preview meaningful boundary options (e.g. cheapest, fastest); the full, high-resolution set is negotiated in cart and checkout. |
+| Name         | Type          | Requirement  | Description                                                                                                                                                                                                                                                                                                                                  |
+| ------------ | ------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type         | string        | **Required** | Fulfillment method type. Well-known values: `shipping`, `pickup`. Businesses MAY use additional values.                                                                                                                                                                                                                                      |
+| description  | object        | Optional     | Short buyer-facing summary (e.g. 'Ships in 2–4 business days').                                                                                                                                                                                                                                                                              |
+| availability | object        | Optional     | Availability of this variant via this method at the specified or inferred location.                                                                                                                                                                                                                                                          |
+| location     | string        | Optional     | The location resolved for this method, where appropriate (e.g. the pickup store or location), as a location id.                                                                                                                                                                                                                              |
+| options      | Array[object] | Optional     | Fulfillment options for this method (e.g. Standard, Express) to describe per-choice details such as cost, time estimates, etc. Optional and selective: without a destination or full cart, a business SHOULD preview meaningful boundary options (e.g. cheapest, fastest); the full, high-resolution set is negotiated in cart and checkout. |
 
 #### Fulfillment Option Base
 
-| Name        | Type                                                       | Required | Description                                                                                                                                             |
-| ----------- | ---------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| id          | string                                                     | **Yes**  | Unique identifier for this fulfillment option.                                                                                                          |
-| title       | string                                                     | **Yes**  | Short label that distinguishes this option from its siblings (e.g. 'Standard', 'Express Shipping', 'Curbside Pickup').                                  |
-| description | [Description](/draft/specification/reference/#description) | No       | Supplementary context for the title (e.g. 'Arrives in 4 business days', 'Arrives Dec 12-15 via FedEx'). Directly renderable; MUST NOT repeat the title. |
+| Name        | Type                                                       | Requirement  | Description                                                                                                                                             |
+| ----------- | ---------------------------------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| id          | string                                                     | **Required** | Unique identifier for this fulfillment option.                                                                                                          |
+| title       | string                                                     | **Required** | Short label that distinguishes this option from its siblings (e.g. 'Standard', 'Express Shipping', 'Curbside Pickup').                                  |
+| description | [Description](/draft/specification/reference/#description) | Optional     | Supplementary context for the title (e.g. 'Arrives in 4 business days', 'Arrives Dec 12-15 via FedEx'). Directly renderable; MUST NOT repeat the title. |
 
 #### Availability
 
-| Name      | Type    | Required | Description                                                                                                                         |
-| --------- | ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| available | boolean | No       | Whether this can be obtained. See status for fulfillment details.                                                                   |
-| status    | string  | No       | Qualifies available with fulfillment state. Well-known values: `in_stock`, `backorder`, `preorder`, `out_of_stock`, `discontinued`. |
+| Name      | Type    | Requirement | Description                                                                                                                         |
+| --------- | ------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| available | boolean | Optional    | Whether this can be obtained. See status for fulfillment details.                                                                   |
+| status    | string  | Optional    | Qualifies available with fulfillment state. Well-known values: `in_stock`, `backorder`, `preorder`, `out_of_stock`, `discontinued`. |
 
 #### Fulfillment Destination Filter
 
-| Name            | Type   | Required | Description                                                                                                                    |
-| --------------- | ------ | -------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| address_country | string | No       | The country, as a 2-letter ISO 3166-1 alpha-2 code (e.g. "US"). A 3-letter alpha-3 code or full country name MAY also be used. |
-| address_region  | string | No       | The first-level administrative region within the country (e.g. a state or province such as California).                        |
-| postal_code     | string | No       | The postal code (e.g. "94043").                                                                                                |
-| location        | string | No       | A reference to the destination (e.g. store, pickup location, saved address).                                                   |
+| Name            | Type   | Requirement | Description                                                                                                                    |
+| --------------- | ------ | ----------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| address_country | string | Optional    | The country, as a 2-letter ISO 3166-1 alpha-2 code (e.g. "US"). A 3-letter alpha-3 code or full country name MAY also be used. |
+| address_region  | string | Optional    | The first-level administrative region within the country (e.g. a state or province such as California).                        |
+| postal_code     | string | Optional    | The postal code (e.g. "94043").                                                                                                |
+| location        | string | Optional    | A reference to the destination (e.g. store, pickup location, saved address).                                                   |
 
 ### Location and method: `context` and `filters`
 
@@ -448,9 +448,9 @@ The `extends` array lists the capabilities this extension adds fulfillment to. C
 
 Platforms declare their rendering capabilities using `platform_schema`:
 
-| Name                 | Type    | Required | Description                         |
-| -------------------- | ------- | -------- | ----------------------------------- |
-| supports_multi_group | boolean | No       | Enables multiple groups per method. |
+| Name                 | Type    | Requirement | Description                         |
+| -------------------- | ------- | ----------- | ----------------------------------- |
+| supports_multi_group | boolean | Optional    | Enables multiple groups per method. |
 
 Platforms that omit config or set `supports_multi_group: false` receive single-group responses. The response shape is always `methods[].groups[]`—the difference is whether `groups.length` can exceed 1 within each method.
 
@@ -499,10 +499,10 @@ Opt-in declaration (business MAY return multiple groups per method):
 
 Businesses declare what fulfillment configurations they support using `business_config`:
 
-| Name                | Type          | Required | Description                                                                                                                                                                                                 |
-| ------------------- | ------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| multi_destination   | Array[object] | No       | Method types that permit multiple destinations within one cart (e.g. split shipping across addresses). Listing a method permits it; an omitted method does not. Open — businesses MAY list any method type. |
-| method_combinations | Array[array]  | No       | Method-type combinations the business permits within one cart. Each inner array is a permitted set of method `type` values (e.g. shipping + pickup).                                                        |
+| Name                | Type          | Requirement | Description                                                                                                                                                                                                 |
+| ------------------- | ------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| multi_destination   | Array[object] | Optional    | Method types that permit multiple destinations within one cart (e.g. split shipping across addresses). Listing a method permits it; an omitted method does not. Open — businesses MAY list any method type. |
+| method_combinations | Array[array]  | Optional    | Method-type combinations the business permits within one cart. Each inner array is a permitted set of method `type` values (e.g. shipping + pickup).                                                        |
 
 ```json
 {

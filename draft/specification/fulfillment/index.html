@@ -3144,7 +3144,7 @@ method.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -3152,7 +3152,7 @@ method.</p>
 <tr>
 <td style="text-align: left;">fulfillment</td>
 <td style="text-align: left;"><a href="/draft/specification/fulfillment/#catalog-fulfillment"> Catalog Fulfillment</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;"></td>
 </tr>
 </tbody>
@@ -3164,7 +3164,7 @@ method.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -3172,13 +3172,13 @@ method.</p>
 <tr>
 <td style="text-align: left;">methods</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#fulfillment-method">Fulfillment Method</a>]</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Fulfillment methods for cart items.</td>
 </tr>
 <tr>
 <td style="text-align: left;">available_methods</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#fulfillment-available-method">Fulfillment Available Method</a>]</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Inventory availability hints.</td>
 </tr>
 </tbody>
@@ -3189,7 +3189,7 @@ method.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -3197,37 +3197,37 @@ method.</p>
 <tr>
 <td style="text-align: left;">id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Unique fulfillment method identifier.</td>
 </tr>
 <tr>
 <td style="text-align: left;">type</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Fulfillment method type. Well-known values: <code>shipping</code>, <code>pickup</code>. Businesses MAY use additional values.</td>
 </tr>
 <tr>
 <td style="text-align: left;">line_item_ids</td>
 <td style="text-align: left;">Array[string]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Line item IDs fulfilled via this method.</td>
 </tr>
 <tr>
 <td style="text-align: left;">destinations</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#fulfillment-destination">Fulfillment Destination</a>]</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Available destinations. For shipping: addresses. For pickup: retail locations.</td>
 </tr>
 <tr>
 <td style="text-align: left;">selected_destination_id</td>
 <td style="text-align: left;">['string', 'null']</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">ID of the selected destination.</td>
 </tr>
 <tr>
 <td style="text-align: left;">groups</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#fulfillment-group">Fulfillment Group</a>]</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Fulfillment groups for selecting options. Agent sets selected_option_id on groups to choose shipping method.</td>
 </tr>
 </tbody>
@@ -3240,7 +3240,7 @@ method.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -3248,61 +3248,61 @@ method.</p>
 <tr>
 <td style="text-align: left;">extended_address</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">An address extension such as an apartment number, C/O or alternative name.</td>
 </tr>
 <tr>
 <td style="text-align: left;">street_address</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">The street address.</td>
 </tr>
 <tr>
 <td style="text-align: left;">address_locality</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">The locality in which the street address is, and which is in the region. For example, Mountain View.</td>
 </tr>
 <tr>
 <td style="text-align: left;">address_region</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">The region in which the locality is, and which is in the country. Required for applicable countries (i.e. state in US, province in CA). For example, California or another appropriate first-level Administrative division.</td>
 </tr>
 <tr>
 <td style="text-align: left;">address_country</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">The country. Recommended to be in 2-letter ISO 3166-1 alpha-2 format, for example "US". For backward compatibility, a 3-letter ISO 3166-1 alpha-3 country code such as "SGP" or a full country name such as "Singapore" can also be used.</td>
 </tr>
 <tr>
 <td style="text-align: left;">postal_code</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">The postal code. For example, 94043.</td>
 </tr>
 <tr>
 <td style="text-align: left;">first_name</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Optional. First name of the contact associated with the address.</td>
 </tr>
 <tr>
 <td style="text-align: left;">last_name</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Optional. Last name of the contact associated with the address.</td>
 </tr>
 <tr>
 <td style="text-align: left;">phone_number</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Optional. Phone number of the contact associated with the address.</td>
 </tr>
 <tr>
 <td style="text-align: left;">id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">ID specific to this shipping destination.</td>
 </tr>
 </tbody>
@@ -3313,7 +3313,7 @@ method.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -3321,19 +3321,19 @@ method.</p>
 <tr>
 <td style="text-align: left;">id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Unique location identifier.</td>
 </tr>
 <tr>
 <td style="text-align: left;">name</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Location name (e.g., store name).</td>
 </tr>
 <tr>
 <td style="text-align: left;">address</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#postal-address">Postal Address</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Physical address of the location.</td>
 </tr>
 </tbody>
@@ -3344,7 +3344,7 @@ method.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -3352,25 +3352,25 @@ method.</p>
 <tr>
 <td style="text-align: left;">id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Group identifier for referencing merchant-generated groups in updates.</td>
 </tr>
 <tr>
 <td style="text-align: left;">line_item_ids</td>
 <td style="text-align: left;">Array[string]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Line item IDs included in this group/package.</td>
 </tr>
 <tr>
 <td style="text-align: left;">options</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#fulfillment-option">Fulfillment Option</a>]</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Available fulfillment options for this group.</td>
 </tr>
 <tr>
 <td style="text-align: left;">selected_option_id</td>
 <td style="text-align: left;">['string', 'null']</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">ID of the selected fulfillment option for this group.</td>
 </tr>
 </tbody>
@@ -3381,7 +3381,7 @@ method.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -3389,43 +3389,43 @@ method.</p>
 <tr>
 <td style="text-align: left;">id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Unique identifier for this fulfillment option.</td>
 </tr>
 <tr>
 <td style="text-align: left;">title</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Short label that distinguishes this option from its siblings (e.g. 'Standard', 'Express Shipping', 'Curbside Pickup').</td>
 </tr>
 <tr>
 <td style="text-align: left;">description</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#description">Description</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Supplementary context for the title (e.g. 'Arrives in 4 business days', 'Arrives Dec 12-15 via FedEx'). Directly renderable; MUST NOT repeat the title.</td>
 </tr>
 <tr>
 <td style="text-align: left;">carrier</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Carrier name (for shipping).</td>
 </tr>
 <tr>
 <td style="text-align: left;">earliest_fulfillment_time</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Earliest fulfillment date.</td>
 </tr>
 <tr>
 <td style="text-align: left;">latest_fulfillment_time</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Latest fulfillment date.</td>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#total">Total</a>]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Fulfillment option totals breakdown.</td>
 </tr>
 </tbody>
@@ -3436,7 +3436,7 @@ method.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -3444,25 +3444,25 @@ method.</p>
 <tr>
 <td style="text-align: left;">type</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Fulfillment method type this availability applies to. Well-known values: <code>shipping</code>, <code>pickup</code>; businesses MAY use additional values.</td>
 </tr>
 <tr>
 <td style="text-align: left;">line_item_ids</td>
 <td style="text-align: left;">Array[string]</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Line items available for this fulfillment method.</td>
 </tr>
 <tr>
 <td style="text-align: left;">fulfillable_on</td>
 <td style="text-align: left;">['string', 'null']</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">'now' for immediate availability, or ISO 8601 date for future (preorders, transfers).</td>
 </tr>
 <tr>
 <td style="text-align: left;">description</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Human-readable availability info (e.g., 'Available for pickup at Downtown Store today').</td>
 </tr>
 </tbody>
@@ -3473,7 +3473,7 @@ method.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -3481,19 +3481,19 @@ method.</p>
 <tr>
 <td style="text-align: left;">type</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Cost category. Well-known values: subtotal, items_discount, discount, fulfillment, tax, fee, total. Businesses MAY use additional values.</td>
 </tr>
 <tr>
 <td style="text-align: left;">display_text</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Text to display against the amount. Should reflect appropriate method (e.g., 'Shipping', 'Delivery').</td>
 </tr>
 <tr>
 <td style="text-align: left;">amount</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#signed-amount">Signed Amount</a></td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Monetary amount in the currency's minor unit as defined by ISO 4217. Refer to the currency's exponent to determine minor-to-major ratio (e.g., 2 for USD, 0 for JPY, 3 for KWD). May be negative — the sign is intrinsic to the value (e.g., discounts are negative, charges are positive).</td>
 </tr>
 </tbody>
@@ -3761,7 +3761,7 @@ products, quantities, and combined fulfillment modify the options.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -3769,7 +3769,7 @@ products, quantities, and combined fulfillment modify the options.</p>
 <tr>
 <td style="text-align: left;">methods</td>
 <td style="text-align: left;">Array[object]</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Fulfillment methods for this variant.</td>
 </tr>
 </tbody>
@@ -3781,7 +3781,7 @@ products, quantities, and combined fulfillment modify the options.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -3789,31 +3789,31 @@ products, quantities, and combined fulfillment modify the options.</p>
 <tr>
 <td style="text-align: left;">type</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Fulfillment method type. Well-known values: <code>shipping</code>, <code>pickup</code>. Businesses MAY use additional values.</td>
 </tr>
 <tr>
 <td style="text-align: left;">description</td>
 <td style="text-align: left;">object</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Short buyer-facing summary (e.g. 'Ships in 2–4 business days').</td>
 </tr>
 <tr>
 <td style="text-align: left;">availability</td>
 <td style="text-align: left;">object</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Availability of this variant via this method at the specified or inferred location.</td>
 </tr>
 <tr>
 <td style="text-align: left;">location</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">The location resolved for this method, where appropriate (e.g. the pickup store or location), as a location id.</td>
 </tr>
 <tr>
 <td style="text-align: left;">options</td>
 <td style="text-align: left;">Array[object]</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Fulfillment options for this method (e.g. Standard, Express) to describe per-choice details such as cost, time estimates, etc. Optional and selective: without a destination or full cart, a business SHOULD preview meaningful boundary options (e.g. cheapest, fastest); the full, high-resolution set is negotiated in cart and checkout.</td>
 </tr>
 </tbody>
@@ -3824,7 +3824,7 @@ products, quantities, and combined fulfillment modify the options.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -3832,19 +3832,19 @@ products, quantities, and combined fulfillment modify the options.</p>
 <tr>
 <td style="text-align: left;">id</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Unique identifier for this fulfillment option.</td>
 </tr>
 <tr>
 <td style="text-align: left;">title</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Short label that distinguishes this option from its siblings (e.g. 'Standard', 'Express Shipping', 'Curbside Pickup').</td>
 </tr>
 <tr>
 <td style="text-align: left;">description</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#description">Description</a></td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Supplementary context for the title (e.g. 'Arrives in 4 business days', 'Arrives Dec 12-15 via FedEx'). Directly renderable; MUST NOT repeat the title.</td>
 </tr>
 </tbody>
@@ -3855,7 +3855,7 @@ products, quantities, and combined fulfillment modify the options.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -3863,13 +3863,13 @@ products, quantities, and combined fulfillment modify the options.</p>
 <tr>
 <td style="text-align: left;">available</td>
 <td style="text-align: left;">boolean</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Whether this can be obtained. See status for fulfillment details.</td>
 </tr>
 <tr>
 <td style="text-align: left;">status</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Qualifies available with fulfillment state. Well-known values: <code>in_stock</code>, <code>backorder</code>, <code>preorder</code>, <code>out_of_stock</code>, <code>discontinued</code>.</td>
 </tr>
 </tbody>
@@ -3880,7 +3880,7 @@ products, quantities, and combined fulfillment modify the options.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -3888,25 +3888,25 @@ products, quantities, and combined fulfillment modify the options.</p>
 <tr>
 <td style="text-align: left;">address_country</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">The country, as a 2-letter ISO 3166-1 alpha-2 code (e.g. "US"). A 3-letter alpha-3 code or full country name MAY also be used.</td>
 </tr>
 <tr>
 <td style="text-align: left;">address_region</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">The first-level administrative region within the country (e.g. a state or province such as California).</td>
 </tr>
 <tr>
 <td style="text-align: left;">postal_code</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">The postal code (e.g. "94043").</td>
 </tr>
 <tr>
 <td style="text-align: left;">location</td>
 <td style="text-align: left;">string</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">A reference to the destination (e.g. store, pickup location, saved address).</td>
 </tr>
 </tbody>
@@ -4007,7 +4007,7 @@ fulfillment on catalog, or omits them to scope itself to checkout only.</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -4015,7 +4015,7 @@ fulfillment on catalog, or omits them to scope itself to checkout only.</p>
 <tr>
 <td style="text-align: left;">supports_multi_group</td>
 <td style="text-align: left;">boolean</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Enables multiple groups per method.</td>
 </tr>
 </tbody>
@@ -4070,7 +4070,7 @@ checkout and on catalog discovery):</p>
 <tr>
 <th style="text-align: left;">Name</th>
 <th style="text-align: left;">Type</th>
-<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Requirement</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -4078,13 +4078,13 @@ checkout and on catalog discovery):</p>
 <tr>
 <td style="text-align: left;">multi_destination</td>
 <td style="text-align: left;">Array[object]</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Method types that permit multiple destinations within one cart (e.g. split shipping across addresses). Listing a method permits it; an omitted method does not. Open — businesses MAY list any method type.</td>
 </tr>
 <tr>
 <td style="text-align: left;">method_combinations</td>
 <td style="text-align: left;">Array[array]</td>
-<td style="text-align: left;">No</td>
+<td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Method-type combinations the business permits within one cart. Each inner array is a permitted set of method <code>type</code> values (e.g. shipping + pickup).</td>
 </tr>
 </tbody>

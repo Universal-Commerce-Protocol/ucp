@@ -47,35 +47,35 @@ When this capability is active, cart and/or checkout are extended with a `discou
 
 Discount codes input and applied discounts output.
 
-| Name    | Type          | Required | Description                                                                                                |
-| ------- | ------------- | -------- | ---------------------------------------------------------------------------------------------------------- |
-| codes   | Array[string] | No       | Discount codes to apply. Case-insensitive. Replaces previously submitted codes. Send empty array to clear. |
-| applied | Array[object] | No       | Discounts successfully applied (code-based and automatic).                                                 |
+| Name    | Type          | Requirement | Description                                                                                                |
+| ------- | ------------- | ----------- | ---------------------------------------------------------------------------------------------------------- |
+| codes   | Array[string] | Optional    | Discount codes to apply. Case-insensitive. Replaces previously submitted codes. Send empty array to clear. |
+| applied | Array[object] | Optional    | Discounts successfully applied (code-based and automatic).                                                 |
 
 ### Applied Discount
 
 A discount that was successfully applied.
 
-| Name        | Type          | Required | Description                                                                                                                                                                        |
-| ----------- | ------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| code        | string        | No       | The discount code. Omitted for automatic discounts.                                                                                                                                |
-| title       | string        | **Yes**  | Human-readable discount name (e.g., 'Summer Sale 20% Off').                                                                                                                        |
-| amount      | integer       | **Yes**  | Total discount amount in ISO 4217 minor units.                                                                                                                                     |
-| automatic   | boolean       | No       | True if applied automatically by merchant rules (no code required).                                                                                                                |
-| method      | string        | No       | Allocation method. 'each' = applied independently per item. 'across' = split proportionally by value. **Enum:** `each`, `across`                                                   |
-| priority    | integer       | No       | Stacking order for discount calculation. Lower numbers applied first (1 = first).                                                                                                  |
-| provisional | boolean       | No       | True if this discount requires additional verification.                                                                                                                            |
-| eligibility | string        | No       | The eligibility claim accepted by the Business for this discount. Corresponds to a value from context.eligibility. Omitted for code-based and non-eligibility automatic discounts. |
-| allocations | Array[object] | No       | Breakdown of where this discount was allocated. Sum of allocation amounts equals total amount.                                                                                     |
+| Name        | Type          | Requirement  | Description                                                                                                                                                                        |
+| ----------- | ------------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| code        | string        | Optional     | The discount code. Omitted for automatic discounts.                                                                                                                                |
+| title       | string        | **Required** | Human-readable discount name (e.g., 'Summer Sale 20% Off').                                                                                                                        |
+| amount      | integer       | **Required** | Total discount amount in ISO 4217 minor units.                                                                                                                                     |
+| automatic   | boolean       | Optional     | True if applied automatically by merchant rules (no code required).                                                                                                                |
+| method      | string        | Optional     | Allocation method. 'each' = applied independently per item. 'across' = split proportionally by value. **Enum:** `each`, `across`                                                   |
+| priority    | integer       | Optional     | Stacking order for discount calculation. Lower numbers applied first (1 = first).                                                                                                  |
+| provisional | boolean       | Optional     | True if this discount requires additional verification.                                                                                                                            |
+| eligibility | string        | Optional     | The eligibility claim accepted by the Business for this discount. Corresponds to a value from context.eligibility. Omitted for code-based and non-eligibility automatic discounts. |
+| allocations | Array[object] | Optional     | Breakdown of where this discount was allocated. Sum of allocation amounts equals total amount.                                                                                     |
 
 ### Allocation
 
 Breakdown of how a discount amount was allocated to a specific target.
 
-| Name   | Type    | Required | Description                                                                       |
-| ------ | ------- | -------- | --------------------------------------------------------------------------------- |
-| path   | string  | **Yes**  | JSONPath to the allocation target (e.g., '$.line_items[0]', '$.totals.shipping'). |
-| amount | integer | **Yes**  | Amount allocated to this target in ISO 4217 minor units.                          |
+| Name   | Type    | Requirement  | Description                                                                       |
+| ------ | ------- | ------------ | --------------------------------------------------------------------------------- |
+| path   | string  | **Required** | JSONPath to the allocation target (e.g., '$.line_items[0]', '$.totals.shipping'). |
+| amount | integer | **Required** | Amount allocated to this target in ISO 4217 minor units.                          |
 
 ## Allocation Details
 
