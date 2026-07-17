@@ -1,0 +1,50 @@
+{
+  "openrpc": "1.3.2",
+  "info": {
+    "title": "UCP Payment Authentication Action Embedded Protocol",
+    "description": "Embedded notifications for standard UCP payment authentication Action surfaces. A Platform loads an Action config URL in an isolated browser-capable surface. The surface sends JSON-RPC 2.0 notifications through postMessage, or an equivalent native bridge, to report that the Platform-facing interaction completed or cannot continue. These notifications are advisory: the Business remains authoritative for payment and Checkout outcomes."
+  },
+  "servers": [],
+  "methods": [
+    {
+      "name": "action.done",
+      "summary": "Payment authentication Action surface completed",
+      "description": "The loaded surface notifies the Platform that its scoped interaction is done. This notification does not assert device-data collection, authentication, or payment success. The Business reflects the authoritative outcome in a later Checkout response.",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "description": "ID of the outstanding Action occurrence represented by this surface."
+          }
+        }
+      ]
+    },
+    {
+      "name": "action.error",
+      "summary": "Payment authentication Action surface cannot continue",
+      "description": "The loaded surface notifies the Platform of a surface-level failure. This notification is not a payment authorization or authentication result. The Platform follows the fallback defined by the active payment authentication extension and negotiated payment handler.",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "description": "ID of the outstanding Action occurrence represented by this surface."
+          }
+        },
+        {
+          "name": "error",
+          "required": true,
+          "schema": {
+            "$ref": "../../schemas/common/types/error_response.json",
+            "description": "Surface-level failure details. Domain outcomes remain owned by the Business and payment provider."
+          }
+        }
+      ]
+    }
+  ]
+}

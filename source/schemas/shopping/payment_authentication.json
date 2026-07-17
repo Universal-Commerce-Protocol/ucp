@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/payment_authentication.json",
+  "name": "dev.ucp.shopping.payment_authentication",
+  "title": "Payment Authentication Extension",
+  "description": "Extends Checkout with standard device data collection and 3DS challenge Action types used during payment authentication.",
+  "$defs": {
+    "dev.ucp.shopping.checkout": {
+      "allOf": [
+        {
+          "$ref": "checkout.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "actions": {
+              "type": "object",
+              "properties": {
+                "dev.ucp.payment.device_data_collection": {
+                  "type": "array",
+                  "description": "A 3DS device data collection Action.",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "config"
+                    ],
+                    "properties": {
+                      "config": {
+                        "type": "object",
+                        "required": [
+                          "url"
+                        ],
+                        "properties": {
+                          "url": {
+                            "type": "string",
+                            "format": "uri",
+                            "description": "URL for the invisible device data collection surface."
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "dev.ucp.payment.three_ds_challenge": {
+                  "type": "array",
+                  "description": "A 3DS challenge Action.",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "config"
+                    ],
+                    "properties": {
+                      "required": {
+                        "const": true
+                      },
+                      "config": {
+                        "type": "object",
+                        "required": [
+                          "url"
+                        ],
+                        "properties": {
+                          "url": {
+                            "type": "string",
+                            "format": "uri",
+                            "description": "URL for the buyer-facing 3DS challenge surface."
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

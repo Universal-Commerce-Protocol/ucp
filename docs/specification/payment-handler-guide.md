@@ -723,6 +723,34 @@ instrument acquisition. Instead, the specification **SHOULD** clearly document:
   business for usage, which is critical for security, based on the available
   `config` and `checkout`.
 
+### Payment Actions
+
+A payment handler may require the Platform to perform additional work while the
+Business processes an instrument. The Business returns that work in the
+Checkout's `actions` map.
+
+Handler authors have two options:
+
+- **Use the standard Payment Authentication extension.** Handlers that need
+  device data collection or a 3DS challenge use
+  [`dev.ucp.shopping.payment_authentication`](payment-authentication.md), which
+  defines the `dev.ucp.payment.device_data_collection` and
+  `dev.ucp.payment.three_ds_challenge` Action types. The handler specification
+  states which types it can cause and any provider-specific trust or fallback
+  requirements.
+- **Define handler-specific Actions.** When the standard types do not fit, the
+  handler author publishes a Checkout extension that declares its Action type
+  keys and `config` shapes. Both the Business and Platform advertise that
+  extension before those Actions are emitted.
+
+For each handler-specific Action, document when it is emitted, what `required`
+gates, how the Platform processes its config, how the Business observes its
+completion, and its trust, failure, abandonment, and fallback behavior.
+
+See [Overview — Actions](overview.md#actions) for the common envelope and
+[Schema Authoring — Extension-Declared Action Types](../documentation/schema-authoring.md#extension-declared-action-types)
+for the extension schema pattern.
+
 ### Processing
 
 **Definition:** The steps a participant (typically business or PSP) takes to
@@ -806,6 +834,12 @@ Before publishing a payment handler specification, verify:
 - [ ] API calls or SDK usage is shown with examples
 - [ ] Binding requirements are specified
 - [ ] Checkout Payment Instrument creation and shape is well-defined
+
+### Payment Authentication Actions (if applicable)
+
+- [ ] Every Action type is declared by a negotiated extension
+- [ ] Unsupported, abandoned, expired, and failed fallbacks are documented
+- [ ] Server-side outcome observation and pending-attempt cleanup are defined
 
 ### Processing
 
