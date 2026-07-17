@@ -59,10 +59,6 @@ terms and term-aware payment instruments.
 
 {{ schema_fields('types/payment_schedule', 'payment_terms') }}
 
-#### Schedule
-
-{{ schema_fields('types/schedule', 'payment_terms') }}
-
 #### Schedule Type
 
 {{ schema_fields('types/schedule_type', 'payment_terms') }}
@@ -86,25 +82,23 @@ Payment schedules use `type` as an open string vocabulary. Well-known values are
 | Type | Meaning |
 | :--- | :------ |
 | `immediate` | Payment is due when checkout is completed. |
-| `deferred` | Payment is due after checkout completion, according to `due_at`. |
+| `deferred` | Payment is due after checkout completion, as stated in `description`. |
 
 Businesses MAY use additional values. Platforms MUST tolerate unknown schedule
 types and either apply business-specific support or surface clear validation
 messages when a selected payment instrument cannot satisfy them.
 
-An `immediate` schedule **MUST** omit `due_at`; a `deferred` schedule **MUST**
-include a non-empty `due_at`. The shared Schedule fields are:
+Every schedule has a buyer-facing `description` that **MUST** completely state
+when and how its payment or payments are due. The `type` field provides only a
+broad timing class; platforms do not infer dates or processor instructions from
+it.
 
-* `anchor_date` — RFC 3339 reference point. If omitted, the anchor is the
-  instant successful checkout completion creates the order.
-* `offset` — ISO 8601 duration from the anchor to the first occurrence.
-* `interval` — ISO 8601 duration between recurring occurrences.
-* `occurrences` — finite number of occurrences; **MUST** be present when
-  `interval` is present.
-
-Each payment schedule has `totals[]`. For a recurring schedule, those totals
-apply to each occurrence. Expanding every occurrence, the sum of schedule
-`total` entries **MUST** equal the checkout `total` exactly once.
+Each schedule's `totals[]` is the aggregate amount of every payment represented
+by that schedule. A schedule may describe several occurrences in text, but its
+`total` covers the complete series. If individual occurrences need different
+instrument assignments, the business represents them as separate schedules.
+The sum of schedule `total` entries **MUST** equal the checkout `total` exactly
+once.
 
 Schedules settle only the current checkout; they do not create future purchases,
 orders, renewals, or fulfillment obligations. They disclose payment timing but
@@ -156,7 +150,7 @@ When the [Split Payments](split-payments.md) extension is also active,
 instruments may include an `amount` field to specify a fixed contribution when
 multiple instruments share a schedule. A fixed contribution **MUST** resolve to
 exactly one schedule. Contributions to each schedule **MUST** equal that
-schedule's expanded total, and every schedule **MUST** be covered by at least
+schedule's aggregate total, and every schedule **MUST** be covered by at least
 one eligible instrument.
 
 ## Discovery
@@ -226,6 +220,7 @@ When this extension is active, a completed Order **MUST** include exactly one
         {
           "id": "sched_first_night",
           "type": "immediate",
+          "description": "Due when checkout is completed.",
           "totals": [
             { "type": "subtotal", "amount": 30000 },
             { "type": "total", "amount": 30000 }
@@ -234,9 +229,7 @@ When this extension is active, a completed Order **MUST** include exactly one
         {
           "id": "sched_check_in_balance",
           "type": "deferred",
-          "due_at": {
-            "anchor_date": "2026-09-01T15:00:00-07:00"
-          },
+          "description": "Due at check-in on September 1, 2026 at 3:00 PM PDT.",
           "totals": [
             { "type": "subtotal", "amount": 90000 },
             { "type": "total", "amount": 90000 }
@@ -334,6 +327,7 @@ amounts.
     {
       "id": "sched_installment_1",
       "type": "immediate",
+      "description": "One payment of $25 due when checkout is completed.",
       "totals": [
         { "type": "subtotal", "amount": 2500 },
         { "type": "total", "amount": 2500 }
@@ -342,22 +336,18 @@ amounts.
     {
       "id": "sched_installments_2_to_4",
       "type": "deferred",
-      "due_at": {
-        "offset": "P2W",
-        "interval": "P2W",
-        "occurrences": 3
-      },
+      "description": "Three payments of $25 due two, four, and six weeks after checkout.",
       "totals": [
-        { "type": "subtotal", "amount": 2500 },
-        { "type": "total", "amount": 2500 }
+        { "type": "subtotal", "amount": 7500 },
+        { "type": "total", "amount": 7500 }
       ]
     }
   ]
 }
 ```
 
-The deferred schedule has three occurrences. Its totals apply to each
-occurrence, so the term expands to four payments of $25 each.
+The deferred schedule describes three occurrences, while its totals represent
+the aggregate $75 obligation assigned to that schedule.
 
 ### Order with accepted payment terms
 
@@ -435,6 +425,7 @@ The Order carries the complete accepted term from the originating Checkout.
           {
             "id": "sched_installment_1",
             "type": "immediate",
+            "description": "One payment of $25 due when checkout is completed.",
             "totals": [
               { "type": "subtotal", "amount": 2500 },
               { "type": "total", "amount": 2500 }
@@ -443,14 +434,10 @@ The Order carries the complete accepted term from the originating Checkout.
           {
             "id": "sched_installments_2_to_4",
             "type": "deferred",
-            "due_at": {
-              "offset": "P2W",
-              "interval": "P2W",
-              "occurrences": 3
-            },
+            "description": "Three payments of $25 due two, four, and six weeks after checkout.",
             "totals": [
-              { "type": "subtotal", "amount": 2500 },
-              { "type": "total", "amount": 2500 }
+              { "type": "subtotal", "amount": 7500 },
+              { "type": "total", "amount": 7500 }
             ]
           }
         ]
@@ -465,7 +452,7 @@ The Order carries the complete accepted term from the originating Checkout.
 Platforms SHOULD:
 
 * Present available payment terms in a clear, buyer-understandable format.
-* Show amounts and due dates for each schedule, including future payments.
+* Show every schedule's aggregate amount and complete timing description.
 * Validate term and schedule references plus instrument constraints before submitting payment.
 * Tolerate unknown schedule types and surface clear recovery guidance when a
   selected instrument cannot satisfy them.
@@ -475,7 +462,7 @@ Platforms SHOULD:
 Businesses MUST:
 
 * Provide at least one checkout-wide payment term when the extension is active.
-* Ensure expanded schedule totals cover the checkout total exactly once.
+* Ensure aggregate schedule totals cover the checkout total exactly once.
 * Validate that all instrument assignments select the same term and completely
   fund its schedules.
 * Include that complete accepted term on the resulting Order.
