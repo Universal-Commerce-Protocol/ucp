@@ -618,8 +618,10 @@ def define_env(env):
     map over ``create``/``update``/``complete``. Request operations left
     unannotated inherit the response visibility.
 
-    Returns a Markdown string such as ``**Required**`` (same everywhere) or
-    ``**Required** in responses; omitted on create, optional on update``.
+    The response visibility is the default: request operations that share it are
+    omitted from the cell, so only the *differences* are spelled out. Returns a
+    Markdown string such as ``**Required**`` (same everywhere) or
+    ``**Required**; optional on update``.
     """
     word = {"required": "required", "optional": "optional", "omit": "omitted"}
     response = "required" if field_name in required_list else "optional"
@@ -631,19 +633,26 @@ def define_env(env):
     if isinstance(ucp_request, str):
       if ucp_request == response:
         return base_disp
-      return (
-        f"{base_disp} in responses; "
-        f"{word.get(ucp_request, ucp_request)} in requests"
-      )
+      return f"{base_disp}; {word.get(ucp_request, ucp_request)} in requests"
 
     if isinstance(ucp_request, dict):
+      # Only keep operations whose visibility differs from the response default;
+      # the rest inherit it and would be redundant to spell out.
+      diff_request = {}
+      for op in ("create", "update", "complete"):
+        val = ucp_request.get(op)
+        if val and val != response:
+          diff_request[op] = val
+      if not diff_request:
+        return base_disp
+
       # Group adjacent request operations that share a visibility value so the
       # cell stays compact (e.g. "required on create & update").
       groups = []  # list of (value, [ops]) preserving operation order
       for op in ("create", "update", "complete"):
-        if op not in ucp_request:
+        if op not in diff_request:
           continue
-        val = ucp_request[op]
+        val = diff_request[op]
         if groups and groups[-1][0] == val:
           groups[-1][1].append(op)
         else:
@@ -653,7 +662,7 @@ def define_env(env):
       ]
       if not clauses:
         return base_disp
-      return f"{base_disp} in responses; {', '.join(clauses)}"
+      return f"{base_disp}; {', '.join(clauses)}"
 
     return base_disp
 
