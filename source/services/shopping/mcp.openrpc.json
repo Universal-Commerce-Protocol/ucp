@@ -65,6 +65,11 @@
             "type": "string",
             "format": "uuid",
             "description": "Unique key for retry safety. Maps to HTTP Idempotency-Key header."
+          },
+          "request-id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique request identifier for tracing across network layers. Maps to HTTP Request-Id header."
           }
         }
       }
@@ -100,17 +105,20 @@
       "params": [
         {
           "name": "meta",
+          "description": "Request metadata containing platform identification and optional idempotency key.",
           "required": true,
           "schema": { "$ref": "#/components/schemas/meta" }
         },
         {
           "name": "checkout",
+          "description": "Checkout session state to create.",
           "required": true,
           "schema": { "$ref": "../../schemas/shopping/checkout.json" }
         }
       ],
       "result": {
         "name": "checkout",
+        "description": "The created checkout session or an error response.",
         "schema": { "$ref": "#/components/schemas/checkout_result" }
       },
       "errors": [
@@ -122,14 +130,17 @@
     {
       "name": "get_checkout",
       "summary": "Get checkout",
+      "description": "Get the latest state of a checkout session.",
       "params": [
         {
           "name": "meta",
+          "description": "Request metadata containing platform identification.",
           "required": true,
           "schema": { "$ref": "#/components/schemas/meta" }
         },
         {
           "name": "id",
+          "description": "The unique identifier of the checkout session.",
           "required": true,
           "schema": {
             "type": "string"
@@ -138,6 +149,7 @@
       ],
       "result": {
         "name": "checkout",
+        "description": "The current checkout session state or an error response.",
         "schema": { "$ref": "#/components/schemas/checkout_result" }
       },
       "errors": [
@@ -148,14 +160,17 @@
     {
       "name": "update_checkout",
       "summary": "Update checkout",
+      "description": "Update a checkout session. If an optional field is provided, its value replaces the corresponding data. If omitted, the current value is unchanged.",
       "params": [
         {
           "name": "meta",
+          "description": "Request metadata containing platform identification.",
           "required": true,
           "schema": { "$ref": "#/components/schemas/meta" }
         },
         {
           "name": "id",
+          "description": "The unique identifier of the checkout session.",
           "required": true,
           "schema": {
             "type": "string"
@@ -163,12 +178,14 @@
         },
         {
           "name": "checkout",
+          "description": "Checkout session fields to update.",
           "required": true,
           "schema": { "$ref": "../../schemas/shopping/checkout.json" }
         }
       ],
       "result": {
         "name": "checkout",
+        "description": "The updated checkout session or an error response.",
         "schema": { "$ref": "#/components/schemas/checkout_result" }
       },
       "errors": [
@@ -180,9 +197,11 @@
     {
       "name": "complete_checkout",
       "summary": "Complete checkout and place order",
+      "description": "Place the order.",
       "params": [
         {
           "name": "meta",
+          "description": "Request metadata containing platform identification and required idempotency key.",
           "required": true,
           "schema": {
             "allOf": [
@@ -198,6 +217,7 @@
         },
         {
           "name": "id",
+          "description": "The unique identifier of the checkout session.",
           "required": true,
           "schema": {
             "type": "string"
@@ -205,12 +225,14 @@
         },
         {
           "name": "checkout",
+          "description": "Final checkout state for order placement.",
           "required": true,
           "schema": { "$ref": "../../schemas/shopping/checkout.json" }
         }
       ],
       "result": {
         "name": "checkout",
+        "description": "The completed checkout session or an error response.",
         "schema": { "$ref": "#/components/schemas/checkout_result" }
       },
       "errors": [
@@ -223,9 +245,11 @@
     {
       "name": "cancel_checkout",
       "summary": "Cancel checkout",
+      "description": "Cancel a checkout session.",
       "params": [
         {
           "name": "meta",
+          "description": "Request metadata containing platform identification and required idempotency key.",
           "required": true,
           "schema": {
             "allOf": [
@@ -241,6 +265,7 @@
         },
         {
           "name": "id",
+          "description": "The unique identifier of the checkout session.",
           "required": true,
           "schema": {
             "type": "string"
@@ -249,6 +274,7 @@
       ],
       "result": {
         "name": "checkout",
+        "description": "The cancelled checkout session or an error response.",
         "schema": { "$ref": "#/components/schemas/checkout_result" }
       },
       "errors": [
@@ -265,17 +291,20 @@
       "params": [
         {
           "name": "meta",
+          "description": "Request metadata containing platform identification and optional idempotency key.",
           "required": true,
           "schema": { "$ref": "#/components/schemas/meta" }
         },
         {
           "name": "cart",
+          "description": "Cart session state to create.",
           "required": true,
           "schema": { "$ref": "../../schemas/shopping/cart.json" }
         }
       ],
       "result": {
         "name": "cart",
+        "description": "The created cart session or an error response.",
         "schema": { "$ref": "#/components/schemas/cart_result" }
       },
       "errors": [
@@ -287,14 +316,17 @@
     {
       "name": "get_cart",
       "summary": "Get cart",
+      "description": "Get the latest state of a cart session.",
       "params": [
         {
           "name": "meta",
+          "description": "Request metadata containing platform identification.",
           "required": true,
           "schema": { "$ref": "#/components/schemas/meta" }
         },
         {
           "name": "id",
+          "description": "The unique identifier of the cart session.",
           "required": true,
           "schema": {
             "type": "string"
@@ -303,6 +335,7 @@
       ],
       "result": {
         "name": "cart",
+        "description": "The current cart session state or an error response.",
         "schema": { "$ref": "#/components/schemas/cart_result" }
       },
       "errors": [
@@ -313,14 +346,17 @@
     {
       "name": "update_cart",
       "summary": "Update cart",
+      "description": "Update a cart session.",
       "params": [
         {
           "name": "meta",
+          "description": "Request metadata containing platform identification.",
           "required": true,
           "schema": { "$ref": "#/components/schemas/meta" }
         },
         {
           "name": "id",
+          "description": "The unique identifier of the cart session.",
           "required": true,
           "schema": {
             "type": "string"
@@ -328,12 +364,14 @@
         },
         {
           "name": "cart",
+          "description": "Cart session fields to update.",
           "required": true,
           "schema": { "$ref": "../../schemas/shopping/cart.json" }
         }
       ],
       "result": {
         "name": "cart",
+        "description": "The updated cart session or an error response.",
         "schema": { "$ref": "#/components/schemas/cart_result" }
       },
       "errors": [
@@ -345,9 +383,11 @@
     {
       "name": "cancel_cart",
       "summary": "Cancel cart",
+      "description": "Cancel a cart session. Returns the cart state at time of cancellation.",
       "params": [
         {
           "name": "meta",
+          "description": "Request metadata containing platform identification and required idempotency key.",
           "required": true,
           "schema": {
             "allOf": [
@@ -363,6 +403,7 @@
         },
         {
           "name": "id",
+          "description": "The unique identifier of the cart session.",
           "required": true,
           "schema": {
             "type": "string"
@@ -371,6 +412,7 @@
       ],
       "result": {
         "name": "cart",
+        "description": "The cancelled cart session or an error response.",
         "schema": { "$ref": "#/components/schemas/cart_result" }
       },
       "errors": [
@@ -387,17 +429,20 @@
       "params": [
         {
           "name": "meta",
+          "description": "Request metadata containing platform identification.",
           "required": true,
           "schema": { "$ref": "#/components/schemas/meta" }
         },
         {
           "name": "catalog",
+          "description": "Catalog search query parameters.",
           "required": true,
           "schema": { "$ref": "../../schemas/shopping/catalog_search.json#/$defs/search_request" }
         }
       ],
       "result": {
         "name": "response",
+        "description": "Catalog search results.",
         "schema": { "$ref": "../../schemas/shopping/catalog_search.json#/$defs/search_response" }
       },
       "errors": [
@@ -412,17 +457,20 @@
       "params": [
         {
           "name": "meta",
+          "description": "Request metadata containing platform identification.",
           "required": true,
           "schema": { "$ref": "#/components/schemas/meta" }
         },
         {
           "name": "catalog",
+          "description": "Catalog lookup request parameters.",
           "required": true,
           "schema": { "$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/lookup_request" }
         }
       ],
       "result": {
         "name": "response",
+        "description": "Catalog lookup results.",
         "schema": { "$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/lookup_response" }
       },
       "errors": [
@@ -437,6 +485,7 @@
       "params": [
         {
           "name": "meta",
+          "description": "Request metadata containing platform identification.",
           "required": true,
           "schema": { "$ref": "#/components/schemas/meta" }
         },
@@ -451,6 +500,7 @@
       ],
       "result": {
         "name": "order",
+        "description": "The current order state or an error response.",
         "schema": { "$ref": "#/components/schemas/order_result" }
       },
       "errors": [
@@ -465,17 +515,20 @@
       "params": [
         {
           "name": "meta",
+          "description": "Request metadata containing platform identification.",
           "required": true,
           "schema": { "$ref": "#/components/schemas/meta" }
         },
         {
           "name": "catalog",
+          "description": "Product detail request parameters.",
           "required": true,
           "schema": { "$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/get_product_request" }
         }
       ],
       "result": {
         "name": "response",
+        "description": "Product details or an error response.",
         "schema": { "$ref": "#/components/schemas/catalog_get_product_result" }
       },
       "errors": [
