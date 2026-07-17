@@ -84,13 +84,8 @@
           "description": "ISO 4217 currency code."
         },
         "measure": {
-          "type": "object",
-          "description": "Product quantity in packaging (e.g., 750ml bottle).",
-          "required": ["value", "unit"],
-          "properties": {
-            "value": { "type": "number", "description": "Package quantity." },
-            "unit": { "type": "string", "description": "Unit of measurement." }
-          }
+          "$ref": "../../common/types/measure.json",
+          "description": "Product quantity in packaging (e.g., 750ml bottle)."
         },
         "reference": {
           "type": "object",
