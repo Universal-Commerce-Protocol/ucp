@@ -611,15 +611,17 @@ def define_env(env):
   def _field_requirement(field_name, ucp_request, required_list):
     """Render the Requirement cell for a schema field.
 
-    The base ``required`` array defines the *response* requirement (responses
-    never omit a defined field, so a field is either ``required`` or ``optional``
-    in responses). The ``ucp_request`` annotation overrides the *request*
-    requirement — either a single value applied to every request operation, or a
-    per-operation map over ``create``/``update``/``complete``. Request operations
-    left unannotated inherit the response requirement.
+    The base ``required`` array defines the *response* requirement
+    (responses never omit a defined field, so a field is either
+    ``required`` or ``optional`` in responses). The ``ucp_request``
+    annotation overrides the *request* requirement — either a single
+    value applied to every request operation, or a per-operation map over
+    ``create``/``update``/``complete``. Request operations left
+    unannotated inherit the response requirement.
 
-    The response requirement is the default: request operations that share it are
-    omitted from the cell, so only the *differences* are spelled out. Returns a
+    The response requirement is the default: request operations that
+    share it are omitted from the cell, so only the *differences* are
+    spelled out. Returns a
     Markdown string such as ``**Required**`` (same everywhere) or
     ``**Required**; optional on update``.
     """
@@ -636,8 +638,8 @@ def define_env(env):
       return f"{base_disp}; {word.get(ucp_request, ucp_request)} in requests"
 
     if isinstance(ucp_request, dict):
-      # Only keep operations whose requirement differs from the response default;
-      # the rest inherit it and would be redundant to spell out.
+      # Only keep operations whose requirement differs from the response
+      # default; the rest inherit it and would be redundant to spell out.
       diff_request = {}
       for op in ("create", "update", "complete"):
         val = ucp_request.get(op)
@@ -919,7 +921,7 @@ def define_env(env):
             desc += "<br>"
           desc += f"**Enum:** {formatted_enums}"
 
-        # --- Handle Requirement (required/optional/omit per request op + response) ---
+        # --- Handle Requirement (per request op + response) ---
         requirement = _field_requirement(
           field_name, ucp_annotation, required_list
         )
