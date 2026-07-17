@@ -4,7 +4,7 @@
   "title": "Available Payment Term",
   "description": "A payment term offered by the business, defining how line items can be paid for over time.",
   "type": "object",
-  "required": ["id", "name", "line_item_ids", "schedules"],
+  "required": ["id", "name", "schedules"],
   "properties": {
     "id": {
       "type": "string",
@@ -17,14 +17,6 @@
     "description": {
       "type": "string",
       "description": "Optional buyer-facing explanation of the payment term."
-    },
-    "line_item_ids": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "minItems": 1,
-      "description": "IDs of line items this payment term can be applied to."
     },
     "schedules": {
       "type": "array",

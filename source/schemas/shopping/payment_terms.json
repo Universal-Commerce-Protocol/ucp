@@ -8,7 +8,8 @@
   "requires": {
     "protocol": { "min": "2026-04-08" },
     "capabilities": {
-      "dev.ucp.shopping.checkout": { "min": "2026-04-08" }
+      "dev.ucp.shopping.checkout": { "min": "2026-04-08" },
+      "dev.ucp.shopping.order": { "min": "2026-04-08" }
     }
   },
   "$defs": {
@@ -77,17 +78,6 @@
               "description": "Available payment terms the buyer can choose from. Each term defines schedules for when payments are due.",
               "ucp_request": "omit"
             },
-            "terms": {
-              "type": "array",
-              "items": { "$ref": "#/$defs/payment_term" },
-              "description": "Selected payment terms for the checkout. Each line item must be covered by exactly one term.",
-              "ucp_request": {
-                "create": "optional",
-                "update": "optional",
-                "complete": "optional"
-              },
-              "ucp_response": "omit"
-            },
             "instruments": {
               "type": "array",
               "items": { "$ref": "#/$defs/payment_instrument" },
@@ -112,6 +102,28 @@
                 "create": "optional",
                 "update": "optional",
                 "complete": "required"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.order": {
+      "title": "Order with Payment Terms",
+      "description": "Order extended with the payment terms accepted during checkout.",
+      "allOf": [
+        { "$ref": "order.json" },
+        {
+          "type": "object",
+          "properties": {
+            "payment": {
+              "type": "object",
+              "properties": {
+                "terms": {
+                  "type": "array",
+                  "items": { "$ref": "#/$defs/available_payment_term" },
+                  "description": "Complete payment terms accepted for the originating checkout."
+                }
               }
             }
           }

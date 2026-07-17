@@ -4,10 +4,7 @@
   "title": "Payment Schedule",
   "description": "Defines when payment is due for a payment term. A schedule can represent a single payment or a recurring series of payments.",
   "type": "object",
-  "required": ["id", "type"],
-  "not": {
-    "required": ["percentage", "amount"]
-  },
+  "required": ["id", "type", "totals"],
   "properties": {
     "id": {
       "type": "string",
@@ -21,14 +18,9 @@
       "$ref": "schedule.json",
       "description": "When the payment is due. Protocol semantics require this for deferred schedules and omit it for immediate schedules."
     },
-    "percentage": {
-      "type": "number",
-      "exclusiveMinimum": 0,
-      "maximum": 100,
-      "description": "Percentage of the selected term's line-item total due for each occurrence of this schedule. For recurring schedules, apply the percentage to each occurrence."
-    },
-    "amount": {
-      "$ref": "../../common/types/amount.json"
+    "totals": {
+      "$ref": "totals.json",
+      "description": "Complete pricing breakdown for this obligation. The entry with `type: total` is the amount due in the checkout or order currency."
     }
   }
 }

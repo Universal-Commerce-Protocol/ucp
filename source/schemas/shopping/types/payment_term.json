@@ -4,19 +4,11 @@
   "title": "Payment Term",
   "description": "A buyer's selection of a payment term for specific line items.",
   "type": "object",
-  "required": ["id", "line_item_ids"],
+  "required": ["id"],
   "properties": {
     "id": {
       "type": "string",
       "description": "ID of the selected payment term from available_terms."
-    },
-    "line_item_ids": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "minItems": 1,
-      "description": "IDs of line items to apply this term to. Must be a subset of the term's line_item_ids."
     }
   }
 }
