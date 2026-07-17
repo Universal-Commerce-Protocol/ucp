@@ -54,6 +54,10 @@ specifications:
 - [Embedded protocol](http://ucp.dev/draft/specification/embedded-protocol/index.md): Core Embedded Protocol (EP) transport binding, defining message formats, handshake patterns, communication channels, security constraints, and shared error handling structures for iframe/webview integrations.
 - [Embedded](http://ucp.dev/draft/specification/embedded-cart/index.md): Embedded Cart Protocol (ECaP), enabling secure, cross-origin iframe communication and synchronized event states between platform agents and business websites.
 
+## Permalink Capability
+
+- [Permalink Capability](http://ucp.dev/draft/specification/permalink/index.md): Browser-addressable shopping intent capability, defining endpoint discovery, compact item paths, open query initialization fields, and redirect resolution.
+
 ## Catalog Capability
 
 - [Overview](http://ucp.dev/draft/specification/catalog/index.md): Core Catalog Capability, detailing high-level product discovery models, variant structures, merchant attribution, and real-time pricing context.

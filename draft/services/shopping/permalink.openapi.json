@@ -1,0 +1,136 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "UCP Shopping Permalink Binding",
+    "description": "Browser redirect binding for UCP shopping permalinks. This document defines route shape, redirect responses, and a non-normative classification hint for permalink query parameters; the permalink specification remains normative for query partitioning and redirect semantics.",
+    "version": "2026-07-17"
+  },
+  "servers": [
+    {
+      "url": "{endpoint}",
+      "description": "Business-provided browser endpoint from dev.ucp.shopping.permalink config.endpoint.",
+      "variables": {
+        "endpoint": {
+          "default": "https://merchant.example/buy",
+          "description": "Absolute HTTPS browser endpoint advertised in permalink capability config."
+        }
+      }
+    }
+  ],
+  "paths": {
+    "/": {
+      "description": "No-item permalink path. With config.endpoint set to https://merchant.example/buy, this route resolves URLs such as https://merchant.example/buy/?context/postal_code=94105&continue_to=/; the no-trailing-slash constraint applies to the advertised config.endpoint value, not this resolved route URL.",
+      "get": {
+        "operationId": "resolve_permalink",
+        "summary": "Resolve permalink",
+        "description": "Resolves a no-item browser-addressable shopping intent from query parameters and redirects the browser to an appropriate buyer-facing destination.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/continue_to"
+          }
+        ],
+        "responses": {
+          "303": {
+            "$ref": "#/components/responses/permalink_redirect"
+          },
+          "4XX": {
+            "$ref": "#/components/responses/malformed_permalink"
+          }
+        }
+      }
+    },
+    "/{items}": {
+      "get": {
+        "operationId": "resolve_permalink_with_items",
+        "summary": "Resolve permalink with compact items",
+        "description": "Resolves a browser-addressable shopping intent from compact item path and query parameters, then redirects the browser to an appropriate buyer-facing destination.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/items"
+          },
+          {
+            "$ref": "#/components/parameters/continue_to"
+          }
+        ],
+        "responses": {
+          "303": {
+            "$ref": "#/components/responses/permalink_redirect"
+          },
+          "4XX": {
+            "$ref": "#/components/responses/malformed_permalink"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "items": {
+        "name": "items",
+        "in": "path",
+        "required": true,
+        "description": "Comma-separated item_id_token:quantity pairs. Use the item identifier directly only when it matches the raw token grammar; otherwise use '~' plus base64url without padding of the UTF-8 item identifier. Do not percent-encode identifiers in the compact path.",
+        "schema": {
+          "type": "string",
+          "pattern": "^(?:[A-Za-z0-9._-]+|~[A-Za-z0-9_-]+):[1-9][0-9]*(?:,(?:[A-Za-z0-9._-]+|~[A-Za-z0-9_-]+):[1-9][0-9]*)*$"
+        }
+      },
+      "continue_to": {
+        "name": "continue_to",
+        "in": "query",
+        "required": false,
+        "description": "Root-relative destination preference after the Business applies permalink inputs. Normative validation is defined in the permalink specification.",
+        "schema": {
+          "type": "string",
+          "description": "Root-relative destination path reference. MUST start with '/' and MUST NOT start with '//'. MUST NOT contain a URL scheme, backslashes, whitespace, or control characters. Businesses MUST decode, validate, and canonicalize it server-side and confirm the result stays same-origin with the endpoint, per the permalink specification.",
+          "pattern": "^/(?!/)"
+        }
+      }
+    },
+    "responses": {
+      "permalink_redirect": {
+        "description": "Permalink resolved to a buyer-facing destination. Businesses use 303 See Other; permanent redirects such as 301 and 308 are forbidden by the permalink specification.",
+        "headers": {
+          "Location": {
+            "required": true,
+            "description": "Appropriate buyer-facing destination chosen by the Business. May be cross-origin when the Business chooses a hosted or accelerated checkout destination.",
+            "schema": {
+              "type": "string",
+              "format": "uri-reference"
+            }
+          },
+          "Cache-Control": {
+            "required": true,
+            "description": "Required by the permalink specification. Set to `no-store`.",
+            "schema": {
+              "type": "string"
+            },
+            "example": "no-store"
+          },
+          "Referrer-Policy": {
+            "required": true,
+            "description": "Required by the permalink specification; a no-referrer policy that prevents leaking the permalink URL to third parties.",
+            "schema": {
+              "type": "string"
+            },
+            "example": "no-referrer"
+          }
+        }
+      },
+      "malformed_permalink": {
+        "description": "The permalink request could not be safely interpreted. The normative preference is to redirect malformed browser requests to a safe buyer-facing fallback when possible; see the permalink specification."
+      }
+    }
+  },
+  "x-ucp-query-semantics": {
+    "description": "OpenAPI cannot enumerate arbitrary JSON Pointer field-path query parameters such as buyer/email, context/postal_code, context/payment/0/handler, attribution/ref, discounts/codes/0, or profile-specific fields. Permalink query syntax omits the leading '/' for UCP field paths, but Businesses may also accept canonical JSON Pointer names. The Business resolves these field paths against its active schemas, capabilities, and internal logic. The permalink specification defines the normative query partitioning and redirect semantics.",
+    "control_parameters": [
+      "continue_to"
+    ],
+    "field_paths": "json-pointer-with-leading-slash-optional"
+  },
+  "x-ucp-forbidden-status": [
+    301,
+    308
+  ]
+}
