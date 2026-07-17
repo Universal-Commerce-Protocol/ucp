@@ -608,19 +608,19 @@ def define_env(env):
 
     return "\n".join(md)
 
-  def _field_visibility(field_name, ucp_request, required_list):
-    """Render the Visibility cell for a schema field.
+  def _field_requirement(field_name, ucp_request, required_list):
+    """Render the Requirement cell for a schema field.
 
-    The base ``required`` array defines *response* visibility (responses never
+    The base ``required`` array defines *response* requirement (responses never
     omit a defined field, so a field is either ``required`` or ``optional`` in
-    responses). The ``ucp_request`` annotation overrides *request* visibility —
+    responses). The ``ucp_request`` annotation overrides *request* requirement —
     either a single value applied to every request operation, or a per-operation
     map over ``create``/``update``/``complete``. Request operations left
-    unannotated inherit the response visibility.
+    unannotated inherit the response requirement.
 
-    The response visibility is the default: request operations that share it are
-    omitted from the cell, so only the *differences* are spelled out. Returns a
-    Markdown string such as ``**Required**`` (same everywhere) or
+    The response requirement is the default: request operations that share
+    it are omitted from the cell, so only the *differences* are spelled out.
+    Returns a Markdown string such as ``**Required**`` (same everywhere) or
     ``**Required**; optional on update``.
     """
     word = {"required": "required", "optional": "optional", "omit": "omitted"}
@@ -753,7 +753,7 @@ def define_env(env):
 
     md = []
     if need_header:
-      md = ["| Name | Type | Visibility | Description |"]
+      md = ["| Name | Type | Requirement | Description |"]
       md.append("| :--- | :--- | :--- | :--- |")
 
     if "allOf" in properties:
@@ -919,12 +919,12 @@ def define_env(env):
             desc += "<br>"
           desc += f"**Enum:** {formatted_enums}"
 
-        # --- Handle Visibility (required/optional/omit per request op + response) ---
-        visibility = _field_visibility(
+        # --- Handle Requirement (req/opt/omit per op + response) ---
+        requirement = _field_requirement(
           field_name, ucp_annotation, required_list
         )
 
-        md.append(f"| {field_name} | {f_type} | {visibility} | {desc} |")
+        md.append(f"| {field_name} | {f_type} | {requirement} | {desc} |")
 
     return "\n".join(md)
 
