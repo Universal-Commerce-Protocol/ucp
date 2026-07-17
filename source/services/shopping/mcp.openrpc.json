@@ -366,6 +366,27 @@
         "name": "response",
         "schema": {"$ref": "#/components/schemas/catalog_get_product_result"}
       }
+    },
+    {
+      "name": "list_catalog",
+      "summary": "List catalog products",
+      "description": "Paginate through the business's full product catalog. Supports optional modified_since filtering for incremental sync.",
+      "params": [
+        {
+          "name": "meta",
+          "required": true,
+          "schema": {"$ref": "#/components/schemas/meta"}
+        },
+        {
+          "name": "catalog",
+          "required": true,
+          "schema": {"$ref": "../../schemas/shopping/catalog_list.json#/$defs/list_request"}
+        }
+      ],
+      "result": {
+        "name": "response",
+        "schema": {"$ref": "../../schemas/shopping/catalog_list.json#/$defs/list_response"}
+      }
     }
   ]
 }

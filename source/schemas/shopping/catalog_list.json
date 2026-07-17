@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/catalog_list.json",
+  "name": "dev.ucp.shopping.catalog.list",
+  "title": "Catalog List",
+  "description": "Paginated enumeration of a business's product catalog.",
+  "type": "object",
+  "$defs": {
+    "list_request": {
+      "type": "object",
+      "properties": {
+        "filters": {
+          "$ref": "types/list_filters.json"
+        },
+        "context": {
+          "$ref": "types/context.json"
+        },
+        "signals": {
+          "$ref": "types/signals.json"
+        },
+        "pagination": {
+          "$ref": "../common/types/pagination.json#/$defs/request"
+        }
+      }
+    },
+    "list_response": {
+      "type": "object",
+      "required": [
+        "ucp",
+        "products"
+      ],
+      "properties": {
+        "ucp": {
+          "$ref": "../ucp.json#/$defs/response_catalog_schema"
+        },
+        "products": {
+          "type": "array",
+          "items": {
+            "$ref": "types/product.json"
+          },
+          "description": "Products in the catalog."
+        },
+        "pagination": {
+          "$ref": "../common/types/pagination.json#/$defs/response"
+        },
+        "messages": {
+          "type": "array",
+          "items": {
+            "$ref": "../common/types/message.json"
+          },
+          "description": "Informational messages about the listing."
+        }
+      }
+    }
+  }
+}

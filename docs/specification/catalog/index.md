@@ -18,13 +18,15 @@
 
 ## Overview
 
-The Catalog capability allows platforms to search and browse business product catalogs.
-This enables product discovery before checkout, supporting use cases like:
+The Catalog capability allows platforms to search, browse, and enumerate business
+product catalogs. This enables product discovery before checkout, supporting use
+cases like:
 
 * Free-text product search
 * Category and filter-based browsing
 * Batch product/variant retrieval by identifier
 * Price comparison across variants
+* Full catalog enumeration for platform indexing and incremental sync
 
 ## Capabilities
 
@@ -32,6 +34,7 @@ This enables product discovery before checkout, supporting use cases like:
 | :--- | :--- |
 | [`dev.ucp.shopping.catalog.search`](search.md) | Search for products using query text and filters. |
 | [`dev.ucp.shopping.catalog.lookup`](lookup.md) | Retrieve products or variants by identifier. |
+| [`dev.ucp.shopping.catalog.list`](list.md) | Paginate through the full product catalog. |
 
 ## Key Concepts
 

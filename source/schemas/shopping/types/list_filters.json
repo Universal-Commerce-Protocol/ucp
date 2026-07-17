@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/list_filters.json",
+  "title": "List Filters",
+  "description": "Filter criteria for catalog list operations. All specified filters combine with AND logic.",
+  "type": "object",
+  "properties": {
+    "modified_since": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Return products created or updated at or after this timestamp (ISO 8601). Covers any change to the product or its variants."
+    }
+  },
+  "additionalProperties": true
+}
