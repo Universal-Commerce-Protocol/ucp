@@ -131,19 +131,11 @@ checkout status lifecycle interprets them.
 invariants governing outstanding required Actions.
 
 A `required: true` instance gates the effect specified for its Action type
-within the containing status:
-
-* While `incomplete`, a required Action identifies work the Business needs
-    completed before it can return `ready_for_complete`. After processing the
-    Action according to its Action type's contract, the Platform **SHOULD** use
-    [Get Checkout](#get-checkout) or a subsequent
-    [Update Checkout](#update-checkout) response to obtain the latest Checkout.
-* When Complete Checkout returns `complete_in_progress`, the Platform processes
-    any required Action according to its Action type's contract. Once that
-    processing completes, the Platform **SHOULD** use
-    [Get Checkout](#get-checkout) to retrieve the updated state. See
-    [Complete Checkout](#complete-checkout) for asynchronous processing and
-    idempotency.
+within the containing status. While `incomplete`, a required Action identifies
+work the Business needs completed before it can return `ready_for_complete`.
+After processing the Action according to its Action type's contract, the
+Platform **SHOULD** use [Get Checkout](#get-checkout) or a subsequent
+[Update Checkout](#update-checkout) response to obtain the latest Checkout.
 
 `required` does not select the Checkout status or report the outcome of a
 particular operation. The same Action can remain `required: true` while a
@@ -157,15 +149,48 @@ unrelated Checkout operations.
 If a required Action prevents Complete Checkout from being accepted, the
 Business **MUST** return the current Checkout with `status: incomplete` and a
 recoverable error Message whose `path` selects that exact Action occurrence.
-`complete_in_progress` means that Complete Checkout was accepted for asynchronous
-processing, whether the Business is processing internally or waiting for a
-required Action surfaced by that accepted operation.
+Processing the Action does not automatically retry the rejected operation. If
+the Platform submits Complete Checkout again, it is a new operation under the
+existing idempotency rules.
 
-After processing an Action, the Platform **SHOULD** obtain the latest Checkout
-through [Get Checkout](#get-checkout) or a subsequent
-[Update Checkout](#update-checkout) response. If it then re-drives a previously
-rejected effect, that is a new operation under the existing idempotency rules;
-Action processing does not replay the earlier request.
+#### Accepted completion
+
+`complete_in_progress` means Complete Checkout was accepted. The Checkout state
+reported by the Business is authoritative.
+
+When a `complete_in_progress` Checkout includes a required Action, the Platform
+processes it according to its contract. After the Action reports completion,
+the Business might need time to receive and apply the result. The Action
+completion signal is not authoritative for Checkout state. The Platform
+**MUST** use [Get Checkout](#get-checkout) to confirm that the Business
+reflected the result, for example by removing the Action or changing the
+Checkout status. When a `complete_in_progress` Checkout contains no required
+Action, the Platform **SHOULD** use Get Checkout to obtain the latest state.
+While the Checkout remains `complete_in_progress`, with or without an Action,
+the Platform **MAY** repeat Get Checkout with bounded backoff set by the Action
+contract or Platform policy. The Platform **MUST** stop repeated Get Checkout
+requests at `expires_at`.
+
+If the same Action key and `id` remain, the Platform **MUST NOT** process it
+again unless its contract explicitly permits retry and every safe-retry
+condition holds. A replacement with a fresh `id` is new work. If the Action
+disappears, that Action is no longer outstanding. If the Checkout remains
+`complete_in_progress`, the Platform **MAY** continue Get Checkout under the
+same backoff and expiry rules.
+
+If the Platform cannot complete an Action, or the Business does not update the
+Checkout within a timeout set by the Action contract or Platform policy before
+`expires_at`, the Platform **SHOULD** follow any applicable Action fallback. If
+no fallback can continue the Checkout and `continue_url` is available, the
+Platform **SHOULD** use it to hand off the Checkout to the Buyer. The Platform
+**MUST NOT** attempt Cancel Checkout while either fallback or handoff can still
+continue the Checkout.
+
+If neither fallback nor handoff can continue, the Platform **SHOULD** use Get
+Checkout to retrieve the latest state and attempt Cancel Checkout only if it
+still reports `complete_in_progress`. Cancellation can race completion; the
+Platform **MUST NOT** treat the Checkout as canceled unless the Business reports
+`status: canceled`.
 
 ### Error Handling
 
@@ -775,27 +800,24 @@ The response is the checkout object:
     `order` field is present, providing necessary identifiers such as `id` and
     `permalink_url` that can be used to reference the full state of the placed
     order.
-* When completion is accepted for asynchronous processing, `status`
-    is `complete_in_progress` and no `order` is present. A required Action can be
-    outstanding in this state. The Platform processes any required Action and,
-    once that processing completes, uses [Get Checkout](#get-checkout) to
-    retrieve the updated state (see [Actions](#actions)). If no Action is
-    present, [Get Checkout](#get-checkout) remains how the Platform retrieves
-    the latest Checkout state while the Business processes completion
-    asynchronously.
+* When completion is accepted for asynchronous processing, `status` is
+    `complete_in_progress` and no `order` is present. The Platform follows
+    [Accepted completion](#accepted-completion) for Business processing and any
+    outstanding Action.
 * Any other status retains its core
     [Checkout status lifecycle](#checkout-status-lifecycle) semantics — for
     example `incomplete` for a recoverable change, or `requires_escalation` for
-    buyer handoff.
+    Buyer handoff.
 
-The Platform uses [Get Checkout](#get-checkout) to retrieve the latest Checkout
-state during accepted asynchronous processing and **MUST NOT** use Complete
-Checkout to poll or resume accepted processing. If the transport result of a
-Complete Checkout call is unknown, the Platform **MAY** retry it with the same
-idempotency key — that is a retry of the original request, not a new call. Any
-later new Complete Checkout call made after the checkout returns to
-`ready_for_complete` **MUST** use a fresh idempotency key,
-even if the payload is unchanged.
+The Platform **MUST NOT** use Complete Checkout to poll or resume accepted
+processing. If the Platform does not receive a response to Complete Checkout, it
+**SHOULD** use Get Checkout with bounded backoff to obtain the current state and
+**MUST** stop at `expires_at`. Only if Get Checkout still does not establish
+whether the Business processed the original request, the Platform **MAY** submit
+the same Complete Checkout request again with the same idempotency key. The
+Platform **MUST NOT** use a new idempotency key for that retry. A genuinely new
+Complete Checkout operation after the Checkout returns to `ready_for_complete`
+**MUST** use a fresh idempotency key, even if the payload is unchanged.
 
 At the time of order persistence, fields from `Checkout` **MAY** be used
 to construct the order representation (i.e. information like `line_items`,

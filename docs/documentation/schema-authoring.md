@@ -452,10 +452,14 @@ When they apply to the Action type, extension authors should define:
   identifying any field that is executable or causes content to be loaded;
 - relevant schemes, origins, delegates, and trust anchors;
 - presentation, isolation, and permission controls;
-- how the Business observes processing and reflects its effect in a later
+- how the Business observes Action completion and reflects it in a later parent
+  response;
+- if the parent response can be delayed, any timeout and bounded-backoff rules,
+  and whether the Platform can safely process the same Action again; if so,
+  every safe-retry condition;
+- the fallback when processing fails, is declined, or is abandoned, when the
+  Action is unsupported or expires, or when the Business does not update the
   parent response;
-- behavior when processing is declined, unsupported, abandoned, expired, or
-  failed, including the fallback for each relevant case;
 - the Action-specific conditions under which work is resolved, superseded, or
   replaced, plus within-type or cross-type ordering semantics when needed.
 
@@ -466,9 +470,10 @@ under `config` and use the existing `allOf` extension composition to contribute
 each Action key and `config` shape to the parent capability schema. They should
 not introduce a standalone Actions capability or registry. Nor should they
 expand the common Actions contract with generic machinery—whether an executor,
-callback/result model, state machine, or fallback enum. A concrete extension
-may define its own callback, result, state, or fallback semantics when genuinely
-required by its Action type.
+callback/result model, state machine, fallback enum, retry field, or polling
+protocol. A concrete extension may define its own callback, result, state,
+fallback, retry, timeout, or backoff semantics when genuinely required by its
+Action type.
 
 ## Complete Example: Capability Schema
 
