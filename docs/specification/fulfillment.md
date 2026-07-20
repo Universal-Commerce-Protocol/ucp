@@ -61,7 +61,7 @@ method.
 
 ### Properties
 
-{{ extension_fields('fulfillment', 'checkout') }}
+{{ extension_fields('fulfillment', 'fulfillment') }}
 
 ### Entities
 
