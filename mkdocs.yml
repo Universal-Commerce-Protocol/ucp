@@ -61,6 +61,7 @@ nav:
               - REST: specification/cart-rest.md
               - MCP: specification/cart-mcp.md
               - Embedded: specification/embedded-cart.md
+      - Permalink Capability: specification/permalink.md
       - Catalog Capability:
           - Overview: specification/catalog/index.md
           - Search: specification/catalog/search.md
@@ -349,6 +350,11 @@ plugins:
               Embedded Cart Protocol (ECaP), enabling secure, cross-origin
               iframe communication and synchronized event states between
               platform agents and business websites.
+        Permalink Capability:
+          - specification/permalink.md: >-
+              Browser-addressable shopping intent capability, defining
+              endpoint discovery, compact item paths, open query initialization
+              fields, and redirect resolution.
         Catalog Capability:
           - specification/catalog/index.md: >-
               Core Catalog Capability, detailing high-level product discovery

@@ -118,6 +118,9 @@ We welcome community contributions to enhance and evolve UCP.
 - **Contribution Guide:** See our
   [CONTRIBUTING.md](https://github.com/Universal-Commerce-Protocol/.github/blob/main/CONTRIBUTING.md)
   for details on how to contribute.
+- **Maintainers:** See our central
+  [MAINTAINERS.md](https://github.com/Universal-Commerce-Protocol/.github/blob/main/MAINTAINERS.md)
+  for the list of project maintainers.
 - **Specific Repositories:** When contributing to SDKs, Samples, Conformance,
   or other UCP repositories, please follow the developer instructions in the
   README of those repositories.
