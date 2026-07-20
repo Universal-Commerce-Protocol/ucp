@@ -38,9 +38,9 @@ Fulfillment applies only to items requiring physical delivery. Items not requiri
 
 ### Properties
 
-| Name        | Type                                                                         | Requirement | Description |
-| ----------- | ---------------------------------------------------------------------------- | ----------- | ----------- |
-| fulfillment | [Catalog Fulfillment](/draft/specification/fulfillment/#catalog-fulfillment) | Optional    |             |
+| Name        | Type                                                         | Requirement                   | Description          |
+| ----------- | ------------------------------------------------------------ | ----------------------------- | -------------------- |
+| fulfillment | [Fulfillment](/draft/specification/fulfillment/#fulfillment) | Optional; omitted on complete | Fulfillment details. |
 
 ### Entities
 

@@ -3,7 +3,7 @@
   "info": {
     "title": "UCP Shopping Permalink Binding",
     "description": "Browser redirect binding for UCP shopping permalinks. This document defines route shape, redirect responses, and a non-normative classification hint for permalink query parameters; the permalink specification remains normative for query partitioning and redirect semantics.",
-    "version": "2026-07-17"
+    "version": "2026-07-20"
   },
   "servers": [
     {
