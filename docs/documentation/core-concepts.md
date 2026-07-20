@@ -127,16 +127,17 @@ interact.
 
 ### Capabilities
 
-Capabilities are standalone, independently versioned features that
-a business declares it supports. They are the "verbs" of the protocol —
-discrete units of functionality that platforms can discover, negotiate, and
-invoke.
+Capabilities are discrete, versioned features that a Business declares it
+supports. They are the "verbs" of the protocol — units of functionality that
+Platforms can discover, negotiate, and invoke.
 
 Each capability is identified by a reverse-domain name (e.g.,
 `dev.ucp.shopping.checkout`) and carries a date-based version. Capabilities
-are declared in the business's UCP profile at `/.well-known/ucp` and
-negotiated and confirmed in every response so that the platform always knows
-the active feature set for a given interaction.
+are declared in the Business's UCP profile at `/.well-known/ucp`, negotiated
+by exact version, and confirmed in every response so that the Platform always
+knows the active feature set for a given interaction. UCP-authored `dev.ucp.*`
+capabilities and extensions declare version `D` in each UCP release `D`.
+Third-party extensions publish versions on their own cadence.
 
 The following are examples of capabilities defined in UCP — see the
 [Specification](../specification/overview.md) for the authoritative and
@@ -190,9 +191,9 @@ up-to-date list.
 ### Services
 
 **Services** group the operations and events for a vertical under a
-reverse-domain namespace (e.g., `dev.ucp.shopping`).
-A service declares *what* functionality exists for that vertical; transport
-bindings declare *how* it is accessed on the wire.
+reverse-domain registry key (e.g., `dev.ucp.shopping`). The key identifies the
+service: a service declares *what* functionality exists for that vertical, and
+each entry in its array declares *how* it is accessed over a transport binding.
 
 A single service can be accessed via multiple transport bindings:
 
@@ -203,12 +204,15 @@ A single service can be accessed via multiple transport bindings:
 | **A2A** | Agent Card | Agent-to-Agent protocol integrations |
 | **Embedded** | OpenRPC | Embedded integrations |
 
-A business declares which transport bindings it supports within each service;
-platforms pick whichever fits their context — an AI agent may prefer MCP, a
-traditional web app may use REST.
+A Business declares which transport bindings it supports within each service;
+Platforms pick whichever fits their context — an AI agent may prefer MCP, a
+traditional web app may use REST. Every UCP-defined service declares an explicit
+`version` equal to the selected `ucp.version`; because each entry pairs the
+service with one transport binding, that service `version` repeats on each entry.
+Transport bindings have no separate version. Multiple UCP-defined vertical
+services can coexist under one `ucp.version`, each declaring that version.
 
-Service namespaces are also UCP's extensibility mechanism for new
-verticals — e.g., `dev.ucp.hotels` may be introduced in the future.
+Service namespaces are also UCP's extensibility mechanism for new verticals.
 Businesses opt in by declaring which services they support.
 
 ## Discovery & Capability Negotiation
@@ -335,13 +339,13 @@ reject entities that fail it. Identifiers carry no fetched URL, and the `spec`
 normative algorithm.
 
 The `dev.ucp.*` namespace is reserved exclusively for capabilities governed by
-the UCP Tech Council. Any vendor can define and publish capabilities under their
-own domain — `org.acme.*` — without UCP maintainer approval. Vendor
-capabilities follow the same extension model, meaning they can extend UCP base
-capabilities (e.g., `org.acme.loyalty` extending `dev.ucp.shopping.checkout`)
-or define entirely new ones. Because negotiation is always opt-in, vendor
-capabilities only activate when both parties declare them, keeping the protocol
-decentralized by design.
+the UCP Tech Council responsible for the capability's domain. Any vendor can
+define and publish capabilities under their own domain — `org.acme.*` — without
+UCP maintainer approval. Vendor capabilities follow the same extension model,
+meaning they can extend UCP base capabilities (e.g., `org.acme.loyalty`
+extending `dev.ucp.shopping.checkout`) or define entirely new ones. Because
+negotiation is always opt-in, vendor capabilities only activate when both parties
+declare them, keeping the protocol decentralized by design.
 
 ## Payment Architecture
 
@@ -437,20 +441,19 @@ Businesses publish their OAuth 2.0 server metadata at
 
 ## Versioning
 
-UCP uses date-based version identifiers (`YYYY-MM-DD`). The version represents
-the date of the last backwards-incompatible change.
+UCP uses date-based version identifiers (`YYYY-MM-DD`). A UCP release `D` is a
+snapshot of the core protocol — its services and transport bindings,
+capabilities, extensions, and shared schemas — published and certified together
+as internally compatible. The selected `ucp.version` selects that snapshot;
+selection is exact, so an older date is available only when the Business
+advertises it in `supported_versions`.
 
-* **Non-breaking additions** do not increment the date.
-* **Breaking changes** require a `!` prefix in the PR title and a 2-week
-  advance notice to the community before merging.
-* Businesses that support older protocol versions **SHOULD** publish
-  version-specific profiles and advertise them via the `supported_versions`
-  field in their profile, enabling platforms to discover the exact capability
-  set for each supported version.
+Every UCP-defined service, capability, and extension in release `D` declares
+version `D`. Capabilities and extensions are selected by exact-version
+intersection. Third-party extensions and payment handlers version independently
+on their authors' own schedules.
 
-Capability schemas carry their version inline, which enables independent
-versioning — a discount extension can version on a different cadence than
-the checkout capability it extends.
-
-See [Versioning](../versioning.md) for the release branch process and the
-full breaking-change procedure.
+See [Protocol Version](../specification/overview.md#protocol-version) for version
+discovery, [Component Versioning and Release Snapshots](../specification/overview.md#component-versioning-and-release-snapshots)
+for the normative release contract, and [Versioning](../versioning.md) for the
+release-branch and backport process.

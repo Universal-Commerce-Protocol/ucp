@@ -29,29 +29,35 @@ UCP schemas use standard JSON Schema fields plus UCP-specific metadata:
 | `$id` | JSON Schema | Schema's canonical URI for `$ref` resolution | All schemas |
 | `title` | JSON Schema | Human-readable display name | All schemas |
 | `description` | JSON Schema | Schema purpose and usage | All schemas |
-| `name` | UCP | Reverse-domain identifier; doubles as registry key | Capabilities, services, handlers |
-| `version` | UCP | Entity version (`YYYY-MM-DD` format) | Capabilities, services, payment handlers |
+| `name` | UCP | Reverse-domain identifier; doubles as registry key | Capabilities, extensions, payment handlers |
+| `version` | UCP | Entity version (`YYYY-MM-DD` format) | Capabilities, extensions, payment handlers |
 | `id` | UCP | Instance identifier for multiple configurations | Payment handlers only |
+
+This table lists top-level metadata embedded in published schema documents;
+profile registry declarations are covered in the sections below.
 
 ### Why Self-Describing?
 
-Capability schemas **must be self-describing**: when a platform fetches a schema,
-it should determine exactly what capability and version it represents without
-cross-referencing other documents. This matters because:
+Capability and payment-handler schemas **must be self-describing**: when a
+Platform fetches a schema, it should determine exactly what entity and version
+it represents without cross-referencing other documents. This matters because:
 
-1. **Independent versioning**: Capabilities may version independently. The schema
-   must declare its version explicitly—you can't infer it from the URL.
+1. **Explicit version identity**: Capabilities, extensions, and payment handlers
+   declare their version explicitly; it cannot be inferred from the URL.
+   UCP-authored `dev.ucp.*` capabilities and extensions declare version `D` in
+   each UCP release `D`. Payment handlers publish on their authors' own schedules.
 
 2. **Validation**: Validators can cross-check that a capability declaration's
    `schema` URL points to a schema whose embedded `name`/`version` match the
    declaration. Mismatches are authoring errors caught at build time.
 
 3. **Developer experience**: When reading a schema file, integrators immediately
-   see what capability it defines without reverse-engineering the `$id` URL.
+   see what entity it defines without reverse-engineering the `$id` URL.
 
 4. **Compact namespace**: The `name` field provides a standardized reverse-domain
    identifier (e.g., `dev.ucp.shopping.checkout`) that's more compact and semantic
-   than the full `$id` URL.
+   than the full `$id` URL. Service registry keys provide the same stable
+   identity.
 
 ### Why Both `$id` and `name`?
 
@@ -77,9 +83,10 @@ breaking capability negotiation.
 The `version` field uses date-based versioning (`YYYY-MM-DD`) to enable:
 
 - **Capability negotiation**: Platforms request specific versions they support
-- **Breaking change management**: New versions get new dates; old versions remain
-  valid and resolvable
-- **Independent lifecycles**: Extensions can release on their own schedule
+- **Certified release identity**: Each date identifies the entity's complete,
+  published schema closure
+- **Independent author lifecycles**: Third-party extensions and payment handlers
+  can release on their authors' own schedules
 
 ## Schema Categories
 
@@ -99,7 +106,14 @@ Examples: `checkout.json`, `fulfillment.json`, `discount.json`, `order.json`
 Define transport bindings that appear in `ucp.services{}` registries. Each transport
 (REST, MCP, A2A, Embedded) is a separate entry.
 
-- **Top-level fields**: `$schema`, `$id`, `title`, `description`, `name`, `version`
+- **Registry identity**: Reverse-domain service name used as the registry key
+- **Entry fields**: `version`, `spec`, `schema`, `config`, and transport-specific fields
+- **Versioning**: Every service entry declares an explicit `version`; in release
+  `D` it is `D`. Because each entry pairs the service with one transport binding,
+  that service `version` repeats on each entry, and transport bindings have no
+  separate version. The referenced OpenAPI/OpenRPC artifact carries its own
+  `info.version` as artifact metadata, not a negotiated version. See
+  [Component Versioning and Release Snapshots](../specification/overview.md#component-versioning-and-release-snapshots)
 - **Variants**: `platform_schema`, `business_schema`
 - **Transport requirements** (additional beyond the common base):
     - Platform profile (`platform_schema`): REST/MCP/Embedded require `schema` (OpenAPI/OpenRPC URL). A2A has no additional requirements.
@@ -178,11 +192,11 @@ by `name` rather than arrays of objects with `name` fields.
 
 The same registry structure appears in three contexts with different field requirements:
 
-| Context | Location | Required Fields |
-| ------- | -------- | --------------- |
-| Platform Profile | Advertised URI | `version`, `spec`, `schema` |
-| Business Profile | `/.well-known/ucp` | `version`; may add `config` |
-| API Responses | Checkout/order payloads | `version` (+ `id` for handlers) |
+| Registry | Platform Profile | Business Profile | API Responses |
+| -------- | ---------------- | ---------------- | ------------- |
+| Services | `version`, `transport`, `spec`; `schema` for REST, MCP, and Embedded | `version`, `transport`; `endpoint` for REST, MCP, and A2A | `version`, `transport`; transport-specific `config` where applicable |
+| Capabilities/extensions | `version`, `spec`, `schema` | `version`, `schema`; may add `config` | `version` |
+| Payment handlers | `id`, `version`, `spec`, `schema` | `id`, `version`; may add `config` | `id`, `version` |
 
 ## The Entity Pattern
 
@@ -288,14 +302,30 @@ values documented in the `description`.
 
 ## Versioning Strategy
 
+### UCP Services (`dev.ucp.*`)
+
+In each UCP release `D`, every UCP-defined service entry declares version `D`.
+See [Service Schemas](#service-schemas) for how the flattened registry represents
+service versions and transport bindings.
+
 ### UCP Capabilities (`dev.ucp.*`)
 
-UCP-authored capabilities version with protocol releases by default. Individual
-capabilities **may** version independently when needed.
+In each UCP release `D`, every UCP-defined capability and extension declares
+version `D`, even when its schema did not change directly. Declaring version `D`
+does not replace negotiation: capabilities and extensions are still selected by
+exact-version intersection.
 
-### Vendor Capabilities (`com.{vendor}.*`)
+Profile selection, including profiles for older supported releases, is defined
+in [Protocol Version](../specification/overview.md#protocol-version).
 
-Capabilities outside `dev.ucp.*` version fully independently:
+### Third-Party Extensions and Payment Handlers
+
+Third-party extensions and payment handlers publish versions on their authors'
+own schedules. Their versions remain independent of the selected `ucp.version`
+and are not constrained to `D`. UCP's `payment_handler.json` defines the shared
+declaration shape, not a payment-handler implementation or its release cadence.
+
+Third-party extensions version independently:
 
 <!-- ucp:example skip reason="schema authoring example" -->
 ```json
@@ -307,7 +337,9 @@ Capabilities outside `dev.ucp.*` version fully independently:
 }
 ```
 
-Vendor schemas follow the same self-describing requirements.
+Extension version requirements belong in the extension schema document:
+`requires.protocol` constrains the selected `ucp.version`, and
+`requires.capabilities` constrains selected parent versions.
 
 ## Extensibility and Forward Compatibility
 
