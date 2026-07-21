@@ -89,6 +89,11 @@
         "code": -32003,
         "message": "Idempotency conflict",
         "data": { "$ref": "../../schemas/common/types/error_response.json" }
+      },
+      "rate_limit_exceeded": {
+        "code": -32004,
+        "message": "Rate limit exceeded",
+        "data": { "$ref": "../../schemas/common/types/error_response.json" }
       }
     }
   },
@@ -116,7 +121,8 @@
       "errors": [
         { "$ref": "#/components/errors/authentication_failed" },
         { "$ref": "#/components/errors/invalid_params" },
-        { "$ref": "#/components/errors/idempotency_conflict" }
+        { "$ref": "#/components/errors/idempotency_conflict" },
+        { "$ref": "#/components/errors/rate_limit_exceeded" }
       ]
     },
     {
@@ -142,7 +148,8 @@
       },
       "errors": [
         { "$ref": "#/components/errors/authentication_failed" },
-        { "$ref": "#/components/errors/not_found" }
+        { "$ref": "#/components/errors/not_found" },
+        { "$ref": "#/components/errors/rate_limit_exceeded" }
       ]
     },
     {
@@ -175,7 +182,8 @@
       "errors": [
         { "$ref": "#/components/errors/authentication_failed" },
         { "$ref": "#/components/errors/invalid_params" },
-        { "$ref": "#/components/errors/not_found" }
+        { "$ref": "#/components/errors/not_found" },
+        { "$ref": "#/components/errors/rate_limit_exceeded" }
       ]
     },
     {
@@ -218,7 +226,8 @@
         { "$ref": "#/components/errors/authentication_failed" },
         { "$ref": "#/components/errors/invalid_params" },
         { "$ref": "#/components/errors/not_found" },
-        { "$ref": "#/components/errors/idempotency_conflict" }
+        { "$ref": "#/components/errors/idempotency_conflict" },
+        { "$ref": "#/components/errors/rate_limit_exceeded" }
       ]
     },
     {
@@ -256,7 +265,8 @@
         { "$ref": "#/components/errors/authentication_failed" },
         { "$ref": "#/components/errors/invalid_params" },
         { "$ref": "#/components/errors/not_found" },
-        { "$ref": "#/components/errors/idempotency_conflict" }
+        { "$ref": "#/components/errors/idempotency_conflict" },
+        { "$ref": "#/components/errors/rate_limit_exceeded" }
       ]
     },
     {
@@ -282,7 +292,8 @@
       "errors": [
         { "$ref": "#/components/errors/authentication_failed" },
         { "$ref": "#/components/errors/invalid_params" },
-        { "$ref": "#/components/errors/idempotency_conflict" }
+        { "$ref": "#/components/errors/idempotency_conflict" },
+        { "$ref": "#/components/errors/rate_limit_exceeded" }
       ]
     },
     {
@@ -308,7 +319,8 @@
       },
       "errors": [
         { "$ref": "#/components/errors/authentication_failed" },
-        { "$ref": "#/components/errors/not_found" }
+        { "$ref": "#/components/errors/not_found" },
+        { "$ref": "#/components/errors/rate_limit_exceeded" }
       ]
     },
     {
@@ -340,7 +352,8 @@
       "errors": [
         { "$ref": "#/components/errors/authentication_failed" },
         { "$ref": "#/components/errors/invalid_params" },
-        { "$ref": "#/components/errors/not_found" }
+        { "$ref": "#/components/errors/not_found" },
+        { "$ref": "#/components/errors/rate_limit_exceeded" }
       ]
     },
     {
@@ -378,7 +391,8 @@
         { "$ref": "#/components/errors/authentication_failed" },
         { "$ref": "#/components/errors/invalid_params" },
         { "$ref": "#/components/errors/not_found" },
-        { "$ref": "#/components/errors/idempotency_conflict" }
+        { "$ref": "#/components/errors/idempotency_conflict" },
+        { "$ref": "#/components/errors/rate_limit_exceeded" }
       ]
     },
     {
@@ -403,7 +417,8 @@
       },
       "errors": [
         { "$ref": "#/components/errors/authentication_failed" },
-        { "$ref": "#/components/errors/invalid_params" }
+        { "$ref": "#/components/errors/invalid_params" },
+        { "$ref": "#/components/errors/rate_limit_exceeded" }
       ]
     },
     {
@@ -428,7 +443,8 @@
       },
       "errors": [
         { "$ref": "#/components/errors/authentication_failed" },
-        { "$ref": "#/components/errors/invalid_params" }
+        { "$ref": "#/components/errors/invalid_params" },
+        { "$ref": "#/components/errors/rate_limit_exceeded" }
       ]
     },
     {
@@ -456,7 +472,8 @@
       },
       "errors": [
         { "$ref": "#/components/errors/authentication_failed" },
-        { "$ref": "#/components/errors/not_found" }
+        { "$ref": "#/components/errors/not_found" },
+        { "$ref": "#/components/errors/rate_limit_exceeded" }
       ]
     },
     {
@@ -481,7 +498,8 @@
       },
       "errors": [
         { "$ref": "#/components/errors/authentication_failed" },
-        { "$ref": "#/components/errors/invalid_params" }
+        { "$ref": "#/components/errors/invalid_params" },
+        { "$ref": "#/components/errors/rate_limit_exceeded" }
       ]
     }
   ]
