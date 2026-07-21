@@ -142,6 +142,7 @@
       },
       "errors": [
         { "$ref": "#/components/errors/authentication_failed" },
+        { "$ref": "#/components/errors/invalid_params" },
         { "$ref": "#/components/errors/not_found" }
       ]
     },
@@ -174,7 +175,8 @@
       "errors": [
         { "$ref": "#/components/errors/authentication_failed" },
         { "$ref": "#/components/errors/invalid_params" },
-        { "$ref": "#/components/errors/not_found" }
+        { "$ref": "#/components/errors/not_found" },
+        { "$ref": "#/components/errors/idempotency_conflict" }
       ]
     },
     {
@@ -307,6 +309,7 @@
       },
       "errors": [
         { "$ref": "#/components/errors/authentication_failed" },
+        { "$ref": "#/components/errors/invalid_params" },
         { "$ref": "#/components/errors/not_found" }
       ]
     },
@@ -339,7 +342,8 @@
       "errors": [
         { "$ref": "#/components/errors/authentication_failed" },
         { "$ref": "#/components/errors/invalid_params" },
-        { "$ref": "#/components/errors/not_found" }
+        { "$ref": "#/components/errors/not_found" },
+        { "$ref": "#/components/errors/idempotency_conflict" }
       ]
     },
     {
@@ -455,6 +459,7 @@
       },
       "errors": [
         { "$ref": "#/components/errors/authentication_failed" },
+        { "$ref": "#/components/errors/invalid_params" },
         { "$ref": "#/components/errors/not_found" }
       ]
     },
