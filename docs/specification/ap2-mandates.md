@@ -241,9 +241,9 @@ credential: `<Issuer-signed JWT>~<Disclosure>~...~[<KB-JWT>]` per
 [RFC 9901](https://datatracker.ietf.org/doc/html/rfc9901). Presentations
 produced through delegation (for example by the
 [AP2 reference implementation](https://github.com/google-agentic-commerce/AP2))
-serialize a *chain* of such tokens joined by `~~`. The schema's `pattern`
-admits both forms; it checks syntactic form only — signature, key-binding,
-and disclosure verification are defined by the AP2 Protocol Specification.
+serialize a *chain* of such tokens joined by `~~`. The schema's `pattern` admits both forms — inside a chain each hop is itself a
+well-formed SD-JWT — and checks syntactic form only; signature, key-binding, and
+disclosure verification are defined by the AP2 Protocol Specification.
 
 ### Canonicalization
 

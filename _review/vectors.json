@@ -1,0 +1,47 @@
+{
+  "expect_accept": [
+    ["bare JWT (back-compat a)", "a.b.c"],
+    ["realistic bare JWT", "eyJhbGciOiJFUzI1NiJ9.eyJzdWIiOiIxIn0.sig_-123"],
+    ["RFC9901 no-KB zero disclosures", "a.b.c~"],
+    ["RFC9901 no-KB one disclosure", "a.b.c~d~"],
+    ["RFC9901 no-KB two disclosures", "a.b.c~d1~d2~"],
+    ["KB zero disclosures", "a.b.c~x.y.z"],
+    ["KB with disclosures", "a.b.c~d~x.y.z"],
+    ["chain: stripped no-KB seg + final tilde", "a.b.c~d~~e.f.g~"],
+    ["chain: bare-JWT seg + final tilde", "a.b.c~~e.f.g~"],
+    ["chain: seg w/ inline KB + final w/ KB", "a.b.c~d~x.y.z~~e.f.g~h~q.w.e"],
+    ["3-segment chain", "a.b.c~d~~e.f.g~h~~i.j.k~"],
+    ["chain: KB seg zero-disclosures", "a.b.c~x.y.z~~e.f.g~"]
+  ],
+  "expect_reject": [
+    ["empty string", ""],
+    ["lone tilde", "~"],
+    ["leading tilde", "~a.b.c~"],
+    ["whitespace inside", "a.b.c ~d~"],
+    ["trailing space", "a.b.c~ "],
+    ["standard b64 plus", "a.b.c~d+e~"],
+    ["standard b64 pad", "a.b.c~d=~"],
+    ["one-dot JWT", "a.b~d~"],
+    ["four-part JWT", "a.b.c.d~"],
+    ["empty disclosure J~~D~", "a.b.c~~~"],
+    ["trailing tilde after KB", "a.b.c~d~x.y.z~"],
+    ["trailing tilde after KB (0 discl)", "a.b.c~x.y.z~"],
+    ["chain sep then nothing", "a.b.c~~"],
+    ["unstripped seg (triple tilde)", "a.b.c~d~~~e.f.g~"],
+    ["chain trailing sep", "a.b.c~d~~e.f.g~~"],
+    ["disclosure after KB", "a.b.c~x.y.z~d~"],
+    ["empty header", ".b.c~"],
+    ["empty signature", "a.b.~"],
+    ["newline embedded", "a.b.c~d~\nx"]
+  ],
+  "questionable": [
+    ["empty payload bare (old pattern also accepted)", "a..b"],
+    ["empty payload SD-JWT", "a..b~d~"],
+    ["KB with empty payload", "a.b.c~d~x..z"],
+    ["disclosures w/o terminator (old pattern accepted)", "a.b.c~d"],
+    ["multi disclosures w/o terminator", "a.b.c~d1~d2"],
+    ["chain final = bare JWT", "a.b.c~~e.f.g"],
+    ["chain final = J~D no terminator", "a.b.c~~e.f.g~d"],
+    ["bare JWT then chain of bare JWTs", "a.b.c~~e.f.g~~i.j.k"]
+  ]
+}
