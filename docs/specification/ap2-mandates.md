@@ -236,6 +236,15 @@ in UCP requests and responses. The mandate credential structure (claims,
 selective disclosure, key binding) is defined by the
 [AP2 Protocol Specification](https://ap2-protocol.org/specification).
 
+**Wire format:** `ap2.checkout_mandate` carries a compact-serialized SD-JWT
+credential: `<Issuer-signed JWT>~<Disclosure>~...~[<KB-JWT>]` per
+[RFC 9901](https://datatracker.ietf.org/doc/html/rfc9901). Presentations
+produced through delegation (for example by the
+[AP2 reference implementation](https://github.com/google-agentic-commerce/AP2))
+serialize a *chain* of such tokens joined by `~~`. The schema's `pattern`
+admits both forms; it checks syntactic form only — signature, key-binding,
+and disclosure verification are defined by the AP2 Protocol Specification.
+
 ### Canonicalization
 
 All JSON payloads **MUST** be canonicalized using **JSON Canonicalization

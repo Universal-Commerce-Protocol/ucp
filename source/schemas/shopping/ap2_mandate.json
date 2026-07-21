@@ -13,9 +13,9 @@
     },
     "checkout_mandate": {
       "title": "Checkout Mandate",
-      "description": "SD-JWT+kb credential in `ap2.checkout_mandate`. Proving user authorization for the checkout. Contains the full checkout including `ap2.merchant_authorization`.",
+      "description": "SD-JWT credential in `ap2.checkout_mandate`, proving user authorization for the checkout. Contains the full checkout including `ap2.merchant_authorization`. Accepted serializations (syntactic form only; cryptographic verification is separate): a compact SD-JWT with or without a trailing Key Binding JWT (RFC 9901 `<JWT>~<Disclosure>~...~[<KB-JWT>]`), or a delegated SD-JWT chain of such tokens joined by `~~` as emitted by the AP2 reference implementation.",
       "type": "string",
-      "pattern": "^[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]*\\.[A-Za-z0-9_-]+(~[A-Za-z0-9_-]+)*$"
+      "pattern": "^([A-Za-z0-9_-]+\\.[A-Za-z0-9_-]*\\.[A-Za-z0-9_-]+(~[A-Za-z0-9_-]+)*(~[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]*\\.[A-Za-z0-9_-]+)?~~)*[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]*\\.[A-Za-z0-9_-]+(~[A-Za-z0-9_-]+)*(~|~[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]*\\.[A-Za-z0-9_-]+)?$"
     },
     "ap2_with_merchant_authorization": {
       "type": "object",
