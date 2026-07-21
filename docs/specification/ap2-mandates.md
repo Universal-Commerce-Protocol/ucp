@@ -129,17 +129,52 @@ If a public key cannot be resolved, or if the signature is invalid, the business
 
 ## Cryptographic Requirements
 
-This extension uses the cryptographic primitives defined in the
-[Message Signatures](signatures.md) specification:
+This extension reuses the JWK format, key discovery, and key rotation
+mechanisms defined in the [Message Signatures](signatures.md) specification.
+AP2 defines the signed object and its accepted JWS algorithms separately:
+
+| JWS `alg` | JWK `kty` / `crv` | Hash |
+| :-------- | :---------------- | :--- |
+| `ES256` | `EC` / `P-256` | SHA-256 |
+| `ES384` | `EC` / `P-384` | SHA-384 |
+| `ES512` | `EC` / `P-521` | SHA-512 |
+
+This algorithm set applies only to AP2 JWS objects. In particular, `ES512`
+support here does not add P-521 to the UCP HTTP Message Signatures algorithm
+table or change its universal `ES256` implementation baseline.
 
 * **Algorithm:** per AP2's Checkout JWT signing rule — AP2 v0.2 requires
-  ECDSA (`ES256`/`ES384`/`ES512`); see the note below.
+  ECDSA (`ES256`/`ES384`/`ES512`); see the note below and
+  [RFC 7518 Section 3.4](https://datatracker.ietf.org/doc/html/rfc7518#section-3.4).
 * **Canonicalization:** JCS ([RFC 8785](https://datatracker.ietf.org/doc/html/rfc8785))
 * **Key Format:** JWK ([RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517))
 * **Key Discovery:** `keys[]` in `/.well-known/ucp` (see
   [Key Discovery](overview.md#key-discovery))
 
 See [Message Signatures](signatures.md) for key format and rotation.
+
+When a verifier selects a key, it **MUST** ensure that the protected JWS
+`alg` is compatible with the key's curve according to the table above. This
+binding follows [RFC 8725 Section 3.1](https://datatracker.ietf.org/doc/html/rfc8725#section-3.1).
+If the JWK includes its optional `alg` member, that value **MUST** also match
+the protected JWS `alg`. A mismatch makes the AP2 signature invalid.
+
+The profile JWK vocabulary is open, so a P-521 key used for an AP2 `ES512`
+signature can be published in the same `keys[]` array used for other UCP
+signing keys:
+
+<!-- ucp:example schema=profile extract=$ target=$.keys[0] -->
+```json
+{
+  "kid": "ap2-es512-2026",
+  "kty": "EC",
+  "crv": "P-521",
+  "x": "ARG3XiQ6SghrNHZSoDSsD-IoCNbhIpNaIvEDBgSSGi4QfON2O80u0QrXbKiy3Bj9vEgzjWy7_ruLCTvWhiOrIvah",
+  "y": "ACG_vmqFWdLoa5eDAWhr7wN-ZPAhGJg43EUO_Qsmv7bK6PVNbKqXogTsCpM00YelW0Q6lN6izF8NoVnOlV_ZJLJM",
+  "use": "sig",
+  "alg": "ES512"
+}
+```
 
 > **Note (algorithm requirement).** AP2 binds the Payment Mandate to the
 > Checkout via `hash(checkout_jwt)`; the underlying security property is
@@ -324,8 +359,9 @@ verify_merchant_authorization(checkout, merchant_profile):
     // Reconstruct signing input (header + payload)
     signing_input = encoded_header + "." + base64url_encode(canonical_bytes)
 
-    // Get business's public key and verify
+    // Get business's public key, bind the algorithm to its curve, and verify
     public_key = get_key_by_kid(merchant_profile.keys, header.kid)
+    assert key_supports_jws_algorithm(public_key, header.alg)
     return verify(encoded_signature, signing_input, public_key, header.alg)
 ```
 

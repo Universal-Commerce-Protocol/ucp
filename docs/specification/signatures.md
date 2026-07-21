@@ -119,8 +119,9 @@ additive option that unlocks Web Bot Auth (WBA) interop.
   the universal UCP baseline and also a valid Web Bot Auth algorithm.
   (WBA's algorithm rules and the current deployment landscape are in
   [WBA Interop](#wba-interop).)
-* **AP2 mandate signing follows AP2's own algorithm rule** — see
-  [AP2 Mandates](ap2-mandates.md).
+* **AP2 mandate signing follows AP2's own JWS algorithm rule** — see
+  [AP2 Mandates](ap2-mandates.md). Its accepted algorithms do not extend the
+  HTTP Message Signatures implementation requirements above.
 * The algorithm is derived from the key's `kty`/`crv` field in the JWK;
   `alg` is **NOT** included in `Signature-Input` parameters.
 
