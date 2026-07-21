@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/value_constraint.json",
+  "title": "Value Constraint",
+  "description": "Bounded JSON Schema fragment applied to a local target value.",
+  "type": "object",
+  "properties": {
+    "enum": {
+      "type": "array",
+      "uniqueItems": true,
+      "description": "Allowed values for the local target. Evaluated with the same semantics as JSON Schema `enum`."
+    },
+    "const": {
+      "description": "The required value for the local target. Evaluated with the same semantics as JSON Schema `const`."
+    }
+  },
+  "anyOf": [
+    { "required": ["enum"] },
+    { "required": ["const"] }
+  ]
+}

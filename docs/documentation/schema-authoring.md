@@ -423,65 +423,89 @@ typos in core metadata like the `ucp` block).
 ### Constraint Objects
 
 UCP uses `constraints` objects when a declaration or response needs to narrow
-what is acceptable without changing the base payload schema. A constraint is a
-runtime requirement attached to a concrete context, not a global schema change.
+what is acceptable without changing the base payload schema. Constraints are sparse runtime requirements on an already-typed target.
+UCP defines three composable primitive constraints:
 
-All new constraint objects **SHOULD** extend
-[`constraint.json`](site:{{ ucp_version }}/schemas/shopping/types/constraint.json):
+| Primitive | Target | Built-in vocabulary |
+| :-------- | :----- | :------------------ |
+| [`ObjectConstraint`](site:{{ ucp_version }}/schemas/shopping/types/object_constraint.json) | Object | `required` |
+| [`ValueConstraint`](site:{{ ucp_version }}/schemas/shopping/types/value_constraint.json) | Property value | `enum`, `const` |
+| [`TypeConstraint`](site:{{ ucp_version }}/schemas/shopping/types/type_constraint.json) | Typed branch | `type`, optional `constraints` |
 
-- `required_fields` names fields on the local constrained object that must be
-  present in an acceptable instance for this context.
-- The schema property that embeds the constraint defines the target object. For
-  example, `available_instruments[].constraints` targets the payment instrument,
-  while `constraints.billing_address` targets that instrument's billing address.
-- Domain-specific constraint keys remain sibling properties. For example, the
-  base payment instrument can require `billing_address` and add a nested
-  `billing_address` constraint describing which address fields are needed.
-- Reusable base schemas **SHOULD NOT** close `required_fields` with enums when
-  the target object can be extended. Concrete resolved schemas MAY narrow
-  `required_fields` when they own the complete target vocabulary, while leaving
-  the object open to future domain-specific keys.
+A concrete Object Constraint **MUST** extend `object_constraint.json` and define
+every supported key. The key's schema determines its meaning:
 
-Prefer field-level constraints over ad-hoc booleans. For example, prefer
-`required_fields: ["billing_address"]` plus a nested address constraint over
-new booleans such as `requires_billing_address` or
-`requires_billing_postal_code`.
+- `ObjectConstraint` — recursively constrains a same-named object property.
+- `ValueConstraint` — constrains a same-named property's value.
+- `TypeConstraint` (or an array of them) — selects a typed branch.
+- Any other schema — defines a domain-specific literal operator whose semantics
+  the owning specification must document.
+
+Every name in `required` **MUST** be a property of the constrained object. The
+Object Constraint stays open so handler and extension schemas can compose with
+`allOf`; after negotiation, a key not defined by the concrete constraint schema
+is an authoring or compatibility error.
+
+This example defines all four key forms:
 
 <!-- ucp:example skip reason="schema authoring example" -->
 ```json
 {
-  "type": "card",
-  "constraints": {
-    "brands": ["visa", "mastercard"],
-    "required_fields": ["billing_address"],
-    "billing_address": {
-      "required_fields": ["postal_code", "address_country"]
+  "$defs": {
+    "constraint": {
+      "allOf": [
+        { "$ref": "object_constraint.json" },
+        {
+          "properties": {
+            "billing_address": {
+              "allOf": [
+                { "$ref": "object_constraint.json" },
+                {
+                  "properties": {
+                    "address_country": { "$ref": "value_constraint.json" }
+                  }
+                }
+              ]
+            },
+            "credentials": {
+              "type": "array",
+              "items": { "$ref": "type_constraint.json" }
+            },
+            "brands": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          }
+        }
+      ]
     }
   }
 }
 ```
 
-For arrays of constraints over a typed family, extend
-[`type_constraint.json`](site:{{ ucp_version }}/schemas/shopping/types/type_constraint.json). Each
-known branch should publish a `$defs/constraint` entry with a `type` discriminator
-and, when applicable, a narrowed `constraints` body. The parent schema can then
-validate UCP-defined branches while still leaving an extension point for
-handler-specific branches.
+Its wire value remains local to the constrained fields:
 
 <!-- ucp:example skip reason="schema authoring example" -->
 ```json
 {
-  "credentials": [
-    { "type": "token" },
-    {
-      "type": "com.example.wallet_token",
-      "constraints": {
-        "required_fields": ["assurance_level"]
-      }
-    }
-  ]
+  "required": ["billing_address"],
+  "billing_address": {
+    "required": ["address_country"],
+    "address_country": { "enum": ["US", "CA"] }
+  },
+  "credentials": [{ "type": "token" }],
+  "brands": ["visa", "mastercard"]
 }
 ```
+
+`ValueConstraint` is deliberately closed: unsupported assertions cannot be
+ignored safely. `ObjectConstraint` and `TypeConstraint.type` are extension
+points. To type-check a declaration, resolve its target and concrete constraint
+schemas, validate each key and value, and check `required` names against the
+target. Object and Value Constraints can compile into a JSON Schema overlay;
+literal domain operators are only type-checked, and their owner enforces their
+meaning. Declared constraints are an upfront minimum; dynamic requirements still
+use recoverable errors and [`message_error.path`](site:{{ ucp_version }}/schemas/common/types/message_error.json).
 
 ### Property-Count Constraints (`minProperties` / `maxProperties`)
 

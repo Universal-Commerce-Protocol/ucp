@@ -9,27 +9,20 @@
       "type": "object",
       "properties": {
         "constraints": {
-          "allOf": [
-            { "$ref": "constraint.json" },
-            {
-              "type": "object",
-              "properties": {
-                "billing_address": {
-                  "$ref": "constraint.json",
-                  "description": "Local constraint on the instrument's `billing_address` field."
-                },
-                "credentials": {
-                  "type": "array",
-                  "items": { "$ref": "type_constraint.json" },
-                  "uniqueItems": true,
-                  "minItems": 1,
-                  "description": "Credential specific constraints accepted for the payment instrument branch selected by `type`. Concrete instrument schemas can narrow known credential entries while preserving handler-extended credential entries."
-                }
-              }
+          "type": "object",
+          "properties": {
+            "billing_address": {
+              "$ref": "object_constraint.json",
+              "description": "Local constraint on the instrument's `billing_address` field."
+            },
+            "credentials": {
+              "type": "array",
+              "items": { "$ref": "type_constraint.json" },
+              "uniqueItems": true,
+              "description": "Credential specific constraints accepted for the payment instrument branch selected by `type`. Concrete instrument schemas can narrow known credential entries while preserving handler-extended credential entries."
             }
-          ],
-          "description": "Constraints on this instrument type. Base payment instrument constraints can require and describe `billing_address` and `credentials`; concrete instrument schemas SHOULD add instrument-specific constraint keys while remaining open to extensions.",
-          "minProperties": 1
+          },
+          "description": "Constraints on this instrument type. Base payment instrument constraints can require and describe `billing_address` and `credentials`; concrete instrument schemas SHOULD add instrument-specific constraint keys while remaining open to extensions."
         }
       }
     }
