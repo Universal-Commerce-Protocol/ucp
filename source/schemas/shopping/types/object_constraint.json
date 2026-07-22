@@ -2,14 +2,20 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/shopping/types/object_constraint.json",
   "title": "Object Constraint",
-  "description": "Constraint applied to a local object target. `required` names target properties that MUST be present in an acceptable instance. Additional keys are nested object constraints, value constraints, typed constraints, or domain-specific operators defined by the concrete constraint schema.",
+  "description": "Field requirements over a local object target. `required` names properties that MUST be present; every other key is the name of a target property whose nested constraint follows — an Object Constraint (recurse into a sub-object) or a Value Constraint (restrict a value). A consumer compiles it to a JSON Schema overlay by taking `required` and moving each field key under `properties`. Stays open so extensions can add fields. `required` is reserved.",
   "type": "object",
   "properties": {
     "required": {
       "type": "array",
       "items": { "type": "string" },
       "uniqueItems": true,
-      "description": "Names of properties on the local constrained object that MUST be present in an acceptable instance. Evaluated with the same semantics as JSON Schema `required`. The base accepts any string so extension schemas can add fields without changing this schema."
+      "description": "Names of properties on the target object that MUST be present. Same semantics as JSON Schema `required`. Open string list so extension schemas can add fields."
     }
+  },
+  "additionalProperties": {
+    "anyOf": [
+      { "$ref": "#" },
+      { "$ref": "value_constraint.json" }
+    ]
   }
 }

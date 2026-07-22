@@ -122,7 +122,7 @@ The handler's specification (referenced via the `spec` field) documents the
           "available_instruments": [
             {
               "type": "card",
-              "constraints": {
+              "options": {
                 "brands": ["visa", "mastercard", "amex"]
               }
             }
@@ -157,7 +157,7 @@ The response config includes runtime information about what's available for this
   "available_instruments": [
     {
       "type": "card",
-      "constraints": {
+      "options": {
         "brands": ["visa", "mastercard", "amex"]
       }
     }
@@ -205,7 +205,7 @@ business's configuration.
           "id": "processor_tokenizer",
           "version": "{{ ucp_version }}",
           "available_instruments": [
-            {"type": "card", "constraints": {"brands": ["visa", "mastercard", "amex"]}}
+            {"type": "card", "options": {"brands": ["visa", "mastercard", "amex"]}}
           ],
           "config": {
             "environment": "production",

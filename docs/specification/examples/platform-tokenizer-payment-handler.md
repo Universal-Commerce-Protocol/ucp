@@ -207,7 +207,7 @@ credential type (e.g., PCI DSS for cards).
           "available_instruments": [
             {
               "type": "card",
-              "constraints": {
+              "options": {
                 "brands": ["visa", "mastercard"]
               }
             }
@@ -243,7 +243,7 @@ The response config includes runtime token lifecycle information.
   "available_instruments": [
     {
       "type": "card",
-      "constraints": {
+      "options": {
         "brands": ["visa", "mastercard"]
       }
     }
@@ -341,7 +341,7 @@ registry using `platform_config`.
           "available_instruments": [
             {
               "type": "card",
-              "constraints": {
+              "options": {
                 "brands": ["visa", "mastercard", "amex", "discover"]
               }
             }
