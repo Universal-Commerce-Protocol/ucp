@@ -2179,15 +2179,30 @@ The warning is type-agnostic: the Platform shows its content without
 understanding the policy behind it, so one channel handles everything from
 final-sale terms to regulatory notices.
 
-A Platform pairs a disclosure with its policy when the warning's `code` equals
-the policy's `type` and its `path` targets the same item. For example, an
-engraved line item is final sale: the Business scopes a refund policy to that
-line — the `description` carries the fact — and pairs it with a disclosure
-warning on the same line, so the term is shown where the Buyer sees the item.
+A disclosure pairs with the policy that **governs** its `path` node — the one
+[Precedence](#precedence) selects when several policies of the same `type` cover
+that node. Precedence yields at most one such policy, so the pairing is
+unambiguous.
+
+Two authoring rules apply:
+
+1. A disclosure's content **MUST** agree with the policy it pairs with — the
+   notice and the policy are two statements about the same node.
+2. A disclosure **SHOULD** resolve to a governing policy. When its `code` names
+   a `type` no policy covers at that node, the notice still displays, but
+   nothing structured stands behind it.
+
+For example, an engraved line item is final sale. A response-wide refund policy
+applies to the whole cart, but the item-scoped final-sale policy governs line 2,
+so the disclosure on that line pairs with it — notice and policy agree:
 
 <!-- ucp:example schema=shopping/checkout target=$.policies -->
 ```json
 [
+  {
+    "type": "dev.ucp.shopping.policy.refund",
+    "description": { "plain": "Free 30-day returns from delivery." }
+  },
   {
     "type": "dev.ucp.shopping.policy.refund",
     "description": { "plain": "This engraved item is final sale and cannot be returned." },
