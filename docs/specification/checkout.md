@@ -95,8 +95,8 @@ platform receives messages indicating what's needed to progress.
 * **`incomplete`**: Checkout session is missing required information or has
     issues that need resolution. Platform should inspect `messages` array for
     context and should attempt to resolve via Update Checkout. When an active
-    extension surfaces a required Action, that instance may identify work
-    the Business needs completed before it can return `ready_for_complete`.
+    extension surfaces an Action, that instance may identify work the Business
+    needs completed before it can return `ready_for_complete`.
 
 * **`requires_escalation`**: Checkout session requires information that
     cannot be provided via API, or buyer input is required. Platform should
@@ -105,20 +105,19 @@ platform receives messages indicating what's needed to progress.
     Then hand off to buyer via `continue_url`.
 
 * **`ready_for_complete`**: Checkout session has all necessary information
-    and platform can finalize programmatically. No required Action remains
-    outstanding. Platform can call Complete Checkout.
+    and platform can finalize programmatically. No Action remains outstanding.
+    Platform can call Complete Checkout.
 
 * **`complete_in_progress`**: The Complete Checkout request was accepted and the
     Business is processing the order. The response **MUST NOT** contain `order`.
-    A required Action can be outstanding in this state. See [Actions](#actions)
-    for how the Platform proceeds.
+    An Action can be outstanding in this state. See [Actions](#actions) for how
+    the Platform proceeds.
 
-* **`completed`**: Order placed successfully. `order` is present and no required
-    Action remains outstanding.
+* **`completed`**: Order placed successfully. `order` is present and no Action
+    remains outstanding.
 
 * **`canceled`**: Checkout session is invalid or expired. Platform should
-    start a new checkout session if needed. No required Action remains
-    outstanding.
+    start a new checkout session if needed. No Action remains outstanding.
 
 ### Actions
 
@@ -128,55 +127,63 @@ response-only `actions` map. The common rules are defined in
 [Overview — Actions](overview.md#actions); this section states only how the
 checkout status lifecycle interprets them.
 [Status Values](#status-values) is the authoritative home for the status
-invariants governing outstanding required Actions.
+invariants governing outstanding Actions.
 
-A `required: true` instance gates the effect specified for its Action type
-within the containing status. While `incomplete`, a required Action identifies
-work the Business needs completed before it can return `ready_for_complete`.
-After processing the Action according to its Action type's contract, the
-Platform **SHOULD** use [Get Checkout](#get-checkout) or a subsequent
-[Update Checkout](#update-checkout) response to obtain the latest Checkout.
+Every Action gates the effect specified for its Action type. While `incomplete`,
+an Action may identify work the Business needs completed before it can return
+`ready_for_complete`. After processing the Action according to its Action type's
+contract, the Platform **SHOULD** use [Get Checkout](#get-checkout) or, outside
+`complete_in_progress`, a subsequent [Update Checkout](#update-checkout)
+response to obtain the latest Checkout.
 
-`required` does not select the Checkout status or report the outcome of a
-particular operation. The same Action can remain `required: true` while a
-recoverable error Message reports that it prevented one attempted effect. In
-that case, the Business returns the current Checkout and sets the Message's
-`path` to the exact Action occurrence, as defined in
-[Overview — Actions](overview.md#actions). The Action remains required while its
-defined gate persists; the response-scoped error does not turn it into a lock on
-unrelated Checkout operations.
+An Action does not select the Checkout status, and a Message's type or severity
+does not determine whether the Action gates its Action-defined effect. A Message
+can report the outcome of a particular operation. An info or warning Message can
+identify an outstanding Action without reporting failure. A recoverable error
+Message can identify an Action to report that the requested effect was not
+applied because of it. In that case, the Business returns the current Checkout
+and sets the Message's `path` to the exact Action occurrence, as defined in
+[Overview — Actions](overview.md#actions). The Message does not turn the Action
+into a lock on unrelated Checkout operations.
 
-If a required Action prevents Complete Checkout from being accepted, the
-Business **MUST** return the current Checkout with `status: incomplete` and a
-recoverable error Message whose `path` selects that exact Action occurrence.
-Processing the Action does not automatically retry the rejected operation. If
-the Platform submits Complete Checkout again, it is a new operation under the
-existing idempotency rules.
+If an Action prevents Complete Checkout from being accepted, the Business
+**MUST** return the current Checkout with `status: incomplete` and an error
+Message with `severity: "recoverable"` whose `path` selects that exact Action
+occurrence. Processing the Action does not retry the rejected Complete Checkout
+request. A later Complete Checkout request is a new operation under the existing
+idempotency rules.
 
 #### Accepted completion
 
 `complete_in_progress` means Complete Checkout was accepted. The Checkout state
-reported by the Business is authoritative.
+reported by the Business is authoritative. While a Checkout has this status, the
+following operation contract applies:
 
-When a `complete_in_progress` Checkout includes a required Action, the Platform
-processes it according to its contract. After the Action reports completion,
-the Business might need time to receive and apply the result. The Action
-completion signal is not authoritative for Checkout state. The Platform
-**MUST** use [Get Checkout](#get-checkout) to confirm that the Business
-reflected the result, for example by removing the Action or changing the
-Checkout status. When a `complete_in_progress` Checkout contains no required
-Action, the Platform **SHOULD** use Get Checkout to obtain the latest state.
-While the Checkout remains `complete_in_progress`, with or without an Action,
-the Platform **MAY** repeat Get Checkout with bounded backoff set by the Action
-contract or Platform policy. The Platform **MUST** stop repeated Get Checkout
-requests at `expires_at`.
+| Operation | Contract |
+| :-------- | :------- |
+| Get Checkout | The Platform **MAY** invoke Get Checkout; the Business's response is authoritative. The Platform **MAY** repeat Get Checkout with bounded backoff set by the Action contract or Platform policy, and **MUST** stop repeated requests at `expires_at`. |
+| Update Checkout | The Platform **MUST NOT** start a new Update Checkout operation. Duplicate requests remain subject to [Replay Protection](signatures.md#replay-protection). If the Business receives a new Update Checkout request, it **MUST** leave the Checkout unchanged and return the current Checkout with a recoverable error Message. |
+| Complete Checkout | The Platform **MUST NOT** start a new Complete Checkout operation during `complete_in_progress`. See [Complete Checkout](#complete-checkout) for the narrow lost-response recovery retry. |
+| Cancel Checkout | The Platform **MUST** follow the fallback, handoff, and cancellation race rules below before attempting Cancel Checkout. |
+
+When a `complete_in_progress` Checkout includes an Action, the Platform
+processes it according to its Action-type contract. When it contains no Action,
+the Platform **SHOULD** use Get Checkout to observe Business processing.
+
+Because Update Checkout is unavailable after Complete Checkout is accepted, the
+Business **MUST** surface any Action that requires input through Update Checkout
+before accepting Complete Checkout.
+
+After an Action's extension-defined processing completes, the Business might
+need time to receive and apply its result. The Action completion signal is not
+authoritative for Checkout state. The Platform **MUST** use
+[Get Checkout](#get-checkout) to confirm that the Business reflected the result,
+for example by removing the Action or changing the Checkout status.
 
 If the same Action key and `id` remain, the Platform **MUST NOT** process it
 again unless its contract explicitly permits retry and every safe-retry
 condition holds. A replacement with a fresh `id` is new work. If the Action
-disappears, that Action is no longer outstanding. If the Checkout remains
-`complete_in_progress`, the Platform **MAY** continue Get Checkout under the
-same backoff and expiry rules.
+disappears, that Action is no longer outstanding.
 
 If the Platform cannot complete an Action, or the Business does not update the
 Checkout within a timeout set by the Action contract or Platform policy before
@@ -407,7 +414,7 @@ A claim is resolved when it is either **verified** or **rescinded**:
 
 * **Verified**: The Business confirms the claim against a proof. UCP does not
   prescribe how verification occurs — proof may come from the payment
-  credential, a required Action surfaced by a negotiated extension, or any
+  credential, an Action surfaced by a negotiated extension, or any
   other mechanism negotiated between Platform and Business.
 * **Rescinded**: The Platform removes the claim from `context.eligibility`
   before completion (e.g., buyer changes payment method, withdraws a
@@ -420,8 +427,8 @@ access to restricted products.
 **When verification fails:**
 
 The Business **MUST** return an error in `messages` with
-`code: "eligibility_invalid"` and `severity: "recoverable"`. When a required
-Action prevents the requested effect, the Business **MUST** set that error
+`code: "eligibility_invalid"` and `severity: "recoverable"`. When an Action
+prevents the requested effect, the Business **MUST** set that error
 Message's `path` to select the exact Action occurrence as specified in
 [Actions](#actions). Otherwise, the Business **SHOULD** use `path` to identify
 which specific claim(s) could not be verified. Any Action or discount state
@@ -437,7 +444,7 @@ This example is illustrative. It uses a negotiated vendor extension,
 `com.example.identity.student_verification`, that declares a single Action type
 under a key of the same name in `actions` and defines the instance `config` and
 verification transport. It composes that extension with `context.eligibility`, a
-provisional [Discount](discount.md), a required [Action](#actions), and
+provisional [Discount](discount.md), an [Action](#actions), and
 `messages`.
 
 The provisional discount fields (`provisional`, `eligibility`) belong to the
@@ -448,7 +455,7 @@ that extension is active for the checkout.
 The Platform submits `org.example.student` in `context.eligibility` on Create
 Checkout. The Business accepts the claim and, with the Discount extension
 active, returns a provisional discount, an explanatory `info` message, and a
-required verification Action. The claim is unresolved, so the checkout stays
+verification Action. The claim is unresolved, so the checkout stays
 `incomplete`:
 
 <!-- ucp:example schema=shopping/checkout op=read -->
@@ -476,7 +483,6 @@ required verification Action. The claim is unresolved, so the checkout stays
     "com.example.identity.student_verification": [
       {
         "id": "verify-student-1",
-        "required": true,
         "config": {
           "verification_url": "https://business.example.com/verify/abc"
         }
@@ -784,7 +790,10 @@ time of checkout session creation.
 Performs a full replacement of the checkout resource.
 The platform is **REQUIRED** to send the entire checkout resource containing any
 data updates to write-only data fields. The resource provided in the request
-will replace the existing checkout session state on the business side.
+will replace the existing checkout session state on the business side. This
+general replacement rule does not apply during `complete_in_progress` because
+Update Checkout is not permitted; see
+[Accepted completion](#accepted-completion) for the frozen operation contract.
 
 {{ method_fields('update_checkout', 'rest.openapi.json', 'checkout') }}
 
@@ -814,9 +823,10 @@ processing. If the Platform does not receive a response to Complete Checkout, it
 **SHOULD** use Get Checkout with bounded backoff to obtain the current state and
 **MUST** stop at `expires_at`. Only if Get Checkout still does not establish
 whether the Business processed the original request, the Platform **MAY** submit
-the same Complete Checkout request again with the same idempotency key. The
-Platform **MUST NOT** use a new idempotency key for that retry. A genuinely new
-Complete Checkout operation after the Checkout returns to `ready_for_complete`
+the identical original Complete Checkout request again with the same idempotency
+key. The Platform **MUST NOT** use a new idempotency key for that retry.
+A genuinely new Complete Checkout operation after the Checkout returns to
+`ready_for_complete`
 **MUST** use a fresh idempotency key, even if the payload is unchanged.
 
 At the time of order persistence, fields from `Checkout` **MAY** be used

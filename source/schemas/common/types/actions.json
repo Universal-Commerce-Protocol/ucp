@@ -6,22 +6,14 @@
   "$defs": {
     "instance": {
       "type": "object",
-      "description": "Common fields for one outstanding Action instance are id, required, and optional config. The extension declaring the Action type defines type-specific processing data under config. Additional properties are permitted for forward compatibility.",
-      "required": [
-        "id",
-        "required"
-      ],
+      "description": "Common fields for one outstanding Action instance are id and optional config. The extension declaring the Action type defines type-specific processing data under config. Additional properties are permitted for forward compatibility.",
+      "required": ["id"],
       "additionalProperties": true,
       "properties": {
         "id": {
           "type": "string",
           "minLength": 1,
           "description": "Identifier for this Action instance.",
-          "ucp_request": "omit"
-        },
-        "required": {
-          "type": "boolean",
-          "description": "Whether this Action instance gates the parent-specific effect specified for its Action type.",
           "ucp_request": "omit"
         },
         "config": {

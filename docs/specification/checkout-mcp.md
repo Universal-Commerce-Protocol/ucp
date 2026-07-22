@@ -388,6 +388,12 @@ Maps to the [Get Checkout](checkout.md#get-checkout) operation.
 
 Maps to the [Update Checkout](checkout.md#update-checkout) operation.
 
+The Platform **MUST NOT** start a new `update_checkout` operation while the
+Checkout is `complete_in_progress`. Duplicate requests remain subject to
+[Replay Protection](signatures.md#replay-protection). If the Business receives a
+new `update_checkout` request in that state, it **MUST** leave the Checkout
+unchanged and return the current Checkout with a recoverable error Message.
+
 #### Input Schema
 
 * `id` (String): **Required**. The ID of the checkout session to update.

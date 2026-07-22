@@ -34,15 +34,16 @@ Schema notes:
 ## Actions
 
 An Action is an outstanding unit of extension-defined work for a Platform to
-process. Actions appear only in responses, under the `actions` map. The common
+process. Its presence means the effect defined by its Action type is gated.
+Actions appear only in responses, under the `actions` map. The common
 fields identify the work but do not define how to process it; the active
 extension does.
 
 This section defines the common Actions shape and the invariants every adopting
 response shares. The shape is reusable, but a capability supports Actions only
 when its specification explicitly adopts it and defines the parent-specific
-behavior: where Actions appear, how the parent interprets `required` and
-Messages, and how a later response reflects processing. Schema composition alone
+behavior: where Actions appear, the effect each Action type gates, how Messages
+apply, and how a later response reflects processing. Schema composition alone
 does not establish support. Cart, Checkout, and Catalog adopt this shape; see
 [Cart — Actions](cart.md#actions),
 [Checkout — Actions](checkout.md#actions), and
@@ -69,7 +70,6 @@ explanatory Message (an illustrative, partial fragment):
     "com.example.identity.student_verification": [
       {
         "id": "verify-student-1",
-        "required": true,
         "config": {
           "verification_url": "https://business.example.com/verify/abc"
         }
@@ -102,24 +102,25 @@ follow those existing rules and can return the original cached response,
 including its `actions` (see
 [Message Signatures — Replay Protection](signatures.md#replay-protection)).
 
-An Action's `required` value and an operation-specific outcome are orthogonal.
-The same Action can remain required for its Action-defined effect and be the
-reason a particular attempted effect was not applied. A Business **MAY** include
-an info or warning Message whose `path` selects an Action occurrence to explain
-the current response without reporting an operation failure. For a
-state-changing operation whose requested effect was gated, the Business
-**MUST** instead return the current resource with a `recoverable` error Message
-whose `path` selects the exact Action occurrence. No Action-specific Message
-type or separate `blocking` Action severity is defined.
+An Action's gate and an operation-specific outcome are orthogonal. Neither a
+parent status nor a Message's type or severity determines whether an Action
+gates its Action-defined effect. A Message explains the response or reports the
+outcome of a particular requested effect. A Business **MAY** include an info or
+warning Message whose `path` selects an outstanding Action to explain the
+current response without reporting an operation failure. For a state-changing
+operation whose requested effect was not applied because of an Action, the
+Business **MUST** instead return the current resource with a `recoverable` error
+Message whose `path` selects the exact Action occurrence.
 
-The Business's response is authoritative for the state after the operation: the
+The Business's response is authoritative for the state after an operation: the
 returned resource, together with any parent lifecycle its capability defines, is
-the source of truth. Processing an Action does not automatically apply the
-earlier requested effect. After processing, the Platform performs a normal fresh
-operation, and the later response is authoritative; Actions add no lifecycle,
-polling, resume, or replay mechanism of their own. Where a capability defines
-request idempotency — Cart and Checkout — re-driving an effect submits a new
-operation under the existing
+the source of truth. The Action-type contract defines how the Business observes
+processing, and the Platform then follows the containing capability's operation
+contract.
+
+When an Action prevents a Cart or Checkout operation from succeeding,
+processing the Action does not repeat that operation. If the Platform wants to
+try again, it submits a new operation under the existing
 [Replay Protection](signatures.md#replay-protection) rules.
 
 Each Action key is a reverse-domain **Action type**: the name identifies the
@@ -165,13 +166,11 @@ challenge, which are illustrative here.
 Every instance shares a set of common fields:
 
 - `id` — a non-empty identifier for the Action instance.
-- `required` — whether the instance gates the effect specified for its Action
-  type.
 - `config` — an optional extension-owned configuration object.
 
-`id` and `required` are required on every instance; `config` is optional. An
-extension defines the instance-specific data a Platform needs to process its
-work under `config`; `config` is the extension-owned channel for that data.
+`id` is required on every instance; `config` is optional. An extension defines
+the instance-specific data a Platform needs to process its work under `config`;
+`config` is the extension-owned channel for that data.
 
 An Action instance also remains open to additional top-level fields for forward
 compatibility. A Platform **MUST** tolerate and ignore Action instance

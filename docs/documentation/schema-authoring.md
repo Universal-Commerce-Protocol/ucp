@@ -447,7 +447,7 @@ schema, the Action-type contract's runtime rules, and Platform policy.
 When they apply to the Action type, extension authors should define:
 
 - its Action type key or keys, parent capability, and emission conditions;
-- the exact effect that `required` gates;
+- the exact effect that the Action type gates;
 - its concrete `config` schema and how the Platform processes it, explicitly
   identifying any field that is executable or causes content to be loaded;
 - relevant schemes, origins, delegates, and trust anchors;

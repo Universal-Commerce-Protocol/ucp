@@ -153,9 +153,9 @@ as the first element. Platforms SHOULD treat the first element as featured.
 ## Actions
 
 Catalog Search, batch Lookup, and successful Get Product responses can include
-extension-defined Actions. In Catalog, an Action is work that may affect which
-products the Business returns or how the Platform handles them. `required` means
-the Action is required for the effect its type defines.
+extension-defined Actions. In Catalog, an Action is outstanding work that gates
+the effect its type defines, which may affect which products the Business
+returns or how the Platform handles them.
 
 Search, batch Lookup, and successful Get Product are independent Catalog
 operations; their responses do not share a containing-resource lifetime. The
@@ -169,9 +169,10 @@ policy. A Message can point to the Action to explain the response. Successful
 Get Product still includes `product`; its existing error response is unchanged.
 
 After processing an Action, the Platform performs a fresh Catalog operation and
-the later Business response is authoritative. Actions add no Catalog lifecycle,
-polling, or resume behavior. The common shape and rules are defined in
-[Overview — Actions](../overview.md#actions).
+the later Business response is authoritative. Catalog defines no Action
+lifecycle, polling, or resume behavior; a concrete Action-type contract **MAY**
+define those behaviors for processing its instances. The common shape and rules
+are defined in [Overview — Actions](../overview.md#actions).
 
 For example, this Search response returns no products and explains that age
 verification may affect the results:
@@ -184,8 +185,7 @@ verification may affect the results:
   "actions": {
     "com.example.identity.age_verification": [
       {
-        "id": "age-check-1",
-        "required": true
+        "id": "age-check-1"
       }
     ]
   },

@@ -94,11 +94,10 @@ SHOULD be linked for the duration of the checkout.
 The cart surfaces outstanding Action instances in its response-only `actions`
 map, defined in [Overview — Actions](overview.md#actions).
 
-The cart has no status lifecycle. A `required: true` instance gates only the
-cart effect specified for its Action type. The Business **MUST NOT** treat an
-outstanding Action as a reason to reject an unrelated cart operation. The
-Platform **MAY** continue to add, remove, and update items while an instance is
-outstanding.
+The cart has no status lifecycle. Each Action gates only the cart effect
+specified for its Action type. The Business **MUST NOT** treat an outstanding
+Action as a reason to reject an unrelated cart operation. The Platform **MAY**
+continue to add, remove, and update items while an Action is outstanding.
 
 After processing an Action, the Platform **SHOULD** use [Get Cart](#get-cart)
 or a subsequent update response to obtain the latest Cart.

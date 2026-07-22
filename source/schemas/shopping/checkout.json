@@ -72,7 +72,7 @@
         "completed",
         "canceled"
       ],
-      "description": "Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details.",
+      "description": "Checkout state indicating the current phase and required processing. See Checkout Status lifecycle documentation for state transition details.",
       "ucp_request": "omit"
     },
     "currency": {

@@ -228,11 +228,21 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
 
 ### Update Checkout
 
+Update Checkout is a full replacement operation. The Platform **MUST** send the
+entire Checkout resource, including any data updates to write-only fields; the
+supplied resource replaces the existing Checkout session state. The Platform
+**MUST NOT** start a new Update Checkout operation while the Checkout is
+`complete_in_progress`. Duplicate requests remain subject to
+[Replay Protection](signatures.md#replay-protection). If the Business receives a
+new Update Checkout request in that state, it **MUST** leave the Checkout
+unchanged and return the current Checkout with a recoverable error Message.
+
 #### Update Buyer Info
 
-All fields in `buyer` are optional, allowing clients to progressively build
-the checkout state across multiple calls. Each PUT replaces the entire session,
-so clients must include all previously set fields they wish to retain.
+All fields in `buyer` are optional, allowing the Platform to progressively build
+the Checkout state across multiple calls. Outside `complete_in_progress`, each
+Update Checkout replaces the entire Checkout session, so the Platform **MUST**
+include all previously set fields it intends to retain.
 
 === "Request"
 
