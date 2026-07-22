@@ -608,6 +608,66 @@ def define_env(env):
 
     return "\n".join(md)
 
+  def _field_requirement(field_name, ucp_request, required_list):
+    """Render the Requirement cell for a schema field.
+
+    The base ``required`` array defines the *response* requirement
+    (responses never omit a defined field, so a field is either
+    ``required`` or ``optional`` in responses). The ``ucp_request``
+    annotation overrides the *request* requirement — either a single
+    value applied to every request operation, or a per-operation map over
+    ``create``/``update``/``complete``. Request operations left
+    unannotated inherit the response requirement.
+
+    The response requirement is the default: request operations that
+    share it are omitted from the cell, so only the *differences* are
+    spelled out. Returns a
+    Markdown string such as ``**Required**`` (same everywhere) or
+    ``**Required**; optional on update``.
+    """
+    word = {"required": "required", "optional": "optional", "omit": "omitted"}
+    response = "required" if field_name in required_list else "optional"
+    base_disp = "**Required**" if response == "required" else "Optional"
+
+    if ucp_request is None:
+      return base_disp
+
+    if isinstance(ucp_request, str):
+      if ucp_request == response:
+        return base_disp
+      return f"{base_disp}; {word.get(ucp_request, ucp_request)} in requests"
+
+    if isinstance(ucp_request, dict):
+      # Only keep operations whose requirement differs from the response
+      # default; the rest inherit it and would be redundant to spell out.
+      diff_request = {}
+      for op in ("create", "update", "complete"):
+        val = ucp_request.get(op)
+        if val and val != response:
+          diff_request[op] = val
+      if not diff_request:
+        return base_disp
+
+      # Group adjacent request operations that share a requirement value so the
+      # cell stays compact (e.g. "required on create & update").
+      groups = []  # list of (value, [ops]) preserving operation order
+      for op in ("create", "update", "complete"):
+        if op not in diff_request:
+          continue
+        val = diff_request[op]
+        if groups and groups[-1][0] == val:
+          groups[-1][1].append(op)
+        else:
+          groups.append((val, [op]))
+      clauses = [
+        f"{word.get(val, val)} on {' & '.join(ops)}" for val, ops in groups
+      ]
+      if not clauses:
+        return base_disp
+      return f"{base_disp}; {', '.join(clauses)}"
+
+    return base_disp
+
   def _render_table_from_schema(
     schema_data,
     spec_file_name,
@@ -695,7 +755,7 @@ def define_env(env):
 
     md = []
     if need_header:
-      md = ["| Name | Type | Required | Description |"]
+      md = ["| Name | Type | Requirement | Description |"]
       md.append("| :--- | :--- | :--- | :--- |")
 
     if "allOf" in properties:
@@ -731,6 +791,12 @@ def define_env(env):
             )
           )
           continue
+
+        # Capture the request-requirement annotation before `details` may be
+        # reassigned during $ref resolution below.
+        ucp_annotation = (
+          details.get("ucp_request") if isinstance(details, dict) else None
+        )
 
         f_type = details.get("type", "any")
         ref = details.get("$ref")
@@ -855,10 +921,12 @@ def define_env(env):
             desc += "<br>"
           desc += f"**Enum:** {formatted_enums}"
 
-        # --- Handle Required ---
-        req_display = "**Yes**" if field_name in required_list else "No"
+        # --- Handle Requirement (per request op + response) ---
+        requirement = _field_requirement(
+          field_name, ucp_annotation, required_list
+        )
 
-        md.append(f"| {field_name} | {f_type} | {req_display} | {desc} |")
+        md.append(f"| {field_name} | {f_type} | {requirement} | {desc} |")
 
     return "\n".join(md)
 
@@ -1243,7 +1311,7 @@ def define_env(env):
 
   # --- MACRO 2: For Standalone JSON Extensions ---
   @env.macro
-  def extension_fields(entity_name, spec_file_name):
+  def extension_fields(entity_name, spec_file_name, target="checkout"):
     """Parse an extension schema file and render a table from its $defs.
 
     Usage: {{ extension_fields('discount', 'checkout') }}
@@ -1253,6 +1321,8 @@ def define_env(env):
       entity_name: The name of the extension schema (e.g., 'discount').
       spec_file_name: The name of the spec file indicating where the dictionary
         should be rendered (e.g., "checkout", "fulfillment").
+      target: Optional. The core schema name that is being extended (e.g.,
+        "checkout", "cart"). Defaults to "checkout".
 
     """
     # Construct full path based on new structure
@@ -1265,8 +1335,22 @@ def define_env(env):
       # or $defs.order_line_item.
       defs = data.get("$defs", {})
 
-      # Dynamically find the composed type by looking for an entry with 'allOf'
-      # where one of the items defines 'properties'.
+      # Try to find the specific target first (e.g. dev.ucp.shopping.checkout)
+      # We look for a key that ends with target.
+      target_def = None
+      for key, schema_def in defs.items():
+        if (key == target or key.endswith("." + target)) and (
+          isinstance(schema_def, dict) and "allOf" in schema_def
+        ):
+          target_def = schema_def
+          break
+
+      if target_def:
+        for item in target_def["allOf"]:
+          if "properties" in item:
+            return _render_table_from_schema(item, spec_file_name)
+
+      # Fallback to dynamically finding the composed type (old behavior)
       for schema_def in defs.values():
         if isinstance(schema_def, dict) and "allOf" in schema_def:
           for item in schema_def["allOf"]:
@@ -1274,7 +1358,8 @@ def define_env(env):
               return _render_table_from_schema(item, spec_file_name)
 
       raise RuntimeError(
-        f"Could not find extension properties in '{entity_name}'"
+        f"Could not find extension properties for target '{target}' "
+        f"in '{entity_name}'"
         f"{get_error_context()}"
       )
     except (FileNotFoundError, json.JSONDecodeError) as e:
