@@ -1,4 +1,6 @@
 # cspell-specific custom words related to UCP
+ACS
+AReq
 Accor
 Adyen
 Affirm
@@ -14,10 +16,14 @@ Carrefour
 Centricity
 Chewy
 Commerce
+CReq
+CRes
 Credentialless
+DDC
 Depot
 Diffie
 EDITMSG
+EMVCo
 EWALLET
 Ed25519
 EdDSA
@@ -40,8 +46,11 @@ Paypal
 Petbarn
 Prasad
 Preorders
+PSP
 Queensway
 Quicktype
+RReq
+RRes
 Sephora
 Shopee
 Shopify
@@ -127,7 +136,10 @@ streamable
 superfences
 talla
 thibmeu
+threeDSCompInd
+threeDSMethodData
 tracción
+transStatus
 ttclid
 unparseable
 upsell

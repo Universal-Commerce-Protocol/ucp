@@ -315,6 +315,25 @@ Content-Type: application/json
 
 ---
 
+## Payment Actions [CONDITIONAL]
+
+{Include this section if the handler can cause Actions. Identify the negotiated
+Checkout extension that declares them. Use the standard
+[Payment Authentication extension](payment-authentication.md) for device data
+collection and 3DS challenges; link to the defining extension specification for
+custom Actions.}
+
+| Action type | When emitted | Handler-specific requirements |
+| :---------- | :----------- | :---------------------------- |
+| `{action_type}` | {conditions} | {provider-specific trust, fallback, or cleanup behavior} |
+
+For standard Payment Authentication Actions, document only the behavior specific
+to this handler, such as which types it can cause, trusted URL rules, and how the
+Business observes provider state. For custom Actions, also document or link to
+their config and Platform processing contract.
+
+---
+
 <!--
   ADDITIONAL PARTICIPANT SECTIONS
 

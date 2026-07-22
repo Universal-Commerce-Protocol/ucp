@@ -50,6 +50,10 @@ nav:
               - A2A: specification/checkout-a2a.md
               - Embedded: specification/embedded-checkout.md
           - AP2 Mandates Extension: specification/ap2-mandates.md
+          - Payment Authentication Extension:
+              - Overview: specification/payment-authentication.md
+              - Device Data Collection: specification/payment-actions/device-data-collection.md
+              - 3DS Challenge: specification/payment-actions/three-ds-challenge.md
           - Buyer Consent Extension: specification/buyer-consent.md
           - Discounts Extension: specification/discount.md
           - Fulfillment Extension: specification/fulfillment.md
@@ -310,6 +314,15 @@ plugins:
               checkout commitments (using SD-JWT+kb digital credentials and
               detached JWS signatures) between business, platform, and payment
               providers.
+          - specification/payment-authentication.md: >-
+              Payment Authentication Extension, defining negotiation,
+              payment-handler association, lifecycle, trust, and embedded
+              notifications for standard payment authentication Actions.
+          - specification/payment-actions/device-data-collection.md: >-
+              Standard Action type for running invisible device-data collection
+              surfaces during payment processing.
+          - specification/payment-actions/three-ds-challenge.md: >-
+              Standard Action type for presenting buyer-facing 3DS challenges.
           - specification/buyer-consent.md: >-
               Buyer Consent Extension, defining data schemas for transmitting
               buyer privacy choices (analytics, marketing, personalization) to
