@@ -164,8 +164,7 @@ challenge, which are illustrative here.
 
 Every instance shares a set of common fields:
 
-- `id` — a non-empty identifier, unique for the lifetime of the containing
-  resource.
+- `id` — a non-empty identifier for the Action instance.
 - `required` — whether the instance gates the effect specified for its Action
   type.
 - `config` — an optional extension-owned configuration object.
@@ -178,9 +177,16 @@ An Action instance also remains open to additional top-level fields for forward
 compatibility. A Platform **MUST** tolerate and ignore Action instance
 fields it does not recognize.
 
-While the same piece of outstanding work persists across responses, it keeps
-the same key and `id`. A replacement is a new instance with a new `id`; an `id`
-is never reused within the containing resource.
+The Business **MUST** use a distinct `id` for each Action instance in a response.
+
+When successive responses represent the same parent resource, the Business
+**MUST** keep the same Action type key and `id` while the same work remains
+outstanding. Replacement work **MUST** have a new `id`, and the Business
+**MUST NOT** reuse an `id` during that resource's lifetime.
+
+Otherwise, the common Actions contract defines no identity relationship between
+Actions in independent responses. Equal `id` values alone do not identify the
+same work.
 
 A Business **MUST** emit an Action type only when an extension that declares it
 is active for the containing capability in the negotiated intersection. The

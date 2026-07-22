@@ -16,7 +16,7 @@
         "id": {
           "type": "string",
           "minLength": 1,
-          "description": "Identifier for this Action instance, unique for the lifetime of the containing resource.",
+          "description": "Identifier for this Action instance.",
           "ucp_request": "omit"
         },
         "required": {

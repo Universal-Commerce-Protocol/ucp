@@ -157,6 +157,12 @@ extension-defined Actions. In Catalog, an Action is work that may affect which
 products the Business returns or how the Platform handles them. `required` means
 the Action is required for the effect its type defines.
 
+Search, batch Lookup, and successful Get Product are independent Catalog
+operations; their responses do not share a containing-resource lifetime. The
+Business **MAY** use the same Action `id` in separate responses; that equality
+does not identify the same work. A concrete Action-type contract **MAY** define
+stronger correlation for its instances.
+
 For Search and batch Lookup, the Business decides whether to return zero, some,
 or all otherwise relevant products under the Action-type contract and its own
 policy. A Message can point to the Action to explain the response. Successful
