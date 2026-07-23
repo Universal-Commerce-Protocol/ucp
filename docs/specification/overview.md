@@ -2254,7 +2254,7 @@ typically versioned and defined alongside their parent capability.
 
 ## Policies
 
-A policy is a business rule — return/refund terms, warranty, subscription
+A policy is a business rule — return terms, warranty, subscription
 terms, and the like — that applies to the items in a response at the time of
 purchase, carried in a core `policies[]` array alongside `messages[]` and
 `links[]`.
@@ -2266,7 +2266,7 @@ A Business publishes well-known and custom policies. Every policy carries a
 
 | Well-known type | Description |
 | :-- | :-- |
-| `dev.ucp.shopping.policy.refund` | Return/refund terms. |
+| `dev.ucp.shopping.policy.return` | Return terms. |
 | `dev.ucp.shopping.policy.warranty` | Warranty terms. |
 
 A Business **MAY** define custom types in its own domain (e.g.,
@@ -2342,7 +2342,9 @@ To resolve which policy of a given `type` governs a node:
    two overlapping Set matches, or two Response-wide entries of one `type`. This
    is an authoring error, not an artifact of path targeting: naming the node by
    an id would collide the same way. A Business **MUST NOT** publish such a
-   collision; a Platform **MUST** surface a warning when it detects one.
+   collision. Because resolution is undefined, a Platform **SHOULD** flag the
+   ambiguity rather than resolve it silently; the treatment is left to the
+   Platform.
 
 ### Absent vs. empty
 
@@ -2383,7 +2385,7 @@ rules apply:
    a `type` no policy covers at that node, the notice still displays, but
    nothing structured stands behind it.
 
-For example, an engraved line item is final sale. A response-wide refund policy
+For example, an engraved line item is final sale. A response-wide return policy
 applies to the whole cart, but the item-scoped final-sale policy governs line 2,
 so the disclosure on that line pairs with it — notice and policy agree:
 
@@ -2391,11 +2393,11 @@ so the disclosure on that line pairs with it — notice and policy agree:
 ```json
 [
   {
-    "type": "dev.ucp.shopping.policy.refund",
+    "type": "dev.ucp.shopping.policy.return",
     "description": { "plain": "Free 30-day returns from delivery." }
   },
   {
-    "type": "dev.ucp.shopping.policy.refund",
+    "type": "dev.ucp.shopping.policy.return",
     "description": { "plain": "This engraved item is final sale and cannot be returned." },
     "applies_to": ["$.line_items[2]"],
     "url": "https://example.com/returns#final-sale"
@@ -2408,7 +2410,7 @@ so the disclosure on that line pairs with it — notice and policy agree:
 [
   {
     "type": "warning",
-    "code": "dev.ucp.shopping.policy.refund",
+    "code": "dev.ucp.shopping.policy.return",
     "path": "$.line_items[2]",
     "presentation": "disclosure",
     "content": "This engraved item is final sale and cannot be returned."
