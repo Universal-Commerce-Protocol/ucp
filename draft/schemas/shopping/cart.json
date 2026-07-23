@@ -101,6 +101,11 @@
       "description": "Estimated cost breakdown. May be partial if shipping/tax not yet calculable.",
       "ucp_request": "omit"
     },
+    "actions": {
+      "$ref": "https://ucp.dev/draft/schemas/common/types/actions.json",
+      "description": "Outstanding extension-defined Actions for this cart.",
+      "ucp_request": "omit"
+    },
     "messages": {
       "type": "array",
       "items": {
@@ -130,5 +135,5 @@
       "ucp_request": "omit"
     }
   },
-  "version": "2026-07-22"
+  "version": "2026-07-23"
 }

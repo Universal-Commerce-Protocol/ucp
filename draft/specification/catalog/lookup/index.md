@@ -77,6 +77,7 @@ Request body for catalog lookup.
 | -------- | -------------- | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
 | ucp      | any            | **Required** | UCP metadata for catalog responses.                                                                                                                 |
 | products | Array[Product] | **Required** | Products matching the requested identifiers. May contain fewer items if some identifiers not found, or more if identifiers match multiple products. |
+| actions  | object         | Optional     | Outstanding extension-defined Actions for this catalog lookup response.                                                                             |
 | messages | Array[object]  | Optional     | Errors, warnings, or informational messages about the requested items.                                                                              |
 
 ______________________________________________________________________
@@ -150,9 +151,14 @@ Request body for single-product retrieval. Supports interactive variant narrowin
 | -------- | ------------- | ------------ | ---------------------------------------------------------------------------------------------------------- |
 | ucp      | any           | **Required** | UCP metadata for catalog responses.                                                                        |
 | product  | object        | **Required** | The requested product with full detail. Singular — this is a single-resource operation.                    |
+| actions  | object        | Optional     | Outstanding extension-defined Actions for this product response.                                           |
 | messages | Array[object] | Optional     | Warnings or informational messages about the product (e.g., price recently changed, limited availability). |
 
 ______________________________________________________________________
+
+## Actions
+
+The batch Lookup response and a successful Get Product response adopt the response-only `actions` map. Batch Lookup retains its required `products` array, which can be empty; successful Get Product retains its required `product`, and its existing error response is unchanged. See [Catalog — Actions](http://ucp.dev/draft/specification/catalog/#actions) for the parent contract and [Overview — Actions](http://ucp.dev/draft/specification/overview/#actions) for the common rules.
 
 ## Transport Bindings
 

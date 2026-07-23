@@ -350,6 +350,8 @@ Maps to the [Get Checkout](http://ucp.dev/draft/specification/checkout/#get-chec
 
 Maps to the [Update Checkout](http://ucp.dev/draft/specification/checkout/#update-checkout) operation.
 
+The Platform **MUST NOT** start a new `update_checkout` operation while the Checkout is `complete_in_progress`. Duplicate requests remain subject to [Replay Protection](http://ucp.dev/draft/specification/signatures/#replay-protection). If the Business receives a new `update_checkout` request in that state, it **MUST** leave the Checkout unchanged and return the current Checkout with a recoverable error Message.
+
 #### Input Schema
 
 - `id` (String): **Required**. The ID of the checkout session to update.
@@ -564,7 +566,7 @@ Maps to the [Complete Checkout](http://ucp.dev/draft/specification/checkout/#com
 
 #### Output Schema
 
-- [Checkout](http://ucp.dev/draft/specification/checkout/#complete-checkout) object, containing a partial `order` that holds only `id` and `permalink_url`.
+- [Checkout](http://ucp.dev/draft/specification/checkout/#complete-checkout) object. See core [Complete Checkout](http://ucp.dev/draft/specification/checkout/#complete-checkout) for status and `order` semantics.
 
 ### `cancel_checkout`
 

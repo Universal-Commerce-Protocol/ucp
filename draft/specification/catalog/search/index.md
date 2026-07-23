@@ -23,12 +23,13 @@ Performs a search against the business's product catalog. Supports free-text que
 
 ### Response
 
-| Name       | Type          | Requirement  | Description                                                           |
-| ---------- | ------------- | ------------ | --------------------------------------------------------------------- |
-| ucp        | any           | **Required** | UCP metadata for catalog responses.                                   |
-| products   | Array[object] | **Required** | Products matching the search criteria.                                |
-| pagination | object        | Optional     | Pagination information in responses.                                  |
-| messages   | Array[object] | Optional     | Errors, warnings, or informational messages about the search results. |
+| Name       | Type          | Requirement  | Description                                                             |
+| ---------- | ------------- | ------------ | ----------------------------------------------------------------------- |
+| ucp        | any           | **Required** | UCP metadata for catalog responses.                                     |
+| products   | Array[object] | **Required** | Products matching the search criteria.                                  |
+| pagination | object        | Optional     | Pagination information in responses.                                    |
+| actions    | object        | Optional     | Outstanding extension-defined Actions for this catalog search response. |
+| messages   | Array[object] | Optional     | Errors, warnings, or informational messages about the search results.   |
 
 ## Search Inputs
 
@@ -67,6 +68,10 @@ The `limit` parameter is a requested page size, not a guaranteed count. Implemen
 ### Pagination Response
 
 [Pagination Response](/draft/specification/reference/#pagination-response)
+
+## Actions
+
+Search responses adopt the response-only `actions` map. The required `products` array can be empty; the Business decides whether it contains zero, some, or all otherwise relevant products under the Action-type contract. See [Catalog — Actions](http://ucp.dev/draft/specification/catalog/#actions) for the parent contract and example, and [Overview — Actions](http://ucp.dev/draft/specification/overview/#actions) for the common rules.
 
 ## Transport Bindings
 

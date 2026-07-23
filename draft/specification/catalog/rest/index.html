@@ -2918,6 +2918,12 @@
 <td style="text-align: left;">Cursor-based pagination for list operations.</td>
 </tr>
 <tr>
+<td style="text-align: left;">actions</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#actions">Actions</a></td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Outstanding extension-defined Actions for this catalog search response.</td>
+</tr>
+<tr>
 <td style="text-align: left;">messages</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#message">Message</a>]</td>
 <td style="text-align: left;">Optional</td>
@@ -3114,6 +3120,12 @@ applies to all lookups in the batch.</p>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#product">Product</a>]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Products matching the requested identifiers. May contain fewer items if some identifiers not found, or more if identifiers match multiple products.</td>
+</tr>
+<tr>
+<td style="text-align: left;">actions</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#actions">Actions</a></td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Outstanding extension-defined Actions for this catalog lookup response.</td>
 </tr>
 <tr>
 <td style="text-align: left;">messages</td>
@@ -3742,6 +3754,12 @@ MAY include informational messages indicating which identifiers were not found.<
 <td style="text-align: left;">object</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">The requested product with full detail. Singular — this is a single-resource operation.</td>
+</tr>
+<tr>
+<td style="text-align: left;">actions</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Outstanding extension-defined Actions for this product response.</td>
 </tr>
 <tr>
 <td style="text-align: left;">messages</td>

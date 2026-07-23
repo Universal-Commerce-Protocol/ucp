@@ -3118,7 +3118,7 @@ with <code>ap2.merchant_authorization</code> embedded in the response body.</p>
 <td style="text-align: left;">status</td>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;"><strong>Required</strong></td>
-<td style="text-align: left;">Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details.<br><strong>Enum:</strong> <code>incomplete</code>, <code>requires_escalation</code>, <code>ready_for_complete</code>, <code>complete_in_progress</code>, <code>completed</code>, <code>canceled</code></td>
+<td style="text-align: left;">Checkout state indicating the current phase and required processing. See Checkout Status lifecycle documentation for state transition details.<br><strong>Enum:</strong> <code>incomplete</code>, <code>requires_escalation</code>, <code>ready_for_complete</code>, <code>complete_in_progress</code>, <code>completed</code>, <code>canceled</code></td>
 </tr>
 <tr>
 <td style="text-align: left;">currency</td>
@@ -3131,6 +3131,12 @@ with <code>ap2.merchant_authorization</code> embedded in the response body.</p>
 <td style="text-align: left;">Array[Total]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Different cart totals.</td>
+</tr>
+<tr>
+<td style="text-align: left;">actions</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Outstanding extension-defined Actions for this checkout.</td>
 </tr>
 <tr>
 <td style="text-align: left;">messages</td>

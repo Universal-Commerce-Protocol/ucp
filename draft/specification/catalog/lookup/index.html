@@ -1584,6 +1584,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Actions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#transport-bindings" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2582,6 +2593,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Actions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#transport-bindings" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2821,6 +2843,12 @@ from the response.</p>
 <td style="text-align: left;">Products matching the requested identifiers. May contain fewer items if some identifiers not found, or more if identifiers match multiple products.</td>
 </tr>
 <tr>
+<td style="text-align: left;">actions</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Outstanding extension-defined Actions for this catalog lookup response.</td>
+</tr>
+<tr>
 <td style="text-align: left;">messages</td>
 <td style="text-align: left;">Array[object]</td>
 <td style="text-align: left;">Optional</td>
@@ -3001,6 +3029,12 @@ selection changes the availability map.</p>
 <td style="text-align: left;">The requested product with full detail. Singular — this is a single-resource operation.</td>
 </tr>
 <tr>
+<td style="text-align: left;">actions</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Outstanding extension-defined Actions for this product response.</td>
+</tr>
+<tr>
 <td style="text-align: left;">messages</td>
 <td style="text-align: left;">Array[object]</td>
 <td style="text-align: left;">Optional</td>
@@ -3009,6 +3043,13 @@ selection changes the availability map.</p>
 </tbody>
 </table>
 <hr />
+<h2 id="actions">Actions<a class="headerlink" href="#actions" title="Permanent link">&para;</a></h2>
+<p>The batch Lookup response and a successful Get Product response adopt the
+response-only <code>actions</code> map. Batch Lookup retains its required <code>products</code> array,
+which can be empty; successful Get Product retains its required <code>product</code>, and
+its existing error response is unchanged. See
+<a href="../#actions">Catalog — Actions</a> for the parent contract and
+<a href="../../overview/#actions">Overview — Actions</a> for the common rules.</p>
 <h2 id="transport-bindings">Transport Bindings<a class="headerlink" href="#transport-bindings" title="Permanent link">&para;</a></h2>
 <ul>
 <li><a href="../rest/#post-cataloglookup">REST Binding</a>: <code>POST /catalog/lookup</code> (batch)</li>

@@ -2140,6 +2140,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Actions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#amount" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3821,6 +3832,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Actions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#amount" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5442,6 +5464,12 @@ within the UCP.</p>
 <td style="text-align: left;">Estimated cost breakdown. May be partial if shipping/tax not yet calculable.</td>
 </tr>
 <tr>
+<td style="text-align: left;">actions</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#actions">Actions</a></td>
+<td style="text-align: left;">Optional; omitted in requests</td>
+<td style="text-align: left;">Outstanding extension-defined Actions for this cart.</td>
+</tr>
+<tr>
 <td style="text-align: left;">messages</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#message">Message</a>]</td>
 <td style="text-align: left;">Optional; omitted in requests</td>
@@ -5531,7 +5559,7 @@ within the UCP.</p>
 <td style="text-align: left;">status</td>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;"><strong>Required</strong>; omitted in requests</td>
-<td style="text-align: left;">Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details.<br><strong>Enum:</strong> <code>incomplete</code>, <code>requires_escalation</code>, <code>ready_for_complete</code>, <code>complete_in_progress</code>, <code>completed</code>, <code>canceled</code></td>
+<td style="text-align: left;">Checkout state indicating the current phase and required processing. See Checkout Status lifecycle documentation for state transition details.<br><strong>Enum:</strong> <code>incomplete</code>, <code>requires_escalation</code>, <code>ready_for_complete</code>, <code>complete_in_progress</code>, <code>completed</code>, <code>canceled</code></td>
 </tr>
 <tr>
 <td style="text-align: left;">currency</td>
@@ -5544,6 +5572,12 @@ within the UCP.</p>
 <td style="text-align: left;"><a href="/draft/specification/reference/#totals">Totals</a></td>
 <td style="text-align: left;"><strong>Required</strong>; omitted in requests</td>
 <td style="text-align: left;">Different cart totals.</td>
+</tr>
+<tr>
+<td style="text-align: left;">actions</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#actions">Actions</a></td>
+<td style="text-align: left;">Optional; omitted in requests</td>
+<td style="text-align: left;">Outstanding extension-defined Actions for this checkout.</td>
 </tr>
 <tr>
 <td style="text-align: left;">messages</td>
@@ -5691,6 +5725,9 @@ within the UCP.</p>
 </table>
 <hr />
 <h2 id="type-schemas">Type Schemas<a class="headerlink" href="#type-schemas" title="Permanent link">&para;</a></h2>
+<h3 id="actions">Actions<a class="headerlink" href="#actions" title="Permanent link">&para;</a></h3>
+<p>Outstanding extension-defined Action instances, keyed by reverse-domain Action type, not extension name.</p>
+<hr />
 <h3 id="amount">Amount<a class="headerlink" href="#amount" title="Permanent link">&para;</a></h3>
 <p>Monetary amount in the currency's minor unit as defined by ISO 4217. Refer to the currency's exponent to determine minor-to-major ratio (e.g., 2 for USD, 0 for JPY, 3 for KWD).</p>
 <hr />
@@ -5920,7 +5957,7 @@ within the UCP.</p>
 <td style="text-align: left;">severity</td>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;"><strong>Required</strong></td>
-<td style="text-align: left;">Reflects the resource state and recommended action. 'recoverable': platform can resolve by modifying inputs and retrying via API. 'requires_buyer_input': merchant requires information their API doesn't support collecting programmatically (checkout incomplete). 'requires_buyer_review': buyer must authorize before order placement due to policy, regulatory, or entitlement rules. 'unrecoverable': no valid resource exists to act on, retry with new resource or inputs. Errors with 'requires_<em>' severity contribute to 'status: requires_escalation'.<br></em><em>Enum:</em>* <code>recoverable</code>, <code>requires_buyer_input</code>, <code>requires_buyer_review</code>, <code>unrecoverable</code></td>
+<td style="text-align: left;">Reflects the resource state and recommended action. 'recoverable': platform can resolve the condition in band, for example by modifying inputs or processing a related Action, and submit a new operation when needed. 'requires_buyer_input': merchant requires information their API doesn't support collecting programmatically (checkout incomplete). 'requires_buyer_review': buyer must authorize before order placement due to policy, regulatory, or entitlement rules. 'unrecoverable': no valid resource exists to act on, retry with new resource or inputs. Errors with 'requires_<em>' severity contribute to 'status: requires_escalation'.<br></em><em>Enum:</em>* <code>recoverable</code>, <code>requires_buyer_input</code>, <code>requires_buyer_review</code>, <code>unrecoverable</code></td>
 </tr>
 </tbody>
 </table>
@@ -8199,7 +8236,7 @@ within the UCP.</p>
 <td style="text-align: left;">status</td>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;"><strong>Required</strong></td>
-<td style="text-align: left;">Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details.<br><strong>Enum:</strong> <code>incomplete</code>, <code>requires_escalation</code>, <code>ready_for_complete</code>, <code>complete_in_progress</code>, <code>completed</code>, <code>canceled</code></td>
+<td style="text-align: left;">Checkout state indicating the current phase and required processing. See Checkout Status lifecycle documentation for state transition details.<br><strong>Enum:</strong> <code>incomplete</code>, <code>requires_escalation</code>, <code>ready_for_complete</code>, <code>complete_in_progress</code>, <code>completed</code>, <code>canceled</code></td>
 </tr>
 <tr>
 <td style="text-align: left;">currency</td>
@@ -8212,6 +8249,12 @@ within the UCP.</p>
 <td style="text-align: left;">Array[Total]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Different cart totals.</td>
+</tr>
+<tr>
+<td style="text-align: left;">actions</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Outstanding extension-defined Actions for this checkout.</td>
 </tr>
 <tr>
 <td style="text-align: left;">messages</td>
@@ -8457,6 +8500,12 @@ within the UCP.</p>
 <td style="text-align: left;">Estimated cost breakdown. May be partial if shipping/tax not yet calculable.</td>
 </tr>
 <tr>
+<td style="text-align: left;">actions</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Outstanding extension-defined Actions for this cart.</td>
+</tr>
+<tr>
 <td style="text-align: left;">messages</td>
 <td style="text-align: left;">Array[object]</td>
 <td style="text-align: left;">Optional</td>
@@ -8546,7 +8595,7 @@ within the UCP.</p>
 <td style="text-align: left;">status</td>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;"><strong>Required</strong></td>
-<td style="text-align: left;">Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details.<br><strong>Enum:</strong> <code>incomplete</code>, <code>requires_escalation</code>, <code>ready_for_complete</code>, <code>complete_in_progress</code>, <code>completed</code>, <code>canceled</code></td>
+<td style="text-align: left;">Checkout state indicating the current phase and required processing. See Checkout Status lifecycle documentation for state transition details.<br><strong>Enum:</strong> <code>incomplete</code>, <code>requires_escalation</code>, <code>ready_for_complete</code>, <code>complete_in_progress</code>, <code>completed</code>, <code>canceled</code></td>
 </tr>
 <tr>
 <td style="text-align: left;">currency</td>
@@ -8559,6 +8608,12 @@ within the UCP.</p>
 <td style="text-align: left;">Array[Total]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Different cart totals.</td>
+</tr>
+<tr>
+<td style="text-align: left;">actions</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Outstanding extension-defined Actions for this checkout.</td>
 </tr>
 <tr>
 <td style="text-align: left;">messages</td>
@@ -8793,6 +8848,12 @@ within the UCP.</p>
 <td style="text-align: left;">Estimated cost breakdown. May be partial if shipping/tax not yet calculable.</td>
 </tr>
 <tr>
+<td style="text-align: left;">actions</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Outstanding extension-defined Actions for this cart.</td>
+</tr>
+<tr>
 <td style="text-align: left;">messages</td>
 <td style="text-align: left;">Array[object]</td>
 <td style="text-align: left;">Optional</td>
@@ -8882,7 +8943,7 @@ within the UCP.</p>
 <td style="text-align: left;">status</td>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;"><strong>Required</strong></td>
-<td style="text-align: left;">Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details.<br><strong>Enum:</strong> <code>incomplete</code>, <code>requires_escalation</code>, <code>ready_for_complete</code>, <code>complete_in_progress</code>, <code>completed</code>, <code>canceled</code></td>
+<td style="text-align: left;">Checkout state indicating the current phase and required processing. See Checkout Status lifecycle documentation for state transition details.<br><strong>Enum:</strong> <code>incomplete</code>, <code>requires_escalation</code>, <code>ready_for_complete</code>, <code>complete_in_progress</code>, <code>completed</code>, <code>canceled</code></td>
 </tr>
 <tr>
 <td style="text-align: left;">currency</td>
@@ -8895,6 +8956,12 @@ within the UCP.</p>
 <td style="text-align: left;">Array[Total]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Different cart totals.</td>
+</tr>
+<tr>
+<td style="text-align: left;">actions</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Outstanding extension-defined Actions for this checkout.</td>
 </tr>
 <tr>
 <td style="text-align: left;">messages</td>
@@ -9839,6 +9906,12 @@ within the UCP.</p>
 <td style="text-align: left;">Pagination information in responses.</td>
 </tr>
 <tr>
+<td style="text-align: left;">actions</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Outstanding extension-defined Actions for this catalog search response.</td>
+</tr>
+<tr>
 <td style="text-align: left;">messages</td>
 <td style="text-align: left;">Array[object]</td>
 <td style="text-align: left;">Optional</td>
@@ -9923,6 +9996,12 @@ within the UCP.</p>
 <td style="text-align: left;">Array[Product]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Products matching the requested identifiers. May contain fewer items if some identifiers not found, or more if identifiers match multiple products.</td>
+</tr>
+<tr>
+<td style="text-align: left;">actions</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Outstanding extension-defined Actions for this catalog lookup response.</td>
 </tr>
 <tr>
 <td style="text-align: left;">messages</td>
@@ -10023,6 +10102,12 @@ within the UCP.</p>
 <td style="text-align: left;">The requested product with full detail. Singular — this is a single-resource operation.</td>
 </tr>
 <tr>
+<td style="text-align: left;">actions</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Outstanding extension-defined Actions for this product response.</td>
+</tr>
+<tr>
 <td style="text-align: left;">messages</td>
 <td style="text-align: left;">Array[object]</td>
 <td style="text-align: left;">Optional</td>
@@ -10098,7 +10183,7 @@ within the UCP.</p>
 <td style="text-align: left;">status</td>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;"><strong>Required</strong></td>
-<td style="text-align: left;">Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details.<br><strong>Enum:</strong> <code>incomplete</code>, <code>requires_escalation</code>, <code>ready_for_complete</code>, <code>complete_in_progress</code>, <code>completed</code>, <code>canceled</code></td>
+<td style="text-align: left;">Checkout state indicating the current phase and required processing. See Checkout Status lifecycle documentation for state transition details.<br><strong>Enum:</strong> <code>incomplete</code>, <code>requires_escalation</code>, <code>ready_for_complete</code>, <code>complete_in_progress</code>, <code>completed</code>, <code>canceled</code></td>
 </tr>
 <tr>
 <td style="text-align: left;">currency</td>
@@ -10111,6 +10196,12 @@ within the UCP.</p>
 <td style="text-align: left;">Array[Total]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Different cart totals.</td>
+</tr>
+<tr>
+<td style="text-align: left;">actions</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Outstanding extension-defined Actions for this checkout.</td>
 </tr>
 <tr>
 <td style="text-align: left;">messages</td>
@@ -10306,7 +10397,7 @@ within the UCP.</p>
 <td style="text-align: left;">status</td>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;"><strong>Required</strong></td>
-<td style="text-align: left;">Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details.<br><strong>Enum:</strong> <code>incomplete</code>, <code>requires_escalation</code>, <code>ready_for_complete</code>, <code>complete_in_progress</code>, <code>completed</code>, <code>canceled</code></td>
+<td style="text-align: left;">Checkout state indicating the current phase and required processing. See Checkout Status lifecycle documentation for state transition details.<br><strong>Enum:</strong> <code>incomplete</code>, <code>requires_escalation</code>, <code>ready_for_complete</code>, <code>complete_in_progress</code>, <code>completed</code>, <code>canceled</code></td>
 </tr>
 <tr>
 <td style="text-align: left;">currency</td>
@@ -10319,6 +10410,12 @@ within the UCP.</p>
 <td style="text-align: left;">Array[Total]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Different cart totals.</td>
+</tr>
+<tr>
+<td style="text-align: left;">actions</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Outstanding extension-defined Actions for this checkout.</td>
 </tr>
 <tr>
 <td style="text-align: left;">messages</td>

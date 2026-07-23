@@ -1457,6 +1457,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Actions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#transport-bindings" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2384,6 +2395,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Actions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#transport-bindings" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2530,6 +2552,12 @@ queries, filtering by category and price, and pagination.</p>
 <td style="text-align: left;">Pagination information in responses.</td>
 </tr>
 <tr>
+<td style="text-align: left;">actions</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Outstanding extension-defined Actions for this catalog search response.</td>
+</tr>
+<tr>
 <td style="text-align: left;">messages</td>
 <td style="text-align: left;">Array[object]</td>
 <td style="text-align: left;">Optional</td>
@@ -2614,6 +2642,12 @@ error. Clients MUST NOT assume the response size equals the requested limit.</p>
 <p><a href="/draft/specification/reference/#pagination-request">Pagination Request</a></p>
 <h3 id="pagination-response">Pagination Response<a class="headerlink" href="#pagination-response" title="Permanent link">&para;</a></h3>
 <p><a href="/draft/specification/reference/#pagination-response">Pagination Response</a></p>
+<h2 id="actions">Actions<a class="headerlink" href="#actions" title="Permanent link">&para;</a></h2>
+<p>Search responses adopt the response-only <code>actions</code> map. The required <code>products</code>
+array can be empty; the Business decides whether it contains zero, some, or all
+otherwise relevant products under the Action-type contract. See
+<a href="../#actions">Catalog — Actions</a> for the parent contract and example, and
+<a href="../../overview/#actions">Overview — Actions</a> for the common rules.</p>
 <h2 id="transport-bindings">Transport Bindings<a class="headerlink" href="#transport-bindings" title="Permanent link">&para;</a></h2>
 <ul>
 <li><a href="../rest/#post-catalogsearch">REST Binding</a>: <code>POST /catalog/search</code></li>

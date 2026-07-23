@@ -3,7 +3,7 @@
   "info": {
     "title": "UCP Shopping Service",
     "description": "Canonical MCP/JSON-RPC interface for UCP Shopping service. Schema references are logical pointers - actual payload shape is determined by negotiated capabilities.\n\n**Endpoint Resolution:** This spec defines methods only. The endpoint URL MUST be obtained from the merchant's discovery profile at `/.well-known/ucp` under `services[\"dev.ucp.shopping\"][transport=mcp].endpoint`. The server entry below is a placeholder for tooling compatibility.",
-    "version": "2026-07-22"
+    "version": "2026-07-23"
   },
   "servers": [
     {
@@ -148,6 +148,7 @@
     {
       "name": "update_checkout",
       "summary": "Update checkout",
+      "description": "Update Checkout is a full replacement operation. A new Update Checkout operation is not permitted while Checkout status is `complete_in_progress`. Duplicate requests remain subject to Replay Protection. If the Business receives a new Update Checkout request in that state, it leaves the Checkout unchanged and returns the current Checkout with a recoverable error Message.",
       "params": [
         {
           "name": "meta",

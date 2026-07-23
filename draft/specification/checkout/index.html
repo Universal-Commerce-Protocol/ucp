@@ -688,6 +688,34 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Actions
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Actions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#accepted-completion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Accepted completion
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#error-handling" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -740,6 +768,23 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Eligibility Verification at Completion">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-resolving-a-claim-with-a-verification-action" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example: resolving a claim with a verification Action
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -3027,6 +3072,34 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Actions
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Actions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#accepted-completion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Accepted completion
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#error-handling" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3079,6 +3152,23 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Eligibility Verification at Completion">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-resolving-a-claim-with-a-verification-action" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example: resolving a claim with a verification Action
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -3866,7 +3956,7 @@ platform to perform checkout for digital goods without needing to furnish
 fulfillment details more relevant for physical goods.</p>
 <h3 id="checkout-status-lifecycle">Checkout Status Lifecycle<a class="headerlink" href="#checkout-status-lifecycle" title="Permanent link">&para;</a></h3>
 <p>The checkout <code>status</code> field indicates the current phase of the session and
-determines what action is required next. The business sets the status; the
+determines what processing is required next. The business sets the status; the
 platform receives messages indicating what's needed to progress.</p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>       +------------+                         +---------------------+
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>       | incomplete |&lt;-----------------------&gt;| requires_escalation |
@@ -3904,7 +3994,9 @@ platform receives messages indicating what's needed to progress.</p>
 <li>
 <p><strong><code>incomplete</code></strong>: Checkout session is missing required information or has
     issues that need resolution. Platform should inspect <code>messages</code> array for
-    context and should attempt to resolve via Update Checkout.</p>
+    context and should attempt to resolve via Update Checkout. When an active
+    extension surfaces an Action, that instance may identify work the Business
+    needs completed before it can return <code>ready_for_complete</code>.</p>
 </li>
 <li>
 <p><strong><code>requires_escalation</code></strong>: Checkout session requires information that
@@ -3915,29 +4007,119 @@ platform receives messages indicating what's needed to progress.</p>
 </li>
 <li>
 <p><strong><code>ready_for_complete</code></strong>: Checkout session has all necessary information
-    and platform can finalize programmatically. Platform can call
-    Complete Checkout.</p>
+    and platform can finalize programmatically. No Action remains outstanding.
+    Platform can call Complete Checkout.</p>
 </li>
 <li>
-<p><strong><code>complete_in_progress</code></strong>: Business is processing the Complete Checkout
-    request.</p>
+<p><strong><code>complete_in_progress</code></strong>: The Complete Checkout request was accepted and the
+    Business is processing the order. The response <strong>MUST NOT</strong> contain <code>order</code>.
+    An Action can be outstanding in this state. See <a href="#actions">Actions</a> for how
+    the Platform proceeds.</p>
 </li>
 <li>
-<p><strong><code>completed</code></strong>: Order placed successfully.</p>
+<p><strong><code>completed</code></strong>: Order placed successfully. <code>order</code> is present and no Action
+    remains outstanding.</p>
 </li>
 <li>
 <p><strong><code>canceled</code></strong>: Checkout session is invalid or expired. Platform should
-    start a new checkout session if needed.</p>
+    start a new checkout session if needed. No Action remains outstanding.</p>
 </li>
 </ul>
+<h3 id="actions">Actions<a class="headerlink" href="#actions" title="Permanent link">&para;</a></h3>
+<p>When an active extension has outstanding work for the checkout, the Business
+surfaces instances under the Action types that extension declares in the
+response-only <code>actions</code> map. The common rules are defined in
+<a href="../overview/#actions">Overview — Actions</a>; this section states only how the
+checkout status lifecycle interprets them.
+<a href="#status-values">Status Values</a> is the authoritative home for the status
+invariants governing outstanding Actions.</p>
+<p>Every Action gates the effect specified for its Action type. While <code>incomplete</code>,
+an Action may identify work the Business needs completed before it can return
+<code>ready_for_complete</code>. After processing the Action according to its Action type's
+contract, the Platform <strong>SHOULD</strong> use <a href="#get-checkout">Get Checkout</a> or, outside
+<code>complete_in_progress</code>, a subsequent <a href="#update-checkout">Update Checkout</a>
+response to obtain the latest Checkout.</p>
+<p>An Action does not select the Checkout status, and a Message's type or severity
+does not determine whether the Action gates its Action-defined effect. A Message
+can report the outcome of a particular operation. An info or warning Message can
+identify an outstanding Action without reporting failure. A recoverable error
+Message can identify an Action to report that the requested effect was not
+applied because of it. In that case, the Business returns the current Checkout
+and sets the Message's <code>path</code> to the exact Action occurrence, as defined in
+<a href="../overview/#actions">Overview — Actions</a>. The Message does not turn the Action
+into a lock on unrelated Checkout operations.</p>
+<p>If an Action prevents Complete Checkout from being accepted, the Business
+<strong>MUST</strong> return the current Checkout with <code>status: incomplete</code> and an error
+Message with <code>severity: "recoverable"</code> whose <code>path</code> selects that exact Action
+occurrence. Processing the Action does not retry the rejected Complete Checkout
+request. A later Complete Checkout request is a new operation under the existing
+idempotency rules.</p>
+<h4 id="accepted-completion">Accepted completion<a class="headerlink" href="#accepted-completion" title="Permanent link">&para;</a></h4>
+<p><code>complete_in_progress</code> means Complete Checkout was accepted. The Checkout state
+reported by the Business is authoritative. While a Checkout has this status, the
+following operation contract applies:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Operation</th>
+<th style="text-align: left;">Contract</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">Get Checkout</td>
+<td style="text-align: left;">The Platform <strong>MAY</strong> invoke Get Checkout; the Business's response is authoritative. The Platform <strong>MAY</strong> repeat Get Checkout with bounded backoff set by the Action contract or Platform policy, and <strong>MUST</strong> stop repeated requests at <code>expires_at</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;">Update Checkout</td>
+<td style="text-align: left;">The Platform <strong>MUST NOT</strong> start a new Update Checkout operation. Duplicate requests remain subject to <a href="../signatures/#replay-protection">Replay Protection</a>. If the Business receives a new Update Checkout request, it <strong>MUST</strong> leave the Checkout unchanged and return the current Checkout with a recoverable error Message.</td>
+</tr>
+<tr>
+<td style="text-align: left;">Complete Checkout</td>
+<td style="text-align: left;">The Platform <strong>MUST NOT</strong> start a new Complete Checkout operation during <code>complete_in_progress</code>. See <a href="#complete-checkout">Complete Checkout</a> for the narrow lost-response recovery retry.</td>
+</tr>
+<tr>
+<td style="text-align: left;">Cancel Checkout</td>
+<td style="text-align: left;">The Platform <strong>MUST</strong> follow the fallback, handoff, and cancellation race rules below before attempting Cancel Checkout.</td>
+</tr>
+</tbody>
+</table>
+<p>When a <code>complete_in_progress</code> Checkout includes an Action, the Platform
+processes it according to its Action-type contract. When it contains no Action,
+the Platform <strong>SHOULD</strong> use Get Checkout to observe Business processing.</p>
+<p>Because Update Checkout is unavailable after Complete Checkout is accepted, the
+Business <strong>MUST</strong> surface any Action that requires input through Update Checkout
+before accepting Complete Checkout.</p>
+<p>After an Action's extension-defined processing completes, the Business might
+need time to receive and apply its result. The Action completion signal is not
+authoritative for Checkout state. The Platform <strong>MUST</strong> use
+<a href="#get-checkout">Get Checkout</a> to confirm that the Business reflected the result,
+for example by removing the Action or changing the Checkout status.</p>
+<p>If the same Action key and <code>id</code> remain, the Platform <strong>MUST NOT</strong> process it
+again unless its contract explicitly permits retry and every safe-retry
+condition holds. A replacement with a fresh <code>id</code> is new work. If the Action
+disappears, that Action is no longer outstanding.</p>
+<p>If the Platform cannot complete an Action, or the Business does not update the
+Checkout within a timeout set by the Action contract or Platform policy before
+<code>expires_at</code>, the Platform <strong>SHOULD</strong> follow any applicable Action fallback. If
+no fallback can continue the Checkout and <code>continue_url</code> is available, the
+Platform <strong>SHOULD</strong> use it to hand off the Checkout to the Buyer. The Platform
+<strong>MUST NOT</strong> attempt Cancel Checkout while either fallback or handoff can still
+continue the Checkout.</p>
+<p>If neither fallback nor handoff can continue, the Platform <strong>SHOULD</strong> use Get
+Checkout to retrieve the latest state and attempt Cancel Checkout only if it
+still reports <code>complete_in_progress</code>. Cancellation can race completion; the
+Platform <strong>MUST NOT</strong> treat the Checkout as canceled unless the Business reports
+<code>status: canceled</code>.</p>
 <h3 id="error-handling">Error Handling<a class="headerlink" href="#error-handling" title="Permanent link">&para;</a></h3>
 <p>The <code>messages</code> array contains errors, warnings, and informational messages
 about the checkout state. <code>ucp.status</code> is the shape discriminator —
 <code>"success"</code> means the response carries the expected payload, <code>"error"</code>
 means it carries error information instead. Each error message carries a <code>type</code>,
 <code>code</code>, <code>severity</code>, <code>content</code>, and an optional <code>path</code> that identifies the
-specific field or line item the message refers to (see <a href="#the-path-field">The <code>path</code> Field</a> below).
-The <code>severity</code> field prescribes the recommended platform action:</p>
+specific response component the message refers to, including a field, line
+item, or Action occurrence (see <a href="#the-path-field">The <code>path</code> Field</a> below). The
+<code>severity</code> field prescribes the recommended platform action:</p>
 <table>
 <thead>
 <tr>
@@ -3949,8 +4131,8 @@ The <code>severity</code> field prescribes the recommended platform action:</p>
 <tbody>
 <tr>
 <td style="text-align: left;"><code>recoverable</code></td>
-<td style="text-align: left;">Platform can resolve by modifying inputs via API</td>
-<td style="text-align: left;">Update resource and retry</td>
+<td style="text-align: left;">Platform can resolve the condition in band</td>
+<td style="text-align: left;">Modify inputs or process a related Action; submit a new operation when needed</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>requires_buyer_input</code></td>
@@ -4008,7 +4190,11 @@ three error types: a recoverable error (invalid phone), a buyer input
 requirement (delivery scheduling), and a review requirement (high-value order).
 The latter two require handoff and serve as explicit signals to the platform.
 Businesses <strong>SHOULD</strong> surface such messages as early as possible, and platforms
-<strong>SHOULD</strong> prioritize resolving recoverable errors before initiating handoff.</p>
+<strong>SHOULD</strong> prioritize resolving recoverable errors before initiating handoff.
+When a recoverable error's <code>path</code> selects an Action occurrence, the Platform
+processes it according to <a href="#actions">Actions</a> and re-evaluates the latest
+Checkout before submitting another operation. The example algorithm below
+covers recoverable input errors whose paths do not select Actions.</p>
 <!-- ucp:example schema=shopping/checkout target=$.messages op=read -->
 <div class="language-json highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="p">[</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="p">{</span>
@@ -4102,15 +4288,14 @@ messages or deferring to checkout completion.</p>
 <p>Example: <code>out_of_stock</code> requires specific upfront UX, whereas
 <code>payment_required</code> can be handled generically at submission.</p>
 <h4 id="the-path-field">The <code>path</code> Field<a class="headerlink" href="#the-path-field" title="Permanent link">&para;</a></h4>
-<p>The optional <code>path</code> field on a message anchors the error to a specific
-component of the response payload. Platforms use it to associate error
-messages with the input field or line item that caused them - for example,
-highlighting a specific buyer field in a form or flagging a specific
-cart line.</p>
+<p>The optional <code>path</code> field on a message anchors it to a specific component of the
+response payload. Platforms use it to associate messages with an input field,
+line item, or Action occurrence — for example, highlighting a specific buyer
+field, flagging a cart line, or identifying the Action related to an operation
+outcome.</p>
 <p><code>path</code> <strong>MUST</strong> be an <a href="https://www.rfc-editor.org/rfc/rfc9535">RFC 9535</a>
-JSONPath expression relative to the root of the UCP response object.
-Property names <strong>MUST</strong> use snake_case matching the request schema.
-When <code>path</code> is omitted, the message applies to the response as a whole.</p>
+JSONPath expression relative to the root of the UCP response object. When <code>path</code>
+is omitted, the message applies to the response as a whole.</p>
 <p><strong>Simple field reference:</strong></p>
 <!-- ucp:example skip reason="path schema example" -->
 <div class="language-json highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p">{</span><span class="w"> </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;$.buyer.email&quot;</span><span class="w"> </span><span class="p">}</span>
@@ -4119,14 +4304,12 @@ When <code>path</code> is omitted, the message applies to the response as a whol
 <!-- ucp:example skip reason="path schema example" -->
 <div class="language-json highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="p">{</span><span class="w"> </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;$.line_items[0].quantity&quot;</span><span class="w"> </span><span class="p">}</span>
 </span></code></pre></div>
-<p><strong>Filter expression (optional, when referencing a specific item by ID):</strong></p>
+<p><strong>Action occurrence:</strong></p>
 <!-- ucp:example skip reason="path schema example" -->
-<div class="language-json highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="p">{</span><span class="w"> </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;$.line_items[?(@.id==&#39;line-item-uuid&#39;)].quantity&quot;</span><span class="w"> </span><span class="p">}</span>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="p">{</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">  </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;$.actions[&#39;com.example.identity.student_verification&#39;][0]&quot;</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="p">}</span>
 </span></code></pre></div>
-<p>Filter expressions are valid RFC 9535 syntax and <strong>MAY</strong> be used when
-referencing a specific line item by <code>id</code> is clearer than its index.
-Index-based paths are equally valid; the business returns indices that
-are unambiguous within the response.</p>
 <p><strong>Specificity rule:</strong> A path to a specific field (e.g.,
 <code>$.line_items[0].quantity</code>) takes precedence over a path to its parent
 (e.g., <code>$.line_items[0]</code>). When multiple errors apply to the same field,
@@ -4173,10 +4356,10 @@ unverified <strong>MUST</strong> result in <code>type: "error"</code> with
 </table>
 <p>A claim is resolved when it is either <strong>verified</strong> or <strong>rescinded</strong>:</p>
 <ul>
-<li><strong>Verified</strong>: The Business confirms the claim against a proof provided at
-  completion time. UCP does not prescribe how verification occurs — proof
-  may come from the payment credential, an identity verification capability,
-  or any other mechanism negotiated between Platform and Business.</li>
+<li><strong>Verified</strong>: The Business confirms the claim against a proof. UCP does not
+  prescribe how verification occurs — proof may come from the payment
+  credential, an Action surfaced by a negotiated extension, or any
+  other mechanism negotiated between Platform and Business.</li>
 <li><strong>Rescinded</strong>: The Platform removes the claim from <code>context.eligibility</code>
   before completion (e.g., buyer changes payment method, withdraws a
   membership claim). Once removed, the Business recalculates without it.</li>
@@ -4185,40 +4368,88 @@ unverified <strong>MUST</strong> result in <code>type: "error"</code> with
 claims. Unverified claims may result in incorrect pricing or unauthorized
 access to restricted products.</p>
 <p><strong>When verification fails:</strong></p>
-<p>Verification failure <strong>MUST</strong> only affect the <code>messages</code> array. The
-Business <strong>MUST</strong> return an error in <code>messages</code> with
-<code>code: "eligibility_invalid"</code> and <code>severity: "recoverable"</code>. Messages
-<strong>SHOULD</strong> use the <code>path</code> field to identify which specific claim(s) could
-not be verified. The Platform <strong>MAY</strong> then provide valid proof and
-resubmit, restructure the checkout (e.g., remove ineligible items, update
-claims), or abandon the attempt.</p>
-<p>For example, the Platform claims a store card benefit via
-<code>context.eligibility</code>. The Business applies member pricing during the session.
-At completion, the payment credential does not match the claimed instrument:</p>
+<p>The Business <strong>MUST</strong> return an error in <code>messages</code> with
+<code>code: "eligibility_invalid"</code> and <code>severity: "recoverable"</code>. When an Action
+prevents the requested effect, the Business <strong>MUST</strong> set that error
+Message's <code>path</code> to select the exact Action occurrence as specified in
+<a href="#actions">Actions</a>. Otherwise, the Business <strong>SHOULD</strong> use <code>path</code> to identify
+which specific claim(s) could not be verified. Any Action or discount state
+contributed by a negotiated extension <strong>MAY</strong> remain current according to that
+extension. The Platform
+<strong>MAY</strong> then retry that extension's verification flow, use
+<a href="#update-checkout">Update Checkout</a> for ordinary checkout changes (e.g.,
+remove ineligible items) or to rescind the claim, or abandon the attempt.</p>
+<h5 id="example-resolving-a-claim-with-a-verification-action">Example: resolving a claim with a verification Action<a class="headerlink" href="#example-resolving-a-claim-with-a-verification-action" title="Permanent link">&para;</a></h5>
+<p>This example is illustrative. It uses a negotiated vendor extension,
+<code>com.example.identity.student_verification</code>, that declares a single Action type
+under a key of the same name in <code>actions</code> and defines the instance <code>config</code> and
+verification transport. It composes that extension with <code>context.eligibility</code>, a
+provisional <a href="../discount/">Discount</a>, an <a href="#actions">Action</a>, and
+<code>messages</code>.</p>
+<p>The provisional discount fields (<code>provisional</code>, <code>eligibility</code>) belong to the
+<a href="../discount/#eligibility-claims">Discount extension</a> and are available only when
+that extension is active for the checkout.</p>
+<p><strong>1. Claim accepted, discount provisional, verification Action outstanding.</strong>
+The Platform submits <code>org.example.student</code> in <code>context.eligibility</code> on Create
+Checkout. The Business accepts the claim and, with the Discount extension
+active, returns a provisional discount, an explanatory <code>info</code> message, and a
+verification Action. The claim is unresolved, so the checkout stays
+<code>incomplete</code>:</p>
 <!-- ucp:example schema=shopping/checkout op=read -->
 <div class="language-json highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="p">{</span>
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">  </span><span class="nt">&quot;ucp&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-01-11&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;success&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;payment_handlers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">},</span>
-</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;checkout_abc&quot;</span><span class="p">,</span>
-</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">  </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ready_for_complete&quot;</span><span class="p">,</span>
-</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">  </span><span class="nt">&quot;currency&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">  </span><span class="nt">&quot;ucp&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">},</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;chk_student_1&quot;</span><span class="p">,</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">  </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;incomplete&quot;</span><span class="p">,</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">  </span><span class="nt">&quot;currency&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;USD&quot;</span><span class="p">,</span>
 </span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">  </span><span class="nt">&quot;line_items&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">],</span>
-</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">  </span><span class="nt">&quot;totals&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">],</span>
-</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="w">  </span><span class="nt">&quot;links&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">],</span>
-</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="w">  </span><span class="nt">&quot;messages&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="w">    </span><span class="p">{</span>
-</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;error&quot;</span><span class="p">,</span>
-</span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="w">      </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;eligibility_invalid&quot;</span><span class="p">,</span>
-</span><span id="__span-7-13"><a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a><span class="w">      </span><span class="nt">&quot;severity&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;recoverable&quot;</span><span class="p">,</span>
-</span><span id="__span-7-14"><a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a><span class="w">      </span><span class="nt">&quot;content&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Payment credential does not match the claimed store card benefit.&quot;</span><span class="p">,</span>
-</span><span id="__span-7-15"><a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a><span class="w">      </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;$.context.eligibility[0]&quot;</span>
-</span><span id="__span-7-16"><a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a><span class="w">    </span><span class="p">}</span>
-</span><span id="__span-7-17"><a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a><span class="w">  </span><span class="p">]</span>
-</span><span id="__span-7-18"><a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a><span class="p">}</span>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">  </span><span class="nt">&quot;discounts&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="w">    </span><span class="nt">&quot;applied&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="w">      </span><span class="p">{</span>
+</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="w">        </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Student 10% Off&quot;</span><span class="p">,</span>
+</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="w">        </span><span class="nt">&quot;amount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">500</span><span class="p">,</span>
+</span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="w">        </span><span class="nt">&quot;automatic&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+</span><span id="__span-7-13"><a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a><span class="w">        </span><span class="nt">&quot;provisional&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+</span><span id="__span-7-14"><a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a><span class="w">        </span><span class="nt">&quot;eligibility&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;org.example.student&quot;</span>
+</span><span id="__span-7-15"><a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a><span class="w">      </span><span class="p">}</span>
+</span><span id="__span-7-16"><a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a><span class="w">    </span><span class="p">]</span>
+</span><span id="__span-7-17"><a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a><span class="w">  </span><span class="p">},</span>
+</span><span id="__span-7-18"><a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a><span class="w">  </span><span class="nt">&quot;totals&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">],</span>
+</span><span id="__span-7-19"><a id="__codelineno-7-19" name="__codelineno-7-19" href="#__codelineno-7-19"></a><span class="w">  </span><span class="nt">&quot;links&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">],</span>
+</span><span id="__span-7-20"><a id="__codelineno-7-20" name="__codelineno-7-20" href="#__codelineno-7-20"></a><span class="w">  </span><span class="nt">&quot;actions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-7-21"><a id="__codelineno-7-21" name="__codelineno-7-21" href="#__codelineno-7-21"></a><span class="w">    </span><span class="nt">&quot;com.example.identity.student_verification&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-7-22"><a id="__codelineno-7-22" name="__codelineno-7-22" href="#__codelineno-7-22"></a><span class="w">      </span><span class="p">{</span>
+</span><span id="__span-7-23"><a id="__codelineno-7-23" name="__codelineno-7-23" href="#__codelineno-7-23"></a><span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;verify-student-1&quot;</span><span class="p">,</span>
+</span><span id="__span-7-24"><a id="__codelineno-7-24" name="__codelineno-7-24" href="#__codelineno-7-24"></a><span class="w">        </span><span class="nt">&quot;config&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-7-25"><a id="__codelineno-7-25" name="__codelineno-7-25" href="#__codelineno-7-25"></a><span class="w">          </span><span class="nt">&quot;verification_url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://business.example.com/verify/abc&quot;</span>
+</span><span id="__span-7-26"><a id="__codelineno-7-26" name="__codelineno-7-26" href="#__codelineno-7-26"></a><span class="w">        </span><span class="p">}</span>
+</span><span id="__span-7-27"><a id="__codelineno-7-27" name="__codelineno-7-27" href="#__codelineno-7-27"></a><span class="w">      </span><span class="p">}</span>
+</span><span id="__span-7-28"><a id="__codelineno-7-28" name="__codelineno-7-28" href="#__codelineno-7-28"></a><span class="w">    </span><span class="p">]</span>
+</span><span id="__span-7-29"><a id="__codelineno-7-29" name="__codelineno-7-29" href="#__codelineno-7-29"></a><span class="w">  </span><span class="p">},</span>
+</span><span id="__span-7-30"><a id="__codelineno-7-30" name="__codelineno-7-30" href="#__codelineno-7-30"></a><span class="w">  </span><span class="nt">&quot;messages&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-7-31"><a id="__codelineno-7-31" name="__codelineno-7-31" href="#__codelineno-7-31"></a><span class="w">    </span><span class="p">{</span>
+</span><span id="__span-7-32"><a id="__codelineno-7-32" name="__codelineno-7-32" href="#__codelineno-7-32"></a><span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;info&quot;</span><span class="p">,</span>
+</span><span id="__span-7-33"><a id="__codelineno-7-33" name="__codelineno-7-33" href="#__codelineno-7-33"></a><span class="w">      </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;eligibility_accepted&quot;</span><span class="p">,</span>
+</span><span id="__span-7-34"><a id="__codelineno-7-34" name="__codelineno-7-34" href="#__codelineno-7-34"></a><span class="w">      </span><span class="nt">&quot;content&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Student discount applied provisionally. Verify your student status to keep it.&quot;</span><span class="p">,</span>
+</span><span id="__span-7-35"><a id="__codelineno-7-35" name="__codelineno-7-35" href="#__codelineno-7-35"></a><span class="w">      </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;$.actions[&#39;com.example.identity.student_verification&#39;][0]&quot;</span>
+</span><span id="__span-7-36"><a id="__codelineno-7-36" name="__codelineno-7-36" href="#__codelineno-7-36"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-7-37"><a id="__codelineno-7-37" name="__codelineno-7-37" href="#__codelineno-7-37"></a><span class="w">  </span><span class="p">]</span>
+</span><span id="__span-7-38"><a id="__codelineno-7-38" name="__codelineno-7-38" href="#__codelineno-7-38"></a><span class="p">}</span>
 </span></code></pre></div>
-<p>The Platform can resolve this by having the buyer switch to the qualifying
-payment instrument, or by removing the claim from <code>context.eligibility</code> to
-renegotiate the checkout (obtaining updated pricing, availability, etc.)
-and then resubmitting for completion.</p>
+<p>The Platform runs the extension-defined verification flow. The Business receives
+the outcome out of band. Once that flow is complete, the Platform uses
+<a href="#get-checkout">Get Checkout</a> to retrieve the updated state.</p>
+<p><strong>2. Verified.</strong> The Business resolves the claim: the verification Action is
+removed from <code>actions</code>, the discount is confirmed (no longer <code>provisional</code>), and
+the explanatory <code>info</code> message is updated. With the claim resolved, the checkout
+<strong>MAY</strong> advance to <code>ready_for_complete</code>.</p>
+<p><strong>3. Invalid proof.</strong> If the submitted proof does not verify, the claim stays
+unresolved. The Business returns an <code>eligibility_invalid</code> error with
+<code>severity: recoverable</code> (per <a href="#eligibility-verification-at-completion">When verification fails</a>)
+and the checkout does not reach <code>ready_for_complete</code>. The Platform <strong>MAY</strong>
+provide valid proof and retry the verification flow, or rescind the claim.</p>
+<p><strong>4. Rescission.</strong> The Platform rescinds the claim with an
+<a href="#update-checkout">Update Checkout</a> that removes it from <code>context.eligibility</code>;
+the Business then recalculates without the provisional discount.</p>
 <h3 id="warning-presentation">Warning Presentation<a class="headerlink" href="#warning-presentation" title="Permanent link">&para;</a></h3>
 <p>The <code>presentation</code> field on warning messages controls the rendering
 contract the platform <strong>MUST</strong> follow. When omitted, it defaults to
@@ -4507,7 +4738,7 @@ custom scopes are defined in <a href="../identity-linking/#scopes">Identity Link
 <td style="text-align: left;">status</td>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;"><strong>Required</strong></td>
-<td style="text-align: left;">Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details.<br><strong>Enum:</strong> <code>incomplete</code>, <code>requires_escalation</code>, <code>ready_for_complete</code>, <code>complete_in_progress</code>, <code>completed</code>, <code>canceled</code></td>
+<td style="text-align: left;">Checkout state indicating the current phase and required processing. See Checkout Status lifecycle documentation for state transition details.<br><strong>Enum:</strong> <code>incomplete</code>, <code>requires_escalation</code>, <code>ready_for_complete</code>, <code>complete_in_progress</code>, <code>completed</code>, <code>canceled</code></td>
 </tr>
 <tr>
 <td style="text-align: left;">currency</td>
@@ -4520,6 +4751,12 @@ custom scopes are defined in <a href="../identity-linking/#scopes">Identity Link
 <td style="text-align: left;"><a href="/draft/specification/reference/#totals">Totals</a></td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Different cart totals.</td>
+</tr>
+<tr>
+<td style="text-align: left;">actions</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#actions">Actions</a></td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Outstanding extension-defined Actions for this checkout.</td>
 </tr>
 <tr>
 <td style="text-align: left;">messages</td>
@@ -4685,7 +4922,10 @@ time of checkout session creation.</p>
 <p>Performs a full replacement of the checkout resource.
 The platform is <strong>REQUIRED</strong> to send the entire checkout resource containing any
 data updates to write-only data fields. The resource provided in the request
-will replace the existing checkout session state on the business side.</p>
+will replace the existing checkout session state on the business side. This
+general replacement rule does not apply during <code>complete_in_progress</code> because
+Update Checkout is not permitted; see
+<a href="#accepted-completion">Accepted completion</a> for the frozen operation contract.</p>
 <p><strong>Inputs</strong></p>
 <table>
 <thead>
@@ -4745,15 +4985,38 @@ will replace the existing checkout session state on the business side.</p>
 <p>This object MUST be one of the following types: <a href="/draft/specification/checkout/#checkout">Checkout</a>, <a href="/draft/specification/reference/#error-response">Error Response</a>.</p>
 <h3 id="complete-checkout">Complete Checkout<a class="headerlink" href="#complete-checkout" title="Permanent link">&para;</a></h3>
 <p>This is the final checkout placement call. To be invoked when the user has
-committed to pay and place an order for the chosen items. The response of this
-call is the checkout object with the <code>order</code> field populated in it. The returned
-<code>order</code> provides necessary identifiers, such as <code>id</code> and <code>permalink_url</code>,
-that can be used to reference the full state of the placed order.
-At the time of order persistence, fields from <code>Checkout</code> <strong>MAY</strong> be used
+committed to pay and place an order for the chosen items. Complete Checkout
+completes checkout and places the order from <code>ready_for_complete</code>.</p>
+<p>The response is the checkout object:</p>
+<ul>
+<li>When completion finishes synchronously, <code>status</code> is <code>completed</code> and the
+    <code>order</code> field is present, providing necessary identifiers such as <code>id</code> and
+    <code>permalink_url</code> that can be used to reference the full state of the placed
+    order.</li>
+<li>When completion is accepted for asynchronous processing, <code>status</code> is
+    <code>complete_in_progress</code> and no <code>order</code> is present. The Platform follows
+    <a href="#accepted-completion">Accepted completion</a> for Business processing and any
+    outstanding Action.</li>
+<li>Any other status retains its core
+    <a href="#checkout-status-lifecycle">Checkout status lifecycle</a> semantics — for
+    example <code>incomplete</code> for a recoverable change, or <code>requires_escalation</code> for
+    Buyer handoff.</li>
+</ul>
+<p>The Platform <strong>MUST NOT</strong> use Complete Checkout to poll or resume accepted
+processing. If the Platform does not receive a response to Complete Checkout, it
+<strong>SHOULD</strong> use Get Checkout with bounded backoff to obtain the current state and
+<strong>MUST</strong> stop at <code>expires_at</code>. Only if Get Checkout still does not establish
+whether the Business processed the original request, the Platform <strong>MAY</strong> submit
+the identical original Complete Checkout request again with the same idempotency
+key. The Platform <strong>MUST NOT</strong> use a new idempotency key for that retry.
+A genuinely new Complete Checkout operation after the Checkout returns to
+<code>ready_for_complete</code>
+<strong>MUST</strong> use a fresh idempotency key, even if the payload is unchanged.</p>
+<p>At the time of order persistence, fields from <code>Checkout</code> <strong>MAY</strong> be used
 to construct the order representation (i.e. information like <code>line_items</code>,
 <code>fulfillment</code> will be used to create the initial order representation).</p>
-<p>After this call, other details will be updated through subsequent events
-as the order, and its associated items, moves through the supply chain.</p>
+<p>After the order is placed, other details will be updated through subsequent
+events as the order, and its associated items, move through the supply chain.</p>
 <p><strong>Inputs</strong></p>
 <table>
 <thead>

@@ -96,12 +96,13 @@ Maps to the [Catalog Search](http://ucp.dev/draft/specification/catalog/search/i
 
 ### Search Response
 
-| Name       | Type          | Requirement  | Description                                                           |
-| ---------- | ------------- | ------------ | --------------------------------------------------------------------- |
-| ucp        | any           | **Required** | UCP metadata for catalog responses.                                   |
-| products   | Array[object] | **Required** | Products matching the search criteria.                                |
-| pagination | object        | Optional     | Pagination information in responses.                                  |
-| messages   | Array[object] | Optional     | Errors, warnings, or informational messages about the search results. |
+| Name       | Type          | Requirement  | Description                                                             |
+| ---------- | ------------- | ------------ | ----------------------------------------------------------------------- |
+| ucp        | any           | **Required** | UCP metadata for catalog responses.                                     |
+| products   | Array[object] | **Required** | Products matching the search criteria.                                  |
+| pagination | object        | Optional     | Pagination information in responses.                                    |
+| actions    | object        | Optional     | Outstanding extension-defined Actions for this catalog search response. |
+| messages   | Array[object] | Optional     | Errors, warnings, or informational messages about the search results.   |
 
 #### Search Example
 
@@ -262,6 +263,7 @@ Request body for catalog lookup.
 | -------- | -------------- | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
 | ucp      | any            | **Required** | UCP metadata for catalog responses.                                                                                                                 |
 | products | Array[Product] | **Required** | Products matching the requested identifiers. May contain fewer items if some identifiers not found, or more if identifiers match multiple products. |
+| actions  | object         | Optional     | Outstanding extension-defined Actions for this catalog lookup response.                                                                             |
 | messages | Array[object]  | Optional     | Errors, warnings, or informational messages about the requested items.                                                                              |
 
 #### Lookup Example
@@ -453,6 +455,7 @@ Request body for single-product retrieval. Supports interactive variant narrowin
 | -------- | ------------- | ------------ | ---------------------------------------------------------------------------------------------------------- |
 | ucp      | any           | **Required** | UCP metadata for catalog responses.                                                                        |
 | product  | object        | **Required** | The requested product with full detail. Singular — this is a single-resource operation.                    |
+| actions  | object        | Optional     | Outstanding extension-defined Actions for this product response.                                           |
 | messages | Array[object] | Optional     | Warnings or informational messages about the product (e.g., price recently changed, limited availability). |
 
 #### Get Product Example
@@ -672,6 +675,7 @@ A product in a get_product response, extended with effective selections and avai
 | -------- | ------------- | ------------ | ---------------------------------------------------------------------------------------------------------- |
 | ucp      | any           | **Required** | UCP metadata for catalog responses.                                                                        |
 | product  | object        | **Required** | The requested product with full detail. Singular — this is a single-resource operation.                    |
+| actions  | object        | Optional     | Outstanding extension-defined Actions for this product response.                                           |
 | messages | Array[object] | Optional     | Warnings or informational messages about the product (e.g., price recently changed, limited availability). |
 
 ### Error Response

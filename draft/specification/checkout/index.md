@@ -24,7 +24,7 @@ Fulfillment is optional in the checkout object. This is done to enable a platfor
 
 ### Checkout Status Lifecycle
 
-The checkout `status` field indicates the current phase of the session and determines what action is required next. The business sets the status; the platform receives messages indicating what's needed to progress.
+The checkout `status` field indicates the current phase of the session and determines what processing is required next. The business sets the status; the platform receives messages indicating what's needed to progress.
 
 ```text
        +------------+                         +---------------------+
@@ -61,23 +61,56 @@ The checkout `status` field indicates the current phase of the session and deter
 
 ### Status Values
 
-- **`incomplete`**: Checkout session is missing required information or has issues that need resolution. Platform should inspect `messages` array for context and should attempt to resolve via Update Checkout.
+- **`incomplete`**: Checkout session is missing required information or has issues that need resolution. Platform should inspect `messages` array for context and should attempt to resolve via Update Checkout. When an active extension surfaces an Action, that instance may identify work the Business needs completed before it can return `ready_for_complete`.
 - **`requires_escalation`**: Checkout session requires information that cannot be provided via API, or buyer input is required. Platform should inspect `messages` to understand what's needed (see Error Handling below). If any `recoverable` errors exist, resolve those first. Then hand off to buyer via `continue_url`.
-- **`ready_for_complete`**: Checkout session has all necessary information and platform can finalize programmatically. Platform can call Complete Checkout.
-- **`complete_in_progress`**: Business is processing the Complete Checkout request.
-- **`completed`**: Order placed successfully.
-- **`canceled`**: Checkout session is invalid or expired. Platform should start a new checkout session if needed.
+- **`ready_for_complete`**: Checkout session has all necessary information and platform can finalize programmatically. No Action remains outstanding. Platform can call Complete Checkout.
+- **`complete_in_progress`**: The Complete Checkout request was accepted and the Business is processing the order. The response **MUST NOT** contain `order`. An Action can be outstanding in this state. See [Actions](#actions) for how the Platform proceeds.
+- **`completed`**: Order placed successfully. `order` is present and no Action remains outstanding.
+- **`canceled`**: Checkout session is invalid or expired. Platform should start a new checkout session if needed. No Action remains outstanding.
+
+### Actions
+
+When an active extension has outstanding work for the checkout, the Business surfaces instances under the Action types that extension declares in the response-only `actions` map. The common rules are defined in [Overview — Actions](http://ucp.dev/draft/specification/overview/#actions); this section states only how the checkout status lifecycle interprets them. [Status Values](#status-values) is the authoritative home for the status invariants governing outstanding Actions.
+
+Every Action gates the effect specified for its Action type. While `incomplete`, an Action may identify work the Business needs completed before it can return `ready_for_complete`. After processing the Action according to its Action type's contract, the Platform **SHOULD** use [Get Checkout](#get-checkout) or, outside `complete_in_progress`, a subsequent [Update Checkout](#update-checkout) response to obtain the latest Checkout.
+
+An Action does not select the Checkout status, and a Message's type or severity does not determine whether the Action gates its Action-defined effect. A Message can report the outcome of a particular operation. An info or warning Message can identify an outstanding Action without reporting failure. A recoverable error Message can identify an Action to report that the requested effect was not applied because of it. In that case, the Business returns the current Checkout and sets the Message's `path` to the exact Action occurrence, as defined in [Overview — Actions](http://ucp.dev/draft/specification/overview/#actions). The Message does not turn the Action into a lock on unrelated Checkout operations.
+
+If an Action prevents Complete Checkout from being accepted, the Business **MUST** return the current Checkout with `status: incomplete` and an error Message with `severity: "recoverable"` whose `path` selects that exact Action occurrence. Processing the Action does not retry the rejected Complete Checkout request. A later Complete Checkout request is a new operation under the existing idempotency rules.
+
+#### Accepted completion
+
+`complete_in_progress` means Complete Checkout was accepted. The Checkout state reported by the Business is authoritative. While a Checkout has this status, the following operation contract applies:
+
+| Operation         | Contract                                                                                                                                                                                                                                                                                                                                                        |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Get Checkout      | The Platform **MAY** invoke Get Checkout; the Business's response is authoritative. The Platform **MAY** repeat Get Checkout with bounded backoff set by the Action contract or Platform policy, and **MUST** stop repeated requests at `expires_at`.                                                                                                           |
+| Update Checkout   | The Platform **MUST NOT** start a new Update Checkout operation. Duplicate requests remain subject to [Replay Protection](http://ucp.dev/draft/specification/signatures/#replay-protection). If the Business receives a new Update Checkout request, it **MUST** leave the Checkout unchanged and return the current Checkout with a recoverable error Message. |
+| Complete Checkout | The Platform **MUST NOT** start a new Complete Checkout operation during `complete_in_progress`. See [Complete Checkout](#complete-checkout) for the narrow lost-response recovery retry.                                                                                                                                                                       |
+| Cancel Checkout   | The Platform **MUST** follow the fallback, handoff, and cancellation race rules below before attempting Cancel Checkout.                                                                                                                                                                                                                                        |
+
+When a `complete_in_progress` Checkout includes an Action, the Platform processes it according to its Action-type contract. When it contains no Action, the Platform **SHOULD** use Get Checkout to observe Business processing.
+
+Because Update Checkout is unavailable after Complete Checkout is accepted, the Business **MUST** surface any Action that requires input through Update Checkout before accepting Complete Checkout.
+
+After an Action's extension-defined processing completes, the Business might need time to receive and apply its result. The Action completion signal is not authoritative for Checkout state. The Platform **MUST** use [Get Checkout](#get-checkout) to confirm that the Business reflected the result, for example by removing the Action or changing the Checkout status.
+
+If the same Action key and `id` remain, the Platform **MUST NOT** process it again unless its contract explicitly permits retry and every safe-retry condition holds. A replacement with a fresh `id` is new work. If the Action disappears, that Action is no longer outstanding.
+
+If the Platform cannot complete an Action, or the Business does not update the Checkout within a timeout set by the Action contract or Platform policy before `expires_at`, the Platform **SHOULD** follow any applicable Action fallback. If no fallback can continue the Checkout and `continue_url` is available, the Platform **SHOULD** use it to hand off the Checkout to the Buyer. The Platform **MUST NOT** attempt Cancel Checkout while either fallback or handoff can still continue the Checkout.
+
+If neither fallback nor handoff can continue, the Platform **SHOULD** use Get Checkout to retrieve the latest state and attempt Cancel Checkout only if it still reports `complete_in_progress`. Cancellation can race completion; the Platform **MUST NOT** treat the Checkout as canceled unless the Business reports `status: canceled`.
 
 ### Error Handling
 
-The `messages` array contains errors, warnings, and informational messages about the checkout state. `ucp.status` is the shape discriminator — `"success"` means the response carries the expected payload, `"error"` means it carries error information instead. Each error message carries a `type`, `code`, `severity`, `content`, and an optional `path` that identifies the specific field or line item the message refers to (see [The `path` Field](#the-path-field) below). The `severity` field prescribes the recommended platform action:
+The `messages` array contains errors, warnings, and informational messages about the checkout state. `ucp.status` is the shape discriminator — `"success"` means the response carries the expected payload, `"error"` means it carries error information instead. Each error message carries a `type`, `code`, `severity`, `content`, and an optional `path` that identifies the specific response component the message refers to, including a field, line item, or Action occurrence (see [The `path` Field](#the-path-field) below). The `severity` field prescribes the recommended platform action:
 
-| Severity                | Meaning                                          | Platform Action                                                   |
-| ----------------------- | ------------------------------------------------ | ----------------------------------------------------------------- |
-| `recoverable`           | Platform can resolve by modifying inputs via API | Update resource and retry                                         |
-| `requires_buyer_input`  | Business requires input not available via API    | Hand off via `continue_url`                                       |
-| `requires_buyer_review` | Buyer review and authorization is required       | Hand off via `continue_url`                                       |
-| `unrecoverable`         | No resource exists to act on                     | Retry with new resource or inputs, or hand off via `continue_url` |
+| Severity                | Meaning                                       | Platform Action                                                               |
+| ----------------------- | --------------------------------------------- | ----------------------------------------------------------------------------- |
+| `recoverable`           | Platform can resolve the condition in band    | Modify inputs or process a related Action; submit a new operation when needed |
+| `requires_buyer_input`  | Business requires input not available via API | Hand off via `continue_url`                                                   |
+| `requires_buyer_review` | Buyer review and authorization is required    | Hand off via `continue_url`                                                   |
+| `unrecoverable`         | No resource exists to act on                  | Retry with new resource or inputs, or hand off via `continue_url`             |
 
 Errors with `requires_*` severity contribute to `status: requires_escalation`. Both result in buyer handoff, but represent different checkout states.
 
@@ -105,7 +138,7 @@ See [REST](http://ucp.dev/draft/specification/checkout-rest/#create-checkout) an
 
 #### Error Processing Algorithm
 
-When status is `incomplete` or `requires_escalation`, platforms should process errors as a prioritized stack. The example below illustrates a checkout with three error types: a recoverable error (invalid phone), a buyer input requirement (delivery scheduling), and a review requirement (high-value order). The latter two require handoff and serve as explicit signals to the platform. Businesses **SHOULD** surface such messages as early as possible, and platforms **SHOULD** prioritize resolving recoverable errors before initiating handoff.
+When status is `incomplete` or `requires_escalation`, platforms should process errors as a prioritized stack. The example below illustrates a checkout with three error types: a recoverable error (invalid phone), a buyer input requirement (delivery scheduling), and a review requirement (high-value order). The latter two require handoff and serve as explicit signals to the platform. Businesses **SHOULD** surface such messages as early as possible, and platforms **SHOULD** prioritize resolving recoverable errors before initiating handoff. When a recoverable error's `path` selects an Action occurrence, the Platform processes it according to [Actions](#actions) and re-evaluates the latest Checkout before submitting another operation. The example algorithm below covers recoverable input errors whose paths do not select Actions.
 
 ```json
 [
@@ -182,9 +215,9 @@ Example: `out_of_stock` requires specific upfront UX, whereas `payment_required`
 
 #### The `path` Field
 
-The optional `path` field on a message anchors the error to a specific component of the response payload. Platforms use it to associate error messages with the input field or line item that caused them - for example, highlighting a specific buyer field in a form or flagging a specific cart line.
+The optional `path` field on a message anchors it to a specific component of the response payload. Platforms use it to associate messages with an input field, line item, or Action occurrence — for example, highlighting a specific buyer field, flagging a cart line, or identifying the Action related to an operation outcome.
 
-`path` **MUST** be an [RFC 9535](https://www.rfc-editor.org/rfc/rfc9535) JSONPath expression relative to the root of the UCP response object. Property names **MUST** use snake_case matching the request schema. When `path` is omitted, the message applies to the response as a whole.
+`path` **MUST** be an [RFC 9535](https://www.rfc-editor.org/rfc/rfc9535) JSONPath expression relative to the root of the UCP response object. When `path` is omitted, the message applies to the response as a whole.
 
 **Simple field reference:**
 
@@ -198,13 +231,13 @@ The optional `path` field on a message anchors the error to a specific component
 { "path": "$.line_items[0].quantity" }
 ```
 
-**Filter expression (optional, when referencing a specific item by ID):**
+**Action occurrence:**
 
 ```json
-{ "path": "$.line_items[?(@.id=='line-item-uuid')].quantity" }
+{
+  "path": "$.actions['com.example.identity.student_verification'][0]"
+}
 ```
-
-Filter expressions are valid RFC 9535 syntax and **MAY** be used when referencing a specific line item by `id` is clearer than its index. Index-based paths are equally valid; the business returns indices that are unambiguous within the response.
 
 **Specificity rule:** A path to a specific field (e.g., `$.line_items[0].quantity`) takes precedence over a path to its parent (e.g., `$.line_items[0]`). When multiple errors apply to the same field, each message **SHOULD** carry the most specific path applicable.
 
@@ -224,39 +257,71 @@ Unrecognized or inapplicable claims **MUST NOT** block the checkout. Businesses 
 
 A claim is resolved when it is either **verified** or **rescinded**:
 
-- **Verified**: The Business confirms the claim against a proof provided at completion time. UCP does not prescribe how verification occurs — proof may come from the payment credential, an identity verification capability, or any other mechanism negotiated between Platform and Business.
+- **Verified**: The Business confirms the claim against a proof. UCP does not prescribe how verification occurs — proof may come from the payment credential, an Action surfaced by a negotiated extension, or any other mechanism negotiated between Platform and Business.
 - **Rescinded**: The Platform removes the claim from `context.eligibility` before completion (e.g., buyer changes payment method, withdraws a membership claim). Once removed, the Business recalculates without it.
 
 Businesses **MUST NOT** complete a transaction with unresolved eligibility claims. Unverified claims may result in incorrect pricing or unauthorized access to restricted products.
 
 **When verification fails:**
 
-Verification failure **MUST** only affect the `messages` array. The Business **MUST** return an error in `messages` with `code: "eligibility_invalid"` and `severity: "recoverable"`. Messages **SHOULD** use the `path` field to identify which specific claim(s) could not be verified. The Platform **MAY** then provide valid proof and resubmit, restructure the checkout (e.g., remove ineligible items, update claims), or abandon the attempt.
+The Business **MUST** return an error in `messages` with `code: "eligibility_invalid"` and `severity: "recoverable"`. When an Action prevents the requested effect, the Business **MUST** set that error Message's `path` to select the exact Action occurrence as specified in [Actions](#actions). Otherwise, the Business **SHOULD** use `path` to identify which specific claim(s) could not be verified. Any Action or discount state contributed by a negotiated extension **MAY** remain current according to that extension. The Platform **MAY** then retry that extension's verification flow, use [Update Checkout](#update-checkout) for ordinary checkout changes (e.g., remove ineligible items) or to rescind the claim, or abandon the attempt.
 
-For example, the Platform claims a store card benefit via `context.eligibility`. The Business applies member pricing during the session. At completion, the payment credential does not match the claimed instrument:
+##### Example: resolving a claim with a verification Action
+
+This example is illustrative. It uses a negotiated vendor extension, `com.example.identity.student_verification`, that declares a single Action type under a key of the same name in `actions` and defines the instance `config` and verification transport. It composes that extension with `context.eligibility`, a provisional [Discount](http://ucp.dev/draft/specification/discount/index.md), an [Action](#actions), and `messages`.
+
+The provisional discount fields (`provisional`, `eligibility`) belong to the [Discount extension](http://ucp.dev/draft/specification/discount/#eligibility-claims) and are available only when that extension is active for the checkout.
+
+**1. Claim accepted, discount provisional, verification Action outstanding.** The Platform submits `org.example.student` in `context.eligibility` on Create Checkout. The Business accepts the claim and, with the Discount extension active, returns a provisional discount, an explanatory `info` message, and a verification Action. The claim is unresolved, so the checkout stays `incomplete`:
 
 ```json
 {
-  "ucp": { "version": "2026-01-11", "status": "success", "payment_handlers": { ... } },
-  "id": "checkout_abc",
-  "status": "ready_for_complete",
-  "currency": "...",
+  "ucp": { ... },
+  "id": "chk_student_1",
+  "status": "incomplete",
+  "currency": "USD",
   "line_items": [ ... ],
+  "discounts": {
+    "applied": [
+      {
+        "title": "Student 10% Off",
+        "amount": 500,
+        "automatic": true,
+        "provisional": true,
+        "eligibility": "org.example.student"
+      }
+    ]
+  },
   "totals": [ ... ],
   "links": [ ... ],
+  "actions": {
+    "com.example.identity.student_verification": [
+      {
+        "id": "verify-student-1",
+        "config": {
+          "verification_url": "https://business.example.com/verify/abc"
+        }
+      }
+    ]
+  },
   "messages": [
     {
-      "type": "error",
-      "code": "eligibility_invalid",
-      "severity": "recoverable",
-      "content": "Payment credential does not match the claimed store card benefit.",
-      "path": "$.context.eligibility[0]"
+      "type": "info",
+      "code": "eligibility_accepted",
+      "content": "Student discount applied provisionally. Verify your student status to keep it.",
+      "path": "$.actions['com.example.identity.student_verification'][0]"
     }
   ]
 }
 ```
 
-The Platform can resolve this by having the buyer switch to the qualifying payment instrument, or by removing the claim from `context.eligibility` to renegotiate the checkout (obtaining updated pricing, availability, etc.) and then resubmitting for completion.
+The Platform runs the extension-defined verification flow. The Business receives the outcome out of band. Once that flow is complete, the Platform uses [Get Checkout](#get-checkout) to retrieve the updated state.
+
+**2. Verified.** The Business resolves the claim: the verification Action is removed from `actions`, the discount is confirmed (no longer `provisional`), and the explanatory `info` message is updated. With the claim resolved, the checkout **MAY** advance to `ready_for_complete`.
+
+**3. Invalid proof.** If the submitted proof does not verify, the claim stays unresolved. The Business returns an `eligibility_invalid` error with `severity: recoverable` (per [When verification fails](#eligibility-verification-at-completion)) and the checkout does not reach `ready_for_complete`. The Platform **MAY** provide valid proof and retry the verification flow, or rescind the claim.
+
+**4. Rescission.** The Platform rescinds the claim with an [Update Checkout](#update-checkout) that removes it from `context.eligibility`; the Business then recalculates without the provisional discount.
 
 ### Warning Presentation
 
@@ -431,9 +496,10 @@ Scope declaration, derivation, and rules for extending this set with custom scop
 | context      | [Context](/draft/specification/reference/#context)                       | Optional     | Provisional buyer signals for relevance and localization—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data. Context SHOULD be non-identifying and can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. |
 | signals      | [Signals](/draft/specification/reference/#signals)                       | Optional     | Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.                                                                                                                                                                                                                                                                 |
 | attribution  | [Attribution](/draft/specification/reference/#attribution)               | Optional     | Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| status       | string                                                                   | **Required** | Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details. **Enum:** `incomplete`, `requires_escalation`, `ready_for_complete`, `complete_in_progress`, `completed`, `canceled`                                                                                                                                                                                                                                                                                                                                                                                                         |
+| status       | string                                                                   | **Required** | Checkout state indicating the current phase and required processing. See Checkout Status lifecycle documentation for state transition details. **Enum:** `incomplete`, `requires_escalation`, `ready_for_complete`, `complete_in_progress`, `completed`, `canceled`                                                                                                                                                                                                                                                                                                                                                                                                     |
 | currency     | string                                                                   | **Required** | ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | totals       | [Totals](/draft/specification/reference/#totals)                         | **Required** | Different cart totals.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| actions      | [Actions](/draft/specification/reference/#actions)                       | Optional     | Outstanding extension-defined Actions for this checkout.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | messages     | Array\[[Message](/draft/specification/reference/#message)\]              | Optional     | List of messages with error and info about the checkout session state.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | links        | Array\[[Link](/draft/specification/reference/#link)\]                    | **Required** | Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | expires_at   | string                                                                   | Optional     | RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
@@ -494,7 +560,7 @@ This object MUST be one of the following types: [Checkout](/draft/specification/
 
 ### Update Checkout
 
-Performs a full replacement of the checkout resource. The platform is **REQUIRED** to send the entire checkout resource containing any data updates to write-only data fields. The resource provided in the request will replace the existing checkout session state on the business side.
+Performs a full replacement of the checkout resource. The platform is **REQUIRED** to send the entire checkout resource containing any data updates to write-only data fields. The resource provided in the request will replace the existing checkout session state on the business side. This general replacement rule does not apply during `complete_in_progress` because Update Checkout is not permitted; see [Accepted completion](#accepted-completion) for the frozen operation contract.
 
 **Inputs**
 
@@ -514,9 +580,19 @@ This object MUST be one of the following types: [Checkout](/draft/specification/
 
 ### Complete Checkout
 
-This is the final checkout placement call. To be invoked when the user has committed to pay and place an order for the chosen items. The response of this call is the checkout object with the `order` field populated in it. The returned `order` provides necessary identifiers, such as `id` and `permalink_url`, that can be used to reference the full state of the placed order. At the time of order persistence, fields from `Checkout` **MAY** be used to construct the order representation (i.e. information like `line_items`, `fulfillment` will be used to create the initial order representation).
+This is the final checkout placement call. To be invoked when the user has committed to pay and place an order for the chosen items. Complete Checkout completes checkout and places the order from `ready_for_complete`.
 
-After this call, other details will be updated through subsequent events as the order, and its associated items, moves through the supply chain.
+The response is the checkout object:
+
+- When completion finishes synchronously, `status` is `completed` and the `order` field is present, providing necessary identifiers such as `id` and `permalink_url` that can be used to reference the full state of the placed order.
+- When completion is accepted for asynchronous processing, `status` is `complete_in_progress` and no `order` is present. The Platform follows [Accepted completion](#accepted-completion) for Business processing and any outstanding Action.
+- Any other status retains its core [Checkout status lifecycle](#checkout-status-lifecycle) semantics — for example `incomplete` for a recoverable change, or `requires_escalation` for Buyer handoff.
+
+The Platform **MUST NOT** use Complete Checkout to poll or resume accepted processing. If the Platform does not receive a response to Complete Checkout, it **SHOULD** use Get Checkout with bounded backoff to obtain the current state and **MUST** stop at `expires_at`. Only if Get Checkout still does not establish whether the Business processed the original request, the Platform **MAY** submit the identical original Complete Checkout request again with the same idempotency key. The Platform **MUST NOT** use a new idempotency key for that retry. A genuinely new Complete Checkout operation after the Checkout returns to `ready_for_complete` **MUST** use a fresh idempotency key, even if the payload is unchanged.
+
+At the time of order persistence, fields from `Checkout` **MAY** be used to construct the order representation (i.e. information like `line_items`, `fulfillment` will be used to create the initial order representation).
+
+After the order is placed, other details will be updated through subsequent events as the order, and its associated items, move through the supply chain.
 
 **Inputs**
 

@@ -3,7 +3,7 @@
   "info": {
     "title": "UCP Shopping Service",
     "description": "Canonical REST interface for UCP Shopping service. Schema references are logical pointers - actual payload shape is determined by negotiated capabilities.\n\n**Endpoint Resolution:** This spec defines operations only. The base URL MUST be obtained from the merchant's discovery profile at `/.well-known/ucp` under `services[\"dev.ucp.shopping\"][transport=rest].endpoint`. The `{endpoint}` server variable below is a placeholder for tooling compatibility.",
-    "version": "2026-07-22"
+    "version": "2026-07-23"
   },
   "servers": [
     {
@@ -171,7 +171,7 @@
       "put": {
         "operationId": "update_checkout",
         "summary": "Update Checkout",
-        "description": "If an optional field is provided in the request body, its value is treated as a complete replacement for the corresponding data. If optional field is omitted, then current checkout session is unchanged.",
+        "description": "Update Checkout is a full replacement operation. A new Update Checkout operation is not permitted while Checkout status is `complete_in_progress`. Duplicate requests remain subject to Replay Protection. If the Business receives a new Update Checkout request in that state, it leaves the Checkout unchanged and returns the current Checkout with a recoverable error Message.",
         "parameters": [
           {
             "$ref": "#/components/parameters/authorization"
@@ -225,7 +225,7 @@
         },
         "responses": {
           "200": {
-            "description": "Checkout session updated",
+            "description": "Current Checkout state after the Update request, whether the update was applied or rejected.",
             "headers": {
               "Signature": {
                 "$ref": "#/components/headers/signature"

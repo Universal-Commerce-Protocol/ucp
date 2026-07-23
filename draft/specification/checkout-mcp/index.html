@@ -3281,6 +3281,11 @@ additional metadata fields.</p>
 </ul>
 <h3 id="update_checkout"><code>update_checkout</code><a class="headerlink" href="#update_checkout" title="Permanent link">&para;</a></h3>
 <p>Maps to the <a href="../checkout/#update-checkout">Update Checkout</a> operation.</p>
+<p>The Platform <strong>MUST NOT</strong> start a new <code>update_checkout</code> operation while the
+Checkout is <code>complete_in_progress</code>. Duplicate requests remain subject to
+<a href="../signatures/#replay-protection">Replay Protection</a>. If the Business receives a
+new <code>update_checkout</code> request in that state, it <strong>MUST</strong> leave the Checkout
+unchanged and return the current Checkout with a recoverable error Message.</p>
 <h4 id="input-schema_2">Input Schema<a class="headerlink" href="#input-schema_2" title="Permanent link">&para;</a></h4>
 <ul>
 <li><code>id</code> (String): <strong>Required</strong>. The ID of the checkout session to update.</li>
@@ -3506,8 +3511,9 @@ additional metadata fields.</p>
 </ul>
 <h4 id="output-schema_3">Output Schema<a class="headerlink" href="#output-schema_3" title="Permanent link">&para;</a></h4>
 <ul>
-<li><a href="../checkout/#complete-checkout">Checkout</a> object, containing a partial
-   <code>order</code> that holds only <code>id</code> and <code>permalink_url</code>.</li>
+<li><a href="../checkout/#complete-checkout">Checkout</a> object. See core
+   <a href="../checkout/#complete-checkout">Complete Checkout</a> for status and <code>order</code>
+   semantics.</li>
 </ul>
 <h3 id="cancel_checkout"><code>cancel_checkout</code><a class="headerlink" href="#cancel_checkout" title="Permanent link">&para;</a></h3>
 <p>Maps to the <a href="../checkout/#cancel-checkout">Cancel Checkout</a> operation.</p>

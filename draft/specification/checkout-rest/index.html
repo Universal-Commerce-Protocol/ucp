@@ -3051,10 +3051,19 @@ business profile.</p>
 </div>
 </div>
 <h3 id="update-checkout">Update Checkout<a class="headerlink" href="#update-checkout" title="Permanent link">&para;</a></h3>
+<p>Update Checkout is a full replacement operation. The Platform <strong>MUST</strong> send the
+entire Checkout resource, including any data updates to write-only fields; the
+supplied resource replaces the existing Checkout session state. The Platform
+<strong>MUST NOT</strong> start a new Update Checkout operation while the Checkout is
+<code>complete_in_progress</code>. Duplicate requests remain subject to
+<a href="../signatures/#replay-protection">Replay Protection</a>. If the Business receives a
+new Update Checkout request in that state, it <strong>MUST</strong> leave the Checkout
+unchanged and return the current Checkout with a recoverable error Message.</p>
 <h4 id="update-buyer-info">Update Buyer Info<a class="headerlink" href="#update-buyer-info" title="Permanent link">&para;</a></h4>
-<p>All fields in <code>buyer</code> are optional, allowing clients to progressively build
-the checkout state across multiple calls. Each PUT replaces the entire session,
-so clients must include all previously set fields they wish to retain.</p>
+<p>All fields in <code>buyer</code> are optional, allowing the Platform to progressively build
+the Checkout state across multiple calls. Outside <code>complete_in_progress</code>, each
+Update Checkout replaces the entire Checkout session, so the Platform <strong>MUST</strong>
+include all previously set fields it intends to retain.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="request_1" name="__tabbed_2" type="radio" /><input id="response_1" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="request_1">Request</label><label for="response_1">Response</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -3581,6 +3590,9 @@ type &amp; addresses.</p>
 <p>If businesses have specific logic to enforce field existence in <code>buyer</code> and
 addresses (i.e. <code>fulfillment_address</code>, <code>billing_address</code>), this is the right
 place to set these expectations via <code>messages</code>.</p>
+<p>The response is the Checkout object; the example below shows the synchronous
+<code>completed</code> case. See core <a href="../checkout/#complete-checkout">Complete Checkout</a>
+for status and <code>order</code> semantics.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="5:2"><input checked="checked" id="request_4" name="__tabbed_5" type="radio" /><input id="response_4" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="request_4">Request</label><label for="response_4">Response</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">

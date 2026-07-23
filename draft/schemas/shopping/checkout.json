@@ -72,7 +72,7 @@
         "completed",
         "canceled"
       ],
-      "description": "Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details.",
+      "description": "Checkout state indicating the current phase and required processing. See Checkout Status lifecycle documentation for state transition details.",
       "ucp_request": "omit"
     },
     "currency": {
@@ -83,6 +83,11 @@
     "totals": {
       "$ref": "https://ucp.dev/draft/schemas/shopping/types/totals.json",
       "description": "Different cart totals.",
+      "ucp_request": "omit"
+    },
+    "actions": {
+      "$ref": "https://ucp.dev/draft/schemas/common/types/actions.json",
+      "description": "Outstanding extension-defined Actions for this checkout.",
       "ucp_request": "omit"
     },
     "messages": {
@@ -127,5 +132,5 @@
       "ucp_request": "omit"
     }
   },
-  "version": "2026-07-22"
+  "version": "2026-07-23"
 }
