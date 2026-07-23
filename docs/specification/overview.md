@@ -31,6 +31,196 @@ Schema notes:
     unless otherwise specified
 - Amounts format: Minor units (cents)
 
+## Actions
+
+An Action is an outstanding unit of extension-defined work for a Platform to
+process. Its presence means the effect defined by its Action type is gated.
+Actions appear only in responses, under the `actions` map. The common
+fields identify the work but do not define how to process it; the active
+extension does.
+
+This section defines the common Actions shape and the invariants every adopting
+response shares. The shape is reusable, but a capability supports Actions only
+when its specification explicitly adopts it and defines the parent-specific
+behavior: where Actions appear, the effect each Action type gates, how Messages
+apply, and how a later response reflects processing. Schema composition alone
+does not establish support. Cart, Checkout, and Catalog adopt this shape; see
+[Cart — Actions](cart.md#actions),
+[Checkout — Actions](checkout.md#actions), and
+[Catalog — Actions](catalog/index.md#actions) for their parent-specific
+contracts.
+
+Actions and Messages have different roles. An Action represents outstanding
+work: it carries an identity and extension-owned processing configuration. A
+Message communicates explanatory or diagnostic context about the current
+response and can identify an exact Action occurrence through its RFC 9535
+`path`. When a Message includes `path`, the Business **MUST** make it an RFC
+9535 JSONPath expression relative to the root of the containing UCP response
+object.
+Messages do not define how an Action is processed or determine its outcome, and
+neither an Action nor a Message requires the other.
+
+For example, a Business can surface one outstanding Action beside an
+explanatory Message (an illustrative, partial fragment):
+
+<!-- ucp:example skip reason="illustrative fragment" -->
+```json
+{
+  "actions": {
+    "com.example.identity.student_verification": [
+      {
+        "id": "verify-student-1",
+        "config": {
+          "verification_url": "https://business.example.com/verify/abc"
+        }
+      }
+    ]
+  },
+  "messages": [
+    {
+      "type": "info",
+      "code": "eligibility_accepted",
+      "content": "Student discount applied provisionally. Verify your status.",
+      "path": "$.actions['com.example.identity.student_verification'][0]"
+    }
+  ]
+}
+```
+
+The Action identifies the outstanding work and carries extension-owned
+processing configuration under `config`. The Message's `path` selects the exact
+Action occurrence it explains. The
+[checkout eligibility example](checkout.md#eligibility-verification-at-completion)
+composes this pattern into a complete Student Verification flow.
+
+For a newly processed successful response from a capability that adopts Actions,
+the Business **MUST** include every outstanding Action and **MUST** omit
+`actions` when none are outstanding.
+
+Cart and Checkout define request idempotency separately. Duplicate requests
+follow those existing rules and can return the original cached response,
+including its `actions` (see
+[Message Signatures — Replay Protection](signatures.md#replay-protection)).
+
+An Action's gate and an operation-specific outcome are orthogonal. Neither a
+parent status nor a Message's type or severity determines whether an Action
+gates its Action-defined effect. A Message explains the response or reports the
+outcome of a particular requested effect. A Business **MAY** include an info or
+warning Message whose `path` selects an outstanding Action to explain the
+current response without reporting an operation failure. For a state-changing
+operation whose requested effect was not applied because of an Action, the
+Business **MUST** instead return the current resource with a `recoverable` error
+Message whose `path` selects the exact Action occurrence.
+
+The Business's response is authoritative for the state after an operation: the
+returned resource, together with any parent lifecycle its capability defines, is
+the source of truth. The Action-type contract defines how the Business observes
+processing, and the Platform then follows the containing capability's operation
+contract.
+
+When an Action prevents a Cart or Checkout operation from succeeding,
+processing the Action does not repeat that operation. If the Platform wants to
+try again, it submits a new operation under the existing
+[Replay Protection](signatures.md#replay-protection) rules.
+
+Each Action key is a reverse-domain **Action type**: the name identifies the
+type of outstanding work, which is not necessarily the name of the extension
+that declares it. An active extension declares each Action type and defines its
+`config`, how a Platform processes it, its trust and fallback, and its outcomes.
+A single extension can declare more than one Action type. Each declaring
+extension contributes its Action-type keys to the containing capability's
+schema through `allOf` composition (see
+[Schema Composition](#schema-composition)), and capability negotiation selects
+which extensions are active. Negotiating an extension activates the whole
+contract it declares, including every Action type within it.
+
+Action type keys follow existing [Namespace Governance](#namespace-governance)
+rules: an extension can declare only types within a reverse-domain namespace
+controlled by its schema authority. An extension can use its own name as the key
+for a single Action type — as the
+[Student Verification example](checkout.md#eligibility-verification-at-completion)
+does — or declare several Action types under distinct keys. Each value is a
+non-empty array of outstanding instances of that one Action type. The key
+identifies the type, so an instance carries no separate type discriminator; a
+Business surfaces multiple outstanding instances of the same type as multiple
+entries in that array.
+
+The `actions` map does not define a processing order across Action types. Within
+a single type's array, JSON preserves the order of its instances, and the
+extension that declares the type defines whether that order carries processing
+meaning. When ordering across Action types matters, the declaring extension
+defines the sequencing and which Action types become outstanding at each step.
+
+For example (illustrative only), a negotiated vendor extension
+`com.example.payment.authentication` declares two Action types:
+`com.example.payment.authentication.device_data_collection`, an invisible
+device- and browser-data collection step, and
+`com.example.payment.authentication.three_ds_challenge`, a Buyer-facing
+authentication step. Because the collection step precedes the challenge, the
+Business can emit the `device_data_collection` type first and, once its instance
+is processed, emit the `three_ds_challenge` type in a later response. This shows
+one extension declaring multiple Action types and sequencing them across
+responses; it does not standardize device data collection or the authentication
+challenge, which are illustrative here.
+
+Every instance shares a set of common fields:
+
+- `id` — a non-empty identifier for the Action instance.
+- `config` — an optional extension-owned configuration object.
+
+`id` is required on every instance; `config` is optional. An extension defines
+the instance-specific data a Platform needs to process its work under `config`;
+`config` is the extension-owned channel for that data.
+
+An Action instance also remains open to additional top-level fields for forward
+compatibility. A Platform **MUST** tolerate and ignore Action instance
+fields it does not recognize.
+
+The Business **MUST** use a distinct `id` for each Action instance in a response.
+
+When successive responses represent the same parent resource, the Business
+**MUST** keep the same Action type key and `id` while the same work remains
+outstanding. Replacement work **MUST** have a new `id`, and the Business
+**MUST NOT** reuse an `id` during that resource's lifetime.
+
+Otherwise, the common Actions contract defines no identity relationship between
+Actions in independent responses. Equal `id` values alone do not identify the
+same work.
+
+A Business **MUST** emit an Action type only when an extension that declares it
+is active for the containing capability in the negotiated intersection. The
+composed JSON Schema can validate the common fields and each declared type's key
+and `config` shape, but confirming that the declaring extension is active also
+requires the negotiated capability context.
+
+### Trust and Execution Boundaries
+
+Negotiating an extension confirms support for its complete Action-type contract
+before runtime. That agreement does not make every future runtime value or
+delegate trusted. Each instance remains subject to the composed schema, the
+Action-type contract, and Platform policy.
+
+The active Action-type contract defines which `config` fields a Platform processes
+and what they mean. A Platform **MUST NOT** treat any other field as an
+instruction to load content, render HTML, execute code, run a shell command, or
+invoke a native API.
+
+A Platform **MAY** apply additional trust or runtime policy and **MAY** decline
+any instance that does not satisfy it. Supporting a whole extension does not
+require a Platform to accept every runtime value.
+
+A Platform **MUST NOT** assume that the effect gated by an Action succeeded
+merely because an Action surface or external interaction completed. A later
+response from the Business, together with any parent lifecycle its capability
+defines, remains authoritative for that outcome.
+
+The declaring extension defines the concrete trust, execution, and fallback rules.
+The common Actions contract defines no generic machinery: no URL scheme, origin,
+or delegate policy; no sandbox, permission, or presentation model; no timeout,
+failure, or recovery model; and no callback, result, state, polling, or
+executor. Each concrete Action type adds only the machinery its own processing
+requires.
+
 ## Discovery, Governance, and Negotiation
 
 UCP separates protocol version compatibility from capability negotiation.
