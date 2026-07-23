@@ -334,7 +334,7 @@ axes**:
 | Axis | Type | Meaning |
 | :--- | :--- | :------ |
 | `constraints` | [`ObjectConstraint`](site:schemas/shopping/types/object_constraint.json) | Field requirements on the instrument's OWN fields: `required` (presence) plus a key per constrained field carrying its nested requirement / allowed values. Compiles to a JSON Schema overlay. |
-| `options` | map | Accepted value menus and typed families: `brands` (a scalar menu of accepted networks) and `credentials` (typed branches with per-branch requirements). Resolved by lookup. |
+| `options` | map | Accepted values and typed families: `brands` (a scalar list of accepted networks) and `credentials` (typed branches with per-branch requirements). Resolved by lookup. |
 
 Express field requirements as `constraints` (an AVS postal-code requirement is
 `constraints.billing_address.required: ["postal_code"]`), and accepted choices as

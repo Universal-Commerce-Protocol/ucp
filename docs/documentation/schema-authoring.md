@@ -430,10 +430,13 @@ runtime requirements on an already-typed target, declared along **two axes**:
   Object Constraint: `required` (presence) plus one key per constrained field.
   A consumer compiles it to a JSON Schema overlay (`required` + `properties`) a
   standard validator can run.
-- **`options`** — accepted value menus and typed families the target negotiates:
-  a uniform map from attribute to acceptable set — a scalar menu (e.g. `brands`) or
+- **`options`** — accepted values and typed families the target negotiates:
+  a uniform map from attribute to acceptable set — a scalar list (e.g. `brands`) or
   a typed family (Type Constraint entries keyed by `type` with per-branch
   `constraints`, e.g. `credentials`). Resolved by lookup; not part of the overlay.
+  `required` names fields the buyer must **submit** (presence); it never lists
+  `options` attributes like `brands`, which name values the seller **accepts**,
+  not fields the buyer sends.
 
 UCP defines three composable primitives:
 
@@ -449,10 +452,10 @@ Object Constraint (recurse) or a Value Constraint. The two are distinguishable
 **from the data alone** — `enum`/`const` is a Value Constraint, otherwise it's an
 Object Constraint — so a consumer compiles the overlay without resolving the
 concrete schema. Field constraints are **open by default**: they live in the wire
-data and validate against the open Object Constraint, so most handlers only narrow
+data and validate against the open Object Constraint, so most schemas only narrow
 `options`. Every name in `required` **MUST** be a property of the target.
 
-Concrete availability schema (a handler narrowing the card branch). Narrowing a
+Concrete availability schema (a payment handler narrowing the card branch). Narrowing a
 field constraint takes a single `properties` keyword — rarely needed, since field
 constraints are open:
 
@@ -508,7 +511,7 @@ and field constraints nest as plain direct keys:
 `ValueConstraint` is deliberately closed: unsupported assertions cannot be ignored
 safely. `ObjectConstraint` and `TypeConstraint.type` are extension points.
 `constraints` compiles into a JSON Schema overlay (presence + allowed values) that
-a standard validator runs; `options` is resolved by lookup — scalar menus by
+a standard validator runs; `options` is resolved by lookup — scalar lists by
 membership, typed families by dispatch on the submitted `type`. Declared constraints
 are an upfront minimum; dynamic requirements still use recoverable errors and
 [`message_error.path`](site:{{ ucp_version }}/schemas/common/types/message_error.json).

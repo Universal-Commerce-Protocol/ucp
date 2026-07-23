@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/shopping/types/available_payment_instrument.json",
   "title": "Available Payment Instrument",
-  "description": "An instrument type a handler accepts, declared along two axes. `constraints` is an Object Constraint over the instrument's OWN fields (a JSON Schema overlay: presence + allowed values). `options` is the set of accepted value menus and typed families this instrument negotiates (resolved by lookup, not compiled into the overlay).",
+  "description": "An instrument type a handler accepts, declared along two axes. `constraints` is an Object Constraint over the instrument's OWN fields (a JSON Schema overlay: presence + allowed values). `options` is the set of accepted values and typed families this instrument negotiates (resolved by lookup, not compiled into the overlay).",
   "allOf": [
     { "$ref": "type_constraint.json" },
     {
@@ -23,7 +23,7 @@
             "items": { "type": "string" },
             "uniqueItems": true
           },
-          "description": "Accepted options this instrument negotiates: `credentials` (a typed family) plus scalar value menus keyed by attribute (e.g. `brands`). A uniform map read to OFFER options; not part of the field-constraint overlay."
+          "description": "Accepted options this instrument negotiates: `credentials` (a typed family) plus scalar value lists keyed by attribute (e.g. `brands`). A uniform map read to OFFER options; not part of the field-constraint overlay."
         }
       }
     }

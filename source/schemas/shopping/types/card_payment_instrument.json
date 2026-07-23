@@ -6,7 +6,7 @@
   "$defs": {
     "available_card_payment_instrument": {
       "title": "Available Card Payment Instrument",
-      "description": "Declares card instrument availability. Field requirements go under `constraints` (e.g. `billing_address`); accepted menus and typed families go under `options` (`brands`, `credentials`).",
+      "description": "Declares card instrument availability. Field requirements go under `constraints` (e.g. `billing_address`); accepted values and typed families go under `options` (`brands`, `credentials`).",
       "allOf": [
         { "$ref": "available_payment_instrument.json" },
         {
