@@ -150,6 +150,60 @@ as the first element. Platforms SHOULD treat the first element as featured.
 
 {{ schema_fields('types/rating', 'catalog') }}
 
+## Actions
+
+Catalog Search, batch Lookup, and successful Get Product responses can include
+extension-defined Actions. In Catalog, an Action is outstanding work that gates
+the effect its type defines, which may affect which products the Business
+returns or how the Platform handles them.
+
+Search, batch Lookup, and successful Get Product are independent Catalog
+operations; their responses do not share a containing-resource lifetime. The
+Business **MAY** use the same Action `id` in separate responses; that equality
+does not identify the same work. A concrete Action-type contract **MAY** define
+stronger correlation for its instances.
+
+For Search and batch Lookup, the Business decides whether to return zero, some,
+or all otherwise relevant products under the Action-type contract and its own
+policy. A Message can point to the Action to explain the response. Successful
+Get Product still includes `product`; its existing error response is unchanged.
+
+After processing an Action, the Platform performs a fresh Catalog operation and
+the later Business response is authoritative. Catalog defines no Action
+lifecycle, polling, or resume behavior; a concrete Action-type contract **MAY**
+define those behaviors for processing its instances. The common shape and rules
+are defined in [Overview — Actions](../overview.md#actions).
+
+For example, this Search response returns no products and explains that age
+verification may affect the results:
+
+<!-- ucp:example schema=shopping/catalog_search op=search -->
+```json
+{
+  "ucp": {...},
+  "products": [],
+  "actions": {
+    "com.example.identity.age_verification": [
+      {
+        "id": "age-check-1"
+      }
+    ]
+  },
+  "messages": [
+    {
+      "type": "info",
+      "code": "age_verification_required",
+      "content": "Complete age verification to see age-restricted products matching your search.",
+      "path": "$.actions['com.example.identity.age_verification'][0]"
+    }
+  ]
+}
+```
+
+Returning zero products is one Business choice; returning a subset or the full
+result set is also conformant. The Action type and Message code are illustrative;
+Catalog defines neither.
+
 ## Messages and Error Handling
 
 All catalog responses include an optional `messages` array that allows businesses
