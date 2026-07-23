@@ -73,12 +73,13 @@ Request body for catalog lookup.
 
 ### Response
 
-| Name     | Type           | Requirement  | Description                                                                                                                                         |
-| -------- | -------------- | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ucp      | any            | **Required** | UCP metadata for catalog responses.                                                                                                                 |
-| products | Array[Product] | **Required** | Products matching the requested identifiers. May contain fewer items if some identifiers not found, or more if identifiers match multiple products. |
-| actions  | object         | Optional     | Outstanding extension-defined Actions for this catalog lookup response.                                                                             |
-| messages | Array[object]  | Optional     | Errors, warnings, or informational messages about the requested items.                                                                              |
+| Name     | Type           | Requirement  | Description                                                                                                                                                                                     |
+| -------- | -------------- | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ucp      | any            | **Required** | UCP metadata for catalog responses.                                                                                                                                                             |
+| products | Array[Product] | **Required** | Products matching the requested identifiers. May contain fewer items if some identifiers not found, or more if identifiers match multiple products.                                             |
+| actions  | object         | Optional     | Outstanding extension-defined Actions for this catalog lookup response.                                                                                                                         |
+| messages | Array[object]  | Optional     | Errors, warnings, or informational messages about the requested items.                                                                                                                          |
+| policies | Array[object]  | Optional     | Policies (e.g., return/refund terms) that apply to the products in this response. `applies_to` targets are relative to the response root; when absent or empty, refer to the URLs in `links[]`. |
 
 ______________________________________________________________________
 
@@ -147,12 +148,13 @@ Request body for single-product retrieval. Supports interactive variant narrowin
 
 ### Response
 
-| Name     | Type          | Requirement  | Description                                                                                                |
-| -------- | ------------- | ------------ | ---------------------------------------------------------------------------------------------------------- |
-| ucp      | any           | **Required** | UCP metadata for catalog responses.                                                                        |
-| product  | object        | **Required** | The requested product with full detail. Singular — this is a single-resource operation.                    |
-| actions  | object        | Optional     | Outstanding extension-defined Actions for this product response.                                           |
-| messages | Array[object] | Optional     | Warnings or informational messages about the product (e.g., price recently changed, limited availability). |
+| Name     | Type          | Requirement  | Description                                                                                                                                                                    |
+| -------- | ------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| ucp      | any           | **Required** | UCP metadata for catalog responses.                                                                                                                                            |
+| product  | object        | **Required** | The requested product with full detail. Singular — this is a single-resource operation.                                                                                        |
+| actions  | object        | Optional     | Outstanding extension-defined Actions for this product response.                                                                                                               |
+| messages | Array[object] | Optional     | Warnings or informational messages about the product (e.g., price recently changed, limited availability).                                                                     |
+| policies | Array[object] | Optional     | Policies (e.g., return/refund terms) that apply to this product. `applies_to` targets are relative to the response root; when absent or empty, refer to the URLs in `links[]`. |
 
 ______________________________________________________________________
 

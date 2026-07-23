@@ -3054,6 +3054,12 @@ version compatibility checking and capability negotiation.</p>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Errors, warnings, or informational messages about the search results.</td>
 </tr>
+<tr>
+<td style="text-align: left;">policies</td>
+<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Policies (e.g., return/refund terms) that apply to the products in these search results. <code>applies_to</code> targets are relative to the response root; when absent or empty, refer to the URLs in <code>links[]</code>.</td>
+</tr>
 </tbody>
 </table>
 <h4 id="search-example">Search Example<a class="headerlink" href="#search-example" title="Permanent link">&para;</a></h4>
@@ -3278,6 +3284,12 @@ for supported identifiers, resolution behavior, and client correlation requireme
 <td style="text-align: left;">Array[object]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Errors, warnings, or informational messages about the requested items.</td>
+</tr>
+<tr>
+<td style="text-align: left;">policies</td>
+<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Policies (e.g., return/refund terms) that apply to the products in this response. <code>applies_to</code> targets are relative to the response root; when absent or empty, refer to the URLs in <code>links[]</code>.</td>
 </tr>
 </tbody>
 </table>
@@ -3542,6 +3554,12 @@ response MAY include informational messages indicating which identifiers were no
 <td style="text-align: left;">Array[object]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Warnings or informational messages about the product (e.g., price recently changed, limited availability).</td>
+</tr>
+<tr>
+<td style="text-align: left;">policies</td>
+<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Policies (e.g., return/refund terms) that apply to this product. <code>applies_to</code> targets are relative to the response root; when absent or empty, refer to the URLs in <code>links[]</code>.</td>
 </tr>
 </tbody>
 </table>
@@ -3809,6 +3827,12 @@ results.</p>
 <td style="text-align: left;">Array[object]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Warnings or informational messages about the product (e.g., price recently changed, limited availability).</td>
+</tr>
+<tr>
+<td style="text-align: left;">policies</td>
+<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Policies (e.g., return/refund terms) that apply to this product. <code>applies_to</code> targets are relative to the response root; when absent or empty, refer to the URLs in <code>links[]</code>.</td>
 </tr>
 </tbody>
 </table>

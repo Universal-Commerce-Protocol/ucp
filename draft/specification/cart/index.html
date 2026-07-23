@@ -1410,6 +1410,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Policy
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2853,6 +2864,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Policy
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -3117,6 +3139,12 @@ custom scopes are defined in <a href="../identity-linking/#scopes">Identity Link
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#link">Link</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Optional merchant links (policies, FAQs).</td>
+</tr>
+<tr>
+<td style="text-align: left;">policies</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#policy">Policy</a>]</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Policies (e.g., return/refund terms) that apply to the items in this cart. <code>applies_to</code> targets are relative to the response root; when absent or empty, refer to the URLs in <code>links[]</code>.</td>
 </tr>
 <tr>
 <td style="text-align: left;">continue_url</td>
@@ -3582,6 +3610,47 @@ are estimates; accurate taxes are computed at checkout.</p>
 <p>See <a href="/draft/specification/reference/#message-warning">Message Warning</a> in the <a href="/draft/specification/reference/">Schema Reference</a> for the canonical field definition.</p>
 <h3 id="link">Link<a class="headerlink" href="#link" title="Permanent link">&para;</a></h3>
 <p>See <a href="/draft/specification/reference/#link">Link</a> in the <a href="/draft/specification/reference/">Schema Reference</a> for the canonical field definition.</p>
+<h3 id="policy">Policy<a class="headerlink" href="#policy" title="Permanent link">&para;</a></h3>
+<p>Policies (return/refund terms, warranty, and the like) that apply to the items
+in this cart. JSONPath targets in <code>applies_to</code> are relative to
+this response root (e.g., <code>$.line_items[0]</code>). See
+<a href="../overview/#policies">Policies</a> for the full model.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Requirement</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">type</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#reverse-domain-name">Reverse Domain Name</a></td>
+<td style="text-align: left;"><strong>Required</strong></td>
+<td style="text-align: left;">Policy type discriminator. Open reverse-DNS vocabulary. Well-known values: <code>dev.ucp.shopping.policy.return</code> (return terms), <code>dev.ucp.shopping.policy.warranty</code> (warranty terms). Businesses MAY define custom types in their own domain (e.g., <code>com.example.policy.price_match</code>). Platforms MUST tolerate unknown values.</td>
+</tr>
+<tr>
+<td style="text-align: left;">description</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#description">Description</a></td>
+<td style="text-align: left;"><strong>Required</strong></td>
+<td style="text-align: left;">Human-readable policy summary in one or more formats (plain, markdown, html). Required on every policy so a platform can present it without understanding any type-specific fields. This is not the buyer-facing disclosure — display is compelled by a <code>messages[]</code> warning (see the Policies section).</td>
+</tr>
+<tr>
+<td style="text-align: left;">applies_to</td>
+<td style="text-align: left;">Array[string]</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">RFC 9535 JSONPath expressions identifying the nodes this policy applies to, relative to the embedding response root (e.g., <code>$.line_items[0]</code> in cart/checkout, <code>$.products[2]</code> in catalog). Each target covers the node it names and everything nested under it, so a target on a product also covers its variants. A singular query (RFC 9535 Section 2.3.5.1; name and index selectors only) names a single node; filters, wildcards, and slices match a set. When omitted, the policy applies to the entire response. When policies of the same <code>type</code> contest a node, the narrowest target wins and overrides the rest. See the Policies section for how specificity resolves.</td>
+</tr>
+<tr>
+<td style="text-align: left;">url</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Optional link to the full policy document.</td>
+</tr>
+</tbody>
+</table>
 
 
 

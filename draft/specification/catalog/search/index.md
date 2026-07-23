@@ -23,13 +23,14 @@ Performs a search against the business's product catalog. Supports free-text que
 
 ### Response
 
-| Name       | Type          | Requirement  | Description                                                             |
-| ---------- | ------------- | ------------ | ----------------------------------------------------------------------- |
-| ucp        | any           | **Required** | UCP metadata for catalog responses.                                     |
-| products   | Array[object] | **Required** | Products matching the search criteria.                                  |
-| pagination | object        | Optional     | Pagination information in responses.                                    |
-| actions    | object        | Optional     | Outstanding extension-defined Actions for this catalog search response. |
-| messages   | Array[object] | Optional     | Errors, warnings, or informational messages about the search results.   |
+| Name       | Type          | Requirement  | Description                                                                                                                                                                                            |
+| ---------- | ------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| ucp        | any           | **Required** | UCP metadata for catalog responses.                                                                                                                                                                    |
+| products   | Array[object] | **Required** | Products matching the search criteria.                                                                                                                                                                 |
+| pagination | object        | Optional     | Pagination information in responses.                                                                                                                                                                   |
+| actions    | object        | Optional     | Outstanding extension-defined Actions for this catalog search response.                                                                                                                                |
+| messages   | Array[object] | Optional     | Errors, warnings, or informational messages about the search results.                                                                                                                                  |
+| policies   | Array[object] | Optional     | Policies (e.g., return/refund terms) that apply to the products in these search results. `applies_to` targets are relative to the response root; when absent or empty, refer to the URLs in `links[]`. |
 
 ## Search Inputs
 

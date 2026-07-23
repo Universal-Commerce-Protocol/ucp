@@ -1494,6 +1494,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Policy
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2670,6 +2681,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Policy
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -3405,6 +3427,47 @@ as the first element. Platforms SHOULD treat the first element as featured.</p>
 <td style="text-align: left;">integer</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Number of reviews contributing to the rating.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="policy">Policy<a class="headerlink" href="#policy" title="Permanent link">&para;</a></h3>
+<p>Policies (return/refund terms, warranty, and the like) that apply to the
+products in a catalog response. JSONPath targets in <code>applies_to</code> are
+relative to the response root — <code>$.products[N]</code> for search and batch lookup,
+<code>$.product</code> for get_product. See <a href="../overview/#policies">Policies</a> for the full model.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Requirement</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">type</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#reverse-domain-name">Reverse Domain Name</a></td>
+<td style="text-align: left;"><strong>Required</strong></td>
+<td style="text-align: left;">Policy type discriminator. Open reverse-DNS vocabulary. Well-known values: <code>dev.ucp.shopping.policy.return</code> (return terms), <code>dev.ucp.shopping.policy.warranty</code> (warranty terms). Businesses MAY define custom types in their own domain (e.g., <code>com.example.policy.price_match</code>). Platforms MUST tolerate unknown values.</td>
+</tr>
+<tr>
+<td style="text-align: left;">description</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#description">Description</a></td>
+<td style="text-align: left;"><strong>Required</strong></td>
+<td style="text-align: left;">Human-readable policy summary in one or more formats (plain, markdown, html). Required on every policy so a platform can present it without understanding any type-specific fields. This is not the buyer-facing disclosure — display is compelled by a <code>messages[]</code> warning (see the Policies section).</td>
+</tr>
+<tr>
+<td style="text-align: left;">applies_to</td>
+<td style="text-align: left;">Array[string]</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">RFC 9535 JSONPath expressions identifying the nodes this policy applies to, relative to the embedding response root (e.g., <code>$.line_items[0]</code> in cart/checkout, <code>$.products[2]</code> in catalog). Each target covers the node it names and everything nested under it, so a target on a product also covers its variants. A singular query (RFC 9535 Section 2.3.5.1; name and index selectors only) names a single node; filters, wildcards, and slices match a set. When omitted, the policy applies to the entire response. When policies of the same <code>type</code> contest a node, the narrowest target wins and overrides the rest. See the Policies section for how specificity resolves.</td>
+</tr>
+<tr>
+<td style="text-align: left;">url</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Optional link to the full policy document.</td>
 </tr>
 </tbody>
 </table>

@@ -67,6 +67,10 @@ Expectations can be split, merged, or adjusted post-order. For example:
 
 Businesses MAY surface a snapshot of the originating checkout's `attribution` on the order. Read-only on the order — agents do not write `order.attribution`. See [Attribution](http://ucp.dev/draft/specification/overview/#attribution) for the underlying contract.
 
+### Policies
+
+Businesses MAY surface a snapshot of the policies that applied at checkout on the order. See [Policies](http://ucp.dev/draft/specification/overview/#policies) for the underlying contract.
+
 ### Adjustments
 
 **Adjustments** are post-order events that exist independently of fulfillment:
@@ -82,20 +86,21 @@ Businesses MAY surface a snapshot of the originating checkout's `attribution` on
 
 ### Order
 
-| Name          | Type                                                                        | Requirement  | Description                                                                                                                                   |
-| ------------- | --------------------------------------------------------------------------- | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| ucp           | any                                                                         | **Required** | UCP metadata for order responses. No payment handlers needed post-purchase.                                                                   |
-| id            | string                                                                      | **Required** | Unique order identifier.                                                                                                                      |
-| label         | string                                                                      | Optional     | Human-readable label for identifying the order. MUST only be provided by the business.                                                        |
-| checkout_id   | string                                                                      | **Required** | Associated checkout ID for reconciliation.                                                                                                    |
-| permalink_url | string                                                                      | **Required** | Permalink to access the order on merchant site.                                                                                               |
-| line_items    | Array\[[Order Line Item](/draft/specification/reference/#order-line-item)\] | **Required** | Line items representing what was purchased — can change post-order via edits or exchanges.                                                    |
-| fulfillment   | object                                                                      | **Required** | Fulfillment data: buyer expectations and what actually happened.                                                                              |
-| adjustments   | Array\[[Adjustment](/draft/specification/reference/#adjustment)\]           | Optional     | Post-order events (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment.                         |
-| currency      | string                                                                      | **Required** | ISO 4217 currency code. MUST match the currency from the originating checkout session.                                                        |
-| totals        | [Totals](/draft/specification/reference/#totals)                            | **Required** | Different totals for the order.                                                                                                               |
-| messages      | Array\[[Message](/draft/specification/reference/#message)\]                 | Optional     | Business outcome messages (errors, warnings, informational). Present when the business needs to communicate status or issues to the platform. |
-| attribution   | [Attribution](/draft/specification/reference/#attribution)                  | Optional     | Snapshot of the attribution associated with the originating checkout. Read-only on the order.                                                 |
+| Name          | Type                                                                        | Requirement  | Description                                                                                                                                                        |
+| ------------- | --------------------------------------------------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| ucp           | any                                                                         | **Required** | UCP metadata for order responses. No payment handlers needed post-purchase.                                                                                        |
+| id            | string                                                                      | **Required** | Unique order identifier.                                                                                                                                           |
+| label         | string                                                                      | Optional     | Human-readable label for identifying the order. MUST only be provided by the business.                                                                             |
+| checkout_id   | string                                                                      | **Required** | Associated checkout ID for reconciliation.                                                                                                                         |
+| permalink_url | string                                                                      | **Required** | Permalink to access the order on merchant site.                                                                                                                    |
+| line_items    | Array\[[Order Line Item](/draft/specification/reference/#order-line-item)\] | **Required** | Line items representing what was purchased — can change post-order via edits or exchanges.                                                                         |
+| fulfillment   | object                                                                      | **Required** | Fulfillment data: buyer expectations and what actually happened.                                                                                                   |
+| adjustments   | Array\[[Adjustment](/draft/specification/reference/#adjustment)\]           | Optional     | Post-order events (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment.                                              |
+| currency      | string                                                                      | **Required** | ISO 4217 currency code. MUST match the currency from the originating checkout session.                                                                             |
+| totals        | [Totals](/draft/specification/reference/#totals)                            | **Required** | Different totals for the order.                                                                                                                                    |
+| policies      | Array\[[Policy](/draft/specification/reference/#policy)\]                   | Optional     | Snapshot of the policies that applied to the items at checkout, captured on the order as a durable record. `applies_to` targets are relative to the response root. |
+| messages      | Array\[[Message](/draft/specification/reference/#message)\]                 | Optional     | Business outcome messages (errors, warnings, informational). Present when the business needs to communicate status or issues to the platform.                      |
+| attribution   | [Attribution](/draft/specification/reference/#attribution)                  | Optional     | Snapshot of the attribution associated with the originating checkout. Read-only on the order.                                                                      |
 
 ### Order Line Item
 

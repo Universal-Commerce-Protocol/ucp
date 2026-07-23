@@ -2563,6 +2563,12 @@ queries, filtering by category and price, and pagination.</p>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Errors, warnings, or informational messages about the search results.</td>
 </tr>
+<tr>
+<td style="text-align: left;">policies</td>
+<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Policies (e.g., return/refund terms) that apply to the products in these search results. <code>applies_to</code> targets are relative to the response root; when absent or empty, refer to the URLs in <code>links[]</code>.</td>
+</tr>
 </tbody>
 </table>
 <h2 id="search-inputs">Search Inputs<a class="headerlink" href="#search-inputs" title="Permanent link">&para;</a></h2>

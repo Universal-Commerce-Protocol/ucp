@@ -2854,6 +2854,12 @@ from the response.</p>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Errors, warnings, or informational messages about the requested items.</td>
 </tr>
+<tr>
+<td style="text-align: left;">policies</td>
+<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Policies (e.g., return/refund terms) that apply to the products in this response. <code>applies_to</code> targets are relative to the response root; when absent or empty, refer to the URLs in <code>links[]</code>.</td>
+</tr>
 </tbody>
 </table>
 <hr />
@@ -3039,6 +3045,12 @@ selection changes the availability map.</p>
 <td style="text-align: left;">Array[object]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Warnings or informational messages about the product (e.g., price recently changed, limited availability).</td>
+</tr>
+<tr>
+<td style="text-align: left;">policies</td>
+<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Policies (e.g., return/refund terms) that apply to this product. <code>applies_to</code> targets are relative to the response root; when absent or empty, refer to the URLs in <code>links[]</code>.</td>
 </tr>
 </tbody>
 </table>

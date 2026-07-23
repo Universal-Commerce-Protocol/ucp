@@ -65,13 +65,14 @@ Maps to the [Catalog Search](http://ucp.dev/draft/specification/catalog/search/i
 
 **Output**
 
-| Name       | Type                                                                       | Requirement  | Description                                                             |
-| ---------- | -------------------------------------------------------------------------- | ------------ | ----------------------------------------------------------------------- |
-| ucp        | any                                                                        | **Required** | UCP metadata for catalog responses.                                     |
-| products   | Array\[[Product](/draft/specification/reference/#product)\]                | **Required** | Products matching the search criteria.                                  |
-| pagination | [Pagination Response](/draft/specification/reference/#pagination-response) | Optional     | Cursor-based pagination for list operations.                            |
-| actions    | [Actions](/draft/specification/reference/#actions)                         | Optional     | Outstanding extension-defined Actions for this catalog search response. |
-| messages   | Array\[[Message](/draft/specification/reference/#message)\]                | Optional     | Errors, warnings, or informational messages about the search results.   |
+| Name       | Type                                                                       | Requirement  | Description                                                                                                                                                                                            |
+| ---------- | -------------------------------------------------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| ucp        | any                                                                        | **Required** | UCP metadata for catalog responses.                                                                                                                                                                    |
+| products   | Array\[[Product](/draft/specification/reference/#product)\]                | **Required** | Products matching the search criteria.                                                                                                                                                                 |
+| pagination | [Pagination Response](/draft/specification/reference/#pagination-response) | Optional     | Cursor-based pagination for list operations.                                                                                                                                                           |
+| actions    | [Actions](/draft/specification/reference/#actions)                         | Optional     | Outstanding extension-defined Actions for this catalog search response.                                                                                                                                |
+| messages   | Array\[[Message](/draft/specification/reference/#message)\]                | Optional     | Errors, warnings, or informational messages about the search results.                                                                                                                                  |
+| policies   | Array\[[Policy](/draft/specification/reference/#policy)\]                  | Optional     | Policies (e.g., return/refund terms) that apply to the products in these search results. `applies_to` targets are relative to the response root; when absent or empty, refer to the URLs in `links[]`. |
 
 #### Example
 
@@ -205,12 +206,13 @@ The request body contains an array of identifiers and optional context that appl
 
 **Output**
 
-| Name     | Type                                                        | Requirement  | Description                                                                                                                                         |
-| -------- | ----------------------------------------------------------- | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ucp      | any                                                         | **Required** | UCP metadata for catalog responses.                                                                                                                 |
-| products | Array\[[Product](/draft/specification/reference/#product)\] | **Required** | Products matching the requested identifiers. May contain fewer items if some identifiers not found, or more if identifiers match multiple products. |
-| actions  | [Actions](/draft/specification/reference/#actions)          | Optional     | Outstanding extension-defined Actions for this catalog lookup response.                                                                             |
-| messages | Array\[[Message](/draft/specification/reference/#message)\] | Optional     | Errors, warnings, or informational messages about the requested items.                                                                              |
+| Name     | Type                                                        | Requirement  | Description                                                                                                                                                                                     |
+| -------- | ----------------------------------------------------------- | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ucp      | any                                                         | **Required** | UCP metadata for catalog responses.                                                                                                                                                             |
+| products | Array\[[Product](/draft/specification/reference/#product)\] | **Required** | Products matching the requested identifiers. May contain fewer items if some identifiers not found, or more if identifiers match multiple products.                                             |
+| actions  | [Actions](/draft/specification/reference/#actions)          | Optional     | Outstanding extension-defined Actions for this catalog lookup response.                                                                                                                         |
+| messages | Array\[[Message](/draft/specification/reference/#message)\] | Optional     | Errors, warnings, or informational messages about the requested items.                                                                                                                          |
+| policies | Array\[[Policy](/draft/specification/reference/#policy)\]   | Optional     | Policies (e.g., return/refund terms) that apply to the products in this response. `applies_to` targets are relative to the response root; when absent or empty, refer to the URLs in `links[]`. |
 
 #### Example: Batch Lookup with Context
 
@@ -611,12 +613,13 @@ A product in a get_product response, extended with effective selections and avai
 
 ### Get Product Response
 
-| Name     | Type          | Requirement  | Description                                                                                                |
-| -------- | ------------- | ------------ | ---------------------------------------------------------------------------------------------------------- |
-| ucp      | any           | **Required** | UCP metadata for catalog responses.                                                                        |
-| product  | object        | **Required** | The requested product with full detail. Singular — this is a single-resource operation.                    |
-| actions  | object        | Optional     | Outstanding extension-defined Actions for this product response.                                           |
-| messages | Array[object] | Optional     | Warnings or informational messages about the product (e.g., price recently changed, limited availability). |
+| Name     | Type          | Requirement  | Description                                                                                                                                                                    |
+| -------- | ------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| ucp      | any           | **Required** | UCP metadata for catalog responses.                                                                                                                                            |
+| product  | object        | **Required** | The requested product with full detail. Singular — this is a single-resource operation.                                                                                        |
+| actions  | object        | Optional     | Outstanding extension-defined Actions for this product response.                                                                                                               |
+| messages | Array[object] | Optional     | Warnings or informational messages about the product (e.g., price recently changed, limited availability).                                                                     |
+| policies | Array[object] | Optional     | Policies (e.g., return/refund terms) that apply to this product. `applies_to` targets are relative to the response root; when absent or empty, refer to the URLs in `links[]`. |
 
 ### Error Response
 

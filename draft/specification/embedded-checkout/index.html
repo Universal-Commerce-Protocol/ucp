@@ -5584,6 +5584,12 @@ line items, totals, and buyer information.</p>
 <td style="text-align: left;">Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.</td>
 </tr>
 <tr>
+<td style="text-align: left;">policies</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#policy">Policy</a>]</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Policies (e.g., return/refund terms) that apply to the items in this checkout. <code>applies_to</code> targets are relative to the response root; when absent or empty, refer to the URLs in <code>links[]</code>.</td>
+</tr>
+<tr>
 <td style="text-align: left;">expires_at</td>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;">Optional</td>
@@ -5681,6 +5687,12 @@ confirmation details.</p>
 <td style="text-align: left;"><a href="/draft/specification/reference/#totals">Totals</a></td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Different totals for the order.</td>
+</tr>
+<tr>
+<td style="text-align: left;">policies</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#policy">Policy</a>]</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Snapshot of the policies that applied to the items at checkout, captured on the order as a durable record. <code>applies_to</code> targets are relative to the response root.</td>
 </tr>
 <tr>
 <td style="text-align: left;">messages</td>

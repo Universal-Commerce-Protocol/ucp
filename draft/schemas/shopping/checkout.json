@@ -106,6 +106,14 @@
       "description": "Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.",
       "ucp_request": "omit"
     },
+    "policies": {
+      "type": "array",
+      "items": {
+        "$ref": "https://ucp.dev/draft/schemas/shopping/types/policy.json"
+      },
+      "description": "Policies (e.g., return/refund terms) that apply to the items in this checkout. `applies_to` targets are relative to the response root; when absent or empty, refer to the URLs in `links[]`.",
+      "ucp_request": "omit"
+    },
     "expires_at": {
       "type": "string",
       "format": "date-time",

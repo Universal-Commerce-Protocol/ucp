@@ -1658,6 +1658,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#policies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Policies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#adjustments" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2668,6 +2679,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#policies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Policies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#adjustments" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3120,6 +3142,9 @@ it will be delivered, and what has happened since order placement.</p>
 <code>attribution</code> on the order. Read-only on the order — agents do not write
 <code>order.attribution</code>. See <a href="../overview/#attribution">Attribution</a> for the
 underlying contract.</p>
+<h3 id="policies">Policies<a class="headerlink" href="#policies" title="Permanent link">&para;</a></h3>
+<p>Businesses MAY surface a snapshot of the policies that applied at checkout on
+the order. See <a href="../overview/#policies">Policies</a> for the underlying contract.</p>
 <h3 id="adjustments">Adjustments<a class="headerlink" href="#adjustments" title="Permanent link">&para;</a></h3>
 <p><strong>Adjustments</strong> are post-order events that exist independently of
 fulfillment:</p>
@@ -3205,6 +3230,12 @@ fulfillment:</p>
 <td style="text-align: left;"><a href="/draft/specification/reference/#totals">Totals</a></td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Different totals for the order.</td>
+</tr>
+<tr>
+<td style="text-align: left;">policies</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#policy">Policy</a>]</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Snapshot of the policies that applied to the items at checkout, captured on the order as a durable record. <code>applies_to</code> targets are relative to the response root.</td>
 </tr>
 <tr>
 <td style="text-align: left;">messages</td>

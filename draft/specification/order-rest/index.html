@@ -2655,6 +2655,12 @@ order capability is defined in the <code>rest.endpoint</code> field of the busin
 <td style="text-align: left;">Different totals for the order.</td>
 </tr>
 <tr>
+<td style="text-align: left;">policies</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#policy">Policy</a>]</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Snapshot of the policies that applied to the items at checkout, captured on the order as a durable record. <code>applies_to</code> targets are relative to the response root.</td>
+</tr>
+<tr>
 <td style="text-align: left;">messages</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#message">Message</a>]</td>
 <td style="text-align: left;">Optional</td>
