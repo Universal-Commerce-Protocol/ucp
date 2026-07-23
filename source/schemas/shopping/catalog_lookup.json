@@ -75,6 +75,11 @@
           },
           "description": "Products matching the requested identifiers. May contain fewer items if some identifiers not found, or more if identifiers match multiple products."
         },
+        "actions": {
+          "$ref": "../common/types/actions.json",
+          "description": "Outstanding extension-defined Actions for this catalog lookup response.",
+          "ucp_request": "omit"
+        },
         "messages": {
           "type": "array",
           "items": {
@@ -163,6 +168,11 @@
         "product": {
           "$ref": "#/$defs/detail_product",
           "description": "The requested product with full detail. Singular — this is a single-resource operation."
+        },
+        "actions": {
+          "$ref": "../common/types/actions.json",
+          "description": "Outstanding extension-defined Actions for this product response.",
+          "ucp_request": "omit"
         },
         "messages": {
           "type": "array",
