@@ -50,6 +50,11 @@
         "pagination": {
           "$ref": "../common/types/pagination.json#/$defs/response"
         },
+        "actions": {
+          "$ref": "../common/types/actions.json",
+          "description": "Outstanding extension-defined Actions for this catalog search response.",
+          "ucp_request": "omit"
+        },
         "messages": {
           "type": "array",
           "items": {

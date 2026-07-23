@@ -101,6 +101,11 @@
       "description": "Estimated cost breakdown. May be partial if shipping/tax not yet calculable.",
       "ucp_request": "omit"
     },
+    "actions": {
+      "$ref": "../common/types/actions.json",
+      "description": "Outstanding extension-defined Actions for this cart.",
+      "ucp_request": "omit"
+    },
     "messages": {
       "type": "array",
       "items": {
