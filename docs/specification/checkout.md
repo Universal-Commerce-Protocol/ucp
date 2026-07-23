@@ -680,6 +680,61 @@ that is not equal to `completed` or `canceled` **SHOULD** be cancelable.
 
 {{ method_fields('cancel_checkout', 'rest.openapi.json', 'checkout') }}
 
+### Concurrency Control
+
+Update Checkout is a full replacement, and a checkout session may
+legitimately have more than one writer: the spec explicitly contemplates an
+agent and a buyer in a trusted UI driving the same session (see
+[Continue URL](#continue-url)). Without coordination, two writers that read
+the same state and then write divergent replacements silently lose one of
+the updates: last write wins, and neither party is told.
+
+`Idempotency-Key` does not address this. Idempotency collapses *identical*
+retries of the same request; it neither detects nor serializes two
+*different* replacement writes racing for the same session.
+
+UCP therefore layers optimistic concurrency onto the state-changing
+checkout operations (Update, Complete, Cancel):
+
+* The business assigns each checkout state an opaque **entity tag** that
+  changes whenever the stored session state changes, and returns it with
+  every checkout response.
+* The platform echoes the last tag it observed when it writes. If the tag
+  still matches the session's current state, the write proceeds. If it does
+  not, the business rejects the write without applying it; the platform
+  re-reads the session (Get Checkout), reconciles its intended changes with
+  the current state, and retries with the new tag.
+
+Support is discovered from responses themselves: a business that returns
+entity tags is advertising conditional-write support, and a platform that
+has never seen a tag has nothing to echo and proceeds unconditionally. No
+profile configuration is involved.
+
+Bindings define the tag carrier. The
+[REST binding](checkout-rest.md#concurrency-control) uses standard HTTP
+conditional requests (`ETag` / `If-Match`,
+[RFC 9110](https://www.rfc-editor.org/rfc/rfc9110#name-conditional-requests){target="_blank"}).
+Bindings without a native metadata carrier for response tags (MCP, A2A,
+Embedded) do not define one yet; writes on those bindings remain
+unconditional.
+
+**Business:**
+
+* **SHOULD** return an entity tag with every checkout response.
+* **MUST**, when returning entity tags, change the tag whenever the stored
+  session state changes, including business-initiated changes (repricing,
+  inventory adjustments), not only platform writes.
+* **MUST** reject a conditional write whose tag does not match the
+  session's current state, without applying any part of it.
+
+**Platform:**
+
+* **SHOULD** write conditionally whenever it has observed an entity tag
+  for the session.
+* **SHOULD**, on rejection, re-read the session, reapply its intended
+  changes on top of the current state, and retry with the fresh tag rather
+  than retrying the stale write verbatim.
+
 ## Transport Bindings
 
 The abstract operations above are bound to specific transport protocols as

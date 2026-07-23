@@ -107,6 +107,11 @@ from the response.
 
 {{ extension_schema_fields('catalog_lookup.json#/$defs/lookup_response', 'catalog') }}
 
+Like every other operation, `lookup_catalog` MAY return the standard error
+envelope (`ucp.status: "error"` with `messages`) in place of a lookup
+response payload when the request cannot be served. See
+[Error Handling](../overview.md#error-handling).
+
 ---
 
 ## Get Product (`get_product`)

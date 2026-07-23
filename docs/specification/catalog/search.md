@@ -35,6 +35,11 @@ queries, filtering by category and price, and pagination.
 
 {{ extension_schema_fields('catalog_search.json#/$defs/search_response', 'catalog') }}
 
+Like every other operation, `search_catalog` MAY return the standard error
+envelope (`ucp.status: "error"` with `messages`) in place of a search
+response payload when the request cannot be served. See
+[Error Handling](../overview.md#error-handling).
+
 ## Search Inputs
 
 A valid search request MUST include at least one of: a `query` string,

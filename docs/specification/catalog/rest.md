@@ -538,6 +538,10 @@ Use HTTP status codes for protocol-level issues that prevent request processing:
 | 429 | Too Many Requests - Rate limited |
 | 500 | Internal Server Error |
 
+The REST service definition (`rest.openapi.json`) declares these as
+`4XX`/`5XX` responses carrying the standard error envelope, so clients
+generated from the service definition receive a typed error shape.
+
 ### Business Outcomes
 
 All application-level outcomes return HTTP 200 with the UCP envelope and optional
@@ -587,6 +591,14 @@ Business outcomes use the standard HTTP 200 status with messages in the response
 ### Detail Product {: #detail-product }
 
 {{ extension_schema_fields('catalog_lookup.json#/$defs/detail_product', 'catalog/rest') }}
+
+### Search Response {: #catalog-search-search-response }
+
+{{ extension_schema_fields('catalog_search.json#/$defs/search_response', 'catalog/rest') }}
+
+### Lookup Response {: #catalog-lookup-lookup-response }
+
+{{ extension_schema_fields('catalog_lookup.json#/$defs/lookup_response', 'catalog/rest') }}
 
 ### Get Product Response {: #catalog-lookup-get-product-response }
 
