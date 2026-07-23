@@ -116,8 +116,8 @@ JSONPath to identify targets:
 | Path Pattern                         | Target            |
 | ------------------------------------ | ----------------- |
 | `$.line_items[0]`                    | First line item   |
-
-filter on its `type` (e.g. `fulfillment`, `tax`, `fee`) rather than a named key.
+| `$.line_items[1]`                    | Second line item  |
+| `$.totals[?@.type == "fulfillment"]` | Fulfillment total |
 
 This enables platforms to explain exactly how much each discount contributed to
 each line item, even when multiple discounts stack.
