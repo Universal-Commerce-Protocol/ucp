@@ -67,7 +67,7 @@ Businesses advertise MCP transport availability through their UCP profile at
           "spec": "https://example.vendor.com/specs/delegate-payment",
           "schema": "https://example.vendor.com/schemas/delegate-payment-config.json",
           "available_instruments": [
-            {"type": "card", "constraints": {"brands": ["visa", "mastercard"]}}
+            {"type": "card", "options": {"brands": ["visa", "mastercard"]}}
           ],
           "config": {}
         }

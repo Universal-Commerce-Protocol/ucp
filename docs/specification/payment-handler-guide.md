@@ -229,7 +229,7 @@ and typically includes different configuration:
   "available_instruments": [
     {
       "type": "card",
-      "constraints": {
+      "options": {
         "brands": ["visa", "mastercard"]
       }
     }
@@ -253,7 +253,7 @@ and typically includes different configuration:
   "available_instruments": [
     {
       "type": "card",
-      "constraints": {
+      "options": {
         "brands": ["visa", "mastercard", "amex", "discover"]
       }
     }
@@ -275,7 +275,7 @@ and typically includes different configuration:
   "available_instruments": [
     {
       "type": "card",
-      "constraints": {
+      "options": {
         "brands": ["visa", "mastercard"]
       }
     }
@@ -319,28 +319,26 @@ authoritative value returned in the `response_schema`.
 
 | Source | `available_instruments` |
 | :----- | :---------------------- |
-| Platform profile | `[{type: "card", constraints: {brands: ["visa", "mastercard", "amex", "discover"]}}]` |
-| Business profile | `[{type: "card", constraints: {brands: ["visa", "mastercard", "amex"]}}]` |
-| **Response (resolved)** | `[{type: "card", constraints: {brands: ["visa", "mastercard", "amex"]}}]` |
+| Platform profile | `[{type: "card", options: {brands: ["visa", "mastercard", "amex", "discover"]}}]` |
+| Business profile | `[{type: "card", options: {brands: ["visa", "mastercard", "amex"]}}]` |
+| **Response (resolved)** | `[{type: "card", options: {brands: ["visa", "mastercard", "amex"]}}]` |
 
 In this example, the business's PSP is not configured for Discover, so Discover
 is excluded from the response even though the platform supports it.
 
 #### Constraint Semantics
 
-Within each available-instrument Type Constraint, `constraints` is an
-[`ObjectConstraint`](site:schemas/shopping/types/object_constraint.json) on the
-selected instrument. The base availability schema defines:
+Within each available-instrument entry, requirements are declared along **two
+axes**:
 
-| Key | Constraint type | Meaning |
-| :-- | :-------------- | :------ |
-| `required` | Object | Instrument properties required in this context. |
-| `billing_address` | Object | Nested requirements on the billing address. |
-| `credentials` | Type | Accepted credential branches and their requirements. |
+| Axis | Type | Meaning |
+| :--- | :--- | :------ |
+| `constraints` | [`ObjectConstraint`](site:schemas/shopping/types/object_constraint.json) | Field requirements on the instrument's OWN fields: `required` (presence) plus a key per constrained field carrying its nested requirement / allowed values. Compiles to a JSON Schema overlay. |
+| `options` | map | Accepted values and typed families: `brands` (a scalar list of accepted networks) and `credentials` (typed branches with per-branch requirements). Resolved by lookup. |
 
-Concrete schemas add their own keys. The card availability schema adds `brands`,
-a literal list of accepted networks. Use field constraints instead of
-handler-specific booleans for modeled data.
+Express field requirements as `constraints` (an AVS postal-code requirement is
+`constraints.billing_address.required: ["postal_code"]`), and accepted choices as
+`options` — not handler-specific booleans or bespoke keys.
 
 <!-- ucp:example schema=payment_handler def=business_schema -->
 ```json
@@ -354,9 +352,11 @@ handler-specific booleans for modeled data.
         "required": ["billing_address"],
         "billing_address": {
           "required": ["postal_code", "address_country"]
-        },
-        "credentials": [{ "type": "token" }],
-        "brands": ["visa", "mastercard"]
+        }
+      },
+      "options": {
+        "brands": ["visa", "mastercard"],
+        "credentials": [{ "type": "token" }]
       }
     }
   ]

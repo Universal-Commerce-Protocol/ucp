@@ -2,27 +2,28 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/shopping/types/available_payment_instrument.json",
   "title": "Available Payment Instrument",
-  "description": "An instrument type available from a payment handler with optional constraints.",
+  "description": "An instrument type a handler accepts, declared along two axes. `constraints` is an Object Constraint over the instrument's OWN fields (a JSON Schema overlay: presence + allowed values). `options` is the set of accepted values and typed families this instrument negotiates (resolved by lookup, not compiled into the overlay).",
   "allOf": [
     { "$ref": "type_constraint.json" },
     {
       "type": "object",
       "properties": {
-        "constraints": {
+        "options": {
           "type": "object",
           "properties": {
-            "billing_address": {
-              "$ref": "object_constraint.json",
-              "description": "Local constraint on the instrument's `billing_address` field."
-            },
             "credentials": {
               "type": "array",
               "items": { "$ref": "type_constraint.json" },
               "uniqueItems": true,
-              "description": "Credential specific constraints accepted for the payment instrument branch selected by `type`. Concrete instrument schemas can narrow known credential entries while preserving handler-extended credential entries."
+              "description": "Accepted credential families — each a Typed Constraint keyed by `type` with per-branch `constraints`. Applied by data lookup on the submitted credential's `type`; unknown types are handler/extension branches."
             }
           },
-          "description": "Constraints on this instrument type. Base payment instrument constraints can require and describe `billing_address` and `credentials`; concrete instrument schemas SHOULD add instrument-specific constraint keys while remaining open to extensions."
+          "additionalProperties": {
+            "type": "array",
+            "items": { "type": "string" },
+            "uniqueItems": true
+          },
+          "description": "Accepted options this instrument negotiates: `credentials` (a typed family) plus scalar value lists keyed by attribute (e.g. `brands`). A uniform map read to OFFER options; not part of the field-constraint overlay."
         }
       }
     }

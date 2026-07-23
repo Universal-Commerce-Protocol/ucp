@@ -565,7 +565,7 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
           "available_instruments": [
             {
               "type": "card",
-              "constraints": {
+              "options": {
                 "brands": ["visa", "mastercard", "amex"]
               }
             }
@@ -727,7 +727,7 @@ example:
           "spec": "https://example.com/specs/payments/processor_tokenizer-payment",
           "schema": "https://example.com/schemas/payments/delegate-payment.json",
           "available_instruments": [
-            {"type": "card", "constraints": {"brands": ["visa", "mastercard"]}}
+            {"type": "card", "options": {"brands": ["visa", "mastercard"]}}
           ]
         }
       ]
@@ -1724,7 +1724,7 @@ request a challenge.
           "available_instruments": [
             {
               "type": "card",
-              "constraints": {
+              "options": {
                 "brands": ["visa", "mastercard"]
               }
             }

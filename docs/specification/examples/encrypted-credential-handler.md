@@ -156,7 +156,7 @@ have their own compliance requirements.
           "available_instruments": [
             {
               "type": "card",
-              "constraints": {
+              "options": {
                 "brands": ["visa", "mastercard"]
               }
             }
@@ -194,7 +194,7 @@ The response config includes information about the encryption used.
   "available_instruments": [
     {
       "type": "card",
-      "constraints": {
+      "options": {
         "brands": ["visa", "mastercard"]
       }
     }
@@ -268,7 +268,7 @@ registry using `platform_config`.
           "available_instruments": [
             {
               "type": "card",
-              "constraints": {
+              "options": {
                 "brands": ["visa", "mastercard", "amex", "discover"]
               }
             }

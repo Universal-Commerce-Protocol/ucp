@@ -6,14 +6,14 @@
   "$defs": {
     "available_card_payment_instrument": {
       "title": "Available Card Payment Instrument",
-      "description": "Declares card instrument availability with card-specific constraints.",
+      "description": "Declares card instrument availability. Field requirements go under `constraints` (e.g. `billing_address`); accepted values and typed families go under `options` (`brands`, `credentials`).",
       "allOf": [
         { "$ref": "available_payment_instrument.json" },
         {
           "type": "object",
           "properties": {
             "type": { "const": "card" },
-            "constraints": {
+            "options": {
               "type": "object",
               "properties": {
                 "brands": {
@@ -21,16 +21,15 @@
                   "items": { "type": "string" },
                   "minItems": 1,
                   "uniqueItems": true,
-                  "description": "Limit to specific card brands (e.g., ['visa', 'mastercard', 'amex'])."
+                  "description": "Accepted card brands (e.g., ['visa', 'mastercard', 'amex'])."
                 },
                 "credentials": {
+                  "type": "array",
                   "items": {
                     "if": {
                       "type": "object",
                       "required": ["type"],
-                      "properties": {
-                        "type": { "const": "token" }
-                      }
+                      "properties": { "type": { "const": "token" } }
                     },
                     "then": { "$ref": "token_credential.json#/$defs/constraint" }
                   }
