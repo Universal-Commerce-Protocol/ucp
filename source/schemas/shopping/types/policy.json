@@ -11,7 +11,7 @@
   "additionalProperties": true,
   "properties": {
     "type": {
-      "type": "string",
+      "$ref": "../../common/types/reverse_domain_name.json",
       "description": "Policy type discriminator. Open reverse-DNS vocabulary. Well-known values: `dev.ucp.shopping.policy.refund` (return/refund terms), `dev.ucp.shopping.policy.warranty` (warranty terms). Businesses MAY define custom types in their own domain (e.g., `com.example.policy.price_match`). Platforms MUST tolerate unknown values."
     },
     "description": {
@@ -30,22 +30,5 @@
       "format": "uri",
       "description": "Optional link to the full policy document."
     }
-  },
-  "allOf": [
-    {
-      "if": {
-        "required": [
-          "type"
-        ],
-        "properties": {
-          "type": {
-            "const": "dev.ucp.shopping.policy.refund"
-          }
-        }
-      },
-      "then": {
-        "$ref": "policy_refund.json"
-      }
-    }
-  ]
+  }
 }

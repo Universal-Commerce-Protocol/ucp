@@ -2280,7 +2280,7 @@ presenting the policy from its `description` (see
 
 `applies_to` is an array of RFC 9535 JSONPath expressions, evaluated relative to
 the **embedding response root** — the same convention `messages[].path` uses.
-The root differs by surface: `$.line_items[N]` on cart and checkout,
+The root differs by surface: `$.line_items[N]` on cart, checkout, and order,
 `$.products[N]` on catalog search and lookup, `$.product` on get_product. A
 policy targets nodes in one of three forms:
 
@@ -2306,9 +2306,12 @@ Policies of **different** `type` are independent: each applies on its own, so a
 single node can carry a warranty policy and a price-match policy at once.
 
 Policies of the **same** `type` can contest a node. When they do, exactly one
-governs and **replaces** the rest at that node — same-type policies do not
-compose, so their bodies are never merged. Resolving which one governs is a
-**longest-prefix match** against the response in hand.
+governs and **replaces** the rest — a Platform **MUST NOT** merge their bodies.
+Merging would mean inferring whether policies combine or replace, which a
+Platform cannot read from the data; resolution selects one governing policy by
+structure alone. When terms genuinely stack, the Business folds them into the
+most-specific policy — composition is authored, not resolved. Resolving which
+one governs is a **longest-prefix match** against the response in hand.
 
 Every node has a canonical identity: its **Normalized Path** ([RFC 9535
 §2.7](https://www.rfc-editor.org/rfc/rfc9535#section-2.7)), the sequence of
@@ -2371,14 +2374,12 @@ final-sale terms to regulatory notices.
 
 A disclosure pairs with the policy that **governs** its `path` node — the one
 [Precedence](#precedence) selects when several policies of the same `type` cover
-that node. Precedence yields at most one such policy, so the pairing is
-unambiguous.
-
-Two authoring rules apply:
+that node. Precedence yields at most one, so the pairing is unambiguous. Two
+rules apply:
 
 1. A disclosure's content **MUST** agree with the policy it pairs with — the
    notice and the policy are two statements about the same node.
-2. A disclosure **SHOULD** resolve to a governing policy. When its `code` names
+2. A disclosure **SHOULD** resolve to a governing policy: when its `code` names
    a `type` no policy covers at that node, the notice still displays, but
    nothing structured stands behind it.
 

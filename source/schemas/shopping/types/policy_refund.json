@@ -1,7 +1,0 @@
-{
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/schemas/shopping/types/policy_refund.json",
-  "title": "Refund Policy",
-  "description": "Refund-specific fields layered onto the base Policy envelope when `type == \"dev.ucp.shopping.policy.refund\"`. Placeholder: the structured refund body (return window, resolutions, fees) is defined by the refund policy proposal. Until then a refund policy carries the base `type` + `description` and adds no further fields.",
-  "type": "object"
-}
