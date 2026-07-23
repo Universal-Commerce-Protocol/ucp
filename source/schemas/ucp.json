@@ -289,6 +289,23 @@
           }
         }
       ]
+    },
+
+    "response_ask_schema": {
+      "title": "UCP Ask Response Schema",
+      "description": "UCP metadata for ask responses.",
+      "allOf": [
+        { "$ref": "#/$defs/base" },
+        {
+          "properties": {
+            "capabilities": {
+              "additionalProperties": {
+                "items": { "$ref": "capability.json#/$defs/response_schema" }
+              }
+            }
+          }
+        }
+      ]
     }
   }
 }
