@@ -961,6 +961,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#extension-declared-action-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Extension-Declared Action Types
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#complete-example-capability-schema" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1626,6 +1637,17 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#extension-declared-action-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Extension-Declared Action Types
+      
+    </span>
+  </a>
   
 </li>
       
@@ -2350,6 +2372,45 @@ object fields:</p>
 <li><strong><code>minProperties</code></strong> — Empty objects (<code>{}</code>) are well-formed and harmless.
   Implementers should accept and process them as a no-op.</li>
 </ul>
+<h2 id="extension-declared-action-types">Extension-Declared Action Types<a class="headerlink" href="#extension-declared-action-types" title="Permanent link">&para;</a></h2>
+<p>Every Action type is declared by an extension and becomes available only when
+that extension is negotiated, as defined in
+<a href="/latest/specification/overview.md#actions">Actions</a>. Before advertising support,
+both the Business and the Platform should assess the extension's complete
+Action contract. Negotiation is pre-runtime agreement on that contract's
+semantics and support; it does not pre-approve every future <code>config</code> value or
+delegate. Each concrete instance still needs to conform to the composed
+schema, the Action-type contract's runtime rules, and Platform policy.</p>
+<p>When they apply to the Action type, extension authors should define:</p>
+<ul>
+<li>its Action type key or keys, parent capability, and emission conditions;</li>
+<li>the exact effect that the Action type gates;</li>
+<li>its concrete <code>config</code> schema and how the Platform processes it, explicitly
+  identifying any field that is executable or causes content to be loaded;</li>
+<li>relevant schemes, origins, delegates, and trust anchors;</li>
+<li>presentation, isolation, and permission controls;</li>
+<li>how the Business observes Action completion and reflects it in a later parent
+  response;</li>
+<li>if the parent response can be delayed, any timeout and bounded-backoff rules,
+  and whether the Platform can safely process the same Action again; if so,
+  every safe-retry condition;</li>
+<li>the fallback when processing fails, is declined, or is abandoned, when the
+  Action is unsupported or expires, or when the Business does not update the
+  parent response;</li>
+<li>the Action-specific conditions under which work is resolved, superseded, or
+  replaced, plus within-type or cross-type ordering semantics when needed.</li>
+</ul>
+<p>Extension authors should define only controls relevant to the concrete
+processing model. For example, an Action with no loadable URL needs no URL
+scheme or origin rules. Extension authors should keep Action-specific data
+under <code>config</code> and use the existing <code>allOf</code> extension composition to contribute
+each Action key and <code>config</code> shape to the parent capability schema. They should
+not introduce a standalone Actions capability or registry. Nor should they
+expand the common Actions contract with generic machinery—whether an executor,
+callback/result model, state machine, fallback enum, retry field, or polling
+protocol. A concrete extension may define its own callback, result, state,
+fallback, retry, timeout, or backoff semantics when genuinely required by its
+Action type.</p>
 <h2 id="complete-example-capability-schema">Complete Example: Capability Schema<a class="headerlink" href="#complete-example-capability-schema" title="Permanent link">&para;</a></h2>
 <p>A capability schema defines both payload structure and declaration variants:</p>
 <!-- ucp:example skip reason="schema authoring example" -->

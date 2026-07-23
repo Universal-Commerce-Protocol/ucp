@@ -1265,6 +1265,24 @@ By default, UCP schemas do not set `minProperties` or `maxProperties` on object 
 - **`maxProperties`** — Limits are deferred to implementers. The protocol does not define caps because any specific limit requires judgment calls that inevitably run into exceptions. Implementers are encouraged to impose their own constraints and surface clear error feedback to support debugging and good behavior.
 - **`minProperties`** — Empty objects (`{}`) are well-formed and harmless. Implementers should accept and process them as a no-op.
 
+## Extension-Declared Action Types
+
+Every Action type is declared by an extension and becomes available only when that extension is negotiated, as defined in [Actions](/latest/specification/overview.md#actions). Before advertising support, both the Business and the Platform should assess the extension's complete Action contract. Negotiation is pre-runtime agreement on that contract's semantics and support; it does not pre-approve every future `config` value or delegate. Each concrete instance still needs to conform to the composed schema, the Action-type contract's runtime rules, and Platform policy.
+
+When they apply to the Action type, extension authors should define:
+
+- its Action type key or keys, parent capability, and emission conditions;
+- the exact effect that the Action type gates;
+- its concrete `config` schema and how the Platform processes it, explicitly identifying any field that is executable or causes content to be loaded;
+- relevant schemes, origins, delegates, and trust anchors;
+- presentation, isolation, and permission controls;
+- how the Business observes Action completion and reflects it in a later parent response;
+- if the parent response can be delayed, any timeout and bounded-backoff rules, and whether the Platform can safely process the same Action again; if so, every safe-retry condition;
+- the fallback when processing fails, is declined, or is abandoned, when the Action is unsupported or expires, or when the Business does not update the parent response;
+- the Action-specific conditions under which work is resolved, superseded, or replaced, plus within-type or cross-type ordering semantics when needed.
+
+Extension authors should define only controls relevant to the concrete processing model. For example, an Action with no loadable URL needs no URL scheme or origin rules. Extension authors should keep Action-specific data under `config` and use the existing `allOf` extension composition to contribute each Action key and `config` shape to the parent capability schema. They should not introduce a standalone Actions capability or registry. Nor should they expand the common Actions contract with generic machinery—whether an executor, callback/result model, state machine, fallback enum, retry field, or polling protocol. A concrete extension may define its own callback, result, state, fallback, retry, timeout, or backoff semantics when genuinely required by its Action type.
+
 ## Complete Example: Capability Schema
 
 A capability schema defines both payload structure and declaration variants:
