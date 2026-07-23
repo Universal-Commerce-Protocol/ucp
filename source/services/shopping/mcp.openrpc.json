@@ -43,6 +43,18 @@
           { "$ref": "../../schemas/common/types/error_response.json" }
         ]
       },
+      "catalog_search_result": {
+        "oneOf": [
+          { "$ref": "../../schemas/shopping/catalog_search.json#/$defs/search_response" },
+          { "$ref": "../../schemas/common/types/error_response.json" }
+        ]
+      },
+      "catalog_lookup_result": {
+        "oneOf": [
+          { "$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/lookup_response" },
+          { "$ref": "../../schemas/common/types/error_response.json" }
+        ]
+      },
       "meta": {
         "type": "object",
         "description": "Request metadata.",
@@ -301,7 +313,7 @@
       ],
       "result": {
         "name": "response",
-        "schema": {"$ref": "../../schemas/shopping/catalog_search.json#/$defs/search_response"}
+        "schema": {"$ref": "#/components/schemas/catalog_search_result"}
       }
     },
     {
@@ -322,7 +334,7 @@
       ],
       "result": {
         "name": "response",
-        "schema": {"$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/lookup_response"}
+        "schema": {"$ref": "#/components/schemas/catalog_lookup_result"}
       }
     },
     {
