@@ -34,6 +34,7 @@ Kroger
 Lowe's
 Macy's
 Mastercard
+MDES
 OKP
 Paymentech
 Paypal
