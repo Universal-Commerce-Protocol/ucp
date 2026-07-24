@@ -27,6 +27,7 @@ are gated and skipped if the binary is missing.
 """
 
 import json
+import re
 import shutil
 import sys
 import tempfile
@@ -206,6 +207,69 @@ def test_string_ellipsis_in_array() -> None:
     "string_ellipsis_in_array_item",
     cleaned == [1, 3],
     f"got {cleaned!r}",
+  )
+
+
+# -----------------------------------------------------------
+# AP2 checkout_mandate pattern
+# -----------------------------------------------------------
+
+
+def test_ap2_checkout_mandate_pattern() -> None:
+  """checkout_mandate accepts an SD-JWT+kb and stays a superset of the old.
+
+  An SD-JWT+kb is <issuer-JWT>~<disclosure>...~<KB-JWT>; the trailing
+  KB-JWT is itself a JWT, so it contains dots. The pattern must accept that,
+  keep accepting what the old pattern accepted, and not go wide open. Reads
+  the pattern from the schema so a revert fails here.
+  """
+  schema_path = (
+    Path(__file__).parent.parent / "source/schemas/shopping/ap2_mandate.json"
+  )
+  pattern = json.loads(schema_path.read_text())["$defs"]["checkout_mandate"][
+    "pattern"
+  ]
+
+  def matches(value: str) -> bool:
+    # fullmatch, not search: the pattern is anchored ^...$ and a JSON Schema
+    # validator treats $ as end-of-string (no trailing-newline match).
+    return re.fullmatch(pattern, value) is not None
+
+  j = "eyJh.eyJz.SIG"  # a JWT: three base64url parts with dots
+  d = "WyJzYWx0Il0"  # a disclosure: one base64url segment, no dots
+
+  for value, why in [
+    (f"{j}~{j}", "key binding, zero disclosures"),
+    (f"{j}~{d}~{j}", "key binding, one disclosure"),
+    (f"{j}~{d}~{d}~{j}", "key binding, many disclosures"),
+    (j, "old form: bare issuer JWT"),
+    (f"{j}~{d}", "old form: issuer JWT + disclosure"),
+  ]:
+    _check(
+      f"checkout_mandate_accepts[{why}]",
+      matches(value),
+      f"{value!r} should match {pattern!r}",
+    )
+
+  for value, why in [
+    ("not a credential", "free text"),
+    (f"{j}~{j}~{j}", "two KB-JWTs"),
+    (f"{j}~d.e", "malformed two-segment KB-JWT"),
+  ]:
+    _check(
+      f"checkout_mandate_rejects[{why}]",
+      not matches(value),
+      f"{value!r} should not match {pattern!r}",
+    )
+
+  # The fix must be a strict superset: the key-bound form was rejected by
+  # the old pattern and is accepted by the new one.
+  old = r"^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]*\.[A-Za-z0-9_-]+(~[A-Za-z0-9_-]+)*$"
+  kb = f"{j}~{d}~{j}"
+  _check(
+    "checkout_mandate_expands_to_key_binding",
+    re.fullmatch(old, kb) is None and matches(kb),
+    "old pattern should reject the key-bound form, new should accept it",
   )
 
 
@@ -583,6 +647,7 @@ def main() -> int:
   test_parse_example_keeps_sentinels()
   test_strip_ellipsis_records_paths()
   test_string_ellipsis_in_array()
+  test_ap2_checkout_mandate_pattern()
   test_annotation_parsing()
   test_extract_blocks()
   test_scaffold_resolution()
