@@ -19,7 +19,7 @@
 * **Capability Name:** `dev.ucp.shopping.catalog.search`
 
 Performs a search against the business's product catalog. Supports free-text
-queries, filtering by category and price, and pagination.
+queries, filtering by category, price, availability, and brand, and pagination.
 
 ## Operation
 
@@ -60,6 +60,22 @@ merchants MAY support additional custom filters via `additionalProperties`.
 ### Price Filter
 
 {{ schema_fields('types/price_filter', 'catalog') }}
+
+### Availability Filter
+
+The `availability` filter narrows results to products with at least one variant
+matching a listed status. Values use the same vocabulary defined in the variant
+`availability.status` field.
+
+When omitted, the business returns products regardless of availability status.
+Businesses that do not track availability status MAY ignore this filter and
+SHOULD notify the platform via a message.
+
+### Brand Filter
+
+The `brand` filter narrows results to products whose `brand` field matches any
+listed value (OR logic). Matching SHOULD be case-insensitive. Businesses that
+do not index brand data MAY ignore this filter.
 
 ## Pagination
 
