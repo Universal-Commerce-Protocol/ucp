@@ -455,11 +455,11 @@
       "request_signature": {
         "name": "Request-Signature",
         "in": "header",
-        "required": true,
+        "required": false,
         "schema": {
           "type": "string"
         },
-        "description": "Ensure the authenticity and integrity of an HTTP message."
+        "description": "Ensure the authenticity and integrity of an HTTP message. Optional; required only when the platform authenticates with HTTP Message Signatures. Platforms MAY use alternative authentication mechanisms (API keys, OAuth, mTLS) instead, per the Message Signatures specification."
       },
       "idempotency_key": {
         "name": "Idempotency-Key",
