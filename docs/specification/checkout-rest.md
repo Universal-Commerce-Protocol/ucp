@@ -1309,6 +1309,9 @@ operations unless otherwise noted.
     3. Return `409 Conflict` if the key is reused with a mismatched body.
     See [Message Signatures — Idempotency Key Requirements](signatures.md#replay-protection)
     for the full payload-matching contract.
+* **ETag / If-Match**: Businesses that support conditional writes return an
+    `ETag` on checkout responses; platforms echo it via `If-Match` on Update,
+    Complete, and Cancel. See [Concurrency Control](#concurrency-control).
 
 ## Protocol Mechanics
 
@@ -1325,11 +1328,113 @@ request.
 | `401 Unauthorized`          | Authentication is required and has failed or has not been provided.                |
 | `403 Forbidden`             | The request is authenticated but the user does not have the necessary permissions. |
 | `409 Conflict`              | The request could not be completed due to a conflict (e.g., idempotent key reuse). |
+| `412 Precondition Failed`   | The `If-Match` entity tag does not match the session's current state.              |
 | `422 Unprocessable Entity`  | The profile content is malformed (discovery failure).                              |
 | `424 Failed Dependency`     | The profile URL is valid but fetch failed (discovery failure).                     |
+| `428 Precondition Required` | The operation requires a conditional request (`If-Match`).                         |
 | `429 Too Many Requests`     | Rate limit exceeded.                                                               |
 | `503 Service Unavailable`   | Temporary unavailability.                                                          |
 | `500 Internal Server Error` | An unexpected condition was encountered on the server.                             |
+
+### Concurrency Control
+
+The REST binding carries the
+[Concurrency Control](checkout.md#concurrency-control) entity tag in
+standard HTTP conditional-request fields
+([RFC 9110](https://www.rfc-editor.org/rfc/rfc9110#name-conditional-requests){target="_blank"}):
+
+* Businesses that support conditional writes **SHOULD** return a strong
+    `ETag` response header on every checkout response (Create, Get, Update,
+    Complete, Cancel).
+* Platforms **SHOULD** send the last observed tag in an `If-Match` request
+    header on Update, Complete, and Cancel.
+* On a tag mismatch the business **MUST NOT** apply any part of the write
+    and **MUST** respond `412 Precondition Failed` with the standard error
+    envelope and `code: "precondition_failed"`. The error is `recoverable`:
+    the platform re-reads the session via Get Checkout, reconciles its
+    intended changes with the current state, and retries with the fresh tag.
+* Businesses that require serialized writes **MAY** reject unconditional
+    writes with `428 Precondition Required`
+    ([RFC 6585](https://www.rfc-editor.org/rfc/rfc6585){target="_blank"}).
+    Platforms treat this like a mismatch: fetch the current state and its
+    tag, then retry conditionally.
+
+`If-Match` composes with `Idempotency-Key`: idempotency deduplicates retries
+of one logical write, while the precondition orders distinct writes. A
+retried request keeps both its original `Idempotency-Key` and its original
+`If-Match` value.
+
+#### Example: Conditional Update
+
+=== "Request"
+
+    <!-- ucp:example schema=shopping/checkout op=update direction=request -->
+    ```json
+    PUT /checkout-sessions/chk_1234567890 HTTP/1.1
+    UCP-Agent: profile="https://platform.example/profile"
+    If-Match: "33a64df551425fcc"
+    Content-Type: application/json
+
+    {
+      "buyer": {
+        "email": "jane@example.com"
+      },
+      "line_items": [
+        {
+          "id": "li_1",
+          "item": {
+            "id": "item_123"
+          },
+          "quantity": 3
+        }
+      ]
+    }
+    ```
+
+=== "Response (applied)"
+
+    The write matched the session's current state; the response carries the
+    new entity tag for the platform's next write.
+
+    <!-- ucp:example schema=shopping/checkout op=read -->
+    ```json
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+    ETag: "5c3e9f10b74d21aa"
+
+    {
+      "ucp": "...",
+      "id": "chk_1234567890",
+      "status": "ready_for_complete",
+      "currency": "USD",
+      "line_items": ["..."],
+      "links": ["..."],
+      "totals": ["..."]
+    }
+    ```
+
+=== "Response (rejected)"
+
+    Another writer changed the session after this platform last read it.
+    Nothing was applied; the platform re-reads and retries.
+
+    <!-- ucp:example schema=common/types/error_response op=read -->
+    ```json
+    HTTP/1.1 412 Precondition Failed
+    Content-Type: application/json
+
+    {
+      "ucp": { "version": "{{ ucp_version }}", "status": "error" },
+      "messages": [
+        {
+          "type": "error",
+          "code": "precondition_failed",
+          "severity": "recoverable",
+          "content": "Checkout changed since the supplied entity tag; re-read and retry."
+        }
+      ]
+    }
+    ```
 
 ### Error Responses
 
@@ -1339,6 +1444,11 @@ code registry and transport binding examples.
 * **Protocol errors**: Return appropriate HTTP status code (401, 403, 409, 429,
     503) with JSON body containing `code` and `content`.
 * **Business outcomes**: Return HTTP 200 with UCP envelope and `messages` array.
+
+The REST service definition (`rest.openapi.json`) declares these as `4XX`/`5XX`
+responses, plus an explicit `409` on state-changing operations for
+idempotency-key conflicts, each carrying the standard error envelope, so
+clients generated from the service definition receive a typed error shape.
 
 #### Business Outcomes
 
