@@ -18,12 +18,12 @@
         "kty": {
           "type": "string",
           "examples": ["EC", "OKP"],
-          "description": "JWK key type. Well-known values: EC for ECDSA (P-256, P-384); OKP for EdDSA (Ed25519). Open vocabulary; verifiers tolerate unrecognized types and select keys by kid."
+          "description": "JWK key type. Well-known values: EC for ECDSA (P-256, P-384, P-521); OKP for EdDSA (Ed25519). Open vocabulary; verifiers tolerate unrecognized types and select keys by kid."
         },
         "crv": {
           "type": "string",
-          "examples": ["P-256", "P-384", "Ed25519"],
-          "description": "Curve name. Well-known values: P-256, P-384 (EC); Ed25519 (OKP). Open vocabulary."
+          "examples": ["P-256", "P-384", "P-521", "Ed25519"],
+          "description": "Curve name. Well-known values: P-256, P-384, P-521 (EC); Ed25519 (OKP). Open vocabulary."
         },
         "x": {
           "type": "string",
@@ -35,8 +35,8 @@
         },
         "alg": {
           "type": "string",
-          "examples": ["ES256", "ES384", "EdDSA"],
-          "description": "JWA algorithm associated with this public key. Optional; verifiers derive the algorithm from crv when alg is omitted. When present for a well-known curve it MUST match: ES256 with P-256, ES384 with P-384, EdDSA with Ed25519."
+          "examples": ["ES256", "ES384", "ES512", "EdDSA"],
+          "description": "JWA algorithm associated with this public key. Optional; verifiers derive the algorithm from crv when alg is omitted. When present for a well-known curve it MUST match: ES256 with P-256, ES384 with P-384, ES512 with P-521, EdDSA with Ed25519."
         },
         "use": {
           "type": "string",
@@ -63,6 +63,11 @@
           "title": "P-384 pairs with ES384",
           "if": { "properties": { "crv": { "const": "P-384" } }, "required": ["crv"] },
           "then": { "properties": { "alg": { "const": "ES384" } } }
+        },
+        {
+          "title": "P-521 pairs with ES512",
+          "if": { "properties": { "crv": { "const": "P-521" } }, "required": ["crv"] },
+          "then": { "properties": { "alg": { "const": "ES512" } } }
         },
         {
           "title": "Ed25519 pairs with EdDSA",
