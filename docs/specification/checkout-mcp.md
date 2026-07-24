@@ -141,6 +141,7 @@ Maps to the [Create Checkout](checkout.md#create-checkout) operation.
 * `checkout` ([Checkout](checkout.md#create-checkout)): **Required**. Contains
     the initial checkout session data and optional extensions.
     * Extensions (Optional):
+        * `dev.ucp.shopping.additional_fields`: [Additional Fields](additional-fields.md)
         * `dev.ucp.shopping.buyer_consent`: [Buyer Consent](buyer-consent.md)
         * `dev.ucp.shopping.fulfillment`: [Fulfillment](fulfillment.md)
         * `dev.ucp.shopping.discount`: [Discount](discount.md)
@@ -400,6 +401,7 @@ unchanged and return the current Checkout with a recoverable error Message.
 * `checkout` ([Checkout](checkout.md#update-checkout)): **Required**.
     Contains the updated checkout session data.
     * Extensions (Optional):
+        * `dev.ucp.shopping.additional_fields`: [Additional Fields](additional-fields.md)
         * `dev.ucp.shopping.buyer_consent`: [Buyer Consent](buyer-consent.md)
         * `dev.ucp.shopping.fulfillment`: [Fulfillment](fulfillment.md)
         * `dev.ucp.shopping.discount`: [Discount](discount.md)
