@@ -110,11 +110,11 @@ Exit codes: 0 if all pass or skip; 1 if any block fails or errors.
 
 import argparse
 import json
-from pathlib import Path
 import re
 import subprocess
 import sys
 import tempfile
+from pathlib import Path
 
 # -----------------------------------------------------------
 # Constants
@@ -153,7 +153,7 @@ def parse_annotation(text: str) -> dict:
     reason_match = re.search(r'reason="([^"]*)"', text)
     return {
       "skip": True,
-      "reason": reason_match.group(1) if reason_match else "",
+      "reason": (reason_match.group(1) if reason_match else ""),
     }
   attrs: dict = {}
   unknown: list[str] = []
@@ -259,7 +259,7 @@ def extract_blocks(filepath: Path) -> list[dict]:
             "content": "",
             "annotation": None,
             "error": (
-              "multiple stacked annotations before fence "
+              f"multiple stacked annotations before fence "
               f"(previous at line {pending_annotation_line})"
             ),
           }
@@ -747,7 +747,7 @@ def resolve_schema(
   )
   if result.returncode != 0:
     raise RuntimeError(
-      "ucp-schema resolve failed for"
+      f"ucp-schema resolve failed for"
       f" {schema_path} ({direction}/{op}):"
       f" {result.stderr.strip()}"
     )
