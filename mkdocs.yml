@@ -66,6 +66,7 @@ nav:
           - Overview: specification/catalog/index.md
           - Search: specification/catalog/search.md
           - Lookup: specification/catalog/lookup.md
+          - List: specification/catalog/list.md
           - Transports:
               - REST: specification/catalog/rest.md
               - MCP: specification/catalog/mcp.md
@@ -368,6 +369,10 @@ plugins:
               Direct item retrieval via the Lookup Catalog capability,
               specifying variant resolution logic, batch identifiers,
               and interactive option selection.
+          - specification/catalog/list.md: >-
+              Full catalog enumeration via the List Catalog capability,
+              specifying cursor-paginated traversal with incremental
+              sync support via modified_since filtering.
           - specification/catalog/rest.md: >-
               HTTP REST transport binding for the Catalog Capability,
               detailing search, batch lookup, and product detail
