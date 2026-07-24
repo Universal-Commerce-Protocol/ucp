@@ -313,7 +313,6 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
     Content-Type: application/json
 
     {
-      "id": "cart_abc123",
       "line_items": [
         {
           "item": {
