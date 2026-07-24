@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/order_payment_instrument.json",
+  "title": "Order Payment Instrument",
+  "description": "A payment instrument used on an order. Unlike the checkout payment instrument, it carries no collection-time details (no handler reference, credential, or selection state) — only what is needed to represent how the order was paid.",
+  "type": "object",
+  "required": [
+    "id",
+    "type"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Identifier for this instrument instance."
+    },
+    "type": {
+      "type": "string",
+      "description": "The broad category of the instrument (e.g., 'card', 'gift_card'). Open string field — businesses can use any values that make sense."
+    },
+    "amount": {
+      "$ref": "../../common/types/amount.json",
+      "description": "The amount charged to this instrument, in the order currency's minor units (ISO 4217)."
+    },
+    "billing_address": {
+      "$ref": "../../common/types/postal_address.json",
+      "description": "The billing address associated with this payment method."
+    },
+    "display": {
+      "type": "object",
+      "description": "Display information for this payment instrument, suitable for rendering on an order confirmation (e.g., card brand and last four digits). Structure depends on the instrument type.",
+      "additionalProperties": true
+    }
+  }
+}
