@@ -75,12 +75,24 @@
           },
           "description": "Products matching the requested identifiers. May contain fewer items if some identifiers not found, or more if identifiers match multiple products."
         },
+        "actions": {
+          "$ref": "../common/types/actions.json",
+          "description": "Outstanding extension-defined Actions for this catalog lookup response.",
+          "ucp_request": "omit"
+        },
         "messages": {
           "type": "array",
           "items": {
             "$ref": "../common/types/message.json"
           },
           "description": "Errors, warnings, or informational messages about the requested items."
+        },
+        "policies": {
+          "type": "array",
+          "items": {
+            "$ref": "types/policy.json"
+          },
+          "description": "Policies (e.g., return/refund terms) that apply to the products in this response. `applies_to` targets are relative to the response root; when absent or empty, refer to the URLs in `links[]`."
         }
       }
     },
@@ -164,12 +176,24 @@
           "$ref": "#/$defs/detail_product",
           "description": "The requested product with full detail. Singular — this is a single-resource operation."
         },
+        "actions": {
+          "$ref": "../common/types/actions.json",
+          "description": "Outstanding extension-defined Actions for this product response.",
+          "ucp_request": "omit"
+        },
         "messages": {
           "type": "array",
           "items": {
             "$ref": "../common/types/message.json"
           },
           "description": "Warnings or informational messages about the product (e.g., price recently changed, limited availability)."
+        },
+        "policies": {
+          "type": "array",
+          "items": {
+            "$ref": "types/policy.json"
+          },
+          "description": "Policies (e.g., return/refund terms) that apply to this product. `applies_to` targets are relative to the response root; when absent or empty, refer to the URLs in `links[]`."
         }
       }
     }

@@ -72,7 +72,7 @@
         "completed",
         "canceled"
       ],
-      "description": "Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details.",
+      "description": "Checkout state indicating the current phase and required processing. See Checkout Status lifecycle documentation for state transition details.",
       "ucp_request": "omit"
     },
     "currency": {
@@ -83,6 +83,11 @@
     "totals": {
       "$ref": "types/totals.json",
       "description": "Different cart totals.",
+      "ucp_request": "omit"
+    },
+    "actions": {
+      "$ref": "../common/types/actions.json",
+      "description": "Outstanding extension-defined Actions for this checkout.",
       "ucp_request": "omit"
     },
     "messages": {
@@ -99,6 +104,14 @@
         "$ref": "../common/types/link.json"
       },
       "description": "Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.",
+      "ucp_request": "omit"
+    },
+    "policies": {
+      "type": "array",
+      "items": {
+        "$ref": "types/policy.json"
+      },
+      "description": "Policies (e.g., return/refund terms) that apply to the items in this checkout. `applies_to` targets are relative to the response root; when absent or empty, refer to the URLs in `links[]`.",
       "ucp_request": "omit"
     },
     "expires_at": {

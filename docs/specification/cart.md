@@ -89,6 +89,19 @@ SHOULD be linked for the duration of the checkout.
     on a cleared cart ID return `not_found`; the platform can start a new
     session with `create_cart`.
 
+## Actions
+
+The cart surfaces outstanding Action instances in its response-only `actions`
+map, defined in [Overview — Actions](overview.md#actions).
+
+The cart has no status lifecycle. Each Action gates only the cart effect
+specified for its Action type. The Business **MUST NOT** treat an outstanding
+Action as a reason to reject an unrelated cart operation. The Platform **MAY**
+continue to add, remove, and update items while an Action is outstanding.
+
+After processing an Action, the Platform **SHOULD** use [Get Cart](#get-cart)
+or a subsequent update response to obtain the latest Cart.
+
 ## Scopes
 
 The Cart capability defines the following well-known scopes for
@@ -273,3 +286,12 @@ are estimates; accurate taxes are computed at checkout.
 ### Link
 
 {{ schema_fields('types/link', 'checkout') }}
+
+### Policy
+
+Policies (return/refund terms, warranty, and the like) that apply to the items
+in this cart. JSONPath targets in `applies_to` are relative to
+this response root (e.g., `$.line_items[0]`). See
+[Policies](overview.md#policies) for the full model.
+
+{{ schema_fields('types/policy', 'cart') }}
