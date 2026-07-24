@@ -1347,7 +1347,7 @@ UCP-Agent: profile="https://platform.example/.well-known/ucp"
 Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000
 Content-Digest: sha-256=:X48E9q...:
 Signature-Input: sig1=("@method" "@authority" "@path" "idempotency-key" "content-digest" "content-type");keyid="platform-2025"
-Signature: sig1=:MEUCIQDTxNq8h7LGHpvVZQp1iHkFp9+3N8Mxk2zH1wK4YuVN8w...:
+Signature: sig1=:6G4i8TS6oUkGrx8KnCFUpsSPwd74...:
 
 {"line_items":[{"item":{"id":"item_123"},"quantity":2}]}
 ```
@@ -1370,8 +1370,8 @@ Response signatures are **OPTIONAL** for:
 HTTP/1.1 200 OK
 Content-Type: application/json
 Content-Digest: sha-256=:Y5fK8nLmPqRsT3vWxYzAbCdEfGhIjKlMnO...:
-Signature-Input: sig1=("@status" "content-digest" "content-type");keyid="merchant-2025"
-Signature: sig1=:MFQCIH7kL9nM2oP5qR8sT1uV4wX6yZaB3cD...:
+Signature-Input: sig1=("@status" "content-digest" "content-type");keyid="merchant-2026"
+Signature: sig1=:6G4i8TS6oUkGrx8KnCFUpsSPwd74...:
 
 {"id":"chk_123","status":"completed","order":{"id":"ord_456"}}
 ```
