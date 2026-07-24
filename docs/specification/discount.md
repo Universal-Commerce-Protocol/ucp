@@ -191,6 +191,208 @@ segment, or promotional rules:
 - Cannot be removed by the platform
 - Surfaced for transparency (platform can explain to user why discount was applied)
 
+## Gift Line Items
+
+Some discounts grant one or more entirely new line items to the cart or
+checkout — a free or discounted product — rather than reducing the price of
+items the buyer already added (e.g. "buy one get one free," or a
+free-gift-with-purchase promotion).
+
+When a discount grants line items this way:
+
+- Each granted item **MUST** appear as a normal entry in `line_items[]`,
+  priced at its regular value — the same as any other line item — with the
+  discount reflected in that line item's own `totals[]`
+  (`items_discount`/`total`), exactly like a non-gift discount. Do not zero
+  out `item.price` itself.
+- The corresponding `applied_discount` entry **MUST** set
+  `gift_line_item_ids` to those line items' `id`s, so platforms can
+  attribute the items to the promotion rather than treating them as
+  unexplained additions. Most promotions grant a single gift, so this is
+  usually a one-element array — it holds more than one entry when a single
+  discount grants multiple gift units (e.g. "buy 2, get 2 free" scaling with
+  how much the buyer already added).
+- `gift_line_item_ids` is omitted for ordinary amount-based discounts — it
+  only applies when the discount's effect is granting line items, not
+  reducing the price of ones already in the cart.
+
+This lets a platform render, for example, "Free gift: T-Shirt — added by
+Summer Sale" instead of surfacing an unexplained zero-price item.
+
+`applied_discount.amount` is still required even when `gift_line_item_ids`
+is present, for the same reason it's required for every discount, gift or
+not: `allocations` is optional, so there may be nothing to sum at all. And
+even when a gift line item's own `price`/`totals[]` correctly show its
+regular value and discount delta, nothing guarantees this is the *only*
+discount touching that line item — an unrelated discount (e.g. a
+storewide percentage-off) can add its own `items_discount` entry to the
+same line item, and nothing in `totals[]` says which discount produced
+which entry. Reading the line item's totals only tells you the combined
+effect of everything that hit it, not this discount's individual share.
+`amount` is the one value a platform can always attribute to this specific
+discount, regardless of whether the business provides `allocations` or how
+many other discounts happen to be stacked on the same items. See the
+example below.
+
+### Example: Free gift with purchase
+
+=== "Request"
+
+    <!-- ucp:example schema=shopping/cart op=update direction=request -->
+    ```json
+    {
+      "id": "...",
+      "line_items": [
+        {
+          "item": {
+            "id": "prod_shoes"
+          },
+          "quantity": 1
+        }
+      ],
+      "discounts": {
+        "codes": ["FREEGIFT"]
+      }
+    }
+    ```
+
+=== "Response"
+
+    <!-- ucp:example schema=shopping/cart op=read -->
+    ```json
+    {
+      "ucp": { ... },
+      "id": "...",
+      "currency": "...",
+      "line_items": [
+        {
+          "id": "li_1",
+          "item": {
+            "id": "prod_shoes",
+            "title": "Running Shoes",
+            "price": 8000
+          },
+          "quantity": 1,
+          "totals": [
+            {"type": "subtotal", "amount": 8000},
+            {"type": "total", "amount": 8000}
+          ]
+        },
+        {
+          "id": "li_2",
+          "item": {
+            "id": "prod_socks_gift",
+            "title": "Socks",
+            "price": 1200
+          },
+          "quantity": 1,
+          "totals": [
+            {"type": "subtotal", "amount": 1200},
+            {"type": "items_discount", "amount": -1200},
+            {"type": "total", "amount": 0}
+          ]
+        }
+      ],
+      "discounts": {
+        "codes": ["FREEGIFT"],
+        "applied": [
+          {
+            "code": "FREEGIFT",
+            "title": "Free Socks with Shoe Purchase",
+            "amount": 1200,
+            "gift_line_item_ids": ["li_2"],
+            "allocations": [
+              {"path": "$.line_items[1]", "amount": 1200}
+            ]
+          }
+        ]
+      },
+      "totals": [
+        {"type": "subtotal", "display_text": "Subtotal", "amount": 9200},
+        {"type": "items_discount", "display_text": "Item Discounts", "amount": -1200},
+        {"type": "total", "display_text": "Total", "amount": 8000}
+      ]
+    }
+    ```
+
+`li_2` shows its full $12 value in `item.price` and `subtotal`, then `-1200`
+in `items_discount` brings its own total to `0` — the same pattern as any
+other discounted line item. `applied_discount.amount` (1200) and
+`allocations` just mirror what `li_2`'s own totals already say;
+`gift_line_item_ids` is the only genuinely new piece of information, and it
+tells the platform *why* `li_2` exists at all.
+
+### Example: Multiple gifts from one discount
+
+A "buy 2 shirts, get 2 socks free" promotion where the buyer added 4 shirts
+grants two gift line items from the same discount. `li_1` is the 4 shirts;
+`li_2` and `li_3` are the two free pairs of socks:
+
+<!-- ucp:example schema=shopping/cart op=read -->
+```json
+{
+  "ucp": { ... },
+  "id": "...",
+  "currency": "...",
+  "line_items": [
+    {
+      "id": "li_1",
+      "item": {"id": "prod_shirt", "title": "Shirt", "price": 3000},
+      "quantity": 4,
+      "totals": [
+        {"type": "subtotal", "amount": 12000},
+        {"type": "total", "amount": 12000}
+      ]
+    },
+    {
+      "id": "li_2",
+      "item": {"id": "prod_socks_gift", "title": "Socks", "price": 1200},
+      "quantity": 1,
+      "totals": [
+        {"type": "subtotal", "amount": 1200},
+        {"type": "items_discount", "amount": -1200},
+        {"type": "total", "amount": 0}
+      ]
+    },
+    {
+      "id": "li_3",
+      "item": {"id": "prod_socks_gift", "title": "Socks", "price": 1200},
+      "quantity": 1,
+      "totals": [
+        {"type": "subtotal", "amount": 1200},
+        {"type": "items_discount", "amount": -1200},
+        {"type": "total", "amount": 0}
+      ]
+    }
+  ],
+  "discounts": {
+    "applied": [
+      {
+        "title": "Free Socks with Every 2 Shirts",
+        "amount": 2400,
+        "automatic": true,
+        "gift_line_item_ids": ["li_2", "li_3"],
+        "allocations": [
+          {"path": "$.line_items[1]", "amount": 1200},
+          {"path": "$.line_items[2]", "amount": 1200}
+        ]
+      }
+    ]
+  },
+  "totals": [
+    {"type": "subtotal", "display_text": "Subtotal", "amount": 14400},
+    {"type": "items_discount", "display_text": "Item Discounts", "amount": -2400},
+    {"type": "total", "display_text": "Total", "amount": 12000}
+  ]
+}
+```
+
+`amount` (2400) still equals the sum of the two gift line items' own
+`items_discount` totals (1200 + 1200) — which is exactly why it's safe to
+read `amount` directly instead of cross-referencing `gift_line_item_ids`
+against `line_items[]` yourself, the same way you would for any other
+line-item-targeted discount.
+
 ## Eligibility Claims
 
 Eligibility claims are buyer claims about eligible benefits (see
