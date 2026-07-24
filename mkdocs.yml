@@ -54,6 +54,7 @@ nav:
           - Discounts Extension: specification/discount.md
           - Fulfillment Extension: specification/fulfillment.md
           - Loyalty Extension: specification/loyalty.md
+          - Return Policy Extension: specification/return.md
           - Split Payments Extension: specification/split-payments.md
       - Cart Capability:
           - Overview: specification/cart.md
@@ -328,6 +329,12 @@ plugins:
               memberships, tiers, benefits, and reward earning forecasts while
               managing provisional eligibility claims and enforcing
               data-minimization privacy rules.
+          - specification/return.md: >-
+              Return Policy Extension, defining the dev.ucp.shopping.policy.return
+              type on the core policies primitive with pre-purchase return terms:
+              window and anchor, supported resolutions, return channels and
+              logistics fees, a policy-level restocking fee, and a final-sale flag
+              across catalog, cart, checkout, and order.
         Cart Capability:
           - specification/cart.md: >-
               Pre-purchase Cart Capability, detailing item collection, state
