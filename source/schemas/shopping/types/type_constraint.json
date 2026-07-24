@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/type_constraint.json",
+  "title": "Type Constraint",
+  "description": "Constraint entry that selects one branch of a typed or discriminated family. The `type` value identifies the selected branch, and `constraints` applies an Object Constraint to that branch. Domain-specific schemas extend this base to document the discriminator and narrow the selected branch's constraints.",
+  "type": "object",
+  "required": ["type"],
+  "properties": {
+    "type": {
+      "type": "string",
+      "description": "The discriminator value for the constrained branch. Concrete schemas typically narrow this with `const`, `enum`, or another type-family constraint. Unknown values are reserved for extension schemas that document their own constraints."
+    },
+    "constraints": {
+      "$ref": "object_constraint.json",
+      "description": "Object constraints applied to the branch selected by `type`. Concrete typed-constraint schemas should narrow this to the selected branch's constraint schema. Omit when accepting the branch without additional context-specific requirements."
+    }
+  }
+}
