@@ -286,3 +286,12 @@ are estimates; accurate taxes are computed at checkout.
 ### Link
 
 {{ schema_fields('types/link', 'checkout') }}
+
+### Policy
+
+Policies (return/refund terms, warranty, and the like) that apply to the items
+in this cart. JSONPath targets in `applies_to` are relative to
+this response root (e.g., `$.line_items[0]`). See
+[Policies](overview.md#policies) for the full model.
+
+{{ schema_fields('types/policy', 'cart') }}

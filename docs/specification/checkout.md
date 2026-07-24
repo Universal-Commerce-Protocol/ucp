@@ -573,7 +573,9 @@ downgrading to a notice.
 * **SHOULD** use the `path` field to associate disclosures with the
   relevant component in the response.
 * **SHOULD** provide a `code` that identifies the disclosure category
-  (e.g., `prop65`, `allergens`, `energy_label`).
+  (e.g., `prop65`, `allergens`, `energy_label`). When the disclosure renders a
+  structured `policies[]` entry, the `code` **MUST** equal that policy's `type`
+  to link the two (see [Policies](overview.md#policies)).
 * **SHOULD** provide `image_url` when the disclosure has an associated
   visual element (e.g., warning symbol, energy class label).
 * **SHOULD** provide `url` when a reference link is available for the
@@ -999,6 +1001,15 @@ following are the recommended well-known types:
 Businesses **MAY** define custom types for domain-specific needs. Platforms
 **SHOULD** handle unknown types gracefully by displaying them using the `title`
 field or omitting them.
+
+### Policy
+
+Policies (return/refund terms, warranty, and the like) that apply to the items
+in this checkout. JSONPath targets in `applies_to` are relative to
+this response root (e.g., `$.line_items[0]`). See
+[Policies](overview.md#policies) for the full model.
+
+{{ schema_fields('types/policy', 'checkout') }}
 
 ### Message
 

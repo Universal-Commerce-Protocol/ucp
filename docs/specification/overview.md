@@ -2252,6 +2252,235 @@ Detailed definitions for endpoints, schemas, and valid extensions for each
 capability are provided in their respective specification files. Extensions are
 typically versioned and defined alongside their parent capability.
 
+## Policies
+
+A policy is a business rule — return terms, warranty, subscription
+terms, and the like — that applies to the items in a response at the time of
+purchase, carried in a core `policies[]` array alongside `messages[]` and
+`links[]`.
+
+### Policy types
+
+A Business publishes well-known and custom policies. Every policy carries a
+`type` drawn from an open, reverse-DNS vocabulary.
+
+| Well-known type | Description |
+| :-- | :-- |
+| `dev.ucp.shopping.policy.return` | Return terms. |
+| `dev.ucp.shopping.policy.warranty` | Warranty terms. |
+
+A Business **MAY** define custom types in its own domain (e.g.,
+`com.example.policy.price_match`) and **MAY** add type-specific fields that a
+Platform modeling that `type` can read for structured context. Because the
+vocabulary is open, a Platform **MUST** tolerate unknown `type` values,
+presenting the policy from its `description` (see
+[Presenting policies](#presenting-policies)).
+
+### Targeting
+
+`applies_to` is an array of RFC 9535 JSONPath expressions, evaluated relative to
+the **embedding response root** — the same convention `messages[].path` uses.
+The root differs by surface: `$.line_items[N]` on cart, checkout, and order,
+`$.products[N]` on catalog search and lookup, `$.product` on get_product. A
+policy targets nodes in one of three forms:
+
+- **Singular query** — an expression naming exactly one node using only name
+  and index selectors ([RFC 9535
+  §2.3.5.1](https://www.rfc-editor.org/rfc/rfc9535#section-2.3.5.1)), e.g.
+  `$.line_items[2]`.
+- **Set match** — a filter, wildcard, or slice matching a set of nodes, e.g.
+  `$.products[?@.category=='electronics']`.
+- **Response-wide** — an omitted `applies_to`; the policy applies to the entire
+  response. This is the common case: a single site-wide policy is one entry with
+  no targeting, never repeated per item.
+
+A target covers the node it names **and everything nested under it** — a policy
+on `$.products[0]` covers the product and all its variants, while one on
+`$.products[0].variants[3]` covers only that variant. To give one variant a
+different term, a Business names it directly; the narrower target wins where the
+two overlap (see Precedence, below).
+
+### Precedence
+
+Policies of **different** `type` are independent: each applies on its own, so a
+single node can carry a warranty policy and a price-match policy at once.
+
+Policies of the **same** `type` can contest a node. When they do, exactly one
+governs and **replaces** the rest — a Platform **MUST NOT** merge their bodies.
+Merging would mean inferring whether policies combine or replace, which a
+Platform cannot read from the data; resolution selects one governing policy by
+structure alone. When terms genuinely stack, the Business folds them into the
+most-specific policy — composition is authored, not resolved. Resolving which
+one governs is a **longest-prefix match** against the response in hand.
+
+Every node has a canonical identity: its **Normalized Path** ([RFC 9535
+§2.7](https://www.rfc-editor.org/rfc/rfc9535#section-2.7)), the sequence of
+segments locating it from the root — `$.products[0].variants[3]` is `products`,
+`0`, `variants`, `3`, and the root `$` is the empty sequence. A target
+**covers** a node when a node it matches is that node or an ancestor of it —
+equivalently, when the matched node's Normalized Path is a prefix of the target
+node's. The length of that prefix is its **depth**.
+
+To resolve which policy of a given `type` governs a node:
+
+1. Take the same-`type` policies with a target covering the node. A
+   Response-wide policy (omitted `applies_to`) targets the root `$`, so it
+   covers every node at depth 0. If none cover the node, no policy of that
+   `type` governs it.
+2. Score each by its **deepest** covering match as the pair `(depth,
+   precision)`: *depth* is that match's prefix length; *precision* is `1`
+   when the target is a **singular query** ([RFC 9535
+   §2.3.5.1](https://www.rfc-editor.org/rfc/rfc9535#section-2.3.5.1) — name and
+   index selectors only, so it names a single node) and `0` when it is a **Set
+   match** (filter, wildcard, or slice). If several covering matches share the
+   greatest depth, take the greatest precision among them.
+3. The policy with the greatest score governs — **depth first, then
+   precision**.
+4. When the greatest score is shared, the outcome is **undefined**. A tie
+   requires two policies to cover the node at the same depth and precision;
+   since a node has one ancestor at each depth, they contest the *same* node —
+   two overlapping Set matches, or two Response-wide entries of one `type`. This
+   is an authoring error, not an artifact of path targeting: naming the node by
+   an id would collide the same way. A Business **MUST NOT** publish such a
+   collision. Because resolution is undefined, a Platform **SHOULD** flag the
+   ambiguity rather than resolve it silently; the treatment is left to the
+   Platform.
+
+### Absent vs. empty
+
+When `policies[]` is absent or empty for a given response, the Platform
+**SHOULD** refer to the general policy resources in `links[]` (e.g.,
+`refund_policy`, or per-variant `seller.links` in catalog).
+
+### Presenting policies
+
+Policies describe the business rules applied to the items. A Platform **MAY**
+reason over them for its own decisions — eligibility, a computed return
+deadline. So that a policy is always presentable — even by a Platform that does
+not model its `type` — a Business **MUST** provide a `description`, a
+human-readable summary a Platform **MAY** surface to the Buyer. Presenting a
+policy is optional.
+
+When a Business **requires** a policy to be shown to the Buyer — a final-sale
+item, a regulatory notice — it **MUST** emit a `messages[]` warning that:
+
+- sets `presentation: "disclosure"`, so the Platform displays the content and
+  cannot hide or dismiss it (see
+  [Warning Presentation](checkout.md#warning-presentation));
+- sets `path` to the item the notice concerns; and
+- sets `code` to the policy's `type`, linking the notice to its policy.
+
+The warning is type-agnostic: the Platform shows its content without
+understanding the policy behind it, so one channel handles everything from
+final-sale terms to regulatory notices.
+
+A disclosure pairs with the policy that **governs** its `path` node — the one
+[Precedence](#precedence) selects when several policies of the same `type` cover
+that node. Precedence yields at most one, so the pairing is unambiguous. Two
+rules apply:
+
+1. A disclosure's content **MUST** agree with the policy it pairs with — the
+   notice and the policy are two statements about the same node.
+2. A disclosure **SHOULD** resolve to a governing policy: when its `code` names
+   a `type` no policy covers at that node, the notice still displays, but
+   nothing structured stands behind it.
+
+For example, an engraved line item is final sale. A response-wide return policy
+applies to the whole cart, but the item-scoped final-sale policy governs line 2,
+so the disclosure on that line pairs with it — notice and policy agree:
+
+<!-- ucp:example schema=shopping/checkout target=$.policies -->
+```json
+[
+  {
+    "type": "dev.ucp.shopping.policy.return",
+    "description": { "plain": "Free 30-day returns from delivery." }
+  },
+  {
+    "type": "dev.ucp.shopping.policy.return",
+    "description": { "plain": "This engraved item is final sale and cannot be returned." },
+    "applies_to": ["$.line_items[2]"],
+    "url": "https://example.com/returns#final-sale"
+  }
+]
+```
+
+<!-- ucp:example schema=shopping/checkout target=$.messages -->
+```json
+[
+  {
+    "type": "warning",
+    "code": "dev.ucp.shopping.policy.return",
+    "path": "$.line_items[2]",
+    "presentation": "disclosure",
+    "content": "This engraved item is final sale and cannot be returned."
+  }
+]
+```
+
+### Relationship to `links[]`
+
+`links[]` and `policies[]` are complementary. `links[]` is the always-present
+fallback — a labeled URL, response-wide, usually one per type. `policies[]` is
+the structured layer when available — typed, with optional per-item
+`applies_to` targeting and multiple entries (a response-wide default plus
+overrides).
+
+### Examples
+
+A site-wide warranty with a per-item override, both the same `type`. On line
+item 2 the singular query governs, overriding the Response-wide default; every
+other line item keeps it:
+
+<!-- ucp:example schema=shopping/checkout target=$.policies -->
+```json
+[
+  {
+    "type": "dev.ucp.shopping.policy.warranty",
+    "description": { "plain": "1-year limited warranty on all items." }
+  },
+  {
+    "type": "dev.ucp.shopping.policy.warranty",
+    "description": { "plain": "3-year extended warranty on this item." },
+    "applies_to": ["$.line_items[2]"]
+  }
+]
+```
+
+A Set match overridden by a singular query, again the same `type`. Product 0 is
+an electronics item, so both entries reach it; the singular query governs
+there, while other electronics keep the 2-year term:
+
+<!-- ucp:example schema=shopping/catalog_search op=search direction=response target=$.policies -->
+```json
+[
+  {
+    "type": "dev.ucp.shopping.policy.warranty",
+    "description": { "plain": "2-year warranty on electronics." },
+    "applies_to": ["$.products[?@.category=='electronics']"]
+  },
+  {
+    "type": "dev.ucp.shopping.policy.warranty",
+    "description": { "plain": "5-year manufacturer-certified warranty on this item." },
+    "applies_to": ["$.products[0]"]
+  }
+]
+```
+
+A custom `type` a Platform does not model is still presentable from its
+`description`:
+
+<!-- ucp:example schema=shopping/catalog_search op=search direction=response target=$.policies -->
+```json
+[
+  {
+    "type": "com.example.policy.price_match",
+    "description": { "plain": "We match a competitor's lower price for 14 days after purchase." },
+    "applies_to": ["$.products[0]"]
+  }
+]
+```
+
 ## Security
 
 ### Transport Security
