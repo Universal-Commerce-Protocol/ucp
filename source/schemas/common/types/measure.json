@@ -13,7 +13,7 @@
     },
     "unit": {
       "type": "string",
-      "description": "Unit of measurement."
+      "description": "Unit of measurement. MUST use 'each' to represent countable goods and SHOULD prefer using standard symbol (e.g., kg for kilogram, lb for pound) for other units."
     }
   }
 }
