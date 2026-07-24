@@ -54,6 +54,7 @@ nav:
           - Discounts Extension: specification/discount.md
           - Fulfillment Extension: specification/fulfillment.md
           - Loyalty Extension: specification/loyalty.md
+          - Business-Owned Response Values: specification/business-owned-response-values.md
           - Split Payments Extension: specification/split-payments.md
       - Cart Capability:
           - Overview: specification/cart.md
@@ -328,6 +329,11 @@ plugins:
               memberships, tiers, benefits, and reward earning forecasts while
               managing provisional eligibility claims and enforcing
               data-minimization privacy rules.
+          - specification/business-owned-response-values.md: >-
+              Business-Owned Response Values, clarifying how businesses can
+              populate existing UCP response fields with authenticated user
+              state such as saved payment instruments, buyer profile data, and
+              fulfillment information without introducing a separate extension.
         Cart Capability:
           - specification/cart.md: >-
               Pre-purchase Cart Capability, detailing item collection, state
