@@ -79,7 +79,7 @@
       "items": {
         "type": "string"
       },
-      "description": "Product tags for categorization and search."
+      "description": "Product tags for categorization, search, and compliance rules (e.g., restricted goods)."
     },
     "metadata": {
       "type": "object",

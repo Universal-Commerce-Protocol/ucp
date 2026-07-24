@@ -22,9 +22,20 @@
       "$ref": "item.json"
     },
     "quantity": {
-      "type": "integer",
-      "description": "Quantity of the item being purchased.",
-      "minimum": 1
+      "anyOf": [
+        {
+          "type": "integer",
+          "description": "Quantity of the item being purchased.",
+          "minimum": 1
+        },
+        {
+          "$ref": "../../common/types/measure.json",
+          "properties": {
+            "value": { "exclusiveMinimum": 0 }
+          },
+          "description": "The precise fractional quantity and unit of the item being purchased."
+        }
+      ]
     },
     "totals": {
       "type": "array",

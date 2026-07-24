@@ -44,8 +44,16 @@
             "description": "Line item ID reference."
           },
           "quantity": {
-            "type": "integer",
-            "description": "Signed quantity affected by this adjustment. Negative values represent reductions (e.g. returns); positive values represent additions (e.g. exchanges)."
+            "anyOf": [
+              {
+                "type": "integer",
+                "description": "Signed quantity affected by this adjustment. Negative values represent reductions (e.g. returns); positive values represent additions (e.g. exchanges)."
+              },
+              {
+                "$ref": "../../common/types/measure.json",
+                "description": "The precise signed fractional quantity and unit of the item affected by this adjustment. Negative values represent reductions (e.g. returns); positive values represent additions (e.g. exchanges)."
+              }
+            ]
           }
         }
       },

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/measure.json",
+  "title": "Measure",
+  "description": "Represents a quantitative value paired with its physical or standardized unit of measurement.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["value", "unit"],
+  "properties": {
+    "value": {
+      "type": "number",
+      "description": "Precise fractional quantity."
+    },
+    "unit": {
+      "type": "string",
+      "description": "Unit of measurement."
+    }
+  }
+}
