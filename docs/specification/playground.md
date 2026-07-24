@@ -438,7 +438,7 @@ const UcpData = {
           environment: "TEST",
           merchant_info: {
             merchant_name: "Example Merchant",
-            merchant_id: "01234567890123456789",
+            key_id: "01234567890123456789",
             merchant_origin: "checkout.merchant.com",
             auth_jwt: "edxsdfoaisjdfapsodjf...."
           },
