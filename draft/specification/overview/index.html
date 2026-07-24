@@ -5339,8 +5339,9 @@ from any host (e.g. a docs subdomain or third-party docs host). Only the
 <h5 id="derivation-algorithm">Derivation algorithm<a class="headerlink" href="#derivation-algorithm" title="Permanent link">&para;</a></h5>
 <p>The authority is derived <strong>from the <code>schema</code> URL host</strong> — which names the
 owning domain directly, with no ambiguity about where the domain ends — and
-validated as a label prefix of the entity's name. For the <code>schema</code> URL of an
-entity whose name is <code>name</code>, a platform <strong>MUST</strong> apply the following:</p>
+validated as a label-aligned prefix of, or an exact match for, the entity's
+name. For the <code>schema</code> URL of an entity whose name is <code>name</code>, a platform
+<strong>MUST</strong> apply the following:</p>
 <ol>
 <li>Parse the URL with a conformant (WHATWG) URL parser. It <strong>MUST</strong> parse,
    <strong>MUST</strong> use the <code>https</code> scheme, and <strong>MUST NOT</strong> contain userinfo (a
@@ -5354,19 +5355,31 @@ entity whose name is <code>name</code>, a platform <strong>MUST</strong> apply t
    strip a trailing <code>.</code>; internationalized domains in A-label / punycode form),
    and <strong>reverse its labels</strong> to form the <code>authority_prefix</code> (host <code>ucp.dev</code> →
    <code>dev.ucp</code>).</li>
-<li>The binding is valid if and only if <code>name</code> begins with <code>authority_prefix</code>
-   followed by a <code>.</code> (a literal trailing dot). The trailing-dot boundary is
-   required so that <code>com.example</code> (from host <code>example.com</code>) cannot satisfy a
-   neighboring namespace like <code>com.examplecorp.*</code>, where it is a textual but
-   not label-aligned prefix; it also guarantees a non-empty remainder after the
-   prefix.</li>
+<li>The binding is valid if and only if <strong>either</strong> of the following holds:</li>
+<li><strong>Exact match</strong> — <code>name</code> equals <code>authority_prefix</code>. The name is itself the
+     reversed host, so the publisher demonstrably controls the entire namespace.
+     This is the shape for an entity whose identity is a bare controlled domain,
+     such as a payment handler <code>com.example.pay</code> served from <code>pay.example.com</code>
+     (reversed host <code>com.example.pay</code> equals the name).</li>
+<li><strong>Prefixed</strong> — <code>name</code> is <code>authority_prefix</code>, then a <code>.</code>, then one or more
+     further labels; that is, the character immediately after <code>authority_prefix</code>
+     in <code>name</code> is a <code>.</code>. Requiring that separating <code>.</code> keeps the match on a
+     label boundary — it stops <code>com.example</code> (host <code>example.com</code>) from matching
+     a neighboring namespace like <code>com.examplecorp.*</code>, where <code>com.example</code> is a
+     textual prefix but not a label-aligned one.</li>
 </ol>
-<p>The remaining labels after the authority prefix are treated as opaque by this
-check; they are not inspected or split.</p>
+<p>Authority binding establishes <strong>provenance only</strong> — that the name is controlled
+by the party serving its <code>schema</code>. It does <strong>not</strong> require any label beyond the
+authority itself. The <code>{reverse-domain}.{service}.{capability}</code> shape is a
+separate <a href="#naming-convention">Naming Convention</a> that governs capability and
+service names — it does not apply to payment handlers — and is validated
+independently of this check.</p>
+<p>Any labels after the authority prefix are treated as opaque by this check; they
+are not inspected or split.</p>
 <table>
 <thead>
 <tr>
-<th>Capability name</th>
+<th>Entity name</th>
 <th><code>schema</code> host</th>
 <th><code>authority_prefix</code></th>
 <th>Result</th>
@@ -5377,19 +5390,31 @@ check; they are not inspected or split.</p>
 <td><code>dev.ucp.shopping.checkout</code></td>
 <td><code>ucp.dev</code></td>
 <td><code>dev.ucp</code></td>
-<td><strong>accept</strong></td>
+<td><strong>accept</strong> (prefix)</td>
 </tr>
 <tr>
 <td><code>dev.ucp.shopping.checkout</code></td>
 <td><code>shopping.ucp.dev</code></td>
 <td><code>dev.ucp.shopping</code></td>
-<td><strong>accept</strong></td>
+<td><strong>accept</strong> (prefix)</td>
 </tr>
 <tr>
 <td><code>com.example.payments.installments</code></td>
 <td><code>example.com</code></td>
 <td><code>com.example</code></td>
-<td><strong>accept</strong></td>
+<td><strong>accept</strong> (prefix)</td>
+</tr>
+<tr>
+<td><code>com.example.pay</code></td>
+<td><code>pay.example.com</code></td>
+<td><code>com.example.pay</code></td>
+<td><strong>accept</strong> (exact)</td>
+</tr>
+<tr>
+<td><code>com.example.pay</code></td>
+<td><code>example.com</code></td>
+<td><code>com.example</code></td>
+<td><strong>accept</strong> (prefix)</td>
 </tr>
 <tr>
 <td><code>com.example.pay</code></td>
@@ -5417,12 +5442,17 @@ check; they are not inspected or split.</p>
 </tr>
 </tbody>
 </table>
-<p>An entity's <code>schema</code> is served from a host whose reversed labels are a prefix of
-its name. A canonical apex host (<code>example.com</code> for <code>com.example.*</code>) always
-satisfies this; a subdomain satisfies it only when its labels line up with the
-namespace path (<code>shopping.ucp.dev</code> for <code>dev.ucp.shopping.*</code>). Unrelated
-subdomains such as a shared CDN do <strong>not</strong> satisfy it — host the canonical
-schema on a name-aligned origin.</p>
+<p>An entity's <code>schema</code> is served from a host whose reversed labels either <strong>equal</strong>
+its name or are a <strong>label-aligned prefix</strong> of it. A host whose reversed labels
+are exactly the name (<code>pay.example.com</code> for <code>com.example.pay</code>) satisfies the
+exact case; a canonical apex host (<code>example.com</code> for <code>com.example.*</code>) satisfies
+the prefix case; a subdomain satisfies the prefix case only when its labels line
+up with the namespace path (<code>shopping.ucp.dev</code> for <code>dev.ucp.shopping.*</code>). Because
+a parent domain's reversed labels are also a prefix, a name such as
+<code>com.example.pay</code> binds equally from its exact host (<code>pay.example.com</code>) or a
+parent authority (<code>example.com</code>) — both prove control. Unrelated subdomains such
+as a shared CDN do <strong>not</strong> satisfy any case — host the canonical schema on a
+name-aligned origin.</p>
 <p>The check uses the <code>schema</code> URL host directly and does not consult the
 <a href="https://publicsuffix.org/">Public Suffix List</a>, so it treats a <strong>public
 suffix</strong> — a domain under which independent parties can register names, from

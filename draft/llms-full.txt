@@ -162,26 +162,32 @@ The `spec` URL is documentation, not part of the machine trust path, so its orig
 
 ##### Derivation algorithm
 
-The authority is derived **from the `schema` URL host** — which names the owning domain directly, with no ambiguity about where the domain ends — and validated as a label prefix of the entity's name. For the `schema` URL of an entity whose name is `name`, a platform **MUST** apply the following:
+The authority is derived **from the `schema` URL host** — which names the owning domain directly, with no ambiguity about where the domain ends — and validated as a label-aligned prefix of, or an exact match for, the entity's name. For the `schema` URL of an entity whose name is `name`, a platform **MUST** apply the following:
 
 1. Parse the URL with a conformant (WHATWG) URL parser. It **MUST** parse, **MUST** use the `https` scheme, and **MUST NOT** contain userinfo (a `user:pass@` component). Substring matching on the raw URL is **NOT** permitted — e.g. `https://ucp.dev@evil.example/x.json` has host `evil.example`, not `ucp.dev`.
 1. The host **MUST** be a registered domain name of at least two labels. IP-literal hosts (`https://203.0.113.10/...`) and single-label hosts (`https://localhost/...`) are invalid authorities.
 1. Take the URL's hostname (the host without any port), normalize it (lowercase; strip a trailing `.`; internationalized domains in A-label / punycode form), and **reverse its labels** to form the `authority_prefix` (host `ucp.dev` → `dev.ucp`).
-1. The binding is valid if and only if `name` begins with `authority_prefix` followed by a `.` (a literal trailing dot). The trailing-dot boundary is required so that `com.example` (from host `example.com`) cannot satisfy a neighboring namespace like `com.examplecorp.*`, where it is a textual but not label-aligned prefix; it also guarantees a non-empty remainder after the prefix.
+1. The binding is valid if and only if **either** of the following holds:
+1. **Exact match** — `name` equals `authority_prefix`. The name is itself the reversed host, so the publisher demonstrably controls the entire namespace. This is the shape for an entity whose identity is a bare controlled domain, such as a payment handler `com.example.pay` served from `pay.example.com` (reversed host `com.example.pay` equals the name).
+1. **Prefixed** — `name` is `authority_prefix`, then a `.`, then one or more further labels; that is, the character immediately after `authority_prefix` in `name` is a `.`. Requiring that separating `.` keeps the match on a label boundary — it stops `com.example` (host `example.com`) from matching a neighboring namespace like `com.examplecorp.*`, where `com.example` is a textual prefix but not a label-aligned one.
 
-The remaining labels after the authority prefix are treated as opaque by this check; they are not inspected or split.
+Authority binding establishes **provenance only** — that the name is controlled by the party serving its `schema`. It does **not** require any label beyond the authority itself. The `{reverse-domain}.{service}.{capability}` shape is a separate [Naming Convention](#naming-convention) that governs capability and service names — it does not apply to payment handlers — and is validated independently of this check.
 
-| Capability name                     | `schema` host      | `authority_prefix` | Result     |
-| ----------------------------------- | ------------------ | ------------------ | ---------- |
-| `dev.ucp.shopping.checkout`         | `ucp.dev`          | `dev.ucp`          | **accept** |
-| `dev.ucp.shopping.checkout`         | `shopping.ucp.dev` | `dev.ucp.shopping` | **accept** |
-| `com.example.payments.installments` | `example.com`      | `com.example`      | **accept** |
-| `com.example.pay`                   | `evil.example`     | `example.evil`     | **reject** |
-| `dev.ucp.shopping.checkout`         | `evil.example`     | `example.evil`     | **reject** |
-| `com.examplecorp.pay`               | `example.com`      | `com.example`      | **reject** |
-| `com.example.pay`                   | `cdn.example.com`  | `com.example.cdn`  | **reject** |
+Any labels after the authority prefix are treated as opaque by this check; they are not inspected or split.
 
-An entity's `schema` is served from a host whose reversed labels are a prefix of its name. A canonical apex host (`example.com` for `com.example.*`) always satisfies this; a subdomain satisfies it only when its labels line up with the namespace path (`shopping.ucp.dev` for `dev.ucp.shopping.*`). Unrelated subdomains such as a shared CDN do **not** satisfy it — host the canonical schema on a name-aligned origin.
+| Entity name                         | `schema` host      | `authority_prefix` | Result              |
+| ----------------------------------- | ------------------ | ------------------ | ------------------- |
+| `dev.ucp.shopping.checkout`         | `ucp.dev`          | `dev.ucp`          | **accept** (prefix) |
+| `dev.ucp.shopping.checkout`         | `shopping.ucp.dev` | `dev.ucp.shopping` | **accept** (prefix) |
+| `com.example.payments.installments` | `example.com`      | `com.example`      | **accept** (prefix) |
+| `com.example.pay`                   | `pay.example.com`  | `com.example.pay`  | **accept** (exact)  |
+| `com.example.pay`                   | `example.com`      | `com.example`      | **accept** (prefix) |
+| `com.example.pay`                   | `evil.example`     | `example.evil`     | **reject**          |
+| `dev.ucp.shopping.checkout`         | `evil.example`     | `example.evil`     | **reject**          |
+| `com.examplecorp.pay`               | `example.com`      | `com.example`      | **reject**          |
+| `com.example.pay`                   | `cdn.example.com`  | `com.example.cdn`  | **reject**          |
+
+An entity's `schema` is served from a host whose reversed labels either **equal** its name or are a **label-aligned prefix** of it. A host whose reversed labels are exactly the name (`pay.example.com` for `com.example.pay`) satisfies the exact case; a canonical apex host (`example.com` for `com.example.*`) satisfies the prefix case; a subdomain satisfies the prefix case only when its labels line up with the namespace path (`shopping.ucp.dev` for `dev.ucp.shopping.*`). Because a parent domain's reversed labels are also a prefix, a name such as `com.example.pay` binds equally from its exact host (`pay.example.com`) or a parent authority (`example.com`) — both prove control. Unrelated subdomains such as a shared CDN do **not** satisfy any case — host the canonical schema on a name-aligned origin.
 
 The check uses the `schema` URL host directly and does not consult the [Public Suffix List](https://publicsuffix.org/), so it treats a **public suffix** — a domain under which independent parties can register names, from `co.uk` to the list's private-section suffixes operated by services that let third parties register subdomains or buckets (`github.io`, object storage, app platforms) — as an ordinary authority. Co-tenants under such a suffix satisfy the same prefix, so declare entities only under a **registrable domain** (a public suffix plus one label) that you exclusively control.
 
