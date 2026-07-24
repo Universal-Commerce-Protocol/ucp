@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/schedule.json",
+  "title": "Schedule",
+  "description": "Defines timing for a future or recurring event using RFC 3339 dates and ISO 8601 durations.",
+  "$defs": {
+    "iso8601_duration": {
+      "type": "string",
+      "pattern": "^P(?=\\d|T\\d)(?:\\d+Y)?(?:\\d+M)?(?:\\d+W)?(?:\\d+D)?(?:T(?:\\d+H)?(?:\\d+M)?(?:\\d+S)?)?$",
+      "description": "ISO 8601 duration. Examples include `P30D`, `P2W`, `P1M`, and `PT1H`."
+    }
+  },
+  "type": "object",
+  "properties": {
+    "anchor_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Reference point for the schedule as an RFC 3339 timestamp. Defaults to order time if omitted."
+    },
+    "offset": {
+      "$ref": "#/$defs/iso8601_duration",
+      "description": "ISO 8601 duration from `anchor_date` to the first occurrence.",
+      "examples": ["P30D", "P2W"]
+    },
+    "interval": {
+      "$ref": "#/$defs/iso8601_duration",
+      "description": "ISO 8601 duration between recurring occurrences.",
+      "examples": ["P2W", "P1M"]
+    },
+    "occurrences": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Number of occurrences. Omit for an indefinite recurring schedule."
+    }
+  }
+}

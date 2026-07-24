@@ -55,6 +55,7 @@ nav:
           - Fulfillment Extension: specification/fulfillment.md
           - Loyalty Extension: specification/loyalty.md
           - Split Payments Extension: specification/split-payments.md
+          - Payment Terms Extension: specification/payment-terms.md
       - Cart Capability:
           - Overview: specification/cart.md
           - Transports:
@@ -328,6 +329,10 @@ plugins:
               memberships, tiers, benefits, and reward earning forecasts while
               managing provisional eligibility claims and enforcing
               data-minimization privacy rules.
+          - specification/payment-terms.md: >-
+              Payment Terms Extension, enabling checkout payment schedules for
+              immediate and deferred payments such as deposits, installments,
+              and lodging balance-at-check-in flows.
         Cart Capability:
           - specification/cart.md: >-
               Pre-purchase Cart Capability, detailing item collection, state

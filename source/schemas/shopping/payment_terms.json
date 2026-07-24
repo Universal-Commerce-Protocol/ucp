@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/payment_terms.json",
+  "name": "dev.ucp.shopping.payment_terms",
+  "version": "2026-01-23",
+  "title": "Payment Terms Extension",
+  "description": "Extends Checkout with flexible payment terms support, enabling deferred payments, installments, and per-line-item payment schedules.",
+  "requires": {
+    "protocol": { "min": "2026-04-08" },
+    "capabilities": {
+      "dev.ucp.shopping.checkout": { "min": "2026-04-08" },
+      "dev.ucp.shopping.order": { "min": "2026-04-08" }
+    }
+  },
+  "$defs": {
+    "available_payment_term": {
+      "$ref": "types/available_payment_term.json"
+    },
+    "payment_term": {
+      "$ref": "types/payment_term.json"
+    },
+    "payment_schedule": {
+      "$ref": "types/payment_schedule.json"
+    },
+    "schedule_ref": {
+      "$ref": "types/entity_ref.json"
+    },
+    "available_payment_instrument": {
+      "title": "Available Payment Instrument (Payment Terms)",
+      "description": "Extends available_payment_instrument with term reference constraints.",
+      "allOf": [
+        { "$ref": "types/available_payment_instrument.json" },
+        {
+          "type": "object",
+          "properties": {
+            "constraints": {
+              "type": "object",
+              "properties": {
+                "term_refs": {
+                  "type": "array",
+                  "items": { "$ref": "#/$defs/schedule_ref" },
+                  "description": "Payment terms and schedules this instrument supports. References can target a payment term by `id`, a payment schedule by `schedule_id`, a schedule class by `schedule_type`, or a combination. If omitted, the instrument supports all terms and schedules unless constrained by the payment handler."
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "payment_instrument": {
+      "title": "Payment Instrument (Payment Terms)",
+      "description": "Payment instrument extended with payment term and payment schedule assignment.",
+      "allOf": [
+        { "$ref": "types/payment_instrument.json" },
+        {
+          "type": "object",
+          "properties": {
+            "term_refs": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/schedule_ref" },
+              "description": "Payment terms or schedules this instrument pays for. References can target a payment term by `id`, a payment schedule by `schedule_id`, a schedule class by `schedule_type`, or a combination. If omitted, the instrument can be applied by the business according to the selected terms and handler constraints."
+            }
+          }
+        }
+      ]
+    },
+    "payment": {
+      "title": "Payment with Terms",
+      "description": "Payment object extended with payment terms.",
+      "allOf": [
+        { "$ref": "payment.json" },
+        {
+          "type": "object",
+          "properties": {
+            "available_terms": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/available_payment_term" },
+              "description": "Available payment terms the buyer can choose from. Each term defines schedules for when payments are due.",
+              "ucp_request": "omit"
+            },
+            "instruments": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/payment_instrument" },
+              "description": "Payment instruments, optionally assigned to selected payment terms or schedules."
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.checkout": {
+      "title": "Checkout with Payment Terms",
+      "description": "Checkout extended with payment terms and payment schedules.",
+      "allOf": [
+        { "$ref": "checkout.json" },
+        {
+          "type": "object",
+          "properties": {
+            "payment": {
+              "$ref": "#/$defs/payment",
+              "description": "Payment details with available and selected payment terms.",
+              "ucp_request": {
+                "create": "optional",
+                "update": "optional",
+                "complete": "required"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.order": {
+      "title": "Order with Payment Terms",
+      "description": "Order extended with the payment terms accepted during checkout.",
+      "allOf": [
+        { "$ref": "order.json" },
+        {
+          "type": "object",
+          "properties": {
+            "payment": {
+              "type": "object",
+              "properties": {
+                "terms": {
+                  "type": "array",
+                  "items": { "$ref": "#/$defs/available_payment_term" },
+                  "description": "Complete payment terms accepted for the originating checkout."
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
