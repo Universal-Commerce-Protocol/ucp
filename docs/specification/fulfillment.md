@@ -171,6 +171,28 @@ method.
 }
 ```
 
+## One-Time Use Destinations
+
+Platforms **MAY** set `one_time_use: true` on any shipping destination when
+the address should not be retained beyond the immediate transaction — typical
+cases include gifts, gift-registry purchases, and care-of shipments where the
+destination belongs to someone other than the buyer.
+
+Businesses **SHOULD** accept the field when present and avoid adding the
+address to the buyer's address book or using it to enrich profiles built from
+past purchases (recommendations, audiences, marketing). Businesses **MAY**
+still retain the address where needed for order records, fulfillment, fraud
+prevention, customer support, tax, and legal compliance. No business-profile
+support declaration is required — this is a best-effort hint.
+
+The field applies to *this destination only*. Buyer-wide consent signals
+belong in [`dev.ucp.shopping.buyer_consent`](buyer-consent.md); `one_time_use`
+is independent of `buyer_consent.marketing` and applies even when the buyer
+has otherwise consented to marketing. The field is echoed back on the
+response, so platforms can verify the business preserved the hint.
+
+See the [Gift Example](#gift-example) for usage.
+
 ## Rendering
 
 Fulfillment options are designed for **method-agnostic rendering**. Platforms
@@ -685,6 +707,61 @@ so a cart can mix shipped and installed items (see
                   {
                     "type": "total",
                     "amount": 1000
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+### Gift Example
+
+A buyer ships a gift to a recipient and marks the destination as one-time use,
+so the recipient's address is not added to the buyer's saved addresses or
+marketing audience. See [One-Time Use Destinations](#one-time-use-destinations)
+for the full behavior contract.
+
+```json
+{
+  "fulfillment": {
+    "methods": [
+      {
+        "id": "method_1",
+        "type": "shipping",
+        "line_item_ids": ["gift_box"],
+        "selected_destination_id": "dest_recipient",
+        "destinations": [
+          {
+            "id": "dest_recipient",
+            "first_name": "Pat",
+            "last_name": "Recipient",
+            "street_address": "123 Recipient St",
+            "address_locality": "Springfield",
+            "address_region": "IL",
+            "postal_code": "62701",
+            "address_country": "US",
+            "one_time_use": true
+          }
+        ],
+        "groups": [
+          {
+            "id": "package_1",
+            "line_item_ids": ["gift_box"],
+            "selected_option_id": "standard",
+            "options": [
+              {
+                "id": "standard",
+                "title": "Standard Shipping",
+                "description": "Arrives Dec 12-15 via USPS",
+                "totals": [
+                  {
+                    "type": "total",
+                    "amount": 500
                   }
                 ]
               }
