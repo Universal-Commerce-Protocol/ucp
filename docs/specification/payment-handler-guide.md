@@ -496,15 +496,24 @@ Each variant has its own config schema tailored to its context:
 
 **Base Instrument Schemas:**
 
-| Schema                                                                                     | Description                                                      |
-| :----------------------------------------------------------------------------------------- | :--------------------------------------------------------------- |
-| [`payment_instrument.json`](site:schemas/shopping/types/payment_instrument.json)           | Base: id, handler_id, type, billing_address, credential, display |
-| [`card_payment_instrument.json`](site:schemas/shopping/types/card_payment_instrument.json) | Extends base with display: brand, last_digits, expiry, card art  |
+- [`payment_instrument.json`](site:schemas/shopping/types/payment_instrument.json)
+  — Entity-agnostic base: ID, type, billing address, credential, and display.
+- `payment_instrument.json#/$defs/selected_payment_instrument` — Checkout
+  context: base instrument plus required handler routing and selection state.
+- [`card_payment_instrument.json`](site:schemas/shopping/types/card_payment_instrument.json)
+  — Extends the base with card display fields.
 
-UCP provides base schemas for universal payment instruments like `card`. Spec
-authors **MAY** extend any of the base instruments to add handler-specific
-display data or customize the credential reference. Handlers **MAY** define
-multiple instrument types for different payment flows.
+Handler instrument schemas extend the entity-agnostic Payment Instrument once
+to define their credential, display, and instrument-specific fields. Containing
+capabilities add their own context: Checkout uses
+`selected_payment_instrument` to require `handler_id` and add selection state,
+while Order uses the base without processing-time routing.
+
+A handler instrument schema validated in isolation therefore does not require
+`handler_id`; the containing Checkout payment schema does. Handler authors
+**MUST NOT** redeclare routing fields merely to make their instrument schema
+Checkout-specific. Handlers **MAY** define multiple instrument types for
+different payment flows.
 
 **Available Instrument Schemas:**
 
@@ -625,7 +634,10 @@ extend these schemas to include handler-specific credential context. Handlers
 **MAY** define multiple credential types for different instrument flows.
 
 The specification **MUST** define which credential types are accepted by the
-handler.
+handler. Every sensitive or reusable credential property **MUST** be annotated
+with `ucp_response: omit`. Before returning a Checkout or Order, businesses
+**MUST** apply the concrete credential schema's response projection so that
+only response-safe metadata, such as the credential `type`, remains.
 
 **Important:** If using token credentials, the schema **MUST** include an
 expiration field (`expiry`, `ttl`, or similar) to ensure platforms know when to
@@ -818,6 +830,7 @@ Before publishing a payment handler specification, verify:
 - [ ] Security requirements are listed
 - [ ] Binding verification is required
 - [ ] Credential handling guidance is provided
+- [ ] Every sensitive or reusable credential field uses `ucp_response: omit`
 - [ ] Token expiry is defined (if applicable)
 
 ### General

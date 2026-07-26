@@ -93,12 +93,14 @@ Expectations can be split, merged, or adjusted post-order. For example:
 order confirmation. Like the rest of the order it reflects current state, so
 it may change post-purchase (e.g. an order edit that adds or changes a tender).
 
-It mirrors the checkout `payment` object, reduced to the subset relevant to a
-placed order:
+It mirrors the checkout `payment` object, but simplifies it for the order
+context: `display` is required, while payment-handler routing is omitted. A
+credential MAY remain as response-safe metadata (for example, its `type`), but
+businesses **MUST** apply the concrete credential schema's response projection
+and omit every sensitive or reusable credential value from Order responses.
 
-* Each instrument keeps only what a confirmation needs (`type`,
-  `billing_address`, `display`) and drops the checkout instrument's
-  collection-time details — no handler reference, credential, or selection state
+When paired with `dev.ucp.shopping.split_payments`, the final amount for every
+instrument **MUST** be reported when the total was split.
 
 ### Attribution
 
@@ -154,11 +156,12 @@ else if (fulfilled > 0) → "partial"
 else → "processing"
 ```
 
-### Order Payment Instrument
+### Payment Instrument
 
-Each instrument represents a single tender used on the order.
+Each entry uses the shared base Payment Instrument. Negotiated extensions may
+add contextual fields.
 
-{{ schema_fields('order_payment_instrument', 'order') }}
+{{ schema_fields('types/payment_instrument', 'order') }}
 
 ### Expectation
 
@@ -198,7 +201,8 @@ Examples: `refund`, `return`, `credit`, `price_adjustment`, `dispute`,
   "ucp": {
     "version": "{{ ucp_version }}",
     "capabilities": {
-      "dev.ucp.shopping.order": [{"version": "{{ ucp_version }}"}]
+      "dev.ucp.shopping.order": [{"version": "{{ ucp_version }}"}],
+      "dev.ucp.shopping.split_payments": [{"version": "{{ ucp_version }}"}]
     }
   },
   "id": "order_abc123",

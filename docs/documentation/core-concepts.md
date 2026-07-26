@@ -184,6 +184,7 @@ up-to-date list.
 | :--- | :--- | :--- |
 | `dev.ucp.shopping.discount` | checkout, cart | Discount codes and promotions |
 | `dev.ucp.shopping.fulfillment` | checkout | Shipping and delivery options |
+| `dev.ucp.shopping.split_payments` | checkout, order | Multiple payment instruments and their final contributions |
 | `dev.ucp.shopping.ap2_mandate` | checkout | Non-repudiable authorization for autonomous commerce |
 | `dev.ucp.shopping.buyer_consent` | checkout, cart | Explicit consent capture |
 

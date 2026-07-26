@@ -3,13 +3,7 @@
   "$id": "https://ucp.dev/schemas/shopping/split_payments.json",
   "name": "dev.ucp.shopping.split_payments",
   "title": "Split Payments Extension",
-  "description": "Enables buyers to use multiple payment instruments for a single checkout.",
-  "requires": {
-    "protocol": { "min": "2026-01-23" },
-    "capabilities": {
-      "dev.ucp.shopping.checkout": { "min": "2026-01-23" }
-    }
-  },
+  "description": "Enables buyers to use multiple payment instruments for a single checkout and reports their final contributions on the resulting order.",
   "$defs": {
     "instrument_group": {
       "$ref": "types/instrument_group.json"
@@ -24,7 +18,7 @@
           "properties": {
             "amount": {
               "$ref": "../common/types/amount.json",
-              "description": "Contribution amount for this instrument in `checkout.currency` minor units (ISO 4217). On request: the platform's requested contribution (omit for open-amount). On response: the actual amount authorized or charged (omitted when not finally processed)."
+              "description": "Contribution amount for this instrument in the containing entity's currency minor units (ISO 4217). On a Checkout request: the platform's requested contribution (omit for open-amount). On a Checkout response: the actual amount authorized or charged (omit when not finally processed). On Order: the preserved final contribution."
             }
           }
         }
@@ -52,6 +46,30 @@
                     "update": "optional",
                     "complete": "required"
                   }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.order": {
+      "title": "Order with Split Payments",
+      "description": "Order extended with optional final contribution amounts for successfully processed payment instruments.",
+      "allOf": [
+        { "$ref": "order.json" },
+        {
+          "type": "object",
+          "properties": {
+            "payment": {
+              "type": "object",
+              "properties": {
+                "instruments": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/payment_instrument"
+                  },
+                  "description": "Successfully processed instruments with final contribution amounts when needed to describe a split."
                 }
               }
             }
