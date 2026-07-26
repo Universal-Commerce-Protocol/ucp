@@ -1521,7 +1521,7 @@ use this extension.
 
 To minimize compliance overhead (PCI-DSS):
 
-1. **Unidirectional Flow:** Credentials flow **Platform → Business** only. Businesses **MUST NOT** echo credentials back in responses.
+1. **Unidirectional Flow:** Sensitive and reusable credential values flow **Platform → Business** only. Businesses **MUST NOT** echo those values in responses. A response **MAY** retain non-sensitive credential metadata, such as its `type`, after applying the concrete credential schema's response projection.
 2. **Opaque Credentials:** Platforms handle tokens (such as network tokens), encrypted payloads, or mandates, not raw PANs.
 3. **Handler ID Routing:** The `handler_id` in the payload ensures the business knows exactly which payment credential provider key to use for decryption/charging, preventing key confusion attacks.
 

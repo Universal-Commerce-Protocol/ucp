@@ -17,6 +17,7 @@
 # Split Payments Extension
 
 * **Capability Name:** `dev.ucp.shopping.split_payments`
+* **Extends:** `dev.ucp.shopping.checkout`, `dev.ucp.shopping.order`
 
 > **Note on examples:** Instrument `type` strings used in this spec
 > (`card`, `gift_card`, `store_credit`, `loyalty`) are illustrative.
@@ -69,6 +70,14 @@ When this capability is active, each payment instrument in
 
 {{ extension_schema_fields('split_payments.json#/$defs/payment_instrument', 'split_payments') }}
 
+### Order
+
+When Split Payments and Order are both active, the extension applies the same
+instrument shape to `order.payment.instruments`. An Order with multiple
+instruments **MUST** report every final `amount`; an Order with one instrument
+**MAY** omit it because the contribution is unambiguous. Core Order does not
+define this field.
+
 ## Configuration
 
 Businesses declare split payments configuration in their profile.
@@ -107,30 +116,33 @@ if any valid assignment exists, the combination matches.
 A business that supports (a) a card with up to 2 redeemables, (b) up to 5
 gift cards alone, and (c) two credit cards:
 
-<!-- ucp:example skip reason="illustrative business profile fragment showing allowed_combinations shape" -->
+<!-- ucp:example schema=profile def=business_schema target=$.ucp.capabilities -->
 ```json
 {
-  "capabilities": [{
-    "dev.ucp.shopping.split_payments": [
-      {
-        "version": "2026-01-23",
-        "config": {
-          "allowed_combinations": [
-            [
-              { "types": ["card"], "min": 1, "max": 1 },
-              { "types": ["gift_card", "store_credit"], "max": 2 }
-            ],
-            [
-              { "types": ["gift_card"], "min": 1, "max": 5 }
-            ],
-            [
-              { "types": ["card"], "min": 2, "max": 2 }
-            ]
+  "dev.ucp.shopping.split_payments": [
+    {
+      "version": "{{ ucp_version }}",
+      "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/split_payments.json",
+      "extends": [
+        "dev.ucp.shopping.checkout",
+        "dev.ucp.shopping.order"
+      ],
+      "config": {
+        "allowed_combinations": [
+          [
+            { "types": ["card"], "min": 1, "max": 1 },
+            { "types": ["gift_card", "store_credit"], "max": 2 }
+          ],
+          [
+            { "types": ["gift_card"], "min": 1, "max": 5 }
+          ],
+          [
+            { "types": ["card"], "min": 2, "max": 2 }
           ]
-        }
+        ]
       }
-    ]
-  }]
+    }
+  ]
 }
 ```
 
@@ -233,6 +245,16 @@ business MUST omit `amount` on all other instruments (e.g., a
 provisional authorization that was voided when a later instrument
 failed, or an instrument the business never attempted).
 
+When Checkout completes with multiple instruments and the resulting Order
+surfaces payment, the business **MUST** preserve each instrument's `id` and
+final response `amount` in the matching `order.payment.instruments` entry. For
+a Checkout completed with one instrument, the business **MUST** preserve its
+`id` and **MAY** omit `amount` from Order.
+
+An Order `amount` is the gross contribution successfully authorized or charged
+through that instrument. Refunds and credits **MUST NOT** reduce it; they are
+reported separately in `order.adjustments`.
+
 Response `amount` is informational. It conveys what the business
 processed for buyer-facing UX and audit (e.g., "$10.00 charged to your
 gift card"). The platform MUST NOT treat prior response `amount` values
@@ -284,14 +306,14 @@ Neither instrument includes `amount` — the business determines both.
         "id": "pi_gc_1",
         "handler_id": "example_handler_1",
         "type": "gift_card",
-        "credential": { "type": "gift_card", "token": "gc_abc123" },
+        "credential": { "type": "gift_card" },
         "amount": 1000
       },
       {
         "id": "pi_card_1",
         "handler_id": "example_handler_1",
         "type": "card",
-        "credential": { "type": "card", "token": "tok_visa_xxxx" },
+        "credential": { "type": "card" },
         "amount": 4000
       }
     ]
@@ -346,14 +368,14 @@ the rest.
         "id": "pi_lp_1",
         "handler_id": "example_handler_1",
         "type": "loyalty",
-        "credential": { "type": "loyalty", "token": "lp_abc123" },
+        "credential": { "type": "loyalty" },
         "amount": 500
       },
       {
         "id": "pi_card_1",
         "handler_id": "example_handler_1",
         "type": "card",
-        "credential": { "type": "card", "token": "tok_visa_xxxx" },
+        "credential": { "type": "card" },
         "amount": 4500
       }
     ]
@@ -409,21 +431,21 @@ credit card covers the remaining $45.
         "id": "pi_gc_1",
         "handler_id": "handler_gc",
         "type": "gift_card",
-        "credential": { "type": "gift_card", "token": "gc_abc123" },
+        "credential": { "type": "gift_card" },
         "amount": 2500
       },
       {
         "id": "pi_gc_2",
         "handler_id": "handler_gc",
         "type": "gift_card",
-        "credential": { "type": "gift_card", "token": "gc_def456" },
+        "credential": { "type": "gift_card" },
         "amount": 0
       },
       {
         "id": "pi_card_1",
         "handler_id": "handler_card",
         "type": "card",
-        "credential": { "type": "card", "token": "tok_visa_xxxx" },
+        "credential": { "type": "card" },
         "amount": 7500
       }
     ]
@@ -455,13 +477,13 @@ per the atomic invariant):**
         "id": "pi_gc_1",
         "handler_id": "example_handler_1",
         "type": "gift_card",
-        "credential": { "type": "gift_card", "token": "gc_abc123" }
+        "credential": { "type": "gift_card" }
       },
       {
         "id": "pi_card_1",
         "handler_id": "example_handler_1",
         "type": "card",
-        "credential": { "type": "card", "token": "tok_visa_xxxx" }
+        "credential": { "type": "card" }
       }
     ]
   },
