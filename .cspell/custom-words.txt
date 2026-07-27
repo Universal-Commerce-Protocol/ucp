@@ -180,3 +180,11 @@ zapatillas
 recoverably
 Honeycrisp
 unrepresentable
+Pix
+pix
+Mercadopago
+mercadopago
+Pago
+boleto
+copia
+vencimento
