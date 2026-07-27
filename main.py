@@ -1311,7 +1311,7 @@ def define_env(env):
 
   # --- MACRO 2: For Standalone JSON Extensions ---
   @env.macro
-  def extension_fields(entity_name, spec_file_name):
+  def extension_fields(entity_name, spec_file_name, target="checkout"):
     """Parse an extension schema file and render a table from its $defs.
 
     Usage: {{ extension_fields('discount', 'checkout') }}
@@ -1321,6 +1321,8 @@ def define_env(env):
       entity_name: The name of the extension schema (e.g., 'discount').
       spec_file_name: The name of the spec file indicating where the dictionary
         should be rendered (e.g., "checkout", "fulfillment").
+      target: Optional. The core schema name that is being extended (e.g.,
+        "checkout", "cart"). Defaults to "checkout".
 
     """
     # Construct full path based on new structure
@@ -1333,8 +1335,22 @@ def define_env(env):
       # or $defs.order_line_item.
       defs = data.get("$defs", {})
 
-      # Dynamically find the composed type by looking for an entry with 'allOf'
-      # where one of the items defines 'properties'.
+      # Try to find the specific target first (e.g. dev.ucp.shopping.checkout)
+      # We look for a key that ends with target.
+      target_def = None
+      for key, schema_def in defs.items():
+        if (key == target or key.endswith("." + target)) and (
+          isinstance(schema_def, dict) and "allOf" in schema_def
+        ):
+          target_def = schema_def
+          break
+
+      if target_def:
+        for item in target_def["allOf"]:
+          if "properties" in item:
+            return _render_table_from_schema(item, spec_file_name)
+
+      # Fallback to dynamically finding the composed type (old behavior)
       for schema_def in defs.values():
         if isinstance(schema_def, dict) and "allOf" in schema_def:
           for item in schema_def["allOf"]:
@@ -1342,7 +1358,8 @@ def define_env(env):
               return _render_table_from_schema(item, spec_file_name)
 
       raise RuntimeError(
-        f"Could not find extension properties in '{entity_name}'"
+        f"Could not find extension properties for target '{target}' "
+        f"in '{entity_name}'"
         f"{get_error_context()}"
       )
     except (FileNotFoundError, json.JSONDecodeError) as e:

@@ -372,6 +372,73 @@ def _process(md: str) -> v.Result:
   return v.process_block(blocks[0], _SCHEMA_BASE, _SCAFFOLDS_DIR)
 
 
+def test_scaffold_resolution() -> None:
+  """Scaffold lookup prefers op-specific fixtures over direction fallbacks.
+
+  get_product shares catalog_lookup.json with the lookup op but has a
+  different payload shape (id/product vs ids/products). Without
+  op-specific fixtures, the direction-only fallback merges lookup
+  boilerplate into every get_product example, so validation runs
+  against a payload carrying both shapes at once.
+  """
+  # Unit: the op-specific file wins over the direction-only file.
+  with tempfile.TemporaryDirectory() as td:
+    d = Path(td)
+    (d / "x_request.json").write_text('{"fallback": true}')
+    (d / "x_request_special.json").write_text('{"specific": true}')
+    _check(
+      "scaffold_prefers_op_specific",
+      v.load_scaffold("x", "request", "special", d) == {"specific": True},
+    )
+    _check(
+      "scaffold_direction_fallback",
+      v.load_scaffold("x", "request", "other", d) == {"fallback": True},
+    )
+
+  # Repo fixtures: get_product must not inherit lookup's payload shape.
+  req = v.load_scaffold(
+    "shopping/catalog_lookup", "request", "get_product", _SCAFFOLDS_DIR
+  )
+  _check(
+    "get_product_request_scaffold_shape",
+    req is not None and "id" in req and "ids" not in req,
+    f"got {req}",
+  )
+  res = v.load_scaffold(
+    "shopping/catalog_lookup", "response", "get_product", _SCAFFOLDS_DIR
+  )
+  _check(
+    "get_product_response_scaffold_shape",
+    res is not None and "product" in res and "products" not in res,
+    f"got {res}",
+  )
+
+  # E2E: a fully-elided get_product response validates via the scaffold
+  # alone, proving the fixture itself is a valid payload seed.
+  if not _has_ucp_schema():
+    _check(
+      "get_product_scaffold_seed_valid",
+      False,
+      "SKIPPED: ucp-schema binary not on PATH",
+    )
+    return
+  md = (
+    "<!-- ucp:example schema=shopping/catalog_lookup op=get_product -->\n"
+    "```json\n"
+    "{\n"
+    '  "ucp": { "version": "{{ ucp_version }}", "...": "..." },\n'
+    '  "product": { "...": "..." }\n'
+    "}\n"
+    "```\n"
+  )
+  result = _process(md)
+  _check(
+    "get_product_scaffold_seed_valid",
+    result.status == "ok",
+    f"got {result.status}: {result.message}",
+  )
+
+
 def test_process_block_integration() -> None:
   """End-to-end through process_block. Requires ucp-schema on PATH."""
   if not _has_ucp_schema():
@@ -518,6 +585,7 @@ def main() -> int:
   test_string_ellipsis_in_array()
   test_annotation_parsing()
   test_extract_blocks()
+  test_scaffold_resolution()
   test_process_block_integration()
   return _report()
 
