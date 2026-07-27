@@ -58,6 +58,7 @@ nav:
           - Discounts Extension: specification/discount.md
           - Fulfillment Extension: specification/fulfillment.md
           - Loyalty Extension: specification/loyalty.md
+          - Payment Display Extension: specification/payment-display.md
           - Split Payments Extension: specification/split-payments.md
           - Payment Terms Extension: specification/payment-terms.md
       - Cart Capability:
@@ -357,6 +358,12 @@ plugins:
               combinations, specified- and open-amount contributions,
               per-instrument charge reporting, and all-or-nothing failure
               handling.
+          - specification/payment-display.md: >-
+              Payment Display Extension, defining an in-session, out-of-band
+              payment Action (e.g., Pix) that surfaces an inert display artifact
+              (QR image, copy-and-paste code, hosted instructions) for the
+              Platform to render without redirect or continue_url, resolved by
+              polling Get Checkout, under a strict render and trust contract.
         Cart Capability:
           - specification/cart.md: >-
               Pre-purchase Cart Capability, detailing item collection, state
