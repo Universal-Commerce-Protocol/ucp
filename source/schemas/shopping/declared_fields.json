@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/declared_fields.json",
+  "name": "dev.ucp.shopping.declared_fields",
+  "title": "Declared Fields Extension",
+  "description": "Negotiates response-advertised JSON Schema contracts for reverse-domain-namespaced data bags attached to UCP shopping entities. Each schema in the response capability config validates the declared_fields value under the same reverse-domain key.",
+  "$defs": {
+    "response_config": {
+      "title": "Declared Fields Response Config",
+      "type": "object",
+      "description": "Complete set of declared field family schemas. Each reverse-domain key maps directly to the JSON Schema for the object under the same key in declared_fields.",
+      "propertyNames": {
+        "$ref": "../common/types/reverse_domain_name.json"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "description": "JSON Schema 2020-12 object schema for one reverse-domain-namespaced declared field family. The schema is advertised by the Business and validates the object carried under the same key in declared_fields."
+      }
+    },
+    "declared_fields": {
+      "title": "Declared Fields",
+      "type": "object",
+      "description": "Reverse-domain-namespaced declared data bags. Each key must have a matching schema in the active Declared Fields response config, and each object value is validated by that schema.",
+      "propertyNames": {
+        "$ref": "../common/types/reverse_domain_name.json"
+      },
+      "additionalProperties": {
+        "type": "object"
+      }
+    },
+    "dev.ucp.shopping.checkout": {
+      "title": "Checkout with Declared Fields",
+      "description": "Checkout extended with reverse-domain-namespaced declared data bags.",
+      "allOf": [
+        {
+          "$ref": "checkout.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "declared_fields": {
+              "$ref": "#/$defs/declared_fields",
+              "ucp_request": {
+                "create": "optional",
+                "update": "optional",
+                "complete": "omit"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.cart": {
+      "title": "Cart with Declared Fields",
+      "description": "Cart extended with reverse-domain-namespaced declared data bags.",
+      "allOf": [
+        {
+          "$ref": "cart.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "declared_fields": {
+              "$ref": "#/$defs/declared_fields",
+              "ucp_request": {
+                "create": "optional",
+                "update": "optional"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.order": {
+      "title": "Order with Declared Fields",
+      "description": "Order extended with read-only reverse-domain-namespaced declared data bags.",
+      "allOf": [
+        {
+          "$ref": "order.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "declared_fields": {
+              "$ref": "#/$defs/declared_fields",
+              "ucp_request": "omit"
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.declared_fields": {
+      "response_schema": {
+        "title": "Declared Fields Capability (Response)",
+        "description": "Response declaration containing the active JSON Schema overlay bag.",
+        "allOf": [
+          {
+            "$ref": "../capability.json#/$defs/response_schema"
+          },
+          {
+            "required": [
+              "config"
+            ],
+            "properties": {
+              "config": {
+                "$ref": "#/$defs/response_config"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}
