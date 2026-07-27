@@ -166,7 +166,7 @@
       "put": {
         "operationId": "update_checkout",
         "summary": "Update Checkout",
-        "description": "If an optional field is provided in the request body, its value is treated as a complete replacement for the corresponding data. If optional field is omitted, then current checkout session is unchanged.",
+        "description": "Update Checkout is a full replacement operation. A new Update Checkout operation is not permitted while Checkout status is `complete_in_progress`. Duplicate requests remain subject to Replay Protection. If the Business receives a new Update Checkout request in that state, it leaves the Checkout unchanged and returns the current Checkout with a recoverable error Message.",
         "parameters": [
           {
             "$ref": "#/components/parameters/authorization"
@@ -218,7 +218,7 @@
         },
         "responses": {
           "200": {
-            "description": "Checkout session updated",
+            "description": "Current Checkout state after the Update request, whether the update was applied or rejected.",
             "headers": {
               "Signature": {
                 "$ref": "#/components/headers/signature"
