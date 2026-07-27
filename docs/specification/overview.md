@@ -2745,6 +2745,11 @@ Version-specific profiles are leaf documents — they describe exactly
 one protocol version and **MUST NOT** contain a `supported_versions`
 field.
 
+Platforms and Businesses **MUST** negotiate using exactly one selected profile
+and **MUST NOT** combine or intersect capabilities across profiles: a capability
+is negotiable at a given protocol version only if it appears in that version's
+profile.
+
 ##### Request-Time Validation
 
 Businesses **MUST** validate the platform's protocol version on
@@ -2822,7 +2827,12 @@ exact shared set contains more than one version, the intersection algorithm
 orders those shared dates to select the latest one. Supported third-party
 extension versions advance independently of `ucp.version`. UCP-authored
 `dev.ucp.*` entries declare version `D` in release `D`: a profile for
-`ucp.version = D` advertises version `D` for those entries. The capability
+`ucp.version = D` advertises version `D` for those entries. Older `dev.ucp.*`
+versions are advertised only through `supported_versions` leaf profiles, never
+as additional entries in a newer profile: the registry mechanism supports
+multi-version arrays, but the core publication contract does not exercise them
+for `dev.ucp.*` entries. Multi-version arrays therefore arise for third-party
+extensions whose authors support multiple versions concurrently. The capability
 intersection algorithm considers only capability versions supported by both
 parties.
 
@@ -2834,19 +2844,17 @@ NOT** be included when processing at an older protocol version.
 ### Backwards Compatibility
 
 UCP classifies changes as backwards-compatible or breaking and applies this
-classification to its own components to govern how a UCP release advances. The
-lists below describe which changes preserve and which break conforming
+classification to its own components to govern how a UCP release advances.
+Publication and backport policy for both classes is defined in
+[Component Versioning and Release Snapshots](#component-versioning-and-release-snapshots).
+The lists below describe which changes preserve and which break conforming
 integrations; third-party extension and payment-handler authors control their own
 version policy and can apply the same distinction on their own cadence.
 
 #### Backwards-Compatible Changes
 
 The following changes are **backwards-compatible**: they do not break conforming
-integrations. UCP publishes backwards-compatible features in the next official
-UCP release, which advances the version date, and **MAY** also backport an
-approved backwards-compatible change — a feature, or a security, correctness, or
-interoperability fix — to an already-published supported release. The
-backwards-compatible changes are:
+integrations.
 
 - Adding new non-required fields to responses
 - Adding new non-required parameters to requests
@@ -2859,8 +2867,7 @@ backwards-compatible changes are:
 #### Breaking Changes
 
 The following changes are **breaking**: they break conforming integrations and
-require a new component version. UCP introduces a breaking change only in a new
-dated release, never as a backport to an already-published release.
+require a new component version.
 
 - Removing or renaming existing fields
 - Changing field types or semantics
@@ -2889,11 +2896,13 @@ snapshot. For a release `D`:
 5. UCP certifies the snapshot — components, bindings, and supported
     compositions — together before publishing it.
 
-Breaking changes are not backported to an earlier release; they enter the next
-release. UCP **MAY** backport an approved backward-compatible change — a feature,
-or a security, correctness, or interoperability fix — to a supported release and
-its generated `D` artifacts, and **MUST** re-certify the snapshot before
-publishing the updated artifacts.
+UCP **MAY** backport an approved backward-compatible change — a feature, or a
+security, correctness, or interoperability fix — to a supported release and its
+generated `D` artifacts. Breaking changes enter the next release and are not
+backported by default; in exceptional cases, the Governance Council **MAY**
+approve backporting a breaking change to a supported release, following the
+breaking-change notice process. UCP **MUST** re-certify the snapshot before
+publishing any updated artifacts.
 
 A Business or Platform that selects `ucp.version` `D` **MUST** declare version
 `D` on every `dev.ucp.*` service, capability, and extension entry in its
@@ -2907,16 +2916,17 @@ capabilities and extensions are still selected by exact-version intersection (se
 
 #### Third-party extensions (`com.{vendor}.*`, `org.{org}.*`)
 
-Third-party authors participate by extending UCP-defined root capabilities
-through independently versioned **extensions**. A third-party extension:
+Third-party capabilities version independently of `ucp.version`: their authors
+control both the version and the release cadence. The common form is an
+**extension** over one or more UCP-defined root capabilities. A third-party
+extension:
 
 - declares `extends` over one or more UCP-defined root capabilities, composed
     via `allOf` (see [Extension Schema Pattern](#extension-schema-pattern));
 - uses the UCP-defined services and transport bindings selected by
-    `ucp.version`;
+    `ucp.version`; and
 - advertises exact extension versions in Business and Platform profiles and is
-    negotiated by exact-version intersection like every capability; and
-- is published on its author's own cadence, independent of UCP release dates.
+    negotiated by exact-version intersection like every capability.
 
 A third-party extension's version is never tied to `ucp.version`. The author
 declares the UCP releases and capability versions the extension needs through
