@@ -76,16 +76,19 @@ that scope require a user identity token.
 
 When a request is user-authenticated, a business **MAY** populate response
 fields it owns for that user from its own stored state, rather than only echoing
-values the platform supplied. Two kinds of fields support this:
+values the platform supplied.
 
-* Fields annotated `ucp_request: "omit"` are business-populated by definition:
-    the platform does not send them and the business returns them (for example
-    `totals`, `messages`, and `order`).
-* Fields the platform **MAY** also supply (annotated `optional`, or unannotated)
-    **MAY** additionally be populated by the business from stored user state on
-    the response (for example `buyer` and `payment.instruments[]`).
+Request annotations determine whether the platform may send a field; they do
+not assign semantic ownership of its value. A field annotated
+`ucp_request: "omit"` is excluded from requests and, when permitted and present
+on a response, is populated by the business (for example, `totals`, `messages`,
+and `order`). Fields annotated `optional` for an operation, or left unannotated,
+may also be supplied by the platform in applicable requests. Where the response
+schema and the field's semantic contract permit business-owned user state, the
+business **MAY** populate it from stored state on the response (for example,
+`buyer` and `payment.instruments[]`).
 
-Identity linking is what makes these values user-specific rather than generic.
+Identity linking provides the authenticated user context for these values.
 Subject to the scopes that gate the operation, a business **MAY** return the
 user's loyalty membership in `loyalty` (see [Loyalty](loyalty.md)), saved
 payment instruments in `payment.instruments[]` (see [Checkout](checkout.md)), or
